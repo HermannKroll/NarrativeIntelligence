@@ -7,11 +7,12 @@ from .khelper import chunks, printProgressBar
 
 
 # Query pmid's from pmed
-def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool'):
+# db: pubmed / pmc
+def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed'):
 	# wait amount specifc amount of time
 	time.sleep(1)
 	# url callls
-	domain = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?email={}?tool={}?db=pubmed&term='.format(mail, tool)
+	domain = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?email={}&tool={}&db={}&term='.format(mail, tool, db)
 	param = "&retmax=20000"
 
 	# get ids for sentence (empty list)
@@ -38,6 +39,21 @@ def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool'):
 		print("Error by crawling pmids for query: {}".format(sen))
 		return None
 
+
+def store_pmids_to_file(pmids, filename, add_pmc_prefix=False):
+	print('Saving {} pmids to file: {}'.format(len(pmids), filename))
+	with open(filename, 'w') as f:
+		for pmid in pmids[0:-2]:
+			if add_pmc_prefix:
+				f.write('PMC{}\n'.format(pmid))
+			else:
+				f.write('{}\n'.format(pmid))
+		# last line without \n‚
+		if add_pmc_prefix:
+			f.write('PMC{}\n'.format(pmids[-1]))
+		else:
+			f.write('PMC{}'.format(pmids[-1]))
+	print('IDs saved!')
 
 
 # Crawl pubtator documents
