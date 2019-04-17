@@ -1,6 +1,7 @@
 from snorkel import SnorkelSession
 from snorkel.models import Document, Sentence
 from snorkel.models.candidate import Marginal
+from snorkel.lf_helpers import get_tagged_text
 
 def split_sentences(session):
 	docs = session.query(Document)
@@ -122,6 +123,95 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 
 	print("Labeld {} positive and {} negative samples".format(pos_labels_sum, neg_labels_sum))
 
+
+
+def save_binary_relation_confusion_matrix_as_tsv(filename, session, all_cands, all_sents, header_str, cand_cid_a_name, cand_cid_b_name, prob_threshold=0.5):
+	print("Storing candidate labels into result file: {}".format(filename))
+	amount_of_candidates = len(all_cands)
+	print("Amount of candidates: {}".format(amount_of_candidates))
+
+	print('Load mariginals from db...')
+	marginals = session.query(Marginal).all()
+
+	cand_probability = {}
+	for marg in marginals:
+		cand_probability[marg.candidate_id] = marg.probability
+	print('Marginals loaded!')
+
+
+	print('Load gold labels from db...')
+	gold_labels = session.query(GoldLabel).all()
+
+	cand_gold_label = {}
+	for gl in gold_labels:
+		cand_gold_label[gl.candidate_id] = gl.value
+	print('Gold labels loaded!')
+
+	amount_of_true_predicitions = 0
+
+	f_fp = open(filename.replace('.tsv', '_FP.tsv'), 'w')
+	f_tp = open(filename.replace('.tsv', '_TP.tsv'), 'w')
+	f_tn = open(filename.replace('.tsv', '_TN.tsv'), 'w')
+	f_fn = open(filename.replace('.tsv', '_FN.tsv'), 'w')
+
+	f_fp.write(header_str)
+	f_tp.write(header_str)
+	f_tn.write(header_str)
+	f_fn.write(header_str)
+	
+	i_fp = 0
+	i_tp = 0
+	i_tn = 0
+	i_fn = 0
+
+	print('Start writing files...')
+	# iterate over all candidates
+	for cand in all_cands:
+		prob = cand_probability[cand.id]
+		gold_label = cand_gold_label[cand.id]
+
+		f = None
+		# TP
+		if prob >= prob_threshold and gold_label == 1:  
+			f = f_tp
+			i_tp += 1
+		# FP
+		elif prob >= prob_threshold and gold_label == -1:
+			f = f_fp
+			i_fp += 1
+		# FN
+		elif prob < prob_threshold and gold_label == 1:
+			f = f_fn
+			i_fn += 1
+		# TN
+		elif prob < prob_threshold and gold_label == -1:
+			f = f_tn
+			i_tn += 1
+
+
+		contexts = cand.get_contexts()
+
+		a_cid = getattr(cand, cand_cid_a_name)
+		b_cid = getattr(cand, cand_cid_b_name)
+		a_context = contexts[0]
+		b_context = contexts[1]
+		a_span = a_context.get_span()
+		b_span = b_context.get_span()
+
+		# we assume both spans to be in the same document
+		sent_id = a_context.sentence_id
+		# extract the sentence
+		sentence = get_tagged_text(cand)
+
+		result_str = '\n{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(sent_id, cand.id, a_cid, a_span, b_cid, b_span, sentence)
+		f.write(result_str)
+		
+
+	f_tp.close()
+	f_fp.close()
+	f_fn.close()
+	f_tn.close()
+	print("Saved {} TP, {} FP, {} TN, {} FN facts in files.".format(i_tp, i_fp, i_tn, i_fn))
 
 
 
