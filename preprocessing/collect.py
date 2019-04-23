@@ -102,11 +102,10 @@ def create_pubtator_format(fn):
     filename = fn.split("/")[-1]
     pmcid = filename[3:filename.rindex(".")]
 
-    if pubtator_abstract.strip():
-        return "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
+    if pubtator_abstract.strip() and title:
+        return "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
     else:
-        return "{pmcid}|t| {title}\n\n".format(title=title, pmcid=pmcid)
-
+        return ""
 
 def collect_files(id_list_or_filename, search_directory):
     """
@@ -118,6 +117,8 @@ def collect_files(id_list_or_filename, search_directory):
     :param search_directory: Directory to search for
     :return: List of absolute paths to found files
     """
+    sys.stdout.write("Collecting files ...")
+    sys.stdout.flush()
     if isinstance(id_list_or_filename, str):
         with open(id_list_or_filename) as f:
             ids = set(line.strip() for line in f)
@@ -127,6 +128,9 @@ def collect_files(id_list_or_filename, search_directory):
     result_files = []
     for root, dirs, files in os.walk(search_directory):
         result_files.extend(os.path.join(root, fname) for fname in files if fname[:-5] in ids)
+
+    sys.stdout.write(" done.\n")
+    sys.stdout.flush()
 
     return result_files
 
@@ -143,7 +147,8 @@ def create_pubtator_file(pmc_files, output_filename):
     with open(output_filename, "w") as f:
         for current, fn in enumerate(pmc_files):
             content = create_pubtator_format(fn)
-            f.write("{}\n".format(content))
+            if content:
+                f.write("{}\n".format(content))
 
             # Output
             if ((current + 1) / count * 100.0) > last_percent:
@@ -173,7 +178,7 @@ def main():
         print(create_pubtator_format(args.create_pubtator_format))
         sys.exit(0)
 
-    pmc_files = collect_files(args.id_file, args.dir)
+    pmc_files = collect_files(args.input, args.dir)
     create_pubtator_file(pmc_files, args.o)
 
 
