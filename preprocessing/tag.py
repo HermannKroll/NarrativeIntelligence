@@ -81,7 +81,7 @@ def merge_pubtator_files(file1, file2, output):
                 tags = d1[did]["tags"] + d2[did]["tags"]
             f.write(f"{title}\n")
             f.write(f"{abstract}\n")
-            f.write("{}\n".format("\n".join(sorted(tags, key=lambda x: int(x.split("\t")[1])))))
+            f.write("{}\n\n".format("\n".join(sorted(tags, key=lambda x: int(x.split("\t")[1])))))
 
 
 # TODO: Add logging command
