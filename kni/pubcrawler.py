@@ -42,18 +42,21 @@ def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubme
 
 def store_pmids_to_file(pmids, filename, add_pmc_prefix=False):
 	print('Saving {} pmids to file: {}'.format(len(pmids), filename))
+	i = 0
 	with open(filename, 'w') as f:
-		for pmid in pmids[0:-2]:
+		for pmid in pmids[0:-1]:
+			i += 1
 			if add_pmc_prefix:
 				f.write('PMC{}\n'.format(pmid))
 			else:
 				f.write('{}\n'.format(pmid))
 		# last line without \n‚
+		i += 1
 		if add_pmc_prefix:
-			f.write('PMC{}\n'.format(pmids[-1]))
+			f.write('PMC{}'.format(pmids[-1]))
 		else:
 			f.write('PMC{}'.format(pmids[-1]))
-	print('IDs saved!')
+	print('IDs saved! (Amount: {})'.format(i))
 
 
 # Crawl pubtator documents
