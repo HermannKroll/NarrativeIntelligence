@@ -35,6 +35,10 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
             # to print progress
             processed_lines = 0
 
+
+            # amount of skipped documents
+            skipped_regarding_min_chemicals = 0
+
             # process file noew
             lines = []
              # move fp to begin of file
@@ -42,7 +46,7 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
             for line in fp:
                 # count processed lines 
                 processed_lines += 1
-                if processed_lines % 100000 == 0:
+                if processed_lines % 5000 == 0:
                     printProgressBar(processed_lines, max_lines, prefix='Sampling pubtator file...')
 
                 # read until empty line
@@ -90,8 +94,19 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                                 title = lines_to_write[0][offset:-1]
                                                 # length of title
                                                 title_len = len(title) + 1 # don't know why +1 but it is necessary
+
+                                                # is entity between title and abstract? skip it
+                                                if mention_start <= title_len and mention_end >= title_len:
+                                                    if debug:
+                                                        print('Mention between abstract and title - skipping it')
+                                                        print('Mention: {}'.format(l_split))
+                                                    continue
+
                                                 # is entity located in title?
-                                                if mention_end <= title_len:
+                                                elif mention_end <= title_len:
+                                                    if debug:
+                                                        print('Replacing in title {} at {} till {}'.format(''.join(replaced_list), mention_start, mention_end))
+                                                
                                                     # replace entity in title
                                                     r_pos = 0
                                                     # convert string to list
@@ -102,6 +117,8 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                                     # convert list to string
                                                     lines_to_write[0] = ''.join(s_list)
                                                 else:
+                                                    if debug:
+                                                        print('Replacing in abstract {} at {} till {}'.format(''.join(replaced_list), mention_start, mention_end))
                                                     # replace entity in abstract
                                                     r_pos = 0
                                                     # convert string to list
@@ -119,12 +136,15 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                             # should we count amount of chemicals?
                                             if min_of_chemical_in_doc > 0:
                                                 # we must force a chemical with a cid
-                                                if l_split[4] == 'Chemical' and l_split[5] != '':
-                                                    amount_of_chemicals += 1
+                                                if l_split[4] == 'Chemical':
+                                                    # if there is no 6 element or 6. element is empty
+                                                    if len(l_split) == 5 or l_split[5] != '':
+                                                        amount_of_chemicals += 1
 
                                             # should skip lines?
                                             if remove_entities_with_empty_cid:
-                                                if l_split[5] == '':
+                                                # then id is missing
+                                                if len(l_split) == 5 or l_split[5] == '':
                                                     # skipping line with empy cid
                                                     if debug:
                                                         print('Skipping line with empty cid: {}'.format(l_split))
@@ -141,6 +161,7 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                         fout.write(lo)   
                                     fout.write('\n')
                                 else:
+                                    skipped_regarding_min_chemicals += 1
                                     if debug:
                                         print('Skipping document {}, because only {} chemicals were found'.format(doc_id, amount_of_chemicals))
                             # min not required - just write file
@@ -157,7 +178,8 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                 else:
                     lines.append(line)
     printProgressBar(max_lines, max_lines, prefix='Sampling pubtator file...')
-    print('Saved {} (sampled) of {} (all) documents:'.format(amount_of_sampled_docs, amount_of_docs))        
+    print('Skipped {} documents due to minimum chemical amount'.format(skipped_regarding_min_chemicals))     
+    print('Saved {} (sampled) of {} (all) documents:'.format(amount_of_sampled_docs, amount_of_docs))   
     print('Sampling finished and saved at {}'.format(pubtator_filename_sampled))
 
 
