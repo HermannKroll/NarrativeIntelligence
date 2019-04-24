@@ -6,3 +6,6 @@
 
 # Virtualenv
 venv/
+
+# Preprocessing
+preprocessing/data

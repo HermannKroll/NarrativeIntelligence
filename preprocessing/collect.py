@@ -107,6 +107,7 @@ def create_pubtator_format(fn):
     else:
         return ""
 
+
 def collect_files(id_list_or_filename, search_directory):
     """
     Method searches ``search_directory`` recursively for files starting with a specific id.
