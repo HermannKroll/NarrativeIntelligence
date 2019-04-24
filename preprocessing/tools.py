@@ -1,7 +1,32 @@
+import argparse
 import os
 import re
 import sys
 from argparse import ArgumentParser
+
+
+def batch(iterable, n=1):
+    """
+    https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
+    """
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
+
+def required_length(nmin, nmax):
+    """
+    https://stackoverflow.com/questions/4194948/python-argparse-is-there-a-way-to-specify-a-range-in-nargs
+    """
+    class RequiredLength(argparse.Action):
+        def __call__(self, parser, args, values, option_string=None):
+            if not nmin <= len(values) <= nmax:
+                msg = 'argument "{f}" requires between {nmin} and {nmax} arguments'.format(
+                    f=self.dest, nmin=nmin, nmax=nmax)
+                raise argparse.ArgumentTypeError(msg)
+            setattr(args, self.dest, values)
+
+    return RequiredLength
 
 
 # TODO: Add doc
@@ -24,18 +49,26 @@ def split(input_file, output_dir):
         if document:
             did = document[0:document.index("|")]
             with open(os.path.join(output_dir, "PMC{}.txt".format(did)), "w") as f:
-                f.write(document + "\n")
+                f.write(document + "\n\n")
 
 
 # TODO: Add doc
-def merge(input_dir, output_file):
+def merge(input_dir, output_file, batch_size=None):
     files = []
     for fn in os.listdir(input_dir):
         if fn.endswith(".txt"):
             with open(os.path.join(input_dir, fn)) as f:
                 files.append(f.read() + "\n")
-    with open(output_file, "w") as f:
-        f.writelines(files)
+
+    if batch_size:
+        basename = ".".join(output_file.split(".")[:-1])
+        ext = output_file.split(".")[-1]
+        for idx, b in enumerate(batch(files, int(batch_size))):
+            with open("{}.{:02d}.{}".format(basename, idx, ext), "w") as f:
+                f.writelines(b)
+    else:
+        with open(output_file, "w") as f:
+            f.writelines(files)
 
 
 # TODO: Add doc
@@ -44,8 +77,9 @@ def main():
     parser.add_argument("--count", help="Count the number of PMC documents in a PubTator file", metavar="FILE")
     parser.add_argument("--split", nargs=2, help="Split the PubTator file into its contained documents",
                         metavar=("FILE", "OUTPUT_DIR"))
-    parser.add_argument("--merge", nargs=2, help="Merge PubTator files of directory into a single file",
-                        metavar=("INPUT_DIR", "OUTPUT_FILE"))
+    parser.add_argument("--merge", nargs="+",
+                        help="Merge PubTator files of directory into a single file (DIR, OUTPUT, BATCH_SIZE)",
+                        action=required_length(2, 3))
     args = parser.parse_args()
 
     if args.count:
@@ -60,7 +94,7 @@ def main():
     if args.merge:
         sys.stdout.write("Begin merging ...")
         sys.stdout.flush()
-        merge(args.merge[0], args.merge[1])
+        merge(args.merge[0], args.merge[1], args.merge[2] if len(args.merge) == 3 else None)
         sys.stdout.write(" done\n")
 
 
