@@ -233,7 +233,7 @@ class PubTatorDocPreprocessor(DocPreprocessor):
     ftp.ncbi.nlm.nih.gov/pub/lu/PubTator/bioconcepts2pubtator_offsets.gz
 
     """
-    def __init__(self, path, encoding="utf-8", max_docs=float('inf'), filter_id_set=None, annotations=False):
+    def __init__(self, path, encoding="utf-8", max_docs=float('inf'), filter_id_set=None, annotations=False, debug=False):
         """
 
         :param path:
@@ -244,6 +244,7 @@ class PubTatorDocPreprocessor(DocPreprocessor):
         super(PubTatorDocPreprocessor,self).__init__(path, encoding="utf-8", max_docs=float('inf'))
         self.filter_id_set = filter_id_set
         self.annotations = annotations
+        self.debug = debug
 
     def _pubtator_parser(self, content):
         """
@@ -259,6 +260,8 @@ class PubTatorDocPreprocessor(DocPreprocessor):
 
         doc_text = split[2]
 
+        if self.debug:
+            print('DEBUG: processing doc_id: {} ...'.format(doc_id))
         # Second line is the abstract
         # Assume these are newline-separated; is this true?
         # Note: some articles do not have abstracts, however they still have this line
