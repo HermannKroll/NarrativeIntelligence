@@ -1,9 +1,22 @@
+import random
+
 from snorkel import SnorkelSession
 from snorkel.models import Document, Sentence
 from snorkel.models.candidate import Marginal
 from snorkel.lf_helpers import get_tagged_text
 
-def split_sentences(session):
+def split_sentences(session, split = [0.8, 0.1, 0.1], seed = 12345):
+	if len(split) != 3:
+		print('Error: split must consist of 3 values')
+		return None
+	
+	sum_split = split[0] + split[1] + split[2]
+	if  sum_split > 1.001 or sum_split < 0.9999:
+		print('Error: sum of split prob. must be 1. It is {}'.format(sum_split))
+		return None
+
+	print('Splitting with probabilities {} and seed {}'.format(split, seed))
+
 	docs = session.query(Document)
 	train_sent, dev_sent, test_sent = [],[],[]
 
@@ -11,17 +24,21 @@ def split_sentences(session):
 	print("Amount of docs: {}".format(amount_of_docs))
 
 	train_ids, dev_ids, test_ids = set(), set(), set()
-	belongs_dev = True
+	# compute thresholds
+	t1 = split[0]
+	t2 = split[0] + split[1]
+
+	# use seed for random
+	random.seed(seed)
 	for i in range(0, amount_of_docs):
-		if i % 3 == 0:
+		rand = random.random() # get a random number between 0.0 and 1.0
+
+		if rand < t1:
 			train_ids.add(i)
+		elif rand < t2:
+			dev_ids.add(i)
 		else:
-			if belongs_dev:
-				dev_ids.add(i)
-				belongs_dev = False
-			else:
-				test_ids.add(i)
-				belongs_dev = True
+			test_ids.add(i)
 
 	print("Document splitted: {} train, {} dev and {} test".format(len(train_ids), len(dev_ids), len(test_ids)))
 
@@ -35,6 +52,7 @@ def split_sentences(session):
 			if i in test_ids:
 				test_sent.append(s)
 
+	print("Sentences splitted: {} train, {} dev and {} test".format(len(train_sent), len(dev_sent), len(test_sent)))
 	return train_sent, dev_sent, test_sent
 	
 
