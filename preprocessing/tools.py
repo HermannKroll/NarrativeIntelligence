@@ -4,6 +4,8 @@ import re
 import sys
 from argparse import ArgumentParser
 
+from preprocessing.tag import merge_pubtator_files
+
 
 def batch(iterable, n=1):
     """
@@ -18,6 +20,7 @@ def required_length(nmin, nmax):
     """
     https://stackoverflow.com/questions/4194948/python-argparse-is-there-a-way-to-specify-a-range-in-nargs
     """
+
     class RequiredLength(argparse.Action):
         def __call__(self, parser, args, values, option_string=None):
             if not nmin <= len(values) <= nmax:
@@ -80,6 +83,7 @@ def main():
     parser.add_argument("--merge", nargs="+",
                         help="Merge PubTator files of directory into a single file (DIR, OUTPUT, BATCH_SIZE)",
                         action=required_length(2, 3))
+    parser.add_argument("--cdg-merge", nargs=3, metavar=("FILE1", "FILE2", "OUTPUT_FILE"))
     args = parser.parse_args()
 
     if args.count:
@@ -96,6 +100,9 @@ def main():
         sys.stdout.flush()
         merge(args.merge[0], args.merge[1], args.merge[2] if len(args.merge) == 3 else None)
         sys.stdout.write(" done\n")
+
+    if args.cdg_merge:
+        merge_pubtator_files(args.cdg_merge[0], args.cdg_merge[1], args.cdg_merge[2])
 
 
 if __name__ == "__main__":
