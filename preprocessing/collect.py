@@ -13,7 +13,6 @@ Some documents do not follow this schema (e.g., PMC3153655, which is a schedule 
 import os
 import re
 import sys
-from argparse import ArgumentParser
 
 from lxml import etree, html
 
@@ -45,7 +44,7 @@ def clean_p_element(p_element):
     return text
 
 
-def create_pubtator_format(fn):
+def translate_file(fn):
     """
     Method takes a filename from an PMC-xml-file and returns the string in the PubTator format
     (e.g., <PMCID>|t| <Title> and <PMCID>|a| <Content>).
@@ -136,52 +135,29 @@ def collect_files(id_list_or_filename, search_directory):
     return result_files
 
 
-def create_pubtator_file(pmc_files, output_filename):
+def translate_files(pmc_files, output_dir):
     """
-    Method creates one PubTator file from a list on PMC input files.
+    Method translates a set of PubMedCentral XML files to the PubTator format.
 
     :param pmc_files: List of absolute paths to PMC files
-    :param output_filename: PubTator file
+    :param output_dir: Directory
     """
     count = len(pmc_files)
+    n_translated = 0
     last_percent = 0
-    with open(output_filename, "w") as f:
-        for current, fn in enumerate(pmc_files):
-            content = create_pubtator_format(fn)
-            if content:
+
+    for current, fn in enumerate(pmc_files):
+        pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
+        content = translate_file(fn)
+        if content:
+            with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
                 f.write("{}\n".format(content))
+            n_translated += 1
 
-            # Output
-            if ((current + 1) / count * 100.0) > last_percent:
-                last_percent = int((current + 1) / count * 100.0)
-                sys.stdout.write("\rMerging ... {} %".format(last_percent))
-                sys.stdout.flush()
-    sys.stdout.write("\nDone.\n")
+        # Output
+        if ((current + 1) / count * 100.0) > last_percent:
+            last_percent = int((current + 1) / count * 100.0)
+            sys.stdout.write("\rTranslating ... {} %".format(last_percent))
+            sys.stdout.flush()
 
-
-# TODO: Add documentation
-def main():
-    parser = ArgumentParser(
-        description="Tool collects all PMC documents with a specific PMCID and unions them into a single PubTator file.")
-    group = parser.add_argument_group('Collection group')
-    group.add_argument("-o", help="Output file", default="documents.PubTator.txt", metavar="FILE")
-    group.add_argument("--input", help="Input file with the PMCIDs. Each PMCID must be in an separate line.",
-                       metavar="FILE")
-    group.add_argument("--dir",
-                       help="Top-level-directory which contains the PMC files. Subdirectory are searched, too.",
-                       metavar="DIRECTORY")
-    # More powerful/debug args
-    parser.add_argument("--create-pubtator-format", metavar="FILE",
-                        help="Create PubTator format from PMC file. Debug only.")
-    args = parser.parse_args()
-
-    if args.create_pubtator_format:
-        print(create_pubtator_format(args.create_pubtator_format))
-        sys.exit(0)
-
-    pmc_files = collect_files(args.input, args.dir)
-    create_pubtator_file(pmc_files, args.o)
-
-
-if __name__ == "__main__":
-    main()
+    sys.stdout.write("\nDone ({} files processed, {} errors)\n".format(count, count - n_translated))
