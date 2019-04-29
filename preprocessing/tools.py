@@ -56,12 +56,12 @@ def split(input_file, output_dir):
 
 
 # TODO: Add doc
-def merge(input_dir, output_file, batch_size=None):
+def concat(input_dir, output_file, batch_size=None):
     files = []
     for fn in os.listdir(input_dir):
         if fn.endswith(".txt"):
             with open(os.path.join(input_dir, fn)) as f:
-                files.append(f.read() + "\n")
+                files.append(f.read())
 
     if batch_size:
         basename = ".".join(output_file.split(".")[:-1])
@@ -80,8 +80,8 @@ def main():
     parser.add_argument("--count", help="Count the number of PMC documents in a PubTator file", metavar="FILE")
     parser.add_argument("--split", nargs=2, help="Split the PubTator file into its contained documents",
                         metavar=("FILE", "OUTPUT_DIR"))
-    parser.add_argument("--merge", nargs="+",
-                        help="Merge PubTator files of directory into a single file (DIR, OUTPUT, BATCH_SIZE)",
+    parser.add_argument("--concat", nargs="+",
+                        help="Concat PubTator files of directory into a single file (DIR, OUTPUT, BATCH_SIZE)",
                         action=required_length(2, 3))
     parser.add_argument("--cdg-merge", nargs=3, metavar=("FILE1", "FILE2", "OUTPUT_FILE"))
     args = parser.parse_args()
@@ -95,10 +95,10 @@ def main():
         split(args.split[0], args.split[1])
         sys.stdout.write(" done\n")
 
-    if args.merge:
+    if args.concat:
         sys.stdout.write("Begin merging ...")
         sys.stdout.flush()
-        merge(args.merge[0], args.merge[1], args.merge[2] if len(args.merge) == 3 else None)
+        concat(args.merge[0], args.merge[1], args.merge[2] if len(args.merge) == 3 else None)
         sys.stdout.write(" done\n")
 
     if args.cdg_merge:
