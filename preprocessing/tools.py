@@ -96,9 +96,9 @@ def main():
         sys.stdout.write(" done\n")
 
     if args.concat:
-        sys.stdout.write("Begin merging ...")
+        sys.stdout.write("Begin concatenation...")
         sys.stdout.flush()
-        concat(args.merge[0], args.merge[1], args.merge[2] if len(args.merge) == 3 else None)
+        concat(args.concat[0], args.concat[1], args.concat[2] if len(args.concat) == 3 else None)
         sys.stdout.write(" done\n")
 
     if args.cdg_merge:

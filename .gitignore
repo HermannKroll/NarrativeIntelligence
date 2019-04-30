@@ -9,3 +9,5 @@ venv/
 
 # Preprocessing
 preprocessing/data
+
+.DS_Store
