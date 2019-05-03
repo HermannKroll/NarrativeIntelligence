@@ -9,5 +9,6 @@ venv/
 
 # Preprocessing
 preprocessing/data
+preprocessing/config.json
 
 .DS_Store
