@@ -1,0 +1,9 @@
+{
+  "pmc_dir": "/data/pmc-files",
+  "taggerOne": {
+    "root": "/opt/TaggerOne-0.2.1",
+    "model": "models/model_BC5CDRJ_011.bin",
+    "batchSize": 50
+  },
+  "gnormPlus": "/opt/GNormPlusJava"
+}
