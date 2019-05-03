@@ -10,18 +10,18 @@ If you want to use the full text of the PubMedCentral documents, you can use the
 
 You need the following requirements to use the package:
 
-- TaggerOne v0.2.1
+- TaggerOne v0.2.1 with a model for recognizing chemicals and diseases (e.g. model_BC5CDRJ)
 - GNormPlusJava
-- Ab3P v1.5 
 - Python 3.6.x with ``lxml`` 4.3.3
 
 The package also requires the PubMedCentral Open Access Document Collection in the ``xml`` format.
 
-Install the Python requirements:
+1. Install the Python requirements:
 
-    pip install -r requirements.txt
+       pip install -r requirements.txt
     
-At first, you need to collect and merge the desired documents into a PubTator format.
-List all the PubMedCentral ids (PMCID) in a text file, one PMCID per line each.
-    
-    python collect.py -o pubtator.txt idfile.txt /path/to/pmc_files
+1. Copy the ``config.example.json`` to ``config.json`` and adjust the settings 
+
+1. Start the pipeline using
+
+       python preprocess.py ids.txt tagged_documents.txt
