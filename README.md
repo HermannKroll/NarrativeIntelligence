@@ -1,8 +1,13 @@
 # PubMedSnorkel
-## Getting Started (download ctd data)
+## Getting Started
+Download ctd data for labeling training and test data. This download recommends 2GB of free disk space.
+
 ```
 .\download_ctd_data.sh
 ```
+
+## Install GPU LSTMs for Snorkel Relation Extraction 
+See https://github.com/sujitpal/snorkel-pytorch-lstm-gpu for further instructions.
 
 ## Preprocessing for PubMedCentral
 
