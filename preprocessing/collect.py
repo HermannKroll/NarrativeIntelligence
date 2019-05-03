@@ -135,15 +135,16 @@ def collect_files(id_list_or_filename, search_directory):
     return result_files
 
 
-def translate_files(pmc_files, output_dir):
+def translate_files(pmc_files, output_dir, err_file=None):
     """
     Method translates a set of PubMedCentral XML files to the PubTator format.
 
+    :param err_file:
     :param pmc_files: List of absolute paths to PMC files
     :param output_dir: Directory
     """
     count = len(pmc_files)
-    n_translated = 0
+    ignored_files = []
     last_percent = 0
 
     for current, fn in enumerate(pmc_files):
@@ -152,7 +153,8 @@ def translate_files(pmc_files, output_dir):
         if content:
             with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
                 f.write("{}\n".format(content))
-            n_translated += 1
+        else:
+            ignored_files.append(fn)
 
         # Output
         if ((current + 1) / count * 100.0) > last_percent:
@@ -160,4 +162,9 @@ def translate_files(pmc_files, output_dir):
             sys.stdout.write("\rTranslating ... {} %".format(last_percent))
             sys.stdout.flush()
 
-    sys.stdout.write("\nDone ({} files processed, {} errors)\n".format(count, count - n_translated))
+    sys.stdout.write("\nDone ({} files processed, {} errors)\n".format(count, len(ignored_files)))
+
+    if err_file:
+        with open(err_file, "w") as f:
+            f.write("\n".join(ignored_files))
+        print("See {} for a list of ignored files.".format(err_file))
