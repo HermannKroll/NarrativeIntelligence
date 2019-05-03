@@ -9,3 +9,4 @@ venv/
 
 # Preprocessing
 preprocessing/data
+gpu-lstm/snorkel-pytorch-lstm-gpu/
