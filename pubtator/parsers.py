@@ -32,7 +32,7 @@ class PubTatorParser(Parser):
                         PubTatorParser.STD_SPLITS_RGX + r'$', self._scrub(mention)) is not None
 
     def _throw_error(self, sentence_parts, mention, toks, msg="Couldn't find match!"):
-        print("Error thrown with sentence parts = {}".format(sentence_parts))
+       # print("Error thrown with sentence parts = {}".format(sentence_parts))
         print("Mention: {}".format(mention))
         print("Tokens:  {}".format(toks))
         if self.stop_on_err:
@@ -198,8 +198,8 @@ class PubTatorParser(Parser):
 
         # Check if we got everything
         if len(annotations) != len(matched_annos):
-            print("Annotations: {}".format(annotations))
-            print("Matched annotations:{}\n".format(matched_annos))
+          #  print("Annotations: {}".format(annotations))
+           # print("Matched annotations:{}\n".format(matched_annos))
             print("Missing annotations:")
             for i in set(range(len(annotations))).difference(matched_annos):
                 print(annotations[i])
