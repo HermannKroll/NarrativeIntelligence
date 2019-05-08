@@ -8,12 +8,12 @@ from .khelper import chunks, printProgressBar
 
 # Query pmid's from pmed
 # db: pubmed / pmc
-def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed'):
+def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=20000):
 	# wait amount specifc amount of time
 	time.sleep(1)
 	# url callls
 	domain = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?email={}&tool={}&db={}&term='.format(mail, tool, db)
-	param = "&retmax=20000"
+	param = "&retmax={}".format(retmax)
 
 	# get ids for sentence (empty list)
 	pmids = []
