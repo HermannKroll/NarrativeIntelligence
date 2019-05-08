@@ -15,6 +15,7 @@ import re
 import sys
 
 from lxml import etree, html
+from lxml.etree import ParseError
 
 patterns_to_delete = (
     re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>
@@ -150,10 +151,13 @@ def translate_files(pmc_files, output_dir, err_file=None):
     for current, fn in enumerate(pmc_files):
         pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
         content = translate_file(fn)
-        if content:
-            with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
-                f.write("{}\n".format(content))
-        else:
+        try:
+            if content:
+                with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
+                    f.write("{}\n".format(content))
+            else:
+                ignored_files.append(fn)
+        except ParseError:
             ignored_files.append(fn)
 
         # Output
