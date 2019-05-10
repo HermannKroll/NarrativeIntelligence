@@ -15,7 +15,7 @@ import re
 import sys
 
 from lxml import etree, html
-from lxml.etree import ParseError
+from lxml.etree import ParserError
 
 patterns_to_delete = (
     re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>
@@ -108,6 +108,7 @@ def translate_file(fn):
         return ""
 
 
+# TODO: Add doc
 def collect_files(id_list_or_filename, search_directory):
     """
     Method searches ``search_directory`` recursively for files starting with a specific id.
@@ -150,14 +151,14 @@ def translate_files(pmc_files, output_dir, err_file=None):
 
     for current, fn in enumerate(pmc_files):
         pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
-        content = translate_file(fn)
         try:
+            content = translate_file(fn)
             if content:
                 with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
                     f.write("{}\n".format(content))
             else:
                 ignored_files.append(fn)
-        except ParseError:
+        except ParserError:
             ignored_files.append(fn)
 
         # Output
