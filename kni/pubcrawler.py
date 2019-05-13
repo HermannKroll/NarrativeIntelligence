@@ -9,6 +9,15 @@ from .khelper import chunks, printProgressBar
 # Query pmid's from pmed
 # db: pubmed / pmc
 def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=20000):
+	"""
+	queries for PMIDs on pubmed by using a given query
+	:param query: given query term
+	:param mail: mail address to identify who is querying
+	:param tool: toolname to identify who is querying
+	:param db: which database should be queried? default (pubmed) also possible: (pmc)
+	:param retmax: max of ids to query fore
+	:return: a list of ids
+	"""
 	# wait amount specifc amount of time
 	time.sleep(1)
 	# url callls
@@ -41,6 +50,13 @@ def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubme
 
 
 def store_pmids_to_file(pmids, filename, add_pmc_prefix=False):
+	"""
+	stores a list of integers (PMIDs) to a file
+	:param pmids: list of ids
+	:param filename: file to write ids to
+	:param add_pmc_prefix: should add a 'pmc' prefix?
+	:return: nothing
+	"""
 	print('Saving {} pmids to file: {}'.format(len(pmids), filename))
 	i = 0
 	with open(filename, 'w') as f:
@@ -62,6 +78,12 @@ def store_pmids_to_file(pmids, filename, add_pmc_prefix=False):
 # Crawl pubtator documents
 # following formats are allowed "PubTator"; //"JSON"; // "BioC";
 def pubtator_crawl_pubtator_documents(pmids, format):
+	"""
+	crawls pubtator tagged documents for a list of PMIDs
+	:param pmids: list of ids
+	:param format: PubTator, JSON, BioC
+	:return: a string with the context of the resulting document
+	"""
 	# wait amount specifc amount of time
 	time.sleep(1)
 
@@ -112,6 +134,13 @@ def pubtator_crawl_pubtator_documents(pmids, format):
 		return result_str
 
 def pubtator_crawl_pubtator_documents_with_query(query, mail='ex@sample.com', tool='sampletool'):
+	"""
+	connects a pubmed query and automatically queries for all documents on pubtator
+	:param query: query on pubmed
+	:param mail: mail address to identify who is querying
+	:param tool: toolname to identify who is querying
+	:return: the resulting document from pubtator
+	"""
 	print("Crawling PMIDs for query: {}".format(query))
 	pmids = pubmed_crawl_pmids(query, mail, tool)
 	print("{} PMIDs queried".format(len(pmids)))
