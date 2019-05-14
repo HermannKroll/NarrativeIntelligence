@@ -5,12 +5,32 @@ from .khelper import printProgressBar
 
 
 def blocks(files, size=65536):
+    """
+    reads blocks from a file
+    :param files: file
+    :param size: size to read in one chunk
+    :return:
+    """
     while True:
         b = files.read(size)
         if not b: break
         yield b
 
 def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, debug=True, replace_special_char_in_entites = True, replace_special_char_in_entites_with = 'X', min_of_chemical_in_doc = 1, remove_entities_with_empty_cid = True, force_full_abstracts = True):
+    """
+    creates a sample of a pubtator file
+    :param pubtator_filename: filename of the pubtator file
+    :param pubtator_filename_sampled: filename to write
+    :param prob: probabilistic - 0.1 means 10% of all docs are randomly selected
+    :param debug: gives debug information for debugging
+    :param replace_special_char_in_entites: default (true), removes any non [a-z0-9] characters in entities by replacing
+    them in text
+    :param replace_special_char_in_entites_with: default (X) character to replace any special character
+    :param min_of_chemical_in_doc: default (1) how many chemical should be at least in a doc?
+    :param remove_entities_with_empty_cid: default (true) removes entites with no given ids
+    :param force_full_abstracts: default (true) only select documents which contain a full abstract (not title only)
+    :return: nothing
+    """
     i = 0
     with open(pubtator_filename_sampled, 'w', encoding='utf-8') as fout:
         # read puptator file as input
@@ -61,6 +81,10 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                 line = line.replace('δ', 'q')
                 line = line.replace('Δ', 'd')
                 line = line.replace('𝜃', 's')
+                line = line.replace('Φ', 'F')
+                line = line.replace('ε', 'e')
+                line = line.replace('ρ', 'p')
+                line = line.replace('κ', 'k')
 
                 # count processed lines 
                 processed_lines += 1
@@ -401,9 +425,9 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
 
 def parse_pubtator_file(pubtator_filename):
         """
-
-        :param content:
-        :return:
+        parses a pubtator file
+        :param content: content of a pubpator file
+        :return: a list of tuples (doc_id, content, annotation_set)
         """
         doc_contents = []
         doc_ids = set()

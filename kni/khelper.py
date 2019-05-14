@@ -1,5 +1,10 @@
-# Create a function called "chunks" with two arguments, l and n:
 def chunks(l, n):
+    """
+    divides a list into chunks
+    :param l: list
+    :param n: chunk size
+    :return: chunk with size chunk size from list
+    """
     # For item i in a range that is a length of l,
     for i in range(0, len(l), n):
         # Create an index range for l of n items:

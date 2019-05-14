@@ -6,6 +6,13 @@ from snorkel.models.candidate import Marginal
 from snorkel.lf_helpers import get_tagged_text
 
 def split_sentences(session, split = [0.8, 0.1, 0.1], seed = 12345):
+	"""
+	split the amount of sentences into 3 sets
+	:param session: current snorkel session
+	:param split: e.g. [0.8, 0.1, 0.1]
+	:param seed: the random seed
+	:return: three lists
+	"""
 	if len(split) != 3:
 		print('Error: split must consist of 3 values')
 		return None
@@ -62,6 +69,13 @@ from snorkel.lf_helpers import get_tagged_text
 
 
 def add_gold_label_for_cand(session, c, label_function):
+	"""
+	adds a gold label for a candidate by using a label_function
+	:param session: current snorkel session
+	:param c: candidate
+	:param label_function: label function
+	:return: the gold label
+	"""
 	cand_label_value = label_function(c)
 	cand_id = c.id
 	 
@@ -75,6 +89,14 @@ def add_gold_label_for_cand(session, c, label_function):
 	return cand_label_value
 
 def add_gold_labels_for_candidates(session, candidate_type, label_function, clear=True):
+	"""
+	adds gold labels for all candidates in session
+	:param session: current snorkel session
+	:param candidate_type: type of candidate
+	:param label_function: labeling function
+	:param clear: if true all old gold labels are cleared
+	:return: nothing
+	"""
 	if clear:
 		print('Clearing existing gold labels...')
 		# delete all gold label
@@ -144,6 +166,18 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 
 
 def save_binary_relation_confusion_matrix_as_tsv(filename, session, all_cands, all_sents, header_str, cand_cid_a_name, cand_cid_b_name, prob_threshold=0.5):
+	"""
+	saves a confusion matrix as 4 separated files for debug information
+	:param filename: master filename (FP, TP, ... ) are added to this filename
+	:param session: current snorkel session
+	:param all_cands: list of all candidates which should be used
+	:param all_sents: list of all regarding sentences
+	:param header_str: header_str (header in each file)
+	:param cand_cid_a_name: name of cands first id
+	:param cand_cid_b_name: name of cands seceond id
+	:param prob_threshold: which threshold should be used for a positive classification
+	:return:
+	"""
 	print("Storing candidate labels into result file: {}".format(filename))
 	amount_of_candidates = len(all_cands)
 	print("Amount of candidates: {}".format(amount_of_candidates))
@@ -234,6 +268,18 @@ def save_binary_relation_confusion_matrix_as_tsv(filename, session, all_cands, a
 
 
 def save_binary_relation_as_tsv(filename, session, all_cands, all_sents, header_str, cand_cid_a_name, cand_cid_b_name, prob_threshold=0.5):
+	"""
+	saves all positive classifications to a list to a file
+	:param filename: filename
+	:param session: current snorkel session
+	:param all_cands: list of all candidates which should be used
+	:param all_sents: list of all regarding sentences
+	:param header_str: header_str (header in each file)
+	:param cand_cid_a_name: name of cands first id
+	:param cand_cid_b_name: name of cands seceond id
+	:param prob_threshold: which threshold should be used for a positive classification
+	:return:
+	"""
 	print("Storing candidate labels into result file: {}".format(filename))
 	amount_of_candidates = len(all_cands)
 	print("Amount of candidates: {}".format(amount_of_candidates))
