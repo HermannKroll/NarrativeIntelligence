@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import tempfile
@@ -5,12 +6,13 @@ from argparse import ArgumentParser
 from shutil import copyfile
 from threading import Thread
 
-from preprocessing.collect import collect_files, translate_files
-from preprocessing.config import Config
-from preprocessing.tag import thread_tag_chemicals_diseases, thread_tag_genes
-from preprocessing.tools import concat, merge_pubtator_files
+from collect import collect_files, translate_files
+from config import Config
+from tag import thread_tag_chemicals_diseases, thread_tag_genes
+from tools import concat, merge_pubtator_files
 
 CONFIG_DEFAULT = "config.json"
+LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
 
 class NoRemainingDocumentError(Exception):
@@ -84,12 +86,15 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
     :param resume: flag, if method should resume (if True, tag_genes and tag_chemicals_diseases must be set accordingly)
     """
     print("=== STEP 1 - Preparation ===")
+    # Create paths
     tmp_root = input_file_dir_list if resume else tempfile.mkdtemp()
     tmp_translation = os.path.join(tmp_root, "translation")
     tmp_batches = os.path.join(tmp_root, "batches")
     tmp_tagger_out = os.path.join(tmp_root, "taggerone")
     tmp_gnorm_out = os.path.join(tmp_root, "gnorm")
     tmp_log = os.path.join(tmp_root, "log")
+    translation_err_file = os.path.join(tmp_root, "translation_errors.txt")
+    # Create directories
     if not resume:
         os.mkdir(tmp_translation)
         os.mkdir(tmp_log)
@@ -98,30 +103,44 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
             os.mkdir(tmp_tagger_out)
         if tag_genes:
             os.mkdir(tmp_gnorm_out)
-    translation_err_file = os.path.join(tmp_root, "translation_errors.txt")
+    # Init logger
+    formatter = logging.Formatter(LOGGING_FORMAT)
+    logger = logging.getLogger("preprocessing")
+    logger.setLevel("DEBUG")
+    fh = logging.FileHandler(os.path.join(tmp_log, "preprocessing.log"), mode="a+")
+    fh.setLevel("DEBUG")
+    fh.setFormatter(formatter)
+    ch = logging.StreamHandler()
+    ch.setLevel("INFO")
+    ch.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    # Init resume
     first_id = None
     run_tagger_one = True
     if resume:
         try:
             first_id = get_next_document_id(tmp_translation, tmp_tagger_out)
-            print("DEBUG: Resuming with document {}".format(first_id))
+            logger.debug("Resuming with document {}".format(first_id))
         except NoRemainingDocumentError:
-            print("DEBUG: No document to resume with")
+            logger.debug("No document to resume with")
             run_tagger_one = False
-    print("INFO: Temp directory: {}".format(tmp_root))
-    print("DEBUG: Translation output directory: {}".format(tmp_translation))
+    logger.info("Project directory: {}".format(tmp_root))
+    logger.debug("Translation output directory: {}".format(tmp_translation))
     if tag_chemicals_diseases:
-        print("DEBUG: Batches directory: {}".format(tmp_batches))
-        print("DEBUG: TaggerOne output directory: {}".format(tmp_tagger_out))
+        logger.debug("Batches directory: {}".format(tmp_batches))
+        logger.debug("TaggerOne output directory: {}".format(tmp_tagger_out))
     if tag_genes:
-        print("DEBUG: GNormPlus output directory: {}".format(tmp_gnorm_out))
-    print("DEBUG: Log directory: {}".format(tmp_log))
+        logger.debug("GNormPlus output directory: {}".format(tmp_gnorm_out))
+    logger.debug("Log directory: {}".format(tmp_log))
     if not resume:
         translate(input_file_dir_list, tmp_translation, conf.pmc_dir, translation_err_file)
     print("=== STEP 2 - Tagging ===")
-    thread_gnorm = Thread(target=thread_tag_genes, args=(conf, tmp_translation, tmp_gnorm_out, tmp_log))
+    thread_gnorm = Thread(target=thread_tag_genes, args=(conf, tmp_translation, tmp_gnorm_out, tmp_log),
+                          name="GNormPlus")
     thread_taggerone = Thread(target=thread_tag_chemicals_diseases,
-                              args=(conf, tmp_translation, tmp_batches, tmp_tagger_out, tmp_log, first_id))
+                              args=(conf, tmp_translation, tmp_batches, tmp_tagger_out, tmp_log, first_id),
+                              name="TaggerOne")
     if tag_genes:
         thread_gnorm.start()
     if tag_chemicals_diseases and run_tagger_one:

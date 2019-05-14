@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import subprocess
@@ -5,7 +6,36 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from preprocessing.config import Config
+from config import Config
+
+OUTPUT_INTERVAL = 30
+
+logger = logging.getLogger("preprocessing")
+
+
+def get_gnorm_progess(output_dir):
+    return len([f for f in os.listdir(output_dir) if f.endswith(".txt")])
+
+
+def get_taggerone_progress(offset, log_file):
+    with open(log_file) as f:
+        content = f.read()
+    matches = re.findall("INFO (\d+)\n", content)
+    progress = len(set(matches))
+    return offset + progress
+
+
+def create_batch_file(batch, batch_file, translation_dir):
+    skipped = []
+    for fn in batch:
+        filename = os.path.join(translation_dir, fn)
+        if os.path.exists(filename):
+            with open(filename) as f_doc:
+                with open(batch_file, "a+") as f_batch:
+                    f_batch.write(f_doc.read())
+        else:
+            skipped.append(filename)
+    return skipped
 
 
 def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir, log_dir, start_with=None):
@@ -31,6 +61,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
     :return:
     """
     files = sorted(f for f in os.listdir(translation_dir) if f.endswith(".txt"))
+    files_total = len(files)
     first = "{}.txt".format(start_with) if start_with else files[0]
     keep_tagging = True
     skipped_files = []
@@ -42,17 +73,11 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
         batch_name = "batch.{:03d}.{}".format(files.index(first), ext)
         batch_file = os.path.join(batch_dir, batch_name)
         batch = files[files.index(first):files.index(first) + config.tagger_one_batch_size]
-        for fn in batch:
-            filename = os.path.join(translation_dir, fn)
-            if os.path.exists(filename):
-                with open(filename) as f_doc:
-                    with open(batch_file, "a+") as f_batch:
-                        f_batch.write(f_doc.read())
-            else:
-                skipped_files.append(filename)
+        skipped = create_batch_file(batch, batch_file, translation_dir)
+        skipped_files.extend(skipped)
 
         # Start Tagging
-        log_file = os.path.join(log_dir, "{}.log".format(batch_name))
+        log_file = os.path.join(log_dir, "taggerone.{}.log".format(files.index(first)))
         with open(log_file, "w") as f_log:
             # Start process
             output_file = os.path.join(output_dir, batch_name)
@@ -60,16 +85,18 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                                                     output_file)
             sp_args = ["/bin/bash", "-c", command]
             process = subprocess.Popen(sp_args, cwd=config.tagger_one_root, stdout=f_log, stderr=f_log)
+            logger.debug("Starting TaggerOne {}".format(process.args))
 
             # Wait until finished
             while process.poll() is None:
-                sleep(5)
-                print("INFO: TaggerOne progress {}/{}".format(files.index(first), len(files)))
-            print("INFO: TaggerOne thread for {} exited with code {}".format(batch_name, process.poll()))
+                sleep(OUTPUT_INTERVAL)
+                progress = get_taggerone_progress(files.index(first), log_file)
+                logger.info("TaggerOne progress {}/{}".format(progress, files_total))
+            logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
 
         # Process terminated by user
         if process.poll() == -9 or process.poll() == 137:
-            print("INFO: Received SIGKILL. Stopping TaggerOne ...")
+            logger.info("Received SIGKILL. Stopping TaggerOne ...")
             keep_tagging = False
 
         # Process quit by exception
@@ -82,7 +109,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                 last_fn = "PMC{}.txt".format(matches[-1])
                 last_file = os.path.join(translation_dir, last_fn)
                 skipped_files.append(last_file)
-                print("DEBUG: TaggerOne exception in file {}".format(last_file))
+                logger.debug("TaggerOne exception in file {}".format(last_file))
                 copyfile(log_file, "{}.{}".format(log_file, len(skipped_files)))
                 os.remove(last_file)
                 # Remove failed tagging from output
@@ -95,7 +122,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                         f.writelines(lines[:-1])
                     else:
                         f.writelines(lines)
-                        print("WARNING: Removing bad document from {} failed ({})".format(output_file, last_fn))
+                        logger.warning("Removing bad document from {} failed ({})".format(output_file, last_fn))
 
                 if files.index(last_fn) == len(files) - 1:
                     keep_tagging = False
@@ -105,7 +132,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
             else:
                 # No file processed, assume another error
                 keep_tagging = False
-                print("ERROR: No files processed. Assuming an unexpected exception")
+                logger.error("No files processed. Assuming an unexpected exception")
 
         if process.poll() == 0:
             if files[-1] == batch[-1]:
@@ -114,7 +141,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                 first = files[files.index(batch[-1]) + 1]
 
     end_time = datetime.now()
-    print("INFO: TaggerOne finished in {} ({} files total, {} errors)".format(end_time - start_time,
+    logger.info("TaggerOne finished in {} ({} files total, {} errors)".format(end_time - start_time,
                                                                               len(files) - len(skipped_files),
                                                                               len(skipped_files)))
 
@@ -145,12 +172,14 @@ def thread_tag_genes(config: Config, input_dir, output_dir, log_dir):
             sp_args = ["java", "-Xmx100G", "-Xms30G", "-jar", config.gnorm_jar, input_dir, output_dir,
                        config.gnorm_setup]
             process = subprocess.Popen(sp_args, cwd=config.gnorm_root, stdout=f_log, stderr=f_log)
+            logger.debug("Starting GNormPlus {}".format(process.args))
 
             # Wait until finished
             while process.poll() is None:
-                sleep(5)
-                print("INFO: GNormPlus progress {}/{}".format(len(os.listdir(output_dir)), files_total))
-            print("INFO: GNormPlus exited with code {}".format(process.poll()))
+                sleep(OUTPUT_INTERVAL)
+                progress = get_gnorm_progess(output_dir)
+                logger.info("GNormPlus progress {}/{}".format(progress, files_total))
+            logger.debug("GNormPlus exited with code {}".format(process.poll()))
             latest_exit_code = process.poll()
 
         if process.poll() == 1:
@@ -161,16 +190,16 @@ def thread_tag_genes(config: Config, input_dir, output_dir, log_dir):
             if matches:
                 last_file = matches[-1]
                 skipped_files.append(last_file)
-                print("DEBUG: GNormPlus exception in file {}".format(last_file))
+                logger.debug("GNormPlus exception in file {}".format(last_file))
                 copyfile(gnorm_log, "{}.{}".format(gnorm_log, len(skipped_files)))
                 os.remove(last_file)
                 latest_exit_code = process.poll()
             else:
                 # No file processed, assume another error
                 latest_exit_code = None
-                print("ERROR: No files processed. Assuming an unexpected exception")
+                logger.error("No files processed. Assuming an unexpected exception")
 
     end_time = datetime.now()
-    print("INFO: GNormPlus finished in {} ({} files total, {} errors)".format(end_time - start_time,
+    logger.info("GNormPlus finished in {} ({} files total, {} errors)".format(end_time - start_time,
                                                                               files_total,
                                                                               len(skipped_files)))
