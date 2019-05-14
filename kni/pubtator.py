@@ -81,6 +81,10 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                 line = line.replace('δ', 'q')
                 line = line.replace('Δ', 'd')
                 line = line.replace('𝜃', 's')
+                line = line.replace('Φ', 'F')
+                line = line.replace('ε', 'e')
+                line = line.replace('ρ', 'p')
+                line = line.replace('κ', 'k')
 
                 # count processed lines 
                 processed_lines += 1
