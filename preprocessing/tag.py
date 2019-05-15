@@ -20,7 +20,7 @@ def get_gnorm_progess(output_dir):
 def get_taggerone_progress(offset, log_file):
     with open(log_file) as f:
         content = f.read()
-    matches = re.findall("INFO (\d+)\n", content)
+    matches = re.findall("INFO (\d+)-\d+\n", content)
     progress = len(set(matches))
     return offset + progress
 
@@ -104,7 +104,7 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
             # Remove problematic document
             with open(log_file) as f_log:
                 content = f_log.read()
-            matches = re.findall(r"INFO (\d+)", content)
+            matches = re.findall(r"INFO (\d+)-\d+", content)
             if matches:
                 last_fn = "PMC{}.txt".format(matches[-1])
                 last_file = os.path.join(translation_dir, last_fn)
