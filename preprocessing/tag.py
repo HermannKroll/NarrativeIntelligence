@@ -111,7 +111,8 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                 skipped_files.append(last_file)
                 logger.debug("TaggerOne exception in file {}".format(last_file))
                 copyfile(log_file, "{}.{}".format(log_file, len(skipped_files)))
-                os.remove(last_file)
+                if os.path.exists(last_file):
+                    os.remove(last_file)
                 # Remove failed tagging from output
                 with open(output_file) as f:
                     lines = f.readlines()
@@ -131,8 +132,9 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                     first = files[files.index(last_fn) + 1]
             else:
                 # No file processed, assume another error
-                keep_tagging = False
-                logger.error("No files processed. Assuming an unexpected exception")
+                # keep_tagging = False
+                first = files[files.index(first) + 1]
+                logger.error("No files processed. Continue with {}".format(first))
 
         if process.poll() == 0:
             if files[-1] == batch[-1]:
