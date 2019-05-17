@@ -5,8 +5,7 @@ import itertools
 
 from lxml import etree
 
-from mesh.utils import get_datetime, get_text, get_attr, get_list, get_previous_indexing, \
-    get_tree_number, get_related_registry_number, get_thesaurus_id
+from mesh.utils import get_datetime, get_text, get_attr, get_list, get_element_text
 
 QUERY_DESCRIPTOR_RECORD = "/DescriptorRecordSet/DescriptorRecord"
 QUERY_DESCRIPTOR_BY_ID = "/DescriptorRecordSet/DescriptorRecord/DescriptorUI[text()='{}']/parent::*"
@@ -20,6 +19,16 @@ QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptList/Co
 
 # noinspection PyTypeChecker,PyUnresolvedReferences
 class MeSHDB:
+    """
+    Class is a Singleton for the MeSH database. You can load a descriptor file and query descriptors with the functions
+
+    - desc_by_id
+    - desc_by_tree_number
+    - descs_by_name
+    - descs_by_term
+
+    Use the instance() method to get a MeSHDB instance.
+    """
     __instance = None
 
     @staticmethod
@@ -126,7 +135,7 @@ class BaseNode:
 
     @property
     def attrs(self):
-        return self._attrs.keys()
+        return tuple(self._attrs.keys())
 
 
 class Term(BaseNode):
@@ -142,7 +151,7 @@ class Term(BaseNode):
         string=(get_text, "String", True),
         term_note=(get_text, "TermNote"),
         term_ui=(get_text, "TermUI", True),
-        thesaurus_id_list=(get_list, "ThesaurusIDList", get_thesaurus_id),
+        thesaurus_id_list=(get_list, "ThesaurusIDList", get_element_text),
     )
 
     def __str__(self):
@@ -169,7 +178,7 @@ class Concept(BaseNode):
         name=(get_text, "ConceptName/String", True),
         preferred_concept_yn=(get_attr, "PreferredConceptYN"),
         registry_number=(get_text, "RegistryNumber"),
-        related_registry_number_list=(get_list, "RelatedRegistryNumberList", get_related_registry_number),
+        related_registry_number_list=(get_list, "RelatedRegistryNumberList", get_element_text),
         scope_note=(get_text, "ScopeNote"),
         term_list=(get_list, "TermList", Term.from_element, True),
         translators_english_scope_note=(get_text, "TranslatorsEnglishScopeNote"),
@@ -209,10 +218,10 @@ class Descriptor(BaseNode):
         mesh_note=(get_text, "PublicMeSHNote"),
         online_note=(get_text, "OnlineNote"),
         pharmacological_action_list=(get_list, "PharmacologicalActionList", PharmacologicalAction.from_element),
-        previous_indexing_list=(get_list, "PreviousIndexingList", get_previous_indexing),
+        previous_indexing_list=(get_list, "PreviousIndexingList", get_element_text),
         scr_class=(get_attr, "SCRClass"),
         see_related_list=(get_list, "SeeRelatedList", SeeRelatedDescriptor.from_element),
-        tree_number_list=(get_list, "TreeNumberList", get_tree_number, True),
+        tree_number_list=(get_list, "TreeNumberList", get_element_text, True),
         unique_id=(get_text, "DescriptorUI", True),
     )
 
