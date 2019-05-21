@@ -29,13 +29,31 @@ def create_batch_file(batch, batch_file, translation_dir):
     skipped = []
     for fn in batch:
         filename = os.path.join(translation_dir, fn)
-        if os.path.exists(filename):
+        if os.path.exists(filename):  # Important if file was delted
             with open(filename) as f_doc:
                 with open(batch_file, "a+") as f_batch:
                     f_batch.write(f_doc.read())
         else:
             skipped.append(filename)
     return skipped
+
+
+def get_next_pivot(translation_dir, last_processed):
+    next_pivot = None  # indicating search is not completed
+    is_search_completed = False
+
+    while not is_search_completed:
+        file_list = sorted(f for f in os.listdir(translation_dir) if f.endswith(".txt"))
+        try:
+            next_pivot = next(x for x in file_list if x > last_processed)
+        except StopIteration:
+            next_pivot = None
+            is_search_completed = True
+        # Check if pivot exists
+        if next_pivot and os.path.exists(os.path.join(translation_dir, next_pivot)):
+            is_search_completed = True
+
+    return next_pivot
 
 
 def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir, log_dir, start_with=None):
@@ -52,6 +70,10 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
 
     The documents are sorted and started in monotone order.
 
+    ---
+
+    If `start_with` is not found, the next available and untagged document is selected.
+
     :param start_with: ID (PMCxxxxx) of the document to start with (None = start with first)
     :param config: Config object
     :param translation_dir: Path to directory with PubMedCentral files in PubTator format
@@ -62,22 +84,28 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
     """
     files = sorted(f for f in os.listdir(translation_dir) if f.endswith(".txt"))
     files_total = len(files)
-    first = "{}.txt".format(start_with) if start_with else files[0]
+    pivot = "{}.txt".format(start_with) if start_with else files[0]
     keep_tagging = True
     skipped_files = []
     start_time = datetime.now()
 
     while keep_tagging:
+        if not os.path.exists(os.path.join(translation_dir, pivot)):
+            pivot = get_next_pivot(translation_dir, pivot)
+
         # Generate batch
-        ext = first.split(".")[-1]
-        batch_name = "batch.{:03d}.{}".format(files.index(first), ext)
+        ext = pivot.split(".")[-1]
+        batch_name = "batch.{:03d}.{}".format(files.index(pivot), ext)
         batch_file = os.path.join(batch_dir, batch_name)
-        batch = files[files.index(first):files.index(first) + config.tagger_one_batch_size]
+        batch = files[files.index(pivot):files.index(pivot) + config.tagger_one_batch_size]
         skipped = create_batch_file(batch, batch_file, translation_dir)
         skipped_files.extend(skipped)
+        logger.debug("Created batch ({} to {}, {} files, {} skipped)".format(
+            batch[0], batch[-1], len(batch), len(skipped)
+        ))
 
         # Start Tagging
-        log_file = os.path.join(log_dir, "taggerone.{}.log".format(files.index(first)))
+        log_file = os.path.join(log_dir, "taggerone.{}.log".format(files.index(pivot)))
         with open(log_file, "w") as f_log:
             # Start process
             output_file = os.path.join(output_dir, batch_name)
@@ -90,21 +118,24 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
             # Wait until finished
             while process.poll() is None:
                 sleep(OUTPUT_INTERVAL)
-                progress = get_taggerone_progress(files.index(first), log_file)
+                progress = get_taggerone_progress(files.index(pivot), log_file)
                 logger.info("TaggerOne progress {}/{}".format(progress, files_total))
             logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
 
-        # Process terminated by user
-        if process.poll() == -9 or process.poll() == 137:
-            logger.info("Received SIGKILL. Stopping TaggerOne ...")
-            keep_tagging = False
-
-        # Process quit by exception
-        if process.poll() == 1:
-            # Remove problematic document
+        # Check process exit code
+        if process.poll() == 0:
+            # Process finished successfully
+            if files[-1] == batch[-1]:
+                keep_tagging = False
+            else:
+                pivot = get_next_pivot(translation_dir, batch[-1])
+        elif process.poll() == 1:
+            # Process quit by exception
+            # Detemine problematic document
             with open(log_file) as f_log:
                 content = f_log.read()
             matches = re.findall(r"INFO (\d+)-\d+", content)
+            logger.debug("Searching log file {} ({} matches found)".format(log_file, len(matches)))
             if matches:
                 last_fn = "PMC{}.txt".format(matches[-1])
                 last_file = os.path.join(translation_dir, last_fn)
@@ -113,6 +144,9 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                 copyfile(log_file, "{}.{}".format(log_file, len(skipped_files)))
                 if os.path.exists(last_file):
                     os.remove(last_file)
+                    logger.debug("Successfully deleted {}".format(last_file))
+                else:
+                    logger.debug("Failed to delete {}. File is already deleted.".format(last_file))
                 # Remove failed tagging from output
                 with open(output_file) as f:
                     lines = f.readlines()
@@ -123,24 +157,24 @@ def thread_tag_chemicals_diseases(config, translation_dir, batch_dir, output_dir
                         f.writelines(lines[:-1])
                     else:
                         f.writelines(lines)
-                        logger.warning("Removing bad document from {} failed ({})".format(output_file, last_fn))
+                        logger.warning("Removing bad document {} from batch {} failed".format(last_fn, output_file))
 
-                if files.index(last_fn) == len(files) - 1:
-                    keep_tagging = False
-                else:
-                    keep_tagging = process.poll()
-                    first = files[files.index(last_fn) + 1]
+                pivot = get_next_pivot(translation_dir, last_fn)
             else:
                 # No file processed, assume another error
                 # keep_tagging = False
-                first = files[files.index(first) + 1]
-                logger.error("No files processed. Continue with {}".format(first))
+                logger.error("No files processed.")
+                pivot = get_next_pivot(translation_dir, pivot)
 
-        if process.poll() == 0:
-            if files[-1] == batch[-1]:
-                keep_tagging = False
+            if pivot:
+                logger.debug("Next document: {}".format(pivot))
             else:
-                first = files[files.index(batch[-1]) + 1]
+                logger.info("No next document found. Stopping ...")
+                keep_tagging = False
+        elif process.poll() == -9 or process.poll() == 137:
+            # Process terminated by user
+            logger.info("Received SIGKILL. Stopping TaggerOne ...")
+            keep_tagging = False
 
     end_time = datetime.now()
     logger.info("TaggerOne finished in {} ({} files total, {} errors)".format(end_time - start_time,
