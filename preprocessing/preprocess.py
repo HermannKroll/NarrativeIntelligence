@@ -72,7 +72,8 @@ def get_next_document_id(translation_dir, tagger_one_out_dir):
         return translations[0]
 
 
-def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_chemicals_diseases=True, resume=False):
+def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_chemicals_diseases=True, resume=False,
+               console_log_level="INFO"):
     """
     Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
     Method expects an ID file or an ID list if resume=False.
@@ -111,7 +112,7 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
     fh.setLevel("DEBUG")
     fh.setFormatter(formatter)
     ch = logging.StreamHandler()
-    ch.setLevel("INFO")
+    ch.setLevel(console_log_level)
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
@@ -181,6 +182,7 @@ def main():
     group_settings = parser.add_argument_group("Settings")
     group_settings.add_argument("--config", default=CONFIG_DEFAULT,
                                 help="Configuration file (default: {})".format(CONFIG_DEFAULT))
+    group_settings.add_argument("--loglevel", default="INFO")
 
     parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
@@ -193,7 +195,7 @@ def main():
     elif args.concat_only:
         concat(args.input, args.output)
     else:
-        preprocess(args.input, args.output, conf, args.no_genes, args.no_cd, args.resume)
+        preprocess(args.input, args.output, conf, args.no_genes, args.no_cd, args.resume, args.loglevel.upper())
 
 
 if __name__ == "__main__":
