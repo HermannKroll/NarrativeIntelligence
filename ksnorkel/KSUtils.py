@@ -61,11 +61,30 @@ def split_sentences(session, split = [0.8, 0.1, 0.1], seed = 12345):
 
 	print("Sentences splitted: {} train, {} dev and {} test".format(len(train_sent), len(dev_sent), len(test_sent)))
 	return train_sent, dev_sent, test_sent
+
+
+def get_all_candidates(session, cand_type):
+	"""
+	gets all candidates of a given candidate type from the current session
+	:param session: snorkel session
+	:param cand_type:  candidate type
+	:return: all_cands as a list, train_cands, dev_cands, test_cands
+	"""
+	train_cands = session.query(cand_type).filter(cand_type.split == 0).order_by(cand_type.id).all()
+	dev_cands = session.query(cand_type).filter(cand_type.split == 1).order_by(cand_type.id).all()
+	test_cands = session.query(cand_type).filter(cand_type.split == 2).order_by(cand_type.id).all()
+
+	all_cands = []
+	all_cands.extend(train_cands)
+	all_cands.extend(dev_cands)
+	all_cands.extend(test_cands)
+
+	print("Amount of all candidates: {}".format(len(all_cands)))
+	return all_cands, train_cands, dev_cands, test_cands
 	
 
 from snorkel.models import GoldLabel, GoldLabelKey
 from snorkel.lf_helpers import get_tagged_text
-
 
 
 def add_gold_label_for_cand(session, c, label_function):
@@ -88,6 +107,7 @@ def add_gold_label_for_cand(session, c, label_function):
 		
 	return cand_label_value
 
+
 def add_gold_labels_for_candidates(session, candidate_type, label_function, clear=True):
 	"""
 	adds gold labels for all candidates in session
@@ -95,13 +115,12 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 	:param candidate_type: type of candidate
 	:param label_function: labeling function
 	:param clear: if true all old gold labels are cleared
-	:return: nothing
+	:return: pos_train_labels, pos_test_labels, pos_dev_labels, pos_labels_sum
 	"""
 	if clear:
 		print('Clearing existing gold labels...')
 		# delete all gold label
 		session.query(GoldLabel).delete()
-
 
 	train_cands = session.query(candidate_type).filter(candidate_type.split == 0).all()
 	dev_cands = session.query(candidate_type).filter(candidate_type.split == 1).all()
@@ -110,7 +129,7 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 	# add gold label key
 	q_glk = session.query(GoldLabelKey).filter(GoldLabelKey.id == 0)
 	if q_glk.count() == 0:
-		session.add(GoldLabelKey(id = 0, name='gold', group=0))
+		session.add(GoldLabelKey(id=0, name='gold', group=0))
 
 
 	print("Adding gold labels to training candidates...")
@@ -122,6 +141,7 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 		else:
 			neg_labels += 1
 
+	pos_train_labels = pos_labels
 
 	print("Labeld {} positive and {} negative samples in train".format(pos_labels, neg_labels))
 	pos_labels_sum = pos_labels
@@ -135,6 +155,7 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 		else:
 			neg_labels += 1
 
+	pos_dev_labels = pos_labels
 
 	print("Labeld {} positive and {} negative samples in dev".format(pos_labels, neg_labels))
 	pos_labels_sum += pos_labels
@@ -147,6 +168,8 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 			pos_labels += 1
 		else:
 			neg_labels += 1
+
+	pos_test_labels = pos_labels
 
 			
 	print("Labeld {} positive and {} negative samples in test".format(pos_labels, neg_labels))
@@ -162,6 +185,7 @@ def add_gold_labels_for_candidates(session, candidate_type, label_function, clea
 	test_cands = None
 
 	print("Labeld {} positive and {} negative samples".format(pos_labels_sum, neg_labels_sum))
+	return pos_train_labels, pos_dev_labels, pos_test_labels, pos_labels_sum
 
 
 

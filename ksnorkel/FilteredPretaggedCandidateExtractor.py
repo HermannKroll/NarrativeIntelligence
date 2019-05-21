@@ -14,6 +14,7 @@ from sqlalchemy.sql import select
 from snorkel.models import Candidate, TemporarySpan, Sentence
 from snorkel.udf import UDF, UDFRunner
 
+
 class FilteredPretaggedCandidateExtractor(UDFRunner):
 	"""UDFRunner for PretaggedCandidateExtractorUDF"""
 	def __init__(self, candidate_class, entity_types, regex_to_search, self_relations=False, nested_relations=False, symmetric_relations=True, entity_sep='~@~'):
@@ -48,23 +49,19 @@ class FilteredPretaggedCandidateExtractorUDF(UDF):
 
 		super(FilteredPretaggedCandidateExtractorUDF, self).__init__(**kwargs)
 
-
 	def apply(self, context, clear, split, check_for_existing=True, **kwargs):
 		"""Extract Candidates from a Context"""
 		# For now, just handle Sentences
 		if not isinstance(context, Sentence):
 			raise NotImplementedError("%s is currently only implemented for Sentence contexts." % self.__name__)
 
-		if self.regex_to_search == None:
+		if not self.regex_to_search:
 			raise NotImplementedError('Regex cannot be empty: {}'.format(self.__name__))
-
 
 		sentence_str = context.text
 		# First search for regex in sentence
-		if re.search(self.regex_to_search, sentence_str) == None:
-			return # Sentence does not fullfill our regex
-
-		
+		if not re.search(self.regex_to_search, sentence_str):
+			return  # Sentence does not fullfill our regex
 
 		# Do a first pass to collect all mentions by entity type / cid
 		entity_idxs = dict((et, defaultdict(list)) for et in set(self.entity_types))

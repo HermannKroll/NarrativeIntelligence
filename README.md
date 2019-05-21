@@ -1,13 +1,10 @@
 # PubMedSnorkel
 ## Getting Started
-Download ctd data for labeling training and test data. This download recommends 2GB of free disk space.
+Download ctd data for labeling training and test data. This download recommends 3GB of free disk space.
 
 ```
 .\download_ctd_data.sh
 ```
-
-## Install GPU LSTMs for Snorkel Relation Extraction 
-See https://github.com/sujitpal/snorkel-pytorch-lstm-gpu for further instructions.
 
 ## Preprocessing for PubMedCentral
 
@@ -30,3 +27,17 @@ The package also requires the PubMedCentral Open Access Document Collection in t
 1. Start the pipeline using
 
        python preprocess.py ids.txt tagged_documents.txt
+
+## Enable GPU Support for Training (PyTorch)
+First switch to conda prompt in env
+
+Find your installed Cuda Version 
+	cat /usr/local/cuda/version.txt
+
+Coda Version 9
+
+        conda install pytorch torchvision cudatoolkit=9.0 -c pytorch  
+
+Cuda Version 10:
+
+        conda install pytorch torchvision cudatoolkit=10.0 -c pytorch   
