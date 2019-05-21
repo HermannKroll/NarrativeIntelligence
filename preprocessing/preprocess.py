@@ -79,6 +79,7 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
     Method expects an ID file or an ID list if resume=False.
     Method expects the working directory (temp-directory) of the processing to resume if resume=True.
 
+    :param console_log_level: Log level for console output
     :param input_file_dir_list: File or list with IDs or directory with tagging to resume
     :param output_filename: Filename of PubTator to create
     :param conf: config object
@@ -89,12 +90,12 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
     print("=== STEP 1 - Preparation ===")
     # Create paths
     tmp_root = input_file_dir_list if resume else tempfile.mkdtemp()
-    tmp_translation = os.path.join(tmp_root, "translation")
-    tmp_batches = os.path.join(tmp_root, "batches")
-    tmp_tagger_out = os.path.join(tmp_root, "taggerone")
-    tmp_gnorm_out = os.path.join(tmp_root, "gnorm")
-    tmp_log = os.path.join(tmp_root, "log")
-    translation_err_file = os.path.join(tmp_root, "translation_errors.txt")
+    tmp_translation = os.path.abspath(os.path.join(tmp_root, "translation"))
+    tmp_batches = os.path.abspath(os.path.join(tmp_root, "batches"))
+    tmp_tagger_out = os.path.abspath(os.path.join(tmp_root, "taggerone"))
+    tmp_gnorm_out = os.path.abspath(os.path.join(tmp_root, "gnorm"))
+    tmp_log = os.path.abspath(os.path.join(tmp_root, "log"))
+    translation_err_file = os.path.abspath(os.path.join(tmp_root, "translation_errors.txt"))
     # Create directories
     if not resume:
         os.mkdir(tmp_translation)
@@ -119,7 +120,7 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True, tag_c
     # Init resume
     first_id = None
     run_tagger_one = True
-    if resume:
+    if resume and tag_chemicals_diseases:
         try:
             first_id = get_next_document_id(tmp_translation, tmp_tagger_out)
             logger.debug("Resuming with document {}".format(first_id))
