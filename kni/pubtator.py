@@ -16,7 +16,10 @@ def blocks(files, size=65536):
         if not b: break
         yield b
 
-def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, debug=True, replace_special_char_in_entites = True, replace_special_char_in_entites_with = 'X', min_of_chemical_in_doc = 1, remove_entities_with_empty_cid = True, force_full_abstracts = True):
+def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, debug=True,
+                         replace_special_char_in_entites=True, replace_special_char_in_entites_with='X',
+                         min_of_chemical_in_doc=1, min_of_genes_in_doc=0, remove_entities_with_empty_cid=True,
+                         force_full_abstracts=True):
     """
     creates a sample of a pubtator file
     :param pubtator_filename: filename of the pubtator file
@@ -27,6 +30,7 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
     them in text
     :param replace_special_char_in_entites_with: default (X) character to replace any special character
     :param min_of_chemical_in_doc: default (1) how many chemical should be at least in a doc?
+    :param min_of_genes_in_doc: default (0) how many genes should be at least in a doc?
     :param remove_entities_with_empty_cid: default (true) removes entites with no given ids
     :param force_full_abstracts: default (true) only select documents which contain a full abstract (not title only)
     :return: nothing
@@ -55,10 +59,10 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
             # to print progress
             processed_lines = 0
 
-
             # amount of skipped documents
             skipped_regarding_missing_title_or_abstract = 0
             skipped_regarding_min_chemicals = 0
+            skipped_regarding_min_genes = 0
 
             skipped_ent_regarding_double_tagged = 0
             skipped_ent_regarding_no_id = 0
@@ -99,6 +103,8 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                         if len(lines) > min_lines and re.match(r'\d+\|t\|', lines[0]) and re.match(r'\d+\|a\|', lines[1]):
                             # count amount of chemicals to filter
                             amount_of_chemicals = 0
+                            # count genes
+                            amount_of_genes = 0
                             # write lines to new file
                             lines_to_write = []
                             amount_of_docs += 1
@@ -364,6 +370,12 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                                     # if there is no 6 element or 6. element is empty
                                                     if len(l_split) == 5 or l_split[5] != '':
                                                         amount_of_chemicals += 1
+                                            # should we count the amount of genes?
+                                            if min_of_genes_in_doc > 0:
+                                                if l_split[4] == 'Gene':
+                                                    # if there is no 6 element or 6. element is empty
+                                                    if len(l_split) == 5 or l_split[5] != '':
+                                                        amount_of_genes += 1
 
                                             # should skip lines?
                                             if remove_entities_with_empty_cid:
@@ -376,28 +388,30 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                                     continue 
                                 # write this line to output
                                 lines_to_write.append(lo)
-                            
-                    
+
+                            should_skip = False
+                            # check if minimum is required
+                            if min_of_genes_in_doc > 0:
+                                if amount_of_genes < min_of_genes_in_doc:
+                                    skipped_regarding_min_genes += 1
+                                    if debug:
+                                        print('Skipping document {}, because only {} genes were found'.
+                                                format(doc_id, amount_of_genes))
+                                    should_skip = True
                             # check if minimum is required
                             if min_of_chemical_in_doc > 0:
-                                # if minimum should be used, then min chemicals must be in doc
-                                if amount_of_chemicals >= min_of_chemical_in_doc:
-                                    amount_of_sampled_docs += 1
-                                    for lo in lines_to_write:
-                                        fout.write(lo)   
-                                    fout.write('\n')
-                                else:
+                                if amount_of_chemicals < min_of_chemical_in_doc:
                                     skipped_regarding_min_chemicals += 1
                                     if debug:
-                                        print('Skipping document {}, because only {} chemicals were found'.format(doc_id, amount_of_chemicals))
-                            # min not required - just write file
-                            else:
+                                        print('Skipping document {}, because only {} chemicals were found'.
+                                                format(doc_id, amount_of_chemicals))
+                                    should_skip = True
+
+                            if not should_skip:
                                 amount_of_sampled_docs += 1
                                 for lo in lines_to_write:
-                                    fout.write(lo)   
+                                    fout.write(lo)
                                 fout.write('\n')
-                            # reset amount of chemicals
-                            amount_of_chemicals = 0
                     else:
                         skipped_regarding_missing_title_or_abstract += 1 
                         if debug:
@@ -409,7 +423,12 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                     lines.append(line)
     printProgressBar(max_lines, max_lines, prefix='Sampling pubtator file...')
     print('Skipped {} documents due to missing title or abstract'.format(skipped_regarding_missing_title_or_abstract))  
-    print('Skipped {} documents due to minimum chemical amount'.format(skipped_regarding_min_chemicals)) 
+
+    if min_of_chemical_in_doc > 0:
+        print('Skipped {} documents due to minimum chemical amount'.format(skipped_regarding_min_chemicals))
+    if min_of_genes_in_doc > 0:
+        print('Skipped {} documents due to minimum gene amount'.format(skipped_regarding_min_genes))
+
     print('Amount of correctly shifted entity mentions {}'.format(amount_correctly_shifted_entity_mentions))
     print('Skipped {} entites due to double tagged (genes are prefered)'.format(skipped_ent_regarding_double_tagged))  
     print('Skipped {} entites due to wrong entity detection position'.format(skipped_ent_regarding_wrong_mention_pos))  
