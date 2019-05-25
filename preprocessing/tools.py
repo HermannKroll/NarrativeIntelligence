@@ -30,13 +30,25 @@ from argparse import ArgumentParser
 
 
 # TODO: Add doc
-def count_documents(filename):
+def get_documents_in_file(filename):
     ids = set()
     with open(filename) as f:
         for line in f:
             matches = re.findall(r"^(\d+).*\n$", line, re.DOTALL)
             if matches:
                 ids |= {int(matches[0])}
+    return ids
+
+
+# TODO: Add doc
+def count_documents(filename):
+    ids = set()
+    if os.path.isdir(filename):
+        for fn in os.listdir(filename):
+            if fn.endswith(".txt"):
+                ids |= get_documents_in_file(os.path.join(filename, fn))
+    else:
+        ids = get_documents_in_file(filename)
     return len(ids)
 
 

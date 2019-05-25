@@ -167,23 +167,26 @@ def get_next_document_id(translation_dir, tagger_one_out_dir):
 #     print("=== Finished ===")
 
 def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
-               tag_chemicals=True, tag_diseases=True, resume=False, console_log_level="INFO"):
+               tag_chemicals=True, tag_diseases=True, resume=False, console_log_level="INFO", workdir=None):
     """
     Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
     Method expects an ID file or an ID list if resume=False.
     Method expects the working directory (temp-directory) of the processing to resume if resume=True.
 
+    :param workdir: Working directory
     :param console_log_level: Log level for console output
     :param input_file_dir_list: File or list with IDs or directory with tagging to resume
     :param output_filename: Filename of PubTator to create
     :param conf: config object
     :param tag_genes: flag, whether to tag genes
-    :param tag_chemicals_diseases: flag, wheter to tag chemicals and diseases
-    :param resume: flag, if method should resume (if True, tag_genes and tag_chemicals_diseases must be set accordingly)
+    :param tag_chemicals: flag, wheter to tag chemicals
+    :param tag_diseases: flag, wheter to tag diseases
+    :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
+    be set accordingly)
     """
     print("=== STEP 1 - Preparation ===")
     # Create paths
-    tmp_root = input_file_dir_list if resume else tempfile.mkdtemp()
+    tmp_root = input_file_dir_list if resume else (os.path.abspath(workdir) if workdir else tempfile.mkdtemp())
     tmp_translation = os.path.abspath(os.path.join(tmp_root, "translation"))
     tmp_log = os.path.abspath(os.path.join(tmp_root, "log"))
     translation_err_file = os.path.abspath(os.path.join(tmp_root, "translation_errors.txt"))
@@ -203,24 +206,8 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
-    # Init resume
-    # first_id = None
-    # run_tagger_one = True
-    # if resume and tag_chemicals_diseases:
-    #    try:
-    #        first_id = get_next_document_id(tmp_translation, tmp_tagger_out)
-    #        logger.debug("Resuming with document {}".format(first_id))
-    #    except NoRemainingDocumentError:
-    #        logger.debug("No document to resume with")
-    #        run_tagger_one = False
     logger.info("Project directory: {}".format(tmp_root))
     logger.debug("Translation output directory: {}".format(tmp_translation))
-    # if tag_chemicals_diseases:
-    #    logger.debug("Batches directory: {}".format(tmp_batches))
-    #    logger.debug("TaggerOne output directory: {}".format(tmp_tagger_out))
-    # if tag_genes:
-    #    logger.debug("GNormPlus output directory: {}".format(tmp_gnorm_out))
-    # logger.debug("Log directory: {}".format(tmp_log))
     if not resume:
         translate(input_file_dir_list, tmp_translation, conf.pmc_dir, translation_err_file)
     # Init taggers
@@ -282,6 +269,7 @@ def main():
     group_settings.add_argument("--config", default=CONFIG_DEFAULT,
                                 help="Configuration file (default: {})".format(CONFIG_DEFAULT))
     group_settings.add_argument("--loglevel", default="INFO")
+    group_settings.add_argument("--workdir", default=None)
 
     parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
@@ -295,7 +283,7 @@ def main():
         concat(args.input, args.output)
     else:
         preprocess(args.input, args.output, conf, args.no_genes, args.no_chemicals, args.no_diseases, args.resume,
-                   args.loglevel.upper())
+                   args.loglevel.upper(), workdir=args.workdir)
 
 
 if __name__ == "__main__":
