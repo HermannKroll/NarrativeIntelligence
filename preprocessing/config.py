@@ -15,6 +15,7 @@ class Config:
     def pmc_dir(self):
         return self.config["pmc_dir"]
 
+    # TaggerOne
     @property
     def tagger_one_root(self):
         return self.config["taggerOne"]["root"]
@@ -31,6 +32,7 @@ class Config:
     def tagger_one_batch_size(self):
         return int(self.config["taggerOne"]["batchSize"])
 
+    # GNorm
     @property
     def gnorm_root(self):
         return self.config["gnormPlus"]
@@ -42,3 +44,24 @@ class Config:
     @property
     def gnorm_jar(self):
         return os.path.join(self.gnorm_root, "GNormPlus.jar")
+
+    # DNorm
+    @property
+    def dnorm_root(self):
+        return self.config["dnorm"]
+
+    @property
+    def dnorm_script(self):
+        return os.path.join(self.dnorm_root, "RunDNorm.sh")
+
+    @property
+    def dnorm_config(self):
+        return os.path.join(self.dnorm_root, "config/banner_NCBIDisease_TEST.xml")
+
+    @property
+    def dnorm_lexicon(self):
+        return os.path.join(self.dnorm_root, "data/CTD_diseases.tsv")
+
+    @property
+    def dnorm_matrix(self):
+        return os.path.join(self.dnorm_root, "output/simmatrix_NCBIDisease_e4.bin")
