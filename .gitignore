@@ -111,3 +111,7 @@ venv.bak/
 # Files
 preprocessing/config.json
 data/
+
+# macOS
+.DS_Store
+._.DS_Store

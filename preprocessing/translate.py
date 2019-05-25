@@ -87,7 +87,9 @@ def translate_file(fn):
 
     # Select title
     e_title = tree.xpath("/article/front/article-meta/title-group/article-title")
-    title = e_title[0].text.replace("\n", " ").strip()
+    title = e_title[0].text
+    if title:
+        title = title.replace("\n", " ").strip()
 
     # Select abstract (observation: abstract could have multiple paragraphs)
     e_abstract = tree.xpath("/article/front/article-meta/abstract//p")
@@ -197,6 +199,7 @@ def main():
             content = translate_file(args.input)
             with open(args.output, "w") as f:
                 f.write(content)
+
 
 if __name__ == "__main__":
     main()
