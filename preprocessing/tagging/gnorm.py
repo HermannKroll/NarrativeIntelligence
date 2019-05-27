@@ -52,7 +52,7 @@ class GNorm(BaseTagger):
                 latest_exit_code = process.poll()
 
             if process.poll() == 1:
-                # Remove problematic document
+                # Java Exception
                 with open(self.log_file) as f_log:
                     content = f_log.read()
                 matches = re.findall(r"/.*?PMC\d+\.txt", content)
@@ -61,7 +61,7 @@ class GNorm(BaseTagger):
                     skipped_files.append(last_file)
                     self.logger.debug("GNormPlus exception in file {}".format(last_file))
                     copyfile(self.log_file, "{}.{}".format(self.log_file, len(skipped_files)))
-                    os.remove(last_file)  # TODO:Fix
+                    os.remove(last_file)
                     latest_exit_code = process.poll()
                 else:
                     # No file processed, assume another error

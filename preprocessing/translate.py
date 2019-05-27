@@ -28,6 +28,13 @@ patterns_to_delete = (
 )
 
 
+def clean_text(text):
+    cleaned = text.replace("\n", " ")
+    cleaned = cleaned.replace("\u2028", " ")
+    cleaned = cleaned.strip()
+    return cleaned
+
+
 def clean_p_element(p_element):
     """
     Clean p-elements from a PubMedCentral nxml-file.
@@ -42,7 +49,7 @@ def clean_p_element(p_element):
     for pattern in patterns_to_delete:
         xml_str = pattern.sub("", xml_str)
     text = html.fragment_fromstring(xml_str).text_content()
-    text = text.replace("\n", " ").strip()
+    text = clean_text(text)
     return text
 
 
@@ -89,7 +96,7 @@ def translate_file(fn):
     e_title = tree.xpath("/article/front/article-meta/title-group/article-title")
     title = e_title[0].text
     if title:
-        title = title.replace("\n", " ").strip()
+        title = clean_text(title)
 
     # Select abstract (observation: abstract could have multiple paragraphs)
     e_abstract = tree.xpath("/article/front/article-meta/abstract//p")
