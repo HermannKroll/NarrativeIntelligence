@@ -28,6 +28,10 @@ class DNorm(BaseTagger):
             content = content.replace("|a| ", "\t")
             with open(self.in_file, "w") as f:
                 f.write(content)
+        else:
+            # Here you must get the already processed IDs and create a new batch file with all the missing IDs.
+            # You must rename the old output file and make sure its not overwritten
+            raise NotImplementedError("Resuming DNorm is not implemented.")
 
     def run(self):
         files_total = len(os.listdir(self.translation_dir))
@@ -48,8 +52,9 @@ class DNorm(BaseTagger):
         self.logger.debug("Exited with code {}".format(process.poll()))
 
         end_time = datetime.now()
-        self.logger.info("Finished in {} ({} files total, {} errors)".format(
+        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
             end_time - start_time,
+            self.get_progress(),
             files_total,
             self.count_skipped_files()),
         )

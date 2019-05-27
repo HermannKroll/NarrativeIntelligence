@@ -65,3 +65,12 @@ class Config:
     @property
     def dnorm_matrix(self):
         return os.path.join(self.dnorm_root, "output/simmatrix_NCBIDisease_e4.bin")
+
+    # tmChem
+    @property
+    def tmchem_root(self):
+        return self.config["tmchem"]
+
+    @property
+    def tmchem_script(self):
+        return os.path.join(self.dnorm_root, "run.sh")

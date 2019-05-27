@@ -29,7 +29,8 @@ patterns_to_delete = (
 
 
 def clean_text(text):
-    cleaned = text.replace("\n", " ")
+    cleaned = text.replace("|", "")
+    cleaned = cleaned.replace("\n", " ")
     cleaned = cleaned.replace("\u2028", " ")
     cleaned = cleaned.strip()
     return cleaned

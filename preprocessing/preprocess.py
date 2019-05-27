@@ -1,25 +1,17 @@
 import logging
 import os
-import re
 import tempfile
 from argparse import ArgumentParser
 
 from config import Config
 from tagging.dnorm import DNorm
 from tagging.gnorm import GNorm
-from tagging.tchem import TChem
+from tagging.tmchem import TMChem
 from tools import concat
 from translate import collect_files, translate_files
 
 CONFIG_DEFAULT = "config.json"
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
-
-
-class NoRemainingDocumentError(Exception):
-    """
-    Error class indicating that no unfinished documents exist.
-    """
-    pass
 
 
 def translate(input_filename, output, pmc_dir, translation_err_file=None):
@@ -37,39 +29,6 @@ def translate(input_filename, output, pmc_dir, translation_err_file=None):
     """
     pmc_files = collect_files(input_filename, pmc_dir)
     translate_files(pmc_files, output, translation_err_file)
-
-
-def get_next_document_id(translation_dir, tagger_one_out_dir):
-    """
-    Method searches the already tagged documents and returns the next document to start with.
-    If no ID is found, a ValueError is raised.
-    If all documents are already processed, a NoRemainingDocumentError is raised.
-
-    :param translation_dir: Directory with the PubMedCentral PubTator documents
-    :param tagger_one_out_dir: Directory with the tagged batches of TaggerOne
-    :return: Next ID to work on
-    :raises ValueError: if no IDs were found
-    :raises NoRemainingDocumentError: if all documents are already processed
-    """
-    translations = sorted(fn[:-4] for fn in os.listdir(translation_dir))
-
-    processed_files = sorted(os.listdir(tagger_one_out_dir))
-    if processed_files:
-        last_batch_file = processed_files[-1]
-        last_batch_path = os.path.join(tagger_one_out_dir, last_batch_file)
-        with open(last_batch_path) as f:
-            content = f.read()
-        finished_ids = re.findall(r"(\d+)\|t\|", content)
-        if finished_ids:
-            last_id = "PMC{}".format(finished_ids[-1])
-        else:
-            raise ValueError("TaggerOne result {} is empty. Please remove manually.".format(last_batch_path))
-        last_idx = translations.index(last_id)
-        if last_idx == len(translations) - 1:
-            raise NoRemainingDocumentError
-        return translations[last_idx + 1]
-    else:
-        return translations[0]
 
 
 def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
@@ -118,29 +77,29 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
         translate(input_file_dir_list, tmp_translation, conf.pmc_dir, translation_err_file)
     # Init taggers
     kwargs = dict(root_dir=tmp_root, translation_dir=tmp_translation, log_dir=tmp_log, config=conf)
-    gnorm = GNorm(**kwargs)
-    dnorm = DNorm(**kwargs)
-    tchem = TChem(**kwargs)
+    gene_tagger = GNorm(**kwargs)
+    disease_tagger = DNorm(**kwargs)
+    chemical_tagger = TMChem(**kwargs)
     if tag_genes:
-        gnorm.prepare(resume)
+        gene_tagger.prepare(resume)
     if tag_diseases:
-        dnorm.prepare(resume)
+        disease_tagger.prepare(resume)
     if tag_chemicals:
-        tchem.prepare(resume)
+        chemical_tagger.prepare(resume)
     print("=== STEP 2 - Tagging ===")
     if tag_genes:
-        gnorm.start()
+        gene_tagger.start()
     if tag_diseases:
-        dnorm.start()
+        disease_tagger.start()
     if tag_chemicals:
-        tchem.start()
+        chemical_tagger.start()
     # Wait until finished
     if tag_genes:
-        gnorm.join()
+        gene_tagger.join()
     if tag_diseases:
-        dnorm.join()
+        disease_tagger.join()
     if tag_chemicals:
-        tchem.join()
+        chemical_tagger.join()
     print("=== STEP 3 - Post-processing ===")
     # genes = os.path.join(tmp_root, "G.txt")
     # chemicals = os.path.join(tmp_root, "CD.txt")

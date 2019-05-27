@@ -9,7 +9,7 @@ class Test(TestCase):
         self.file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/gnorm_problem_files/u2028.nxml")
 
     def test_clean_text_normal(self):
-        text = " Line 1\nLine 2\u2028Line 3 "
+        text = " Line 1\nLine ||2\u2028Line 3 "
         text_expected = "Line 1 Line 2 Line 3"
         self.assertEqual(clean_text(text), text_expected)
 

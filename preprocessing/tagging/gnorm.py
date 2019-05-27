@@ -42,13 +42,13 @@ class GNorm(BaseTagger):
                 sp_args = ["java", "-Xmx100G", "-Xms30G", "-jar", self.config.gnorm_jar, self.in_dir, self.out_dir,
                            self.config.gnorm_setup]
                 process = subprocess.Popen(sp_args, cwd=self.config.gnorm_root, stdout=f_log, stderr=f_log)
-                self.logger.debug("Starting GNormPlus {}".format(process.args))
+                self.logger.debug("Starting {}".format(process.args))
 
                 # Wait until finished
                 while process.poll() is None:
                     sleep(self.OUTPUT_INTERVAL)
-                    self.logger.info("GNormPlus progress {}/{}".format(self.get_progress(), files_total))
-                self.logger.debug("GNormPlus exited with code {}".format(process.poll()))
+                    self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
+                self.logger.debug("Exited with code {}".format(process.poll()))
                 latest_exit_code = process.poll()
 
             if process.poll() == 1:
@@ -59,7 +59,7 @@ class GNorm(BaseTagger):
                 if matches:
                     last_file = matches[-1]
                     skipped_files.append(last_file)
-                    self.logger.debug("GNormPlus exception in file {}".format(last_file))
+                    self.logger.debug("Exception in file {}".format(last_file))
                     copyfile(self.log_file, "{}.{}".format(self.log_file, len(skipped_files)))
                     os.remove(last_file)
                     latest_exit_code = process.poll()
@@ -69,9 +69,10 @@ class GNorm(BaseTagger):
                     self.logger.error("No files processed. Assuming an unexpected exception")
 
         end_time = datetime.now()
-        self.logger.info("GNormPlus finished in {} ({} files total, {} errors)".format(end_time - start_time,
-                                                                                       files_total,
-                                                                                       len(skipped_files)))
+        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(end_time - start_time,
+                                                                                                 self.get_progress(),
+                                                                                                 files_total,
+                                                                                                 len(skipped_files)))
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

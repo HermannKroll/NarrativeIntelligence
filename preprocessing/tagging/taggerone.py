@@ -9,6 +9,13 @@ from time import sleep
 from tagging.base import BaseTagger
 
 
+class NoRemainingDocumentError(Exception):
+    """
+    Error class indicating that no unfinished documents exist.
+    """
+    pass
+
+
 class TaggerOne(BaseTagger):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,6 +31,8 @@ class TaggerOne(BaseTagger):
             shutil.copytree(self.translation_dir, self.in_dir)
             os.mkdir(self.out_dir)
             os.mkdir(self.batch_dir)
+        else:
+            raise NotImplementedError("Resuming TaggerOne is not implemented.")
 
     def get_progress(self, offset=0):
         with open(self.log_file) as f:
@@ -60,6 +69,38 @@ class TaggerOne(BaseTagger):
                 is_search_completed = True
 
         return next_pivot
+
+    def get_next_document_id(self):
+        """
+        Method searches the already tagged documents and returns the next document to start with.
+        If no ID is found, a ValueError is raised.
+        If all documents are already processed, a NoRemainingDocumentError is raised.
+
+        :param translation_dir: Directory with the PubMedCentral PubTator documents
+        :param tagger_one_out_dir: Directory with the tagged batches of TaggerOne
+        :return: Next ID to work on
+        :raises ValueError: if no IDs were found
+        :raises NoRemainingDocumentError: if all documents are already processed
+        """
+        translations = sorted(fn[:-4] for fn in os.listdir(self.translation_dir))
+
+        processed_files = sorted(os.listdir(self.out_dir))
+        if processed_files:
+            last_batch_file = processed_files[-1]
+            last_batch_path = os.path.join(self.out_dir, last_batch_file)
+            with open(last_batch_path) as f:
+                content = f.read()
+            finished_ids = re.findall(r"(\d+)\|t\|", content)
+            if finished_ids:
+                last_id = "PMC{}".format(finished_ids[-1])
+            else:
+                raise ValueError("TaggerOne result {} is empty. Please remove manually.".format(last_batch_path))
+            last_idx = translations.index(last_id)
+            if last_idx == len(translations) - 1:
+                raise NoRemainingDocumentError
+            return translations[last_idx + 1]
+        else:
+            return translations[0]
 
     def run(self, start_with=None):
         """
