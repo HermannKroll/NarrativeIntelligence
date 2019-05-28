@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser
 
 # TODO: Add doc
-from tagging.base import merge_result_files
+from tagging.base import merge_result_files, finalize_dir
 
 
 # def batch(iterable, n=1):
@@ -92,6 +92,7 @@ def main():
     parser.add_argument("--merge", nargs="*", metavar="FILE")
     parser.add_argument("--out", metavar="OUTPUT_FILE")
     parser.add_argument("--translation-dir", metavar="TRANSLATION_DIR")
+    parser.add_argument("--finalize-dir", metavar=("DIR", "FILE"))
     args = parser.parse_args()
 
     if args.count:
@@ -111,6 +112,9 @@ def main():
 
     if args.merge and args.translation_dir and args.out:
         merge_result_files(args.translation_dir, args.out, *args.merge)
+
+    if args.finalize_dir:
+        finalize_dir(args.finalize_dir[0], args.finalize_dir[1])
 
 
 if __name__ == "__main__":
