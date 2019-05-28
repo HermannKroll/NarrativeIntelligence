@@ -17,7 +17,7 @@
 
         <div class="row">
             <div class="col">
-                <form method="POST" action="{% url 'search' %}">
+                <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -34,8 +34,64 @@
             </div>
         </div>
 
+        <div class="row margin-top" id="patterns">
+            <div class="col">
+                <h2>Graph patterns</h2>
+
+                {% for graph, result in results %}
+                    {{ graph }}<br>
+                    {{ result }}
+                {% endfor %}
+                <!--<form method="POST" action="{% url 'search' %}">
+                        {% csrf_token %}
+                        {% for pattern in patterns %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="patterns"
+                                       value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
+                                <label class="form-check-label" for="p{{ forloop.counter }}">
+                                    {% for s,p,o in pattern %}
+                                        <p>{{ s }} - {{ p }} - {{ o }}</p>
+                                    {% endfor %}
+                                </label>
+                            </div>
+                        {% endfor %}
+                        <input type="hidden" name="keywords" value="{{ keyword_str }}"/>
+                        <button type="submit" class="btn btn-primary">Search documents</button>
+                    </form>-->
+            </div>
+        </div>
+
+        {% if results and keyword_str %}
+            <div class="row margin-top" id="patterns">
+                <div class="col">
+                    <h2>Graph patterns</h2>
+
+                    {% for graph, result in results %}
+                        {{ graph }}<br>
+                        {{ result }}
+                    {% endfor %}
+                    <!--<form method="POST" action="{% url 'search' %}">
+                        {% csrf_token %}
+                        {% for pattern in patterns %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="patterns"
+                                       value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
+                                <label class="form-check-label" for="p{{ forloop.counter }}">
+                                    {% for s,p,o in pattern %}
+                                        <p>{{ s }} - {{ p }} - {{ o }}</p>
+                                    {% endfor %}
+                                </label>
+                            </div>
+                        {% endfor %}
+                        <input type="hidden" name="keywords" value="{{ keyword_str }}"/>
+                        <button type="submit" class="btn btn-primary">Search documents</button>
+                    </form>-->
+                </div>
+            </div>
+        {% endif %}
+
         {% if patterns and keyword_str %}
-            <div class="row margin-top">
+            <div class="row margin-top" id="patterns">
                 <div class="col">
                     <h2>Graph patterns for {{ keyword_str }}</h2>
                     <form method="POST" action="{% url 'search' %}">
@@ -56,14 +112,28 @@
                     </form>
                 </div>
             </div>
-            </div>
         {% endif %}
 
-    {% if pattern_idx and keyword_str %}
-        <div class="row margin-top">
-            <div class="col">
-                <h2>Documents for pattern {{ pattern_idx }}</h2>
+        {% if documents and keyword_str %}
+            <div class="row margin-top" id="documents">
+                <div class="col-md-6">
+                    <h2>Documents</h2>
+
+                    <div class="list-group">
+                        {% for doc in documents %}
+                            <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC385743/"
+                               class="list-group-item list-group-item-action">{{ doc }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        const search_url = "{% url 'search' %}";
+    </script>
+    <script src="{% static 'js/search.js' %}"></script>
 {% endblock %}

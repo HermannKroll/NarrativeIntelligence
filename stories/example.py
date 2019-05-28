@@ -1,8 +1,7 @@
 from library_graph import LibraryGraph
+from mesh.data import MeSHDB
 from story import MeshTagger
 from story import StoryProcessor
-from mesh.data import MeSHDB
-
 
 lg = LibraryGraph()
 lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')
@@ -17,4 +16,4 @@ results = story.query('Simvastatin Rhabdomyolysis associated')
 for r in results:
     print('Query: {}'.format(r[0]))
     print('Docs: {}'.format(r[1]))
-    print('='*60)
+    print('=' * 60)

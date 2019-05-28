@@ -1,9 +1,8 @@
 import copy
 import itertools
-from library_graph import LibraryGraph
-from mesh.data import MeSHDB
 
-#class Graph(object):
+
+# class Graph(object):
 
 
 class GraphQuery(object):
@@ -84,7 +83,7 @@ class GraphQueryProcessor(object):
 
                 # no substitution was found?
                 if not has_substitution:
-                    return False, {} # no query result found
+                    return False, {}  # no query result found
                 # merge var_subs for this fact against all var subs and check for compatibility
                 if len(var_subs_for_fact) > 0:  # some var is substituted
                     # go through all new substituted variables
@@ -231,7 +230,7 @@ class StoryProcessor(object):
                     for pred_type_pair in self.library_graph.predicate2enttypes[pred]:
                         candidates_pos_0 = []
                         candidates_pos_1 = []
-                        for _,e_id,e_type,_ in entities_detected:
+                        for _, e_id, e_type, _ in entities_detected:
                             if e_type == pred_type_pair[0]:
                                 candidates_pos_0.append(e_id)
                                 continue
@@ -293,4 +292,3 @@ class MeshTagger(StoryEntityTagger):
 
     def get_tagger_name(self):
         return 'Mesh 2019 Tagger'
-
