@@ -29,7 +29,12 @@
 
                             </textarea>
                             <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
-                                Please type in the keywords you want to query.
+                                Please type in the keywords you want to query. (Mesh / Gene IDs can be entered manually "1576" for CYP3A4.
+                                Detection of entities is currently only supported for Chemicals and Diseases.
+                            </small>
+
+                            <small id="id_help_3" class="form-text text-muted" aria-describedby="id_help">
+                                Current Corpus: PubMedCentral 108 Documents: Simvastatin Amiodarone CYP3A4
                             </small>
                         </div>
                     </div>
@@ -62,6 +67,54 @@
             <div class="col-md-6">
                 <h2>Documents</h2>
             </div>
+        </div>
+
+        <div>
+        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                    Support the following predicates:<br/>
+                    associated : [('Chemical', 'Disease'), ('Chemical', 'Gene'), ('Gene', 'Disease')]<br/>
+                    inhibits : [('Chemical', 'Gene')]<br/>
+                    metabolites : [('Gene', 'Chemical')]<br/>
+                    marker_mechanism : [('Chemical', 'Disease')]<br/>
+                    therapeutic : [('Chemical', 'Disease')]<br/>
+                    affects_abundance : [('Chemical', 'Gene')]<br/>
+                    affects_activity : [('Chemical', 'Gene')]<br/>
+                    affects_binding : [('Chemical', 'Gene')]<br/>
+                    affects_cotreatment : [('Chemical', 'Gene')]<br/>
+                    affects_expression : [('Chemical', 'Gene')]<br/>
+                    affects_localization : [('Chemical', 'Gene')]<br/>
+                    affects_metabolic_processing : [('Chemical', 'Gene')]<br/>
+                    affects_methylation : [('Chemical', 'Gene')]<br/>
+                    affects_reaction : [('Chemical', 'Gene')]<br/>
+                    affects_response_to_substance : [('Chemical', 'Gene')]<br/>
+                    affects_transport : [('Chemical', 'Gene')]<br/>
+                    decreases_abundance : [('Chemical', 'Gene')]<br/>
+                    decreases_activity : [('Chemical', 'Gene')]<br/>
+                    decreases_expression : [('Chemical', 'Gene')]<br/>
+                    decreases_methylation : [('Chemical', 'Gene')]<br/>
+                    decreases_phosphorylation : [('Chemical', 'Gene')]<br/>
+                    decreases_reaction : [('Chemical', 'Gene')]<br/>
+                    decreases_response_to_substance : [('Chemical', 'Gene')]<br/>
+                    decreases_secretion : [('Chemical', 'Gene')]<br/>
+                    increases_abundance : [('Chemical', 'Gene')]<br/>
+                    increases_acetylation : [('Chemical', 'Gene')]<br/>
+                    increases_activity : [('Chemical', 'Gene')]<br/>
+                    increases_chemical_synthesis : [('Chemical', 'Gene')]<br/>
+                    increases_cleavage : [('Chemical', 'Gene')]<br/>
+                    increases_degradation : [('Chemical', 'Gene')]<br/>
+                    increases_expression : [('Chemical', 'Gene')]<br/>
+                    increases_localization : [('Chemical', 'Gene')]<br/>
+                    increases_metabolic_processing : [('Chemical', 'Gene')]<br/>
+                    increases_oxidation : [('Chemical', 'Gene')]<br/>
+                    increases_phosphorylation : [('Chemical', 'Gene')]<br/>
+                    increases_reaction : [('Chemical', 'Gene')]<br/>
+                    increases_reduction : [('Chemical', 'Gene')]<br/>
+                    increases_response_to_substance : [('Chemical', 'Gene')]<br/>
+                    increases_secretion : [('Chemical', 'Gene')]<br/>
+                    increases_transport : [('Chemical', 'Gene')]<br/>
+                    increases_uptake : [('Chemical', 'Gene')]<br/>
+
+                    </small>
         </div>
     </div>
 {% endblock %}

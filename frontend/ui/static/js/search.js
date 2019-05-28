@@ -17,6 +17,8 @@ const search = (event) => {
         console.log(response);
 
         let form = $('#patterns form');
+        form.empty();
+        $('#documents > div').empty();
 
         response["results"].forEach((item, idx) => {
             let graph = item[0];
