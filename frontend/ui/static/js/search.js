@@ -26,8 +26,9 @@ const search = (event) => {
             let formDiv = $('<div class="form-check"></div>');
             let input = $('<input class="form-check-input" type="radio" name="patterns" value="p' + idx + '" id="p' + idx + '">');
             let label = $('<label class="form-check-label" for="p' + idx + '">');
+            label.append(results.length + ' documents<br/>');
             graph.forEach(triple => {
-                label.append('<p>' + triple[0] + ' - ' + triple[1] + ' - ' + triple[2] + '</p>')
+                label.append(triple[0] + ' - ' + triple[1] + ' - ' + triple[2] + '<br/>')
             });
             formDiv.append(input);
             formDiv.append(label);
