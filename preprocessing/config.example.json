@@ -5,5 +5,6 @@
     "model": "models/model_BC5CDRJ_011.bin",
     "batchSize": 50
   },
-  "gnormPlus": "/opt/GNormPlusJava"
+  "gnormPlus": "/opt/GNormPlusJava",
+  "dnorm": "/opt/DNorm-0.0.7"
 }

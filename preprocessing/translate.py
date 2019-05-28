@@ -13,6 +13,7 @@ Some documents do not follow this schema (e.g., PMC3153655, which is a schedule 
 import os
 import re
 import sys
+from argparse import ArgumentParser
 
 from lxml import etree, html
 from lxml.etree import ParserError
@@ -25,6 +26,14 @@ patterns_to_delete = (
     re.compile(r"<xref\s.*?</xref>"),  # <xref>
     re.compile(r"<fig\s.*?</fig>"),  # <fig>
 )
+
+
+def clean_text(text):
+    cleaned = text.replace("|", "")
+    cleaned = cleaned.replace("\n", " ")
+    cleaned = cleaned.replace("\u2028", " ")
+    cleaned = cleaned.strip()
+    return cleaned
 
 
 def clean_p_element(p_element):
@@ -41,7 +50,7 @@ def clean_p_element(p_element):
     for pattern in patterns_to_delete:
         xml_str = pattern.sub("", xml_str)
     text = html.fragment_fromstring(xml_str).text_content()
-    text = text.strip().replace("\n", " ")
+    text = clean_text(text)
     return text
 
 
@@ -87,6 +96,8 @@ def translate_file(fn):
     # Select title
     e_title = tree.xpath("/article/front/article-meta/title-group/article-title")
     title = e_title[0].text
+    if title:
+        title = clean_text(title)
 
     # Select abstract (observation: abstract could have multiple paragraphs)
     e_abstract = tree.xpath("/article/front/article-meta/abstract//p")
@@ -98,6 +109,7 @@ def translate_file(fn):
 
     # Merge abstract and content
     pubtator_abstract = "{} {}".format(abstract, content)
+    pubtator_abstract = pubtator_abstract.strip()
 
     filename = fn.split("/")[-1]
     pmcid = filename[3:filename.rindex(".")]
@@ -108,7 +120,6 @@ def translate_file(fn):
         return ""
 
 
-# TODO: Add doc
 def collect_files(id_list_or_filename, search_directory):
     """
     Method searches ``search_directory`` recursively for files starting with a specific id.
@@ -173,3 +184,30 @@ def translate_files(pmc_files, output_dir, err_file=None):
         with open(err_file, "w") as f:
             f.write("\n".join(ignored_files))
         print("See {} for a list of ignored files.".format(err_file))
+
+
+def main():
+    parser = ArgumentParser(description="Translate and/or collect PubMedCentral files")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--collect", metavar="DIR", help="Collect PubMedCentral files from DIR")
+
+    parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
+    parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
+    args = parser.parse_args()
+
+    if args.collect:
+        files = collect_files(args.input, args.collect)
+        translate_files(files, args.output)
+    else:
+        if os.path.isdir(args.input):
+            files = [os.path.join(args.input, fn) for fn in os.listdir(args.input) if fn.endswith(".nxml")]
+            translate_files(files, args.output)
+        else:
+            content = translate_file(args.input)
+            with open(args.output, "w") as f:
+                f.write(content)
+
+
+if __name__ == "__main__":
+    main()
