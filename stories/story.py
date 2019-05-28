@@ -1,6 +1,7 @@
 import copy
 import itertools
-
+import gzip
+import time
 
 # class Graph(object):
 
@@ -185,14 +186,36 @@ class StoryProcessor(object):
                 matched_docs.append((doc_id, subs))
         return matched_docs
 
+    def _score_graph_pattern(self, graph_pattern):
+        return 1.0
+
     def translate_keywords_to_graph_queries(self, keyword_query, k):
         # split keyword query in single words
         words = keyword_query.split(' ')
+
+        # if keyword query is empty - skip it
+        if not keyword_query or len(words) == 0:
+            return []
+
         # store all detected entities in this query
         entities_detected = []
         other_words = []
         # go through all words
         for w in words:
+            # default entity
+            if w.startswith('\"') and w.endswith('\"'):
+                if w.startswith('"C'):
+                    # is a disease
+                    e_type = 'Disease'
+                elif w.startswith('"D'):
+                    # is a chemical / drug
+                    e_type = 'Chemical'
+                else:
+                    # its a gene
+                    e_type = 'Gene'
+                entities_detected.append((w[1:-1], w[1:-1], e_type, 'Manual'))
+                continue
+
             for entity_tagger in self.entity_taggers:
                 # is the word a entity?
                 ent_id, ent_type = entity_tagger.tag_entity(w)
@@ -210,58 +233,67 @@ class StoryProcessor(object):
             else:
                 not_matched_words.append(w)
 
-        # construct possible graph queries
-        graph_queries = []
         # start with just one empty query
         stack = [[]]
-        # which predicates were already processed
-        current_pred_index = 0
-        while len(stack) > 0:
-            # get first query
-            graph_query = stack.pop()
+        # try to match predicate between tuples
+        for pred in predicates_detected:
+            # get pred types from library graph
+            for pred_type_pair in self.library_graph.predicate2enttypes[pred]:
+                candidates_pos_0 = []
+                candidates_pos_1 = []
+                for _, e_id, e_type, _ in entities_detected:
+                    if e_type == pred_type_pair[0]:
+                        candidates_pos_0.append(e_id)
+                        continue
+                    if e_type == pred_type_pair[1]:
+                        candidates_pos_1.append(e_id)
+                        continue
+                # no combination possible
+                if len(candidates_pos_0) == 0 or len(candidates_pos_1) == 0:
+                    continue
 
-            # was the query expanded?
-            query_expanded = False
-            # if there is a predicate left to check
-            if current_pred_index < len(predicates_detected):
-                # try to match predicate between tuples
-                for pred in predicates_detected[current_pred_index:]:
-                    # get pred types from library graph
-                    for pred_type_pair in self.library_graph.predicate2enttypes[pred]:
-                        candidates_pos_0 = []
-                        candidates_pos_1 = []
-                        for _, e_id, e_type, _ in entities_detected:
-                            if e_type == pred_type_pair[0]:
-                                candidates_pos_0.append(e_id)
-                                continue
-                            if e_type == pred_type_pair[1]:
-                                candidates_pos_1.append(e_id)
-                                continue
+                # stories for next generation
+                stack_copy = []
+                # compute cross product of candidates
+                cand_pairs = list(itertools.product(candidates_pos_0, candidates_pos_1))
+                # go through all pairs of candidates
+                for cand_p in cand_pairs:
+                    t = (cand_p[0], pred, cand_p[1])
+                    # extend query list by new tuple
+                    for graph_query in stack:
+                        # append same pattern
+                        if len(graph_query) > 0:
+                            # only if it is not the empty story
+                            stack_copy.append(graph_query)
+                        # expand pattern and append it also
+                        graph_query_c = copy.copy(graph_query)
+                        graph_query_c.append(t)
+                        stack_copy.append(graph_query_c)
 
-                        # compute cross product of candidates
-                        cand_pairs = list(itertools.product(candidates_pos_0, candidates_pos_1))
-                        # go through all pairs of candidates
-                        for cand_p in cand_pairs:
-                            t = (cand_p[0], pred, cand_p[1])
-                            # extend query list by new tuple
-                            graph_query_c = copy.copy(graph_query)
-                            graph_query_c.append(t)
-                            stack.append(graph_query_c)
-                            # extended - not finished yet
-                            query_expanded = True
-                # increment pred index by one
-                current_pred_index += 1
-            # add current query to final list
-            if not query_expanded:
-                graph_queries.append(graph_query)
+                stack = stack_copy
+
+        # construct possible graph queries
+        graph_queries = []
+
+        # select best stories here
+        for gp in stack:
+
+            supp = self.library_graph.compute_support_for_fact(gp)
+            print('Support {} for story {}'.format(supp, gp))
+
+        graph_queries = stack
 
         # return the list of final graph queries
         return graph_queries
 
     def query(self, keyword_query, amount_of_stories=5):
+        start = time.time()
         # 1. transform the keyword query to a graph query
         # multiple solutions are possible
         graph_queries = self.translate_keywords_to_graph_queries(keyword_query, k=amount_of_stories)
+
+        query_trans_time = time.time() - start
+        before_matching = time.time()
 
         # 2. compute matches to graph query on document level
         results = []
@@ -269,6 +301,13 @@ class StoryProcessor(object):
             doc_ids = self.match_graph_query(gq)
             results.append((gq, doc_ids))
 
+        query_matched_time = time.time() - before_matching
+        complete_time = time.time() - start
+        print('='*120)
+        print('='*120)
+        print('Time needed: {}s ({}s Query Translation / {}s Matching)'.format(complete_time, query_trans_time, query_matched_time))
+        print('='*120)
+        print('='*120)
         # returns a list of doc_ids
         return results
 
@@ -285,10 +324,41 @@ class MeshTagger(StoryEntityTagger):
                     if d.tree_number.startswith('C'):
                         return "MESH:{}".format(d.unique_id), 'Disease'
                     if d.tree_number.startswith('D'):
-                        return "MESH:{}".format(d.unique_id), 'Chemical'
+                        if d.tree_number.startswith('D08'):
+                            return "MESH:{}".format(d.unique_id), 'Gene'
+                        else:
+                            return "MESH:{}".format(d.unique_id), 'Chemical'
 
-        else:
-            return None, None
+        return None, None
 
     def get_tagger_name(self):
         return 'Mesh 2019 Tagger'
+
+
+class GeneTagger(StoryEntityTagger):
+    def __init__(self, ctd_genes_file):
+        self.gene2id = {}
+        with gzip.open(ctd_genes_file, 'r') as f:
+            for l in f:
+                line = str(l).replace('b\'', '')
+                # skip comments
+                if line.startswith('#'):
+                    continue
+                # print(line)
+                comp = line.replace('\\n', '').split('\\t')
+                # print(comp)
+                gene_id = comp[2]
+                gene_name = comp[1]
+
+                self.gene2id[gene_name] = gene_id
+
+        print('Amount of gene ids: {}'.format(len(self.gene2id)))
+
+    def tag_entity(self, word):
+        if word in self.gene2id:
+            return self.gene2id[word], 'Gene'
+        return None, None
+
+    def get_tagger_name(self):
+        return 'CTD Gene Tagger'
+
