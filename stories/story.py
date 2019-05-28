@@ -1,5 +1,7 @@
+import copy
 import itertools
-
+from library_graph import LibraryGraph
+from mesh.data import MeSHDB
 
 #class Graph(object):
 
@@ -20,6 +22,7 @@ class GraphQuery(object):
 
 
 class GraphQueryProcessor(object):
+
     def check_variable_substitution(self, substitutions, variable, substitution):
         # if variable has currently no substitution
         if variable not in substitution:
@@ -155,16 +158,10 @@ class StoryEntityTagger(object):
     def get_tagger_name(self):
         pass
 
-#class PlotGraph(object):
-
-
-#class StoryGraph(object):
-
-
 
 class StoryProcessor(object):
-    def __init__(self, doc_fact_store, entity_taggers=[]):
-        self.doc_fact_store = doc_fact_store
+    def __init__(self, library_graph, entity_taggers=[]):
+        self.library_graph = library_graph
         self.graph_query_processor = GraphQueryProcessor()
         self.entity_taggers = entity_taggers
 
@@ -180,9 +177,9 @@ class StoryProcessor(object):
         """
         matched_docs = []
         # go through all documents
-        for doc_id, doc_fs in self.doc_fact_store.items():
+        for doc_id, doc_fs in self.library_graph.doc2tuples.items():
             # now match query against this facts
-            matched, subs = self.graph_query_processor.match_query_facts_in_doc_facts(graph_query.facts, doc_fs)
+            matched, subs = self.graph_query_processor.match_query_facts_in_doc_facts(graph_query, doc_fs)
             if matched:
                 if debug:
                     print('Matched in doc {} with var_subs {}'.format(doc_id, subs))
@@ -205,26 +202,95 @@ class StoryProcessor(object):
                 else:
                     other_words.append(w)
 
+        # we try to match all words now against predicates with a string similarity
+        predicates_detected = []
+        not_matched_words = []
+        for w in other_words:
+            if w in self.library_graph.predicates:
+                predicates_detected.append(w)
+            else:
+                not_matched_words.append(w)
 
+        # construct possible graph queries
+        graph_queries = []
+        # start with just one empty query
+        stack = [[]]
+        # which predicates were already processed
+        current_pred_index = 0
+        while len(stack) > 0:
+            # get first query
+            graph_query = stack.pop()
 
-        return None
+            # was the query expanded?
+            query_expanded = False
+            # if there is a predicate left to check
+            if current_pred_index < len(predicates_detected):
+                # try to match predicate between tuples
+                for pred in predicates_detected[current_pred_index:]:
+                    # get pred types from library graph
+                    for pred_type_pair in self.library_graph.predicate2enttypes[pred]:
+                        candidates_pos_0 = []
+                        candidates_pos_1 = []
+                        for _,e_id,e_type,_ in entities_detected:
+                            if e_type == pred_type_pair[0]:
+                                candidates_pos_0.append(e_id)
+                                continue
+                            if e_type == pred_type_pair[1]:
+                                candidates_pos_1.append(e_id)
+                                continue
 
-    def match_query_to_doc_graphs(self, graph_query):
-        return None
+                        # compute cross product of candidates
+                        cand_pairs = list(itertools.product(candidates_pos_0, candidates_pos_1))
+                        # go through all pairs of candidates
+                        for cand_p in cand_pairs:
+                            t = (cand_p[0], pred, cand_p[1])
+                            # extend query list by new tuple
+                            graph_query_c = copy.copy(graph_query)
+                            graph_query_c.append(t)
+                            stack.append(graph_query_c)
+                            # extended - not finished yet
+                            query_expanded = True
+                # increment pred index by one
+                current_pred_index += 1
+            # add current query to final list
+            if not query_expanded:
+                graph_queries.append(graph_query)
+
+        # return the list of final graph queries
+        return graph_queries
 
     def query(self, keyword_query, amount_of_stories=5):
         # 1. transform the keyword query to a graph query
         # multiple solutions are possible
         graph_queries = self.translate_keywords_to_graph_queries(keyword_query, k=amount_of_stories)
 
-
         # 2. compute matches to graph query on document level
         results = []
-        for gq, prob in graph_queries:
-            doc_ids = self.match_query_to_doc_graphs(gp)
-            results.append((gq, prob, doc_ids))
+        for gq in graph_queries:
+            doc_ids = self.match_graph_query(gq)
+            results.append((gq, doc_ids))
 
         # returns a list of doc_ids
         return results
 
+
+class MeshTagger(StoryEntityTagger):
+    def __init__(self, meshdb):
+        self.meshdb = meshdb
+
+    def tag_entity(self, word):
+        descs = self.meshdb.descs_by_name(word)
+        if descs:
+            for d in descs:
+                if d.heading == word:
+                    if d.tree_number.startswith('C'):
+                        return "MESH:{}".format(d.unique_id), 'Disease'
+                    if d.tree_number.startswith('D'):
+                        return "MESH:{}".format(d.unique_id), 'Chemical'
+
+        else:
+            return None, None
+
+    def get_tagger_name(self):
+        return 'Mesh 2019 Tagger'
 
