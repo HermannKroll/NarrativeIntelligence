@@ -79,49 +79,49 @@ def concat(input_dir, output_file):
     sys.stdout.write(" done.\n")
 
 
-# TODO: Add doc
-def read_pubtator_file(filename):
-    docs = {}
-    with open(filename) as f:
-        for line in f:
-            if line.strip():
-                did = re.findall(r"^\d+", line)[0]
-                if did not in docs:
-                    docs[did] = dict(title="", abstract="", tags=[])
-                if title_pattern.match(line):
-                    docs[did]["title"] = line.strip()
-                elif abstract_pattern.match(line):
-                    docs[did]["abstract"] = line.strip()
-                else:
-                    docs[did]["tags"] += [line.strip()]
-
-    return docs
-
-
-# TODO: Add doc
-def merge_pubtator_files(file1, file2, output):
-    d1 = read_pubtator_file(file1)
-    d2 = read_pubtator_file(file2)
-
-    ids = set(d1.keys()) | set(d2.keys())
-
-    with open(output, "w") as f:
-        for did in ids:
-            if did in d1 and did not in d2:
-                title = d1[did]["title"]
-                abstract = d1[did]["abstract"]
-                tags = d1[did]["tags"]
-            elif did not in d1 and did in d2:
-                title = d2[did]["title"]
-                abstract = d2[did]["abstract"]
-                tags = d2[did]["tags"]
-            else:
-                title = d1[did]["title"]
-                abstract = d1[did]["abstract"]
-                tags = d1[did]["tags"] + d2[did]["tags"]
-            f.write(f"{title}\n")
-            f.write(f"{abstract}\n")
-            f.write("{}\n\n".format("\n".join(sorted(tags, key=lambda x: int(x.split("\t")[1])))))
+# # TODO: Add doc
+# def read_pubtator_file(filename):
+#     docs = {}
+#     with open(filename) as f:
+#         for line in f:
+#             if line.strip():
+#                 did = re.findall(r"^\d+", line)[0]
+#                 if did not in docs:
+#                     docs[did] = dict(title="", abstract="", tags=[])
+#                 if title_pattern.match(line):
+#                     docs[did]["title"] = line.strip()
+#                 elif abstract_pattern.match(line):
+#                     docs[did]["abstract"] = line.strip()
+#                 else:
+#                     docs[did]["tags"] += [line.strip()]
+#
+#     return docs
+#
+#
+# # TODO: Add doc
+# def merge_pubtator_files(file1, file2, output):
+#     d1 = read_pubtator_file(file1)
+#     d2 = read_pubtator_file(file2)
+#
+#     ids = set(d1.keys()) | set(d2.keys())
+#
+#     with open(output, "w") as f:
+#         for did in ids:
+#             if did in d1 and did not in d2:
+#                 title = d1[did]["title"]
+#                 abstract = d1[did]["abstract"]
+#                 tags = d1[did]["tags"]
+#             elif did not in d1 and did in d2:
+#                 title = d2[did]["title"]
+#                 abstract = d2[did]["abstract"]
+#                 tags = d2[did]["tags"]
+#             else:
+#                 title = d1[did]["title"]
+#                 abstract = d1[did]["abstract"]
+#                 tags = d1[did]["tags"] + d2[did]["tags"]
+#             f.write(f"{title}\n")
+#             f.write(f"{abstract}\n")
+#             f.write("{}\n\n".format("\n".join(sorted(tags, key=lambda x: int(x.split("\t")[1])))))
 
 
 # TODO: Add doc
@@ -151,7 +151,8 @@ def main():
         sys.stdout.write(" done\n")
 
     if args.merge:
-        merge_pubtator_files(args.merge[0], args.merge[1], args.merge[2])
+        # merge_pubtator_files(args.merge[0], args.merge[1], args.merge[2])
+        raise NotImplementedError
 
 
 if __name__ == "__main__":

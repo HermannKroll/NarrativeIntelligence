@@ -1,12 +1,13 @@
 import os
-from unittest import TestCase
 
+from tests.base import BaseTestCase
 from translate import translate_file, clean_text
 
 
-class Test(TestCase):
+class Test(BaseTestCase):
     def setUp(self):
-        self.file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/gnorm_problem_files/u2028.nxml")
+        super().setUp()
+        self.file = os.path.join(self.resource_dir, "gnorm_problem_files/u2028.nxml")
 
     def test_clean_text_normal(self):
         text = " Line 1\nLine ||2\u2028Line 3 "

@@ -1,12 +1,11 @@
 import os
-import re
 import shutil
 import subprocess
 from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from tagging.base import BaseTagger
+from tagging.base import BaseTagger, get_pmcid_from_filename, get_exception_causing_file_from_log, finalize_dir
 
 
 class GNorm(BaseTagger):
@@ -21,6 +20,11 @@ class GNorm(BaseTagger):
         if not resume:
             shutil.copytree(self.translation_dir, self.in_dir)
             os.mkdir(self.out_dir)
+        else:
+            self.logger.info("Resuming")
+
+    def finalize(self):
+        finalize_dir(self.out_dir, self.result_file)
 
     def run(self):
         """
@@ -32,11 +36,11 @@ class GNorm(BaseTagger):
         a manual analysis is recommended (maybe an OutOfMemoryException?).
         """
         skipped_files = []
-        latest_exit_code = 1
+        keep_tagging = True
         files_total = len(os.listdir(self.in_dir))
         start_time = datetime.now()
 
-        while latest_exit_code == 1:
+        while keep_tagging:
             with open(self.log_file, "w") as f_log:
                 # Start GNormPlus
                 sp_args = ["java", "-Xmx100G", "-Xms30G", "-jar", self.config.gnorm_jar, self.in_dir, self.out_dir,
@@ -49,24 +53,22 @@ class GNorm(BaseTagger):
                     sleep(self.OUTPUT_INTERVAL)
                     self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
                 self.logger.debug("Exited with code {}".format(process.poll()))
-                latest_exit_code = process.poll()
 
             if process.poll() == 1:
                 # Java Exception
-                with open(self.log_file) as f_log:
-                    content = f_log.read()
-                matches = re.findall(r"/.*?PMC\d+\.txt", content)
-                if matches:
-                    last_file = matches[-1]
+                last_file = get_exception_causing_file_from_log(self.log_file)
+                if last_file:
+                    last_pmcid = get_pmcid_from_filename(last_file)
                     skipped_files.append(last_file)
                     self.logger.debug("Exception in file {}".format(last_file))
-                    copyfile(self.log_file, "{}.{}".format(self.log_file, len(skipped_files)))
+                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_pmcid))
                     os.remove(last_file)
-                    latest_exit_code = process.poll()
                 else:
                     # No file processed, assume another error
-                    latest_exit_code = None
+                    keep_tagging = False
                     self.logger.error("No files processed. Assuming an unexpected exception")
+            else:
+                keep_tagging = False
 
         end_time = datetime.now()
         self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(end_time - start_time,

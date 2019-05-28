@@ -1,6 +1,7 @@
 import os
 import subprocess
 from datetime import datetime
+from shutil import copyfile
 from time import sleep
 
 from tagging.base import BaseTagger
@@ -8,6 +9,9 @@ from tools import concat, count_documents
 
 
 class DNorm(BaseTagger):
+    def finalize(self):
+        copyfile(self.out_file, self.result_file)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "dnorm_in")

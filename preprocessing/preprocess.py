@@ -4,6 +4,7 @@ import tempfile
 from argparse import ArgumentParser
 
 from config import Config
+from tagging.base import merge_result_files
 from tagging.dnorm import DNorm
 from tagging.gnorm import GNorm
 from tagging.tmchem import TMChem
@@ -101,18 +102,17 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
     if tag_chemicals:
         chemical_tagger.join()
     print("=== STEP 3 - Post-processing ===")
-    # genes = os.path.join(tmp_root, "G.txt")
-    # chemicals = os.path.join(tmp_root, "CD.txt")
-    # if tag_genes:
-    #    concat(tmp_gnorm_out, genes)
-    # if tag_chemicals_diseases:
-    #    concat(tmp_tagger_out, chemicals)
-    # if tag_genes and tag_chemicals_diseases:
-    #    merge_pubtator_files(genes, chemicals, output_filename)
-    # elif tag_genes and not tag_chemicals_diseases:
-    #    copyfile(genes, output_filename)
-    # elif not tag_genes and tag_chemicals_diseases:
-    #    copyfile(chemicals, output_filename)
+    result_files = []
+    if tag_genes:
+        gene_tagger.finalize()
+        result_files.append(gene_tagger.result_file)
+    if tag_diseases:
+        disease_tagger.finalize()
+        result_files.append(disease_tagger.result_file)
+    if tag_chemicals:
+        chemical_tagger.finalize()
+        result_files.append(chemical_tagger.result_file)
+    merge_result_files(tmp_translation, output_filename, *result_files)
     print("=== Finished ===")
 
 
