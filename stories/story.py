@@ -2,6 +2,7 @@ import copy
 import itertools
 import gzip
 import time
+import operator
 
 # class Graph(object):
 
@@ -186,8 +187,57 @@ class StoryProcessor(object):
                 matched_docs.append((doc_id, subs))
         return matched_docs
 
-    def _score_graph_pattern(self, graph_pattern):
-        return 1.0
+    def _score_graph_pattern(self, graph_pattern, supp, entity_ids_detected, predicates_detected, max_supp):
+        gp = graph_pattern
+
+        ent_in_gp = set()
+        pred_in_gp = []
+        for f in gp:
+            ent_in_gp.add(f[0])
+            ent_in_gp.add(f[2])
+            pred_in_gp.append(f[1])
+
+        # how many entities and predicates are contained?
+        ent_score = len(ent_in_gp.intersection(entity_ids_detected)) / len(entity_ids_detected)
+
+        # how many predicates are missed in query?
+        amount_contained_preds = 0
+        for p in predicates_detected:
+            if p in pred_in_gp:
+                amount_contained_preds += 1
+
+        pred_score = amount_contained_preds / len(predicates_detected)
+
+        supp_score = (supp / max_supp)
+        print('Support {} / Ent_Score {} / Pred_Score {} / Supp_Score {} for story {}'.format(supp, ent_score, pred_score, supp_score, gp))
+        score = 0.4 * ent_score + 0.4 * pred_score + 0.2 * supp_score
+        print('Final Score {}'.format(score))
+        return score
+
+    def _select_k_best_stores(self, stories, k, entity_ids_detected, predicates_detected):
+        stories_with_supp = []
+        # get max supp
+        max_supp = 0
+        for gp in stories:
+            # get support for graph pattern
+            supp = self.library_graph.compute_support_for_fact(gp)
+            stories_with_supp.append((gp, supp))
+            if supp > max_supp:
+                max_supp = supp
+
+        scored_stories = []
+        # select best stories here
+        for gp, supp in stories_with_supp:
+            score = self._score_graph_pattern(gp, supp, entity_ids_detected, predicates_detected, max_supp)
+            scored_stories.append((gp, score))
+
+        # construct possible graph queries
+        scored_stories_sorted = sorted(scored_stories, key=operator.itemgetter(1), reverse=True)
+        for story, score in scored_stories_sorted:
+            print('Score {} for story {}'.format(score, story))
+
+        # return the list of final graph queries
+        return scored_stories_sorted[0:k]
 
     def translate_keywords_to_graph_queries(self, keyword_query, k):
         # split keyword query in single words
@@ -199,6 +249,7 @@ class StoryProcessor(object):
 
         # store all detected entities in this query
         entities_detected = []
+        entity_ids_detected = set()
         other_words = []
         # go through all words
         for w in words:
@@ -213,7 +264,9 @@ class StoryProcessor(object):
                 else:
                     # its a gene
                     e_type = 'Gene'
-                entities_detected.append((w[1:-1], w[1:-1], e_type, 'Manual'))
+                ent_id = w[1:-1]
+                entities_detected.append((ent_id, ent_id, e_type, 'Manual'))
+                entity_ids_detected.add(ent_id)
                 continue
 
             for entity_tagger in self.entity_taggers:
@@ -221,6 +274,7 @@ class StoryProcessor(object):
                 ent_id, ent_type = entity_tagger.tag_entity(w)
                 if ent_id:
                     entities_detected.append((w, ent_id, ent_type, entity_tagger.get_tagger_name()))
+                    entity_ids_detected.add(ent_id)
                 else:
                     other_words.append(w)
 
@@ -272,19 +326,7 @@ class StoryProcessor(object):
 
                 stack = stack_copy
 
-        # construct possible graph queries
-        graph_queries = []
-
-        # select best stories here
-        for gp in stack:
-
-            supp = self.library_graph.compute_support_for_fact(gp)
-            print('Support {} for story {}'.format(supp, gp))
-
-        graph_queries = stack
-
-        # return the list of final graph queries
-        return graph_queries
+        return self._select_k_best_stores(stack, k, entity_ids_detected, predicates_detected)
 
     def query(self, keyword_query, amount_of_stories=5):
         start = time.time()
@@ -297,7 +339,7 @@ class StoryProcessor(object):
 
         # 2. compute matches to graph query on document level
         results = []
-        for gq in graph_queries:
+        for gq, score in graph_queries:
             doc_ids = self.match_graph_query(gq)
             results.append((gq, doc_ids))
 
