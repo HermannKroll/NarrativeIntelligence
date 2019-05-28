@@ -19,7 +19,7 @@ class SearchView(TemplateView):
         if request.is_ajax():
             results = dict()
             if "query" in request.GET:
-                query = self.request.GET.get("query", "")
+                query = self.request.GET.get("query", "").strip()
                 story = StoryProcessor(lg, [MeshTagger(db)])
                 results = story.query(query)
             return JsonResponse(dict(results=results))

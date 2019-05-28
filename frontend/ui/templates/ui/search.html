@@ -23,7 +23,11 @@
                         <div class="form-group col-md-6">
                             <label for="id_keywords">Keywords</label>
                             <textarea class="form-control" id="id_keywords" rows="3"
-                                      name="keywords">{{ keyword_str }}</textarea>
+                                      name="keywords">
+
+                                Simvastatin Rhabdomyolysis associated
+
+                            </textarea>
                             <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
                                 Please type in the keywords you want to query.
                             </small>
@@ -38,96 +42,27 @@
             <div class="col">
                 <h2>Graph patterns</h2>
 
-                {% for graph, result in results %}
-                    {{ graph }}<br>
-                    {{ result }}
-                {% endfor %}
-                <!--<form method="POST" action="{% url 'search' %}">
-                        {% csrf_token %}
-                        {% for pattern in patterns %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="patterns"
-                                       value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
-                                <label class="form-check-label" for="p{{ forloop.counter }}">
-                                    {% for s,p,o in pattern %}
-                                        <p>{{ s }} - {{ p }} - {{ o }}</p>
-                                    {% endfor %}
-                                </label>
-                            </div>
-                        {% endfor %}
-                        <input type="hidden" name="keywords" value="{{ keyword_str }}"/>
-                        <button type="submit" class="btn btn-primary">Search documents</button>
-                    </form>-->
+                <form>
+                    {% for pattern in patterns %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="patterns"
+                                   value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
+                            <label class="form-check-label" for="p{{ forloop.counter }}">
+                                {% for s,p,o in pattern %}
+                                    <p>{{ s }} - {{ p }} - {{ o }}</p>
+                                {% endfor %}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </form>
             </div>
         </div>
 
-        {% if results and keyword_str %}
-            <div class="row margin-top" id="patterns">
-                <div class="col">
-                    <h2>Graph patterns</h2>
-
-                    {% for graph, result in results %}
-                        {{ graph }}<br>
-                        {{ result }}
-                    {% endfor %}
-                    <!--<form method="POST" action="{% url 'search' %}">
-                        {% csrf_token %}
-                        {% for pattern in patterns %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="patterns"
-                                       value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
-                                <label class="form-check-label" for="p{{ forloop.counter }}">
-                                    {% for s,p,o in pattern %}
-                                        <p>{{ s }} - {{ p }} - {{ o }}</p>
-                                    {% endfor %}
-                                </label>
-                            </div>
-                        {% endfor %}
-                        <input type="hidden" name="keywords" value="{{ keyword_str }}"/>
-                        <button type="submit" class="btn btn-primary">Search documents</button>
-                    </form>-->
-                </div>
+        <div class="row margin-top" id="documents">
+            <div class="col-md-6">
+                <h2>Documents</h2>
             </div>
-        {% endif %}
-
-        {% if patterns and keyword_str %}
-            <div class="row margin-top" id="patterns">
-                <div class="col">
-                    <h2>Graph patterns for {{ keyword_str }}</h2>
-                    <form method="POST" action="{% url 'search' %}">
-                        {% csrf_token %}
-                        {% for pattern in patterns %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="patterns"
-                                       value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
-                                <label class="form-check-label" for="p{{ forloop.counter }}">
-                                    {% for s,p,o in pattern %}
-                                        <p>{{ s }} - {{ p }} - {{ o }}</p>
-                                    {% endfor %}
-                                </label>
-                            </div>
-                        {% endfor %}
-                        <input type="hidden" name="keywords" value="{{ keyword_str }}"/>
-                        <button type="submit" class="btn btn-primary">Search documents</button>
-                    </form>
-                </div>
-            </div>
-        {% endif %}
-
-        {% if documents and keyword_str %}
-            <div class="row margin-top" id="documents">
-                <div class="col-md-6">
-                    <h2>Documents</h2>
-
-                    <div class="list-group">
-                        {% for doc in documents %}
-                            <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC385743/"
-                               class="list-group-item list-group-item-action">{{ doc }}</a>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+        </div>
     </div>
 {% endblock %}
 
