@@ -9,8 +9,42 @@ class LibraryGraph(object):
         self.sent_ids = set()
         self.predicates = set()
         self.predicate2enttypes = {}
+        self.fact2docIDs = {}
 
         self.type_and_cid_to_span = {}
+
+    def compute_keys_for_facts(self, facts):
+        keys = []
+        for f in facts:
+            keys.append(frozenset(f))
+        return keys
+
+    def compute_support_for_fact(self, facts):
+        # first compute keys for the facts
+        fact_keys = self.compute_keys_for_facts(facts)
+        supporting_doc_ids = set()
+        first = True
+        for f_key in fact_keys:
+            # if some fact key is not in docs -> no support
+            if f_key not in self.fact2docIDs:
+                return 0
+            # first
+            if first:
+                supporting_doc_ids.update(self.fact2docIDs[f_key])
+                first = False
+                continue
+
+            # compute set intersection (both doc should support this)
+            support_for_new = self.fact2docIDs[f_key]
+
+            inter = supporting_doc_ids.intersection(support_for_new)
+            # no support
+            if len(inter) == 0:
+                return 0
+            # work with new intersection
+            supporting_doc_ids = inter
+        # return support for facts
+        return len(supporting_doc_ids)
 
     def add_span_for_cid_and_type(self, cid, type, span):
         if type not in self.type_and_cid_to_span:
@@ -25,6 +59,13 @@ class LibraryGraph(object):
             self.doc2tuples[doc_id] = [tuple]
         else:
             self.doc2tuples[doc_id].append(tuple)
+
+    def add_doc_for_fact(self, fact, doc_id):
+        key = frozenset(fact)
+        if key not in self.fact2docIDs:
+            self.fact2docIDs[key] = set(doc_id)
+        else:
+            self.fact2docIDs[key].add(doc_id)
 
     def read_from_tsv(self, filename):
         first_line = True
@@ -61,6 +102,8 @@ class LibraryGraph(object):
                 self.tuples.append(t)
                 doc_t = (s_cid, predicate, o_cid)
                 self.add_tuple_for_doc(doc_id, doc_t)
+
+                self.add_doc_for_fact((s_cid, predicate, o_cid), doc_id)
 
                 self.add_span_for_cid_and_type(s_cid, s_type, s_span)
                 self.add_span_for_cid_and_type(o_cid, o_type, o_span)
