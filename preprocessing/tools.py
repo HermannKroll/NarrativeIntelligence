@@ -92,7 +92,7 @@ def main():
     parser.add_argument("--merge", nargs="*", metavar="FILE")
     parser.add_argument("--out", metavar="OUTPUT_FILE")
     parser.add_argument("--translation-dir", metavar="TRANSLATION_DIR")
-    parser.add_argument("--finalize-dir", metavar=("DIR", "FILE"))
+    parser.add_argument("--finalize-dir", metavar=("DIR", "FILE"), nargs=2)
     args = parser.parse_args()
 
     if args.count:
