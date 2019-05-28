@@ -99,6 +99,8 @@ class MeSHDB:
         return desc_list
 
     def descs_by_name(self, name):
+        # TODO: Option: Match exactly
+        # TODO: Option: Dont search for terms
         query = QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
         records = self.tree.xpath(query)
         desc_list = [Descriptor.from_element(record) for record in records]

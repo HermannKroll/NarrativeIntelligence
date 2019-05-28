@@ -1,9 +1,8 @@
 from library_graph import LibraryGraph
+from mesh.data import MeSHDB
 from story import MeshTagger
 from story import GeneTagger
 from story import StoryProcessor
-from mesh.data import MeSHDB
-
 
 lg = LibraryGraph()
 lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')

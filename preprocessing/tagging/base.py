@@ -39,7 +39,7 @@ def finalize_dir(files_dir, result_file):
             with open(fn) as f_in:
                 content = f_in.readlines()
                 content = content[2:]
-                if not content[-1].strip():
+                if content and not content[-1].strip():
                     content = content[:-1]
                 f_out.writelines(content)
 
@@ -75,7 +75,7 @@ def merge_result_files(translation_dir, output_file, *files):
             document_fn = os.path.join(translation_dir, "PMC{}.txt".format(pmid))
             if os.path.exists(document_fn):
                 with open(document_fn) as f_doc:
-                    f_out.write(f_doc.read())
+                    f_out.write(f_doc.read().strip()+"\n")
                 mention_list = sorted(mentions, key=lambda x: int(x.split("\t")[1]))
                 f_out.writelines(mention_list)
                 f_out.write("\n")

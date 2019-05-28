@@ -1,7 +1,6 @@
 import os
 import subprocess
 from datetime import datetime
-from shutil import copyfile
 from time import sleep
 
 from tagging.base import BaseTagger
@@ -10,7 +9,16 @@ from tools import concat, count_documents
 
 class DNorm(BaseTagger):
     def finalize(self):
-        copyfile(self.out_file, self.result_file)
+        with open(self.out_file) as f:
+            content = f.readlines()
+        with open(self.result_file, "w") as f_out:
+            for line in content:
+                if line.strip():
+                    new_line = line.split("\t")
+                    new_line.insert(4, "Disease")
+                    f_out.write("\t".join(new_line))
+                else:
+                    f_out.write(line)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

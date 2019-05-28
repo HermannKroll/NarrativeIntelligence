@@ -3,11 +3,7 @@ import itertools
 import gzip
 import time
 
-from library_graph import LibraryGraph
-from mesh.data import MeSHDB
-
-
-#class Graph(object):
+# class Graph(object):
 
 
 class GraphQuery(object):
@@ -88,7 +84,7 @@ class GraphQueryProcessor(object):
 
                 # no substitution was found?
                 if not has_substitution:
-                    return False, {} # no query result found
+                    return False, {}  # no query result found
                 # merge var_subs for this fact against all var subs and check for compatibility
                 if len(var_subs_for_fact) > 0:  # some var is substituted
                     # go through all new substituted variables
