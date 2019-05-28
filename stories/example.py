@@ -1,3 +1,4 @@
+import operator
 from library_graph import LibraryGraph
 from mesh.data import MeSHDB
 from story import MeshTagger
@@ -7,6 +8,11 @@ from story import StoryProcessor
 lg = LibraryGraph()
 lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')
 
+
+#sorted_preds = sorted(lg.predicate2enttypes.items(), key=operator.itemgetter(0))
+#for key, types in sorted_preds:
+#    print('<p>{} : {}</p>'.format(key, types))
+
 db = MeSHDB().instance()
 db.load_xml('../data/desc2019.xml')
 
@@ -14,8 +20,8 @@ story = StoryProcessor(lg, [MeshTagger(db)]) #, GeneTagger('../data/CTD_genes.ts
 
 q1 = 'Simvastatin "1576" Amiodarone Rhabdomyolysis associated'
 q2 = 'Simvastatin "1576" Amiodarone inhibits metabolites'
-
-results = story.query(q2)
+q3 = 'Simvastatin Rhabdomyolysis Amiodarone associated'
+results = story.query(q3)
 
 #for r in results:
 #    print('Query: {}'.format(r[0]))
