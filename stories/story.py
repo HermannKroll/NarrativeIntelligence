@@ -160,6 +160,34 @@ class StoryEntityTagger(object):
         pass
 
 
+class QueryTranslation(object):
+
+    def __init__(self, entities_detected, entity_ids_detected, predicates_detected, not_matched_words, words,
+                 keyword_query, library_graph):
+        self.entities_detected = entities_detected
+        self.entity_ids_detected = entity_ids_detected
+        self.predicates_detected = predicates_detected
+        self.not_matched_words = not_matched_words
+        self.words = words
+        self.keyword_query = keyword_query
+        self.library_graph = library_graph
+
+    def __str__(self):
+        result = ['-------------- Query Translation --------------\n']
+        result.append('Query: "{}"\n'.format(self.keyword_query))
+        result.append('Detected Words: {}\n'.format(self.words))
+        result.append('\nTagged entities: \n')
+        for w, e_id, e_t, tagger in self.entities_detected:
+            result.append('{} -{}-> ({}, {}, Supp: {})\n'.format(w, tagger, e_id, e_t,
+                                                                 self.library_graph.get_doc_support_for_entity(e_id)))
+        result.append('\nPredicates matched:\n')
+        for p in self.predicates_detected:
+            result.append('{} (Supp: {})\n'.format(p, self.library_graph.get_doc_support_for_predicate(p)))
+        result.append('\nWords not matched: {}\n'.format(self.not_matched_words))
+        result.append('\n-------------- Query Translation --------------')
+        return ''.join(result)
+
+
 class StoryProcessor(object):
     def __init__(self, library_graph, entity_taggers=[]):
         self.library_graph = library_graph
@@ -300,25 +328,12 @@ class StoryProcessor(object):
             else:
                 not_matched_words.append(w)
 
-        return entities_detected, entity_ids_detected, predicates_detected, not_matched_words, words
+        return QueryTranslation(entities_detected, entity_ids_detected, predicates_detected, not_matched_words, words,
+                                keyword_query, self.library_graph)
 
     def tag_entities_in_keywords_human_readable(self, keyword_query):
-        entities_detected, _, predicates_detected, not_matched_words, words = self._tag_entities_in_keywords(keyword_query)
+        return str(self._tag_entities_in_keywords(keyword_query))
 
-        result = []
-        result.append('Query: {}\n'.format(keyword_query))
-        result.append('Detected Words: {}\n'.format(words))
-        result.append('\nTagged entities: \n')
-        for w, e_id, e_t, tagger in entities_detected:
-            result.append('{} -{}-> ({}, {}, Supp: {})\n'.format(w, tagger, e_id, e_t, self.library_graph.get_doc_support_for_entity(e_id)))
-        result.append('\nPredicates matched:\n')
-        for p in predicates_detected:
-            result.append('{} (Supp: {})\n'.format(p, self.library_graph.get_doc_support_for_predicate(p)))
-        result.append('\nWords not matched:\n')
-        for w in not_matched_words:
-            result.append(w+'\n')
-
-        return ''.join(result)
 
     def translate_keywords_to_graph_queries(self, keyword_query, k):
         # split keyword query in single words
@@ -329,7 +344,7 @@ class StoryProcessor(object):
             return []
 
         # tag entities in query
-        entities_detected, entity_ids_detected, predicates_detected, not_matched_words, _ = self._tag_entities_in_keywords(keyword_query)
+        qt = self._tag_entities_in_keywords(keyword_query)
 
         # Todo: What about not mached words here?
         # suggest new predicates here
@@ -341,7 +356,7 @@ class StoryProcessor(object):
         should_expand = False
         if should_expand:
             # cross product of entities
-            entity_combis = list(itertools.product(entities_detected, entities_detected))
+            entity_combis = list(itertools.product(qt.entities_detected, qt.entities_detected))
             for e1, e2 in entity_combis:
                 e_id_1 = e1[1]
                 e_t_1 = e1[2]
@@ -370,12 +385,12 @@ class StoryProcessor(object):
 
 
         # try to match predicate between tuples
-        for pred in predicates_detected:
+        for pred in qt.predicates_detected:
             # get pred types from library graph
             for pred_type_pair in self.library_graph.predicate2enttypes[pred]:
                 candidates_pos_0 = []
                 candidates_pos_1 = []
-                for _, e_id, e_type, _ in entities_detected:
+                for _, e_id, e_type, _ in qt.entities_detected:
                     if e_type == pred_type_pair[0]:
                         candidates_pos_0.append(e_id)
                         continue
@@ -406,13 +421,13 @@ class StoryProcessor(object):
                 print('Current Stack Size: {}'.format(len(stack_copy)))
                 stack = stack_copy
 
-        return self._select_k_best_stores(stack, k, entity_ids_detected, predicates_detected)
+        return self._select_k_best_stores(stack, k, qt.entity_ids_detected, qt.predicates_detected), qt
 
     def query(self, keyword_query, amount_of_stories=5):
         start = time.time()
         # 1. transform the keyword query to a graph query
         # multiple solutions are possible
-        graph_queries = self.translate_keywords_to_graph_queries(keyword_query, k=amount_of_stories)
+        graph_queries, query_trans = self.translate_keywords_to_graph_queries(keyword_query, k=amount_of_stories)
 
         query_trans_time = time.time() - start
         before_matching = time.time()
@@ -430,8 +445,8 @@ class StoryProcessor(object):
         print('Time needed: {}s ({}s Query Translation / {}s Matching)'.format(complete_time, query_trans_time, query_matched_time))
         print('='*120)
         print('='*120)
-        # returns a list of doc_ids
-        return results
+        # returns a list of doc_ids and the query translation
+        return results, query_trans
 
 
 class MeshTagger(StoryEntityTagger):

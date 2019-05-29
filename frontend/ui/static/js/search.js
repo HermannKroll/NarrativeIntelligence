@@ -20,6 +20,11 @@ const search = (event) => {
         form.empty();
         $('#documents > div').empty();
 
+
+        let query_trans_textarea = $("#query_trans_textarea");
+        let query_trans_string = response["query_translation"];
+        query_trans_textarea.val(query_trans_string);
+
         response["results"].forEach((item, idx) => {
             let graph = item[0];
             let results = item[1];
