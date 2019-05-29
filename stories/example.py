@@ -13,15 +13,21 @@ lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')
 #for key, types in sorted_preds:
 #    print('<p>{} : {}</p>'.format(key, types))
 
-db = MeSHDB().instance()
+db = MeSHDB.instance()
 db.load_xml('../data/desc2019.xml')
 
 story = StoryProcessor(lg, [MeshTagger(db)]) #, GeneTagger('../data/CTD_genes.tsv.gz')])
 
 q1 = 'Simvastatin "1576" Amiodarone Rhabdomyolysis associated'
-q2 = 'Simvastatin "1576" Amiodarone inhibits metabolites'
+q2 = 'Simvastatin (1576) Amiodarone inhibits metabolites'
 q3 = 'Simvastatin Rhabdomyolysis Amiodarone associated'
-results = story.query(q3)
+q4 = 'Simvastatin Hyperlipidemias Amiodarone "Diabetes Mellitus" therapeutic'
+
+
+
+cq = q4
+#results = story.query(cq)
+print(story.tag_entities_in_keywords_human_readable(cq))
 
 #for r in results:
 #    print('Query: {}'.format(r[0]))

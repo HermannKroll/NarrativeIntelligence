@@ -207,8 +207,11 @@ class StoryProcessor(object):
                 amount_contained_preds += 1
 
         pred_score = amount_contained_preds / len(predicates_detected)
-
-        supp_score = (supp / max_supp)
+        if supp > 0 and max_supp > 0:
+            supp_score = (supp / max_supp)
+        else:
+            print('No support (score = 0) for story {}'.format(gp))
+            return 0.0
         print('Support {} / Ent_Score {} / Pred_Score {} / Supp_Score {} for story {}'.format(supp, ent_score, pred_score, supp_score, gp))
         score = 0.4 * ent_score + 0.4 * pred_score + 0.2 * supp_score
         print('Final Score {}'.format(score))
@@ -220,7 +223,7 @@ class StoryProcessor(object):
         max_supp = 0
         for gp in stories:
             # get support for graph pattern
-            supp = self.library_graph.compute_support_for_fact(gp)
+            supp = self.library_graph.compute_support_for_facts(gp)
             stories_with_supp.append((gp, supp))
             if supp > max_supp:
                 max_supp = supp
@@ -239,13 +242,23 @@ class StoryProcessor(object):
         # return the list of final graph queries
         return scored_stories_sorted[0:k]
 
-    def translate_keywords_to_graph_queries(self, keyword_query, k):
-        # split keyword query in single words
-        words = keyword_query.split(' ')
+    def _tag_entities_in_keywords(self, keyword_query):
+        stripped = keyword_query.strip()
 
-        # if keyword query is empty - skip it
-        if not keyword_query or len(words) == 0:
-            return []
+        words = []
+        word_buffer = []
+        bracket_open = False
+        for c in stripped:
+            if c == '"':
+                bracket_open = not bracket_open
+                continue
+            if not bracket_open and c == ' ':
+                words.append(''.join(word_buffer))
+                word_buffer = []
+            else:
+                word_buffer.append(c)
+        # rest must be added to words
+        words.append(''.join(word_buffer))
 
         # store all detected entities in this query
         entities_detected = []
@@ -254,11 +267,11 @@ class StoryProcessor(object):
         # go through all words
         for w in words:
             # default entity
-            if w.startswith('\"') and w.endswith('\"'):
-                if w.startswith('"C'):
+            if w.startswith('(') and w.endswith(')'):
+                if w.startswith('(C'):
                     # is a disease
                     e_type = 'Disease'
-                elif w.startswith('"D'):
+                elif w.startswith('(D'):
                     # is a chemical / drug
                     e_type = 'Chemical'
                 else:
@@ -287,8 +300,75 @@ class StoryProcessor(object):
             else:
                 not_matched_words.append(w)
 
+        return entities_detected, entity_ids_detected, predicates_detected, not_matched_words, words
+
+    def tag_entities_in_keywords_human_readable(self, keyword_query):
+        entities_detected, _, predicates_detected, not_matched_words, words = self._tag_entities_in_keywords(keyword_query)
+
+        result = []
+        result.append('Query: {}\n'.format(keyword_query))
+        result.append('Detected Words: {}\n'.format(words))
+        result.append('\nTagged entities: \n')
+        for w, e_id, e_t, tagger in entities_detected:
+            result.append('{} -{}-> ({}, {}, Supp: {})\n'.format(w, tagger, e_id, e_t, self.library_graph.get_doc_support_for_entity(e_id)))
+        result.append('\nPredicates matched:\n')
+        for p in predicates_detected:
+            result.append('{} (Supp: {})\n'.format(p, self.library_graph.get_doc_support_for_predicate(p)))
+        result.append('\nWords not matched:\n')
+        for w in not_matched_words:
+            result.append(w+'\n')
+
+        return ''.join(result)
+
+    def translate_keywords_to_graph_queries(self, keyword_query, k):
+        # split keyword query in single words
+        words = keyword_query.split(' ')
+
+        # if keyword query is empty - skip it
+        if not keyword_query or len(words) == 0:
+            return []
+
+        # tag entities in query
+        entities_detected, entity_ids_detected, predicates_detected, not_matched_words, _ = self._tag_entities_in_keywords(keyword_query)
+
+        # Todo: What about not mached words here?
+        # suggest new predicates here
+        # predicates may be suggested regarding their type
+        suggested_predicates = []
+        suggested_facts = []
+        suggested_facts_keys = set()
+
+        should_expand = False
+        if should_expand:
+            # cross product of entities
+            entity_combis = list(itertools.product(entities_detected, entities_detected))
+            for e1, e2 in entity_combis:
+                e_id_1 = e1[1]
+                e_t_1 = e1[2]
+                e_id_2 = e2[1]
+                e_t_2 = e2[2]
+
+                for pred in self.library_graph.get_predicates_for_type((e_t_1, e_t_2)):
+                    # check support for fact
+                    f = (e_id_1, pred, e_id_2)
+                    support = self.library_graph.compute_support_for_facts([f])
+                    if support > 25:
+                        print('Support {} for {}'.format(support, f))
+                        suggested_predicates.append(pred)
+                        f_key = frozenset(f)
+                        if f_key not in suggested_facts_keys:
+                            suggested_facts.append(f)
+                            suggested_facts_keys.add(f_key)
+
+            print('Would suggest: {}'.format(suggested_predicates))
+
         # start with just one empty query
         stack = [[]]
+        # add sugg f
+       # for sugg_f in suggested_facts:
+        #    stack.append([sugg_f])
+
+
         # try to match predicate between tuples
         for pred in predicates_detected:
             # get pred types from library graph
@@ -323,7 +403,7 @@ class StoryProcessor(object):
                         graph_query_c = copy.copy(graph_query)
                         graph_query_c.append(t)
                         stack_copy.append(graph_query_c)
-
+                print('Current Stack Size: {}'.format(len(stack_copy)))
                 stack = stack_copy
 
         return self._select_k_best_stores(stack, k, entity_ids_detected, predicates_detected)
@@ -403,4 +483,5 @@ class GeneTagger(StoryEntityTagger):
 
     def get_tagger_name(self):
         return 'CTD Gene Tagger'
+
 
