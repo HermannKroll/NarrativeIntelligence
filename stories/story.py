@@ -268,10 +268,10 @@ class StoryProcessor(object):
         for w in words:
             # default entity
             if w.startswith('(') and w.endswith(')'):
-                if w.startswith('(C'):
+                if w.startswith('(C') or w.startswith('(MESH:C'):
                     # is a disease
                     e_type = 'Disease'
-                elif w.startswith('(D'):
+                elif w.startswith('(D') or w.startswith('(MESH:D'):
                     # is a chemical / drug
                     e_type = 'Chemical'
                 else:
