@@ -178,11 +178,11 @@ class QueryTranslation(object):
         result.append('Detected Words: {}\n'.format(self.words))
         result.append('\nTagged entities: \n')
         for w, e_id, e_t, tagger in self.entities_detected:
-            result.append('{} -{}-> ({}, {}, Supp: {})\n'.format(w, tagger, e_id, e_t,
+            result.append('{} -{}-> ({}, {}, Support: {})\n'.format(w, tagger, e_id, e_t,
                                                                  self.library_graph.get_doc_support_for_entity(e_id)))
         result.append('\nPredicates matched:\n')
         for p in self.predicates_detected:
-            result.append('{} (Supp: {})\n'.format(p, self.library_graph.get_doc_support_for_predicate(p)))
+            result.append('{} (Support: {})\n'.format(p, self.library_graph.get_doc_support_for_predicate(p)))
         result.append('\nWords not matched: {}\n'.format(self.not_matched_words))
         result.append('\n-------------- Query Translation --------------')
         return ''.join(result)
