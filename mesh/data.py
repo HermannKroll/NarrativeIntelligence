@@ -2,6 +2,7 @@
 XML Documentation: https://www.nlm.nih.gov/mesh/xml_data_elements.html
 """
 import itertools
+from datetime import datetime
 
 from lxml import etree
 
@@ -13,6 +14,8 @@ QUERY_DESCRIPTOR_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNum
                                   "/TreeNumber[text()='{}']/parent::*/parent::*"
 QUERY_DESCRIPTOR_BY_HEADING_CONTAINS = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
                                        "/String[contains(text(),'{}')]/parent::*/parent::*"
+QUERY_DESCRIPTOR_BY_HEADING_EXACT = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
+                                    "/String[text()='{}')]/parent::*/parent::*"
 QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptList/Concept/TermList/Term" \
                            "/String[text()='{}']/parent::*/parent::*/parent::*/parent::*/parent::*"
 
@@ -41,30 +44,48 @@ class MeSHDB:
         self.tree = None
         self._desc_by_id = dict()
         self._desc_by_tree_number = dict()
+        self._desc_by_name = dict()
         if MeSHDB.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             MeSHDB.__instance = self
 
     def load_xml(self, filename, prefetch_all=False, verbose=False):
+        start = datetime.now()
         with open(filename) as f:
             self.tree = etree.parse(f)
+        end = datetime.now()
         if verbose:
-            print("XML loaded.")
+            print("XML loaded in {}".format(end - start))
         if prefetch_all:
+            start = datetime.now()
             self.prefetch_all()
+            end = datetime.now()
             if verbose:
-                print("All descriptors loaded.")
+                print("All descriptors loaded in {}".format(end - start))
 
     def prefetch_all(self):
         records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
         for record in records:
             desc = Descriptor.from_element(record)
-            self._desc_by_id[desc.unique_id] = desc
+            self.add_desc(desc)
 
     def add_desc(self, desc_obj):
+        """
+        Adds an descriptor to the indexes.
+
+        .. note::
+
+           The try-except was introduced because some descriptors (e.g., Female) don't have a tre number.
+
+        :param desc_obj: Descriptor object to add
+        """
         self._desc_by_id[desc_obj.unique_id] = desc_obj
-        self._desc_by_tree_number[desc_obj.tree_number_list[0]] = desc_obj
+        try:
+            self._desc_by_tree_number[desc_obj.tree_number_list[0]] = desc_obj
+        except IndexError:
+            pass
+        self._desc_by_name[desc_obj.heading] = desc_obj
 
     def desc_by_id(self, unique_id):
         if unique_id not in self._desc_by_id:
@@ -94,22 +115,25 @@ class MeSHDB:
         desc_list = [Descriptor.from_element(record) for record in records]
         # Add to cache
         for desc in desc_list:
-            if desc.unique_id not in self._desc_by_id.keys():
+            if desc.unique_id not in self._desc_by_id:
                 self.add_desc(desc)
         return desc_list
 
-    def descs_by_name(self, name):
-        # TODO: Option: Match exactly
-        # TODO: Option: Dont search for terms
-        query = QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
+    def descs_by_name(self, name, match_exact=True, search_terms=True):
+        if match_exact and name in self._desc_by_name:
+            return [self._desc_by_name[name]]
+        if match_exact:
+            query = QUERY_DESCRIPTOR_BY_HEADING_EXACT.format(name)
+        else:
+            query = QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
         records = self.tree.xpath(query)
         desc_list = [Descriptor.from_element(record) for record in records]
         # Add to cache
         for desc in desc_list:
-            if desc.unique_id not in self._desc_by_id.keys():
+            if desc.unique_id not in self._desc_by_id:
                 self.add_desc(desc)
         # Search by terms
-        if not desc_list:
+        if not desc_list and search_terms:
             desc_list = self.descs_by_term(name)
         # Return
         return desc_list
