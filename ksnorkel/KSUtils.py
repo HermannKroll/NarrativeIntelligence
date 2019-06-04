@@ -1,4 +1,5 @@
 import random
+import os
 
 from snorkel import SnorkelSession
 from snorkel.models import Document, Sentence
@@ -319,10 +320,11 @@ def save_binary_relation_as_tsv(filename, session, all_cands, all_sents, header_
 	print('Building sentence to document map...')
 	sent_id_to_doc = {}
 	for sent in all_sents:
-		sent_id_to_doc[sent.id] = sent.document_id
+		if sent.id not in sent_id_to_doc:
+			sent_id_to_doc[sent.id] = sent.document_id
 	print('Map built!')
 
-	amount_of_true_predicitions = 0
+	amount_of_true_predictions = 0
 	with open(filename, 'w') as f:
 		f.write(header_str)
 		for cand in all_cands:
@@ -345,6 +347,81 @@ def save_binary_relation_as_tsv(filename, session, all_cands, all_sents, header_
 				#print(result_str)
 				f.write(result_str)
 				
-				amount_of_true_predicitions += 1
+				amount_of_true_predictions += 1
 
-	print("Saved {} positive predicitions for binary relation!".format(amount_of_true_predicitions))
+	print("Saved {} positive predicitions for binary relation!".format(amount_of_true_predictions))
+
+
+def append_relation_in_tsv(filename, session, all_cands, all_sents, sent_id_to_doc, cand_cid_a_name, cand_a_type, relation_name,
+						cand_cid_b_name, cand_b_type, prob_threshold=0.5):
+	"""
+	saves all positive classifications to a list to a file
+	:param filename: filename
+	:param session: current snorkel session
+	:param all_cands: list of all candidates which should be used
+	:param all_sents: list of all regarding sentences
+	:param sent_id_to_doc: mapping between a sentence id and its document
+	:param cand_cid_a_name: name of cands first id
+	:param cand_a_type: type of cand a
+	:param relation_name: name of relation
+	:param cand_cid_b_name: name of cands seceond id
+	:param cand_b_type: type of cand b
+	:param prob_threshold: which threshold should be used for a positive classification
+	:return:
+	"""
+
+	header_str = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format('document_id', 'sentence_id', 'cand_id',
+													'subject_cid','subject_type', 'subject_span',
+													'predicate',
+													'object_cid', 'object_type', 'object_span', 'probability')
+
+	if os.path.isfile(filename):
+		print('File already exists - appending...')
+	else:
+		print('Create new file: {}'.format(filename))
+		with open(filename, 'w') as f:
+			f.write(header_str)
+		print('File created with header')
+
+	print("Storing candidate labels into result file: {}".format(filename))
+	amount_of_candidates = len(all_cands)
+	print("Amount of candidates: {}".format(amount_of_candidates))
+
+	print('Load mariginals from db...')
+	marginals = session.query(Marginal).all()
+
+	cand_probability = {}
+	for marg in marginals:
+		cand_probability[marg.candidate_id] = marg.probability
+	print('Marginals loaded!')
+
+	print('Appending to file  {} ...'.format(filename))
+	amount_of_true_predictions = 0
+	with open(filename, 'a') as f:
+		f.write(header_str)
+		for cand in all_cands:
+			prob = cand_probability[cand.id]
+			if prob >= prob_threshold:
+				contexts = cand.get_contexts()
+
+				a_cid = getattr(cand, cand_cid_a_name)
+				b_cid = getattr(cand, cand_cid_b_name)
+				a_context = contexts[0]
+				b_context = contexts[1]
+				a_span = a_context.get_span()
+				b_span = b_context.get_span()
+
+				# we assume both spans to be in the same document
+				sent_id = a_context.sentence_id
+				doc_id = sent_id_to_doc[sent_id]
+
+				result_str = '\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(doc_id, sent_id, cand.id, a_cid,
+																				   a_span, cand_a_type, relation_name,
+																				   b_cid, b_span, cand_b_type, prob)
+				# print(result_str)
+				f.write(result_str)
+
+				amount_of_true_predictions += 1
+
+	print("Saved {} positive predicitions for binary relation!".format(amount_of_true_predictions))
+

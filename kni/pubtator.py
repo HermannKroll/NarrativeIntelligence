@@ -71,7 +71,8 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
             skipped_ent_regarding_max_length = 0
             skipped_ent_regarding_wrong_detected_length = 0
             amount_correctly_shifted_entity_mentions = 0
-
+            skipped_ent_regarding_id_negative = 0
+            skipped_ent_regarding_type_missing = 0
 
             # process file noew
             lines = []
@@ -126,6 +127,27 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                         # if we found pmid start_span stop_span (3 numbers)
                                         # then this line is a entity line
                                         if l_split[0].isdigit() and l_split[1].isdigit() and l_split[2].isdigit():
+                                            if len(l_split) < 5:
+                                                # entity type and id missing
+                                                skipped_ent_regarding_type_missing += 1
+                                                if debug:
+                                                    print('Skipping entity {} (type and id missing)'.format((l_split[3])))
+                                                continue
+                                            # should skip lines?
+                                            if remove_entities_with_empty_cid:
+                                                # then id is missing
+                                                if len(l_split) == 5 or l_split[5] == '':
+                                                    # skipping line with empy cid
+                                                    if debug:
+                                                        print('Skipping line with empty cid: {}'.format(l_split))
+                                                    skipped_ent_regarding_no_id += 1
+                                                    continue
+                                                # check also war negative id
+                                                if l_split[5] == '-1':
+                                                        skipped_ent_regarding_max_length += 1
+                                                        if debug:
+                                                            print('Skipping entity {} (id is -1)'.format(l_split[3]))
+                                                        continue
                                             # if entity is very short
                                             if len(l_split[3]) < 3: 
                                                 # entity is only 1 or 2 characters long - ingore it
@@ -377,15 +399,7 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
                                                     if len(l_split) == 5 or l_split[5] != '':
                                                         amount_of_genes += 1
 
-                                            # should skip lines?
-                                            if remove_entities_with_empty_cid:
-                                                # then id is missing
-                                                if len(l_split) == 5 or l_split[5] == '':
-                                                    # skipping line with empy cid
-                                                    if debug:
-                                                        print('Skipping line with empty cid: {}'.format(l_split))
-                                                    skipped_ent_regarding_no_id += 1
-                                                    continue 
+
                                 # write this line to output
                                 lines_to_write.append(lo)
 
@@ -435,10 +449,11 @@ def sample_pubtator_file(pubtator_filename, pubtator_filename_sampled, prob, deb
     print('Skipped {} entites due to no id was found'.format(skipped_ent_regarding_no_id))  
     print('Skipped {} entites due to length (only 1 or 2 charcters)'.format(skipped_ent_regarding_min_length))  
     print('Skipped {} entites due to length (> 100 characters)'.format(skipped_ent_regarding_max_length))  
-    print('Skipped {} entites due to wrong detection of their length'.format(skipped_ent_regarding_wrong_detected_length))  
-    
-    
-    print('Saved {} (sampled) of {} (all) documents:'.format(amount_of_sampled_docs, amount_of_docs))   
+    print('Skipped {} entites due to wrong detection of their length'.format(skipped_ent_regarding_wrong_detected_length))
+    print('Skipped {} entites due to missing type'.format(skipped_ent_regarding_type_missing))
+    print('Skipped {} entites due to negative id (-1)'.format(skipped_ent_regarding_id_negative))
+
+    print('Saved {} (sampled) of {} (all) documents:'.format(amount_of_sampled_docs, amount_of_docs))
     print('Sampling finished and saved at {}'.format(pubtator_filename_sampled))
 
 
