@@ -1,5 +1,0 @@
-1065332	160	199	chronic inflammatory autoimmune disease	Disease	MESH:D001327
-1065332	823	845	inflammatory arthritis	Disease	MESH:D001168
-1065332	863	891	autoimmune encephalomyelitis	Disease	MESH:D004681
-1065332	1063	1083	rheumatoid arthritis	Disease	MESH:D001172
-1065332	1262	1282	rheumatoid arthritis	Disease	MESH:D001172
