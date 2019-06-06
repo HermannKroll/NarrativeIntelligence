@@ -8,12 +8,12 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from snorkel.learning.pytorch_gpu.rnn.rnn_base import RNNBase
-from snorkel.learning.pytorch_gpu.rnn.utils import SymbolTable
+from pytorch_gpu.rnn.rnn_base import RNNBase
+from pytorch_gpu.rnn.utils import SymbolTable
 
 
 class LSTM(RNNBase):
-    
+
     def _build_model(self, embedding_dim=50, hidden_dim=50, num_layers=1, dropout=0.25, bidirectional=False,
                      word_dict=SymbolTable(), **kwargs):
         self.word_dict = word_dict
@@ -36,7 +36,7 @@ class LSTM(RNNBase):
                         ).to(self.device)
         
         self.dropout_layer = nn.Dropout(p=dropout).to(self.device)
-        
+
     def forward(self, X, hidden_state):
         seq_lengths = torch.zeros((X.size(0)), dtype=torch.long)
         for i in range(X.size(0)):

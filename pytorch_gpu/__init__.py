@@ -1,5 +1,5 @@
 from __future__ import absolute_import
 
-from .logistic_regression import LogisticRegression
-from .noise_aware_model import TorchNoiseAwareModel
-from .rnn import LSTM
+from pytorch_gpu.logistic_regression import LogisticRegression
+from pytorch_gpu.noise_aware_model import TorchNoiseAwareModel
+from pytorch_gpu.rnn import LSTM
