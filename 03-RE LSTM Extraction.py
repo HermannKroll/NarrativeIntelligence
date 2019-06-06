@@ -17,32 +17,24 @@ from ksnorkel import KSUtils
 from pytorch_gpu import LSTM
 
 
-
 # In[2]
 result_path = 'results/pmc_10000/'
 file = 'data/pmc_simvastatin_8712_filtered.pubtator'
 file_out = 'data/temp/pmc_simvastatin_8712_filtered.pubtator'
 extract_documents_again = False
 
-
-
 result_lg_file = result_path + 'lg.tsv'
 already_processed_docs_file = result_path + 'processed_docs.txt'
 already_skipped_doc_file = result_path + 'skipped_docs.txt'
 
-
-
-
 import os
 
-
-try:  
+try:
     os.mkdir(result_path)
-except OSError:  
-    print ("Creation of the directory {} failed because it may exists".format(result_path))
-else:  
-    print ("Successfully created the directory %s " % result_path)
-
+except OSError:
+    print("Creation of the directory {} failed because it may exists".format(result_path))
+else:
+    print("Successfully created the directory %s " % result_path)
 
 if extract_documents_again:
     print('extracting single documents...')
@@ -53,33 +45,32 @@ if extract_documents_again:
             line_buffer.append(l)
             # split file here
             if l == '\n':
-                fo_name = '{}.{}'.format(file_out,i)
+                fo_name = '{}.{}'.format(file_out, i)
                 with open(fo_name, 'w') as fo:
                     for lo in line_buffer:
                         fo.write(lo)
-                #print('{} written'.format(fo_name))
+                # print('{} written'.format(fo_name))
                 line_buffer = []
                 i += 1
     print('extraction finished')
 
 # In[3]:
 
-gene_chemical_interaction_types = ['increases_acetylation', 'affects_abundance', 'increases_reduction', 
+gene_chemical_interaction_types = ['increases_acetylation', 'affects_abundance', 'increases_reduction',
                                    'increases_localization', 'decreases_abundance', 'affects_metabolic processing',
-                                   'increases_oxidation', 'decreases_secretion', 'affects_activity', 
-                                   'increases_degradation', 'increases_transport', 'increases_uptake', 
-                                   'increases_metabolic processing', 'decreases_phosphorylation', 
-                                   'decreases_response to substance', 'affects_localization', 'increases_cleavage', 
-                                   'increases_response to substance', 'increases_abundance', 
-                                   'increases_chemical synthesis', 'affects_methylation', 
-                                   'affects_response to substance', 'increases_secretion', 
-                                   'decreases_methylation', 'affects_reaction', 'increases_phosphorylation', 
-                                   'decreases_activity', 'increases_activity', 'increases_reaction', 
-                                   'affects_binding', 'affects_expression', 'decreases_reaction', 
+                                   'increases_oxidation', 'decreases_secretion', 'affects_activity',
+                                   'increases_degradation', 'increases_transport', 'increases_uptake',
+                                   'increases_metabolic processing', 'decreases_phosphorylation',
+                                   'decreases_response to substance', 'affects_localization', 'increases_cleavage',
+                                   'increases_response to substance', 'increases_abundance',
+                                   'increases_chemical synthesis', 'affects_methylation',
+                                   'affects_response to substance', 'increases_secretion',
+                                   'decreases_methylation', 'affects_reaction', 'increases_phosphorylation',
+                                   'decreases_activity', 'increases_activity', 'increases_reaction',
+                                   'affects_binding', 'affects_expression', 'decreases_reaction',
                                    'affects_cotreatment', 'decreases_expression', 'increases_expression',
                                    'affects_transport']
 chemical_disease_interaction_types = ['therapeutic', 'marker_mechanism']
-
 
 session = SnorkelSession()
 
@@ -93,21 +84,23 @@ def compute_candidates(cand_str, cand_type_pair, cand_type_pair_lower):
 
     return cand_type
 
+
 def load_and_apply_lstm(lstm_path, cand_type):
     lstm = LSTM(n_threads=1, device='cpu')
     lstm.load(lstm_path)
- 
-    #print("Loading all candidates from db...")
+
+    # print("Loading all candidates from db...")
     all_cands = session.query(cand_type).filter(cand_type.split == 0).order_by(cand_type.id).all()
-    #print("{} candidates load from db!".format(len(all_cands)))
+    # print("{} candidates load from db!".format(len(all_cands)))
 
     if len(all_cands) == 0:
         return all_cands
 
-    #print("Applying LSTM to candidates...")
+    # print("Applying LSTM to candidates...")
     lstm.save_marginals(session, all_cands)
-    #print("LSTM applied!")
+    # print("LSTM applied!")
     return all_cands
+
 
 if os.path.isfile(already_processed_docs_file):
     print('Resume work (procssed documents)....')
@@ -143,136 +136,126 @@ for i in range(0, 8712):
         corpus_parser = CorpusParser(parser=parser)
         corpus_parser.apply(doc_preprocessor, parallelism=1, clear=True)
         end_ts = time()
-        
+
         print("\nDONE in {}".format((time() - start_ts)))
-    
-      
+
         all_docs = session.query(Document).all()
         snorkel_to_real_doc_name = {}
 
         for doc in all_docs:
             snorkel_to_real_doc_name[doc.id] = doc.name
 
-
-        #print("Loading all sentences from db...")
+        # print("Loading all sentences from db...")
         all_sents = session.query(Sentence).all()
-        #print("Loading complete!")
+        # print("Loading complete!")
+        session.expunge_all()
 
+        # print('Amount of sentences: {}'.format(len(all_sents)))
 
-        #print('Amount of sentences: {}'.format(len(all_sents)))
-
-        #print('Building sentence to document map...')
+        # print('Building sentence to document map...')
         sent_id_to_doc = {}
         for sent in all_sents:
             if sent.id not in sent_id_to_doc:
                 sent_id_to_doc[sent.id] = snorkel_to_real_doc_name[sent.document_id]
-        #print('Map built!')
+        # print('Map built!')
 
-
-
-        ChemicalDisease = compute_candidates('ChemicalDisease' , ['Chemical', 'Disease'], ['chemical', 'disease'])
+        ChemicalDisease = compute_candidates('ChemicalDisease', ['Chemical', 'Disease'], ['chemical', 'disease'])
         all_cands = load_and_apply_lstm('chemical_disease.lstm', ChemicalDisease)
-        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid', 'Chemical', 'associated', 'disease_cid', 'Disease')
-        
-        session = SnorkelSession()   
+        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid',
+                                       'Chemical', 'associated', 'disease_cid', 'Disease')
 
-        
-        ChemicalGeneInteraction = compute_candidates('ChemicalGeneInteraction', ['Chemical', 'Gene'], ['chemical', 'gene'])
-        all_cands = load_and_apply_lstm('chemical_gene_interaction.lstm', ChemicalGeneInteraction)
-        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents,  sent_id_to_doc, 'chemical_cid', 'Chemical', 'associated', 'gene_cid', 'Gene')
-      
         session = SnorkelSession()
-        
 
+        ChemicalGeneInteraction = compute_candidates('ChemicalGeneInteraction', ['Chemical', 'Gene'],
+                                                     ['chemical', 'gene'])
+        all_cands = load_and_apply_lstm('chemical_gene_interaction.lstm', ChemicalGeneInteraction)
+        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid',
+                                       'Chemical', 'associated', 'gene_cid', 'Gene')
+
+        session = SnorkelSession()
 
         GeneDiseaseInteraction = compute_candidates('GeneDiseaseInteraction', ['Gene', 'Disease'], ['gene', 'disease'])
         all_cands = load_and_apply_lstm('gene_disease_interaction.lstm', GeneDiseaseInteraction)
-        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents,  sent_id_to_doc,'gene_cid', 'Gene', 'associated', 'disease_cid', 'Disease')
-       
+        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'gene_cid',
+                                       'Gene', 'associated', 'disease_cid', 'Disease')
+
         session = SnorkelSession()
 
-        
-
-        GeneChemicalMetabolism = compute_candidates('GeneChemicalMetabolism', ['Gene', 'Chemical'], ['gene', 'chemical'])
+        GeneChemicalMetabolism = compute_candidates('GeneChemicalMetabolism', ['Gene', 'Chemical'],
+                                                    ['gene', 'chemical'])
         all_cands = load_and_apply_lstm('gene_chemical_metabolism.lstm', GeneChemicalMetabolism)
-        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'gene_cid', 'Gene', 'metabolites', 'chemical_cid', 'Chemical')
-       
-        session = SnorkelSession()
-       
+        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'gene_cid',
+                                       'Gene', 'metabolites', 'chemical_cid', 'Chemical')
 
-        ChemicalGeneInhibition = compute_candidates('ChemicalGeneInhibition', ['Chemical', 'Gene'], ['chemical', 'gene'])
-        all_cands = load_and_apply_lstm('chemical_gene_inhibition.lstm', ChemicalGeneInhibition)
-        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid', 'Chemical', 'inhibits', 'gene_cid', 'Gene')
-      
         session = SnorkelSession()
-       
+
+        ChemicalGeneInhibition = compute_candidates('ChemicalGeneInhibition', ['Chemical', 'Gene'],
+                                                    ['chemical', 'gene'])
+        all_cands = load_and_apply_lstm('chemical_gene_inhibition.lstm', ChemicalGeneInhibition)
+        KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid',
+                                       'Chemical', 'inhibits', 'gene_cid', 'Gene')
+
+        session = SnorkelSession()
 
         # Tag candidates
-        GeneDiseaseInteraction = compute_candidates('GeneDiseaseInteraction', ['Gene', 'Disease'], ['gene', 'disease'])
-       
+        ChemicalGeneInteraction = compute_candidates('ChemicalGeneInteraction', ['Chemical', 'Gene'],
+                                                     ['chemical', 'gene'])
 
         # go through all interactions
         print(len(gene_chemical_interaction_types))
         for inter_type in gene_chemical_interaction_types:
             inter_type = inter_type.replace(' ', '_')
             lstm_file = 'chemical_gene_interaction_{}.lstm'.format(inter_type)
-            
-            all_cands = load_and_apply_lstm(lstm_file, GeneDiseaseInteraction)
-            
+
+            all_cands = load_and_apply_lstm(lstm_file, ChemicalGeneInteraction)
+
+            KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc,
+                                           'chemical_cid', 'Chemical', inter_type, 'gene_cid', 'Gene')
             session = SnorkelSession()
-            print('='*60) 
-        
-        
+            print('=' * 60)
 
+        ChemicalDisease = compute_candidates('ChemicalDisease', ['Chemical', 'Disease'], ['chemical', 'disease'])
 
-
-        ChemicalDisease = compute_candidates('ChemicalDisease' , ['Chemical', 'Disease'], ['chemical', 'disease'])
-       
         # go through all interactions
-        print(len(chemical_disease_interaction_types ))
+        print(len(chemical_disease_interaction_types))
         for inter_type in chemical_disease_interaction_types:
             inter_type = inter_type.replace(' ', '_')
             lstm_file = 'chemical_disease_interaction_{}.lstm'.format(inter_type)
-            
+
             all_cands = load_and_apply_lstm(lstm_file, ChemicalDisease)
-       
-            
-            KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc, 'chemical_cid', 'Chemical', inter_type, 'disease_cid', 'Disease')
+
+            KSUtils.append_relation_in_tsv(result_lg_file, session, all_cands, all_sents, sent_id_to_doc,
+                                           'chemical_cid', 'Chemical', inter_type, 'disease_cid', 'Disease')
             session = SnorkelSession()
-            print('='*60) 
-         
-        print('='*60)       
-        print('='*60)
-        print('='*60) 
+            print('=' * 60)
+
+        print('=' * 60)
+        print('=' * 60)
+        print('=' * 60)
 
         already_processed_doc_ids.add(i)
         with open(already_processed_docs_file, 'w') as f:
             f.write(str(already_processed_doc_ids))
- 
+
         sys.stdout.flush()
 
     except Exception as err:
         print('Error while processing {}: {}'.format(i, err))
         failed_documents += 1
 
-        if os.path.isfile('snorkel.db'):
-            print('remove snorkel db...')
-            os.remove("snorkel.db") 
-            print('snorkel db removed')
- 
-        session = SnorkelSession()
+        session.rollback()
+        session.commit()
+
         already_skipped_doc_ids.add(i)
         with open(already_skipped_doc_file, 'w') as f:
             f.write(str(already_skipped_doc_ids))
 
         sys.stdout.flush()
-        
 
-
-        #print('Amount of docs: {}'.format(len(all_docs)))
-        #with open(result_path + 'doc_mapping.tsv', 'w') as f:
+        # print('Amount of docs: {}'.format(len(all_docs)))
+        # with open(result_path + 'doc_mapping.tsv', 'w') as f:
         #    f.write('{}\t{}'.format('snorkel_id', 'pmid'))
         #    for doc in all_docs:
         #        f.write('\n{}\t{}'.format(doc.id, doc.name))
-        #print('Finished')
+        # print('Finished')
 
