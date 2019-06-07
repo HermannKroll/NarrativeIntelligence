@@ -53,11 +53,24 @@ class LabeledGraph(object):
         self.edges = []
 
     def get_node(self, label):
+        """
+        gets a node of this graph by label
+        :param label: label of node
+        :return: a node or none if no node is found
+        """
         if label in self.nodes:
             return self.nodes[label]
         return None
 
     def add_edge(self, label, node1_label, node2_label):
+        """
+        adds a edge and nodes to the graph
+        :param label: label of edge
+        :param node1_label: label of node from
+        :param node2_label: label of node to
+        :return: nothing
+        """
+
         if node1_label not in self.nodes:
             node1 = LabeledNode(node1_label)
             self.nodes[node1_label] = node1
@@ -75,7 +88,13 @@ class LabeledGraph(object):
         node2.add_edge_incoming(edge)
         self.edges.append(edge)
 
-    def breath_search(self, start_node, max_steps=-1):
+    def breath_first_search(self, start_node, max_steps=-1):
+        """
+        applies a breath first search starting by a node
+        :param start_node: starting node
+        :param max_steps: how many steps should be done? -1 if unlimited
+        :return: a subgraph
+        """
         current_step = 0
         todo = [start_node]
         visited = set()
@@ -129,6 +148,10 @@ class LabeledGraph(object):
         return target_graph
 
     def compute_connectivity_components(self):
+        """
+        computes all connectivity components in this graph
+        :return: a list of subgraphs
+        """
         if len(self) == 0:
             return None
         if len(self) == 1:
@@ -149,7 +172,7 @@ class LabeledGraph(object):
             visited.add(node.get_label())
 
             # start a breath search for this node
-            component = self.breath_search(node)
+            component = self.breath_first_search(node)
             # add all nodes visited here to our already visited nodes
             visited.update(component.nodes.keys())
             # component found

@@ -173,52 +173,43 @@ class GraphTest(unittest.TestCase):
         g4.add_edge('p1', 'c', 'e')
         self.g4 = g4
 
-    def test_breath_search_g1_a(self):
-        target = self.g1.breath_search(self.g1.get_node('a'))
+    def test_breath_first_search_g1_a(self):
+        target = self.g1.breath_first_search(self.g1.get_node('a'))
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('d'))
 
-    def test_breath_search_g1_b(self):
-        target = self.g1.breath_search(self.g1.get_node('b'))
+    def test_breath_first_search_g1_b(self):
+        target = self.g1.breath_first_search(self.g1.get_node('b'))
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('d'))
 
-    def test_breath_search_g1_c(self):
-        target = self.g1.breath_search(self.g1.get_node('c'))
+    def test_breath_first_search_g1_c(self):
+        target = self.g1.breath_first_search(self.g1.get_node('c'))
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('d'))
 
-    def test_breath_search_g1_steps_1(self):
-        target = self.g1.breath_search(self.g1.get_node('a'), max_steps=1)
+    def test_breath_first_search_g1_steps_1(self):
+        target = self.g1.breath_first_search(self.g1.get_node('a'), max_steps=1)
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNone(target.get_node('c'))
         self.assertIsNone(target.get_node('d'))
 
-    def test_breath_search_g1_steps_2(self):
-        target = self.g1.breath_search(self.g1.get_node('a'), max_steps=2)
+    def test_breath_first_search_g1_steps_2(self):
+        target = self.g1.breath_first_search(self.g1.get_node('a'), max_steps=2)
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('d'))
 
-    def test_breath_search_g4_a(self):
-        target = self.g4.breath_search(self.g4.get_node('a'))
-        self.assertIsNotNone(target.get_node('a'))
-        self.assertIsNotNone(target.get_node('b'))
-        self.assertIsNotNone(target.get_node('d'))
-        self.assertIsNone(target.get_node('c'))
-        self.assertIsNone(target.get_node('f'))
-        self.assertIsNone(target.get_node('e'))
-
-    def test_breath_search_g4_b(self):
-        target = self.g4.breath_search(self.g4.get_node('b'))
+    def test_breath_first_search_g4_a(self):
+        target = self.g4.breath_first_search(self.g4.get_node('a'))
         self.assertIsNotNone(target.get_node('a'))
         self.assertIsNotNone(target.get_node('b'))
         self.assertIsNotNone(target.get_node('d'))
@@ -226,8 +217,17 @@ class GraphTest(unittest.TestCase):
         self.assertIsNone(target.get_node('f'))
         self.assertIsNone(target.get_node('e'))
 
-    def test_breath_search_g4_c(self):
-        target = self.g4.breath_search(self.g4.get_node('c'))
+    def test_breath_first_search_g4_b(self):
+        target = self.g4.breath_first_search(self.g4.get_node('b'))
+        self.assertIsNotNone(target.get_node('a'))
+        self.assertIsNotNone(target.get_node('b'))
+        self.assertIsNotNone(target.get_node('d'))
+        self.assertIsNone(target.get_node('c'))
+        self.assertIsNone(target.get_node('f'))
+        self.assertIsNone(target.get_node('e'))
+
+    def test_breath_first_search_g4_c(self):
+        target = self.g4.breath_first_search(self.g4.get_node('c'))
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('f'))
         self.assertIsNotNone(target.get_node('e'))
@@ -235,8 +235,8 @@ class GraphTest(unittest.TestCase):
         self.assertIsNone(target.get_node('b'))
         self.assertIsNone(target.get_node('d'))
 
-    def test_breath_search_g4_steps_1(self):
-        target = self.g4.breath_search(self.g4.get_node('c'), max_steps=1)
+    def test_breath_first_search_g4_steps_1(self):
+        target = self.g4.breath_first_search(self.g4.get_node('c'), max_steps=1)
         self.assertIsNotNone(target.get_node('c'))
         self.assertIsNotNone(target.get_node('f'))
         self.assertIsNotNone(target.get_node('e'))
@@ -244,8 +244,8 @@ class GraphTest(unittest.TestCase):
         self.assertIsNone(target.get_node('b'))
         self.assertIsNone(target.get_node('d'))
 
-    def test_breath_search_g4_steps_0(self):
-        target = self.g4.breath_search(self.g4.get_node('c'), max_steps=0)
+    def test_breath_first_search_g4_steps_0(self):
+        target = self.g4.breath_first_search(self.g4.get_node('c'), max_steps=0)
         self.assertIsNone(target.get_node('c'))
         self.assertIsNone(target.get_node('f'))
         self.assertIsNone(target.get_node('e'))
