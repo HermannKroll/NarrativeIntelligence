@@ -7,9 +7,9 @@ from builtins import *
 import numpy as np
 import torch
 
-from snorkel.learning.pytorch_gpu import TorchNoiseAwareModel
 from snorkel.models import Candidate
-from snorkel.learning.pytorch_gpu.rnn.utils import candidate_to_tokens, SymbolTable
+from pytorch_gpu.noise_aware_model import TorchNoiseAwareModel
+from pytorch_gpu.rnn.utils import candidate_to_tokens, SymbolTable
 
 
 def mark(l, h, idx):

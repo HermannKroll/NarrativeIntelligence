@@ -33,11 +33,12 @@ class TorchNoiseAwareModel(Classifier, nn.Module):
     
     :param n_threads: Parallelism to use; single-threaded if None
     """
-    def __init__(self, n_threads=None, **kwargs):
+    def __init__(self, n_threads=None, device='cpu', **kwargs):
         Classifier.__init__(self, **kwargs)
         nn.Module.__init__(self)
         self.n_threads = n_threads
         self.model_kwargs = None
+        self.device = device
 
     def _check_input(self, X):
         """Checks correctness of input; optional to implement."""
@@ -100,7 +101,7 @@ class TorchNoiseAwareModel(Classifier, nn.Module):
         self._build_model(**self.model_kwargs)
         
         self.load_state_dict(
-            torch.load('{}/model.params'.format(model_dir))
+            torch.load('{}/model.params'.format(model_dir), map_location=self.device)
         )
         if verbose:
             print("[{0}] Loaded model <{1}>".format(self.name, model_name))
@@ -126,7 +127,7 @@ class TorchNoiseAwareModel(Classifier, nn.Module):
         
     def train(self, X_train, Y_train, n_epochs=25, lr=0.01, batch_size=64,
         rebalance=False, X_dev=None, Y_dev=None, print_freq=1, dev_ckpt=True,
-        dev_ckpt_delay=0.75, save_dir='checkpoints', seed=123, use_cudnn=True,cudnn_device="cuda:0", **kwargs):
+        dev_ckpt_delay=0.75, save_dir='checkpoints', seed=123, use_cudnn=True,cudnn_device='cuda:0', **kwargs):
         """
         Generic training procedure for PyTorch model
 
@@ -176,7 +177,7 @@ class TorchNoiseAwareModel(Classifier, nn.Module):
         if use_cudnn and torch.cuda.is_available():
             self.device = torch.device(cudnn_device)
         else:
-            self.device = torch.device("cpu")
+            self.device = torch.device('cpu')
         if verbose:
             print("[{0}] Running on {1}".format(self.name, str(self.device)))
 

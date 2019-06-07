@@ -15,11 +15,12 @@ class PubTatorParser(Parser):
     ENTITY_SEP = '~@~'
     STD_SPLITS_RGX = r'[\s\t\-\/\.]*'
 
-    def __init__(self, parser=Spacy(lang='en'), stop_on_err=True, encoding="utf-8"):
+    def __init__(self, parser=Spacy(lang='en'), stop_on_err=True, encoding="utf-8", debug=False):
         super(PubTatorParser, self).__init__(name="PubTatorParser", encoding=encoding)
         self.parser = parser
         self.stop_on_err = stop_on_err
         self.miss_annotations_count = 0
+        self.debug = debug
 
     def _scrub(self, mention):
         m = re.sub(r'\'\'|``', '"', mention)
@@ -33,12 +34,13 @@ class PubTatorParser(Parser):
 
     def _throw_error(self, sentence_parts, mention, toks, msg="Couldn't find match!"):
        # print("Error thrown with sentence parts = {}".format(sentence_parts))
-        print("Mention: {}".format(mention))
-        print("Tokens:  {}".format(toks))
+        #print("Mention: {}".format(mention))
+        #print("Tokens:  {}".format(toks))
         if self.stop_on_err:
             raise ValueError(msg)
         else:
-            print("Warning {}".format(msg))#print 'WARNING:', msg
+            if self.debug:
+                print("Warning {} (Mention: {} and Tokens: {}".format(msg, mention, toks))
 
     def _mark_matched_annotation(self, wi, we, sentence_parts, cid, cid_type):
         for j in range(wi, we):
@@ -99,6 +101,9 @@ class PubTatorParser(Parser):
         return ParserConnection(self)
 
     def parse(self, doc, text):
+        token_split_error_count = 0
+        could_not_find_match_count = 0
+
         annotations = doc.meta["annotations"]
         #print("PubTatorParser parse test")
         #print(annotations)
@@ -153,6 +158,7 @@ class PubTatorParser(Parser):
                                 self._split_token(sentence_parts, abs_offsets, wi, si - 1, mention, words, left_tok=False)
                             except IndexError:
                                 self._throw_error(sentence_parts, mention, words, msg="Token split error")
+                                token_split_error_count += 1
                                 matched_annos.append(i)
                                 continue
 
@@ -175,6 +181,7 @@ class PubTatorParser(Parser):
                                 self._split_token(sentence_parts, abs_offsets, we - 1, ei, mention, words)
                             except IndexError:
                                 self._throw_error(sentence_parts, mention, words, msg="Token split error")
+                                token_split_error_count += 1
                                 matched_annos.append(i)
                                 continue
 
@@ -185,6 +192,7 @@ class PubTatorParser(Parser):
                                 self._mark_matched_annotation(wi, we, sentence_parts, cid, cid_type)
                             else:
                                 self._throw_error(sentence_parts, mention, words)
+                                could_not_find_match_count += 1
                                 matched_annos.append(i)
                                 continue
 
@@ -195,6 +203,9 @@ class PubTatorParser(Parser):
             except Exception as e:
                 print("WARNING: parsing exception {} in document {}".format(e, doc.name))
 
+        # additional error information
+        if could_not_find_match_count > 0 or token_split_error_count > 0:
+            print('Errors while parsing document: {} (could not match entity) and {} (token split errors)'.format(could_not_find_match_count, token_split_error_count))
 
         # Check if we got everything
         if len(annotations) != len(matched_annos):
