@@ -15,7 +15,7 @@ QUERY_DESCRIPTOR_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNum
 QUERY_DESCRIPTOR_BY_HEADING_CONTAINS = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
                                        "/String[contains(text(),'{}')]/parent::*/parent::*"
 QUERY_DESCRIPTOR_BY_HEADING_EXACT = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
-                                    "/String[text()='{}')]/parent::*/parent::*"
+                                    "/String[text()='{}']/parent::*/parent::*"
 QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptList/Concept/TermList/Term" \
                            "/String[text()='{}']/parent::*/parent::*/parent::*/parent::*/parent::*"
 
