@@ -3,8 +3,9 @@
 class LibraryGraph(object):
 
     def __init__(self):
-        self.tuples = []
-        self.doc2tuples = {}
+        self.facts = []
+        self.doc2facts = {}
+        self.doc2factkeys = {}
         self.doc_ids = set()
         self.sent_ids = set()
         self.predicates = set()
@@ -73,11 +74,17 @@ class LibraryGraph(object):
         else:
             self.type_and_cid_to_span[type][cid] = span
 
-    def add_tuple_for_doc(self, doc_id, tuple):
-        if doc_id not in self.doc2tuples:
-            self.doc2tuples[doc_id] = [tuple]
+    def add_fact_for_doc(self, doc_id, tuple):
+        if doc_id not in self.doc2facts:
+            self.doc2facts[doc_id] = [tuple]
+            self.doc2factkeys[doc_id] = set(frozenset(tuple))
         else:
-            self.doc2tuples[doc_id].append(tuple)
+            key = frozenset(tuple)
+            # allow every triple only once in a document
+            if key not in self.doc2factkeys[doc_id]:
+                #print('Error duplicated tuple: {} in doc {}'.format(tuple, doc_id))
+                self.doc2factkeys[doc_id].add(key)
+                self.doc2facts[doc_id].append(tuple)
 
     def add_doc_for_fact(self, fact, doc_id):
         key = frozenset(fact)
@@ -137,9 +144,9 @@ class LibraryGraph(object):
                     self.predicate2docIDs[predicate].add(doc_id)
 
                 t = (doc_id, s_cid, predicate, o_cid, prob)
-                self.tuples.append(t)
+                self.facts.append(t)
                 doc_t = (s_cid, predicate, o_cid)
-                self.add_tuple_for_doc(doc_id, doc_t)
+                self.add_fact_for_doc(doc_id, doc_t)
 
                 self.add_doc_for_fact((s_cid, predicate, o_cid), doc_id)
 
@@ -149,6 +156,6 @@ class LibraryGraph(object):
                 self.doc_ids.add(doc_id)
                 self.sent_ids.add(sent_id)
 
-        print('Read {} tuples from csv'.format(len(self.tuples)))
+        print('Read {} facts from csv'.format(len(self.facts)))
 
 

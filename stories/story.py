@@ -24,7 +24,7 @@ class GraphQuery(object):
 
 class GraphQueryProcessor(object):
 
-    def check_variable_substitution(self, substitutions, variable, substitution):
+    def __check_variable_substitution(self, substitutions, variable, substitution):
         # if variable has currently no substitution
         if variable not in substitution:
             # substitution works fine
@@ -38,7 +38,7 @@ class GraphQueryProcessor(object):
             # no compatible substitution was found - no query result
             return False
 
-    def add_var_substitution(self, var_subs, var, sub):
+    def __add_var_substitution(self, var_subs, var, sub):
         if var not in var_subs:
             var_subs[var] = set()
         var_subs[var].add(sub)
@@ -63,24 +63,24 @@ class GraphQueryProcessor(object):
                     # predicates are equal?
                     if qf[1] == df[1]:
                         # then q1 is now substituted by - check it
-                        if qf[0].startswith('?') and self.check_variable_substitution(var_subs, qf[0], df[0]):
+                        if qf[0].startswith('?') and self.__check_variable_substitution(var_subs, qf[0], df[0]):
                             # if q2 is also a variable - add substitution or check
                             if qf[2].startswith('?'):
-                                if self.check_variable_substitution(var_subs_for_fact, qf[2], df[2]):
-                                    self.add_var_substitution(var_subs_for_fact, qf[0], df[0])
-                                    self.add_var_substitution(var_subs_for_fact, qf[2], df[2])
+                                if self.__check_variable_substitution(var_subs_for_fact, qf[2], df[2]):
+                                    self.__add_var_substitution(var_subs_for_fact, qf[0], df[0])
+                                    self.__add_var_substitution(var_subs_for_fact, qf[2], df[2])
                                     has_substitution = True
                             else:
                                 # qf2 is not a variable - just check if equal
                                 if qf[2] == df[2]:
-                                    self.add_var_substitution(var_subs_for_fact, qf[0], df[0])
+                                    self.__add_var_substitution(var_subs_for_fact, qf[0], df[0])
                                     has_substitution = True
                                     # then q1 is now substituted by - check it
                         # only if qf is not a varible, else it would be checked above
-                        elif qf[2].startswith('?') and self.check_variable_substitution(var_subs, qf[2], df[2]):
+                        elif qf[2].startswith('?') and self.__check_variable_substitution(var_subs, qf[2], df[2]):
                             # qf0 is not a variable - just check if equal
                             if qf[0] == df[0]:
-                                self.add_var_substitution(var_subs_for_fact, qf[2], df[2])
+                                self.__add_var_substitution(var_subs_for_fact, qf[2], df[2])
                                 has_substitution = True
 
                 # no substitution was found?
@@ -141,7 +141,7 @@ class GraphQueryProcessor(object):
                 # just add valid combinations
                 if comb_valid:
                     for i in range(0, len(v_names)):
-                        self.add_var_substitution(correct_var_combinations, v_names[i], comb[i])
+                        self.__add_var_substitution(correct_var_combinations, v_names[i], comb[i])
 
             # if no comb is valid - no query result
             if len(correct_var_combinations) == 0:
@@ -200,22 +200,22 @@ class StoryProcessor(object):
     def match_graph_query(self, graph_query, debug=False):
         """
         matches a graph query against the document fact store
-        :param graph_query: a graph query allowing variables
+        :param graph_query: a graph query including variables
         :param debug: should print additional debug information?
         :return: a list of tuples consisting of (doc_id, variable_substitutions (HashMap))
         """
         matched_docs = []
         # go through all documents
-        for doc_id, doc_fs in self.library_graph.doc2tuples.items():
+        for doc_id, doc_fs in self.library_graph.doc2facts.items():
             # now match query against this facts
-            matched, subs = self.graph_query_processor.match_query_facts_in_doc_facts(graph_query, doc_fs)
+            matched, subs = self.graph_query_processor.match_query_facts_in_doc_facts(graph_query.facts, doc_fs)
             if matched:
                 if debug:
                     print('Matched in doc {} with var_subs {}'.format(doc_id, subs))
                 matched_docs.append((doc_id, subs))
         return matched_docs
 
-    def _score_graph_pattern(self, graph_pattern, supp, entity_ids_detected, predicates_detected, max_supp):
+    def __score_graph_pattern(self, graph_pattern, supp, entity_ids_detected, predicates_detected, max_supp):
         gp = graph_pattern
 
         ent_in_gp = set()
@@ -245,7 +245,7 @@ class StoryProcessor(object):
         print('Final Score {}'.format(score))
         return score
 
-    def _select_k_best_stores(self, stories, k, entity_ids_detected, predicates_detected):
+    def __select_k_best_stores(self, stories, k, entity_ids_detected, predicates_detected):
         stories_with_supp = []
         # get max supp
         max_supp = 0
@@ -259,7 +259,7 @@ class StoryProcessor(object):
         scored_stories = []
         # select best stories here
         for gp, supp in stories_with_supp:
-            score = self._score_graph_pattern(gp, supp, entity_ids_detected, predicates_detected, max_supp)
+            score = self.__score_graph_pattern(gp, supp, entity_ids_detected, predicates_detected, max_supp)
             scored_stories.append((gp, score))
 
         # construct possible graph queries
@@ -270,7 +270,7 @@ class StoryProcessor(object):
         # return the list of final graph queries
         return scored_stories_sorted[0:k]
 
-    def _tag_entities_in_keywords(self, keyword_query):
+    def __tag_entities_in_keywords(self, keyword_query):
         stripped = keyword_query.strip()
 
         words = []
@@ -332,8 +332,7 @@ class StoryProcessor(object):
                                 keyword_query, self.library_graph)
 
     def tag_entities_in_keywords_human_readable(self, keyword_query):
-        return str(self._tag_entities_in_keywords(keyword_query))
-
+        return str(self.__tag_entities_in_keywords(keyword_query))
 
     def translate_keywords_to_graph_queries(self, keyword_query, k):
         # split keyword query in single words
@@ -344,7 +343,7 @@ class StoryProcessor(object):
             return []
 
         # tag entities in query
-        qt = self._tag_entities_in_keywords(keyword_query)
+        qt = self.__tag_entities_in_keywords(keyword_query)
 
         # Todo: What about not mached words here?
         # suggest new predicates here
@@ -421,7 +420,7 @@ class StoryProcessor(object):
                 print('Current Stack Size: {}'.format(len(stack_copy)))
                 stack = stack_copy
 
-        return self._select_k_best_stores(stack, k, qt.entity_ids_detected, qt.predicates_detected), qt
+        return self.__select_k_best_stores(stack, k, qt.entity_ids_detected, qt.predicates_detected), qt
 
     def query(self, keyword_query, amount_of_stories=5):
         start = time.time()

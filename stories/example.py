@@ -25,7 +25,7 @@ q4 = 'Simvastatin Hyperlipidemias Amiodarone "Diabetes Mellitus" therapeutic'
 
 
 
-cq = q4
+cq = q1
 #results = story.query(cq)
 print(story.tag_entities_in_keywords_human_readable(cq))
 
