@@ -2,6 +2,7 @@
 XML Documentation: https://www.nlm.nih.gov/mesh/xml_data_elements.html
 """
 import itertools
+import warnings
 from datetime import datetime
 
 from lxml import etree
@@ -12,6 +13,8 @@ QUERY_DESCRIPTOR_RECORD = "/DescriptorRecordSet/DescriptorRecord"
 QUERY_DESCRIPTOR_BY_ID = "/DescriptorRecordSet/DescriptorRecord/DescriptorUI[text()='{}']/parent::*"
 QUERY_DESCRIPTOR_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
                                   "/TreeNumber[text()='{}']/parent::*/parent::*"
+QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
+                                      "/TreeNumber[starts-with(text(),'{}')]/parent::*/parent::*/DescriptorUI"
 QUERY_DESCRIPTOR_BY_HEADING_CONTAINS = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
                                        "/String[contains(text(),'{}')]/parent::*/parent::*"
 QUERY_DESCRIPTOR_BY_HEADING_EXACT = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
@@ -81,10 +84,8 @@ class MeSHDB:
         :param desc_obj: Descriptor object to add
         """
         self._desc_by_id[desc_obj.unique_id] = desc_obj
-        try:
-            self._desc_by_tree_number[desc_obj.tree_number_list[0]] = desc_obj
-        except IndexError:
-            pass
+        for tn in desc_obj.tree_numbers:
+            self._desc_by_tree_number[tn] = desc_obj
         self._desc_by_name[desc_obj.heading] = desc_obj
 
     def desc_by_id(self, unique_id):
@@ -95,8 +96,15 @@ class MeSHDB:
                 desc = Descriptor.from_element(desc_rec[0])
                 self.add_desc(desc)
             else:
-                raise ValueError("Descriptor not found.")
+                raise ValueError("Descriptor {} not found.".format(unique_id))
         return self._desc_by_id[unique_id]
+
+    def descs_under_tree_number(self, tree_number):
+        query = QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER.format(tree_number + ".")
+        records = self.tree.xpath(query)
+        ids = [record.text.strip() for record in records]
+        desc_list = [self.desc_by_id(uid) for uid in ids]
+        return sorted(desc_list)
 
     def desc_by_tree_number(self, tree_number):
         if tree_number not in self._desc_by_tree_number:
@@ -106,7 +114,7 @@ class MeSHDB:
                 desc = Descriptor.from_element(desc_rec[0])
                 self.add_desc(desc)
             else:
-                raise ValueError("Descriptor not found.")
+                raise ValueError("Descriptor {} not found.".format(tree_number))
         return self._desc_by_tree_number[tree_number]
 
     def descs_by_term(self, term):
@@ -253,28 +261,39 @@ class Descriptor(BaseNode):
 
     @property
     def tree_number(self):
-        return getattr(self, "tree_number_list")[0]
+        warnings.simplefilter("always")
+        warnings.warn("Method is deprecated. Please use tree_numbers.", DeprecationWarning)
+        return self.tree_numbers[0] if self.tree_numbers else None
 
     @property
-    def parent(self):
-        parent = ".".join(self.tree_number.split(".")[:-1])
-        if parent:
-            return MeSHDB.instance().desc_by_tree_number(parent)
-        else:
-            return None
+    def tree_numbers(self):
+        return getattr(self, "tree_number_list")
 
     @property
-    def lineage(self):
-        if not hasattr(self, "_lineage"):
-            parent_lineage = self.parent.lineage if self.parent else []
-            lineage = parent_lineage + [self]
-            setattr(self, "_lineage", lineage)
-        return getattr(self, "_lineage")
+    def parents(self):
+        if not hasattr(self, "_parents"):
+            parent_tns = [".".join(tn.split(".")[:-1]) for tn in self.tree_numbers if "." in tn]
+            parents = [MeSHDB.instance().desc_by_tree_number(tn) for tn in parent_tns]
+            setattr(self, "_parents", parents)
+        return getattr(self, "_parents")
+
+    @property
+    def lineages(self):
+        """
+        :return: List of lists of Descriptors.
+        """
+        if not hasattr(self, "_lineages"):
+            parent_lineages = [lineage for p in self.parents for lineage in p.lineages]
+            if parent_lineages:
+                lineages = [lineage + [self] for lineage in parent_lineages]
+            else:
+                lineages = [[self]]
+            setattr(self, "_lineages", lineages)
+        return getattr(self, "_lineages")
 
     def get_common_lineage(self, other):
-        lin1 = self.lineage
-        lin2 = other.lineage
-        return [x for x, y in zip(lin1, lin2) if x == y]
+        common = [[x for x, y in zip(l1, l2) if x == y] for l1 in self.lineages for l2 in other.lineages]
+        return [x for x in common if x]
 
     @property
     def terms(self):
@@ -288,3 +307,6 @@ class Descriptor(BaseNode):
 
     def __repr__(self):
         return "<Descriptor {} at {}>".format(getattr(self, "heading"), id(self))
+
+    def __lt__(self, other):
+        return self.unique_id < other.unique_id
