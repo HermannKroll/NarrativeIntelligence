@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}" type="text/css" />
 {% endblock %}
 
 {# TODO: Implement https://visjs.org/examples/network/basicUsage.html #}
@@ -256,5 +256,5 @@
     <script type="text/javascript">
         const search_url = "{% url 'search' %}";
     </script>
-    <script src="{% static 'js/search.js' %}"></script>
+    <script src="{% static 'js/search.js' %}" type="text/javascript"></script>
 {% endblock %}
