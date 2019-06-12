@@ -20,6 +20,7 @@ class SearchView(TemplateView):
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             results = dict()
+            query_trans_string = ""
             if "query" in request.GET:
                 query = self.request.GET.get("query", "").strip()
                 results, query_trans = story.query(query)

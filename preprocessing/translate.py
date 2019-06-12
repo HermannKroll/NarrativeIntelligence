@@ -18,6 +18,8 @@ from argparse import ArgumentParser
 from lxml import etree, html
 from lxml.etree import ParserError
 
+MAX_CONTENT_LENGTH = 500000
+
 patterns_to_delete = (
     re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>
     re.compile(r"<inline-formula\s.*?</inline-formula>"),  # <inline-formula>
@@ -164,7 +166,7 @@ def translate_files(pmc_files, output_dir, err_file=None):
         pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
         try:
             content = translate_file(fn)
-            if content:
+            if content and len(content) < MAX_CONTENT_LENGTH:
                 with open(os.path.join(output_dir, f"{pmcid}.txt"), "w") as f:
                     f.write("{}\n".format(content))
             else:
