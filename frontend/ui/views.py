@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
@@ -6,11 +9,10 @@ from stories.library_graph import LibraryGraph
 from stories.story import StoryProcessor, MeshTagger
 
 lg = LibraryGraph()
-lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')
+lg.read_from_tsv(os.path.join(settings.DATA_DIR, 'lg_pmc_sim_ami_108.tsv'))
 
-db = MeSHDB().instance()
-db.load_xml('../data/desc2019.xml')
-
+db = MeSHDB.instance()
+db.load_xml(os.path.join(settings.DATA_DIR, 'desc2019.xml'))
 story = StoryProcessor(lg, [MeshTagger(db)])
 
 

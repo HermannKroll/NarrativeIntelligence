@@ -7,34 +7,27 @@
 
 {# TODO: Implement https://visjs.org/examples/network/basicUsage.html #}
 
-{% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1>{% block title %}PubMedCentral{% endblock %}</h1>
-            </div>
-        </div>
+{% block title %}PubMedCentral{% endblock %}
 
+{% block content %}
+    <div class="container margin-top">
         <div class="row">
             <div class="col">
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="id_keywords">Keywords</label>
+                            <label for="id_keywords"><strong>Keywords</strong></label>
                             <textarea class="form-control" id="id_keywords" rows="3"
-                                      name="keywords">
-
-                                Simvastatin Rhabdomyolysis associated
-
-                            </textarea>
+                                      name="keywords">Simvastatin Rhabdomyolysis associated</textarea>
                             <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
-                                Please type in the keywords you want to query. (Mesh / Gene IDs can be entered manually "1576" for CYP3A4.
+                                Please type in the keywords you want to query. (Mesh / Gene IDs can be entered manually
+                                "1576" for CYP3A4.
                                 Detection of entities is currently only supported for Chemicals and Diseases.
                             </small>
 
                             <small id="id_help_3" class="form-text text-muted" aria-describedby="id_help">
-                                Current Corpus: PubMedCentral 108 Documents: Simvastatin Amiodarone CYP3A4
+                                Current Corpus: PubMedCentral: Simvastatin Amiodarone CYP3A4 (108 documents)
                             </small>
                         </div>
                     </div>
@@ -43,14 +36,14 @@
             </div>
         </div>
 
-        <div class="row margin-top" id="query_translation">
+        <div class="row margin-top" id="div_query_translation">
             <div class="col">
                 <h2>Query Translation</h2>
-                <textarea cols="75" rows="10" id="query_trans_textarea"></textarea>
+                <p id="query_translation"></p>
             </div>
         </div>
 
-        <div class="row margin-top" id="patterns">
+        <div class="row margin-top" id="div_patterns">
             <div class="col">
                 <h2>Graph patterns</h2>
 
@@ -70,58 +63,191 @@
             </div>
         </div>
 
-        <div class="row margin-top" id="documents">
+        <div class="row margin-top" id="div_documents">
             <div class="col-md-6">
                 <h2>Documents</h2>
             </div>
         </div>
 
-        <div>
-        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
-                    Support the following predicates:<br/>
-                    associated : [('Chemical', 'Disease'), ('Chemical', 'Gene'), ('Gene', 'Disease')]<br/>
-                    inhibits : [('Chemical', 'Gene')]<br/>
-                    metabolites : [('Gene', 'Chemical')]<br/>
-                    marker_mechanism : [('Chemical', 'Disease')]<br/>
-                    therapeutic : [('Chemical', 'Disease')]<br/>
-                    affects_abundance : [('Chemical', 'Gene')]<br/>
-                    affects_activity : [('Chemical', 'Gene')]<br/>
-                    affects_binding : [('Chemical', 'Gene')]<br/>
-                    affects_cotreatment : [('Chemical', 'Gene')]<br/>
-                    affects_expression : [('Chemical', 'Gene')]<br/>
-                    affects_localization : [('Chemical', 'Gene')]<br/>
-                    affects_metabolic_processing : [('Chemical', 'Gene')]<br/>
-                    affects_methylation : [('Chemical', 'Gene')]<br/>
-                    affects_reaction : [('Chemical', 'Gene')]<br/>
-                    affects_response_to_substance : [('Chemical', 'Gene')]<br/>
-                    affects_transport : [('Chemical', 'Gene')]<br/>
-                    decreases_abundance : [('Chemical', 'Gene')]<br/>
-                    decreases_activity : [('Chemical', 'Gene')]<br/>
-                    decreases_expression : [('Chemical', 'Gene')]<br/>
-                    decreases_methylation : [('Chemical', 'Gene')]<br/>
-                    decreases_phosphorylation : [('Chemical', 'Gene')]<br/>
-                    decreases_reaction : [('Chemical', 'Gene')]<br/>
-                    decreases_response_to_substance : [('Chemical', 'Gene')]<br/>
-                    decreases_secretion : [('Chemical', 'Gene')]<br/>
-                    increases_abundance : [('Chemical', 'Gene')]<br/>
-                    increases_acetylation : [('Chemical', 'Gene')]<br/>
-                    increases_activity : [('Chemical', 'Gene')]<br/>
-                    increases_chemical_synthesis : [('Chemical', 'Gene')]<br/>
-                    increases_cleavage : [('Chemical', 'Gene')]<br/>
-                    increases_degradation : [('Chemical', 'Gene')]<br/>
-                    increases_expression : [('Chemical', 'Gene')]<br/>
-                    increases_localization : [('Chemical', 'Gene')]<br/>
-                    increases_metabolic_processing : [('Chemical', 'Gene')]<br/>
-                    increases_oxidation : [('Chemical', 'Gene')]<br/>
-                    increases_phosphorylation : [('Chemical', 'Gene')]<br/>
-                    increases_reaction : [('Chemical', 'Gene')]<br/>
-                    increases_reduction : [('Chemical', 'Gene')]<br/>
-                    increases_response_to_substance : [('Chemical', 'Gene')]<br/>
-                    increases_secretion : [('Chemical', 'Gene')]<br/>
-                    increases_transport : [('Chemical', 'Gene')]<br/>
-                    increases_uptake : [('Chemical', 'Gene')]<br/>
+        <div class="row">
+            <div class="col">
+                <h3>Supported predicates</h3>
 
-                    </small>
+                <table class="table table-sm table-striped">
+                    <thead>
+                    <tr>
+                        <th>Predicate</th>
+                        <th>Entities</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>associated</td>
+                        <td>(Chemical, Disease)<br/>(Chemical, Gene)<br/>(Gene, Disease)</td>
+                    </tr>
+                    <tr>
+                        <td>inhibits</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>metabolites</td>
+                        <td>(Gene, Chemical)</td>
+                    </tr>
+                    <tr>
+                        <td>marker_mechanism</td>
+                        <td>(Chemical, Disease)</td>
+                    </tr>
+                    <tr>
+                        <td>therapeutic</td>
+                        <td>(Chemical, Disease)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_abundance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_activity</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_binding</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_cotreatment</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_expression</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_localization</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_metabolic_processing</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_methylation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_reaction</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_response_to_substance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>affects_transport</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_abundance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_activity</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_expression</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_methylation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_phosphorylation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_reaction</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_response_to_substance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>decreases_secretion</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_abundance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_acetylation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_activity</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_chemical_synthesis</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_cleavage</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_degradation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_expression</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_localization</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_metabolic_processing</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_oxidation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_phosphorylation</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_reaction</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_reduction</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_response_to_substance</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_secretion</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_transport</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    <tr>
+                        <td>increases_uptake</td>
+                        <td>(Chemical, Gene)</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}

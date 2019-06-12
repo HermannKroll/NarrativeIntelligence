@@ -16,14 +16,13 @@ const search = (event) => {
     request.done(function (response) {
         console.log(response);
 
-        let form = $('#patterns form');
+        let form = $('#div_patterns form');
         form.empty();
-        $('#documents > div').empty();
+        $('#div_documents > div').empty();
 
-
-        let query_trans_textarea = $("#query_trans_textarea");
+        let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
-        query_trans_textarea.val(query_trans_string);
+        query_translation.text(query_trans_string);
 
         response["results"].forEach((item, idx) => {
             let graph = item[0];
@@ -41,7 +40,7 @@ const search = (event) => {
             formDiv.append(label);
             form.append(formDiv);
             formDiv.on('click', event => {
-                $('#documents div.list-group').hide();
+                $('#div_documents div.list-group').hide();
                 $('div[data-by=' + event.target.id + ']').show();
             });
 
@@ -54,7 +53,7 @@ const search = (event) => {
                     'PMC' + document[0] + '</a>'
                 )
             });
-            $('#documents > div').append(divList);
+            $('#div_documents > div').append(divList);
 
             console.log(item[0], item[1])
         });
