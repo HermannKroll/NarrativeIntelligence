@@ -16,7 +16,25 @@ let CYTOSCAPE_STYLE = [
             'label': 'data(label)'
         }
     }
-]
+];
+
+const setButtonSearching = isSearching => {
+    let btn = $('#btn_search');
+    let help = $('#help_search');
+    btn.empty();
+
+    if (isSearching) {
+        let span = $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+        btn.append(span)
+            .append(" Searching ...")
+            .prop("disabled", true);
+        help.fadeIn();
+    } else {
+        btn.append("Search patterns")
+            .prop("disabled", false);
+        help.fadeOut();
+    }
+};
 
 $(document).ready(function () {
     $("#search_form").submit(search);
@@ -26,6 +44,8 @@ const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
     console.log("Query: " + query);
+    setButtonSearching(true);
+
     let request = $.ajax({
         url: search_url,
         data: {
@@ -60,9 +80,13 @@ const search = (event) => {
             let divList = createDocumentList(results, idx);
             divDocuments.append(divList);
         });
+
+        // Disable button
+        setButtonSearching(false);
     });
 
     request.fail(function (result) {
+        setButtonSearching(false);
         console.log(result);
     });
 };

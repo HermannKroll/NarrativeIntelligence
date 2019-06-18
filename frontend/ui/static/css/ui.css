@@ -51,3 +51,7 @@
     padding-right: 10px;
     display: inline-block;
 }
+
+#help_search {
+    display: none;
+}

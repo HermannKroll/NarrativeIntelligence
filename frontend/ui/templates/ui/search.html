@@ -13,23 +13,26 @@
             <div class="col">
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="id_keywords"><strong>Keywords</strong></label>
-                            <textarea class="form-control" id="id_keywords" rows="3"
-                                      name="keywords">Simvastatin Rhabdomyolysis associated</textarea>
-                            <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
-                                Please type in the keywords you want to query. (Mesh / Gene IDs can be entered manually
-                                "1576" for CYP3A4.
-                                Detection of entities is currently only supported for Chemicals and Diseases.
-                            </small>
+                    <div class="form-group">
+                        <label for="id_keywords"><strong>Keywords</strong></label>
+                        <textarea class="form-control" id="id_keywords" rows="3"
+                                  name="keywords">Simvastatin Rhabdomyolysis associated</textarea>
+                        <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
+                            Please type in the keywords you want to query. (Mesh / Gene IDs can be entered manually
+                            "1576" for CYP3A4.
+                            Detection of entities is currently only supported for Chemicals and Diseases.
+                        </small>
 
-                            <small id="id_help_3" class="form-text text-muted" aria-describedby="id_help">
-                                Current Corpus: PubMedCentral: Simvastatin Amiodarone CYP3A4 (108 documents)
-                            </small>
-                        </div>
+                        <small id="id_help_3" class="form-text text-muted" aria-describedby="id_help">
+                            Current Corpus: PubMedCentral: Simvastatin Amiodarone CYP3A4 (108 documents)
+                        </small>
                     </div>
-                    <button type="submit" class="btn btn-primary">Search patterns</button>
+                    <button type="submit" class="btn btn-primary" id="btn_search">
+                        Search patterns
+                    </button>
+                    <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                        Please be patient. This process can take up to one minute.
+                    </p>
                 </form>
             </div>
             <div class="col">
