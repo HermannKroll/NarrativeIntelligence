@@ -26,7 +26,12 @@ class SearchView(TemplateView):
             if "query" in request.GET:
                 query = self.request.GET.get("query", "").strip()
                 results, query_trans = story.query(query)
+
+                results_converted = []
+                for res in results:
+                    results_converted.append((list(res[0].facts), res[1]))
+
                 query_trans_string = str(query_trans)
                 print(query_trans_string)
-            return JsonResponse(dict(results=results, query_translation=query_trans_string))
+            return JsonResponse(dict(results=results_converted, query_translation=query_trans_string))
         return super().get(request, *args, **kwargs)

@@ -251,7 +251,7 @@ class StoryProcessor(object):
         max_supp = 0
         for gp in stories:
             # get support for graph pattern
-            supp = self.library_graph.compute_support_for_facts(gp)
+            supp = self.library_graph.compute_support_for_facts(gp.facts)
             stories_with_supp.append((gp, supp))
             if supp > max_supp:
                 max_supp = supp
@@ -259,7 +259,7 @@ class StoryProcessor(object):
         scored_stories = []
         # select best stories here
         for gp, supp in stories_with_supp:
-            score = self.__score_graph_pattern(gp, supp, entity_ids_detected, predicates_detected, max_supp)
+            score = self.__score_graph_pattern(gp.facts, supp, entity_ids_detected, predicates_detected, max_supp)
             scored_stories.append((gp, score))
 
         # construct possible graph queries
@@ -420,7 +420,14 @@ class StoryProcessor(object):
                 print('Current Stack Size: {}'.format(len(stack_copy)))
                 stack = stack_copy
 
-        return self.__select_k_best_stores(stack, k, qt.entity_ids_detected, qt.predicates_detected), qt
+        # convert stack into graph query
+        graph_queries = []
+        for facts in stack:
+            gq = GraphQuery()
+            for f in facts:
+                gq.add_fact(f[0], f[1], f[2])
+            graph_queries.append(gq)
+        return self.__select_k_best_stores(graph_queries, k, qt.entity_ids_detected, qt.predicates_detected), qt
 
     def query(self, keyword_query, amount_of_stories=5):
         start = time.time()
