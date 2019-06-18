@@ -124,7 +124,7 @@ const createCheckbox = (graph, results, pIdx, targetElement) => {
 };
 
 const createDocumentList = (results, idx) => {
-    let divList = $(`<div class="list-group" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
+    let divList = $(`<div class="list-group list-group-flush" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
     results.forEach(document => {
         divList.append(
             '<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
