@@ -1,3 +1,53 @@
 .margin-top {
     margin-top: 50px;
 }
+
+#query_translation {
+    white-space: pre-wrap;
+}
+
+.graph-pattern {
+    width: 200px;
+    height: 200px;
+    display: block;
+}
+
+/*
+ * Radio
+ * https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons
+ */
+
+[type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+[type=radio] + div {
+    cursor: pointer;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 3px solid #fff;
+
+    -webkit-transition: background-color 0.3s;
+    -moz-transition: background-color 0.3s;
+    -ms-transition: background-color 0.3s;
+    -o-transition: background-color 0.3s;
+    transition: background-color 0.3s;
+}
+
+[type=radio]:hover + div {
+    background: #ebebeb;
+}
+
+[type=radio]:checked + div {
+    border: 3px solid #8EB72B;
+}
+
+.form-check {
+    padding-left: 0;
+    padding-right: 10px;
+    display: inline-block;
+}

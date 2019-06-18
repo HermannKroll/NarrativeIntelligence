@@ -1,3 +1,23 @@
+let CYTOSCAPE_STYLE = [
+    {
+        selector: 'node',
+        style: {
+            'background-color': '#8EB72B',
+            'label': 'data(id)'
+        }
+    },
+    {
+        selector: 'edge',
+        style: {
+            'width': 3,
+            'line-color': '#ccc',
+            'target-arrow-color': '#ccc',
+            'target-arrow-shape': 'triangle',
+            'label': 'data(label)'
+        }
+    }
+]
+
 $(document).ready(function () {
     $("#search_form").submit(search);
 });
@@ -16,46 +36,29 @@ const search = (event) => {
     request.done(function (response) {
         console.log(response);
 
-        let form = $('#div_patterns form');
+        // Clear DIVs
+        let form = $('#graph-patterns');
         form.empty();
-        $('#div_documents > div').empty();
+        let divDocuments = $('#div_documents');
+        divDocuments.empty();
 
+        // Print query translation
         let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
         query_translation.text(query_trans_string);
 
+        // Print patterns and documents
         response["results"].forEach((item, idx) => {
             let graph = item[0];
             let results = item[1];
+            console.log(graph, results);
 
-            // Create graph pattern selection DIV
-            let formDiv = $('<div class="form-check"></div>');
-            let input = $('<input class="form-check-input" type="radio" name="patterns" value="p' + idx + '" id="p' + idx + '">');
-            let label = $('<label class="form-check-label" for="p' + idx + '">');
-            label.append(results.length + ' documents<br/>');
-            graph.forEach(triple => {
-                label.append(triple[0] + ' - ' + triple[1] + ' - ' + triple[2] + '<br/>')
-            });
-            formDiv.append(input);
-            formDiv.append(label);
-            form.append(formDiv);
-            formDiv.on('click', event => {
-                $('#div_documents div.list-group').hide();
-                $('div[data-by=' + event.target.id + ']').show();
-            });
+            // Create graph pattern selection
+            createCheckbox(graph, results, idx, form);
 
             // Create documents DIV
-            let divList = $('<div class="list-group" style="display: none;" data-by="p' + idx + '" id="d' + idx + '"></div>');
-            results.forEach(document => {
-                divList.append(
-                    '<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
-                    'class="list-group-item list-group-item-action" target="_blank">' +
-                    'PMC' + document[0] + '</a>'
-                )
-            });
-            $('#div_documents > div').append(divList);
-
-            console.log(item[0], item[1])
+            let divList = createDocumentList(results, idx);
+            divDocuments.append(divList);
         });
     });
 
@@ -63,3 +66,131 @@ const search = (event) => {
         console.log(result);
     });
 };
+
+const createCheckbox = (graph, results, pIdx, targetElement) => {
+    let graphId = `graph-${pIdx}`;
+
+    let formDiv = $('<div class="form-check"></div>');
+    let input = $(`<input class="form-check-input" type="radio" name="patterns" value="p-${pIdx}" id="p-${pIdx}">`);
+    let label = $(`<label class="form-check-label" for="p-${pIdx}">`);
+    let divGraph = $(`<div id="${graphId}" class="graph-pattern"></div>`);
+
+    //label.append(results.length + ' documents<br/>');
+
+    label.append(input);
+    label.append(divGraph);
+    formDiv.append(label);
+    formDiv.on('click', event => {
+        $('#div_documents div.list-group').hide();
+        $('div[data-by=' + event.target.id + ']').show();
+    });
+    targetElement.append(formDiv);
+
+    // Prepare graph
+    let elements = [];
+    graph.forEach((triple, tripleIdx) => {
+        let s = triple[0];
+        let p = triple[1];
+        let o = triple[2];
+
+        // Add subject
+        if (!elements.includes(s)) {
+            elements.push({
+                data: {id: s}
+            });
+        }
+
+        // Add object
+        if (!elements.includes(o)) {
+            elements.push({
+                data: {id: o}
+            });
+        }
+
+        // Add edge
+        elements.push({
+            data: {id: `triple-${tripleIdx}`, source: s, target: o, label: p}
+        });
+    });
+
+    cytoscape({
+        container: $(`#${graphId}`),
+        elements: elements,
+        style: CYTOSCAPE_STYLE,
+        layout: {
+            name: 'circle'
+        }
+    });
+};
+
+const createDocumentList = (results, idx) => {
+    let divList = $(`<div class="list-group" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
+    results.forEach(document => {
+        divList.append(
+            '<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
+            'class="list-group-item list-group-item-action" target="_blank">' +
+            'PMC' + document[0] + '</a>'
+        )
+    });
+    return divList;
+};
+
+/*
+const createGraph = (graph, patternIdx, targetContainerId) => {
+    let graphId = `graph-${patternIdx}`;
+    let divGraph = $(`<div id="${graphId}" class="graph-pattern"></div>`);
+    $(`#${targetContainerId}`).append(divGraph);
+
+    let elements = [];
+    graph.forEach((triple, tripleIdx) => {
+        let s = triple[0];
+        let p = triple[1];
+        let o = triple[2];
+
+        // Add subject
+        if (!elements.includes(s)) {
+            elements.push({
+                data: {id: s}
+            });
+        }
+
+        // Add object
+        if (!elements.includes(o)) {
+            elements.push({
+                data: {id: o}
+            });
+        }
+
+        // Add edge
+        elements.push({
+            data: {id: `triple-${tripleIdx}`, source: s, target: o}
+        });
+    });
+
+    cytoscape({
+        container: $(`#${graphId}`),
+        elements: elements,
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#8EB72B',
+                    'label': 'data(id)'
+                }
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'triangle',
+                    'label': 'data(id)'
+                }
+            }
+        ],
+        layout: {
+            name: 'circle'
+        }
+    });
+};*/

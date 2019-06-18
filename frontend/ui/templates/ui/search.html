@@ -2,10 +2,8 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/ui.css' %}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}" type="text/css"/>
 {% endblock %}
-
-{# TODO: Implement https://visjs.org/examples/network/basicUsage.html #}
 
 {% block title %}PubMedCentral{% endblock %}
 
@@ -16,7 +14,7 @@
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-row">
-                        <div class="form-group col-md-6">
+                        <div class="form-group">
                             <label for="id_keywords"><strong>Keywords</strong></label>
                             <textarea class="form-control" id="id_keywords" rows="3"
                                       name="keywords">Simvastatin Rhabdomyolysis associated</textarea>
@@ -34,44 +32,31 @@
                     <button type="submit" class="btn btn-primary">Search patterns</button>
                 </form>
             </div>
-        </div>
-
-        <div class="row margin-top" id="div_query_translation">
             <div class="col">
-                <h2>Query Translation</h2>
-                <p id="query_translation"></p>
+                <label for="query_translation"><strong>Query Translation</strong></label>
+                <div id="query_translation">No query translation available.</div>
             </div>
         </div>
 
-        <div class="row margin-top" id="div_patterns">
+        <div class="row margin-top">
             <div class="col">
                 <h2>Graph patterns</h2>
 
-                <form>
-                    {% for pattern in patterns %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="patterns"
-                                   value="{{ forloop.counter }}" id="p{{ forloop.counter }}">
-                            <label class="form-check-label" for="p{{ forloop.counter }}">
-                                {% for s,p,o in pattern %}
-                                    <p>{{ s }} - {{ p }} - {{ o }}</p>
-                                {% endfor %}
-                            </label>
-                        </div>
-                    {% endfor %}
-                </form>
+                <form id="graph-patterns"></form>
             </div>
         </div>
 
-        <div class="row margin-top" id="div_documents">
+        <div class="row margin-top" id="div_wrapper_documents">
             <div class="col-md-6">
                 <h2>Documents</h2>
+
+                <div id="div_documents"></div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row margin-top">
             <div class="col">
-                <h3>Supported predicates</h3>
+                <h2>Supported predicates</h2>
 
                 <table class="table table-sm table-striped">
                     <thead>
@@ -253,6 +238,8 @@
 {% endblock %}
 
 {% block javascript %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.7.2/cytoscape.umd.js"
+            type="text/javascript"></script>
     <script type="text/javascript">
         const search_url = "{% url 'search' %}";
     </script>
