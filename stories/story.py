@@ -457,13 +457,15 @@ class MeshTagger(StoryEntityTagger):
         if descs:
             for d in descs:
                 if d.heading == word:
-                    if d.tree_number.startswith('C'):
-                        return "MESH:{}".format(d.unique_id), 'Disease'
-                    if d.tree_number.startswith('D'):
-                        if d.tree_number.startswith('D08'):
-                            return "MESH:{}".format(d.unique_id), 'Gene'
-                        else:
-                            return "MESH:{}".format(d.unique_id), 'Chemical'
+                    # TODO: fix this
+                    for tn in d.tree_numbers:
+                        if tn.startswith('C'):
+                            return "MESH:{}".format(d.unique_id), 'Disease'
+                        if tn.startswith('D'):
+                            if tn.startswith('D08'):
+                                return "MESH:{}".format(d.unique_id), 'Gene'
+                            else:
+                                return "MESH:{}".format(d.unique_id), 'Chemical'
 
         return None, None
 
