@@ -1,4 +1,5 @@
 import argparse
+import os
 import pickle
 
 from frontend.frontend.settings import base as settings
@@ -13,30 +14,35 @@ def build_index():
 
 
 def mesh_synonyms(tree_number_list, output):
+    def write(filename, lines):
+        with open(filename, "w") as f:
+            for fields in lines:
+                f.write("MESH:{}\t{}\t{}\n".format(*fields))
+
     db = MeSHDB.instance()
     db.load_xml(settings.DESCRIPTOR_FILE, verbose=True)
 
-    descs = set()
+    descendants_by_desc = dict()
     for tree_number in tree_number_list:
         print("Querying descriptors for {}".format(tree_number))
-        descs |= set(db.descs_under_tree_number(tree_number))
-        descs.add(db.desc_by_tree_number(tree_number))
-    print("Found {} descriptors".format(len(descs)))
+        desc = db.desc_by_tree_number(tree_number)
+        descendants_by_desc[desc] = [desc] + db.descs_under_tree_number(tree_number)
 
     print("Collecting data ...")
-    data = sorted((desc.unique_id, desc.heading, ", ".join(t.string for t in desc.terms)) for desc in descs)
+    lines_by_desc = dict()
+    for desc, descendants in descendants_by_desc.items():
+        lines_by_desc[desc] = [(d.unique_id, d.heading, ", ".join(t.string for t in d.terms)) for d in descendants]
 
-    with open(output, "w") as f:
-        for line in data:
-            f.write("MESH:{}\t{}\t{}\n".format(*line))
-    print("Done.")
+    print("Writing output ...")
+    for desc, lines in lines_by_desc.items():
+        write(os.path.join(output, "Descriptors_{}.tsv".format(desc.heading.replace(" ", "_"))), lines)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--build-index", action="store_true")
     parser.add_argument("--mesh-synonyms", nargs="+", metavar="TREE_NUMBER")
-    parser.add_argument("-o", metavar="OUT")
+    parser.add_argument("-o", metavar="OUT_DIR", default=os.path.dirname(os.path.abspath(__file__)))
     args = parser.parse_args()
 
     if args.build_index:
