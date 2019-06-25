@@ -2,6 +2,7 @@
 XML Documentation: https://www.nlm.nih.gov/mesh/xml_data_elements.html
 """
 import itertools
+import sys
 import warnings
 from datetime import datetime
 
@@ -62,16 +63,28 @@ class MeSHDB:
             print("XML loaded in {}".format(end - start))
         if prefetch_all:
             start = datetime.now()
-            self.prefetch_all()
+            self.prefetch_all(verbose)
             end = datetime.now()
             if verbose:
                 print("All descriptors loaded in {}".format(end - start))
 
-    def prefetch_all(self):
+    def prefetch_all(self, verbose=False):
         records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
-        for record in records:
+        total = len(records)
+        last = 0
+        if verbose:
+            sys.stdout.write("Indexing ...")
+            sys.stdout.flush()
+        for idx, record in enumerate(records):
             desc = Descriptor.from_element(record)
             self.add_desc(desc)
+            if verbose and int((idx + 1.0) / total * 100.0) > last:
+                last = int((idx + 1.0) / total * 100.0)
+                sys.stdout.write("\rIndexing ... {} %".format(last))
+                sys.stdout.flush()
+        if verbose:
+            sys.stdout.write("\rIndexing ... done")
+            sys.stdout.flush()
 
     def add_desc(self, desc_obj):
         """

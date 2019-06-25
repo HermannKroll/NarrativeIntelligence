@@ -109,3 +109,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 DATA_DIR = os.path.join(BASE_DIR, "../data")
+LIBRARY_GRAPH_FILE =os.path.join(DATA_DIR, 'lg_pmc_sim_ami_108.tsv')
+DESCRIPTOR_FILE =os.path.join(DATA_DIR, 'desc2019.xml')
