@@ -137,14 +137,18 @@ const createCheckbox = (graph, results, pIdx, targetElement) => {
         });
     });
 
-    cytoscape({
-        container: $(`#${graphId}`),
-        elements: elements,
-        style: CYTOSCAPE_STYLE,
-        layout: {
-            name: 'circle'
-        }
-    });
+    if (graph.length > 0) {
+        cytoscape({
+            container: $(`#${graphId}`),
+            elements: elements,
+            style: CYTOSCAPE_STYLE,
+            layout: {
+                name: 'circle'
+            }
+        });
+    } else {
+        divGraph.append("<p><span>Pattern</span><span>not available</span></p>")
+    }
 };
 
 const createDocumentList = (results, idx) => {

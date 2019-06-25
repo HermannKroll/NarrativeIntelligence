@@ -12,6 +12,22 @@
     display: block;
 }
 
+.graph-pattern p {
+    text-align: center;
+    text-transform: uppercase;
+    color: #4f4f4f;
+}
+
+.graph-pattern p span {
+    font-size: 1.1rem;
+    display: block;
+}
+
+.graph-pattern p span:first-child {
+    font-size: 2.0rem;
+    margin-top: 62px;
+}
+
 /*
  * Radio
  * https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons

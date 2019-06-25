@@ -44,6 +44,17 @@ class MeSHDB:
             MeSHDB()
         return MeSHDB.__instance
 
+    def get_index(self):
+        return dict(
+            _desc_by_id=self._desc_by_id,
+            _desc_by_tree_number=self._desc_by_tree_number,
+            _desc_by_name=self._desc_by_name,
+        )
+
+    def set_index(self, index):
+        for key, value in index.items():
+            setattr(self, key, value)
+
     def __init__(self):
         self.tree = None
         self._desc_by_id = dict()
@@ -83,7 +94,7 @@ class MeSHDB:
                 sys.stdout.write("\rIndexing ... {} %".format(last))
                 sys.stdout.flush()
         if verbose:
-            sys.stdout.write("\rIndexing ... done")
+            sys.stdout.write("\rIndexing ... done\n")
             sys.stdout.flush()
 
     def add_desc(self, desc_obj):
