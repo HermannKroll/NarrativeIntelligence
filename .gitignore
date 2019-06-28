@@ -115,3 +115,6 @@ data/
 # macOS
 .DS_Store
 ._.DS_Store
+utils/Descriptors_Dosage_Forms.tsv
+utils/Descriptors_Drug_Delivery_Systems.tsv
+utils/Descriptors_Nanoparticles.tsv
