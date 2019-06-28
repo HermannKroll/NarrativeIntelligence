@@ -1,7 +1,7 @@
-import copy
+import hashlib
+
 
 class LabeledNode(object):
-
     def __init__(self, label):
         self.__edges_out = []
         self.__edges_in = []
@@ -27,7 +27,6 @@ class LabeledNode(object):
 
 
 class LabeledEdge(object):
-
     def __init__(self, label, node1, node2):
         self.__label = label
         self.__node1 = node1
@@ -47,7 +46,6 @@ class LabeledEdge(object):
 
 
 class LabeledGraph(object):
-
     def __init__(self):
         self.nodes = {}
         self.edges = []
@@ -186,109 +184,121 @@ class LabeledGraph(object):
     def __str__(self):
         return ''.join([str(e) + '\n' for e in self.edges])
 
-class GraphTools(object):
+    def save_to_dot(self, filename):
+        def get_node_id(node_obj):
+            return "n{}".format(hashlib.sha1(node_obj.get_label().encode("UTF-8")).hexdigest()[:10])
 
-    @staticmethod
-    def find_largest_common_subgraphdfdg(node1, node2):
-        g1Node2EdgesInc = {}
-        g1Node2EdgesOut = {}
-        g2Node2EdgesIn = {}
-        g2Node2EdgesOut = {}
+        with open(filename, "w") as f:
+            f.write("digraph g {\n")
 
+            for label, node in self.nodes.items():
+                f.write("    {} [label=\"{}\"];\n".format(get_node_id(node), label))
 
+            for edge in self.edges:
+                f.write("    {} -> {} [label=\"{}\"];\n".format(
+                    get_node_id(edge.get_node1()), get_node_id(edge.get_node2()), edge.get_label()))
 
-    @staticmethod
-    def find_largest_common_subgraph(node1, node2):
-        todo = [(node1, node2, LabeledGraph(), set())]
-        subgraph_candidates = []
+            f.write("}\n")
 
-        # while pairs to check in list
-        while todo:
-            n1, n2, subg, visited = todo.pop()
-            changed = False
-
-            branch_later = []
-            # check all outgoing and all incoming edges
-            edges_to_check = [(n1.get_edges_outgoing(), n2.get_edges_outgoing()), (n1.get_edges_incoming(), n2.get_edges_incoming())]
-            # check if their are more pairs in neighbourhood
-            for mode, edge_list_pair in enumerate(edges_to_check):
-                for i, e1 in enumerate(edge_list_pair[0]):
-                    cands_for_e1 = []
-                    for j, e2 in enumerate(edge_list_pair[1]):
-                        # skip already visited combis
-                        key = frozenset((e1, e2))
-                        if key in visited:
-                            continue
-
-                        # it's symmetric - just check once
-                        if i > j:
-                            continue
-                        # edge labels are similar?
-                        if e1.get_label() == e2.get_label():
-                            # outgoing edges
-                            if mode == 0:
-                                cands_for_e1.append((e1.get_node2(), e2.get_node2(), key))
-                            # incoming edges
-                            else:
-                                cands_for_e1.append((e1.get_node1(), e2.get_node1(), key))
-
-                    # check all candidates for e1
-                    for n1_next, n2_next, key in cands_for_e1:
-                        if mode == 0:
-                            new_n1_label = n1.get_label() + '|' + n2.get_label()
-                            new_n2_label = n1_next.get_label() + '|' + n2_next.get_label()
-                        else:
-                            new_n2_label = n1.get_label() + '|' + n2.get_label()
-                            new_n1_label = n1_next.get_label() + '|' + n2_next.get_label()
-                        # add it as an edge to our graph
-                        # easy? only one candidate? No branching!
-                        if len(cands_for_e1) == 1:
-                            visited.add(key)
-                            subg.add_edge(e1.get_label(), new_n1_label, new_n2_label)
-                            todo.append((n1_next, n2_next, subg, visited))
-                            changed = True
-                        else:
-                            branch_later.append((e1, n1_next, new_n1_label, n2_next, new_n2_label, key))
-
-            # check in next run
-            for e1, n1_next, new_n2_label, n2_next, new_n2_label, key in branch_later:
-                # we have to check multiple combinations and have to branch here
-                copy_subg = copy.deepcopy(subg)
-                visited_c = copy.deepcopy(visited)
-                visited_c.add(key)
-                copy_subg.add_edge(e1.get_label(), new_n1_label, new_n2_label)
-                todo.append((n1, n2, copy_subg, visited_c))
-                changed = True
-
-            if not changed:
-                subgraph_candidates.append(subg)
-
-        max_sub = None
-        max_sub_len = -1
-        for current_sub in subgraph_candidates:
-            current_len = len(current_sub)
-            if current_len > max_sub_len:
-                max_sub_len = current_len
-                max_sub = current_sub
-
-        return max_sub
-
-
-
-    @staticmethod
-    def find_largest_common_subgraphsdfasf(graph1, graph2):
-        max_sub = None
-        max_sub_len = -1
-        for i, n1 in enumerate(graph1.nodes.values()):
-            for j, n2 in enumerate(graph2.nodes.values()):
-                # the problem is symmetric - just check the half matrix
-                if i > j:
-                    continue
-
-                for current_sub in GraphTools.find_common_subgraph(n1, n2):
-                    current_len = len(current_sub)
-                    if current_len > max_sub_len:
-                        max_sub_len = current_len
-                        max_sub = current_sub
-
-        return max_sub
+# class GraphTools(object):
+#     @staticmethod
+#     def find_largest_common_subgraphdfdg(node1, node2):
+#         g1Node2EdgesInc = {}
+#         g1Node2EdgesOut = {}
+#         g2Node2EdgesIn = {}
+#         g2Node2EdgesOut = {}
+#
+#     @staticmethod
+#     def find_largest_common_subgraph(node1, node2):
+#         todo = [(node1, node2, LabeledGraph(), set())]
+#         subgraph_candidates = []
+#
+#         # while pairs to check in list
+#         while todo:
+#             n1, n2, subg, visited = todo.pop()
+#             changed = False
+#
+#             branch_later = []
+#             # check all outgoing and all incoming edges
+#             edges_to_check = [(n1.get_edges_outgoing(), n2.get_edges_outgoing()),
+#                               (n1.get_edges_incoming(), n2.get_edges_incoming())]
+#             # check if their are more pairs in neighbourhood
+#             for mode, edge_list_pair in enumerate(edges_to_check):
+#                 for i, e1 in enumerate(edge_list_pair[0]):
+#                     cands_for_e1 = []
+#                     for j, e2 in enumerate(edge_list_pair[1]):
+#                         # skip already visited combis
+#                         key = frozenset((e1, e2))
+#                         if key in visited:
+#                             continue
+#
+#                         # it's symmetric - just check once
+#                         if i > j:
+#                             continue
+#                         # edge labels are similar?
+#                         if e1.get_label() == e2.get_label():
+#                             # outgoing edges
+#                             if mode == 0:
+#                                 cands_for_e1.append((e1.get_node2(), e2.get_node2(), key))
+#                             # incoming edges
+#                             else:
+#                                 cands_for_e1.append((e1.get_node1(), e2.get_node1(), key))
+#
+#                     # check all candidates for e1
+#                     for n1_next, n2_next, key in cands_for_e1:
+#                         if mode == 0:
+#                             new_n1_label = n1.get_label() + '|' + n2.get_label()
+#                             new_n2_label = n1_next.get_label() + '|' + n2_next.get_label()
+#                         else:
+#                             new_n2_label = n1.get_label() + '|' + n2.get_label()
+#                             new_n1_label = n1_next.get_label() + '|' + n2_next.get_label()
+#                         # add it as an edge to our graph
+#                         # easy? only one candidate? No branching!
+#                         if len(cands_for_e1) == 1:
+#                             visited.add(key)
+#                             subg.add_edge(e1.get_label(), new_n1_label, new_n2_label)
+#                             todo.append((n1_next, n2_next, subg, visited))
+#                             changed = True
+#                         else:
+#                             branch_later.append((e1, n1_next, new_n1_label, n2_next, new_n2_label, key))
+#
+#             # check in next run
+#             for e1, n1_next, new_n2_label, n2_next, new_n2_label, key in branch_later:
+#                 # we have to check multiple combinations and have to branch here
+#                 copy_subg = copy.deepcopy(subg)
+#                 visited_c = copy.deepcopy(visited)
+#                 visited_c.add(key)
+#                 copy_subg.add_edge(e1.get_label(), new_n1_label, new_n2_label)
+#                 todo.append((n1, n2, copy_subg, visited_c))
+#                 changed = True
+#
+#             if not changed:
+#                 subgraph_candidates.append(subg)
+#
+#         max_sub = None
+#         max_sub_len = -1
+#         for current_sub in subgraph_candidates:
+#             current_len = len(current_sub)
+#             if current_len > max_sub_len:
+#                 max_sub_len = current_len
+#                 max_sub = current_sub
+#
+#         return max_sub
+#
+#     @staticmethod
+#     def find_largest_common_subgraphsdfasf(graph1, graph2):
+#         max_sub = None
+#         max_sub_len = -1
+#         for i, n1 in enumerate(graph1.nodes.values()):
+#             for j, n2 in enumerate(graph2.nodes.values()):
+#                 # the problem is symmetric - just check the half matrix
+#                 if i > j:
+#                     continue
+#
+#                 for current_sub in GraphTools.find_common_subgraph(n1, n2):
+#                     current_len = len(current_sub)
+#                     if current_len > max_sub_len:
+#                         max_sub_len = current_len
+#                         max_sub = current_sub
+#
+#         return max_sub

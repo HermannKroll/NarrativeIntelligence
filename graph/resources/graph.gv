@@ -1,0 +1,9 @@
+digraph g {
+    n86f7e437fa [label="a"];
+    ne9d71f5ee7 [label="b"];
+    n84a516841b [label="c"];
+    n3c363836cf [label="d"];
+    n86f7e437fa -> ne9d71f5ee7 [label="l1"];
+    ne9d71f5ee7 -> n84a516841b [label="l2"];
+    ne9d71f5ee7 -> n3c363836cf [label="l3"];
+}
