@@ -1,3 +1,4 @@
 lxml==4.3.3
 Django==2.2.1
 gunicorn==19.9.0
+stanfordnlp==0.2.0
