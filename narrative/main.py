@@ -1,13 +1,41 @@
 """
-Task: Extract subject-predicate and predicate-object pairs from documents
+Task: Extract subject-predicate, predicate-object, s-p-o pairs from documents
 
 https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
 
-Workflow:
-For each document, select the sentences which contain at least one entity.
+----------------------------------------
+INPUT: Text file in PubTator format with tagged documents
+OUTPUT: subject-predicate, predicate-object, subject-predicate-object with MESH terms and predicates
+
+SENT_BY_DOC = {}
+SENT_BY_ID = {}
+PAIRS_BY_SENT = {}
+
+FOR EACH document d
+    Split d into sentences S(d)
+    Parse dependencies for each S(d)
+    Assign an ID to each sent in S(d): id: S(d) -> N
+
+    SENT_BY_ID[id(sent)] = sent
+    SENT_BY_DOC[d] = id(S(d))
+
+    Collect pairs P(sent) = (s,p), (p,o), (s,p,o) from each sent in S(d)
+        Use only pairs if s and o are in MESH
+        Use only lemmatized predicates p
+        TODO: Find synonyms of predicates p
+    PAIRS_BY_SENT[id(sent)] = P(sent)
+
+// Create index
+Store all predicates in a file: predicates.txt
+Store all pairs in three files: sp.txt, po.txt, spo.txt
+    Format: DOC_ID PREDICATE MESH [MESH]
+DONE.
+----------------------------------------
+
 For the set of sentences, build the NLP dependency tree.
 Use lemmatization to build a set of synonyms for the predicates (e.g., is metabolized, metabolizes, ...)
 """
+import argparse
 import os
 from datetime import datetime
 
@@ -19,6 +47,13 @@ NLP_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/sta
 DEP_REL_OBJ = ["comp", "acomp", "ccomp", "xcomp", "obj", "dobj", "iobj", "pobj", "obl"]
 DEP_REL_SUBJ = ["nsubj", "subj", "csubj", "nsubj:pass"]
 CORPUS_DOCUMENT = "corpus.txt"
+DEFAULT_OUT = "out"
+
+SP_BY_SENT = dict()
+PO_BY_SENT = dict()
+SPO_BY_SENT = dict()
+SENT_BY_ID = dict()
+DOC_BY_ID = dict()
 
 
 def get_root_word(sentence):
@@ -59,114 +94,128 @@ def parse_sentence(sentence):
     obj = get_word_with_relation(sentence, DEP_REL_OBJ)
     subj = get_word_with_relation(sentence, DEP_REL_SUBJ)
     root = get_root_word(sentence)
-    result = [None, None, None]
+    result = dict(sp=None, po=None, spo=None)
     if subj:
         related_subj = get_related_words(sentence, subj)
-        result[0] = (related_subj, root)
+        result["sp"] = (related_subj, root)
     if obj:
         related_obj = get_related_words(sentence, obj)
-        result[1] = (root, related_obj)
+        result["po"] = (root, related_obj)
     if obj and subj:
-        result[2] = (related_subj, root, related_obj)
-    return tuple(result)
+        result["spo"] = (related_subj, root, related_obj)
+    return result
 
 
 def process_document(pipeline, document):
-    # Create initial results consisting of tuples ( (s,p), (p,o), (s,p,o) )
     nlp_doc = pipeline(document.content)
-    results = []
-    for sentence in nlp_doc.sentences:
-        result = parse_sentence(sentence)
-        if result:
-            results.append(result)
 
-    # Add mesh terms
-    for idx, result in enumerate(results):
-        sp = result[0]
-        po = result[1]
-        spo = result[2]
-        s_ent = None
-        o_ent = None
+    document.sentences = nlp_doc.sentences
+    for sent in nlp_doc.sentences:
+        SENT_BY_ID[id(sent)] = sent
+        result = parse_sentence(sent)
 
-        if sp:  # S-O
-            s_phrase = get_str_from_related_words(sp[0])
-            s_ent = next((t.mesh for t in document.tags if t.text in s_phrase), None)
-        if po:  # P-O
-            o_phrase = get_str_from_related_words(po[1])
-            o_ent = next((t.mesh for t in document.tags if t.text in o_phrase), None)
-        results[idx] = (sp, po, spo, s_ent, o_ent)
-    return results
+        if result["sp"]:
+            SP_BY_SENT[id(sent)] = result["sp"]
+        if result["po"]:
+            PO_BY_SENT[id(sent)] = result["po"]
+        if result["spo"]:
+            SPO_BY_SENT[id(sent)] = result["spo"]
 
 
-def write_output(result_dict):
-    f_sp = open("sp.txt", "w")
-    f_po = open("po.txt", "w")
-    f_spo = open("spo.txt", "w")
-    for document, results in result_dict.items():
-        for idx, result in enumerate(results):
-            if result[3]:
-                output_sp = get_str_from_related_words(result[0][0]) + ", " + result[0][1].text
-                f_sp.write("{}\t{}\t{}\t{}\n".format(document.id, idx, result[3], output_sp))
+def write_output(out_dir):
+    """
+    Write output to out_dir.
+    File structure:
+    - Document ID
+    - Lemmatized predicate
+    - Subject/object (single or pair)
+    - Text
+    """
+    f_sp = open(os.path.join(out_dir, "sp.txt"), "w")
+    f_po = open(os.path.join(out_dir, "po.txt"), "w")
+    f_spo = open(os.path.join(out_dir, "spo.txt"), "w")
 
-            if result[4]:
-                output_po = result[1][0].text + ", " + get_str_from_related_words(result[1][1])
-                f_po.write("{}\t{}\t{}\t{}\n".format(document.id, idx, result[4], output_po))
+    for doc_id, doc in DOC_BY_ID.items():
+        for sent in doc.sentences:
+            sent_id = id(sent)
+            s_ent = None
+            s_phrase = None
+            o_ent = None
+            o_phrase = None
 
-            if result[3] and result[4]:
-                output_spo = get_str_from_related_words(result[2][0]) + ", " + result[2][
-                    1].text + ", " + get_str_from_related_words(result[2][2])
-                f_spo.write("{}\t{}\t({}, {}, {})\t({})\n".format(document.id, idx, result[3], result[2][
-                    1].lemma, result[4], output_spo))
+            if sent_id in SP_BY_SENT:
+                s_phrase = get_str_from_related_words(SP_BY_SENT[sent_id][0])
+                s_ent = next((t.mesh for t in doc.tags if t.text in s_phrase), None)
+
+            if sent_id in PO_BY_SENT:
+                o_phrase = get_str_from_related_words(PO_BY_SENT[sent_id][1])
+                o_ent = next((t.mesh for t in doc.tags if t.text in o_phrase), None)
+
+            if s_ent and s_ent != -1:
+                output_sp = s_phrase + ", " + SP_BY_SENT[sent_id][1].text
+                f_sp.write("{}\t{}\t{}\t{}\n".format(doc_id, SP_BY_SENT[sent_id][1].lemma, s_ent, output_sp))
+
+            if o_ent and o_ent != -1:
+                output_po = PO_BY_SENT[sent_id][0].text + ", " + o_phrase
+                f_po.write("{}\t{}\t{}\t{}\n".format(doc_id, PO_BY_SENT[sent_id][0].lemma, o_ent, output_po))
+
+            if s_ent and o_ent and s_ent != -1 and o_ent != -1:
+                output_spo = s_phrase + ", " + SPO_BY_SENT[sent_id][1].text + ", " + o_phrase
+                f_spo.write("{}\t{}\t{}\t{}\t({})\n".format(
+                    doc_id, SPO_BY_SENT[sent_id][1].lemma, s_ent, o_ent, output_spo))
+
     f_sp.close()
     f_po.close()
     f_spo.close()
 
 
 def main():
+    global DOC_BY_ID
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", default=CORPUS_DOCUMENT, help="Input file (default: {})".format(CORPUS_DOCUMENT))
+    parser.add_argument("--out", default=DEFAULT_OUT, help="Directory for output (default: {})".format(DEFAULT_OUT))
+    args = parser.parse_args()
+
+    if not os.path.exists(args.out):
+        os.mkdir(args.out)
+
     start_global = datetime.now()
     start = datetime.now()
     print("Loading Stanford NLP ...")
     nlp = stanfordnlp.Pipeline(models_dir=NLP_DATA)
-    # sent1 = "The need for a large-scale trial of fibrate therapy in diabetes: the rationale and design of the Fenofibrate Intervention and Event Lowering in Diabetes (FIELD) study. [ISRCTN64783481]"
-    # sent2 = "Fibrates correct the typical lipid abnormalities of type 2 diabetes mellitus, yet no study, to date, has specifically set out to evaluate the role of fibrate therapy in preventing cardiovascular events in this setting. Subjects with type 2 diabetes, aged 50–75 years, were screened for eligibility to participate in a long-term trial of comicronized fenofibrate 200 mg daily compared with matching placebo to assess benefits of treatment on the occurrence of coronary and other vascular events."
-    # sent3 = "Barack Obama modifies three apples while eating a pear and laughing with Biden."
-    # sent4 = "Simvastatin is metabolized by CYP3A4."
-    # doc = nlp(sent4)
-    # for sentence in doc.sentences:
-    #    parse_sentence(sentence)
     end = datetime.now()
     print("Done in {}".format(end - start))
 
     # Prepare documents
     print("Loading documents ...")
     start = datetime.now()
-    with open(CORPUS_DOCUMENT) as f:
+    with open(args.input) as f:
         content = f.read()
     docs = content.split("\n\n")
-    docs = [TaggedDocument(doc) for doc in docs]
+    docs = [TaggedDocument(doc) for doc in docs if doc]
+    docs = docs[:2]  # TODO: Remove for production
+    DOC_BY_ID = {doc.id: doc for doc in docs}
     end = datetime.now()
     print("Done in {}".format(end - start))
 
     print("Processing ...")
     start = datetime.now()
-    result_dict = dict()
-    docs_to_process = docs[0:3]
-    for idx, doc in enumerate(docs_to_process):
-        print("Processing document {}/{}: {}".format(idx + 1, len(docs_to_process), doc))
-        results = process_document(nlp, doc)
-        result_dict[doc] = results
+    for idx, (doc_id, doc) in enumerate(DOC_BY_ID.items()):
+        print("Processing document {}/{}: {}".format(idx + 1, len(docs), doc))
+        process_document(nlp, doc)
     end = datetime.now()
     print("Done in {}".format(end - start))
 
     print("Writing output ...")
     start = datetime.now()
-    write_output(result_dict)
+    write_output(args.out)
     end = datetime.now()
     print("Done in {}".format(end - start))
     print("Completely done in {}".format(end - start_global))
 
-    # Evaluation
-    # print(evaluate_tagged_sentence_ratio(docs))
+
+# Evaluation
+# print(evaluate_tagged_sentence_ratio(docs))
 
 
 if __name__ == "__main__":

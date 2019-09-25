@@ -26,6 +26,7 @@ class TaggedDocument:
         self.content = self.title + self.abstract
         self.tags = [TaggedEntity(t) for t in self.REGEX_TAGS.findall(pubtator_content)]
         self.entities = {t.text for t in self.tags}
+        self.sentences = []
 
     def __str__(self):
         return "<Document {} {}>".format(self.id, self.title)
