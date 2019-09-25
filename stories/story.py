@@ -260,6 +260,9 @@ class StoryProcessor(object):
         # select best stories here
         for gp, supp in stories_with_supp:
             score = self.__score_graph_pattern(gp.facts, supp, entity_ids_detected, predicates_detected, max_supp)
+            # skip stories with no support
+            if score < 0.01:
+                continue
             scored_stories.append((gp, score))
 
         # construct possible graph queries
