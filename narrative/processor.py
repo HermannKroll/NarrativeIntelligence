@@ -93,7 +93,33 @@ class QueryProcessor:
                     var_assignment[v_name] = var_assignment[v_name].intersection(v_candidates)
             else:
                 # Two variables
-                raise NotImplementedError("Narrative with two variables is not implemented.")
+                v1_name, v1_type = fact.vars[0]
+                v2_name, v2_type = fact.vars[1]
+                sents_with_pred = {sid for sid, sent in document.sentence_by_id.items() if
+                                   fact.p.lower() in sent.text.lower()}
+                v1_candidates = set()
+                v2_candidates = set()
+                for sid in sents_with_pred:
+                    if sid in document.entities_by_sentence:
+                        v1_cand_sent = set()
+                        v2_cand_sent = set()
+                        for ent in document.entities_by_sentence[sid]:
+                            if ent.type == v1_type:
+                                v1_cand_sent.add(ent.text.lower())
+                            if ent.type == v2_type:
+                                v2_cand_sent.add(ent.text.lower())
+                        if v1_cand_sent and v2_cand_sent:
+                            sents.add(sid)
+                            v1_candidates.union(v1_cand_sent)
+                            v2_candidates.union(v2_cand_sent)
+                if v1_name not in var_assignment:
+                    var_assignment[v1_name] = v1_candidates
+                else:
+                    var_assignment[v1_name] = var_assignment[v1_name].intersection(v1_candidates)
+                if v2_name not in var_assignment:
+                    var_assignment[v2_name] = v2_candidates
+                else:
+                    var_assignment[v2_name] = var_assignment[v2_name].intersection(v2_candidates)
             fact_match[fact] = sents
 
         for event in self._query.events:
@@ -130,10 +156,13 @@ class QueryProcessor:
         has_result = are_events_matching and are_facts_matching
         if has_result:
             variables = var_assignment.keys()
-            assignments = [var_assignment[v] for v in variables]
-            cart_prod = itertools.product(*assignments)
-            for prod in cart_prod:
-                result.append({v: prod[idx] for idx, v in enumerate(variables)})
+            if variables:
+                assignments = [var_assignment[v] for v in variables]
+                cart_prod = itertools.product(*assignments)
+                for prod in cart_prod:
+                    result.append({v: prod[idx] for idx, v in enumerate(variables)})
+            else:
+                result.append({})
 
         return result if has_result else None
 
