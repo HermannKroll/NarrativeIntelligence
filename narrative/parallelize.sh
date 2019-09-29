@@ -16,6 +16,6 @@ do
   echo "Starting $f ..."
   NAME=$(basename ${f})
   NAME=${NAME%.txt}
-  echo "screen -dmS ${NAME} bash -c \"python3 main.py --out ${DATA}/out/${NAME} ${f} 2>&1 | tee -a ${DATA}/logs/${NAME}.log\""
-  screen -dmS ${NAME} bash -c "python3 main.py --out ${DATA}/out/${NAME} ${f} 2>&1 | tee -a ${DATA}/logs/${NAME}.log"
+  echo "screen -dmS ${NAME} bash -c \"python3 nlp.py --out ${DATA}/out/${NAME} ${f} 2>&1 | tee -a ${DATA}/logs/${NAME}.log\""
+  screen -dmS ${NAME} bash -c "python3 nlp.py --out ${DATA}/out/${NAME} ${f} 2>&1 | tee -a ${DATA}/logs/${NAME}.log"
 done
