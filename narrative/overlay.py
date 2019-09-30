@@ -84,6 +84,9 @@ class Narrative:
     def add_fact(self, fact):
         self.facts.append(fact)
 
+    def add_event(self, evt):
+        self.events.append(evt)
+
     def add_transition(self, head, transition, tail):
         self.transitions.append((head, transition, tail))
         if isinstance(head, Substory):
@@ -103,6 +106,8 @@ class Narrative:
             result = result.union(set(t[2].vars))
         for f in self.facts:
             result = result.union(set(f.vars))
+        for e in self.events:
+            result = result.union(set(e.vars))
         return result
 
     @property
@@ -113,4 +118,6 @@ class Narrative:
             result = result.union(set(t[2].bounds))
         for f in self.facts:
             result = result.union(set(f.bounds))
+        for e in self.events:
+            result = result.union(set(e.bounds))
         return result

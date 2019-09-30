@@ -1,4 +1,5 @@
 import itertools
+import re
 from datetime import datetime
 from typing import List
 
@@ -72,14 +73,14 @@ class QueryProcessor:
                 mesh_o = document.mesh_by_entity_name[fact.o.lower()]
                 sents_with_ent = document.sentences_by_mesh[mesh_s].intersection(document.sentences_by_mesh[mesh_o])
                 sents = {s for s in sents_with_ent if
-                         fact.p.lower() in document.sentence_by_id[s].text.lower()}
+                         re.search(fact.p.lower(), document.sentence_by_id[s].text.lower())}
             elif len(fact.bounds) == 1:
                 # One variable
                 mesh = document.mesh_by_entity_name[fact.bounds[0][0].lower()]
                 v_name, v_type = fact.vars[0]
                 sents_with_ent = document.sentences_by_mesh[mesh]
                 sents_with_pred = {s for s in sents_with_ent if
-                                   fact.p.lower() in document.sentence_by_id[s].text.lower()}
+                                   re.search(fact.p.lower(), document.sentence_by_id[s].text.lower())}
                 v_candidates = set()
                 for sid in sents_with_pred:
                     for ent in document.entities_by_sentence[sid]:
@@ -96,7 +97,7 @@ class QueryProcessor:
                 v1_name, v1_type = fact.vars[0]
                 v2_name, v2_type = fact.vars[1]
                 sents_with_pred = {sid for sid, sent in document.sentence_by_id.items() if
-                                   fact.p.lower() in sent.text.lower()}
+                                   re.search(fact.p.lower(), sent.text.lower())}
                 v1_candidates = set()
                 v2_candidates = set()
                 for sid in sents_with_pred:
@@ -129,12 +130,12 @@ class QueryProcessor:
                 mesh = document.mesh_by_entity_name[event.entity.lower()]
                 sents_with_ent = document.sentences_by_mesh[mesh]
                 sents = {s for s in sents_with_ent if
-                         event.label.lower() in document.sentence_by_id[s].text.lower()}
+                         re.search(event.label.lower(), document.sentence_by_id[s].text.lower())}
             else:
                 # One variable
                 v_name, v_type = event.vars[0]
                 sents_with_pred = {sid for sid, sent in document.sentence_by_id.items() if
-                                   event.label.lower() in sent.text.lower()}
+                                   re.search(event.label.lower(), sent.text.lower())}
                 v_candidates = set()
                 for sid in sents_with_pred:
                     if sid in document.entities_by_sentence:

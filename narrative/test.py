@@ -63,19 +63,28 @@ def main():
 
     # Create Narrative _query
     fp1 = FactPattern("CYP3A4", "metaboli", "Simvastatin", "Gene", "Chemical")
-    fp2 = FactPattern("Erythromycin", "inhibit", "CYP3A4", "Chemical", "Gene")
-    ss = Substory(fp1, fp2)
-    e1 = Event("accumulat", "Simvastatin", "Chemical")
-    # e2 = Event("increas", "?x", "Disease")
-    query = Narrative(
-        (ss, "leads_to", e1),
-        #   (e1, "leads_to", e2),
+    fp2_ami = FactPattern("Amiodarone", "inhibit", "CYP3A4", "Chemical", "Gene")
+    fp2_ery = FactPattern("Erythromycin", "inhibit", "CYP3A4", "Chemical", "Gene")
+    ss_ery = Substory(fp1, fp2_ery)
+    ss_ami = Substory(fp1, fp2_ami)
+    e1 = Event(r"(accum)|(increas.*level)|(level.*increas)", "Simvastatin", "Chemical")
+    e2 = Event("(increas.*risk)|(risk.*increas)", "?x", "Disease")
+    q_ami = Narrative(
+        (ss_ami, "leads_to", e1),
+        (e1, "leads_to", e2),
+    )
+    q_ery = Narrative(
+        (ss_ery, "leads_to", e1),
+        (e1, "leads_to", e2),
     )
 
     # Match
-    print("Matching documents ...")
     qp = QueryProcessor(*docs)
-    qp.query(query)
+    print("Matching documents Amiodarone")
+    qp.query(q_ami)
+    qp.print_result()
+    print("Matching documents Erythromycin")
+    qp.query(q_ery)
     qp.print_result()
 
 
