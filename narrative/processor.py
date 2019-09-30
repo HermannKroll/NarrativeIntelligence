@@ -182,7 +182,7 @@ class QueryProcessor:
             output += row_format.format(idx + 1, doc.id, *assignments)
         output += "-" * (len(variables) + 2) * 15 + "\n"
         # Meta
-        output += "Number of documents: {}\n".format(len(self._result))
+        output += "Number of documents: {}\n".format(len(self._match_by_doc.keys()))
         output += "Execution time (total): {}\n".format(self.exec_time_total)
         output += "Execution time (per document): {}".format(self.exec_time_per_document)
         return output
@@ -208,7 +208,7 @@ class QueryProcessor:
                 output += row_format.format("", str(evt), "")
                 for m in evt_matches:
                     output += row_format.format("", "", doc.sentence_by_id[m].text)
-            output += "-" * 3 * 15
+            output += "-" * 3 * 15 + "\n"
         return output
 
     def print_debug(self, filename="debug.log"):
