@@ -14,6 +14,7 @@ class QueryProcessor:
         self._result = []
         self._start = None
         self._end = None
+        self._match_by_doc = dict()
 
     @property
     def exec_time_total(self):
@@ -41,6 +42,7 @@ class QueryProcessor:
         return [doc for doc in self.documents if self._is_document_candidate(doc)]
 
     def query(self, narrative: Narrative):
+        self._match_by_doc = dict()
         self._start = datetime.now()
         self._query = narrative
         pruned_docs = self.prune_documents()
@@ -164,6 +166,7 @@ class QueryProcessor:
                     result.append({v: prod[idx] for idx, v in enumerate(variables)})
             else:
                 result.append({})
+            self._match_by_doc[document] = [fact_match, event_match]
 
         return result if has_result else None
 
@@ -179,12 +182,37 @@ class QueryProcessor:
             output += row_format.format(idx + 1, doc.id, *assignments)
         output += "-" * (len(variables) + 2) * 15 + "\n"
         # Meta
+        output += "Number of documents: {}\n".format(len(self._result))
         output += "Execution time (total): {}\n".format(self.exec_time_total)
         output += "Execution time (per document): {}".format(self.exec_time_per_document)
         return output
 
-    def print_result(self):
+    def print_result(self, filename="results.log"):
         output = self._get_output()
         print(output)
-        with open("results.log", "w") as f:
+        with open(filename, "w") as f:
+            f.write(output)
+
+    def _get_debug(self):
+        output = "+" * 16 + " PROVENANCE " + "+" * 17 + "\n"
+        row_format = "{:<15}" * 3 + "\n"
+        output += row_format.format("DocID", "Fact/Event", "Sentence")
+        output += "-" * 3 * 15 + "\n"
+        for doc, (fact_match, evt_match) in self._match_by_doc.items():
+            output += row_format.format(doc.id, "", "")
+            for fact, fact_matches in fact_match.items():
+                output += row_format.format("", str(fact), "")
+                for m in fact_matches:
+                    output += row_format.format("", "", doc.sentence_by_id[m].text)
+            for evt, evt_matches in evt_match.items():
+                output += row_format.format("", str(evt), "")
+                for m in evt_matches:
+                    output += row_format.format("", "", doc.sentence_by_id[m].text)
+            output += "-" * 3 * 15
+        return output
+
+    def print_debug(self, filename="debug.log"):
+        output = self._get_debug()
+        print(output)
+        with open(filename, "w") as f:
             f.write(output)

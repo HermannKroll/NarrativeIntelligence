@@ -82,10 +82,12 @@ def main():
     qp = QueryProcessor(*docs)
     print("Matching documents Amiodarone")
     qp.query(q_ami)
-    qp.print_result()
+    qp.print_result("results_amiodarone.log")
+    qp.print_debug("debug_amiodarone.log")
     print("Matching documents Erythromycin")
     qp.query(q_ery)
-    qp.print_result()
+    qp.print_result("results_erythromycin.log")
+    qp.print_debug("debug_erythromycin.log")
 
 
 if __name__ == "__main__":
