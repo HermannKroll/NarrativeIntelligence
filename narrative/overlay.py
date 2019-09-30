@@ -81,6 +81,9 @@ class Narrative:
         for t in transitions:
             self.add_transition(*t)
 
+    def add_fact(self, fact):
+        self.facts.append(fact)
+
     def add_transition(self, head, transition, tail):
         self.transitions.append((head, transition, tail))
         if isinstance(head, Substory):
@@ -94,16 +97,20 @@ class Narrative:
 
     @property
     def vars(self):
-        result = []
+        result = set()
         for t in self.transitions:
-            result += t[0].vars
-            result += t[2].vars
+            result = result.union(set(t[0].vars))
+            result = result.union(set(t[2].vars))
+        for f in self.facts:
+            result = result.union(set(f.vars))
         return result
 
     @property
     def bounds(self):
-        result = []
+        result = set()
         for t in self.transitions:
-            result += t[0].bounds
-            result += t[2].bounds
+            result = result.union(set(t[0].bounds))
+            result = result.union(set(t[2].bounds))
+        for f in self.facts:
+            result = result.union(set(f.bounds))
         return result
