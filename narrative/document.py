@@ -48,7 +48,7 @@ class TaggedDocument:
         self.tags = [TaggedEntity(t) for t in self.REGEX_TAGS.findall(pubtator_content)]
         self.entity_names = {t.text.lower() for t in self.tags}
         # Indexes
-        self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
+        # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
         self.sentence_by_id = {}  # Use to build mesh->sentence index
         self.entities_by_mesh = {}  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
         self.sentences_by_mesh = {}  # Mesh->Sentence index
@@ -56,8 +56,8 @@ class TaggedDocument:
         self._create_index()
 
     def _create_index(self):
-        self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
-                                    t.text.lower() not in self.mesh_by_entity_name}
+        # self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
+        #                            t.text.lower() not in self.mesh_by_entity_name}
         sentences = self.content.split(". ")
         for idx, sent in enumerate(sentences):
             self.sentence_by_id[idx] = Sentence(

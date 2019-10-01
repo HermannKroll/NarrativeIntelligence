@@ -15,6 +15,7 @@ class QueryProcessor:
         self._start = None
         self._end = None
         self._match_by_doc = dict()
+        self._mismatch_by_doc = dict()
 
     @property
     def exec_time_total(self):
@@ -30,13 +31,20 @@ class QueryProcessor:
         :param doc:
         :return:
         """
-        ent_found = 0
-        for ent_name, ent_type in self._query.bounds:
-            if ent_name.lower() in doc.mesh_by_entity_name:
-                mesh = doc.mesh_by_entity_name[ent_name.lower()]
-                if mesh in doc.entities_by_mesh and doc.entities_by_mesh[mesh][0].type == ent_type:
-                    ent_found += 1
-        return ent_found == len(self._query.bounds)
+        ent_found = []
+        for ent_id, ent_type in self._query.bounds:
+            if ent_id in doc.entities_by_mesh and doc.entities_by_mesh[ent_id][0].type == ent_type:
+                # mesh = doc.mesh_by_entity_name[ent_id.lower()]
+                # if mesh in doc.entities_by_mesh and doc.entities_by_mesh[mesh][0].type == ent_type:
+                ent_found.append(ent_id)
+        if len(ent_found) == len(self._query.bounds):
+            return True
+        else:
+            self._mismatch_by_doc[doc] = [
+                {ent_id: ent_id in ent_found for (ent_id, ent_type) in self._query.bounds},
+                dict()
+            ]
+            return False
 
     def prune_documents(self):
         return [doc for doc in self.documents if self._is_document_candidate(doc)]
@@ -71,9 +79,9 @@ class QueryProcessor:
             sents = set()
             if len(fact.bounds) == 2:
                 # No variable
-                mesh_s = document.mesh_by_entity_name[fact.s.lower()]
-                mesh_o = document.mesh_by_entity_name[fact.o.lower()]
-                sents_with_ent = document.sentences_by_mesh[mesh_s].intersection(document.sentences_by_mesh[mesh_o])
+                # mesh_s = document.mesh_by_entity_name[fact.s.lower()]
+                # mesh_o = document.mesh_by_entity_name[fact.o.lower()]
+                sents_with_ent = document.sentences_by_mesh[fact.s].intersection(document.sentences_by_mesh[fact.o])
                 sents = {s for s in sents_with_ent if
                          re.search(fact.p.lower(), document.sentence_by_id[s].text.lower())}
             elif len(fact.bounds) == 1:
@@ -129,8 +137,8 @@ class QueryProcessor:
             sents = set()
             if len(event.vars) == 0:
                 # No variable
-                mesh = document.mesh_by_entity_name[event.entity.lower()]
-                sents_with_ent = document.sentences_by_mesh[mesh]
+                # mesh = document.mesh_by_entity_name[event.entity.lower()]
+                sents_with_ent = document.sentences_by_mesh[event.entity]
                 sents = {s for s in sents_with_ent if
                          re.search(event.label.lower(), document.sentence_by_id[s].text.lower())}
             else:
@@ -167,6 +175,8 @@ class QueryProcessor:
             else:
                 result.append({})
             self._match_by_doc[document] = [fact_match, event_match]
+        else:
+            self._mismatch_by_doc[document] = [fact_match, event_match]
 
         return result if has_result else None
 
@@ -193,7 +203,7 @@ class QueryProcessor:
         with open(filename, "w") as f:
             f.write(output)
 
-    def _get_debug(self):
+    def _get_debug_match(self):
         output = "+" * 16 + " PROVENANCE " + "+" * 17 + "\n"
         row_format = "{:<15}" * 3 + "\n"
         output += row_format.format("DocID", "Fact/Event", "Sentence")
@@ -203,16 +213,34 @@ class QueryProcessor:
             for fact, fact_matches in fact_match.items():
                 output += row_format.format("", str(fact), "")
                 for m in fact_matches:
-                    output += row_format.format("", "", doc.sentence_by_id[m].text)
+                    output += row_format.format("", "", "* " + doc.sentence_by_id[m].text)
             for evt, evt_matches in evt_match.items():
                 output += row_format.format("", str(evt), "")
                 for m in evt_matches:
-                    output += row_format.format("", "", doc.sentence_by_id[m].text)
+                    output += row_format.format("", "", "* " + doc.sentence_by_id[m].text)
             output += "-" * 3 * 15 + "\n"
         return output
 
-    def print_debug(self, filename="debug.log"):
-        output = self._get_debug()
+    def _get_debug_mismatch(self):
+        output = "+" * 17 + " MISMATCH " + "+" * 18 + "\n"
+        row_format = "{:<15}" * 3 + "\n"
+        output += row_format.format("DocID", "Fact/Event", "Sentence")
+        output += "-" * 3 * 15 + "\n"
+        for doc, (fact_match, evt_match) in self._mismatch_by_doc.items():
+            output += row_format.format(doc.id, "", "")
+            for fact, fact_matches in fact_match.items():
+                output += row_format.format("", str(fact), "")
+                output += row_format.format("", "", str(fact_matches))
+            for evt, evt_matches in evt_match.items():
+                output += row_format.format("", str(evt), "")
+                output += row_format.format("", "", str(evt_matches))
+            output += "-" * 3 * 15 + "\n"
+        return output
+
+    def print_debug(self, filename="debug.log", with_mismatch=False):
+        output = self._get_debug_match()
+        if with_mismatch:
+            output += "\n" + self._get_debug_mismatch()
         print(output)
         with open(filename, "w") as f:
             f.write(output)

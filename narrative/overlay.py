@@ -82,12 +82,15 @@ class Narrative:
             self.add_transition(*t)
 
     def add_fact(self, fact):
+        # TODO: Translate names to MESH
         self.facts.append(fact)
 
     def add_event(self, evt):
+        # TODO: Translate names to MESH
         self.events.append(evt)
 
     def add_transition(self, head, transition, tail):
+        # TODO: Translate names to MESH
         self.transitions.append((head, transition, tail))
         if isinstance(head, Substory):
             self.facts.extend(head.facts)

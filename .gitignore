@@ -118,3 +118,7 @@ data/
 utils/Descriptors_Dosage_Forms.tsv
 utils/Descriptors_Drug_Delivery_Systems.tsv
 utils/Descriptors_Nanoparticles.tsv
+
+narrative/*.log
+narrative/res
+narrative/.docs
