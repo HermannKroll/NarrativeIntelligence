@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from config import Config
 from tagging.base import merge_result_files
 from tagging.dnorm import DNorm
+from tagging.dosage import DosageFormTagger
 from tagging.gnorm import GNorm
 from tagging.tmchem import TMChem
 from tools import concat
@@ -32,13 +33,15 @@ def translate(input_filename, output, pmc_dir, translation_err_file=None):
     translate_files(pmc_files, output, translation_err_file)
 
 
-def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
-               tag_chemicals=True, tag_diseases=True, resume=False, console_log_level="INFO", workdir=None):
+def preprocess(input_file_dir_list, output_filename, conf,
+               tag_chemicals=False, tag_diseases=False, tag_dosage_forms=False, tag_genes=False,
+               resume=False, console_log_level="INFO", workdir=None):
     """
     Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
     Method expects an ID file or an ID list if resume=False.
     Method expects the working directory (temp-directory) of the processing to resume if resume=True.
 
+    :param tag_dosage_forms: flat, whether to tag dosage forms
     :param workdir: Working directory
     :param console_log_level: Log level for console output
     :param input_file_dir_list: File or list with IDs or directory with tagging to resume
@@ -53,6 +56,8 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
     print("=== STEP 1 - Preparation ===")
     # Create paths
     tmp_root = input_file_dir_list if resume else (os.path.abspath(workdir) if workdir else tempfile.mkdtemp())
+    if not os.path.exists(tmp_root):
+        os.mkdir(tmp_root)
     tmp_translation = os.path.abspath(os.path.join(tmp_root, "translation"))
     tmp_log = os.path.abspath(os.path.join(tmp_root, "log"))
     translation_err_file = os.path.abspath(os.path.join(tmp_root, "translation_errors.txt"))
@@ -81,12 +86,15 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
     gene_tagger = GNorm(**kwargs)
     disease_tagger = DNorm(**kwargs)
     chemical_tagger = TMChem(**kwargs)
+    dosage_form_tagger = DosageFormTagger(**kwargs)
     if tag_genes:
         gene_tagger.prepare(resume)
     if tag_diseases:
         disease_tagger.prepare(resume)
     if tag_chemicals:
         chemical_tagger.prepare(resume)
+    if tag_dosage_forms:
+        dosage_form_tagger.prepare(resume)
     print("=== STEP 2 - Tagging ===")
     if tag_genes:
         gene_tagger.start()
@@ -94,6 +102,8 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
         disease_tagger.start()
     if tag_chemicals:
         chemical_tagger.start()
+    if tag_dosage_forms:
+        dosage_form_tagger.start()
     # Wait until finished
     if tag_genes:
         gene_tagger.join()
@@ -101,6 +111,8 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
         disease_tagger.join()
     if tag_chemicals:
         chemical_tagger.join()
+    if tag_dosage_forms:
+        dosage_form_tagger.join()
     print("=== STEP 3 - Post-processing ===")
     result_files = []
     if tag_genes:
@@ -112,6 +124,10 @@ def preprocess(input_file_dir_list, output_filename, conf, tag_genes=True,
     if tag_chemicals:
         chemical_tagger.finalize()
         result_files.append(chemical_tagger.result_file)
+    if tag_dosage_forms:
+        dosage_form_tagger.finalize()
+        result_files.append(dosage_form_tagger.result_file)
+    # TODO: Add clean step
     merge_result_files(tmp_translation, output_filename, *result_files)
     print("=== Finished ===")
 
@@ -126,9 +142,10 @@ def main():
                        help="Resume tagging (input: temp-directory, output: result file)")
 
     group_tag = parser.add_argument_group()
-    group_tag.add_argument("--no-genes", action="store_false", help="Do not tag genes")
-    group_tag.add_argument("--no-diseases", action="store_false", help="Do not tag diseases")
-    group_tag.add_argument("--no-chemicals", action="store_false", help="Do not tag chemicals")
+    group_tag.add_argument("-G", "--gene", action="store_true", help="Tag genes")
+    group_tag.add_argument("-D", "--disease", action="store_true", help="Tag diseases")
+    group_tag.add_argument("-C", "--chemical", action="store_true", help="Tag chemicals")
+    group_tag.add_argument("-F", "--dosage", action="store_true", help="Tag dosage forms")
 
     group_settings = parser.add_argument_group("Settings")
     group_settings.add_argument("--config", default=CONFIG_DEFAULT,
@@ -147,8 +164,9 @@ def main():
     elif args.concat_only:
         concat(args.input, args.output)
     else:
-        preprocess(args.input, args.output, conf, args.no_genes, args.no_chemicals, args.no_diseases, args.resume,
-                   args.loglevel.upper(), workdir=args.workdir)
+        preprocess(args.input, args.output, conf,
+                   args.chemical, args.disease, args.dosage, args.gene,
+                   args.resume, args.loglevel.upper(), workdir=args.workdir)
 
 
 if __name__ == "__main__":
