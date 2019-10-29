@@ -226,6 +226,7 @@ class TIBTurtleTranslator:
         self.TITLE_ID_LEN = len(TIBTurtleTranslator.TITLE_ID)
 
     def translate(self, in_file, out_file):
+        print("Reading file ...")
         with open(in_file) as f:
             content = f.read()
         print("Searching matches ...")
@@ -243,7 +244,8 @@ class TIBTurtleTranslator:
                         title = title[1:len(title) - 1]
                         break
                 else:
-                    raise ValueError("No title found.")
+                    print("WARNING: Title not found: {}".format(match))
+                    continue
                 data[subject] = title
         print("Writing output ...")
         with open(out_file, "w") as f:
