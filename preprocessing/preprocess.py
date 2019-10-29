@@ -9,8 +9,7 @@ from tagging.dnorm import DNorm
 from tagging.dosage import DosageFormTagger
 from tagging.gnorm import GNorm
 from tagging.tmchem import TMChem
-from tools import concat
-from translate import collect_files, translate_files
+from translate import collect_files, translate_pmc_files
 
 CONFIG_DEFAULT = "config.json"
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
@@ -30,7 +29,7 @@ def translate(input_filename, output, pmc_dir, translation_err_file=None):
     :param translation_err_file: Filename of the list with bad documents
     """
     pmc_files = collect_files(input_filename, pmc_dir)
-    translate_files(pmc_files, output, translation_err_file)
+    translate_pmc_files(pmc_files, output, translation_err_file)
 
 
 def preprocess(input_file_dir_list, output_filename, conf,
@@ -127,7 +126,7 @@ def preprocess(input_file_dir_list, output_filename, conf,
     if tag_dosage_forms:
         dosage_form_tagger.finalize()
         result_files.append(dosage_form_tagger.result_file)
-    # TODO: Add clean step
+    # TODO: Add clean step to expand overlapping tags
     merge_result_files(tmp_translation, output_filename, *result_files)
     print("=== Finished ===")
 
@@ -136,8 +135,6 @@ def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--translate-only", action="store_true", help="Translate PubMedCentral files to PubTator format")
-    group.add_argument("--concat-only", action="store_true", help="Concat PubTator files to one single file")
     group.add_argument("--resume", action="store_true",
                        help="Resume tagging (input: temp-directory, output: result file)")
 
@@ -153,20 +150,15 @@ def main():
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
 
-    parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
+    parser.add_argument("input", help="ID file / Workdir / Directory with PMC files", metavar="INPUT_FILE_OR_DIR")
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
     args = parser.parse_args()
 
     conf = Config(args.config)
 
-    if args.translate_only:
-        translate(args.input, args.output, conf.pmc_dir)
-    elif args.concat_only:
-        concat(args.input, args.output)
-    else:
-        preprocess(args.input, args.output, conf,
-                   args.chemical, args.disease, args.dosage, args.gene,
-                   args.resume, args.loglevel.upper(), workdir=args.workdir)
+    preprocess(args.input, args.output, conf,
+               args.chemical, args.disease, args.dosage, args.gene,
+               args.resume, args.loglevel.upper(), workdir=args.workdir)
 
 
 if __name__ == "__main__":
