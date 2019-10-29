@@ -248,7 +248,7 @@ class TIBTurtleTranslator:
         print("Writing output ...")
         with open(out_file, "w") as f:
             for doc_id, title in data.items():
-                f.write("{id}|t| {title}\n{id}|a| {abs}\n\n".format(id=doc_id, title=title, abs=""))
+                f.write("{id}|t| {title}\n{id}|a| {abs}\n\n".format(id=doc_id.lstrip("CN"), title=title, abs=""))
         print("Done.")
 
 
