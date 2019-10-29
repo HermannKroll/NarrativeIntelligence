@@ -228,8 +228,10 @@ class TIBTurtleTranslator:
     def translate(self, in_file, out_file):
         with open(in_file) as f:
             content = f.read()
+        print("Searching matches ...")
         matches = re.findall(r"(<.*?\s\.)", content, re.DOTALL)
         data = dict()
+        print("Processing {} matches ...".format(len(matches)))
         for match in matches:
             if ";" in match and "bibo:Patent" in match:
                 idx_tag_end = match.index(">")
@@ -243,9 +245,11 @@ class TIBTurtleTranslator:
                 else:
                     raise ValueError("No title found.")
                 data[subject] = title
+        print("Writing output ...")
         with open(out_file, "w") as f:
             for doc_id, title in data.items():
                 f.write("{id}|t| {title}\n{id}|a| {abs}\n\n".format(id=doc_id, title=title, abs=""))
+        print("Done.")
 
 
 def main():
@@ -259,7 +263,7 @@ def main():
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
     args = parser.parse_args()
 
-    if args.format == "PMC":
+    if args.format == FMT_PMC_XML:
         t = PMCTranslator()
         if args.collect:
             collector = PMCCollector(args.collect)
@@ -272,7 +276,7 @@ def main():
             else:
                 t.translate_single(args.input, args.output)
 
-    if args.format == "EPA":
+    if args.format == FMT_EPA_TTL:
         t = TIBTurtleTranslator()
         t.translate(args.input, args.output)
 
