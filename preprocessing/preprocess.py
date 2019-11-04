@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import tempfile
 from argparse import ArgumentParser
 
@@ -8,33 +9,17 @@ from tagging.base import merge_result_files
 from tagging.dnorm import DNorm
 from tagging.dosage import DosageFormTagger
 from tagging.gnorm import GNorm
+from tagging.taggerone import TaggerOne
 from tagging.tmchem import TMChem
-from translate import collect_files, translate_pmc_files
+from translate import PMCCollector, PMCTranslator
 
 CONFIG_DEFAULT = "config.json"
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
 
-def translate(input_filename, output, pmc_dir, translation_err_file=None):
-    """
-    Method takes a file with PubMedCentral IDs (PMCxxxxxx), searches ``pmc_dir`` for PubMedCentral
-    XML-documents with the name
-    of these ids and translates them into the PubTator Format. Results are written into ``output``.
-
-    Documents which were not translated are listed in ``translation_err_file``.
-
-    :param input_filename: ID file with PubMedCentral IDs
-    :param output: Directory to place the translated files in PubTator format
-    :param pmc_dir: Directory containing the PubMedCentral XML files
-    :param translation_err_file: Filename of the list with bad documents
-    """
-    pmc_files = collect_files(input_filename, pmc_dir)
-    translate_pmc_files(pmc_files, output, translation_err_file)
-
-
 def preprocess(input_file_dir_list, output_filename, conf,
                tag_chemicals=False, tag_diseases=False, tag_dosage_forms=False, tag_genes=False,
-               resume=False, console_log_level="INFO", workdir=None):
+               resume=False, console_log_level="INFO", workdir=None, skip_translation=False, use_tagger_one=False):
     """
     Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
     Method expects an ID file or an ID list if resume=False.
@@ -51,6 +36,8 @@ def preprocess(input_file_dir_list, output_filename, conf,
     :param tag_diseases: flag, wheter to tag diseases
     :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
     be set accordingly)
+    :param skip_translation: Flag whether to skip the translation/collection of files. `input_file_dir_list` is a
+        directory with PubTator files to process.
     """
     print("=== STEP 1 - Preparation ===")
     # Create paths
@@ -79,53 +66,43 @@ def preprocess(input_file_dir_list, output_filename, conf,
     logger.info("Project directory: {}".format(tmp_root))
     logger.debug("Translation output directory: {}".format(tmp_translation))
     if not resume:
-        translate(input_file_dir_list, tmp_translation, conf.pmc_dir, translation_err_file)
+        if skip_translation:
+            shutil.copytree(input_file_dir_list, tmp_translation)
+        else:
+            collector = PMCCollector(conf.pmc_dir)
+            files = collector.collect(input_file_dir_list)
+            translator = PMCTranslator()
+            translator.translate_multiple(files, tmp_translation, translation_err_file)
     # Init taggers
     kwargs = dict(root_dir=tmp_root, translation_dir=tmp_translation, log_dir=tmp_log, config=conf)
-    gene_tagger = GNorm(**kwargs)
-    disease_tagger = DNorm(**kwargs)
-    chemical_tagger = TMChem(**kwargs)
-    dosage_form_tagger = DosageFormTagger(**kwargs)
+    taggers = []
     if tag_genes:
-        gene_tagger.prepare(resume)
-    if tag_diseases:
-        disease_tagger.prepare(resume)
-    if tag_chemicals:
-        chemical_tagger.prepare(resume)
+        t = GNorm(**kwargs)
+        taggers.append(t)
+    if tag_diseases and not use_tagger_one:
+        t = DNorm(**kwargs)
+        taggers.append(t)
+    if tag_chemicals and not use_tagger_one:
+        t = TMChem(**kwargs)
+        taggers.append(t)
+    if tag_chemicals and tag_diseases and use_tagger_one:
+        t = TaggerOne(**kwargs)
+        taggers.append(t)
     if tag_dosage_forms:
-        dosage_form_tagger.prepare(resume)
+        t = DosageFormTagger(**kwargs)
+        taggers.append(t)
+    for tagger in taggers:
+        tagger.prepare(resume)
     print("=== STEP 2 - Tagging ===")
-    if tag_genes:
-        gene_tagger.start()
-    if tag_diseases:
-        disease_tagger.start()
-    if tag_chemicals:
-        chemical_tagger.start()
-    if tag_dosage_forms:
-        dosage_form_tagger.start()
-    # Wait until finished
-    if tag_genes:
-        gene_tagger.join()
-    if tag_diseases:
-        disease_tagger.join()
-    if tag_chemicals:
-        chemical_tagger.join()
-    if tag_dosage_forms:
-        dosage_form_tagger.join()
+    for tagger in taggers:
+        tagger.start()
+    for tagger in taggers:
+        tagger.join()
     print("=== STEP 3 - Post-processing ===")
     result_files = []
-    if tag_genes:
-        gene_tagger.finalize()
-        result_files.append(gene_tagger.result_file)
-    if tag_diseases:
-        disease_tagger.finalize()
-        result_files.append(disease_tagger.result_file)
-    if tag_chemicals:
-        chemical_tagger.finalize()
-        result_files.append(chemical_tagger.result_file)
-    if tag_dosage_forms:
-        dosage_form_tagger.finalize()
-        result_files.append(dosage_form_tagger.result_file)
+    for tagger in taggers:
+        tagger.finalize()
+        result_files.append(tagger.result_file)
     # TODO: Add clean step to expand overlapping tags
     merge_result_files(tmp_translation, output_filename, *result_files)
     print("=== Finished ===")
@@ -135,14 +112,18 @@ def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--resume", action="store_true",
-                       help="Resume tagging (input: temp-directory, output: result file)")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume tagging (input: temp-directory, output: result file)")
+    parser.add_argument("--skip-translation", action="store_true",
+                        help="Skip translation. INPUT is the directory with PubTator files to tag.")
 
-    group_tag = parser.add_argument_group()
+    group_tag = parser.add_argument_group("Tagging")
     group_tag.add_argument("-G", "--gene", action="store_true", help="Tag genes")
     group_tag.add_argument("-D", "--disease", action="store_true", help="Tag diseases")
     group_tag.add_argument("-C", "--chemical", action="store_true", help="Tag chemicals")
     group_tag.add_argument("-F", "--dosage", action="store_true", help="Tag dosage forms")
+    group_tag.add_argument("--tagger-one", action="store_true",
+                           help="Tag diseases and chemicals with TaggerOne instead of DNorm and tmChem.")
 
     group_settings = parser.add_argument_group("Settings")
     group_settings.add_argument("--config", default=CONFIG_DEFAULT,
@@ -158,7 +139,8 @@ def main():
 
     preprocess(args.input, args.output, conf,
                args.chemical, args.disease, args.dosage, args.gene,
-               args.resume, args.loglevel.upper(), workdir=args.workdir)
+               resume=args.resume, console_log_level=args.loglevel.upper(), workdir=args.workdir,
+               skip_translation=args.skip_translation, use_tagger_one=args.tagger_one)
 
 
 if __name__ == "__main__":

@@ -218,40 +218,55 @@ class PMCTranslator:
             print("See {} for a list of ignored files.".format(err_file))
 
 
-class TIBTurtleTranslator:
-    REGEX = re.compile(r"(<.*?\s\.)", re.DOTALL | re.MULTILINE)
-    TITLE_ID = "<http://purl.org/dc/elements/1.1/title>"
+class TIBTranslator:
+    REGEX_ID = re.compile(r"^\d+$")
+    COUNTRIES = {"AU", "CN", "WO", "GB", "US", "EP", "CA"}
 
-    def __init__(self):
-        self.TITLE_ID_LEN = len(TIBTurtleTranslator.TITLE_ID)
+    def translate(self, in_file, out_dir):
+        """
+        `in_file` is the file preprocessed by the Academic library of the TU Braunschweig.
 
-    def translate(self, in_file, out_file):
+        :param in_file:
+        :param out_dir:
+        :return:
+        """
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
         print("Reading file ...")
+        title_by_id = dict()
+        abstract_by_id = dict()
+        count = 0
         with open(in_file) as f:
-            content = f.read()
-        print("Searching matches ...")
-        matches = re.findall(r"(<.*?\s\.)", content, re.DOTALL)
-        data = dict()
-        print("Processing {} matches ...".format(len(matches)))
-        for match in matches:
-            if ";" in match and "bibo:Patent" in match:
-                idx_tag_end = match.index(">")
-                subject_url = match[1:idx_tag_end]
-                subject = subject_url[subject_url.rindex(":") + 1:]
-                for fact in match.split(";"):
-                    if fact.strip().startswith(self.TITLE_ID):
-                        title = fact.strip()[self.TITLE_ID_LEN:].strip()
-                        title = title[1:len(title) - 1]
-                        break
-                else:
-                    print("WARNING: Title not found: {}".format(match))
-                    continue
-                data[subject] = title
-        print("Writing output ...")
-        with open(out_file, "w") as f:
-            for doc_id, title in data.items():
-                f.write("{id}|t| {title}\n{id}|a| {abs}\n\n".format(id=doc_id.lstrip("CN"), title=title, abs=""))
-        print("Done.")
+            for idx, line in enumerate(f):
+                id_part, body = line.strip().split("|", maxsplit=1)
+                did = id_part[id_part.rindex(":") + 1:]
+                if did[:2] in self.COUNTRIES and self.REGEX_ID.fullmatch(did[2:]):
+                    count += 1
+                    did = did[2:]
+                    if idx % 2 == 0:
+                        title_by_id[did] = body.title()
+                    else:
+                        abstract_by_id[did] = body
+
+        print("Writing {}/{} patents ...".format(int(count / 2), int((idx + 1) / 2)))
+        total = len(title_by_id.keys())
+        count = 0
+        last_percentage = 0
+        for did, title in title_by_id.items():
+            if did in abstract_by_id:
+                # FIXME: This hack is required for most taggers since they check if a file starts with "PMC"
+                out_fn = os.path.join(out_dir, "PMC{}.txt".format(did))
+                with open(out_fn, "w") as f:
+                    f.write("{}|t| {}\n".format(did, title))
+                    f.write("{}|a| {}\n\n".format(did, abstract_by_id[did]))
+                current_percentage = int(count / total * 100.0)
+                if current_percentage > last_percentage:
+                    sys.stdout.write("\r{} %".format(current_percentage))
+                    last_percentage = current_percentage
+            else:
+                print("WARNING: Document {} has no abstract".format(did))
+            count += 1
+        print("\nDone.")
 
 
 def main():
@@ -279,7 +294,7 @@ def main():
                 t.translate_single(args.input, args.output)
 
     if args.format == FMT_EPA_TTL:
-        t = TIBTurtleTranslator()
+        t = TIBTranslator()
         t.translate(args.input, args.output)
 
 
