@@ -1,0 +1,541 @@
+104257187|t| Traditional Chinese Medicine Pillow For Soothing Nerves And Preparation Method Thereof
+104257187|a| The invention provides a traditional Chinese medicine pillow for soothing nerves and a preparation method thereof. The traditional Chinese medicine pillow comprises a pillow interior and a pillowcase; materials filled in the pillow interior comprises the components of aizoon stonecrop herb, concha ostreae, magnet, acanthopanax, concha margaritiferallsta, erosaria caputserpentis, amethyst, poria with hostwood, spina date seed, caulis polygoni multiflori, longan aril, lotus seed, lily, lucid ganoderma, cortex albiziae, folium apocyni veneti, rhizoma anemones altaicae, ginseng, polygala tenuifolia, platycladi seed, stigma croci, valerian, fructus choerospondiatis, cinnabar, physochlaina macrophylla and henbane. The preparation method comprises the following steps: cleaning and drying the raw materials; grinding; filtering through a filter net to obtain raw material powder; uniformly mixing the raw material powder according to the ratio; sterilizing through an ultraviolet lamp; packaging into a silk pillow interior; then sleeving the pillowcase to obtain the traditional Chinese medicine pillow. According to the traditional Chinese medicine pillow for soothing nerves and the preparation method thereof, all components in the formula are reasonably matched, which is beneficial for helping sleeping and can treat neurological disease well; all the components coordinately act and complement each other; the preparation process is simple, and mass production applies.
+104257187	358	379	aizoon stonecrop herb	Disease
+104257187	405	417	acanthopanax	Chemical	MESH:C400150
+104257187	446	469	erosaria caputserpentis	Disease
+104257187	578	593	lucid ganoderma	Disease
+104257187	612	618	folium	Chemical
+104257187	635	660	rhizoma anemones altaicae	Disease
+104257187	671	690	polygala tenuifolia	Disease
+104257187	759	767	cinnabar	Chemical	MESH:C034211
+104257187	769	793	physochlaina macrophylla	Disease
+104257187	798	805	henbane	Chemical
+104257187	1415	1435	neurological disease	Disease	MESH:D009422
+
+104257524|t| Shampoo Containing Alkyl Ethoxy Polyglycosides
+104257524|a| The invention relates to shampoo containing alkyl ethoxy polyglycosides. The shampoo is characterized by consisting of the following components in percentage by mass: 5-15 percent of alkyl ethoxy polyglycosides, 5-15 percent of alkyl glycoside dipropylene glycol sulfosuccinate, 30 percent of cocamidopropyl betaine, 1-5 percent of C16-18 alkyl glycoside, 0.1 percent of ethylene diamine tetraacetic acid, 0.1-2 percent of other aids and the balance of deionized water. The shampoo is excellent in performance, has outstanding biocompatibility, has the advantages of environmental friendliness, safety and irritating avoidance and is particularly suitable for the mucosa-sensitive crowd and the crowd with high requirement on the use feeling. Moreover, the industrial application of the alkyl ethoxy polyglycosides is successfully realized, the production application of the shampoo products is widened, and benefits are brought to the human society.
+104257524	20	47	Alkyl Ethoxy Polyglycosides	Chemical	MESH:D000477
+104257524	93	120	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+104257524	232	259	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+104257524	277	326	alkyl glycoside dipropylene glycol sulfosuccinate	Chemical	MESH:D000477
+104257524	342	364	cocamidopropyl betaine	Chemical	MESH:C077055
+104257524	388	403	alkyl glycoside	Chemical	MESH:D000477
+104257524	420	453	ethylene diamine tetraacetic acid	Chemical	MESH:D004533
+104257524	836	863	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+
+104257526|t| Single Dose Type Air Oxidation Hair Dye Composition And Application Thereof
+104257526|a| The invention discloses single dose type air oxidation hair dye composition and an application thereof. The single dose type air oxidation hair dye composition comprises components in percentage by weight as follows: 5.0%-10.0% of an emulsifying agent, 3.0%-5.0% of a thickening agent, 2.0%-7.0% of oxidation dyes, 2.0%-5.0% of an alkaline agent, 1.0%-3.0% of hydroxyhydroquinone compounds, 1.0%-2.0% of a surface active agent, 0.05%-0.1% of a metal chelating agent, 2.0%-5.0% of an auxiliary penetrating agent, 0.1%-0.5% of other auxiliaries and the balance of water. The single dose type air oxidation hair dye composition is stable in system, fast to color, uniform and durable in dyeing effect and high in covering power; operation such as mixing of double doses and the like in a traditional method is avoided, and the use is convenient; and meanwhile, the composition is not required to be matched with hydrogen peroxide, so that adverse effects of scalp itching, pricking and the like are prevented, hair damage of the hair dye is reduced, and the safety is higher.
+104257526	438	457	hydroxyhydroquinone	Chemical	MESH:C013038
+104257526	987	1004	hydrogen peroxide	Chemical	MESH:D006861
+
+104257624|t| Novel Effervescent And Disintegrative Premix And Preparation Method Thereof
+104257624|a| The invention belongs to the technical field of producing food, healthcare food and medicines, and relates to a novel effervescent and disintegrative premix and a preparation method thereof. According to the novel effervescent and disintegrative premix, an acid source and a carbon dioxide source are isolated through such technical means as coating; under a circumstance of little moisture absorption, acid-base neutralization is avoided; the premix effectively improves shortcomings that bag bulging, pipe boosting and like are easy to occur, and a stability is improved.
+104257624	335	339	acid	Chemical
+104257624	353	367	carbon dioxide	Chemical	MESH:D002245
+104257624	481	485	acid	Chemical	MESH:D000143
+
+104257669|t| Oral Administration Composition For Delivering Salicylic Acid Medicines To Intestinal Tract
+104257669|a| The invention discloses an oral administration composition for delivering salicylic acid medicines to the intestinal tract. The composition comprises sustained release components, capsules and delayed release components, wherein the capsules are coated on the outer sides of the sustained release components and are coated by the delayed release components; the sustained release components comprise drug cores, organic acid layers and alkali-containing ethyecellulose layers; organic acids are coated on the outer side of the drug cores; the alkali-containing ethyecellulose is coated on the outer sides of the organic acids; the drug cores comprise sulfasalazine and/or 5-aminosalicylic acid; the capsules are prepared from gel, hydroxypropyl methyl cellulose or starch; and the delayed release components comprise polymers with enteric solubility. After the composition is subjected to oral administration during use, the medicine is delivered to the intestines, the drug release is controlled in the intestines to provide sustained release of the medicine, the salicylic acid medicines reach a to-be-treated area at enough concentration, and last for long time in the area, so that a local treatment effect is provided.
+104257669	48	72	Salicylic Acid Medicines	Chemical	MESH:D012459
+104257669	168	182	salicylic acid	Chemical	MESH:D012459
+104257669	506	518	organic acid	Chemical	MESH:D013463
+104257669	579	584	acids	Chemical	MESH:D000143
+104257669	714	719	acids	Chemical	MESH:D000143
+104257669	745	758	sulfasalazine	Chemical	MESH:D012460
+104257669	766	787	5-aminosalicylic acid	Chemical	MESH:D019804
+104257669	825	845	hydroxypropyl methyl	Chemical	MESH:D065347
+104257669	1159	1173	salicylic acid	Chemical	MESH:D012459
+
+104257719|t| Multi-Purpose Chinese And Western Medicine Ointment With Swelling Reducing And Stagnation Dissipating Functions And Preparation Method Of Ointment
+104257719|a| The invention discloses a multi-purpose Chinese and western medicine ointment with swelling reducing and stagnation dissipating functions. The ointment is prepared by raw materials at weight ratio as follows: 20-30 g of alum, 10-15 g of prepared frankincense, 10-15 g of prepared myrrh, 10-20 g of borneol, 10-15 g of liquidambar, 20-30 g of refined mirabilite and 50-100 g of an ichthammol ointment. The invention further discloses a preparation method of the ointment. The preparation method comprises the following steps: (1) the five crude medicines including alum, prepared frankincense, prepared myrrh, borneol and liquidambar are mixed at the raw material weight ratio and ground to 100-mesh powder, then the refined mirabilite and the ichthammol ointment are added at the raw material weight ratio and uniformly stirred and mixed to obtain a mixture; and (2) the mixture is sterilized at a high temperature, and then bagged or bottled for standby. Compared with the prior art, the multi-purpose Chinese and western medicine ointment has the advantages as follows: the application is wide, the efficacy is high, toxic and side effects are avoided, the recovery rate can reach 100%, the raw materials are cheap, the medicinal herb resource is wide, and the preparation technology is simple.
+104257719	58	66	Swelling	Disease	MESH:D004487
+104257719	175	196	multi-purpose Chinese	Disease	MESH:D015161
+104257719	232	240	swelling	Disease	MESH:D004487
+104257719	447	454	borneol	Chemical	MESH:C022871
+104257719	529	539	ichthammol	Chemical
+104257719	758	765	borneol	Chemical	MESH:C022871
+104257719	892	902	ichthammol	Chemical	MESH:C089399
+104257719	1138	1159	multi-purpose Chinese	Disease
+
+104257933|t| Qi-Tonifying And Yin-Nourishing Preparation For Woman Menostaxis And Preparation Method Thereof
+104257933|a| The invention discloses a qi-tonifying and yin-nourishing preparation for woman menostaxis, wherein the Qi-tonifying and Yin-nourishing preparation is prepared from the following raw materials in parts by weight: 8-14 parts of largehead atractylodes rhizome, 5-10 parts of rhizome of kirilow rhodiola, 20-40 parts of dragon bone, 12-22 parts of white peony root, 6-15 parts of monorchid herminium herb, 8-16 parts of charred sanguisorba root, 6-12 parts of root of Yunnan starwort, 4-9 parts of licorice root, 8-12 parts of motherwort fruit, 8-15 parts of prepared rehmannia root, 15-25 parts of figwort root and 6-9 parts of straw nutgrass galingale rhizome. The invention further has the excellent effects that the qi-tonifying and yin-nourishing preparation for woman menostaxis is prepared from various kinds of traditional Chinese medicines, and is reasonable in combination, concurrent in the treatment of symptoms and root causes, quick to take effect, free of toxic or side effects, and free of relapse after recovery; the qi-tonifying and yin-nourishing preparation can effectively treat menostaxis and can further prevent menostaxis well; the qi-tonifying and yin-nourishing preparation is featured with exact curative effect, convenient administration and low price in the treatment of menostaxis.
+104257933	325	355	largehead atractylodes rhizome	Disease
+104257933	371	398	rhizome of kirilow rhodiola	Disease
+104257933	523	539	sanguisorba root	Disease	MESH:D011843
+104257933	663	677	rehmannia root	Disease	MESH:D011843
+104257933	730	756	nutgrass galingale rhizome	Disease
+
+104257998|t| Traditional Chinese Medicine Preparation For Treating Constipation
+104257998|a| The invention discloses a traditional Chinese medicine preparation for treating constipation. The traditional Chinese medicine preparation is prepared from the following traditional Chinese medicines by weight: at first, 40-60 g of sunset abelmoschus leaf, 5-15 g of convolvulate asiabell root, 3-11 g of reineckea carnea kunth, 2-8g of thinleaf buckthorn root and 1-7g of champion bauhinia leaf. A preparation method of the traditional Chinese medicine preparation comprises the following steps: putting the traditional Chinese medicines in a medicine decocting utensil, adding 2,000 ml of purified water, soaking for half-hours to fully wet the traditional Chinese medicines to facilitate fully decocting out drug juice; poaching for 1 hour after boiling with strong fire, filtering to remove dregs to obtain a traditional Chinese medicine liquid; performing the heating concentration on the traditional Chinese medicine liquid to be 1,000 ml. The traditional Chinese medicine preparation for treating constipation has the advantages of being good in treatment effect, fast in effect and free of toxic or side effect; the used traditional Chinese medicines are low in cost and easy to obtain.
+104257998	55	67	Constipation	Disease	MESH:D003248
+104257998	149	161	constipation	Disease	MESH:D003248
+104257998	336	362	convolvulate asiabell root	Disease	MESH:D011843
+104257998	374	396	reineckea carnea kunth	Disease
+104257998	406	424	thinleaf buckthorn	Chemical
+104257998	442	464	champion bauhinia leaf	Disease	MESH:D018860
+104257998	1073	1085	constipation	Disease	MESH:D003248
+
+104258066|t| Traditional Chinese Medicine Preparation For Treating Kidney-Yin Deficiency-Type Dysfunctional Uterine Bleeding, And Preparation Method Thereof
+104258066|a| The invention provides a traditional Chinese medicine preparation for treating kidney-yin deficiency-type dysfunctional uterine bleeding. The traditional Chinese medicine preparation comprises the following bulk drugs in parts by weight: 10-20 parts of siberian solomonseal rhizomes, 10-20 parts of white paeony roots, 10-20 parts of raspberries, 10-20 parts of astragalus membranaceus, 10-20 parts of dogwoods, 10-20 parts of radix asparagi, 10-20 parts of cyrtomium rhizome carbon, 10-20 parts of dried rehmannia, 10-20 parts of dwarf lilyturf tubers, 10-20 parts of corydalis tuber, 10-20 parts of motherworts, 10-20 parts of carbonized hair, 10-20 parts of Chinese angelica, 10-20 parts of trogopterus dung, 10-20 parts of cortex lycii radicis, 10-20 parts of polygala roots, 10-20 parts of rhizoma cyperi, 10-20 parts of Chinese magnoliavine fruits, 10-20 parts of poria cocos, 10-20 parts of hairyvein agrimony, 10-20 parts of fried sanguisorba, 10-20 parts of eclipta alba and 10-20 parts of rhizoma curculiginis. According to the traditional Chinese medicine preparation, the disease cause is solved by tonifying qi and nourishing yin and tonifying lung and kidney, the root cause is eliminated by soothing liver and strengthening spleen, and nourishing blood and smoothing nutrition qi, and the current problems are treated by strengthening thoroughfare and conception vessels and reinforcing main and collateral channels and stanching.
+104258066	55	112	Kidney-Yin Deficiency-Type Dysfunctional Uterine Bleeding	Disease	MESH:D007674
+104258066	225	282	kidney-yin deficiency-type dysfunctional uterine bleeding	Disease	MESH:D007674
+104258066	604	613	cyrtomium	Chemical
+104258066	622	628	carbon	Chemical	MESH:D002254
+104258066	651	660	rehmannia	Disease
+104258066	677	698	dwarf lilyturf tubers	Disease	MESH:D004393
+104258066	715	730	corydalis tuber	Disease	MESH:D014402
+104258066	873	893	cortex lycii radicis	Disease	MESH:D001480
+104258066	910	924	polygala roots	Disease	MESH:D011843
+104258066	941	955	rhizoma cyperi	Disease
+104258066	1016	1027	poria cocos	Disease
+104258066	1085	1096	sanguisorba	Chemical
+104258066	1113	1125	eclipta alba	Disease	MESH:D003741
+104258066	1145	1165	rhizoma curculiginis	Disease
+
+104258087|t| Heat-Clearing, Blood-Cooling And Blood-Stanching Drug For Woman Menorrhagia And Preparation Method Thereof
+104258087|a| The invention discloses a heat-clearing, blood-cooling and blood-stanching drug for woman menorrhagia, wherein the drug is prepared from the following main raw materials in parts by weight: 12-22 parts of white peony root, 6-12 parts of rustcoloured crotalaria herb with root, 10-18 parts of common macrocarpium fruit, 5-8 parts of root or leaf of patenthairy melastoma, 9-18 parts of Chinese magnoliavine fruit, 10-20 parts of Chinese wolfberry root-bark, 6-15 parts of herb of tonkin pepper, 12-25 parts of yerbadetajo herb, 8-15 parts of lac, 5-9 parts of phellodendron bark and 4-8 parts of monorchid herminium herb. According to the invention, the heat-clearing, blood-cooling and blood-stanching drug for woman menorrhagia is simple to operate, low in cost of medicinal materials, less in side effects, and high in cure rate.
+104258087	65	76	Menorrhagia	Disease	MESH:D008595
+104258087	199	210	menorrhagia	Disease	MESH:D008595
+104258087	346	369	rustcoloured crotalaria	Disease
+104258087	469	478	melastoma	Disease
+104258087	650	653	lac	Chemical	MESH:C028562
+104258087	655	658	5-9	Chemical	MESH:C087567
+104258087	826	837	menorrhagia	Disease	MESH:D008595
+
+104258105|t| Method For Preparing Powder Tea By Adopting Microwave Drying Of Dendrobium Nobile Lindl
+104258105|a| A method for preparing powder tea by adopting microwave drying of dendrobium nobile lindl comprises the following steps: leaves of fresh dendrobium nobile lindl are removed, the fresh dendrobium nobile lindl is washed, drained and placed in a 500-3,000 w microwave field to dry for 5-60 min until the water content is 50%; then the dendrobium nobile lindl is cut into slices by a traditional Chinese medicine slicer, the dendrobium nobile lindl slices are placed in 500-1,500 w microwave to dry for 5-30 min, and a dry dendrobium nobile lindl product with the water content lower than 12% is obtained; and the dry dendrobium nobile lindl product is pulverized by a pulverizer and bagged. The method has the advantages of high heating speed, uniform inner and outer heating, sterilization, non-pollution, low carbon, energy saving, low production cost and high drying efficiency, and can further improve the heating quality greatly, maintain nutritional components of the raw material and prevent damage and loss of active ingredients in the material.
+104258105	65	75	Dendrobium	Chemical
+104258105	156	166	dendrobium	Chemical
+104258105	227	237	dendrobium	Chemical
+104258105	274	284	dendrobium	Chemical
+104258105	422	432	dendrobium	Chemical
+104258105	511	521	dendrobium	Chemical
+104258105	609	619	dendrobium	Chemical
+104258105	704	714	dendrobium	Chemical
+
+104258109|t| Traditional Chinese Medicine Compound Preparation For Treating Migraine Disease And Preparation Method Thereof
+104258109|a| The invention discloses a traditional Chinese medicine compound preparation for treating a migraine disease and a preparation method thereof. The traditional Chinese medicine compound preparation is prepared by nine traditional Chinese medicines, namley angelica sinensis, ligusticum wallichii, rhizoma gastrodiae, bombyx batryticatus, earthworm, radix bupleuri, salviae miltiorrhizae, scorpion and centipede through a scientific processing technology. According to the invention, based on the theory that stasis is a pathological product of migraine, and obstruction and stagnation by blood stasis and wind-yang nuisance are pathogenesis of the migraine disease, a method for treating the blood stasis and wind syndrome migraine through activating blood and expelling wind is provided, so that the blood stasis is dissipated, and the liver wind is converged to reduce the frequency of relapse; the traditional Chinese medicine compound preparation has the characteristics that the migraine symptom can be alleviated, the relapse frequency is reduced, the duration of pain is shortened, and part of patients is healed; the traditional Chinese medicine compound preparation has good clinical treatment effects, also has the characteristics of small side effects, high convenience for carrying and taking, low price and the like, and the patient's mental and economic burden can be reduced.
+104258109	64	80	Migraine Disease	Disease	MESH:D008881
+104258109	204	220	migraine disease	Disease	MESH:D008881
+104258109	376	384	sinensis	Chemical	MESH:C417765
+104258109	408	426	rhizoma gastrodiae	Disease
+104258109	655	663	migraine	Disease	MESH:D008881
+104258109	699	711	blood stasis	Disease	MESH:D054070
+104258109	759	775	migraine disease	Disease	MESH:D008881
+104258109	803	815	blood stasis	Disease	MESH:D054070
+104258109	825	842	syndrome migraine	Disease	MESH:D008881
+104258109	912	924	blood stasis	Disease
+104258109	1095	1103	migraine	Disease	MESH:D008881
+104258109	1181	1185	pain	Disease	MESH:D010146
+
+104258155|t| Pharmaceutical Composition For Treating Diabetes Insipidus
+104258155|a| The invention relates to pharmaceutical composition for treating the diabetes insipidus. The pharmaceutical composition is prepared from bulk drugs by weight as follows: 10 g of dodder seed, 10 g of dendrobium, 7 g of common anemarrhena rhizome, 5 g of cape jasmine fruit, 13 g of common yam rhizome, 3 g of pseudostellaria maximowicziana, 10 g of golden thread, 5 g of creeping fig fruit, 5 g of solomonseal rhizome, 10 g of fragrant solomonseal rhizome, 5 g of flatstem milkvetch seed and 5 g of marsh orchis herb. The pharmaceutical composition consists of pure traditional Chinese medicines, the dodder seed, the creeping fig fruit and the flatstem milkvetch seed have effects of nourishing kidneys and controlling nocturnal emission, the solomonseal rhizome, the fragrant solomonseal rhizome and the dendrobium have effects of tonifying qi and nourishing yin, the common yam rhizome, the marsh orchis herb and the pseudostellaria heterophylla have effects of tonifying spleens and promoting body fluid secretion, the common anemarrhena rhizome, the cape jasmine fruit and the golden thread have effects of clearing stomachs and purging intense heat, all the medicines are matched and cooperate with one another, and clinical experiments prove that the pharmaceutical composition is exact and significant in curative effect, high in effective rate and free of toxic and side effects.
+104258155	41	59	Diabetes Insipidus	Disease	MESH:D003919
+104258155	130	148	diabetes insipidus	Disease	MESH:D003919
+104258155	260	270	dendrobium	Chemical
+104258155	286	305	anemarrhena rhizome	Disease
+104258155	524	547	flatstem milkvetch seed	Disease	MESH:D009366
+104258155	705	728	flatstem milkvetch seed	Disease
+104258155	866	876	dendrobium	Chemical
+104258155	980	1008	pseudostellaria heterophylla	Disease
+104258155	1090	1109	anemarrhena rhizome	Disease
+
+104258197|t| Traditional Chinese Medicine Preparation For Treating Osteoproliferation
+104258197|a| The invention discloses a traditional Chinese medicine preparation for treating osteoproliferation. The traditional Chinese medicine preparation comprises the following selected bulk drugs by weight: 5-15 g of herba pyrolae., 5-15 g of drynaria rhizome, 5-15 g of radish seed, 5-10 g of radix cyathulae, 5-15 g of radix clematidis, 5-15 g of caulis spatholobi, 5-15 g of mulberry twig, 3-9 g of radix semiaquilegiae, 3-9 g of herba violae, 10-20 g of coix seed, 5-15 g of root of Chinese elder herb, 5-15 g of frankincense, 5-15 g of ground beetle, 5-15 g of root of damnacanthus indicus and 5-15 g of pangolin scale. The selected drugs are reasonable in compatibility, and have the functions of removing stasis and stimulating meridians, expelling wind and strengthening tendons, clearing away heat and detoxifying, and activating blood circulation and eliminating mass, so that the medicine preparation achieves the efficacies of removing stasis, stopping pain, activating blood circulation and stimulating meridians, and is worthy of clinical popularization and application.
+104258197	311	327	drynaria rhizome	Disease
+104258197	424	434	spatholobi	Disease
+104258197	476	490	semiaquilegiae	Disease
+104258197	677	685	pangolin	Chemical
+104258197	1033	1037	pain	Disease	MESH:D010146
+
+104258240|t| Spleen-Tonifying Digestant Tea And Preparation Method Thereof
+104258240|a| The invention provides spleen-tonifying digestant tea and a preparation method thereof. The spleen-tonifying digestant tea comprises the following components: rhizoma kaempferiae, hawthorn, medicated leaven, microcos leaves, diverse wormwood herbs, red yeast rice, galanga galangal seeds, emblic leafflower fruits, seabuckthorn, endothelium corneum gigeriae galli, Chinese fevervine herbs, malts, radish seeds, lesser galangal rhizomes, endives, scorch-fried areca and auriculate cynanchum tuber. A preparation method of the spleen-tonifying digestant tea comprises the following steps of: cleanly washing and drying the raw materials for later use; sterilizing the raw materials by using an ultraviolet lamp; stirring and mixing; pulverizing the raw materials by virtue of a pulverizer to be powder; filtering the powder by using a filter screen; collecting the powder; respectively packaging 9g of powder into each follicular paper bag to obtain the spleen-tonifying digestant tea. Because the raw materials are combined, the tea has the functions of tonifying the spleen and supplementing qi, digesting and appetizing, regulating the flow of qi and removing stagnation, warming spleen and stomach for dispelling cold and clearing away hot stagnation, has significant effect and quick response, is simple in preparation process and suitable for large-scale production.
+104258240	223	230	rhizoma	Disease
+104258240	329	351	galanga galangal seeds	Disease	MESH:D009366
+104258240	437	446	fevervine	Chemical
+104258240	482	499	galangal rhizomes	Disease
+104258240	533	559	auriculate cynanchum tuber	Disease	MESH:D014402
+
+104258307|t| Traditional Chinese Medicine Combination For Relieving Swelling And Pain After Fracture
+104258307|a| The invention relates to a traditional Chinese medicine combination for relieving swelling and pain after fracture. The traditional Chinese medicine combination comprises the following traditional Chinese medicine materials: ahiry birthwort, common nutmeg, Chinese peony, clove, safflower, cinnamon bark, cinnamon twig, red halloysite, sappan wood, silkworm larva, pangolin scale, mulberry bark, zedoary root, lycopus herb, chuanxiong rhizome and lemonfragrant angelica root. The combination has the advantages that the compatibility of the traditional Chinese medicines is obtained after various clinical formulas, the medicine directly reaches infected parts after being taken, the combination has the functions of eliminating the swelling, alleviating pain, dissolving the stagnant, promoting blood circulation, promoting pus discharge, activating the channels, promoting granulation and the like, and the combination can rapidly expand vessels and promote local qi and blood to be smooth, quicken the absorbing of extravasated blood and relieve the swelling, regulate the function of the nervous system, restrain pain, speed up metabolism, improve the nutrition of local tissue and the whole body function, enhance blood circulation, thoroughly relieve pain, swelling, cyanosis and dysfunction, ensure that blood circulation recovers self regulation function, regulate endocrine dysfunction, and finally achieve the ultimate purpose of relieving swelling and pain after fracture.
+104258307	56	73	Swelling And Pain	Disease	MESH:D010146
+104258307	172	180	swelling	Disease	MESH:D004487
+104258307	185	189	pain	Disease	MESH:D010146
+104258307	196	204	fracture	Disease	MESH:D050723
+104258307	380	388	cinnamon	Chemical	MESH:C510049
+104258307	395	403	cinnamon	Chemical	MESH:C510049
+104258307	455	463	pangolin	Chemical
+104258307	514	532	chuanxiong rhizome	Disease
+104258307	823	831	swelling	Disease	MESH:D004487
+104258307	845	849	pain	Disease	MESH:D010146
+104258307	1143	1151	swelling	Disease	MESH:D004487
+104258307	1207	1211	pain	Disease	MESH:D010146
+104258307	1347	1351	pain	Disease	MESH:D010146
+104258307	1353	1361	swelling	Disease	MESH:D004487
+104258307	1363	1387	cyanosis and dysfunction	Disease	MESH:D003490
+104258307	1463	1484	endocrine dysfunction	Disease	MESH:D004700
+104258307	1540	1548	swelling	Disease	MESH:D004487
+104258307	1553	1557	pain	Disease	MESH:D010146
+104258307	1564	1572	fracture	Disease	MESH:D050723
+
+104258329|t| External Ointment For Treating Gout And Preparation Method Thereof
+104258329|a| The invention discloses an external ointment for treating gout and a preparation method thereof, aiming at solving a problem of treating chronic gouty arthritis. The preparation method is characterized by comprising the following steps: (1) carrying out aqueous extraction and concentration on periostracum cicada, root of kudzu vine, mussel, tabasheer and perilla stem, and spray-drying to obtain primary materials; (2) heating common perilla oil to 200 DEG C, adding scallion and frying for 3min; adding locust bean gum, dried ginger and coarse powder of arisaema fargesii, uniformly stirring, heating for 10min, and filtering oil to obtain filtered oil; (3) grinding pearl mother, filtering through a sieve of 150 meshes, and reserving fine powder for later use; and (4) heating the oil generated from the step 2 to 150 DEG C, adding the primary materials generated from the step 1, uniformly mixing and heating for 5min, naturally cooling to 60 DEG C, adding pollen pini and fine powder of the pearl mother, continuing to stir, spraying cold water on surface when decocting the materials into the form of drops, removing water toxicity, cooling to normal temperature and sub-packaging to obtain the ointment. Clinical experiments prove that the ointment disclosed by the invention has a characteristic of good curative effect on treating gouty arthritis, and the ointment is worthy of clinical application and popularization.
+104258329	127	131	gout	Disease	MESH:D006073
+104258329	214	229	gouty arthritis	Disease	MESH:D015210
+104258329	626	643	arisaema fargesii	Disease
+104258329	1200	1208	toxicity	Disease	MESH:D064420
+104258329	1411	1426	gouty arthritis	Disease	MESH:D015210
+
+104258360|t| Traditional Chinese Medicine Combination For Curing Menstrual Colic And Preparation Method Of Preparations Thereof
+104258360|a| The invention discloses a traditional Chinese medicine combination for curing menstrual colic. The traditional Chinese medicine combination is prepared by 25 to 35 parts of Chinese angelica root, 15 to 25 parts of rhizome of Sichuan lovage, 6 to 10 parts of cassia bark, 15 to 25 parts of cyperirhizome, 25 to 35 parts of fox glove, 15 to 25 parts of ledebouriella root, 6 to 10 parts of fresh ginger, 6 to 10 parts of leaf of argyi wormwood, 10 to 20 parts of Indian bread, 15 to 25 parts of red peony root, and 5 to 15 parts of zedoary. The preparations of the traditional Chinese medicine combination comprise the followings: water decoction, capsule, tablet, granules, water pill and honeyed pill. According to the characteristic of repeated attack of menstrual colic, the traditional Chinese medicine combination for curing menstrual colic does not have side-effects of chemical drugs, and can be taken for a long time.
+104258360	544	558	argyi wormwood	Disease
+
+104258412|t| A Targeting Pyrolin Composition, A Preparing Method Thereof And Applications Of The Composition
+104258412|a| The invention provides a preparing method of a targeting pyrolin composition. The targeting pyrolin composition is prepared by mixing pyrolin and rabbit anti-escherichia coli, adding polylactic acid (PLA), mixing, allowing the mixture to stand at 4-6 DEG C for 24-40 h, removing supernatant liquid, and subjecting the deposition to freeze-drying. The invention also provides applications of the targeting pyrolin composition in preparation of targeting medicines aiming at escherichia coli. By coupling the pyrolin and an escherichia coli serum antibody, the targeting pyrolin composition of veterinary use specially aiming at the escherichia coli is prepared. The escherichia coli serum antibody is used for searching and capturing the escherichia coli, and the pyrolin is used for inhibiting and killing the escherichia coli, thus performing 'accurate strike' for the escherichia coli, and enhancing the antibacterial function of the pyrolin.
+104258412	155	162	pyrolin	Chemical
+104258412	190	197	pyrolin	Chemical
+104258412	232	239	pyrolin	Chemical
+104258412	281	296	polylactic acid	Chemical	MESH:C010506
+104258412	298	301	PLA	Chemical	MESH:C010506
+104258412	503	510	pyrolin	Chemical
+104258412	605	612	pyrolin	Chemical
+104258412	667	674	pyrolin	Chemical
+104258412	861	868	pyrolin	Chemical
+104258412	1034	1041	pyrolin	Chemical
+
+104261456|t| Preparation Method For Cerium Dioxide Nanobelts Or Cerium Dioxide Nanotubes
+104261456|a| The invention discloses a preparation method for cerium dioxide nanobelts or cerium dioxide nanotubes, and particularly relates to the preparation method for the cerium dioxide nanobelts or the cerium dioxide nanotubes by utilizing an electrostatic spinning technique. The preparation method comprises the following steps: adding cerium salt to N,N-dimethyl formamide(DMF), and magnetic stirring the mixture of the cerium salt and the N,N-dimethyl formamide until the mixture is completely dissolved; adding polyvinylpyrrolidone to the solution, and stirring the mixture of the cerium salt, the N,N-dimethyl formamide(DMF) and the polyvinylpyrrolidone to obtain a ropy clear solution as spinning raw liquid; spinning the raw liquid by utilizing an electrostatic spinning method; finally, adopting different calcining systems to obtain the cerium dioxide nanobelts or the cerium dioxide nanotubes. The preparation method disclosed by the invention is simple, through the use of the preparation method, the size distribution of the obtained cerium dioxide nanobelts or the obtained cerium dioxide nanotubes is uniform, the specific surface area is large, and the cerium dioxide nanobelts or the cerium dioxide nanotubes have a wide application prospect in the high science and technology fields of sensors, ultraviolet absorbents, vehicle exhaust cocatalysts, and the like.
+104261456	24	76	Cerium Dioxide Nanobelts Or Cerium Dioxide Nanotubes	Chemical	MESH:C030583
+104261456	127	141	cerium dioxide	Chemical	MESH:C030583
+104261456	155	179	cerium dioxide nanotubes	Chemical	MESH:C030583
+104261456	240	264	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	272	286	cerium dioxide	Chemical	MESH:C030583
+104261456	425	445	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	446	449	DMF	Chemical	MESH:C503868
+104261456	515	535	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	586	606	polyvinylpyrrolidone	Chemical	MESH:D011205
+104261456	675	695	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	696	699	DMF	Chemical	MESH:C503868
+104261456	709	729	polyvinylpyrrolidone	Chemical	MESH:D011205
+104261456	917	941	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	949	963	cerium dioxide	Chemical	MESH:C030583
+104261456	1117	1141	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	1165	1182	dioxide nanotubes	Chemical	MESH:D045333
+104261456	1239	1263	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	1271	1285	cerium dioxide	Chemical	MESH:C030583
+
+104262366|t| Amino Acid Schiff Base Ligand Silver Complexes, And Preparation Method And Antibacterial Application Thereof
+104262366|a| The invention provides two complexes formed by a salicylaldehyde L-histidine schiff base ligand, a reduced ligand of the salicylaldehyde L-histidine schiff base ligand and silver, and a preparation method and an antibacterial application of the complexes. The two silver complexes can be represented by general formulas {Ag(L)}n and Ag2(L)2.3H2O, wherein the structural formulas of L and L are as shown in the figure. The preparation method comprises the following steps: firstly, restoring C=N double bonds in the salicylaldehyde L-histidine schiff base ligand (HL) into a C-N single bond by using NaBH4 to obtain a reduced ligand (HL); and then enabling the two ligands to respectively act together with AgNO3 to obtain two silver complexes. The amino acid schiff base ligand silver complexes provided by the invention are brand new in structure and simple in preparation method, have significant antibacterial activity, and are expected to be applied to antibacterial materials and antibacterial medicines.
+104262366	160	187	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	232	259	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	431	439	{Ag(L)}n	Chemical	MESH:D012834
+104262366	444	456	Ag2(L)2.3H2O	Chemical	MESH:C057495
+104262366	626	653	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	674	676	HL	Disease	MESH:C538324
+104262366	710	715	NaBH4	Chemical	MESH:C059662
+104262366	744	746	HL	Disease
+104262366	817	822	AgNO3	Chemical
+104262366	859	869	amino acid	Chemical	MESH:D000596
+
+104262647|t| Preparation And Applications Of Pharmaceutic Adjuvant
+104262647|a| The invention discloses preparation and applications of a pharmaceutic adjuvant. The preparation method has the following advantages: (1) the natural cellulose is taken as the raw material, is easily available, cheap, renewable, degradable, safe, and environment-friendly, and has good biological compatibility; (2) the technology is simple and practicable, the reaction conditions are mild, precise equipment is not required, and the obtained pharmaceutic adjuvant (crosslinked hydroxypropyl methylcellulose) has a very good disintegrating effect.
+104262647	535	564	hydroxypropyl methylcellulose	Chemical	MESH:D065347
+
+104264442|t| Method For Preparing Nano-Coating By Using Pecvd (Plasma Enhanced Chemical Vapor Deposition) Of Teos (Tetraethyl Orthosilicate)
+104264442|a| The invention provides a method for preparing a nano-coating by using PECVD (Plasma Enhanced Chemical Vapor Deposition) of TEOS (tetraethyl orthosilicate). The method comprises the following step: with a textile material as a base material and with the heated and vaporized TEOS gas as working gas, introducing oxygen, thereby generating a laminated film of plasma deposited on the surface of the base material. The method disclosed by the invention has the beneficial effects that the nano-coating has an ultraviolet-resistant function, can effectively protect the skin, and is extremely high in air permeability and hydrophilcity, so that the textile material is breathable and sweat-absorbent when worn, and a wearer feels very comfortable. All the processes are finished in vacuum, the treatment time is short, the process is simple, the efficiency is extremely high, and the whole reaction process is completely clean and environmentally friendly. According to the prepared film similar to nano-silica, the nano polymer coating and the base material are bonded through covalent bonds very tightly and firmly, so that the coating is unlikely to be separated from the surface of the base material.
+104264442	97	101	Teos	Chemical	MESH:C040733
+104264442	103	127	Tetraethyl Orthosilicate	Chemical	MESH:C040733
+104264442	253	257	TEOS	Chemical	MESH:C040733
+104264442	259	283	tetraethyl orthosilicate	Chemical	MESH:C040733
+104264442	404	408	TEOS	Chemical	MESH:C040733
+104264442	441	447	oxygen	Chemical	MESH:D010100
+
+104269565|t| Preparation Method And Use Of Multiwalled Carbon Nanotube (Mwcnt)-Loaded Ni0.85Se Composite Material
+104269565|a| The invention relates to the technical field of novel energy and novel material application and discloses a preparation method of a multiwalled carbon nanotube (MWCNT)-loaded Ni0.85Se composite material and a use of the MWCNT-loaded Ni0.85Se composite material as a microbiological fuel cell cathode catalyst. The Ni0.85Se/MWCNT nanometer composite material is a compound of nano-Ni0.85Se and MWCNT. The Ni0.85Se/MWCNT nanometer composite material prepared by a hydrothermal method can be used as a cathode catalyst in a microbiological fuel cell and can improve cathode oxygen reduction performances and microbiological fuel cell electrogenesis capability. The cathode catalyst has the advantages of preparation simpleness, low cost and high activity.
+104269565	674	680	oxygen	Chemical	MESH:D010100
+
+104271136|t| Pharmaceutical Diagnostic
+104271136|a| The invention is directed, in part, to selective cancer treatment regimes based on assaying for the presence or absence of a mutation in a nucleic acid that encodes glutamine at position 859 of the catalytic p110alpha subunit of PI3K.
+104271136	77	83	cancer	Disease	MESH:D009369
+104271136	193	202	glutamine	Chemical
+104271136	260	261	K	Chemical	MESH:D011188
+
+104271320|t| Particle Adsorption Probe
+104271320|a| Provided is a novel particle adsorption probe (1000) that picks up particles by adsorbing said particles. The particle adsorption probe (1000) does not require physical stress to be applied when picking up particles, and the surface of the particle adsorption probe is not contaminated with foreign particles when picking up particles. Furthermore, the particle adsorption probe (1000) is capable of selectively picking up particles with a specific diameter from particle groups with a wide distribution of particle sizes, and allows particles to be analyzed and evaluated in an analyzer as is after being picked up. This particle adsorption probe (1000) has carbon nanotube aggregates (100), which are provided with multiple carbon nanotubes (10).
+104271320	687	713	carbon nanotube aggregates	Disease	MESH:D001791
+104271320	745	770	multiple carbon nanotubes	Disease	MESH:D000015
+
+104271733|t| Recombinant Strain Of Mycobacterium Bovis Bacillus Calmette-Guerin (Bcg), Immunogenic Composition And Use
+104271733|a| The present invention relates to recombinant strains of Mycobacterium that encode the mutated Escherichia coli LT heat-labile toxin or the A subunit of the mutated Escherichia coli LT heat-labile toxin. The present invention also relates to strains of Mycobacterium that encode the LT heat-labile toxin or the A subunit of the LT heat-labile toxin of Escherichia coli mutated in position 63. Specifically, the present invention relates to strains of Mycobacterium that encode the LT heat-labile toxin or the A subunit of the LT heat-labile toxin of Escherichia coli mutated in position 63 from serine to lysine. The present invention also provides immunogenic compositions that comprise the strains of the present invention. The present invention further provides for the use of said strains and immunological compositions in the production of a vaccine for preventing tuberculosis and infections caused by Mycobacterium tuberculosis. Lastly, the present invention relates to methods for preventing or treating tuberculosis in animals.
+104271733	23	67	Mycobacterium Bovis Bacillus Calmette-Guerin	Chemical	MESH:D001500
+104271733	164	177	Mycobacterium	Chemical	MESH:C052242
+104271733	360	373	Mycobacterium	Chemical	MESH:C052242
+104271733	558	571	Mycobacterium	Chemical	MESH:C052242
+104271733	702	708	serine	Chemical	MESH:C047902
+104271733	712	718	lysine	Chemical	MESH:C011679
+104271733	977	1004	tuberculosis and infections	Disease	MESH:D014376
+104271733	1015	1028	Mycobacterium	Chemical	MESH:C052242
+104271733	1029	1041	tuberculosis	Disease	MESH:D014376
+104271733	1119	1131	tuberculosis	Disease	MESH:D014376
+
+104273533|t| Health Food With Improvement Effect On Blood Pressure
+104273533|a| The invention particularly provides a health food with an improvement effect on blood pressure, relating to the technical field of health foods. The health food with the improvement effect on the blood pressure comprises the following raw drugs in parts by weight: 4-9 parts of chrysanthemum, 2-12 parts of polygonatum odoratum, 4-9 parts of mulberry leaves, 5-13 parts of kudzuvine roots, 2-8 parts of scrophularia ningpoensis, 5-10 parts of fallopia multiflora, 3-9 parts of carcuma longa, 6-16 parts of rhus chinensis mill, 7-18 parts of highland barley and 10-20 parts of alginic acid. All the raw materials of the product are selected from Chinese herbal medicines from nature; the formula is scientific and reasonable and the health food has a certain improvement effect on hypertension; and the health food is very safe and is suitable for patients with the hypertension to eat.
+104273533	363	383	polygonatum odoratum	Chemical
+104273533	429	438	kudzuvine	Chemical
+104273533	459	483	scrophularia ningpoensis	Disease
+104273533	499	518	fallopia multiflora	Disease
+104273533	533	546	carcuma longa	Disease
+104273533	562	581	rhus chinensis mill	Disease	MESH:D011040
+104273533	632	644	alginic acid	Chemical	MESH:D000464
+104273533	836	848	hypertension	Disease	MESH:D006973
+104273533	921	933	hypertension	Disease	MESH:D006973
+
+104274366|t| Rose Fragrance Type Perfume
+104274366|a| The invention relates to perfume and in particular relates to rose fragrance type perfume. The rose fragrance type perfume comprises the following components in weight ratio: rose centifolia essential oil produced in Morocco, Provence rose, rose bud essential oil, rosemary essential oil, clove essential oil, German chamomile essential oil, cypress essential oil, tea tree essential oil, quercetin, vinyl benzoate, 1-pentanol, neryl acetate, salicylate, rose oxide, methyl eugenol, linalyl fformate and the balance of ethyl alcohol. The rose fragrance type perfume is high in quality, has long fragrance lasting effect, can be used for regulating endocrinal organs, promoting secretion of hormones and promoting estrus, so that physical and psychological activities of a human body are well developed.
+104274366	419	428	quercetin	Chemical	MESH:D011794
+104274366	430	444	vinyl benzoate	Chemical	MESH:D001565
+104274366	446	456	1-pentanol	Chemical	MESH:C024999
+104274366	458	471	neryl acetate	Chemical	MESH:C015234
+104274366	473	483	salicylate	Chemical	MESH:D012459
+104274366	490	495	oxide	Chemical	MESH:D016877
+104274366	497	511	methyl eugenol	Chemical	MESH:C005223
+104274366	513	529	linalyl fformate	Chemical	MESH:C074463
+104274366	549	562	ethyl alcohol	Chemical	MESH:D000431
+
+104274368|t| Perfume For Ladies
+104274368|a| The invention relates to perfume and in particular relates to perfume for ladies. The perfume for the ladies comprises the following components in percent by weight: 3-5% of fixative, 0.5-1% of cananga odorata essential oil, 4-6% of rose essential oil, 0.6-1.5% of citronella essential oil, 0.2-0.4% of rosemary essential oil, 0.2-0.4% of chamomile essential oil, 1.5-2% of lavender essential oil, 2-6% of sweet orange essential oil, 1-2% of geranium essential oil, 0.02-0.05% of linalool, 0.01-0.02% of vinyl benzoate, 0.01-0.03% of acetic-3-vinyl ester, 0.02-0.04% of ger-anylformate, 0.01-0.05% of alpha-perilla alkene, 0.01-0.03% of pentadecane, 0.02-0.05% of salicylate and the balance of 70-85% ethyl alcohol. The perfume for the ladies has fragrance of fruits, flowers and tea and is low in volatility.
+104274368	286	296	citronella	Chemical	MESH:C076730
+104274368	463	471	geranium	Chemical	MESH:C027250
+104274368	501	509	linalool	Chemical	MESH:C018584
+104274368	525	539	vinyl benzoate	Chemical	MESH:D001565
+104274368	555	575	acetic-3-vinyl ester	Chemical	MESH:C011566
+104274368	658	669	pentadecane	Chemical	MESH:C033245
+104274368	685	695	salicylate	Chemical	MESH:D012459
+104274368	722	735	ethyl alcohol	Chemical	MESH:D000431
+104274368	801	804	tea	Disease
+
+104274373|t| Acne Controlling And Moisturizing Toner
+104274373|a| The invention discloses an acne controlling and moisturizing toner, and relates to the field of a daily skin care product. The acne controlling and moisturizing toner is composed of the following raw materials in parts by weight: 3-5 parts of a pure plant additive, 3-5 parts of glycerol, 2-4 parts of butanediol, 0.05-0.2 part of hyaluronic acid, 0.4-0.6 part of polyethylene glycol 400 (PEG-400), 0.03-0.05 part of ethylene diamine tetraacetic acid-2Na (EDTA-2Na), 0.2-0.4 part of lauryl alcohol ether, 0.2-0.4 part of diazolidinyl urea, 0.05-0.1 part of essence, 0.03-0.05 part of citric acid, 0.02-0.04 part of tocopheryl acetate, 0.01-0.03 part of hydrogenated castor oil and 100-110 parts of de-ionized water; in every 100g of the acne controlling and moisturizing toner, the pure plant additive comprises the following components in percentage by weight: 0.5-2g of a bitter gourd extracting solution, 0.5-1g of a scutellaria baicalensis extracting solution, 0.5-1g of a rosemary extracting solution, 0.5-1g of a witch hazel extracting solution and 0.5-1g of a wild chrysanthemum flower extracting solution. The acne controlling and moisturizing toner disclosed by the invention solves problems of a toner in current market which is serious in irritation, poor in quality and not significant in effect; and the toner is free from irritation, capable of cleaning skin, supplementing nutrient substances, and has functions of controlling acnes and moisturizing.
+104274373	321	329	glycerol	Chemical	MESH:D005990
+104274373	344	354	butanediol	Chemical	MESH:D002072
+104274373	373	388	hyaluronic acid	Chemical	MESH:D006820
+104274373	406	429	polyethylene glycol 400	Chemical	MESH:D011092
+104274373	431	438	PEG-400	Chemical	MESH:D011092
+104274373	459	496	ethylene diamine tetraacetic acid-2Na	Chemical	MESH:D004533
+104274373	498	506	EDTA-2Na	Chemical	MESH:D004533
+104274373	525	539	lauryl alcohol	Chemical	MESH:D007851
+104274373	563	580	diazolidinyl urea	Chemical	MESH:C044982
+104274373	626	637	citric acid	Chemical	MESH:D019343
+104274373	657	675	tocopheryl acetate	Chemical	MESH:D024502
+104274373	1292	1302	irritation	Disease
+104274373	1378	1388	irritation	Disease	MESH:D001523
+
+104274474|t| Doxycycline Hydrochloride Injection And Preparation Method Thereof
+104274474|a| The invention relates to a doxycycline hydrochloride injection and a preparation method thereof, and belongs to the technical field of medicines, wherein every 100ml of the injection mainly comprises the following components by weight: 8-12g of doxycycline hydrochloride, 3-5g of magnesium chloride, 8-12g of polyinylpyrolidone, 1-3g of trimethoprim, 1-3g of flunixin meglumine, 35-45g of polyethylene glycol-400, 4-6g of carbamide, a proper amount of ethanol amine so that pH value of the injection is regulated to 2.8-3.2, and the balance being injection water. The doxycycline hydrochloride injection disclosed by the invention has the beneficial effects of reasonable formula, high bioavailability, obvious curative effect, and stable quality to keep relatively high bioactivity for long time.
+104274474	1	26	Doxycycline Hydrochloride	Chemical	MESH:D004318
+104274474	96	121	doxycycline hydrochloride	Chemical	MESH:D004318
+104274474	314	339	doxycycline hydrochloride	Chemical	MESH:D004318
+104274474	349	367	magnesium chloride	Chemical	MESH:D015636
+104274474	378	396	polyinylpyrolidone	Chemical
+104274474	406	418	trimethoprim	Chemical	MESH:D014295
+104274474	428	446	flunixin meglumine	Chemical	MESH:C014558
+104274474	458	481	polyethylene glycol-400	Chemical	MESH:D011092
+104274474	491	500	carbamide	Chemical	MESH:D014508
+104274474	521	534	ethanol amine	Chemical	MESH:D000588
+104274474	637	662	doxycycline hydrochloride	Chemical	MESH:D004318
+
+104274484|t| Application Of Lycium Barbarum Polysaccharide In Preparation Of Medicine For Treating Xerophthalmus
+104274484|a| The invention relates to a new application of lycium barbarum polysaccharide and in particular relates to an application of the lycium barbarum polysaccharide in preparation of a medicine for treating xerophthalmus, wherein molecular weight of lycium barbarum polysaccharide is more than 2000 Dalton. According to the application of the lycium barbarum polysaccharide in preparation of the medicine for treating the xerophthalmus, the medicine is an external preparation, like eye drops or gel, prepared from lycium barbarum polysaccharide and conventional dosage of medically acceptable auxiliary materials; the medicine has the advantages of being colourless, tasteless and non-irritant to mucous membranes on the surfaces of eyes.
+104274484	16	46	Lycium Barbarum Polysaccharide	Chemical	MESH:C500223
+104274484	65	73	Medicine	Chemical	MESH:C519022
+104274484	148	178	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	230	260	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	303	316	xerophthalmus	Disease
+104274484	346	376	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	439	469	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	518	531	xerophthalmus	Disease
+104274484	611	641	lycium barbarum polysaccharide	Chemical	MESH:C500223
+
+104274696|t| Traditional Chinese Medicine For Preventing And Treating Heart Disease, Cerebral Hemorrhage, Cerebral Infarction And Preparation Method Thereof
+104274696|a| The invention relates to a traditional Chinese medicine for preventing and treating heart disease, cerebral hemorrhage, cerebral infarction and a preparation method thereof. The traditional Chinese medicine is safe and effective, stable in quality and convenient to take. The traditional Chinese medicine for preventing and treating heart disease, cerebral hemorrhage, cerebral infarction is prepared from the following raw materials in parts by weight: 5-11 parts of safflower, 5-11 parts of salviae miltiorrhizae, 3-9 parts of leech, 9-16 parts of polygonum multiflorum, 9-16 parts of angelica, 5-11 parts of ginseng, 10-20 parts of astragalus, 5-16 parts of bighead atractylodes rhizome, 5-16 parts of rhizoma polygonati, 5-11 parts of eucommia ulmoides, 3-7 parts of cartialgenous and 6-12 parts of lily. The traditional Chinese medicine is prepared in the following manner: cleaning the raw materials, soaking the raw materials in warm water of 20-30 DEG C for 30 minutes, beginning to decoct the raw materials, using a big fire before the liquid medicine boils, changing to a slow fire after the liquid medicine boils, frequently stirring during decocting to fully decoct the liquid medicine, and decocting for 20-30 minutes after the liquid medicine boils.
+104274696	58	71	Heart Disease	Disease	MESH:D006331
+104274696	73	92	Cerebral Hemorrhage	Disease	MESH:D002543
+104274696	94	113	Cerebral Infarction	Disease	MESH:D002544
+104274696	230	243	heart disease	Disease	MESH:D006331
+104274696	245	264	cerebral hemorrhage	Disease	MESH:D002543
+104274696	266	285	cerebral infarction	Disease	MESH:D002544
+104274696	479	492	heart disease	Disease	MESH:D006331
+104274696	494	513	cerebral hemorrhage	Disease	MESH:D002543
+104274696	515	534	cerebral infarction	Disease	MESH:D002544
+104274696	696	705	polygonum	Chemical
+104274696	815	835	atractylodes rhizome	Disease
+104274696	851	869	rhizoma polygonati	Disease
+104274696	885	902	eucommia ulmoides	Disease
+
+104274700|t| Traditional Chinese Medicinal Disinfectant For Nursing And Preparation Method Thereof
+104274700|a| The invention belongs to the technical field of a traditional Chinese medicine, and in particular relates to a traditional Chinese medicinal disinfectant for nursing. The traditional Chinese medicinal disinfectant for nursing is prepared from the following crude medicines in parts by weight: 15 parts of ixora chinensis, 6-9 parts of anemone hupehensis, 8-10 parts of Chinese holly, 3-6 parts of foxtail millet, 9 parts of digua fig fruit, 8-10 parts of morinda umbellate, 7 parts of sanmon oil, 5-10 parts of chicken white feces, 7-10 parts of erectcalyx sullcap herb, 10 parts of clavateleaf oberonia herb, 11 parts of paliurus ramosissimus poir, 9 parts of pleurospermum hookeri, 8 parts of radix rubiae, 6 parts of long pepper root, 8-10 parts of stachys sieboldi, 6 parts of swallowtail caterpillar, 9 parts of she lingya grass and 5-10 parts of carapax eretmochelyos. The disinfectant disclosed by the invention, due to relatively low content of iodine, can relieve irritation of iodine to human skin; and clinically, cotton wool containing alcohol is generally not used for wiping twice, thus relieving workloads of nurses.
+104274700	393	408	ixora chinensis	Disease
+104274700	423	441	anemone hupehensis	Chemical	MESH:C084875
+104274700	671	696	clavateleaf oberonia herb	Disease
+104274700	940	947	carapax	Chemical
+104274700	1041	1047	iodine	Chemical	MESH:D007455
+104274700	1075	1081	iodine	Chemical	MESH:D007455
+104274700	1136	1143	alcohol	Chemical	MESH:D000431
+
+104274734|t| Traditional Chinese Medicine Composition For Treating Acute Conjunctivitis
+104274734|a| The invention relates to a traditional Chinese medicine composition for treating acute conjunctivitis. The traditional Chinese medicine composition is prepared from the following components: coptis chinensis, astragalus, corn stigma, schizonepeta, chrysanthemum, concha haliotidis, mint, angelica sinensis, radix isatidis, orange peel, semen plantaginis and liquorice. The traditional Chinese medicine composition for treating acute conjunctivitis disclosed by the invention has the advantages of low dosage, high cure rate and zero toxic or side effect. Moreover, the preparation method is simple and feasible and is suitable for large-scale production and popularization and application.
+104274734	55	75	Acute Conjunctivitis	Disease	MESH:D003232
+104274734	158	178	acute conjunctivitis	Disease	MESH:D003232
+104274734	268	284	coptis chinensis	Disease
+104274734	311	323	schizonepeta	Disease
+104274734	374	382	sinensis	Chemical	MESH:C417765
+104274734	504	524	acute conjunctivitis	Disease	MESH:D003232
+
+104276548|t| Preparation Method Of Ni3C Nanoparticles With Electromagnetic Wave Absorption Property
+104276548|a| The invention relates to a preparation method of nanoparticles, particularly a preparation method of Ni3C nanoparticles with electromagnetic wave absorption property. The preparation method comprises the following steps: in an inert gas protective atmosphere, by using nickel soluble salt as a nickel source and polyalcohol as a solvent, adding a certain alkali to regulate the pH value, and refluxing at certain temperature for some time to prepare the Ni3C magnetic nanoparticles by one step without adding any reducer. The size of the Ni3C magnetic nanoparticles can be regulated within the range of 50-1000nm; and the Ni3C nanoparticles are a soft magnetic material and have electromagnetic wave absorption property. The Ni3C magnetic nanoparticles can be synthesized on a large scale; and the method has the advantages of short synthesis period, simple facility request, accessible raw materials and no toxicity or harm.
+104276548	23	27	Ni3C	Chemical	MESH:C410766
+104276548	190	194	Ni3C	Chemical	MESH:C410766
+104276548	401	412	polyalcohol	Chemical	MESH:C063114
+104276548	543	547	Ni3C	Chemical
+104276548	627	631	Ni3C	Chemical
+104276548	711	715	Ni3C	Chemical
+104276548	814	818	Ni3C	Chemical
+104276548	997	1005	toxicity	Disease	MESH:D064420
+
+104276596|t| Oxygen Doped Zinc Sulfide Nanoparticle And Preparation Method Thereof
+104276596|a| The invention discloses an oxygen doped zinc sulfide nanoparticle having the grain size of 5-100nm and the chemical formula of ZnS (1-x) Ox, wherein x is greater than or equal to 0.1 and less than or equal to 0.5. The invention also discloses a preparation method of the oxygen doped zinc sulfide nanoparticle, a sulfur source solution is dripped into a zinc source solution, and the oxygen doped zinc sulfide nanoparticle is obtained by heating to a certain temperature for reaction; and solvents in the zinc and sulfur source solutions are a mixed solvent of a proton solvent and pyridine. The preparation method has the advantages of simple preparation process, easy operation and mild reaction conditions; needed zinc and sulfur sources are low in toxicity, and the preparation method is low cost and suitable for industrial production. The prepared oxygen doped zinc sulfide nanoparticle has good hydrophilic lipophilic properties, and has good application prospects in the application of electrical materials and optical materials.
+104276596	99	105	oxygen	Chemical	MESH:D010100
+104276596	112	116	zinc	Chemical
+104276596	112	124	zinc sulfide	Chemical
+104276596	343	349	oxygen	Chemical	MESH:D010100
+104276596	356	368	zinc sulfide	Chemical	MESH:C031238
+104276596	426	430	zinc	Chemical
+104276596	456	462	oxygen	Chemical	MESH:D010100
+104276596	469	481	zinc sulfide	Chemical	MESH:C031238
+104276596	577	581	zinc	Chemical	MESH:D015032
+104276596	654	662	pyridine	Chemical	MESH:D011725
+104276596	789	793	zinc	Chemical	MESH:D015032
+104276596	824	832	toxicity	Disease	MESH:D064420
+104276596	926	932	oxygen	Chemical	MESH:D010100
+104276596	939	951	zinc sulfide	Chemical	MESH:C031238
+
+104277081|t| Hydroxy Cinnamic Acid Amine Compounds And Preparation And Application Thereof
+104277081|a| The invention provides a hydroxy cinnamic acid amine alkaloid shown as the formula structure in the specification, or a physiologically acceptable salt, a crystalline hydrate or a solvate, and a preparation method and application thereof. The hydroxy cinnamic acid amine alkaloid has human COMT (catechol-O-methyltransferase) enzyme activity inhibition effect, can be used simultaneously with levodopa, and can reduce levodopa metabolism of COMT enzyme so as to improve levodopa bioavailability.
+104277081	9	28	Cinnamic Acid Amine	Chemical	MESH:D000588
+104277081	113	141	cinnamic acid amine alkaloid	Chemical	MESH:D000588
+104277081	331	359	cinnamic acid amine alkaloid	Chemical	MESH:D000588
+104277081	376	386	catechol-O	Chemical	MESH:D002396
+104277081	473	481	levodopa	Chemical	MESH:D007980
+104277081	498	506	levodopa	Chemical	MESH:D007980
+104277081	550	558	levodopa	Chemical	MESH:D007980
+
+104284675|t| Novel Binding Molecules With Antitumoral Activity
+104284675|a| The present invention relates to a binding molecule that specifically binds to two different epitopes of an antigen expressed on tumor cells, wherein the binding molecule comprises: (a) a first binding (poly)peptide that specifically binds to a first epitope of said antigen expressed on tumor cells, wherein said first binding (poly)peptide is a Fyn SH3-derived polypeptide; and (b) a second binding (poly)peptide that specifically binds to a second epitope of said antigen expressed on tumor cells. The present invention further relates to a nucleic acid molecule encoding the binding molecule of the invention, a vector comprising said nucleic acid molecule as well as a host cell or a non-human host transformed with said vector. The invention further relates to a method of producing a binding molecule of the invention as well as to pharmaceutical and diagnostic composition. Moreover, the present invention also relates to the binding molecule, the nucleic acid molecule, the vector or the host cell of the invention for use in the treatment of tumors.
+104284675	181	186	tumor	Disease	MESH:D009369
+104284675	340	345	tumor	Disease	MESH:D009369
+104284675	540	545	tumor	Disease	MESH:D009369
+104284675	1104	1110	tumors	Disease	MESH:D009369
+
+104284677|t| Compositions And Methods For The Diagnosis And Treatment Of Tumor
+104284677|a| The present invention is directed to compositions of matter useful for the diagnosis and treatment of tumor in mammals and to methods of using those compositions of matter for the same. In certain aspects, the isolated nucleic acid molecule comprises a nucleotide sequence having at least about 80% nucleic acid sequence identity, alternatively at least about 81%, 82%, 83%, 84%, 85%, 86%, 87%, 88%, 89%, 90%, 91%, 92%, 93%, 94%, 95%, 96%, 97%, 98%, 99% or 100% nucleic acid sequence identity, to (a) a DNA molecule encoding a full-length TAT polypeptide having an amino acid sequence as disclosed herein, a TAT polypeptide amino acid sequence lacking the signal peptide as disclosed herein, an extracellular domain of a transmembrane TAT polypeptide, with or without the signal peptide, as disclosed herein.
+104284677	61	66	Tumor	Disease	MESH:D009369
+104284677	170	175	tumor	Disease	MESH:D009369
+104284677	321	331	nucleotide	Chemical	MESH:D009711
+104284677	633	643	amino acid	Chemical	MESH:D000596
+104284677	676	702	TAT polypeptide amino acid	Chemical	MESH:C080974
+
+104286307|t| Liver-Nourishing Penthorum Chinense Pursh Tea
+104286307|a| The invention discloses liver-nourishing penthorum chinense pursh tea. The liver-nourishing penthorum chinense pursh tea is prepared from the following raw materials in parts by weight: 3-5 parts of penthorum chinense pursh, 1-2 parts of lactuca taiwaniana maxim, 2-5 parts of polygonum chinense, 1-3 parts of gardenia jasminoides ellis, 4-6 parts of ophiopogon japonicus, 1-3 parts of astragalus membranaceus, 1-2 parts of orange peels, 2-4 parts of eleutherococcus senticosus, 1-3 parts of fructus sophorae, 2-5 parts of schisandra chinensis, 1-2 parts of pulp of dogwood fruit, 1-2 parts of Chinese yams, 1-2 parts of scrophularia ningpoensis leaves, 1-2 parts of phragmitis, 2-3 parts of sida acuta burm, 1-2 parts of Kunlun chrysanthemum, 1-2 parts of purple flower sonchus oleraceus and 8-10 parts of compound soybean milk powder.
+104286307	108	117	pursh tea	Disease	MESH:C566483
+104286307	159	168	pursh tea	Disease	MESH:C566483
+104286307	286	304	lactuca taiwaniana	Disease
+104286307	325	334	polygonum	Chemical
+104286307	358	384	gardenia jasminoides ellis	Disease	MESH:D004613
+104286307	715	725	phragmitis	Disease
+
+104288027|t| Eye And Lip Cleansing Lotion And Preparation Method Thereof
+104288027|a| The invention discloses an eye and lip cleansing lotion and a preparation method thereof. The eye and lip cleansing lotion is characterized by comprising the following raw materials in parts by weight: 5-40 parts of plant extracting solution, 10-50 parts of grease and 1-10 parts of inorganic salt. The eye and lip cleansing lotion prepared by the formula is mild and non-irritating in texture and obvious in cleansing effect and has the effects of nourishing and moisturizing the skin.
+104288027	9	22	Lip Cleansing	Chemical	MESH:D003902
+
+104288058|t| Toner
+104288058|a| The invention discloses a toner. The toner comprises the following ingredients by weight percent: 8-15 percent of an angelica dahurica extractive, 7-14 percent of a radix zanthoxyli extractive, 5-12 percent of a lemon extractive, 10-18 percent of a fimbriatestipulate begonia extractive, 5-10 percent of a radix bupleuri extractive, 0.8-3 percent of a hyaluronic acid, 0.5-5 percent of dipotassium glycyrrhizinate, 5-11 percent of butanediol, 0.1-0.5 percent of an essence and the balance of deionized water. Most of the raw materials are natural vegetation with small dermal irritation; through the synergistic effect of the raw materials, the functions of whitening, moisture-holding and inflammation eliminating are achieved, and the absorption effect of skins is promoted, so that the skins can become smooth and moist; the toner is suitable for various skins.
+104288058	394	421	dipotassium glycyrrhizinate	Chemical	MESH:D019695
+104288058	439	449	butanediol	Chemical	MESH:D002072
+104288058	571	594	small dermal irritation	Disease	MESH:D001523
+104288058	698	710	inflammation	Disease	MESH:D007249
+
+104288143|t| Glycopyrrolate And Neosigmine Methylsuifate Combined Injection And Preparation Method Thereof
+104288143|a| The invention provides a stable glycopyrrolate and neosigmine methylsuIfate combined injection and a preparation method thereof. An injection additive is composed of a buffer of citric acid and sodium citrate, a stabilizer sodium acetate trihydrate and an isoosmotic adjusting agent sodium chloride. The pH value of the injection is 3.5-4.0, related substances are basically not increased under the condition of hot-pressure sterilization, the problems do not appear during storage that pH value decreases, visible foreign-matter inspection is unqualified and related substance inspection is unqualified, and the product is guaranteed to accord with prescription on drug standards and is convenient for clinical medication and popularization.
+104288143	20	44	Neosigmine Methylsuifate	Chemical
+104288143	128	142	glycopyrrolate	Chemical	MESH:D006024
+104288143	147	157	neosigmine	Chemical
+104288143	274	285	citric acid	Chemical	MESH:D019343
+104288143	290	304	sodium citrate	Chemical	MESH:C102006
+104288143	319	344	sodium acetate trihydrate	Chemical	MESH:D019346
+104288143	379	394	sodium chloride	Chemical	MESH:D012965
+
+104288156|t| Pharmaceutical Composition For Treating Stomach Cancer And Application Thereof
+104288156|a| The invention belongs to the technical field of medicines and in particular relates to a pharmaceutical composition for treating stomach cancer and application thereof. The pharmaceutical composition is prepared from the following raw materials: 6-hydroxydendroxine, phytolaccagenin A, friedelin-3beta-ol, resveratrol and calycosin. The pharmaceutical composition has the advantages of stable quality control, safety, effectiveness, nature, no toxicity, capacities of obviously inhibiting and killing gastric carcinoma cells and effectively treating stomach cancer and suitableness for long-term administration.
+104288156	41	55	Stomach Cancer	Disease	MESH:D013274
+104288156	210	224	stomach cancer	Disease	MESH:D013274
+104288156	329	346	hydroxydendroxine	Chemical
+104288156	403	412	calycosin	Chemical	MESH:C121707
+104288156	525	533	toxicity	Disease	MESH:D064420
+104288156	574	599	killing gastric carcinoma	Disease	MESH:D013274
+104288156	631	645	stomach cancer	Disease	MESH:D013274
+
+104288163|t| Application Of L-Arabinose To Preparation Of Medicine Or Health Care Products For Preventing Or Curing Hyperammonemia
+104288163|a| The invention discloses the application of L-arabinose to the preparation of medicine or health care products for preventing or curing hyperammonemia, and particularly discloses the application of L-arabinose to the preparation of medicine or health care products for reducing blood ammonia and/or endotoxin. The applicant finds, in experiments, that L-arabinose can effectively reduce the level of blood ammonia and endotoxin of a mouse (1 to 4 grams/kg/day), and body health is not damaged while the function is achieved.
+104288163	16	27	L-Arabinose	Chemical	MESH:D001089
+104288163	46	54	Medicine	Chemical	MESH:C519022
+104288163	104	118	Hyperammonemia	Disease	MESH:D022124
+104288163	163	174	L-arabinose	Chemical
+104288163	255	269	hyperammonemia	Disease	MESH:D022124
+104288163	317	328	L-arabinose	Chemical
+104288163	403	410	ammonia	Chemical	MESH:D000641
+104288163	418	427	endotoxin	Chemical	MESH:D004731
+104288163	471	482	L-arabinose	Chemical	MESH:D001089
+104288163	525	532	ammonia	Chemical	MESH:D000641
+104288163	537	546	endotoxin	Chemical	MESH:D004731
+
+104288246|t| Composite Traditional Chinese Medicine Composition For Treating Chronic Rhinitis And Preparation Method Thereof
+104288246|a| The invention belongs to the field of traditional Chinese medicine, and discloses a composite traditional Chinese medicine composition for treating chronic rhinitis and a preparation method thereof. The composite traditional Chinese medicine composition comprises the following components in weight: 6-11 parts of cocklebur fruit extraction outlier, 5-9 parts of scutellaria baicalensis aqueous extract, 7-13 parts of magnolia flower ethanol extract, 5-12 parts of radix semiaquilegiae zymolyte, 8-10 parts of 50 wt% ethanol extract of pogostemon cablin and 3-6 parts of mountain pine nut. The preparation steps of the composite traditional Chinese medicine composition comprise: extracting, column separating, hydrolyzing and the like, the prepared composite traditional Chinese medicine composition has a very high cure rate on chronic rhinitis.
+104288246	65	81	Chronic Rhinitis	Disease	MESH:D012220
+104288246	262	278	chronic rhinitis	Disease	MESH:D012220
+104288246	464	467	5-9	Chemical	MESH:C087567
+104288246	548	563	ethanol extract	Chemical	MESH:D000431
+104288246	585	608	semiaquilegiae zymolyte	Disease
+104288246	631	646	ethanol extract	Chemical	MESH:D000431
+104288246	952	960	rhinitis	Disease	MESH:D012220
+
+104288250|t| Liquid Vitamin Premixed Feed Preparation For Resisting Piglet Isospora As Well As Preparation Method And Application Of Liquid Vitamin Premixed Feed Preparation
+104288250|a| The invention discloses a liquid vitamin premixed feed preparation for resisting piglet isospora. The liquid vitamin premixed feed preparation is characterized in that every 1000 weight parts of the liquid vitamin premixed feed preparation comprises active components, 13.5-27 parts of an emulsifier and 2-5 parts of a co-emulsifier, wherein the active components comprises the following components in parts by weight: 3-7 parts of vitamin, 10-25 parts of sodium butyrate and 935-972 parts of Chinese medicine extraction. The invention aims to provide the liquid vitamin premixed feed preparation for resisting the piglet isospora with the special effects of eliminating dampness, astringing, resisting isospora, nourishing intestinal villi, repairing damaged intestinal mucosa, promoting digestive organ development and maintaining intestinal health condition, and also aims to provide a preparation method for the liquid vitamin premixed feed preparation for resisting the piglet isospora as well as application of the liquid vitamin premixed feed preparation in suckling piglet feeding.
+104288250	8	15	Vitamin	Chemical	MESH:D014801
+104288250	63	71	Isospora	Chemical
+104288250	121	135	Liquid Vitamin	Chemical	MESH:D014801
+104288250	196	203	vitamin	Chemical	MESH:D014801
+104288250	251	259	isospora	Chemical
+104288250	272	279	vitamin	Chemical	MESH:D014801
+104288250	369	376	vitamin	Chemical	MESH:D014801
+104288250	595	602	vitamin	Chemical	MESH:D014801
+104288250	619	634	sodium butyrate	Chemical	MESH:D020148
+104288250	639	646	935-972	Chemical	MESH:C002116
+104288250	726	733	vitamin	Chemical	MESH:D014801
+104288250	785	793	isospora	Chemical
+104288250	866	874	isospora	Chemical
+104288250	1086	1093	vitamin	Chemical	MESH:D014801
+104288250	1145	1153	isospora	Chemical
+104288250	1191	1198	vitamin	Chemical	MESH:D014801
+
+104288314|t| Traditional Chinese Medicine Perfusate For Treating Infertility Of Dairy Cattle And Preparation Method Thereof
+104288314|a| The invention relates to traditional Chinese medicine perfusate for treating infertility of dairy cattle, wherein the traditional Chinese medicine perfusate comprises the following components in parts by weight of 1-10 parts of semen cuscutae extract, 1-10 parts of herba epimedii extract, 1-10 parts of houttuynia cordata extract, 5-30 parts of absolute ethyl alcohol and 10-50 parts of purified water. The traditional Chinese medicine perfusate for treating infertility of dairy cattle provided by the invention uses the extracts of three kinds of traditional Chinese medicine, namely semen cuscutae, herba epimedii and houttuynia cordata as the effective ingredients, thereby having the functions of clearing away heat and toxic materials, eliminating swelling and removing blood stasis, removing abscess, promoting estrus to ensure pregnancy, the traditional Chinese medicine perfusate has a quick treatment effect and an obvious effect on infertility of dairy cattle caused by endometritis and dysovarism and the like. Meanwhile, the pure natural traditional Chinese medicine perfusate generates no toxic side effect on animal bodies let alone generating residual drug to influence human health.
+104288314	21	39	Medicine Perfusate	Chemical	MESH:C519022
+104288314	190	201	infertility	Disease	MESH:D007247
+104288314	417	443	houttuynia cordata extract	Disease	OMIM:400045
+104288314	468	481	ethyl alcohol	Chemical	MESH:D000431
+104288314	573	584	infertility	Disease	MESH:D007247
+104288314	735	753	houttuynia cordata	Disease
+104288314	868	876	swelling	Disease	MESH:D004487
+104288314	1057	1084	infertility of dairy cattle	Disease	MESH:D002418
+104288314	1095	1122	endometritis and dysovarism	Disease	MESH:D004716
+

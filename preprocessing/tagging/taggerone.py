@@ -6,7 +6,7 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from tagging.base import BaseTagger
+from tagging.base import BaseTagger, finalize_dir
 
 
 class NoRemainingDocumentError(Exception):
@@ -17,6 +17,9 @@ class NoRemainingDocumentError(Exception):
 
 
 class TaggerOne(BaseTagger):
+    def finalize(self):
+        finalize_dir(self.out_dir, self.result_file, batch_mode=True)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "taggerone_in")

@@ -32,16 +32,23 @@ class BaseTagger(Thread):
         raise NotImplementedError
 
 
-def finalize_dir(files_dir, result_file):
+def finalize_dir(files_dir, result_file, batch_mode=False, keep_incomplete_lines=False):
     file_list = sorted(os.path.join(files_dir, fn) for fn in os.listdir(files_dir) if fn.endswith(".txt"))
     with open(result_file, "w") as f_out:
         for fn in file_list:
-            with open(fn) as f_in:
-                content = f_in.readlines()
+            if batch_mode:
+                content = []
+                with open(fn) as f_in:
+                    documents = f_in.read().strip().split("\n\n")
+                for doc in documents:
+                    doc_content = doc.strip().split("\n")
+                    content += doc_content[2:]
+            else:
+                with open(fn) as f_in:
+                    content = f_in.read().strip().split("\n")
                 content = content[2:]
-                if content and not content[-1].strip():
-                    content = content[:-1]
-                f_out.writelines(content)
+            # Write to file
+            f_out.writelines(line + "\n" for line in content if line.count("\t") == 5 or keep_incomplete_lines)
 
 
 def get_pmcid_from_filename(abs_path):
@@ -75,7 +82,7 @@ def merge_result_files(translation_dir, output_file, *files):
             document_fn = os.path.join(translation_dir, "PMC{}.txt".format(pmid))
             if os.path.exists(document_fn):
                 with open(document_fn) as f_doc:
-                    f_out.write(f_doc.read().strip()+"\n")
+                    f_out.write(f_doc.read().strip() + "\n")
                 mention_list = sorted(mentions, key=lambda x: int(x.split("\t")[1]))
                 f_out.writelines(mention_list)
                 f_out.write("\n")

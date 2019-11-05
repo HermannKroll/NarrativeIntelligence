@@ -1,0 +1,288 @@
+104257187	405	417	acanthopanax	Chemical	MESH:C400150
+104257187	759	767	cinnabar	Chemical	MESH:C034211
+104257187	1415	1435	neurological disease	Disease	MESH:D009422
+104257524	20	47	Alkyl Ethoxy Polyglycosides	Chemical	MESH:D000477
+104257524	93	120	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+104257524	232	259	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+104257524	277	326	alkyl glycoside dipropylene glycol sulfosuccinate	Chemical	MESH:D000477
+104257524	342	364	cocamidopropyl betaine	Chemical	MESH:C077055
+104257524	388	403	alkyl glycoside	Chemical	MESH:D000477
+104257524	420	453	ethylene diamine tetraacetic acid	Chemical	MESH:D004533
+104257524	836	863	alkyl ethoxy polyglycosides	Chemical	MESH:D000477
+104257526	438	457	hydroxyhydroquinone	Chemical	MESH:C013038
+104257526	987	1004	hydrogen peroxide	Chemical	MESH:D006861
+104257624	353	367	carbon dioxide	Chemical	MESH:D002245
+104257624	481	485	acid	Chemical	MESH:D000143
+104257669	48	72	Salicylic Acid Medicines	Chemical	MESH:D012459
+104257669	168	182	salicylic acid	Chemical	MESH:D012459
+104257669	506	518	organic acid	Chemical	MESH:D013463
+104257669	579	584	acids	Chemical	MESH:D000143
+104257669	714	719	acids	Chemical	MESH:D000143
+104257669	745	758	sulfasalazine	Chemical	MESH:D012460
+104257669	766	787	5-aminosalicylic acid	Chemical	MESH:D019804
+104257669	825	845	hydroxypropyl methyl	Chemical	MESH:D065347
+104257669	1159	1173	salicylic acid	Chemical	MESH:D012459
+104257719	58	66	Swelling	Disease	MESH:D004487
+104257719	175	196	multi-purpose Chinese	Disease	MESH:D015161
+104257719	232	240	swelling	Disease	MESH:D004487
+104257719	447	454	borneol	Chemical	MESH:C022871
+104257719	758	765	borneol	Chemical	MESH:C022871
+104257719	892	902	ichthammol	Chemical	MESH:C089399
+104257933	523	539	sanguisorba root	Disease	MESH:D011843
+104257933	663	677	rehmannia root	Disease	MESH:D011843
+104257998	55	67	Constipation	Disease	MESH:D003248
+104257998	149	161	constipation	Disease	MESH:D003248
+104257998	336	362	convolvulate asiabell root	Disease	MESH:D011843
+104257998	442	464	champion bauhinia leaf	Disease	MESH:D018860
+104257998	1073	1085	constipation	Disease	MESH:D003248
+104258066	55	112	Kidney-Yin Deficiency-Type Dysfunctional Uterine Bleeding	Disease	MESH:D007674
+104258066	225	282	kidney-yin deficiency-type dysfunctional uterine bleeding	Disease	MESH:D007674
+104258066	622	628	carbon	Chemical	MESH:D002254
+104258066	677	698	dwarf lilyturf tubers	Disease	MESH:D004393
+104258066	715	730	corydalis tuber	Disease	MESH:D014402
+104258066	873	893	cortex lycii radicis	Disease	MESH:D001480
+104258066	910	924	polygala roots	Disease	MESH:D011843
+104258066	1113	1125	eclipta alba	Disease	MESH:D003741
+104258087	65	76	Menorrhagia	Disease	MESH:D008595
+104258087	199	210	menorrhagia	Disease	MESH:D008595
+104258087	650	653	lac	Chemical	MESH:C028562
+104258087	655	658	5-9	Chemical	MESH:C087567
+104258087	826	837	menorrhagia	Disease	MESH:D008595
+104258109	64	80	Migraine Disease	Disease	MESH:D008881
+104258109	204	220	migraine disease	Disease	MESH:D008881
+104258109	376	384	sinensis	Chemical	MESH:C417765
+104258109	655	663	migraine	Disease	MESH:D008881
+104258109	699	711	blood stasis	Disease	MESH:D054070
+104258109	759	775	migraine disease	Disease	MESH:D008881
+104258109	803	815	blood stasis	Disease	MESH:D054070
+104258109	825	842	syndrome migraine	Disease	MESH:D008881
+104258109	1095	1103	migraine	Disease	MESH:D008881
+104258109	1181	1185	pain	Disease	MESH:D010146
+104258155	41	59	Diabetes Insipidus	Disease	MESH:D003919
+104258155	130	148	diabetes insipidus	Disease	MESH:D003919
+104258155	524	547	flatstem milkvetch seed	Disease	MESH:D009366
+104258197	1033	1037	pain	Disease	MESH:D010146
+104258240	329	351	galanga galangal seeds	Disease	MESH:D009366
+104258240	533	559	auriculate cynanchum tuber	Disease	MESH:D014402
+104258307	56	73	Swelling And Pain	Disease	MESH:D010146
+104258307	172	180	swelling	Disease	MESH:D004487
+104258307	185	189	pain	Disease	MESH:D010146
+104258307	196	204	fracture	Disease	MESH:D050723
+104258307	380	388	cinnamon	Chemical	MESH:C510049
+104258307	395	403	cinnamon	Chemical	MESH:C510049
+104258307	823	831	swelling	Disease	MESH:D004487
+104258307	845	849	pain	Disease	MESH:D010146
+104258307	1143	1151	swelling	Disease	MESH:D004487
+104258307	1207	1211	pain	Disease	MESH:D010146
+104258307	1347	1351	pain	Disease	MESH:D010146
+104258307	1353	1361	swelling	Disease	MESH:D004487
+104258307	1363	1387	cyanosis and dysfunction	Disease	MESH:D003490
+104258307	1463	1484	endocrine dysfunction	Disease	MESH:D004700
+104258307	1540	1548	swelling	Disease	MESH:D004487
+104258307	1553	1557	pain	Disease	MESH:D010146
+104258307	1564	1572	fracture	Disease	MESH:D050723
+104258329	127	131	gout	Disease	MESH:D006073
+104258329	214	229	gouty arthritis	Disease	MESH:D015210
+104258329	1200	1208	toxicity	Disease	MESH:D064420
+104258329	1411	1426	gouty arthritis	Disease	MESH:D015210
+104258412	281	296	polylactic acid	Chemical	MESH:C010506
+104258412	298	301	PLA	Chemical	MESH:C010506
+104261456	24	76	Cerium Dioxide Nanobelts Or Cerium Dioxide Nanotubes	Chemical	MESH:C030583
+104261456	127	141	cerium dioxide	Chemical	MESH:C030583
+104261456	155	179	cerium dioxide nanotubes	Chemical	MESH:C030583
+104261456	240	264	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	272	286	cerium dioxide	Chemical	MESH:C030583
+104261456	425	445	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	446	449	DMF	Chemical	MESH:C503868
+104261456	515	535	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	586	606	polyvinylpyrrolidone	Chemical	MESH:D011205
+104261456	675	695	N-dimethyl formamide	Chemical	MESH:D004126
+104261456	696	699	DMF	Chemical	MESH:C503868
+104261456	709	729	polyvinylpyrrolidone	Chemical	MESH:D011205
+104261456	917	941	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	949	963	cerium dioxide	Chemical	MESH:C030583
+104261456	1117	1141	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	1165	1182	dioxide nanotubes	Chemical	MESH:D045333
+104261456	1239	1263	cerium dioxide nanobelts	Chemical	MESH:C030583
+104261456	1271	1285	cerium dioxide	Chemical	MESH:C030583
+104262366	160	187	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	232	259	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	431	439	{Ag(L)}n	Chemical	MESH:D012834
+104262366	444	456	Ag2(L)2.3H2O	Chemical	MESH:C057495
+104262366	626	653	salicylaldehyde L-histidine	Chemical	MESH:C013243
+104262366	674	676	HL	Disease	MESH:C538324
+104262366	710	715	NaBH4	Chemical	MESH:C059662
+104262366	859	869	amino acid	Chemical	MESH:D000596
+104262647	535	564	hydroxypropyl methylcellulose	Chemical	MESH:D065347
+104264442	97	101	Teos	Chemical	MESH:C040733
+104264442	103	127	Tetraethyl Orthosilicate	Chemical	MESH:C040733
+104264442	253	257	TEOS	Chemical	MESH:C040733
+104264442	259	283	tetraethyl orthosilicate	Chemical	MESH:C040733
+104264442	404	408	TEOS	Chemical	MESH:C040733
+104264442	441	447	oxygen	Chemical	MESH:D010100
+104269565	674	680	oxygen	Chemical	MESH:D010100
+104271136	77	83	cancer	Disease	MESH:D009369
+104271136	260	261	K	Chemical	MESH:D011188
+104271320	687	713	carbon nanotube aggregates	Disease	MESH:D001791
+104271320	745	770	multiple carbon nanotubes	Disease	MESH:D000015
+104271733	23	67	Mycobacterium Bovis Bacillus Calmette-Guerin	Chemical	MESH:D001500
+104271733	164	177	Mycobacterium	Chemical	MESH:C052242
+104271733	360	373	Mycobacterium	Chemical	MESH:C052242
+104271733	558	571	Mycobacterium	Chemical	MESH:C052242
+104271733	702	708	serine	Chemical	MESH:C047902
+104271733	712	718	lysine	Chemical	MESH:C011679
+104271733	977	1004	tuberculosis and infections	Disease	MESH:D014376
+104271733	1015	1028	Mycobacterium	Chemical	MESH:C052242
+104271733	1029	1041	tuberculosis	Disease	MESH:D014376
+104271733	1119	1131	tuberculosis	Disease	MESH:D014376
+104273533	562	581	rhus chinensis mill	Disease	MESH:D011040
+104273533	632	644	alginic acid	Chemical	MESH:D000464
+104273533	836	848	hypertension	Disease	MESH:D006973
+104273533	921	933	hypertension	Disease	MESH:D006973
+104274366	419	428	quercetin	Chemical	MESH:D011794
+104274366	430	444	vinyl benzoate	Chemical	MESH:D001565
+104274366	446	456	1-pentanol	Chemical	MESH:C024999
+104274366	458	471	neryl acetate	Chemical	MESH:C015234
+104274366	473	483	salicylate	Chemical	MESH:D012459
+104274366	490	495	oxide	Chemical	MESH:D016877
+104274366	497	511	methyl eugenol	Chemical	MESH:C005223
+104274366	513	529	linalyl fformate	Chemical	MESH:C074463
+104274366	549	562	ethyl alcohol	Chemical	MESH:D000431
+104274368	286	296	citronella	Chemical	MESH:C076730
+104274368	463	471	geranium	Chemical	MESH:C027250
+104274368	501	509	linalool	Chemical	MESH:C018584
+104274368	525	539	vinyl benzoate	Chemical	MESH:D001565
+104274368	555	575	acetic-3-vinyl ester	Chemical	MESH:C011566
+104274368	658	669	pentadecane	Chemical	MESH:C033245
+104274368	685	695	salicylate	Chemical	MESH:D012459
+104274368	722	735	ethyl alcohol	Chemical	MESH:D000431
+104274373	321	329	glycerol	Chemical	MESH:D005990
+104274373	344	354	butanediol	Chemical	MESH:D002072
+104274373	373	388	hyaluronic acid	Chemical	MESH:D006820
+104274373	406	429	polyethylene glycol 400	Chemical	MESH:D011092
+104274373	431	438	PEG-400	Chemical	MESH:D011092
+104274373	459	496	ethylene diamine tetraacetic acid-2Na	Chemical	MESH:D004533
+104274373	498	506	EDTA-2Na	Chemical	MESH:D004533
+104274373	525	539	lauryl alcohol	Chemical	MESH:D007851
+104274373	563	580	diazolidinyl urea	Chemical	MESH:C044982
+104274373	626	637	citric acid	Chemical	MESH:D019343
+104274373	657	675	tocopheryl acetate	Chemical	MESH:D024502
+104274373	1378	1388	irritation	Disease	MESH:D001523
+104274474	1	26	Doxycycline Hydrochloride	Chemical	MESH:D004318
+104274474	96	121	doxycycline hydrochloride	Chemical	MESH:D004318
+104274474	314	339	doxycycline hydrochloride	Chemical	MESH:D004318
+104274474	349	367	magnesium chloride	Chemical	MESH:D015636
+104274474	406	418	trimethoprim	Chemical	MESH:D014295
+104274474	428	446	flunixin meglumine	Chemical	MESH:C014558
+104274474	458	481	polyethylene glycol-400	Chemical	MESH:D011092
+104274474	491	500	carbamide	Chemical	MESH:D014508
+104274474	521	534	ethanol amine	Chemical	MESH:D000588
+104274474	637	662	doxycycline hydrochloride	Chemical	MESH:D004318
+104274484	16	46	Lycium Barbarum Polysaccharide	Chemical	MESH:C500223
+104274484	65	73	Medicine	Chemical	MESH:C519022
+104274484	148	178	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	230	260	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	346	376	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	439	469	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274484	611	641	lycium barbarum polysaccharide	Chemical	MESH:C500223
+104274696	58	71	Heart Disease	Disease	MESH:D006331
+104274696	73	92	Cerebral Hemorrhage	Disease	MESH:D002543
+104274696	94	113	Cerebral Infarction	Disease	MESH:D002544
+104274696	230	243	heart disease	Disease	MESH:D006331
+104274696	245	264	cerebral hemorrhage	Disease	MESH:D002543
+104274696	266	285	cerebral infarction	Disease	MESH:D002544
+104274696	479	492	heart disease	Disease	MESH:D006331
+104274696	494	513	cerebral hemorrhage	Disease	MESH:D002543
+104274696	515	534	cerebral infarction	Disease	MESH:D002544
+104274700	423	441	anemone hupehensis	Chemical	MESH:C084875
+104274700	1041	1047	iodine	Chemical	MESH:D007455
+104274700	1075	1081	iodine	Chemical	MESH:D007455
+104274700	1136	1143	alcohol	Chemical	MESH:D000431
+104274734	55	75	Acute Conjunctivitis	Disease	MESH:D003232
+104274734	158	178	acute conjunctivitis	Disease	MESH:D003232
+104274734	374	382	sinensis	Chemical	MESH:C417765
+104274734	504	524	acute conjunctivitis	Disease	MESH:D003232
+104276548	23	27	Ni3C	Chemical	MESH:C410766
+104276548	190	194	Ni3C	Chemical	MESH:C410766
+104276548	401	412	polyalcohol	Chemical	MESH:C063114
+104276548	997	1005	toxicity	Disease	MESH:D064420
+104276596	99	105	oxygen	Chemical	MESH:D010100
+104276596	343	349	oxygen	Chemical	MESH:D010100
+104276596	356	368	zinc sulfide	Chemical	MESH:C031238
+104276596	456	462	oxygen	Chemical	MESH:D010100
+104276596	469	481	zinc sulfide	Chemical	MESH:C031238
+104276596	577	581	zinc	Chemical	MESH:D015032
+104276596	654	662	pyridine	Chemical	MESH:D011725
+104276596	789	793	zinc	Chemical	MESH:D015032
+104276596	824	832	toxicity	Disease	MESH:D064420
+104276596	926	932	oxygen	Chemical	MESH:D010100
+104276596	939	951	zinc sulfide	Chemical	MESH:C031238
+104277081	9	28	Cinnamic Acid Amine	Chemical	MESH:D000588
+104277081	113	141	cinnamic acid amine alkaloid	Chemical	MESH:D000588
+104277081	331	359	cinnamic acid amine alkaloid	Chemical	MESH:D000588
+104277081	376	386	catechol-O	Chemical	MESH:D002396
+104277081	473	481	levodopa	Chemical	MESH:D007980
+104277081	498	506	levodopa	Chemical	MESH:D007980
+104277081	550	558	levodopa	Chemical	MESH:D007980
+104284675	181	186	tumor	Disease	MESH:D009369
+104284675	340	345	tumor	Disease	MESH:D009369
+104284675	540	545	tumor	Disease	MESH:D009369
+104284675	1104	1110	tumors	Disease	MESH:D009369
+104284677	61	66	Tumor	Disease	MESH:D009369
+104284677	170	175	tumor	Disease	MESH:D009369
+104284677	321	331	nucleotide	Chemical	MESH:D009711
+104284677	633	643	amino acid	Chemical	MESH:D000596
+104284677	676	702	TAT polypeptide amino acid	Chemical	MESH:C080974
+104286307	108	117	pursh tea	Disease	MESH:C566483
+104286307	159	168	pursh tea	Disease	MESH:C566483
+104286307	358	384	gardenia jasminoides ellis	Disease	MESH:D004613
+104288027	9	22	Lip Cleansing	Chemical	MESH:D003902
+104288058	394	421	dipotassium glycyrrhizinate	Chemical	MESH:D019695
+104288058	439	449	butanediol	Chemical	MESH:D002072
+104288058	571	594	small dermal irritation	Disease	MESH:D001523
+104288058	698	710	inflammation	Disease	MESH:D007249
+104288143	128	142	glycopyrrolate	Chemical	MESH:D006024
+104288143	274	285	citric acid	Chemical	MESH:D019343
+104288143	290	304	sodium citrate	Chemical	MESH:C102006
+104288143	319	344	sodium acetate trihydrate	Chemical	MESH:D019346
+104288143	379	394	sodium chloride	Chemical	MESH:D012965
+104288156	41	55	Stomach Cancer	Disease	MESH:D013274
+104288156	210	224	stomach cancer	Disease	MESH:D013274
+104288156	403	412	calycosin	Chemical	MESH:C121707
+104288156	525	533	toxicity	Disease	MESH:D064420
+104288156	574	599	killing gastric carcinoma	Disease	MESH:D013274
+104288156	631	645	stomach cancer	Disease	MESH:D013274
+104288163	16	27	L-Arabinose	Chemical	MESH:D001089
+104288163	46	54	Medicine	Chemical	MESH:C519022
+104288163	104	118	Hyperammonemia	Disease	MESH:D022124
+104288163	255	269	hyperammonemia	Disease	MESH:D022124
+104288163	403	410	ammonia	Chemical	MESH:D000641
+104288163	418	427	endotoxin	Chemical	MESH:D004731
+104288163	471	482	L-arabinose	Chemical	MESH:D001089
+104288163	525	532	ammonia	Chemical	MESH:D000641
+104288163	537	546	endotoxin	Chemical	MESH:D004731
+104288246	65	81	Chronic Rhinitis	Disease	MESH:D012220
+104288246	262	278	chronic rhinitis	Disease	MESH:D012220
+104288246	464	467	5-9	Chemical	MESH:C087567
+104288246	548	563	ethanol extract	Chemical	MESH:D000431
+104288246	631	646	ethanol extract	Chemical	MESH:D000431
+104288246	952	960	rhinitis	Disease	MESH:D012220
+104288250	8	15	Vitamin	Chemical	MESH:D014801
+104288250	121	135	Liquid Vitamin	Chemical	MESH:D014801
+104288250	196	203	vitamin	Chemical	MESH:D014801
+104288250	272	279	vitamin	Chemical	MESH:D014801
+104288250	369	376	vitamin	Chemical	MESH:D014801
+104288250	595	602	vitamin	Chemical	MESH:D014801
+104288250	619	634	sodium butyrate	Chemical	MESH:D020148
+104288250	639	646	935-972	Chemical	MESH:C002116
+104288250	726	733	vitamin	Chemical	MESH:D014801
+104288250	1086	1093	vitamin	Chemical	MESH:D014801
+104288250	1191	1198	vitamin	Chemical	MESH:D014801
+104288314	21	39	Medicine Perfusate	Chemical	MESH:C519022
+104288314	190	201	infertility	Disease	MESH:D007247
+104288314	417	443	houttuynia cordata extract	Disease	OMIM:400045
+104288314	468	481	ethyl alcohol	Chemical	MESH:D000431
+104288314	573	584	infertility	Disease	MESH:D007247
+104288314	868	876	swelling	Disease	MESH:D004487
+104288314	1057	1084	infertility of dairy cattle	Disease	MESH:D002418
+104288314	1095	1122	endometritis and dysovarism	Disease	MESH:D004716

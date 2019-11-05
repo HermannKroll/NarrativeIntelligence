@@ -20,7 +20,7 @@ from lxml import etree, html
 from lxml.etree import ParserError
 
 MAX_CONTENT_LENGTH = 500000
-FMT_EPA_TTL = "EPA-TTL"
+FMT_EPA_TTL = "TIB-EPA"
 FMT_PMC_XML = "PMC-XML"
 FMT_CHOICES = (
     FMT_EPA_TTL,
