@@ -101,9 +101,10 @@ class DosageFormTagger(BaseTagger):
                     end = len(content) - 1
 
                 occurrence = content[start:end]
+                occurrence = occurrence.rstrip(".,;")
 
                 line = "{id}\t{start}\t{end}\t{str}\t{type}\tMESH:{desc}\n".format(
-                    id=pmid, start=start, end=end, str=occurrence, type=self.TYPE, desc=desc
+                    id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=self.TYPE, desc=desc
                 )
                 output += line
         output += "\n"
