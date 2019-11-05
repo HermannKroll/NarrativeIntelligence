@@ -25,6 +25,7 @@ def preprocess(input_file_dir_list, output_filename, conf,
     Method expects an ID file or an ID list if resume=False.
     Method expects the working directory (temp-directory) of the processing to resume if resume=True.
 
+    :param use_tagger_one:
     :param tag_dosage_forms: flat, whether to tag dosage forms
     :param workdir: Working directory
     :param console_log_level: Log level for console output
@@ -49,7 +50,8 @@ def preprocess(input_file_dir_list, output_filename, conf,
     translation_err_file = os.path.abspath(os.path.join(tmp_root, "translation_errors.txt"))
     # Create directories
     if not resume:
-        os.mkdir(tmp_translation)
+        if not skip_translation:
+            os.mkdir(tmp_translation)
         os.mkdir(tmp_log)
     # Init logger
     formatter = logging.Formatter(LOGGING_FORMAT)
@@ -111,7 +113,6 @@ def preprocess(input_file_dir_list, output_filename, conf,
 def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
-    group = parser.add_mutually_exclusive_group()
     parser.add_argument("--resume", action="store_true",
                         help="Resume tagging (input: temp-directory, output: result file)")
     parser.add_argument("--skip-translation", action="store_true",
