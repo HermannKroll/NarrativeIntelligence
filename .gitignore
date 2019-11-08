@@ -122,3 +122,6 @@ utils/Descriptors_Nanoparticles.tsv
 narrative/*.log
 narrative/res
 narrative/.docs
+venvlinux/
+tmp/
+semmeddb/config.json
