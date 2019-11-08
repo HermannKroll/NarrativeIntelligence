@@ -171,7 +171,7 @@ const createDocumentList = (results, idx) => {
                 '<class="list-group-item">' +
                  name + ' : ' + var_sub[name] +  '</a>'
             );
-        });
+        }); 
 
     });
     return divList;
