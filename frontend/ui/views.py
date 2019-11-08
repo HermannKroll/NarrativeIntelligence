@@ -103,9 +103,23 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
         explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt, s, p, o)
         fact_patterns.append((s, p, o))
 
+    # check for at least 1 entity
+    entity_check = False
+    for f in fact_patterns:
+        if s.startswith('MESH:') or o.startswith('MESH:'):
+            entity_check = True
+            break
+    if not entity_check:
+        explanation_str += "no entity included in query - error\n"
+        return None, explanation_str
+
+
     explanation_str += '\n' + 60 * '==' + '\n'
     explanation_str += 60 * '==' + '\n'
     return fact_patterns, explanation_str
+
+
+
 
 
 class SearchView(TemplateView):
