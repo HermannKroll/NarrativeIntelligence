@@ -10,10 +10,16 @@ from tagging.base import BaseTagger, finalize_dir
 class DocumentError(Exception):
     pass
 
+# supports the following dosage forms:
+# D26.255 Dosage Forms
+# E02.319.300 Drug Delivery Systems
+# J01.637.512.600 Nanoparticles
+
 
 class DosageFormTagger(BaseTagger):
     DOSAGE_FORM_ID = "D004304"
-    DOSAGE_FORM_TREE_NUMBER = "D26.255"
+
+    DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600"]
     TYPE = "DosageForm"
     MESH_FILE = "../data/desc2020.xml"
 
@@ -30,12 +36,18 @@ class DosageFormTagger(BaseTagger):
     def prepare(self, resume=False):
         self.meshdb = MeSHDB.instance()
         self.meshdb.load_xml(self.MESH_FILE)
-        dosage_forms = self.meshdb.descs_under_tree_number(self.DOSAGE_FORM_TREE_NUMBER)
-        for dosage_form in dosage_forms:
-            for term in dosage_form.terms:
-                if term.string.lower() in self.desc_by_term:
-                    raise ValueError("Term duplicate found")
-                self.desc_by_term[term.string.lower()] = dosage_form.unique_id
+
+        for df_tn in self.DOSAGE_FORM_TREE_NUMBERS:
+            dosage_forms = self.meshdb.descs_under_tree_number(df_tn)
+            for dosage_form in dosage_forms:
+                for term in dosage_form.terms:
+                    if term.string.lower() in self.desc_by_term:
+                        current_desc = self.desc_by_term[term.string.lower()]
+                        if current_desc != dosage_form.unique_id:
+                            raise ValueError("Term duplicate found {} with different descriptors ({} vs {})".format(term.string, current_desc, dosage_form.unique_id))
+                        else:
+                            continue
+                    self.desc_by_term[term.string.lower()] = dosage_form.unique_id
 
         if not resume:
             shutil.copytree(self.translation_dir, self.in_dir)
