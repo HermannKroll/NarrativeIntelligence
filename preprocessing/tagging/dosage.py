@@ -10,16 +10,15 @@ from tagging.base import BaseTagger, finalize_dir
 class DocumentError(Exception):
     pass
 
-# supports the following dosage forms:
-# D26.255 Dosage Forms
-# E02.319.300 Drug Delivery Systems
-# J01.637.512.600 Nanoparticles
-
 
 class DosageFormTagger(BaseTagger):
     DOSAGE_FORM_ID = "D004304"
+    DOSAGE_FORM_TREE_NUMBERS = (
+        "D26.255",  # Dosage Forms
+        "E02.319.300",  # Drug Delivery Systems
+        "J01.637.512.600",  # Nanoparticles
 
-    DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600"]
+    )
     TYPE = "DosageForm"
     MESH_FILE = "../data/desc2020.xml"
 
@@ -44,7 +43,13 @@ class DosageFormTagger(BaseTagger):
                     if term.string.lower() in self.desc_by_term:
                         current_desc = self.desc_by_term[term.string.lower()]
                         if current_desc != dosage_form.unique_id:
-                            raise ValueError("Term duplicate found {} with different descriptors ({} vs {})".format(term.string, current_desc, dosage_form.unique_id))
+                            raise ValueError(
+                                "Term duplicate found {} with different descriptors ({} vs {})".format(
+                                    term.string,
+                                    current_desc,
+                                    dosage_form.unique_id),
+                            )
+
                         else:
                             continue
                     self.desc_by_term[term.string.lower()] = dosage_form.unique_id
@@ -64,7 +69,7 @@ class DosageFormTagger(BaseTagger):
         start_time = datetime.now()
 
         for fn in os.listdir(self.in_dir):
-            if fn.startswith("PMC") and fn.endswith(".txt"):
+            if fn.endswith(".txt"):
                 in_file = os.path.join(self.in_dir, fn)
                 out_file = os.path.join(self.out_dir, fn)
                 try:
@@ -74,12 +79,16 @@ class DosageFormTagger(BaseTagger):
                     self.logger.info("DocumentError for {}".format(in_file))
                 os.remove(in_file)
                 self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
+            else:
+                self.logger.debug("Ignoring {}: Suffix .txt missing".format(fn))
 
         end_time = datetime.now()
-        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(end_time - start_time,
-                                                                                                 self.get_progress(),
-                                                                                                 files_total,
-                                                                                                 len(skipped_files)))
+        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
+            end_time - start_time,
+            self.get_progress(),
+            files_total,
+            len(skipped_files)),
+        )
 
     def tag(self, in_file, out_file):
         with open(in_file) as f:
@@ -88,7 +97,7 @@ class DosageFormTagger(BaseTagger):
         if not match:
             raise DocumentError
         pmid, title, abstact = match.group(1, 2, 3)
-        content = title + abstact
+        content = title + " " + abstact
         content = content.lower()
 
         # Generate output
