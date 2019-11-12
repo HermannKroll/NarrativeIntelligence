@@ -154,11 +154,25 @@ const createCheckbox = (graph, results, pIdx, targetElement) => {
 const createDocumentList = (results, idx) => {
     let divList = $(`<div class="list-group list-group-flush" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
     results.forEach(document => {
+        let doc_id = document[0];
+        let var_sub = document[1];
+        let var_names = document[2];
+
         divList.append(
-            '<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
+            //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
+            '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
             'class="list-group-item list-group-item-action" target="_blank">' +
-            'PMC' + document[0] + '</a>'
-        )
+            'P' + doc_id + '</a>'
+           // 'PMC' + document[0] + '</a>'
+        );
+
+        var_names.forEach(name => {
+            divList.append(
+                '<class="list-group-item">' +
+                 name + ' : ' + var_sub[name] +  '</a>'
+            );
+        }); 
+
     });
     return divList;
 };
