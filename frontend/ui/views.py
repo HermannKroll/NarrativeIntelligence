@@ -8,6 +8,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
+from graph.labeled import LabeledGraph
 from mesh.data import MeSHDB
 from stories.library_graph import LibraryGraph
 from stories.story import StoryProcessor, MeshTagger
@@ -105,7 +106,7 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
 
     # check for at least 1 entity
     entity_check = False
-    for f in fact_patterns:
+    for s, p, o in fact_patterns:
         if s.startswith('MESH:') or o.startswith('MESH:'):
             entity_check = True
             break
@@ -113,6 +114,15 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
         explanation_str += "no entity included in query - error\n"
         return None, explanation_str
 
+    # check if the query is one connected graph
+    g = LabeledGraph()
+    for s, p, o in fact_patterns:
+        g.add_edge(p, s, o)
+    # there are multiple connected components - stop
+    con_comp = g.compute_connectivity_components()
+    if len(con_comp) != 1:
+        explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
+        return None, explanation_str
 
     explanation_str += '\n' + 60 * '==' + '\n'
     explanation_str += 60 * '==' + '\n'
