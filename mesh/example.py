@@ -6,7 +6,7 @@ from mesh.data import MeSHDB
 db = MeSHDB.instance()
 
 # Load XML file
-db.load_xml("data/desc2019.xml")
+db.load_xml("data/desc2020.xml")
 
 # Select descriptor by Unique ID
 desc01 = db.desc_by_id("D000001")

@@ -8,7 +8,7 @@ class Test(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        xml = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../data/desc2019.xml")
+        xml = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../data/desc2020.xml")
         cls.db = MeSHDB.instance()
         cls.db.load_xml(xml, verbose=True)
 

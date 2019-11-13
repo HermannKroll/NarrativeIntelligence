@@ -14,7 +14,7 @@ lg.read_from_tsv('../data/lg_pmc_sim_ami_108.tsv')
 #    print('<p>{} : {}</p>'.format(key, types))
 
 db = MeSHDB.instance()
-db.load_xml('../data/desc2019.xml')
+db.load_xml('../data/desc2020.xml')
 
 story = StoryProcessor(lg, [MeshTagger(db)]) #, GeneTagger('../data/CTD_genes.tsv.gz')])
 
