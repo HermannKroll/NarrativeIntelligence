@@ -14,12 +14,14 @@ class DocumentError(Exception):
 # D26.255 Dosage Forms
 # E02.319.300 Drug Delivery Systems
 # J01.637.512.600 Nanoparticles
+# J01.637.512.850 Nanotubes
+# J01.637.512.925 Nanowires
 
 
 class DosageFormTagger(BaseTagger):
-    DOSAGE_FORM_ID = "D004304"
+    # DOSAGE_FORM_ID = "D004304"
 
-    DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600"]
+    DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600", "J01.637.512.850", "J01.637.512.925"]
     TYPE = "DosageForm"
     MESH_FILE = "../data/desc2020.xml"
 
@@ -38,16 +40,32 @@ class DosageFormTagger(BaseTagger):
         self.meshdb.load_xml(self.MESH_FILE)
 
         for df_tn in self.DOSAGE_FORM_TREE_NUMBERS:
+            dosage_form_header_node = self.meshdb.desc_by_tree_number(df_tn)
             dosage_forms = self.meshdb.descs_under_tree_number(df_tn)
+            dosage_forms.append(dosage_form_header_node)
             for dosage_form in dosage_forms:
-                for term in dosage_form.terms:
-                    if term.string.lower() in self.desc_by_term:
-                        current_desc = self.desc_by_term[term.string.lower()]
+                # add all terms for desc
+                terms = []
+                for t in dosage_form.terms:
+                    # e.g. tag ointments as well as ointment (plural form -> singular form)
+                    if t.string.endswith('s'):
+                        # convert to singular
+                        terms.append(t.string[0:-1].lower())
+                    else:
+                        # add plural form
+                        terms.append(t.string.lower() + 's')
+                    terms.append(t.string.lower())
+                if dosage_form.unique_id == 'D009824' or dosage_form.unique_id == 'D053758':
+                    print(terms)
+                # go trough heading and all terms
+                for term in terms:
+                    if term in self.desc_by_term:
+                        current_desc = self.desc_by_term[term]
                         if current_desc != dosage_form.unique_id:
-                            raise ValueError("Term duplicate found {} with different descriptors ({} vs {})".format(term.string, current_desc, dosage_form.unique_id))
+                            raise ValueError("Term duplicate found {} with different descriptors ({} vs {})".format(term, current_desc, dosage_form.unique_id))
                         else:
                             continue
-                    self.desc_by_term[term.string.lower()] = dosage_form.unique_id
+                    self.desc_by_term[term] = dosage_form.unique_id
 
         if not resume:
             shutil.copytree(self.translation_dir, self.in_dir)
