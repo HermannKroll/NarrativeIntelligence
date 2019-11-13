@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import shutil
 import tempfile
 from argparse import ArgumentParser
@@ -15,6 +16,19 @@ from translate import PMCCollector, PMCTranslator
 
 CONFIG_DEFAULT = "config.json"
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
+
+
+def rename_input_files(translation_dir, logger):
+    for fn in os.listdir(translation_dir):
+        if not fn.startswith(".") and not fn.endswith("/"):
+            doc_id = re.search(r"\d+", fn)
+            if doc_id:
+                target_name = "PMC{}.txt".format(doc_id.group())
+                if fn != target_name:
+                    os.rename(os.path.join(translation_dir, fn), os.path.join(translation_dir, target_name))
+            else:
+                os.remove(os.path.join(translation_dir, fn))
+                logger.debug("Removing file {}: No ID found".format(fn))
 
 
 def preprocess(input_file_dir_list, output_filename, conf,
@@ -70,6 +84,7 @@ def preprocess(input_file_dir_list, output_filename, conf,
     if not resume:
         if skip_translation:
             shutil.copytree(input_file_dir_list, tmp_translation)
+            rename_input_files(tmp_translation, logger)
         else:
             collector = PMCCollector(conf.pmc_dir)
             files = collector.collect(input_file_dir_list)

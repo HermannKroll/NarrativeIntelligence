@@ -40,7 +40,7 @@ class TaggerOne(BaseTagger):
     def get_progress(self, offset=0):
         with open(self.log_file) as f:
             content = f.read()
-        matches = re.findall("INFO (\d+)-\d+\n", content)
+        matches = re.findall(r"INFO (\d+)-\d+\n", content)
         progress = len(set(matches))
         return offset + progress
 

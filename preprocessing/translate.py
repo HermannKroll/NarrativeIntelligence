@@ -45,7 +45,7 @@ class PMCCollector:
             with open(id_list_or_filename) as f:
                 ids = set(line.strip() for line in f)
         else:
-            ids = id_list_or_filename
+            ids = set(id_list_or_filename)
         return ids
 
     def collect(self, id_list_or_filename):

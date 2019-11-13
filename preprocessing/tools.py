@@ -3,35 +3,10 @@ import re
 import sys
 from argparse import ArgumentParser
 
-# TODO: Add doc
 from tagging.base import merge_result_files, finalize_dir
 
 
-# def batch(iterable, n=1):
-#     """
-#     https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
-#     """
-#     l = len(iterable)
-#     for ndx in range(0, l, n):
-#         yield iterable[ndx:min(ndx + n, l)]
-#
-#
-# def required_length(nmin, nmax):
-#     """
-#     https://stackoverflow.com/questions/4194948/python-argparse-is-there-a-way-to-specify-a-range-in-nargs
-#     """
-#
-#     class RequiredLength(argparse.Action):
-#         def __call__(self, parser, args, values, option_string=None):
-#             if not nmin <= len(values) <= nmax:
-#                 msg = 'argument "{f}" requires between {nmin} and {nmax} arguments'.format(
-#                     f=self.dest, nmin=nmin, nmax=nmax)
-#                 raise argparse.ArgumentTypeError(msg)
-#             setattr(args, self.dest, values)
-#
-#     return RequiredLength
-
-
+# TODO: Add doc
 def get_documents_in_file(filename):
     ids = set()
     with open(filename) as f:
