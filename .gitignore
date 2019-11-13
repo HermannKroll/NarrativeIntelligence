@@ -125,3 +125,4 @@ narrative/.docs
 venvlinux/
 tmp/
 semmeddb/config.json
+config/semmed_config.json
