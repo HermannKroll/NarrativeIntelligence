@@ -36,6 +36,10 @@ def split(input_file, output_dir):
     documents = content.split("\n\n")
     for document in documents:
         if document:
+            # some pubtator files include empty lines or end with a empty line
+            if document == '\n':
+                print('skipping empty line')
+                continue
             did = document[0:document.index("|")]
             with open(os.path.join(output_dir, "PMC{}.txt".format(did)), "w") as f:
                 f.write(document + "\n\n")
