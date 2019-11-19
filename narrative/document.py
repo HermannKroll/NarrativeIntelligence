@@ -4,12 +4,20 @@ CHEMICAL = "Chemical"
 DISEASE = "Disease"
 GENE = "Gene"
 SPECIES = "Species"
+MUTATION = "Mutation"
+CELLLINE = "CellLine"
+PROTEINMUTATION = "ProteinMutation"
+DNAMUTATION = "DNAMutation"
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,
     Disease=DISEASE,
     Gene=GENE,
     Species=SPECIES,
+    Mutation=MUTATION,
+    CellLine=CELLLINE,
+    ProteinMutation=PROTEINMUTATION,
+    DNAMutation=DNAMUTATION
 )
 
 
@@ -36,8 +44,8 @@ class Sentence:
 
 
 class TaggedDocument:
-    REGEX_TITLE = re.compile("\|t\| (.*?)\n")
-    REGEX_ABSTRACT = re.compile("\|a\| (.*?)\n")
+    REGEX_TITLE = re.compile("\|t\|(.*?)\n")
+    REGEX_ABSTRACT = re.compile("\|a\|(.*?)\n")
     REGEX_TAGS = re.compile("(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 
     def __init__(self, pubtator_content):
