@@ -121,5 +121,7 @@ src/narrative/res
 src/narrative/.docs
 venvlinux/
 tmp/
-config/[a-zA-Z0-9]*.json
 logs/
+
+config/*
+!config/*.example.json

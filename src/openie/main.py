@@ -8,6 +8,8 @@ from datetime import datetime
 
 from time import sleep
 
+from config import OPENIE_CONFIG
+
 PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)\n")
 
 
@@ -78,7 +80,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
     parser.add_argument("output")
-    parser.add_argument("--conf", default="config.json")
+    parser.add_argument("--conf", default=OPENIE_CONFIG)
     args = parser.parse_args()
 
     # Read config

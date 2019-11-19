@@ -28,3 +28,6 @@ NLP_DATA = os.path.join(DATA_DIR, "stanfordnlp_resources")
 
 # Graph
 GRAPH_GV = os.path.join(DATA_DIR, "graph/graph.gv")
+
+# OpenIE
+OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")

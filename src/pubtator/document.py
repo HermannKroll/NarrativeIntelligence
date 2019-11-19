@@ -4,12 +4,20 @@ CHEMICAL = "Chemical"
 DISEASE = "Disease"
 GENE = "Gene"
 SPECIES = "Species"
+MUTATION = "Mutation"
+CELLLINE = "CellLine"
+PROTEINMUTATION = "ProteinMutation"
+DNAMUTATION = "DNAMutation"
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,
     Disease=DISEASE,
     Gene=GENE,
     Species=SPECIES,
+    Mutation=MUTATION,
+    CellLine=CELLLINE,
+    ProteinMutation=PROTEINMUTATION,
+    DNAMutation=DNAMUTATION
 )
 
 
