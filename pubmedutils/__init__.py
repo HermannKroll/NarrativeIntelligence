@@ -1,4 +1,4 @@
-from .khelper import chunks, printProgressBar
+from .progress import chunks, printProgressBar
 
 
 from .pubcrawler import pubmed_crawl_pmids

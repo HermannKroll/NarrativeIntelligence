@@ -1,7 +1,7 @@
 import re
 import random
 
-from .khelper import printProgressBar
+from .progress import printProgressBar
 
 
 def blocks(files, size=65536):

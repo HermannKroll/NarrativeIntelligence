@@ -3,7 +3,7 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 import time
 
-from .khelper import chunks, printProgressBar
+from .progress import chunks, printProgressBar
 
 
 # Query pmid's from pmed

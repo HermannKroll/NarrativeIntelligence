@@ -1,0 +1,3 @@
+from __future__ import absolute_import
+
+from snorkel.pytorch_gpu.logistic_regression import LogisticRegression

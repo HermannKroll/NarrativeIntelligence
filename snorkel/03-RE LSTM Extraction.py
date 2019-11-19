@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 import sys
-import os
 from time import time
 
 from snorkel import SnorkelSession
-from snorkel.parser import CorpusParser, Spacy, StanfordCoreNLPServer
+from snorkel.parser import CorpusParser
 from snorkel.models import Document, Sentence
-from snorkel.models import Candidate, candidate_subclass
+from snorkel.models import candidate_subclass
 from snorkel.candidates import PretaggedCandidateExtractor
 
-from pubtator import PubTatorDocPreprocessor, PubTatorTagProcessor, PubTatorParser
+from snorkel.pubtator import PubTatorDocPreprocessor, PubTatorParser
 
-from ksnorkel import KSUtils
+from snorkel.ksnorkel import KSUtils
 
-from pytorch_gpu import LSTM
+from snorkel.pytorch_gpu import LSTM
 
 
 # In[2]

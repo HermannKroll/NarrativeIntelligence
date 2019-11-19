@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import warnings
 
-from pytorch_gpu.noise_aware_model import TorchNoiseAwareModel
+from snorkel.pytorch_gpu import TorchNoiseAwareModel
 
 
 class LogisticRegression(TorchNoiseAwareModel):

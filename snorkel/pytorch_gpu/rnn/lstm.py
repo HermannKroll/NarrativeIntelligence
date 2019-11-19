@@ -8,8 +8,8 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from pytorch_gpu.rnn.rnn_base import RNNBase
-from pytorch_gpu.rnn.utils import SymbolTable
+from snorkel.pytorch_gpu.rnn import RNNBase
+from snorkel.pytorch_gpu.rnn import SymbolTable
 
 
 class LSTM(RNNBase):
