@@ -55,8 +55,6 @@ class DosageFormTagger(BaseTagger):
                         # add plural form
                         terms.append(t.string.lower() + 's')
                     terms.append(t.string.lower())
-                if dosage_form.unique_id == 'D009824' or dosage_form.unique_id == 'D053758':
-                    print(terms)
                 # go trough heading and all terms
                 for term in terms:
                     if term in self.desc_by_term:
