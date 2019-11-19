@@ -1,7 +1,0 @@
-1618905|t|Kinetochores and chromatin diminution in early embryos of Parascaris univalens 
-1618905|a|In Parascaris the mitotic chromosomes of gonial germline cells are holocentric and possess a continuous kinetochore along their entire length. By contrast, in meiotic cells, the centromeric activity is restricted to the heterochromatic tips where direct insertion of spindle microtubules into chromatin without any kinetochore plate is seen. In the presomatic cells of early embryos, which undergo heterochromatin elimination, only euchromatin shows kinetic activity. After developing a technique to separate the very resistant egg shell from the embryos, we studied the cell divisions during early embryogenesis by immunochemical and EM approaches. The results reported here show that in presomatic cells microtubules bind only the euchromatin where a continuous kinetochore plate is present. We also report observations suggesting that the binding of the long kinetochores to the mitotic spindle initiates to a limited number of sites and extends along the entire length, during chromosome condensation. The existence of different centromere stages in different cell types, rends Parascaris chromosomes a very good model to study centromere organization. 
-1618905	47	54	embryos	Species	6239
-1618905	58	78	Parascaris univalens	Disease	
-1618905	454	461	embryos	Species	6239
-1618905	626	633	embryos	Species	6239
-

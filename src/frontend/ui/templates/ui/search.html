@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/ui.css' %}" type="text/css"/>
+{% endblock %}
+
+{% block title %}Narrative Information Access to PubMed{% endblock %}
+
+{% block content %}
+    <div class="container margin-top">
+        <div class="row">
+            <div class="col">
+                <form action="{% url 'search' %}" id="search_form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_keywords"><strong>Keywords</strong></label>
+                        <textarea class="form-control" id="id_keywords" rows="3"
+                                  name="keywords">Simvastatin CAUSES Rhabdomyolysis</textarea>
+                        <small id="id_help" class="form-text text-muted" aria-describedby="id_help">
+                            Please type in the keywords you want to query. 
+                        </small>
+                        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            Currently, only entities in Mesh are supported. They can be entered by as a keyword or as a Mesh Identifier (beginning with MESH:):
+                            Simvastatin or MESH:DD019821
+                        </small>
+                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            Entities including empty spaces must be encoded like follows:
+                            Cytochrome_P-450_CYP3A or Diabetes_Mellitus
+                        </small>
+                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            Predicates must stem from a predifined set of predicates (see below).
+                        </small>
+                        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            You can also use variables in your query by adding a question mark, e.g.
+                            Simvastatin CAUSES ?X
+                        </small>
+                       <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            Multiple facts are queried as follows (seperated by a ';'):
+                            Simvastatin CAUSES ?X; ?X AFFECTS ?Y
+                        </small>
+                        <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
+                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                             'ADMINISTERED_TO', 'AFFECTS', 'ASSOCIATED_WITH', 'AUGMENTS', 'CAUSES', 'COEXISTS_WITH', 'COMPLICATES', 'CONVERTS_TO', 'DIAGNOSES', 'DISRUPTS', 'INHIBITS', 'INTERACTS_WITH', 'ISA', 'LOCATION_OF', 'MANIFESTATION_OF', 'METHOD_OF', 'NEG_ADMINISTERED_TO', 'NEG_AFFECTS', 'NEG_ASSOCIATED_WITH', 'NEG_AUGMENTS', 'NEG_CAUSES', 'NEG_COEXISTS_WITH', 'NEG_COMPLICATES', 'NEG_CONVERTS_TO', 'NEG_DIAGNOSES', 'NEG_DISRUPTS', 'NEG_INHIBITS', 'NEG_INTERACTS_WITH', 'NEG_LOCATION_OF', 'NEG_MANIFESTATION_OF', 'NEG_METHOD_OF', 'NEG_OCCURS_IN', 'NEG_PART_OF', 'NEG_PRECEDES', 'NEG_PREDISPOSES', 'NEG_PREVENTS', 'NEG_PROCESS_OF', 'NEG_PRODUCES', 'NEG_STIMULATES', 'NEG_TREATS', 'NEG_USES', 'NEG_higher_than', 'NEG_lower_than', 'OCCURS_IN', 'PART_OF', 'PRECEDES', 'PREDISPOSES', 'PREVENTS', 'PROCESS_OF', 'PRODUCES', 'STIMULATES', 'TREATS', 'USES', 'compared_with', 'different_from', 'higher_than', 'lower_than', 'same_as'
+                        </small>
+                       <label for="id_keywords"><strong>Corpus:</strong></label>
+
+                        <small id="id_help_3" class="form-text text-muted" aria-describedby="id_help">
+                            Current Corpus: SemMedDB 06.2018 (PubMed Abstracts + Titles, 31.12.2017)
+                        </small>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn_search">
+                        Search patterns
+                    </button>
+                    <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                        Please be patient. This process can take up to one minute.
+                    </p>
+                </form>
+            </div>
+            <div class="col">
+                <label for="query_translation"><strong>Query Translation</strong></label>
+                <div id="query_translation">No query translation available.</div>
+            </div>
+        </div>
+
+        <div class="row margin-top">
+            <div class="col">
+                <h2>Graph patterns</h2>
+
+                <form id="graph-patterns"></form>
+            </div>
+        </div>
+
+        <div class="row margin-top" id="div_wrapper_documents">
+            <div class="col-md-6">
+                <h2>Documents</h2>
+
+                <div id="div_documents"></div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.7.2/cytoscape.umd.js"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+        const search_url = "{% url 'search' %}";
+    </script>
+    <script src="{% static 'js/../../static/js/search.js' %}" type="text/javascript"></script>
+{% endblock %}
