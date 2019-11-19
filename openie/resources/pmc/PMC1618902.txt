@@ -1,7 +1,0 @@
-1618902|t|A multifunctional cell surface developmental stage-specific antigen in the cockroach embryo: involvement in pathfinding by CNS pioneer axons 
-1618902|a|mAb DSS-8 binds to a 164-kD developmental stage-specific cell surface antigen in the nervous system of the cockroach, Periplaneta americana. The antigen is localized to different subsets of cells at various stages of development. The spatial and temporal distributions of DSS-8 binding were determined and are consistent with this antigen playing multiple roles in the development of the nervous system. Direct identification of some of these functions was made by perturbation experiments in which pioneer axon growth occurs in embryos that are cultured in vitro in the presence of mAb DSS-8 or its Fab fragment. Under these conditions the pioneer axons of the median fiber tract grow but follow altered pathways. In a smaller percentage of the ganglia, the immunoreagents additionally produce defasciculation of a subset of DSS-8 labeled axons. Therefore, direct roles for the DSS-8 antigen in both the guidance of pioneer axons and selective fasciculation have been demonstrated. 
-1618902	85	91	embryo	Species	6239
-1618902	670	677	embryos	Species	6239
-1618902	1086	1099	fasciculation	Disease	MESH:D005207
-1618902	936	951	defasciculation	Disease	
-

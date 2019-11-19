@@ -1,7 +1,0 @@
-1315315|t|Misfolding and aggregation of newly synthesized proteins in the endoplasmic reticulum 
-1315315|a|As a part of our studies on the folding of glycoproteins in the ER, we analyzed the fate of viral glycoproteins that have misfolded either spontaneously or through inhibition of N-linked glycosylation. Newly synthesized Semliki Forest virus spike glycoproteins E1 and p62 and influenza hemagglutinin were studied in infected and transfected tissue culture cells. Misfolded proteins aggregated in less than 1 min after release from polysomes and aberrant interchain disulfide bonds were formed immediately. When more than one protein was misfolded, mixed aggregates were generated. This indicated that the formation of complexes was nonspecific, random, and not restricted to products from single polysomes. The size of the aggregates varied from small oligomers to complexes of several million daltons. BiP was associated noncovalently with the aggregates and with some of the nonaggregated products. We conclude that aggregation reflects the poor solubility of incompletely folded polypeptide chains. 
-1315315	889	892	BiP	Gene	3309
-1315315	306	326	Semliki Forest virus	Species	11033
-1315315	551	560	disulfide	Chemical	MESH:D004220
-1315315	264	265	N	Chemical	MESH:D009584
-

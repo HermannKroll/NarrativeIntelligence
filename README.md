@@ -3,8 +3,18 @@
 Download ctd data for labeling training and test data. This download recommends 3GB of free disk space.
 
 ```
-.\download_ctd_data.sh
+./download_ctd_data.sh
 ```
+
+### Data directory
+The ``data`` directory contains application data for **all** packages.
+Application data should **never** be stored inside the ``src`` directory.
+
+Application data includes:
+- MESH descriptor files
+- UMLS data
+- TIB EPA dump
+
 
 ## Preprocessing for PubMedCentral
 
