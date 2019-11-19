@@ -2,7 +2,7 @@ import argparse
 import os
 import logging
 
-from narrative.document import TaggedDocument
+from pubtator.document import TaggedDocument
 
 
 def load_pubtator_file(pmid, pubtator_dir, prefix='PMC'):
