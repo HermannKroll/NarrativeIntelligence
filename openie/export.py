@@ -15,6 +15,7 @@ SQL_HEADER = "CREATE TABLE IF NOT EXISTS PREDICATION_OPENIE \
                   sentence VARCHAR );\n"
 SQL_INSERT_HEADER = 'INSERT INTO PREDICATION_OPENIE VALUES \n';
 
+
 def read_input_tuples(input, logger):
     # open the input open ie file
     # read all lines for a single doc
@@ -63,7 +64,6 @@ def export_to_cesi(input, output, logger):
         for _, value in aggregation.items():
             t, sentences = value
             sub, pred, obj, sub_id, sub_ent, obj_id, obj_ent = t
-            # Todo: lemmatize predicate
             json_data = {'triple_norm': [sub.lower(), pred.lower(), obj.lower()],
                          'true_link': {'subject': sub_id, 'object': obj_id},
                          '_id': id_counter,
