@@ -1,0 +1,14 @@
+1577862|t|Neurolin, a cell surface glycoprotein on growing retinal axons in the goldfish visual system, is reexpressed during retinal axonal regeneration 
+1577862|a|The mAb E 21 recognizes a cell surface glycoprotein selectively associated with fish retinal ganglion cell axons that are in a state of growth. All retinal axons and ganglion cells in goldfish embryos stained for E 21. In adult fish, however, E 21 immunoreactivity exhibited a patterned distribution in ganglion cells in the marginal growth zone of the continuously enlarging fish retina and the new axons emerging from these cells in the retina, optic nerve, and optic tract. The E 21 antigen was absent from older axons, except the terminal arbor layer in the tectum, the Stratum fibrosum et griseum superficiale where it was uniformly distributed. Upon optic nerve transection, the previously unlabeled axons reacquired E 21 positivity as they regenerated throughout their path to the tectum. Several months after ONS, however, E 21 staining disappeared from the regenerated axons over most of their lengths but reappeared as in normal fish in the terminal arbor layer. The immunoaffinity-purified E 21 antigen, called Neurolin, has an apparent molecular mass of 86 kD and contains the HNK1/L2 carbohydrate moiety, like several members of the class of cell adhesion molecules of the Ig superfamily. The NH2-terminal amino acid sequence has homologies to the cell adhesion molecule DM-Grasp recently described in the chicken. Thus, retinal ganglion cell axons express Neurolin during their development and are able to reexpress this candidate cell adhesion molecule during axonal regeneration, suggesting that Neurolin is functionally important for fish retinal axon growth. 
+1577862	0	8	Neurolin	Gene	30194
+1577862	70	78	goldfish	Species	7957
+1577862	1166	1174	Neurolin	Gene	30194
+1577862	1428	1436	DM-Grasp	Gene	396092
+1577862	1514	1522	Neurolin	Gene	30194
+1577862	1656	1664	Neurolin	Gene	30194
+1577862	328	336	goldfish	Species	7957
+1577862	337	344	embryos	Species	6239
+1577862	1463	1470	chicken	Species	9031
+1577862	1241	1253	carbohydrate	Chemical	MESH:D002241
+1577862	1350	1353	NH2	Chemical	MESH:D000641
+

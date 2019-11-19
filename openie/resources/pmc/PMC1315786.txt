@@ -1,0 +1,8 @@
+1315786|t|Localization of RAP1 and topoisomerase II in nuclei and meiotic chromosomes of yeast 
+1315786|a|Topoisomerase II (topoII) and RAP1 (Repressor Activator Protein 1) are two abundant nuclear proteins with proposed structural roles in the higher-order organization of chromosomes. Both proteins co-fractionate as components of nuclear scaffolds from vegetatively growing yeast cells, and both proteins are present as components of pachytene chromosome, co-fractionating with an insoluble subfraction of meiotic nuclei. Immunolocalization using antibodies specific for topoII shows staining of an axial core of the yeast meiotic chromosome, extending the length of the synaptonemal complex. RAP1, on the other hand, is located at the ends of the paired bivalent chromosomes, consistent with its ability to bind telomeric sequences in vitro. In interphase nuclei, again in contrast to anti-topoII, anti-RAP1 gives a distinctly punctate staining that is located primarily at the nuclear periphery. Approximately 16 brightly staining foci can be identified in a diploid nucleus stained with anti-RAP1 antibodies, suggesting that telomeres are grouped together, perhaps through interaction with the nuclear envelope. 
+1315786	16	20	RAP1	Chemical	MESH:C040523
+1315786	356	361	yeast	Species	4932
+1315786	599	604	yeast	Species	4932
+1315786	675	679	RAP1	Chemical	MESH:C071212
+1315786	115	119	RAP1	Chemical	MESH:C071212
+

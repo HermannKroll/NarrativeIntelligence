@@ -1,0 +1,17 @@
+1577857|t|High level expression of transfected beta- and gamma-actin genes differentially impacts on myoblast cytoarchitecture 
+1577857|a|The impact of the human beta- and gamma-actin genes on myoblast cytoarchitecture was examined by their stable transfection into mouse C2 myoblasts. Transfectant C2 clones expressing high levels of human beta-actin displayed increases in cell surface area. In contrast, C2 clones with high levels of human gamma-actin expression showed decreases in cell surface area. The changes in cell morphology were accompanied by changes in actin stress-fiber organization. The beta- actin transfectants displayed well-defined filamentous organization of actin; whereas the gamma-actin transfectants displayed a more diffuse organization of the actin cables. The role of the beta-actin protein in generating the enlarged cell phenotype was examined by transfecting a mutant form of the human beta-actin gene. Transfectant cells were shown to incorporate the aberrant actin protein into stress-fiber-like structures. High level expression of the mutant beta-actin produced decreases in cell surface area and disruption of the actin microfilament network similar to that seen with transfection of the gamma-actin gene. In contrast, transfection of another mutant form of the beta-actin gene which encodes an unstable protein had no impact on cell morphology or cytoarchitecture. These results strongly suggest that it is the nature of the encoded protein that determines the morphological response of the cell. We conclude that the relative gene expression of beta- and gamma-actin is of relevance to the control of myoblast cytoarchitecture. In particular, we conclude that the beta- and gamma-actin genes encode functionally distinct cytoarchitectural information. 
+1577857	37	58	beta- and gamma-actin	Gene	728378
+1577857	141	162	beta- and gamma-actin	Gene	728378
+1577857	320	330	beta-actin	Gene	728378
+1577857	780	790	beta-actin	Gene	728378
+1577857	897	907	beta-actin	Gene	728378
+1577857	1057	1067	beta-actin	Gene	728378
+1577857	1278	1288	beta-actin	Gene	728378
+1577857	1563	1584	beta- and gamma-actin	Gene	728378
+1577857	1682	1703	beta- and gamma-actin	Gene	728378
+1577857	135	140	human	Species	9606
+1577857	245	250	mouse	Species	10090
+1577857	314	319	human	Species	9606
+1577857	416	421	human	Species	9606
+1577857	891	896	human	Species	9606
+

@@ -1,0 +1,284 @@
+25568584|t|Occupational Overuse Syndrome (Technological Diseases): Carpal Tunnel Syndrome, a Mouse Shoulder, Cervical Pain Syndrome 
+25568584|a|ABSTRACT Technological diseases are diseases of the modern era. Some are caused by occupational exposures, and are marked with direct professional relation, or the action of harmful effects in the workplace. Due to the increasing incidence of these diseases on specific workplaces which may be caused by one or more causal factors present in the workplace today, these diseases are considered as professional diseases. Severity of technological disease usually responds to the level and duration of exposure, and usually occurs after many years of exposure to harmful factor. Technological diseases occur due to excessive work at the computer, or excessive use of keyboards and computer mice, especially the non-ergonomic ones. This paper deals with the diseases of the neck, shoulder, elbow and wrist (cervical radiculopathy, mouse shoulder and carpal tunnel syndrome), as is currently the most common diseases of technology in our country and abroad. These three diseases can be caused by long-term load and physical effort, and are tied to specific occupations, such as occupations associated with prolonged sitting, working at the computer and work related to the fixed telephone communication, as well as certain types of sports (tennis, golf and others). 
+25568584	82	87	Mouse	Species	10090
+25568584	0	29	Occupational Overuse Syndrome	Disease	MESH:D012090
+25568584	107	120	Pain Syndrome	Disease	MESH:D010146
+25568584	808	812	mice	Species	10090
+25568584	948	953	mouse	Species	10090
+25568584	967	989	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	924	946	cervical radiculopathy	Disease	MESH:D011843
+25568584	1787	1790	CTS	Gene	7276
+25568584	1795	1800	Mouse	Species	10090
+25568584	2447	2451	mice	Species	10090
+25568584	2590	2594	mice	Species	10090
+25568584	2870	2875	mouse	Species	10090
+25568584	3019	3061	Bosnia and Herzegovina to overuse injuries	Disease	MESH:D012090
+25568584	2762	2779	Cervical syndrome	Disease	MESH:D002575
+25568584	1819	1832	Cervical Pain	Disease	MESH:D019547
+25568584	3429	3446	cervical syndrome	Disease	MESH:D002575
+25568584	1843	1846	CPS	Disease	MESH:D019547
+25568584	2738	2760	Carpal Tunnel Syndrome	Disease	MESH:D002349
+25568584	3390	3412	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	3779	3782	lat	Gene	27040
+25568584	3652	3655	CTS	Gene	7276
+25568584	3859	3867	numbness	Disease	MESH:D006987
+25568584	3676	3696	canaliculus syndrome	Disease	MESH:D061325
+25568584	3840	3844	pain	Disease	MESH:D010146
+25568584	3628	3650	Carpal tunnel syndrome	Disease	MESH:D002349
+25568584	3884	3899	muscle weakness	Disease	MESH:D018908
+25568584	4092	4095	lat	Gene	27040
+25568584	4025	4028	lat	Gene	27040
+25568584	4291	4306	palmaris longus	Disease	MESH:D007645
+25568584	4606	4609	CTS	Gene	7276
+25568584	4830	4836	people	Species	9606
+25568584	4725	4735	neuropathy	Disease	MESH:D009422
+25568584	4582	4604	Carpal tunnel syndrome	Disease	MESH:D002349
+25568584	5127	5135	numbness	Disease	MESH:D006987
+25568584	5045	5049	pain	Disease	MESH:D010146
+25568584	5678	5700	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	5483	5489	trauma	Disease	MESH:D014947
+25568584	5428	5450	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	5508	5549	tenosynovitis of the rheumatoid arthritis	Disease	MESH:D001172
+25568584	5847	5854	patient	Species	9606
+25568584	6036	6043	patient	Species	9606
+25568584	5874	5886	nerve damage	Disease	MESH:D003389
+25568584	5762	5769	illness	Disease	MESH:D002908
+25568584	6307	6310	CTS	Gene	7276
+25568584	6279	6287	patients	Species	9606
+25568584	6396	6404	patients	Species	9606
+25568584	6560	6568	patients	Species	9606
+25568584	6670	6678	patients	Species	9606
+25568584	6936	6943	patient	Species	9606
+25568584	7062	7069	patient	Species	9606
+25568584	7173	7181	patients	Species	9606
+25568584	7329	7334	Euros	Species	9319
+25568584	7471	7478	patient	Species	9606
+25568584	7602	7609	patient	Species	9606
+25568584	7761	7764	CTS	Gene	7276
+25568584	8023	8027	pain	Disease	MESH:D010146
+25568584	8290	8312	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	7891	7897	Phalen	Chemical	
+25568584	8203	8207	pain	Disease	MESH:D010146
+25568584	8585	8589	pain	Disease	MESH:D010146
+25568584	8793	8797	pain	Disease	MESH:D010146
+25568584	8965	8987	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	9136	9140	EMNG	Chemical	
+25568584	9522	9528	trauma	Disease	MESH:D014947
+25568584	9327	9369	Carpal tunnel syndrome the primary disease	Disease	MESH:D002349
+25568584	9471	9486	corticosteroids	Chemical	MESH:D000305
+25568584	9650	9656	Turkey	Species	9103
+25568584	9804	9812	patients	Species	9606
+25568584	9909	9919	vitamin B6	Chemical	MESH:D025101
+25568584	9881	9903	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	9818	9840	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	9713	9723	vitamin B6	Chemical	MESH:D025101
+25568584	9942	9948	Turkey	Species	9103
+25568584	10053	10061	patients	Species	9606
+25568584	10081	10103	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	10325	10333	patients	Species	9606
+25568584	10339	10361	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	10459	10467	patients	Species	9606
+25568584	10693	10701	patients	Species	9606
+25568584	10473	10495	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	10909	10913	PAIN	Disease	MESH:D009477
+25568584	11093	11102	Neck pain	Disease	MESH:D019547
+25568584	11060	11064	pain	Disease	MESH:D010146
+25568584	10923	10945	Cervical pain syndrome	Disease	MESH:D019547
+25568584	10947	10950	CPS	Disease	MESH:D019547
+25568584	11624	11629	C6-C2	Chemical	MESH:C023714
+25568584	11682	11704	Cervical radiculopathy	Disease	MESH:D011843
+25568584	12038	12046	weakness	Disease	MESH:D018908
+25568584	12018	12022	pain	Disease	MESH:D010146
+25568584	12195	12203	Patients	Species	9606
+25568584	12351	12364	radiculopathy	Disease	MESH:D011843
+25568584	12374	12389	spine disorders	Disease	MESH:D016135
+25568584	12427	12440	radiculopathy	Disease	MESH:D011843
+25568584	12301	12314	radiculopathy	Disease	MESH:D011843
+25568584	12114	12127	radiculopathy	Disease	MESH:D011843
+25568584	12469	12486	cervical syndrome	Disease	MESH:D002575
+25568584	12693	12706	radiculopathy	Disease	MESH:D011843
+25568584	12595	12608	radiculopathy	Disease	MESH:D011843
+25568584	12769	12780	osteophytes	Disease	MESH:D054850
+25568584	12645	12657	acute injury	Disease	MESH:D058186
+25568584	12910	12918	patients	Species	9606
+25568584	12931	12935	pain	Disease	MESH:D010146
+25568584	13345	13354	auricular	Disease	MESH:D004428
+25568584	13201	13209	headache	Disease	MESH:D006261
+25568584	13246	13254	Headache	Disease	MESH:D006261
+25568584	13129	13139	irritation	Disease	MESH:D001523
+25568584	13398	13408	irritation	Disease	MESH:D001523
+25568584	13687	13705	vascular disorders	Disease	MESH:D014652
+25568584	13810	13862	spondylosis (osteophytes), uncarthrosis, spondylosis	Disease	MESH:D055009
+25568584	13864	13879	Atherosclerosis	Disease	MESH:D050197
+25568584	13943	13951	patients	Species	9606
+25568584	14245	14253	headache	Disease	MESH:D006261
+25568584	13957	13974	cervical syndrome	Disease	MESH:D002575
+25568584	14083	14087	pain	Disease	MESH:D010146
+25568584	14011	14015	pain	Disease	MESH:D010146
+25568584	14480	14484	pain	Disease	MESH:D010146
+25568584	14561	14570	dizziness	Disease	MESH:D004244
+25568584	14668	14678	tenderness	Disease	
+25568584	14607	14615	headache	Disease	MESH:D006261
+25568584	14588	14602	blurred vision	Disease	MESH:D014786
+25568584	14575	14583	tinnitus	Disease	MESH:D014012
+25568584	14527	14531	pain	Disease	MESH:D010146
+25568584	14302	14306	pain	Disease	MESH:D010146
+25568584	14620	14628	diplopia	Disease	MESH:D004172
+25568584	15253	15257	pain	Disease	MESH:D010146
+25568584	15152	15165	radiculopathy	Disease	MESH:D011843
+25568584	15269	15277	weakness	Disease	MESH:D018908
+25568584	15738	15744	people	Species	9606
+25568584	15828	15836	patients	Species	9606
+25568584	15999	16002	hot	Gene	137872
+25568584	16545	16553	patients	Species	9606
+25568584	16485	16499	sleep problems	Disease	MESH:D012893
+25568584	16559	16568	neck pain	Disease	MESH:D019547
+25568584	16658	16666	patients	Species	9606
+25568584	16650	16654	pain	Disease	MESH:D010146
+25568584	16607	16614	steroid	Chemical	MESH:D013256
+25568584	16672	16689	cervical syndrome	Disease	MESH:D002575
+25568584	16939	16947	steroids	Chemical	MESH:D013256
+25568584	16911	16925	radicular pain	Disease	MESH:D011842
+25568584	16814	16822	steroids	Chemical	MESH:D013256
+25568584	16875	16887	inflammation	Disease	MESH:D007249
+25568584	17232	17236	pain	Disease	MESH:D010146
+25568584	17115	17122	steroid	Chemical	MESH:D013256
+25568584	17383	17391	patients	Species	9606
+25568584	17296	17313	cervical syndrome	Disease	MESH:D002575
+25568584	17609	17631	cervical radiculopathy	Disease	MESH:D011843
+25568584	17641	17646	MOUSE	Species	10090
+25568584	17836	17842	people	Species	9606
+25568584	17984	17988	mice	Species	10090
+25568584	18138	18142	mice	Species	10090
+25568584	18300	18304	mice	Species	10090
+25568584	18611	18631	musculoskeletal pain	Disease	MESH:D059352
+25568584	18638	18642	pain	Disease	MESH:D010146
+25568584	19036	19044	children	Species	9606
+25568584	18715	18738	inflammation of tendons	Disease	MESH:D007249
+25568584	18851	18863	inflammation	Disease	MESH:D007249
+25568584	19179	19183	pain	Disease	MESH:D010146
+25568584	19233	19248	muscle weakness	Disease	MESH:D018908
+25568584	19560	19575	sleep disorders	Disease	MESH:D012893
+25568584	19350	19354	pain	Disease	MESH:D010146
+25568584	19976	19980	pain	Disease	MESH:D010146
+25568584	20202	20207	mouse	Species	10090
+25568584	20305	20312	patient	Species	9606
+25568584	20378	20385	patient	Species	9606
+25568584	20417	20423	injury	Disease	MESH:D014947
+25568584	20443	20455	inflammation	Disease	MESH:D007249
+25568584	20646	20650	pain	Disease	MESH:D010146
+25568584	20736	20740	pain	Disease	MESH:D010146
+25568584	20502	20506	pain	Disease	MESH:D010146
+25568584	20895	20899	rays	Species	255564
+25568584	20959	20985	inflammation of the joints	Disease	MESH:D007249
+25568584	21101	21106	mouse	Species	10090
+25568584	21199	21204	mouse	Species	10090
+25568584	21213	21220	patient	Species	9606
+25568584	21330	21335	mouse	Species	10090
+25568584	21411	21416	mouse	Species	10090
+25568584	21820	21824	pain	Disease	MESH:D010146
+25568584	21489	21493	pain	Disease	MESH:D010146
+25568584	21896	21904	patients	Species	9606
+25568584	21926	21933	painful	Disease	MESH:D010146
+25568584	22061	22065	pain	Disease	MESH:D010146
+25568584	22307	22312	mouse	Species	10090
+25568584	22587	22592	mouse	Species	10090
+25568584	22641	22645	pain	Disease	MESH:D010146
+25568584	22338	22355	upper extremities	Disease	MESH:D009207
+25568584	22443	22447	pain	Disease	MESH:D010146
+25568584	22713	22726	TECHNOLOGICAL	Chemical	
+25568584	22823	22830	patient	Species	9606
+25568584	23348	23354	people	Species	9606
+25568584	23360	23372	disabilities	Disease	MESH:D009069
+25568584	23514	23520	people	Species	9606
+25568584	23526	23538	disabilities	Disease	MESH:D009069
+25568584	23872	23879	persons	Species	9606
+25568584	23943	23951	patients	Species	9606
+25568584	23885	23897	disabilities	Disease	MESH:D009069
+25568584	24294	24300	people	Species	9606
+25568584	24306	24318	disabilities	Disease	MESH:D009069
+25568584	24434	24441	patient	Species	9606
+25568584	24500	24510	disability	Disease	MESH:D009069
+25568584	24862	24870	patients	Species	9606
+25568584	24943	24951	patients	Species	9606
+25568584	25033	25041	patients	Species	9606
+25568584	25150	25158	Children	Species	9606
+25568584	25169	25175	people	Species	9606
+25568584	25190	25198	children	Species	9606
+25568584	25073	25084	Lumbar pain	Disease	MESH:D010146
+25568584	25098	25116	Rheumatic diseases	Disease	MESH:D012216
+25568584	25142	25148	stroke	Disease	MESH:D020521
+25568584	25046	25059	Cervical pain	Disease	MESH:D019547
+25568584	25527	25533	people	Species	9606
+25568584	25660	25688	implementation of the vision	Disease	MESH:D014786
+25568584	25836	25843	persons	Species	9606
+25568584	26732	26740	patients	Species	9606
+25568584	27274	27282	patients	Species	9606
+25568584	27417	27424	patient	Species	9606
+25568584	27540	27547	patient	Species	9606
+25568584	27954	27962	patients	Species	9606
+25568584	28214	28221	patient	Species	9606
+25568584	28408	28416	patients	Species	9606
+25568584	28645	28651	people	Species	9606
+25568584	28657	28669	disabilities	Disease	MESH:D009069
+25568584	28971	28976	labor	Disease	MESH:D048949
+25568584	29109	29124	musculoskeletal	Disease	MESH:D009140
+25568584	29192	29203	THERAPEUTIC	Chemical	MESH:D045506
+25568584	29382	29385	CTS	Gene	7276
+25568584	29609	29612	CTS	Gene	7276
+25568584	29884	29889	mouse	Species	10090
+25568584	30084	30092	patients	Species	9606
+25568584	31417	31424	patient	Species	9606
+25568584	30336	30346	disability	Disease	MESH:D009069
+25568584	30774	30782	steroids	Chemical	MESH:D013256
+25568584	30952	30956	pain	Disease	MESH:D010146
+25568584	30448	30467	radicular neck pain	Disease	MESH:D019547
+25568584	30098	30120	cervical radiculopathy	Disease	MESH:D011843
+25568584	30261	30286	musculoskeletal disorders	Disease	MESH:D009140
+25568584	30801	30806	ozone	Chemical	MESH:D010126
+25568584	30164	30173	neck pain	Disease	MESH:D019547
+25568584	30241	30254	low back pain	Disease	MESH:D017116
+25568584	31609	31624	musculoskeletal	Disease	MESH:D009140
+25568584	31725	31734	neck pain	Disease	MESH:D019547
+25568584	32001	32005	pain	Disease	MESH:D010146
+25568584	32412	32425	low back pain	Disease	MESH:D017116
+25568584	32333	32346	low back pain	Disease	MESH:D017116
+25568584	32532	32546	osteoarthritis	Disease	MESH:D010003
+25568584	32560	32569	neck pain	Disease	MESH:D019547
+25568584	32750	32769	calcific tendonitis	Disease	MESH:D052256
+25568584	33052	33069	repetitive injury	Disease	MESH:D012090
+25568584	33272	33281	neck pain	Disease	MESH:D019547
+25568584	32992	33010	injury or accident	Disease	MESH:D020521
+25568584	33028	33037	neck pain	Disease	MESH:D019547
+25568584	33071	33080	Neck pain	Disease	MESH:D019547
+25568584	32957	32966	neck pain	Disease	MESH:D019547
+25568584	33559	33563	pain	Disease	MESH:D010146
+25568584	33487	33491	pain	Disease	MESH:D010146
+25568584	34035	34039	mice	Species	10090
+25568584	34349	34370	occupational diseases	Disease	MESH:D009784
+25568584	34004	34021	overuse keyboards	Disease	MESH:D012090
+25568584	35153	35157	mice	Species	10090
+25568584	35231	35238	fatigue	Disease	MESH:D005221
+25568584	35243	35262	exhaustion syndrome	Disease	MESH:D006359
+25568584	35583	35605	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	35654	35676	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	35686	35699	carpal tunnel	Disease	MESH:D002349
+25568584	35816	35824	patients	Species	9606
+25568584	35751	35761	vitamin B6	Chemical	MESH:D025101
+25568584	35930	35938	patients	Species	9606
+25568584	35944	35966	carpal tunnel syndrome	Disease	MESH:D002349
+25568584	36113	36117	Pain	Disease	MESH:D010146
+25568584	36187	36200	radiculopathy	Disease	MESH:D011843
+25568584	36216	36223	steroid	Chemical	MESH:D013256
+25568584	36255	36277	cervical radiculopathy	Disease	MESH:D011843
+25568584	36321	36346	spondylotic radiculopathy	Disease	MESH:D011843
+25568584	36468	36488	Musculoskeletal pain	Disease	MESH:D059352
+25568584	36785	36793	children	Species	9606
+25568584	36888	36896	Patients	Species	9606
+25568584	36902	36924	Cervical Radiculopathy	Disease	MESH:D011843
+25568584	36932	36947	Disc Herniation	Disease	MESH:D007405
+25568584	36975	36996	Carpal Tunel Syndrome	Gene	7276
+25568584	36998	37001	CTS	Gene	7276
+25568584	37045	37053	Patients	Species	9606
+25568584	37059	37072	Low Back Pain	Disease	MESH:D017116
+

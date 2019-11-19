@@ -1,0 +1,9 @@
+1376732|t|Molecular cloning of a novel hyaluronan receptor that mediates tumor cell motility [published erratum appears in J Cell Biol 1992 Aug;118(3):753] 
+1376732|a|A cDNA encoding a unique hyaluronan receptor has been molecularly cloned from a lambda GT11 3T3 cDNA expression library. Immunoblot analyses of cell lysates, using antibodies to peptides encoded in the cDNA, specifically react with a 58-kD protein. This protein is regulated by the mutant H-ras gene in cells containing a metallothionein promoter H-ras hybrid gene. Further, antibodies to peptide sequences encoded in the cDNA block the increase in locomotion resulting from induction of the mutant H-ras gene in this cell line. In a transblot assay, the bacterially expressed protein binds to biotinylated hyaluronan. Antibodies to peptides encoded in the cDNA react in immunoblot assays with the 58- and 52-kD proteins of a novel hyaluronan receptor complex previously implicated in cell locomotion. Furthermore, antibodies specific to the 58- and 52-kD proteins, which block ras-induced locomotion, also cross-react with the expressed, encoded protein. The gene product described here appears to be a new type of hyaluronan receptor that is involved in cell locomotion. It is named RHAMM, an acronym for receptor for hyaluronan-mediated motility. 
+1376732	63	68	tumor	Disease	MESH:D009369
+1376732	435	440	H-ras	Gene	3265
+1376732	645	650	H-ras	Gene	3265
+1376732	1231	1236	RHAMM	Gene	3161
+1376732	1253	1294	receptor for hyaluronan-mediated motility	Gene	3161
+1376732	493	498	H-ras	Gene	3265
+

@@ -1,0 +1,6 @@
+1374066|t|Balbiani ring hnRNP substructure visualized by selective staining and electron spectroscopic imaging 
+1374066|a|The Balbiani Rings (BR) in the polytene chromosomes of Chironomus salivary glands are intense sites of transcription. The nascent RNPs fold during transcription into 40-50-nm granules, containing in the mature transcript approximately 37-kb RNA. Using a new nucleic acid specific stain, osmium ammine B on Lowicryl sections, in combination with electron energy filtered imaging of sections containing BR granules, we demonstrate a RNA-rich particulate substructure (10-nm particle diameter; 10-12 particles per BR granule). Elemental imaging supports that these particles are enriched in phosphorus. The possible relationship of these RNA-rich particles to ribonucleosomes is discussed, as well as models for their arrangement in the mature BR granules. 
+1374066	14	19	hnRNP	Gene	9987
+1374066	689	699	phosphorus	Chemical	MESH:D010758
+1374066	388	403	osmium ammine B	Chemical	MESH:C058639
+

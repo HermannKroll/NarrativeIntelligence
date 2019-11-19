@@ -1,0 +1,7 @@
+1320035|t|Immunocytochemical analysis of the transfer of vesicular stomatitis virus G glycoprotein from the intermediate compartment to the Golgi complex 
+1320035|a|We performed an immunocytochemical analysis to study the transfer of a marker protein (G glycoprotein coded by vesicular stomatitis virus ts 045 strain) from the intermediate compartment to the Golgi stacks in infected Vero cells. The intermediate compartment seemed to consist of about 30-40 separate units of clustered small vesicles and short tubules. The units contained Rab2 protein and were spread throughout the cytoplasm, with a ratio of about 6:4 in the peripheral versus perinuclear site. Time-course experiments revealed a progressive transfer of G glycoprotein from the intermediate compartment to the Golgi stacks, while the tubulo-vesicular units did not appear to change their intracellular distribution. Moreover, the labeling density of peripheral and perinuclear units decreased in parallel during the transfer. These results support the notion that the intermediate compartment is a station in the secretory pathway, and that a vesicular transport connects this station to the Golgi complex. 
+1320035	68	73	virus	Species	12081
+1320035	47	67	vesicular stomatitis	Disease	MESH:D054243
+1320035	276	281	virus	Species	12081
+1320035	255	275	vesicular stomatitis	Disease	MESH:D054243
+

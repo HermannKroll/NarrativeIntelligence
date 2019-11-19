@@ -1,0 +1,16 @@
+1374416|t|Regulation of alpha 2 beta 1-mediated fibroblast migration on type I collagen by shifts in the concentrations of extracellular Mg2+ and Ca2+ [published erratum appears in J Cell Biol 1992 Jul;118(1):219] 
+1374416|a|Extracellular Ca2+ can reverse the Mg(2+)-dependent, alpha 2 beta 1- mediated adhesion of WI38 human fibroblasts to type I collagen substrates. Affinity chromatography data also demonstrate that Ca2+ can specifically elute the fibroblast alpha 2 beta 1 integrin bound to type I collagen-Sepharose in Mg2+. In modified Boyden chamber migration assays, Mg2+ alone supports the alpha 2 beta 1-mediated migration of fibroblasts on type I collagen substrates, while Ca2+ does not. However, a twofold enhancement in migration was observed when combinations of the two cations were used, with optimal migration observed when the Mg2+/Ca2+ ratio was higher than one. Inhibitory mAbs directed against various integrin subunits demonstrate that these observed cation effects appear to be mediated primarily by alpha 2 beta 1. These data, together with reports that under certain physiological conditions significant fluctuations in the concentrations of extracellular Ca2+ and Mg2+ can take place in vivo, suggest that the ratio between these two cations is involved in the up- and downregulation of integrin function, and thus, may influence cell migratory behavior. 
+1374416	136	140	Ca2+	Chemical	MESH:D002118
+1374416	127	131	Mg2+	Chemical	MESH:D008274
+1374416	299	304	human	Species	9606
+1374416	504	507	Mg2	Chemical	MESH:D008274
+1374416	1171	1175	Mg2+	Chemical	MESH:D008274
+1374416	826	830	Mg2+	Chemical	MESH:D008274
+1374416	239	245	Mg(2+)	Chemical	MESH:D008274
+1374416	831	835	Ca2+	Chemical	MESH:D002118
+1374416	399	403	Ca2+	Chemical	MESH:D002118
+1374416	555	559	Mg2+	Chemical	MESH:D008274
+1374416	665	669	Ca2+	Chemical	MESH:D002118
+1374416	28	222	Ca2+	Chemical	MESH:D002118
+1374416	1162	1166	Ca2+	Chemical	MESH:D002118
+

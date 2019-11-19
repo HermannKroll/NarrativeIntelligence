@@ -1,0 +1,16 @@
+1374068|t|Slow axonal transport mechanisms move neurofilaments relentlessly in mouse optic axons 
+1374068|a|Pulse-labeling studies of slow axonal transport in many kinds of axons (spinal motor, sensory ganglion, oculomotor, hypoglossal, and olfactory) have led to the inference that axonal transport mechanisms move neurofilaments (NFs) unidirectionally as a single continuous kinetic population with a diversity of individual transport rates. One study in mouse optic axons (Nixon, R. A., and K. B. Logvinenko. 1986. J. Cell Biol. 102:647-659) has given rise to the different suggestion that a significant and distinct population of NFs may be entirely stationary within axons. In mouse optic axons, there are relatively few NFs and the NF proteins are more lightly labeled than other slowly transported slow component b (SCb) proteins (which, however, move faster than the NFs); thus, in mouse optic axons, the radiolabel of some of these faster-moving SCb proteins may confuse NF protein analyses that use one dimensional (1-D) SDS-PAGE, which separates proteins by size only. To test this possibility, we used a 2-mm "window" (at 3-5 mm from the posterior of the eye) to compare NF kinetics obtained by 1-D SDS-PAGE and by the higher resolution two- dimensional (2-D) isoelectric focusing/SDS-PAGE, which separates proteins both by their net charge and by their size. We found that 1-D SDS-PAGE is insufficient for definitive NF kinetics in the mouse optic system. By contrast, 2-D SDS-PAGE provides essentially pure NF kinetics, and these indicate that in the NF-poor mouse optic axons, most NFs advance as they do in other, NF-rich axons. In mice, greater than 97% of the radiolabeled NFs were distributed in a unimodal wave that moved at a continuum of rates, between 3.0 and 0.3 mm/d, and less than 0.1% of the NF population traveled at the very slowest rates of less than 0.005 mm/d. These results are inconsistent with the proposal (Nixon and Logvinenko, 1986) that 32% of the transported NFs remain within optic axons in an entirely stationary state. As has been found in other axons, the axonal transport system of mouse optic axons moves NFs and other cytoskeletal elements relentlessly from the cell body to the axon tip. 
+1374068	69	74	mouse	Species	10090
+1374068	436	441	mouse	Species	10090
+1374068	661	666	mouse	Species	10090
+1374068	869	874	mouse	Species	10090
+1374068	1428	1433	mouse	Species	10090
+1374068	1552	1557	mouse	Species	10090
+1374068	1627	1631	mice	Species	10090
+1374068	2106	2111	mouse	Species	10090
+1374068	1272	1275	SDS	Chemical	MESH:C032259
+1374068	1369	1372	SDS	Chemical	MESH:C032259
+1374068	1190	1193	SDS	Chemical	MESH:C032259
+1374068	1010	1013	SDS	Chemical	MESH:C032259
+1374068	1461	1468	2-D SDS	Chemical	MESH:C032259
+

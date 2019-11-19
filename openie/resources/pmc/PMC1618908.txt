@@ -1,0 +1,17 @@
+1618908|t|How Listeria exploits host cell actin to form its own cytoskeleton. I. Formation of a tail and how that tail might be involved in movement 
+1618908|a|After Listeria is phagocytosed by a macrophage, it dissolves the phagosomal membrane and enters the cytoplasm. The Listeria then nucleates actin filaments from its surface. These actin filaments rearrange to form a tail with which the Listeria moves to the macrophage surface as a prelude to spreading. Since individual actin filaments appear to remain in their same positions in the tail in vitro after extraction with detergent, the component filaments must be cross- bridged together. From careful examination of the distribution of actin filaments attached to the surface of Listeria and in the tail, and the fact that during and immediately after division filaments are not nucleated from the new wall formed during septation, we show how a cloud of actin filaments becomes rearranged into a tail simply by the mechanics of growth. From lineage studies we can relate the length of the tail to the age of the surface of Listeria and make predictions as to the ratio of Listeria with varying tail lengths at a particular time after the initial infection. Since we know that division occurs about every 50 min, after 4 h we would predict that if we started with one Listeria in a macrophage, 16 bacteria would be found, two with long tails, two with medium tails, four with tiny tails, and eight with no tails or a ratio of 1:1:2:4. We measured the lengths of the tails on Listeria 4 h after infection in serial sections and confirmed this prediction. By decorating the actin filaments that make up the tail of Listeria with subfragment 1 of myosin we find (a) that the filaments are indeed short (maximally 0.3 microns in length); (b) that the filament length is approximately the same at the tip and the base of the tail; and (c) that the polarity of these filaments is inappropriate for myosin to be responsible or to facilitate movement through the cytoplasm, but the polarity insures that the bacterium will be located at the tip of a pseudopod, a location that is essential for spreading to an adjacent cell. Putting all this information together we can begin to unravel the problem of how the Listeria forms the cytoskeleton and what is the biological purpose of this tail. Two functions are apparent: movement and pseudopod formation. 
+1618908	4	12	Listeria	Species	1637
+1618908	130	138	movement	Disease	MESH:D020820
+1618908	145	153	Listeria	Species	1637
+1618908	254	262	Listeria	Species	1637
+1618908	374	382	Listeria	Species	1637
+1618908	718	726	Listeria	Species	1637
+1618908	1063	1071	Listeria	Species	1637
+1618908	1112	1120	Listeria	Species	1637
+1618908	1307	1315	Listeria	Species	1637
+1618908	1336	1344	bacteria	Species	562
+1618908	1514	1522	Listeria	Species	1637
+1618908	1652	1660	Listeria	Species	1637
+1618908	2241	2249	Listeria	Species	1637
+1618908	1533	1542	infection	Disease	MESH:D007239
+

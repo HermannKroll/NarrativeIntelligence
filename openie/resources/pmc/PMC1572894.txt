@@ -1,0 +1,9 @@
+1572894|t|Intermediates in the constitutive and regulated secretory pathways released in vitro from semi-intact cells 
+1572894|a|Regulated secretory cells have two pathways that transport secreted proteins from the Golgi complex to the cell surface. To identify carrier vesicles involved in regulated and constitutive secretion, PC12 pheochromocytoma cells were labeled with [35S]sulfate to identify markers for the two secretory pathways, then mechanically permeabilized and incubated in vitro. Small constitutive secretory vesicles, containing mostly sulfated proteoglycans, accumulated during an in vitro incubation with ATP. In the presence of GTP gamma S, the constitutive vesicles became significantly more dense, suggesting that a coated intermediate was stabilized. Larger immature regulated secretory granules, enriched in sulfated secretogranin II, also escaped from the permeabilized cells in vitro. During granule maturation, their density increased and the amount of cofractionating proteoglycans diminished. The data suggest that sorting continues during secretory granule maturation. 
+1572894	820	836	secretogranin II	Gene	24765
+1572894	313	329	pheochromocytoma	Disease	MESH:D010673
+1572894	354	366	[35S]sulfate	Chemical	MESH:C031512
+1572894	627	638	GTP gamma S	Chemical	MESH:D016244
+1572894	603	606	ATP	Chemical	MESH:D000255
+1572894	308	312	PC12	CellLine	CVCL:0481
+

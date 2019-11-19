@@ -1,0 +1,14 @@
+25491129|t|The perceived effects of faculty presence vs. absence on small-group learning and group dynamics: a quasi-experimental study 
+25491129|a|Background Medical education increasingly relies on small-group learning. Small group learning provides more active learning, better retention, higher satisfaction, and facilitates development of problem-solving and team-working abilities. However, less is known about student experience and preference for different small groups teaching models. We evaluated group educational dynamics and group learning process in medical school clerkship small group case-based settings, with a faculty member present versus absent. Methods Students completed surveys after cases when the faculty was present ("in") or absent ("out") for the bulk of the discussion. 228 paired surveys (114 pairs) were available for paired analysis, assessing group dynamics, group learning process, student preference, and participation through self-report and self-rating of group behaviors tied to learning and discussion quality. Results Ratings of group dynamics and group learning process were significantly higher with the faculty absent vs. present (p range <0.001 to 0.015). Students also reported higher levels of participation when the faculty member was absent (p = 0.03). Students were more likely to express a preference for having the faculty member present after "in" case vs. "out" case discussions. (p < 0.001). There was no difference in reported success of the case discussion after "in" vs. "out" cases (p = 0.67). Conclusions Student groups without faculty present reported better group dynamics, group learning processes, and participation with faculty absent. Students reported that they feel somewhat dependent on faculty, especially when the faculty is present, though there was no significant difference in students reporting that they obtained the most they could from the discussion of the case after both "in" and "out" cases. 
+25491129	7789	7793	male	Species	9606
+25491129	7856	7868	participants	Species	9606
+25491129	8618	8625	patient	Species	9606
+25491129	9178	9185	patient	Species	9606
+25491129	8710	8718	diabetes	Disease	MESH:D003920
+25491129	8676	8688	hypertension	Disease	MESH:D006973
+25491129	12755	12762	patient	Species	9606
+25491129	13421	13433	participants	Species	9606
+25491129	18901	18913	psychosocial	Disease	MESH:C535569
+25491129	22517	22525	diabetes	Disease	MESH:D003920
+25491129	25549	25558	Wilkinson	Disease	MESH:D012872
+

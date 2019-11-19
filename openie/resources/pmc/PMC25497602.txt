@@ -1,0 +1,253 @@
+25497602|t|Proctitis following stereotactic body radiation therapy for prostate cancer 
+25497602|a|Background Proctitis after radiation therapy for prostate cancer remains an ongoing clinical challenge and critical quality of life issue. SBRT could minimize rectal toxicity by reducing the volume of rectum receiving high radiation doses and offers the potential radiobiologic benefits of hypofractionation. This study sought to evaluate the incidence and severity of proctitis following SBRT for prostate cancer. Methods Between February 2008 and July 2011, 269 men with clinically localized prostate cancer were treated definitively with SBRT monotherapy at Georgetown University Hospital. All patients were treated to 35-36.25Gy in 5 fractions delivered with the CyberKnife Radiosurgical System (Accuray). Rectal bleeding was recorded and scored using the CTCAE v.4. Telangiectasias were graded using the Vienna Rectoscopy Score (VRS). Proctitis was assessed via the Bowel domain of the Expanded Prostate Index Composite (EPIC)-26 at baseline and at 1, 3, 6, 9, 12, 18 and 24 months post-SBRT. Results The median age was 69 years with a median prostate volume of 39 cc. The median follow-up was 3.9 years with a minimum follow-up of two years. The 2-year actuarial incidence of late rectal bleeding >= grade 2 was 1.5%. Endoscopy revealed VRS Grade 2 rectal telangiectasias in 11% of patients. All proctitis symptoms increased at one month post-SBRT but returned to near-baseline with longer follow-up. The most bothersome symptoms were bowel urgency and frequency. At one month post-SBRT, 11.2% and 8.5% of patients reported a moderate to big problem with bowel urgency and frequency, respectively. The EPIC bowel summary scores declined transiently at 1 month and experienced a second, more protracted decline between 6 months and 18 months before returning to near-baseline at two years post-SBRT. Prior to treatment, 4.1% of men felt their bowel function was a moderate to big problem which increased to 11.5% one month post-SBRT but returned to near-baseline at two years post-SBRT. Conclusions In this single institution cohort, the rate and severity of proctitis observed following SBRT is low. QOL decreased on follow-up; however, our results compare favorably to those reported for patients treated with alternative radiation modalities. Future prospective randomized studies are needed to confirm these observations. 
+25497602	0	9	Proctitis	Disease	MESH:D011349
+25497602	60	75	prostate cancer	Disease	MESH:D011471
+25497602	445	454	proctitis	Disease	MESH:D011349
+25497602	242	250	toxicity	Disease	MESH:D064420
+25497602	474	489	prostate cancer	Disease	MESH:D011471
+25497602	125	140	prostate cancer	Disease	MESH:D011471
+25497602	87	96	Proctitis	Disease	MESH:D011349
+25497602	540	543	men	Species	9606
+25497602	673	681	patients	Species	9606
+25497602	570	585	prostate cancer	Disease	MESH:D011471
+25497602	916	925	Proctitis	Disease	MESH:D011349
+25497602	847	862	Telangiectasias	Disease	MESH:D013684
+25497602	1365	1373	patients	Species	9606
+25497602	1589	1597	patients	Species	9606
+25497602	1910	1913	men	Species	9606
+25497602	1259	1279	late rectal bleeding	Disease	MESH:D012002
+25497602	1339	1354	telangiectasias	Disease	MESH:D013684
+25497602	2273	2281	patients	Species	9606
+25497602	2730	2737	patient	Species	9606
+25497602	2765	2773	Patients	Species	9606
+25497602	2966	2974	patients	Species	9606
+25497602	3044	3051	Patient	Species	9606
+25497602	2876	2880	pain	Disease	MESH:D010146
+25497602	2526	2541	prostate cancer	Disease	MESH:D011471
+25497602	3282	3301	radiation proctitis	Disease	MESH:D011349
+25497602	3119	3145	inflammatory bowel disease	Disease	MESH:D015212
+25497602	2863	2871	bleeding	Disease	MESH:D006470
+25497602	2660	2669	proctitis	Disease	MESH:D011349
+25497602	3106	3117	hemorrhoids	Disease	MESH:D006484
+25497602	2849	2861	incontinence	Disease	MESH:D014549
+25497602	4031	4039	patients	Species	9606
+25497602	4151	4159	patients	Species	9606
+25497602	4109	4124	Telangiectasias	Disease	MESH:D013684
+25497602	4063	4077	telangiectasia	Disease	MESH:D013684
+25497602	3787	3794	atrophy	Disease	MESH:D001284
+25497602	3446	3455	proctitis	Disease	MESH:D011349
+25497602	3397	3405	toxicity	Disease	MESH:D064420
+25497602	3650	3655	edema	Disease	MESH:D004487
+25497602	3356	3365	Proctitis	Disease	MESH:D011349
+25497602	4101	4107	ulcers	Disease	MESH:D014456
+25497602	3745	3762	Chronic proctitis	Disease	MESH:D011349
+25497602	3799	3824	obliterative endarteritis	Disease	MESH:D004692
+25497602	4045	4054	proctitis	Disease	MESH:D011349
+25497602	3732	3743	rectal pain	Disease	MESH:C563475
+25497602	3863	3871	fibrosis	Disease	MESH:D005355
+25497602	3846	3854	ischemia	Disease	MESH:D007511
+25497602	3977	3992	rectal bleeding	Disease	MESH:D012002
+25497602	4475	4478	PTV	Species	187978
+25497602	4568	4585	rectal toxicities	Disease	MESH:D012002
+25497602	4948	4957	proctitis	Disease	MESH:D011349
+25497602	4599	4613	bowel toxicity	Disease	MESH:D015212
+25497602	4234	4243	proctitis	Disease	MESH:D011349
+25497602	5816	5824	patients	Species	9606
+25497602	5092	5107	prostate cancer	Disease	MESH:D011471
+25497602	5201	5216	prostate cancer	Disease	MESH:D011471
+25497602	5133	5148	prostate cancer	Disease	MESH:D011471
+25497602	6527	6530	PTV	Species	187978
+25497602	5957	5982	localized prostate cancer	Disease	MESH:D011471
+25497602	6693	6718	localized prostate cancer	Disease	MESH:D011471
+25497602	6728	6735	Patient	Species	9606
+25497602	6746	6754	Patients	Species	9606
+25497602	6813	6828	prostate cancer	Disease	MESH:D011471
+25497602	7689	7692	PTV	Species	187978
+25497602	8027	8035	Patients	Species	9606
+25497602	8135	8138	PTV	Species	187978
+25497602	9076	9084	Patients	Species	9606
+25497602	8205	8210	tumor	Disease	MESH:D009369
+25497602	8396	8416	ischial tuberosities	Disease	MESH:D014402
+25497602	9460	9468	Toxicity	Disease	MESH:D064420
+25497602	9892	9906	Telangiectasia	Disease	MESH:D013684
+25497602	9547	9555	toxicity	Disease	MESH:D064420
+25497602	9503	9518	rectal bleeding	Disease	MESH:D012002
+25497602	10075	10089	telangiectasia	Disease	MESH:D013684
+25497602	9978	9992	telangiectasia	Disease	MESH:D013684
+25497602	9346	9361	Rectal bleeding	Disease	MESH:D012002
+25497602	9599	9614	rectal bleeding	Disease	MESH:D012002
+25497602	9722	9730	bleeding	Disease	MESH:D006470
+25497602	10027	10041	telangiectasia	Disease	MESH:D013684
+25497602	10099	10108	Proctitis	Disease	MESH:D011349
+25497602	11510	11517	patient	Species	9606
+25497602	11297	11300	MID	Disease	MESH:D008661
+25497602	11562	11569	patient	Species	9606
+25497602	11607	11615	Patients	Species	9606
+25497602	12296	12304	patients	Species	9606
+25497602	12653	12661	patients	Species	9606
+25497602	12823	12831	patients	Species	9606
+25497602	12730	12738	androgen	Chemical	MESH:D000728
+25497602	12280	12295	prostate cancer	Disease	MESH:D011471
+25497602	12556	12563	aspirin	Chemical	MESH:D001241
+25497602	12916	12924	patients	Species	9606
+25497602	12978	12986	patients	Species	9606
+25497602	13019	13027	patients	Species	9606
+25497602	13149	13157	patients	Species	9606
+25497602	13364	13372	patients	Species	9606
+25497602	13051	13059	bleeding	Disease	MESH:D006470
+25497602	13434	13454	late rectal bleeding	Disease	MESH:D012002
+25497602	13003	13011	bleeding	Disease	MESH:D006470
+25497602	13093	13108	rectal bleeding	Disease	MESH:D012002
+25497602	13204	13217	rectal bleeds	Disease	MESH:D012002
+25497602	13241	13256	rectal bleeding	Disease	MESH:D012002
+25497602	12934	12949	rectal bleeding	Disease	MESH:D012002
+25497602	13566	13574	patients	Species	9606
+25497602	13717	13724	patient	Species	9606
+25497602	13926	13934	patients	Species	9606
+25497602	13942	13950	patients	Species	9606
+25497602	14035	14042	patient	Species	9606
+25497602	14139	14147	patients	Species	9606
+25497602	13886	13901	telangiectasias	Disease	MESH:D013684
+25497602	13996	14011	telangiectasias	Disease	MESH:D013684
+25497602	14076	14090	telangiectasia	Disease	MESH:D013684
+25497602	13683	13700	colorectal cancer	Disease	MESH:D015179
+25497602	14187	14195	fistulas	Disease	MESH:D005402
+25497602	13752	13767	rectal bleeding	Disease	MESH:D012002
+25497602	14249	14264	prostate cancer	Disease	MESH:D011471
+25497602	15415	15419	Pain	Disease	MESH:D010146
+25497602	15761	15768	Patient	Species	9606
+25497602	15848	15850	6B	Chemical	MESH:D001895
+25497602	15883	15885	6C	Chemical	MESH:D002244
+25497602	15967	15978	rectal pain	Disease	MESH:C563475
+25497602	16063	16078	prostate cancer	Disease	MESH:D011471
+25497602	16645	16660	prostate cancer	Disease	MESH:D011471
+25497602	16924	16935	rectal pain	Disease	MESH:C563475
+25497602	17302	17309	patient	Species	9606
+25497602	17735	17743	patients	Species	9606
+25497602	18194	18202	patients	Species	9606
+25497602	18483	18490	patient	Species	9606
+25497602	18160	18163	MID	Disease	MESH:D008661
+25497602	18631	18639	patients	Species	9606
+25497602	18813	18821	patients	Species	9606
+25497602	18591	18609	proctitis symptoms	Disease	MESH:D051271
+25497602	19062	19077	prostate cancer	Disease	MESH:D011471
+25497602	19718	19721	MID	Disease	MESH:D008661
+25497602	20005	20012	Patient	Species	9606
+25497602	19988	20003	prostate cancer	Disease	MESH:D011471
+25497602	20053	20060	EPIC-26	Chemical	MESH:C509968
+25497602	20843	20851	patients	Species	9606
+25497602	20920	20928	patients	Species	9606
+25497602	21219	21227	patients	Species	9606
+25497602	21521	21529	patients	Species	9606
+25497602	21795	21803	patients	Species	9606
+25497602	21498	21501	MID	Disease	MESH:D008661
+25497602	22241	22249	patients	Species	9606
+25497602	22073	22082	proctitis	Disease	MESH:D011349
+25497602	22019	22027	toxicity	Disease	MESH:D064420
+25497602	22145	22159	bowel symptoms	Disease	MESH:D020821
+25497602	22389	22400	rectal pain	Disease	MESH:C563475
+25497602	22102	22117	prostate cancer	Disease	MESH:D011471
+25497602	22405	22420	rectal bleeding	Disease	MESH:D012002
+25497602	22528	22542	bowel symptoms	Disease	MESH:D020821
+25497602	21896	21931	Proctitis following prostate cancer	Disease	MESH:D011471
+25497602	23413	23421	patients	Species	9606
+25497602	23485	23500	rectal bleeding	Disease	MESH:D012002
+25497602	22803	22818	rectal toxicity	Disease	MESH:D012002
+25497602	23241	23247	bleeds	Disease	MESH:D006470
+25497602	23395	23409	telangiectasia	Disease	MESH:D013684
+25497602	23312	23322	hemorrhoid	Disease	MESH:D006484
+25497602	23287	23308	acute anal irritation	Disease	MESH:D001005
+25497602	23504	23510	cancer	Disease	MESH:D009369
+25497602	22991	23006	rectal bleeding	Disease	MESH:D012002
+25497602	23981	23989	patients	Species	9606
+25497602	24340	24348	patients	Species	9606
+25497602	24226	24246	SBRT rectal bleeding	Disease	MESH:D012002
+25497602	24000	24015	rectal bleeding	Disease	MESH:D012002
+25497602	23773	23788	rectal bleeding	Disease	MESH:D012002
+25497602	23827	23837	toxicities	Disease	MESH:D064420
+25497602	24561	24569	bleeding	Disease	MESH:D006470
+25497602	24359	24374	rectal bleeding	Disease	MESH:D012002
+25497602	24979	24994	prostate cancer	Disease	MESH:D011471
+25497602	25606	25614	patients	Species	9606
+25497602	26124	26132	patients	Species	9606
+25497602	26598	26605	patient	Species	9606
+25497602	26791	26798	patient	Species	9606
+25497602	26934	26941	patient	Species	9606
+25497602	27380	27388	toxicity	Disease	MESH:D064420
+25497602	27465	27473	toxicity	Disease	MESH:D064420
+25497602	27931	27939	patients	Species	9606
+25497602	28238	28246	Androgen	Chemical	MESH:D000728
+25497602	28301	28309	toxicity	Disease	MESH:D064420
+25497602	28598	28601	MID	Disease	MESH:D008661
+25497602	28668	28674	cancer	Disease	MESH:D009369
+25497602	28748	28751	VRS	Disease	MESH:C564884
+25497602	29451	29458	patient	Species	9606
+25497602	29559	29567	patients	Species	9606
+25497602	29846	29848	AD	Disease	MESH:D000544
+25497602	29854	29856	JL	Chemical	MESH:C441720
+25497602	30220	30248	localized prostate carcinoma	Disease	MESH:D011471
+25497602	30337	30352	prostate cancer	Disease	MESH:D011471
+25497602	30405	30420	prostate-cancer	Disease	MESH:D011471
+25497602	30431	30438	Patient	Species	9606
+25497602	30541	30566	localized prostate cancer	Disease	MESH:D011471
+25497602	30602	30609	patient	Species	9606
+25497602	30689	30704	prostate cancer	Disease	MESH:D011471
+25497602	30747	30762	prostate cancer	Disease	MESH:D011471
+25497602	30705	30726	Radiation proctopathy	Disease	MESH:D011832
+25497602	30829	30844	prostate cancer	Disease	MESH:D011471
+25497602	30922	30930	patients	Species	9606
+25497602	30936	30951	prostate cancer	Disease	MESH:D011471
+25497602	31021	31029	patients	Species	9606
+25497602	31079	31088	carcinoma	Disease	MESH:D002277
+25497602	31168	31176	toxicity	Disease	MESH:D064420
+25497602	31224	31239	prostate cancer	Disease	MESH:D011471
+25497602	31128	31135	illness	Disease	MESH:D002908
+25497602	31267	31275	patients	Species	9606
+25497602	31281	31307	inflammatory bowel disease	Disease	MESH:D015212
+25497602	31349	31365	pelvic neoplasms	Disease	MESH:D010386
+25497602	31255	31263	toxicity	Disease	MESH:D064420
+25497602	31473	31490	bleeding toxicity	Disease	MESH:D064420
+25497602	31397	31412	prostate cancer	Disease	MESH:D011471
+25497602	31505	31524	radiation proctitis	Disease	MESH:D011349
+25497602	31602	31617	prostate cancer	Disease	MESH:D011471
+25497602	31680	31695	prostate cancer	Disease	MESH:D011471
+25497602	31720	31728	MRC RT01	CellLine	CVCL:D923
+25497602	31827	31852	localized prostate cancer	Disease	MESH:D011471
+25497602	32000	32015	rectal toxicity	Disease	MESH:D012002
+25497602	31900	31915	prostate cancer	Disease	MESH:D011471
+25497602	31853	31862	Proctitis	Disease	MESH:D011349
+25497602	32127	32140	rectal injury	Disease	MESH:D012002
+25497602	32352	32360	toxicity	Disease	MESH:D064420
+25497602	32561	32568	patient	Species	9606
+25497602	32607	32614	patient	Species	9606
+25497602	32793	32818	localized prostate cancer	Disease	MESH:D011471
+25497602	32694	32704	toxicities	Disease	MESH:D064420
+25497602	32831	32839	toxicity	Disease	MESH:D064420
+25497602	33005	33020	prostate cancer	Disease	MESH:D011471
+25497602	33047	33062	prostate cancer	Disease	MESH:D011471
+25497602	33164	33182	prostate carcinoma	Disease	MESH:D011471
+25497602	33183	33220	Hypofractionation for prostate cancer	Disease	MESH:D011471
+25497602	33279	33304	localized prostate cancer	Disease	MESH:D011471
+25497602	33378	33403	localized prostate cancer	Disease	MESH:D011471
+25497602	33525	33550	Localized Prostate Cancer	Disease	MESH:D011471
+25497602	33655	33680	Localized Prostate Cancer	Disease	MESH:D011471
+25497602	33830	33845	prostate cancer	Disease	MESH:D011471
+25497602	33906	33929	prostate adenocarcinoma	Disease	MESH:D011471
+25497602	34092	34107	prostate cancer	Disease	MESH:D011471
+25497602	34450	34475	localized prostate cancer	Disease	MESH:D011471
+25497602	34563	34588	localized prostate cancer	Disease	MESH:D011471
+25497602	34671	34690	prostatic carcinoma	Disease	MESH:D011471
+25497602	34611	34637	late rectal mucosal damage	Disease	MESH:D012002
+25497602	34839	34842	men	Species	9606
+25497602	34848	34863	prostate cancer	Disease	MESH:D011471
+25497602	34734	34749	prostate cancer	Disease	MESH:D011471
+25497602	34931	34946	prostate cancer	Disease	MESH:D011471
+25497602	35146	35171	localized prostate cancer	Disease	MESH:D011471
+25497602	35263	35278	prostate cancer	Disease	MESH:D011471
+25497602	35329	35344	prostate cancer	Disease	MESH:D011471
+25497602	35402	35429	toxicity in prostate cancer	Disease	MESH:D011471
+25497602	35553	35571	endorectal balloon	Disease	MESH:D054549
+25497602	35641	35649	patients	Species	9606
+25497602	35629	35637	toxicity	Disease	MESH:D064420
+25497602	35715	35740	localized prostate cancer	Disease	MESH:D011471
+

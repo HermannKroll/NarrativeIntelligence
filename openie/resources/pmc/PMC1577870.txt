@@ -1,0 +1,16 @@
+1577870|t|O-glycosylation of intact and truncated ribophorins in brefeldin A- treated cells: newly synthesized intact ribophorins are only transiently accessible to the relocated glycosyltransferases 
+1577870|a|Ribophorins I and II are type I transmembrane glycoproteins of the ER that are segregated to the rough domains of this organelle. Both ribophorins appear to be part of the translocation apparatus for nascent polypeptides that is associated with membrane-bound ribosomes and participate in the formation of a proteinaceous network within the ER membrane that also includes other components of the translocation apparatus. The ribophorins are both highly stable proteins that lack O- linked sugars but each contains one high mannose N-linked oligosaccharide that remains endo H sensitive throughout their lifetimes. We have previously shown (Tsao, Y. S., N. E. Ivessa, M. Adesnik, D. D. Sabatini, and G. Kreibich. 1992. J. Cell Biol. 116:57- 67) that a COOH-terminally truncated variant of ribophorin I that contains only the first 332 amino acids of the luminal domain (RI332), when synthesized in permanent transformants of HeLa cells, undergoes a rapid degradation with biphasic kinetics in the ER itself and in a second, as yet unidentified nonlysosomal pre-Golgi compartment. We now show that in cells treated with brefeldin A (BFA) RI332 molecules undergo rapid O-glycosylation in a multistep process that involves the sequential addition of N-acetylgalactosamine, galactose, and terminal sialic acid residues. Addition of O-linked sugars affected all newly synthesized RI332 molecules and was completed soon after synthesis with a half time of about 10 min. In the same cells, intact ribophorins I and II also underwent O-linked glycosylation in the presence of BFA, but these molecules were modified only during a short time period immediately after their synthesis was completed, and the modification affected only a fraction of the newly synthesized polypeptides. More important, these molecules synthesized before the addition of BFA were not modified by O-glycosylation. The same is true for ribophorin I when overexpressed in HeLa cells although it is significantly less stable than the native polypeptide in control cells. We, therefore, conclude that soon after their synthesis, ribophorins lose their susceptibility to the relocated Golgi enzymes that effect the O-glycosylation, most likely as a consequence of a conformational change in the ribophorins that occurs during their maturation, although it cannot be excluded that rapid integration of these molecules into a supramolecular complex in the ER membrane leads to their inaccessibility to these enzymes. 
+1577870	1436	1457	N-acetylgalactosamine	Chemical	MESH:D000116
+1577870	2029	2032	BFA	Chemical	MESH:D020126
+1577870	1308	1319	brefeldin A	Chemical	MESH:D020126
+1577870	1526	1532	sugars	Chemical	MESH:D002241
+1577870	941	945	COOH	Chemical	MESH:C102887
+1577870	2127	2131	HeLa	CellLine	CVCL:0030
+1577870	1757	1760	BFA	Chemical	MESH:D020126
+1577870	679	685	sugars	Chemical	MESH:D002241
+1577870	713	720	mannose	Chemical	MESH:D008358
+1577870	1114	1118	HeLa	CellLine	CVCL:0030
+1577870	1483	1494	sialic acid	Chemical	MESH:D012794
+1577870	1321	1324	BFA	Chemical	MESH:D020126
+1577870	1459	1468	galactose	Chemical	MESH:D005690
+

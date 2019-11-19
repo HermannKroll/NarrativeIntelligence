@@ -1,0 +1,22 @@
+1577867|t|Neurite outgrowth in peripherin-depleted PC12 cells 
+1577867|a|Peripherin is the major neuronal intermediate filament (IF) protein in PC12 cells and both its synthesis and amount increase during nerve growth factor (NGF) promoted neuronal differentiation. To address the question of the biological function of peripherin in neurite initiation we have used an antisense oligonucleotide complementary to the 5' region of peripherin mRNA to specifically inhibit its transcription. The oligonucleotide blocks both the synthesis of peripherin and its increase in response to NGF. Peripherin was found to be a stable protein with a cellular half-life of approximately 7 d. 6 wk of incubation with the oligonucleotide decreases peripherin to 11% of the level in naive control cells and to 3% of that in NGF-treated control cells. Despite the depletion, NGF elicits apparently normal neurite outgrowth from the oligonucleotide-treated cells. As evaluated by EM, there are few IFs in these cells, either in the cell bodies or neurites. There is no compensatory increase in NF-M, NF-L, or vimentin levels as a result of the inhibition of peripherin synthesis. These findings suggest that peripherin is not required for neurite formation, but is necessary for the formation of a cellular IF network which could be involved in process stability. They also demonstrate the utility of antisense oligonucleotides for the study of proteins with long half- lives. 
+1577867	21	31	peripherin	Gene	24688
+1577867	41	45	PC12	CellLine	CVCL:0481
+1577867	52	62	Peripherin	Gene	24688
+1577867	184	203	nerve growth factor	Gene	310738
+1577867	205	208	NGF	Gene	310738
+1577867	299	309	peripherin	Gene	24688
+1577867	408	418	peripherin	Gene	24688
+1577867	516	526	peripherin	Gene	24688
+1577867	559	562	NGF	Gene	310738
+1577867	564	574	Peripherin	Gene	24688
+1577867	785	788	NGF	Gene	310738
+1577867	835	838	NGF	Gene	310738
+1577867	1053	1057	NF-M	Gene	24588
+1577867	1059	1063	NF-L	Gene	83613
+1577867	1068	1076	vimentin	Gene	81818
+1577867	1167	1177	peripherin	Gene	24688
+1577867	710	720	peripherin	Gene	24688
+1577867	1117	1127	peripherin	Gene	24688
+1577867	123	127	PC12	CellLine	CVCL:0481
+

@@ -1,0 +1,7 @@
+25568587|t|The Most Influential Scientists in the Development of the Medical Informatics (2): Morris F. Collen 
+25568587|a|
+25568587	823	826	Drs	Gene	8406
+25568587	1126	1140	infrastructure	Disease	
+25568587	1411	1420	pneumonia	Disease	MESH:D011014
+25568587	3269	3273	Trib	Gene	26150
+

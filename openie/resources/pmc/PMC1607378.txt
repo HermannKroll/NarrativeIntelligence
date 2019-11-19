@@ -1,0 +1,21 @@
+1607378|t|Examining the function and regulation of hsp 70 in cells subjected to metabolic stress 
+1607378|a|Members of the heat-shock protein (hsp) 70 family, distributed within various cellular compartments, have been implicated in facilitating protein maturation events. In particular, related hsp 70 family members appear to bind nascent polypeptides which are in the course of synthesis and/or translocation into organelles. We previously reported that in normal, unstressed cells, cytosolic hsp 70 (hsp 72/73) interacted transiently with nascent polypeptides. We suspect that such interactions function to prevent or slow down the folding of the nascent polypeptide chain. Once synthesis is complete, and now with all of the information for folding present, the newly synthesized protein appears to commence along its folding pathway, accompanied by the ATP- dependent release of hsp 72/73. Herein, we examined how these events occur in cells subjected to different types of metabolic stress. In cells exposed to either an amino acid analog or sodium arsenite, two potent inducers of the stress response, newly synthesized proteins bind to but are not released from hsp 70. Under these conditions of metabolic stress, we suspect that the newly synthesized proteins are unable to commence proper folding and consequently remain bound to their hsp 70 chaperone. In cells subjected to heat shock, a large number of both newly synthesized as well as mature proteins are rendered insoluble. Within this insoluble material are appreciable amounts of hsp 72/73. Finally, we show that in cells depleted of ATP, the release of hsp 70 from maturing proteins is inhibited. Thus, in cells experiencing metabolic stress, newly synthesized proteins unable to properly fold, as will as mature proteins which begin to unfold become stably bound to hsp 72/73. As a consequence and over time, the free or available levels of pre-existing hsp 72/73 are reduced. We propose that this reduction in the available levels of hsp 72/73 is the trigger by which the stress response is initiated. 
+1607378	41	47	hsp 70	Gene	3308
+1607378	70	86	metabolic stress	Disease	MESH:D008659
+1607378	102	129	heat-shock protein (hsp) 70	Gene	3308
+1607378	275	281	hsp 70	Gene	3308
+1607378	475	481	hsp 70	Gene	3308
+1607378	864	870	hsp 72	Gene	3303
+1607378	1150	1156	hsp 70	Gene	3308
+1607378	1528	1534	hsp 72	Gene	3303
+1607378	1602	1608	hsp 70	Gene	3308
+1607378	1816	1822	hsp 72	Gene	3303
+1607378	1904	1910	hsp 72	Gene	3303
+1607378	1985	1991	hsp 72	Gene	3303
+1607378	1326	1332	hsp 70	Gene	3308
+1607378	483	489	hsp 72	Gene	3303
+1607378	1582	1585	ATP	Chemical	MESH:D000255
+1607378	1028	1043	sodium arsenite	Chemical	MESH:C017947
+1607378	838	841	ATP	Chemical	MESH:D000255
+1607378	1371	1376	shock	Disease	MESH:D012769
+

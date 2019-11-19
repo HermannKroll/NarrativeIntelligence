@@ -1,0 +1,15 @@
+1349305|t|Expression of unique sets of GPI-linked proteins by different primary neurons in vitro 
+1349305|a|We have surveyed the proteins expressed at the surface of different primary neurons as a first step in elucidating how axons regulate their ensheathment by glial cells. We characterized the surface proteins of dorsal root ganglion neurons, superior cervical ganglion neurons, and cerebellar granule cells which are myelinated, ensheathed but unmyelinated, and unensheathed, respectively. We found that the most abundant proteins are common to all three types of neurons. Reproducible differences in the composition of the integral membrane proteins (enriched by partitioning into a Triton X-114 detergent phase) were detected. These differences were most striking when the expression of glycosylphosphatidyl-inositol (GPI)-anchored membrane proteins by these different neurons was compared. Variations in the relative abundance and degree of glycosylation of several well known GPI- anchored proteins, including Thy-1, F3/F11, and the 120-kD form of the neural cell adhesion molecule (N-CAM), and an abundant 60-kD GPI-linked protein were observed. In addition, we have identified several potentially novel GPI-anchored glycoproteins on each class of neurons. These include a protein that is present only on superior cervical ganglion neurons and is 90 kD; an abundant protein of 69 kD that is essentially restricted in its expression to dorsal root ganglion neurons; and proteins of 38 and 31 kD that are expressed only on granule cell neurons. Finally, the relative abundance of the three major isoforms of N-CAM was found to vary significantly between these different primary neurons. These results are the first demonstration that nerve fibers with diverse ensheathment fates differ significantly in the composition of their surface proteins and suggest an important role for GPI-anchored proteins in generating diversity of the neuronal cell surface. 
+1349305	29	32	GPI	Chemical	MESH:D007294
+1349305	999	1004	Thy-1	Gene	7070
+1349305	1041	1070	neural cell adhesion molecule	Gene	4684
+1349305	1072	1077	N-CAM	Gene	4684
+1349305	1596	1601	N-CAM	Gene	4684
+1349305	669	675	Triton	Chemical	MESH:D011092
+1349305	774	803	glycosylphosphatidyl-inositol	Chemical	MESH:D007294
+1349305	805	808	GPI	Chemical	MESH:D007294
+1349305	1194	1197	GPI	Chemical	MESH:D007294
+1349305	1867	1870	GPI	Chemical	MESH:D007294
+1349305	965	968	GPI	Chemical	MESH:D007294
+1349305	1102	1105	GPI	Chemical	MESH:D007294
+

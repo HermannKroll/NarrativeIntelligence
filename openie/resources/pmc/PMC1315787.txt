@@ -1,0 +1,11 @@
+1315787|t|Local expression and exocytosis of viral glycoproteins in multinucleated muscle cells 
+1315787|a|We have analyzed the distribution of enveloped viral infections in multinucleated L6 muscle cells. A temperature-sensitive vesicular stomatitis virus (mutant VSV ts045) was utilized at the nonpermissive temperature (39 degrees C). As expected, the glycoprotein (G protein) of this mutant was restricted to the ER when the multinucleated cells were maintained at 39 degrees C. We demonstrate that this G protein remained localized when the infection was performed at low dose. By 4 h after infection the G protein patches spanned an average of 220 microns. The localization was independent of nuclear positions, showing that the ER was a peripheric structure. Thus, the infection did not recognize nuclear domains characteristic of nuclearly encoded proteins. After release of the 39 degrees C block, transport through a perinuclear compartment into a restricted surface domain lying above the internal G protein patch occurred. Accordingly, the transport pathway was locally restricted. After a 16-h infection the G protein spanned 420 microns, while the matrix protein occupied 700-800 microns of the myotube length. Double infection of multinucleated L6 muscle cells with Semliki Forest virus and VSV at high multiplicities showed that the glycoprotein of each virus occupied intracellular domains which were devoid of the other respective glycoprotein. Taken together, these findings indicate that the viral glycoproteins did not range far from their site of synthesis within the ER or other intracellular membrane compartments in these large cells. This result also suggests that relocation of viral RNA synthesis occurred slowly. 
+1315787	244	247	VSV	Species	11277
+1315787	1260	1280	Semliki Forest virus	Species	11033
+1315787	1285	1288	VSV	Species	11277
+1315787	1349	1354	virus	Species	12081
+1315787	755	764	infection	Disease	MESH:D007239
+1315787	525	534	infection	Disease	MESH:D007239
+1315787	133	149	viral infections	Disease	MESH:D014777
+1315787	209	235	vesicular stomatitis virus	Disease	MESH:D054243
+

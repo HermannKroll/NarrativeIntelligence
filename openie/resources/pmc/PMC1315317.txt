@@ -1,0 +1,19 @@
+1315317|t|Neutrophil migration across monolayers of cytokine-prestimulated endothelial cells: a role for platelet-activating factor and IL-8 
+1315317|a|In a previous study we observed that neutrophils respond with a rapid rise in [Ca2+]i during adherence to cytokine-activated endothelial cells (EC), caused by EC membrane-associated platelet-activating factor (PAF). In the present study, we investigated whether this form of PAF was important in neutrophil adherence and migration across monolayers of rIL-1 beta- or rTNF alpha-prestimulated EC. PAF receptor antagonists prevented neutrophil migration across cytokine-pretreated EC by approximately 60% (P less than 0.005) without interfering with the process of adherence. The antagonists WEB 2086 and L-652,731 had no effect on neutrophil migration across resting EC induced by formylmethionyl-leucyl-phenylalanine (FMLP). A murine anti-IL-8 antiserum was found to also partially inhibit the neutrophil transmigration across cytokine-activated EC. When the anti-IL-8 antiserum was used in combination with a PAF receptor antagonist, neutrophil migration across cytokine-pretreated monolayers of EC was completely prevented. During transmigration, LAM-1 and CD44 on the neutrophils were down-modulated; both WEB 2086 and anti-IL-8 antiserum partially prevented this down-modulation caused by cytokine- prestimulated EC. Our results indicate that human neutrophils are activated and guided by EC-associated PAF and EC-derived IL-8 during the in vitro diapedesis in between cytokine-stimulated EC. 
+1315317	870	874	IL-8	Gene	3576
+1315317	995	999	IL-8	Gene	3576
+1315317	1180	1185	LAM-1	Gene	6402
+1315317	1190	1194	CD44	Gene	960
+1315317	1258	1262	IL-8	Gene	3576
+1315317	1457	1461	IL-8	Gene	3576
+1315317	406	409	PAF	Gene	9768
+1315317	1438	1441	PAF	Gene	9768
+1315317	341	344	PAF	Gene	9768
+1315317	1378	1383	human	Species	9606
+1315317	1041	1044	PAF	Gene	9768
+1315317	527	530	PAF	Gene	9768
+1315317	849	853	FMLP	Chemical	MESH:D009240
+1315317	734	743	L-652,731	Chemical	MESH:C047504
+1315317	210	214	Ca2+	Chemical	MESH:D002118
+1315317	811	847	formylmethionyl-leucyl-phenylalanine	Chemical	MESH:D009240
+

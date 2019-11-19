@@ -1,0 +1,12 @@
+1607385|t|Release of myosin II from the membrane-cytoskeleton of Dictyostelium discoideum mediated by heavy-chain phosphorylation at the foci within the cortical actin network 
+1607385|a|Membrane-cytoskeletons were prepared from Dictyostelium amebas, and networks of actin and myosin II filaments were visualized on the exposed cytoplasmic surfaces of the cell membranes by fluorescence staining (Yumura, S., and T. Kitanishi-Yumura. 1990. Cell Struct. Funct. 15:355-364). Addition of ATP caused contraction of the cytoskeleton with aggregation of part of actin into several foci within the network, but most of myosin II was released via the foci. However, in the presence of 10 mM MgCl2, which stabilized myosin II filaments, myosin II remained at the foci. Ultrastructural examination revealed that, after contraction, only traces of monomeric myosin II remained at the foci. By contrast, myosin II filaments remained in the foci in the presence of 10 mM MgCl2. These observations suggest that myosin II was released not in a filamentous form but in a monomeric form. Using [gamma 32P]ATP, we found that the heavy chains of myosin II released from membrane-cytoskeletons were phosphorylated, and this phosphorylation resulted in disassembly of myosin filaments. Using ITP (a substrate for myosin II ATPase) and/or ATP gamma S (a substrate for myosin II heavy-chain kinase [MHCK]), we demonstrated that phosphorylation of myosin heavy chains occurred at the foci within the actin network, a result that suggests that MHCK was localized at the foci. These results together indicate that, during contraction, the heavy chains of myosin II that have moved toward the foci within the actin network are phosphorylated by a specific MHCK, with the resultant disassembly of filaments which are finally released from membrane- cytoskeletons. This series of reactions could represent the mechanism for the relocation of myosin II from the cortical region to the endoplasm. 
+1607385	55	79	Dictyostelium discoideum	Species	44689
+1607385	937	942	MgCl2	Chemical	MESH:D015636
+1607385	1306	1307	S	Chemical	MESH:D013455
+1607385	256	275	myosin II filaments	Disease	MESH:C579880
+1607385	662	667	MgCl2	Chemical	MESH:D015636
+1607385	1056	1070	[gamma 32P]ATP	Chemical	MESH:C022571
+1607385	1250	1253	ITP	Chemical	MESH:C024164
+1607385	1296	1299	ATP	Chemical	MESH:D000255
+1607385	464	467	ATP	Chemical	MESH:D000255
+

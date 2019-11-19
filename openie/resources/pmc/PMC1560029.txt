@@ -1,0 +1,38 @@
+1560029|t|Surface structure and properties of plant seed oil bodies 
+1560029|a|Storage triacylglycerols (TAG) in plant seeds are present in small discrete intracellular organelles called oil bodies. An oil body has a matrix of TAG, which is surrounded by phospholipids (PL) and alkaline proteins, termed oleosins. Oil bodies isolated from mature maize (Zea mays) embryos maintained their discreteness, but coalesced after treatment with trypsin but not with phospholipase A2 or C. Phospholipase A2 or C exerted its activity on oil bodies only after the exposed portion of oleosins had been removed by trypsin. Attempts were made to reconstitute oil bodies from their constituents. TAG, either extracted from oil bodies or of a 1:2 molar mixture of triolein and trilinolein, in a dilute buffer were sonicated to produce droplets of sizes similar to those of oil bodies; these droplets were unstable and coalesced rapidly. Addition of oil body PL or dioleoyl phosphatidylcholine, with or without charged stearylamine/stearic acid, or oleosins, to the medium before sonication provided limited stabilization effects to the TAG droplets. High stability was achieved only when the TAG were sonicated with both oil body PL (or dioleoyl phosphatidylcholine) and oleosins of proportions similar to or higher than those in the native oil bodies. These stabilized droplets were similar to the isolated oil bodies in chemical properties, and can be considered as reconstituted oil bodies. Reconstituted oil bodies were also produced from TAG of a 1:2 molar mixture of triolein and trilinolein, dioleoyl phosphatidylcholine, and oleosins from rice (Oryza sativa), wheat (Triticum aestivum), rapeseed (Brassica napus), soybean (Glycine max), or jojoba (Simmondsia chinensis). It is concluded that both oleosins and PL are required to stabilize the oil bodies and that oleosins prevent oil bodies from coalescing by providing steric hindrance. A structural model of an oil body is presented. The current findings on seed oil bodies could be extended to the intracellular storage lipid particles present in diverse organisms. 
+1560029	437	453	phospholipase A2	Gene	182374
+1560029	460	476	Phospholipase A2	Gene	182374
+1560029	325	330	maize	Species	4577
+1560029	332	340	Zea mays	Species	4577
+1560029	342	349	embryos	Species	6239
+1560029	1610	1614	rice	Species	4530
+1560029	1616	1628	Oryza sativa	Species	4530
+1560029	1631	1636	wheat	Species	4565
+1560029	1638	1655	Triticum aestivum	Species	4565
+1560029	1668	1682	Brassica napus	Species	3708
+1560029	1685	1692	soybean	Species	3847
+1560029	1694	1705	Glycine max	Species	3847
+1560029	660	663	TAG	Chemical	MESH:D014280
+1560029	1536	1544	triolein	Chemical	MESH:D014304
+1560029	1234	1242	oleosins	Chemical	MESH:C510904
+1560029	1834	1842	oleosins	Chemical	MESH:C510904
+1560029	551	559	oleosins	Chemical	MESH:C510904
+1560029	283	291	oleosins	Chemical	MESH:C510904
+1560029	1562	1590	dioleoyl phosphatidylcholine	Chemical	MESH:C017251
+1560029	1200	1228	dioleoyl phosphatidylcholine	Chemical	MESH:C017251
+1560029	1768	1776	oleosins	Chemical	MESH:C510904
+1560029	66	82	triacylglycerols	Chemical	MESH:D014280
+1560029	727	735	triolein	Chemical	MESH:D014304
+1560029	84	87	TAG	Chemical	MESH:D014280
+1560029	1011	1019	oleosins	Chemical	MESH:C510904
+1560029	981	993	stearylamine	Chemical	MESH:C009317
+1560029	1506	1509	TAG	Chemical	MESH:D014280
+1560029	206	209	TAG	Chemical	MESH:D014280
+1560029	1099	1102	TAG	Chemical	MESH:D014280
+1560029	994	1006	stearic acid	Chemical	MESH:D013229
+1560029	1155	1158	TAG	Chemical	MESH:D014280
+1560029	927	955	dioleoyl phosphatidylcholine	Chemical	MESH:C017251
+1560029	1596	1604	oleosins	Chemical	MESH:C510904
+1560029	740	751	trilinolein	Chemical	MESH:C009564
+1560029	1549	1560	trilinolein	Chemical	MESH:C009564
+

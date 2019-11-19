@@ -1,0 +1,18 @@
+1313814|t|Nerve growth factor nonresponsive pheochromocytoma cells: altered internalization results in signaling dysfunction 
+1313814|a|Variant rat pheochromocytoma (PC12) cells which fail to respond to nerve growth factor (NGF) (PC12nnr5) (Green, S. H., R. E. Rydel, J. L. Connoly, and L. A. Greene. 1986. J. Cell Biol. 102:830-843) bind NGF at both high and low affinity sites. Although still undefined at the molecular level, these have been referred to as type I (high) and type II (low) receptors. They are apparently composed of two membrane-bound proteins, p75 and the protooncogene trk, both of which bind NGF, and apparently contribute singularly or in concert to the two observed affinities, and to the promotion of the NGF effects. In native PC12 cells, only the high affinity receptors are apparently capable of mediating internalization and degradation. PC12nnr5 cells also display type I binding, but the subsequent internalization is not the same fashion as in the parental cell line, nor is it subjected to lysosomal degradation. Rather it is initially sequestered during the first 15 min, and is eventually released intact into the medium. In contrast, EGF is bound, internalized, and degraded by PC12nnr5 cells, albeit less efficiently than in the parent cells. These observations argue that the defect(s) preventing the PC12nnr5 variants from responding to NGF prevents competent internalization, which in the case of NGF, may be required for the full expression of activity. The absence of trk, as one alteration in PC12nnr5 cells (Loeb, D. M., J. Maragos, D. Martin- Zanca, M. V. Chao, L. F. Parada, and L. A. Greene. 1991. Cell. 66:961- 966), is consistent with this conclusion. 
+1313814	0	19	Nerve growth factor	Gene	310738
+1313814	93	114	signaling dysfunction	Disease	MESH:C566796
+1313814	34	50	pheochromocytoma	Disease	MESH:D010673
+1313814	182	201	nerve growth factor	Gene	310738
+1313814	203	206	NGF	Gene	310738
+1313814	543	546	p75	Gene	24596
+1313814	569	572	trk	Gene	59109
+1313814	593	596	NGF	Gene	310738
+1313814	709	712	NGF	Gene	310738
+1313814	1355	1358	NGF	Gene	310738
+1313814	1416	1419	NGF	Gene	310738
+1313814	1489	1492	trk	Gene	59109
+1313814	318	321	NGF	Gene	310738
+1313814	123	126	rat	Species	10116
+1313814	127	143	pheochromocytoma	Disease	MESH:D010673
+

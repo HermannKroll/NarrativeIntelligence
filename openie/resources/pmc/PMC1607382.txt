@@ -1,0 +1,48 @@
+1607382|t|Translocation of the glucose transporter (GLUT4) to the cell surface in permeabilized 3T3-L1 adipocytes: effects of ATP insulin, and GTP gamma S and localization of GLUT4 to clathrin lattices 
+1607382|a|Insulin stimulates the movement of two glucose transporter isoforms (GLUT1 and GLUT4) to the plasma membrane (PM) in adipocytes. To study this process we have prepared highly purified PM fragments by gently sonicating 3T3-L1 adipocytes grown on glass coverslips. Using confocal laser immunofluorescence microscopy we observed increased PM labeling for GLUT1 (2.3-fold) and GLUT4 (eightfold) after insulin treatment in intact cells. EM immunolabeling of PM fragments indicated that in the nonstimulated state GLUT4 was mainly localized to flat clathrin lattices. Whereas GLUT4 labeling of clathrin lattices was only slightly increased after insulin treatment, labeling of uncoated PM regions was markedly increased with insulin. These data suggest that GLUT4 recycles from the cell surface both in the presence and absence of insulin. In streptolysin-O permeabilized adipocytes, insulin, and GTP gamma S increased PM levels of GLUT4 to a similar extent as observed with insulin in intact cells. In the absence of an exogenous ATP source the magnitude of these effects was considerably reduced. Removal of ATP per se caused a significant increase in cell surface levels of GLUT4 suggesting that ATP may be required for intracellular sequestration of these transporters. When insulin and GTP gamma S were added together, in the presence of ATP, PM GLUT4 levels were similar to levels observed when either insulin or GTP gamma S was added individually. Addition of GTP gamma S was able to overcome this ATP dependence of insulin- stimulated GLUT4 movement. GTP gamma S had no effect on constitutive secretion of adipsin in permeabilized cells. In addition, there was no effect of insulin or GTP gamma S on GLUT4 movement to the PM in noninsulin sensitive streptolysin-O-permeabilized 3T3-L1 fibroblasts overexpressing GLUT4. We conclude that the insulin-stimulated movement of GLUT4 to the cell surface in adipocytes may require ATP early in the insulin signaling pathway and a GTP-binding protein(s) at a later step(s). We propose that the association of GLUT4 with clathrin lattices may be important in maintaining the exclusive intracellular location of this transporter in the absence of insulin. 
+1607382	42	47	GLUT4	Gene	6517
+1607382	165	170	GLUT4	Gene	6517
+1607382	120	127	insulin	Gene	3630
+1607382	21	28	glucose	Chemical	MESH:D005947
+1607382	116	119	ATP	Chemical	MESH:D000255
+1607382	261	266	GLUT1	Gene	6513
+1607382	271	276	GLUT4	Gene	6517
+1607382	544	549	GLUT1	Gene	6513
+1607382	565	570	GLUT4	Gene	6517
+1607382	700	705	GLUT4	Gene	6517
+1607382	762	767	GLUT4	Gene	6517
+1607382	944	949	GLUT4	Gene	6517
+1607382	1017	1024	insulin	Gene	3630
+1607382	1070	1077	insulin	Gene	3630
+1607382	1118	1123	GLUT4	Gene	6517
+1607382	1363	1368	GLUT4	Gene	6517
+1607382	1537	1542	GLUT4	Gene	6517
+1607382	1709	1716	insulin	Gene	3630
+1607382	1729	1734	GLUT4	Gene	6517
+1607382	1800	1807	adipsin	Gene	1675
+1607382	1868	1890	insulin or GTP gamma S	Gene	3630
+1607382	1894	1899	GLUT4	Gene	6517
+1607382	2006	2011	GLUT4	Gene	6517
+1607382	2065	2070	GLUT4	Gene	6517
+1607382	2244	2249	GLUT4	Gene	6517
+1607382	2380	2387	insulin	Gene	3630
+1607382	911	918	insulin	Gene	3630
+1607382	832	839	insulin	Gene	3630
+1607382	589	596	insulin	Gene	3630
+1607382	192	199	Insulin	Gene	3630
+1607382	2134	2141	insulin	Gene	3630
+1607382	2034	2041	insulin	Gene	3630
+1607382	1594	1616	insulin or GTP gamma S	Gene	3630
+1607382	1465	1472	insulin	Gene	3630
+1607382	1161	1168	insulin	Gene	3630
+1607382	1745	1756	GTP gamma S	Chemical	MESH:D016244
+1607382	1217	1220	ATP	Chemical	MESH:D000255
+1607382	2117	2120	ATP	Chemical	MESH:D000255
+1607382	1653	1664	GTP gamma S	Chemical	MESH:D016244
+1607382	1529	1532	ATP	Chemical	MESH:D000255
+1607382	1083	1094	GTP gamma S	Chemical	MESH:D016244
+1607382	231	238	glucose	Chemical	MESH:D005947
+1607382	1296	1299	ATP	Chemical	MESH:D000255
+1607382	1691	1694	ATP	Chemical	MESH:D000255
+1607382	1385	1388	ATP	Chemical	MESH:D000255
+

@@ -1,0 +1,39 @@
+1607393|t|Malaria sporozoites and circumsporozoite proteins bind specifically to sulfated glycoconjugates 
+1607393|a|Circumsporozoite (CS) proteins, which densely coat malaria (Plasmodia) sporozoites, contain an amino acid sequence that is homologous to segments in other proteins which bind specifically to sulfated glycoconjugates. The presence of this homology suggests that sporozoites and CS proteins may also bind sulfated glycoconjugates. To test this hypothesis, recombinant P. yoelii CS protein was examined for binding to sulfated glycoconjugate-Sepharoses. CS protein bound avidly to heparin-, fucoidan-, and dextran sulfate-Sepharose, but bound comparatively poorly to chondroitin sulfate A- or C-Sepharose. CS protein also bound with significantly lower affinity to a heparan sulfate biosynthesis-deficient mutant cell line compared with the wild- type line, consistent with the possibility that the protein also binds to sulfated glycoconjugates on the surfaces of cells. This possibility is consistent with the observation that CS protein binding to hepatocytes, cells invaded by sporozoites during the primary stage of malaria infection, was inhibited by fucoidan, pentosan polysulfate, and heparin. The effects of sulfated glycoconjugates on sporozoite infectivity were also determined. P. berghei sporozoites bound specifically to sulfatide (galactosyl[3-sulfate]beta 1-1ceramide), but not to comparable levels of cholesterol-3-sulfate, or several examples of neutral glycosphingolipids, gangliosides, or phospholipids. Sporozoite invasion into hepatocytes was inhibited by fucoidan, heparin, and dextran sulfate, paralleling the observed binding of CS protein to the corresponding Sepharose derivatives. These sulfated glycoconjugates blocked invasion by inhibiting an event occurring within 3 h of combining sporozoites and hepatocytes. Sporozoite infectivity in mice was significantly inhibited by dextran sulfate 500,000 and fucoidan. Taken together, these data indicate that CS proteins bind selectively to certain sulfated glycoconjugates, that sporozoite infectivity can be inhibited by such compounds, and that invasion of host hepatocytes by sporozoites may involve interactions with these types of compounds. 
+1607393	24	40	circumsporozoite	Chemical	
+1607393	0	19	Malaria sporozoites	Disease	MESH:D008288
+1607393	462	471	P. yoelii	Species	5861
+1607393	1283	1293	P. berghei	Species	5821
+1607393	1862	1866	mice	Species	10090
+1607393	1647	1649	CS	Chemical	
+1607393	1602	1609	sulfate	Chemical	MESH:D013431
+1607393	96	112	Circumsporozoite	Chemical	
+1607393	1465	1483	glycosphingolipids	Chemical	MESH:D006028
+1607393	1517	1527	Sporozoite	Chemical	MESH:C061194
+1607393	768	775	sulfate	Chemical	MESH:D013431
+1607393	574	581	heparin	Chemical	MESH:D006493
+1607393	699	701	CS	Chemical	
+1607393	142	154	coat malaria	Disease	MESH:D058456
+1607393	2048	2058	sporozoite	Chemical	MESH:C061194
+1607393	1411	1432	cholesterol-3-sulfate	Chemical	MESH:C007045
+1607393	1022	1024	CS	Chemical	
+1607393	472	474	CS	Chemical	
+1607393	1114	1131	malaria infection	Disease	MESH:D008288
+1607393	1186	1193	heparin	Chemical	MESH:D006493
+1607393	547	549	CS	Chemical	
+1607393	1339	1376	galactosyl[3-sulfate]beta 1-1ceramide	Chemical	MESH:C511581
+1607393	1906	1913	sulfate	Chemical	MESH:D013431
+1607393	599	614	dextran sulfate	Chemical	MESH:D016264
+1607393	114	116	CS	Chemical	
+1607393	1238	1248	sporozoite	Chemical	MESH:C061194
+1607393	1485	1497	gangliosides	Chemical	MESH:D005732
+1607393	1581	1588	heparin	Chemical	MESH:D006493
+1607393	373	375	CS	Chemical	
+1607393	1160	1180	pentosan polysulfate	Chemical	MESH:D010426
+1607393	1571	1579	fucoidan	Chemical	MESH:C007789
+1607393	1150	1158	fucoidan	Chemical	MESH:C007789
+1607393	1977	1979	CS	Chemical	
+1607393	660	681	chondroitin sulfate A	Chemical	MESH:D002809
+1607393	1836	1858	Sporozoite infectivity	Disease	MESH:D007239
+1607393	1328	1337	sulfatide	Chemical	MESH:D013433
+

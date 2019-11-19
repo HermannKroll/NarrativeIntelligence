@@ -1,0 +1,23 @@
+1374067|t|PKC epsilon-related kinase associates with and phosphorylates cytokeratin 8 and 18 
+1374067|a|A 40-kD protein kinase C (PKC)epsilon related activity was found to associate with human epithelial specific cytokeratin (CK) polypeptides 8 and 18. The kinase activity coimmunoprecipitated with CK8 and 18 and phosphorylated immunoprecipitates of the CK. Immunoblot analysis of CK8/18 immunoprecipitates using an anti-PKC epsilon specific antibody showed that the 40-kD species, and not native PKC epsilon (90 kD) associated with the cytokeratins. Reconstitution experiments demonstrated that purified CK8 or CK18 associated with a 40-kD tryptic fragment of purified PKC epsilon, or with a similar species obtained from cells that express the fragment constitutively but do not express CK8/18. A peptide pseudosubstrate specific for PKC epsilon inhibited phosphorylation of CK8/18 in intact cells or in a kinase assay with CK8/18 immunoprecipitates. Tryptic peptide map analysis of the cytokeratins that were phosphorylated by purified rat brain PKC epsilon or as immunoprecipitates by the associated kinase showed similar phosphopeptides. Furthermore, PKC epsilon immunoreactive species and CK8/18 colocalized using immunofluorescent double staining. We propose that a kinase related to the catalytic fragment of PKC epsilon physically associates with and phosphorylates cytokeratins 8 and 18. 
+1374067	62	75	cytokeratin 8	Gene	3856
+1374067	0	11	PKC epsilon	Gene	5581
+1374067	109	120	PKC)epsilon	Gene	5581
+1374067	278	281	CK8	Gene	3856
+1374067	361	364	CK8	Gene	3856
+1374067	401	412	PKC epsilon	Gene	5581
+1374067	477	488	PKC epsilon	Gene	5581
+1374067	585	588	CK8	Gene	3856
+1374067	592	596	CK18	Gene	3875
+1374067	650	661	PKC epsilon	Gene	5581
+1374067	769	772	CK8	Gene	3856
+1374067	816	827	PKC epsilon	Gene	5581
+1374067	857	863	CK8/18	Gene	3856;3875
+1374067	906	909	CK8	Gene	3856
+1374067	1136	1147	PKC epsilon	Gene	5581
+1374067	1175	1178	CK8	Gene	3856
+1374067	1297	1308	PKC epsilon	Gene	5581
+1374067	166	171	human	Species	9606
+1374067	1019	1022	rat	Species	10116
+1374067	1023	1040	brain PKC epsilon	Disease	MESH:C566847
+

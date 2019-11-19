@@ -1,0 +1,165 @@
+25568583|t|Outcome of Endovenous Laser Ablation of Varicose Veins 
+25568583|a|ABSTRACT Introduction: In Bosnia and Herzegovina according to available data, treatment of incompetent superficial lower extremity varicose veins by endovenous laser ablation (EVLA) has been introduced two years ago and so far no paper has been published regarding results of EVLA treatment of patients from our country. We wanted to present our results with EVLA treatment. Aim of study: to evaluate and compare primary posttreatment outcomes of endovenous laser ablation (EVLA) with classical surgical method of varicose vein treatment. Patients and methods: The study was clinical and prospective. It was carried out at Clinic for vascular surgery in Sarajevo where fifty-eight (58) patients received surgical treatment for varicose veins and in Aesthetic Surgery Center "Nasa mala klinika" in Sarajevo were sixty-one (61) patients with varicose veins were treated by endovenous laser ablation. Total 119 patients (limbs) with pathologic reflux only in great saphenous vein were evaluated between 1st of January 2013 and 31st of April 2014. Following primary outcome endpoints were evaluated smean day of return to normal everyday activities, patient subjective quantification of pain during first seven days after intervention, incidence of deep venous thrombosis (DVT), incidence of wound bleeding requiring surgical intervention, incidence of peri-saphenous vein hematoma and infection rate. Results: Mean of return to normal activities (expressed in days after intervention); EVLA vs. stripping (surgery) =1.21vs12.24, T test 13,619; p=0, 000, p<0,05. T test was used for comparing Mean value of visual pain analog scale for the first 7 days between groups, for all seven days pain was significantly higher in surgical group of patients as compared to EVLA group; p<0,05. Incidence of hematoma greater than 1% of total body surface area was significantly higher in patients receiving surgical treatment; Pearson Chi Square=23,830, p<0,05; odds ratio:10,453. Incidences of infection, deep venous thrombosis and posttreatment bleeding were not statistically different between analyzed groups; EVLA vs Surgery (Pearson Chi Square =3,237; p>0,05; Pearson Chi Square=2,139, p>0,05, Pearson Chi Square=2,139, p>0,05, respectively.) Conclusion: EVLA offers better patient recovery in terms of significantly lower post treatment pain, faster return to everyday activities and lower incidence of bruising (hematomas). 
+25568583	40	48	Varicose	Chemical	MESH:C077381
+25568583	349	357	patients	Species	9606
+25568583	594	602	Patients	Species	9606
+25568583	741	749	patients	Species	9606
+25568583	881	889	patients	Species	9606
+25568583	963	971	patients	Species	9606
+25568583	1201	1208	patient	Species	9606
+25568583	1349	1357	bleeding	Disease	MESH:D006470
+25568583	1324	1327	DVT	Disease	MESH:D020246
+25568583	1300	1322	deep venous thrombosis	Disease	MESH:D020246
+25568583	1419	1446	vein hematoma and infection	Disease	MESH:D006406
+25568583	1238	1242	pain	Disease	MESH:D010146
+25568583	1794	1802	patients	Species	9606
+25568583	1931	1939	patients	Species	9606
+25568583	2049	2071	deep venous thrombosis	Disease	MESH:D020246
+25568583	1662	1673	visual pain	Disease	MESH:D014786
+25568583	2038	2047	infection	Disease	MESH:D007239
+25568583	1743	1747	pain	Disease	MESH:D010146
+25568583	1851	1859	hematoma	Disease	MESH:D006406
+25568583	2090	2098	bleeding	Disease	MESH:D006470
+25568583	2323	2330	patient	Species	9606
+25568583	2453	2461	bruising	Disease	MESH:D003288
+25568583	2463	2472	hematomas	Disease	MESH:D006406
+25568583	2387	2391	pain	Disease	MESH:D010146
+25568583	2648	2651	SSV	Species	10836
+25568583	3352	3365	vein hematoma	Disease	MESH:D006406
+25568583	3324	3332	bleeding	Disease	MESH:D006470
+25568583	3286	3304	postoperative pain	Disease	MESH:D010149
+25568583	3217	3261	aggressiveness of avulsion of saphenous vein	Disease	MESH:D001523
+25568583	3401	3410	infection	Disease	MESH:D007239
+25568583	3650	3657	patient	Species	9606
+25568583	3664	3668	EVLA	Chemical	
+25568583	3912	3920	patients	Species	9606
+25568583	4261	4269	PATIENTS	Species	9606
+25568583	4390	4398	patients	Species	9606
+25568583	4572	4580	patients	Species	9606
+25568583	4715	4723	patients	Species	9606
+25568583	4880	4888	patients	Species	9606
+25568583	5102	5109	patient	Species	9606
+25568583	5602	5610	patients	Species	9606
+25568583	5720	5727	patient	Species	9606
+25568583	5925	5932	patient	Species	9606
+25568583	6135	6142	patient	Species	9606
+25568583	6255	6263	Patients	Species	9606
+25568583	6378	6382	Pain	Disease	MESH:D010146
+25568583	5225	5228	DVT	Disease	MESH:D020246
+25568583	6335	6343	hematoma	Disease	MESH:D006406
+25568583	5201	5223	deep venous thrombosis	Disease	MESH:D020246
+25568583	6451	6455	pain	Disease	MESH:D010146
+25568583	6303	6311	hematoma	Disease	MESH:D006406
+25568583	5250	5258	bleeding	Disease	MESH:D006470
+25568583	5139	5143	pain	Disease	MESH:D010146
+25568583	5320	5347	vein hematoma and infection	Disease	MESH:D006406
+25568583	6475	6479	pain	Disease	MESH:D010146
+25568583	5767	5771	pain	Disease	MESH:D010146
+25568583	5948	5956	Hematoma	Disease	MESH:D006406
+25568583	6516	6520	pain	Disease	MESH:D010146
+25568583	7018	7025	patient	Species	9606
+25568583	7088	7095	patient	Species	9606
+25568583	7377	7385	patients	Species	9606
+25568583	7426	7434	patients	Species	9606
+25568583	7543	7551	patients	Species	9606
+25568583	7650	7654	calf	Species	9913
+25568583	8435	8443	patients	Species	9606
+25568583	9035	9043	patients	Species	9606
+25568583	9116	9124	patients	Species	9606
+25568583	9336	9344	patients	Species	9606
+25568583	9378	9386	patients	Species	9606
+25568583	7901	7911	skin ulcer	Disease	MESH:D012883
+25568583	7988	8004	arterial disease	Disease	MESH:D003324
+25568583	6589	6611	deep venous thrombosis	Disease	MESH:D020246
+25568583	7807	7816	phlebitis	Disease	MESH:D010689
+25568583	7078	7081	DVT	Disease	MESH:D020246
+25568583	6770	6778	bleeding	Disease	MESH:D006470
+25568583	6861	6869	bleeding	Disease	MESH:D006470
+25568583	7942	7964	deep venous thrombosis	Disease	MESH:D020246
+25568583	7966	7983	diabetes mellitus	Disease	MESH:D003920
+25568583	7880	7897	hyperpigmentation	Disease	MESH:D017495
+25568583	7766	7773	allergy	Disease	MESH:D004342
+25568583	8683	8692	Lidocaine	Chemical	MESH:D008012
+25568583	9244	9259	povidone-iodine	Chemical	MESH:D011206
+25568583	7777	7786	lidocaine	Chemical	MESH:D008012
+25568583	6663	6671	bleeding	Disease	MESH:D006470
+25568583	6613	6616	DVT	Disease	MESH:D020246
+25568583	10491	10499	patients	Species	9606
+25568583	10440	10444	pain	Disease	MESH:D010146
+25568583	10352	10363	visual pain	Disease	MESH:D014786
+25568583	10014	10022	hematoma	Disease	MESH:D006406
+25568583	10841	10852	visual pain	Disease	MESH:D014786
+25568583	10992	11000	patients	Species	9606
+25568583	10912	10920	hematoma	Disease	MESH:D006406
+25568583	11407	11415	hematoma	Disease	MESH:D006406
+25568583	11472	11481	infection	Disease	MESH:D007239
+25568583	11501	11509	bleeding	Disease	MESH:D006470
+25568583	11542	11564	deep venous thrombosis	Disease	MESH:D020246
+25568583	11828	11836	patients	Species	9606
+25568583	12005	12008	DVT	Disease	MESH:D020246
+25568583	12112	12119	patient	Species	9606
+25568583	12580	12587	patient	Species	9606
+25568583	12650	12658	patients	Species	9606
+25568583	12408	12414	trauma	Disease	MESH:D014947
+25568583	12334	12338	pain	Disease	MESH:D010146
+25568583	13254	13262	hematoma	Disease	MESH:D006406
+25568583	12903	12911	bruising	Disease	MESH:D003288
+25568583	12894	12898	pain	Disease	MESH:D010146
+25568583	12371	12377	trauma	Disease	MESH:D014947
+25568583	12172	12183	visual pain	Disease	MESH:D014786
+25568583	13607	13615	hematoma	Disease	MESH:D006406
+25568583	12257	12261	pain	Disease	MESH:D010146
+25568583	12694	12698	pain	Disease	MESH:D010146
+25568583	12024	12028	Pain	Disease	MESH:D010146
+25568583	13299	13307	hematoma	Disease	MESH:D006406
+25568583	12597	12601	pain	Disease	MESH:D010146
+25568583	13632	13655	Postoperative hematomas	Disease	MESH:D010149
+25568583	13830	13838	patients	Species	9606
+25568583	13873	13881	patients	Species	9606
+25568583	13885	13893	patients	Species	9606
+25568583	14591	14599	patients	Species	9606
+25568583	14660	14668	patients	Species	9606
+25568583	14857	14865	patients	Species	9606
+25568583	15379	15387	patients	Species	9606
+25568583	15676	15683	patient	Species	9606
+25568583	16176	16184	patients	Species	9606
+25568583	14560	14568	bleeding	Disease	MESH:D006470
+25568583	13777	13786	infection	Disease	MESH:D007239
+25568583	14455	14463	bleeding	Disease	MESH:D006470
+25568583	15106	15109	DVT	Disease	MESH:D020246
+25568583	14170	14178	bleeding	Disease	MESH:D006470
+25568583	15832	15842	thrombosis	Disease	MESH:D013927
+25568583	14947	14954	heparin	Chemical	MESH:D006493
+25568583	15034	15037	DVT	Disease	MESH:D020246
+25568583	15214	15217	DVT	Disease	MESH:D020246
+25568583	15501	15505	LMWH	Chemical	MESH:D006495
+25568583	15192	15212	deep vein thrombosis	Disease	MESH:D020246
+25568583	14776	14779	DVT	Disease	MESH:D020246
+25568583	15844	15848	EHIT	Disease	MESH:D013927
+25568583	14648	14656	bleeding	Disease	MESH:D006470
+25568583	14183	14191	hematoma	Disease	MESH:D006406
+25568583	16069	16077	thrombus	Disease	MESH:D013927
+25568583	15887	15890	DVT	Disease	MESH:D020246
+25568583	14811	14821	crural DVT	Disease	MESH:D020246
+25568583	16276	16284	patients	Species	9606
+25568583	16463	16472	hematomas	Disease	MESH:D006406
+25568583	16453	16461	bruising	Disease	MESH:D003288
+25568583	16387	16391	pain	Disease	MESH:D010146
+25568583	16592	16600	bleeding	Disease	MESH:D006470
+25568583	16602	16611	infection	Disease	MESH:D007239
+25568583	16620	16623	DVT	Disease	MESH:D020246
+25568583	16861	16865	CEAP	Gene	282991
+25568583	16663	16671	patients	Species	9606
+25568583	16804	16812	patients	Species	9606
+25568583	16894	16901	patient	Species	9606
+25568583	16954	16958	pain	Disease	MESH:D010146
+25568583	18247	18255	patients	Species	9606
+25568583	18261	18269	varicose	Chemical	MESH:C077381
+25568583	18636	18646	Thrombosis	Disease	MESH:D013927
+25568583	18668	18671	DVT	Disease	MESH:D020246
+25568583	18558	18561	DVT	Disease	MESH:D020246
+25568583	18536	18556	Deep Vein Thrombosis	Disease	MESH:D020246
+25568583	18856	18864	patients	Species	9606
+25568583	18789	18811	venous thromboembolism	Disease	MESH:D054556
+25568583	18910	18930	deep vein thrombosis	Disease	MESH:D020246
+

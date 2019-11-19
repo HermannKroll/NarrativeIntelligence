@@ -1,0 +1,15 @@
+1577869|t|Laminin forms an independent network in basement membranes [published erratum appears in J Cell Biol 1992 Jun;118(2):493] 
+1577869|a|Laminin self-assembles in vitro into a polymer by a reversible, entropy- driven and calcium-facilitated process dependent upon the participation of the short arm globular domains. We now find that this polymer is required for the structural integrity of the collagen-free basement membrane of cultured embryonal carcinoma cells (ECC) and for the supramolecular organization and anchorage of laminin in the collagen- rich basement membrane of the Engelbreth-Holm-Swarm tumor (EHS). First, low temperature and EDTA induced the dissolution of ECC basement membranes and released approximately 80% of total laminin from the EHS basement membrane. Second, laminin elastase fragments (E4 and E1') possessing the short arm globules of the B1, B2, and A chains selectively acted as competitive ligands that dissolved ECC basement membranes and displaced laminin from the EHS basement membrane into solution. The fraction of laminin released increased as a function of ligand concentration, approaching the level of the EDTA-reversible pool. The smaller (approximately 20%) residual pool of EHS laminin, in contrast, could only be effectively displaced by E1' and E4 if the collagenous network was first degraded with bacterial collagenase. The supramolecular architecture of freeze-etched and platinum/carbon replicated reconstituted laminin gel polymer, ECC, and collagenase- treated EHS basement membranes were compared and found to be similar, further supporting the biochemical data. We conclude that laminin forms a network independent of that of type IV collagen in basement membranes. Furthermore, in the EHS basement membrane four-fifths of laminin is anchored strictly through noncovalent bonds between laminin monomers while one-fifth is anchored through a combination of these bonds and laminin-collagen bridges. 
+1577869	1331	1340	bacterial	Species	2
+1577869	206	213	calcium	Chemical	MESH:D002118
+1577869	662	665	ECC	CellLine	CVCL:M564
+1577869	1416	1422	carbon	Chemical	MESH:D002244
+1577869	1407	1415	platinum	Chemical	MESH:D010984
+1577869	630	634	EDTA	Chemical	MESH:D004492
+1577869	931	934	ECC	CellLine	CVCL:M564
+1577869	1469	1472	ECC	CellLine	CVCL:M564
+1577869	590	595	tumor	Disease	MESH:D009369
+1577869	1133	1137	EDTA	Chemical	MESH:D004492
+1577869	451	454	ECC	CellLine	CVCL:M564
+1577869	424	443	embryonal carcinoma	Disease	MESH:D018236
+

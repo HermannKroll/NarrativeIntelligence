@@ -1,0 +1,109 @@
+25568631|t|Effect of Sperm Count on Success of Intrauterine Insemination in Couples Diagnosed with Male Factor Infertility 
+25568631|a|Objective: To exam semen parameters in predicting intrauterine insemination (IUI) outcomes in couples with male factor. Study design: This retrospective study was performed at department of infertility and sexual medicine from September 2007 to February 2014. 307 couples with male factor infertility were included and 672 IUI cycles were analyzed. Results: From 672 inseminations performed on 307 couples, there are 27.36% couples get pregnancy (84 out of 307) and the overall pregnancy rate was 12.95% (87 out of 672) of IUI. With the increase of post total progressive sperm count, the clinical pregnancy rate increased. When the initial progressive sperm count was lower than 5*106, there was no pregnant in the IUI cycle. At the end of the third cycle, 85 clinical pregnancies had been achieved (97.70%). Conclusions: The initial total progressive sperm count lower than 5*106 means the poor outcome of IUI in the infertile couples with male factor. If the infertile couples with male factor don't get pregnancy after three IUI cycles, the couples should receive re-assessment or other artificial reproductive technology. 
+25568631	88	111	Male Factor Infertility	Disease	MESH:D007248
+25568631	219	223	male	Species	9606
+25568631	189	192	IUI	Disease	MESH:D005317
+25568631	389	393	male	Species	9606
+25568631	401	412	infertility	Disease	MESH:D007246
+25568631	435	438	IUI	Disease	MESH:D005317
+25568631	302	313	infertility	Disease	MESH:D007246
+25568631	828	831	IUI	Disease	MESH:D005317
+25568631	635	638	IUI	Disease	MESH:D005317
+25568631	1054	1058	male	Species	9606
+25568631	1097	1101	male	Species	9606
+25568631	1074	1083	infertile	Disease	MESH:D007246
+25568631	1020	1023	IUI	Disease	MESH:D005317
+25568631	1031	1040	infertile	Disease	MESH:D007246
+25568631	1141	1144	IUI	Disease	MESH:D005317
+25568631	1479	1484	woman	Species	9606
+25568631	1587	1591	male	Species	9606
+25568631	1656	1667	infertility	Disease	MESH:D007246
+25568631	1599	1610	infertility	Disease	MESH:D007246
+25568631	1284	1287	IUI	Disease	MESH:D005317
+25568631	1565	1585	cervical infertility	Disease	MESH:D007246
+25568631	1343	1354	infertility	Disease	MESH:D007246
+25568631	1625	1638	endometriosis	Disease	MESH:D004715
+25568631	1422	1425	IUI	Disease	MESH:D005317
+25568631	1958	1965	patient	Species	9606
+25568631	1918	1921	IUI	Disease	MESH:D005317
+25568631	1860	1871	infertility	Disease	MESH:D007246
+25568631	1742	1745	IUI	Disease	MESH:D005317
+25568631	2010	2029	infertility factors	Disease	MESH:D007246
+25568631	1825	1846	endometrial thickness	Disease	MESH:D016889
+25568631	2467	2471	male	Species	9606
+25568631	2668	2672	male	Species	9606
+25568631	2429	2432	IUI	Disease	MESH:D005317
+25568631	2680	2691	infertility	Disease	MESH:D007246
+25568631	2202	2218	male infertility	Disease	MESH:D007248
+25568631	2629	2632	IUI	Disease	MESH:D005317
+25568631	3159	3163	Male	Species	9606
+25568631	3204	3208	male	Species	9606
+25568631	3367	3371	male	Species	9606
+25568631	3487	3490	IUI	Disease	MESH:D005317
+25568631	3379	3390	infertility	Disease	MESH:D007246
+25568631	3027	3036	infertile	Disease	MESH:D007246
+25568631	2819	2830	infertility	Disease	MESH:D007246
+25568631	3171	3182	infertility	Disease	MESH:D007246
+25568631	2969	2992	male factor infertility	Disease	MESH:D007248
+25568631	3297	3300	IUI	Disease	MESH:D005317
+25568631	4109	4112	hCG	Gene	93659
+25568631	4149	4152	HCG	Gene	93659
+25568631	3984	3987	hCG	Gene	93659
+25568631	3522	3530	Patients	Species	9606
+25568631	3954	3959	human	Species	9606
+25568631	4162	4170	patients	Species	9606
+25568631	3604	3622	Clomiphene citrate	Chemical	MESH:D002996
+25568631	3648	3657	letrozole	Chemical	MESH:C067431
+25568631	4241	4253	progesterone	Chemical	MESH:D011374
+25568631	4227	4236	estradiol	Chemical	MESH:D004958
+25568631	4732	4736	CASA	Gene	1446
+25568631	5511	5518	patient	Species	9606
+25568631	5557	5564	patient	Species	9606
+25568631	5673	5678	human	Species	9606
+25568631	5708	5711	hCG	Gene	93659
+25568631	5754	5757	IUI	Disease	MESH:D005317
+25568631	6597	6605	patients	Species	9606
+25568631	6621	6632	infertility	Disease	MESH:D007246
+25568631	6868	6879	infertility	Disease	MESH:D007246
+25568631	6332	6335	IUI	Disease	MESH:D005317
+25568631	7861	7864	IUI	Disease	MESH:D005317
+25568631	7972	7976	male	Species	9606
+25568631	8285	8288	IUI	Disease	MESH:D005317
+25568631	8063	8085	infertility conditions	Disease	MESH:D007246
+25568631	8373	8376	IUI	Disease	MESH:D005317
+25568631	9532	9535	IUI	Disease	MESH:D005317
+25568631	8790	8793	TMS	Disease	
+25568631	10347	10351	male	Species	9606
+25568631	10626	10631	donor	Species	9606
+25568631	10914	10917	IUI	Disease	MESH:D005317
+25568631	10359	10370	infertility	Disease	MESH:D007246
+25568631	10632	10635	IUI	Disease	MESH:D005317
+25568631	12045	12056	infertility	Disease	MESH:D007246
+25568631	11400	11403	IUI	Disease	MESH:D005317
+25568631	12111	12124	endometriosis	Disease	MESH:D004715
+25568631	11612	11623	infertility	Disease	MESH:D007246
+25568631	11826	11829	IUI	Disease	MESH:D005317
+25568631	11754	11757	IUI	Disease	MESH:D005317
+25568631	12133	12156	male factor infertility	Disease	MESH:D007248
+25568631	12237	12241	male	Species	9606
+25568631	12370	12374	male	Species	9606
+25568631	12403	12407	male	Species	9606
+25568631	12347	12356	infertile	Disease	MESH:D007246
+25568631	12215	12224	infertile	Disease	MESH:D007246
+25568631	12177	12180	IUI	Disease	MESH:D005317
+25568631	12415	12426	infertility	Disease	MESH:D007246
+25568631	12336	12339	IUI	Disease	MESH:D005317
+25568631	12459	12462	IUI	Disease	MESH:D005317
+25568631	12678	12695	tubal infertility	Disease	MESH:D007246
+25568631	12777	12780	IUI	Disease	MESH:D005317
+25568631	12749	12752	IUI	Disease	MESH:D005317
+25568631	12843	12868	intrauterine insemination	Disease	MESH:D005317
+25568631	13013	13016	IUI	Disease	MESH:D005317
+25568631	13134	13142	patients	Species	9606
+25568631	13441	13464	male factor infertility	Disease	MESH:D007248
+25568631	14000	14004	CASA	Gene	1446
+25568631	14027	14032	donor	Species	9606
+25568631	14488	14499	infertility	Disease	MESH:D007246
+25568631	14404	14428	ovarian hyperstimulation	Disease	MESH:D016471
+25568631	14579	14591	Intrauterine	Chemical	
+

@@ -1,0 +1,19 @@
+1374417|t|Immunological evidence for eight spans in the membrane domain of 3- hydroxy-3-methylglutaryl coenzyme A reductase: implications for enzyme degradation in the endoplasmic reticulum 
+1374417|a|We have raised two monospecific antibodies against synthetic peptides derived from the membrane domain of the ER glycoprotein 3-hydroxy-3- methylglutaryl coenzyme A (HMG-CoA) reductase, the rate limiting enzyme in the cholesterol biosynthetic pathway. This domain, which was proposed to span the ER membrane seven times (Liscum, L., J. Finer- Moore, R. M. Stroud, K. L. Luskey, M. S. Brown, and J. L. Goldstein. 1985. J. Biol. Chem. 260:522-538), plays a critical role in the regulated degradation of the enzyme in the ER in response to sterols. The antibodies stain the ER of cells and immunoprecipitate HMG-CoA reductase and HMGal, a chimeric protein composed of the membrane domain of the reductase fused to Escherichia coli beta-galactosidase, the degradation of which is also accelerated by sterols. We show that the sequence Arg224 through Leu242 of HMG-CoA reductase (peptide G) faces the cytoplasm both in cultured cells and in rat liver, whereas the sequence Thr284 through Glu302 (peptide H) faces the lumen of the ER. This indicates that a sequence between peptide G and peptide H spans the membrane of the ER. Moreover, by epitope tagging with peptide H, we show that the loop segment connecting membrane spans 3 and 4 is sequestered in the lumen of the ER. These results demonstrate that the membrane domain of HMG-CoA reductase spans the ER eight times and are inconsistent with the seven membrane spans topological model. The approximate boundaries of the proposed additional transmembrane segment are between Lys248 and Asp276. Replacement of this 7th span in HMGal with the first transmembrane helix of bacteriorhodopsin abolishes the sterol-enhanced degradation of the protein, indicating its role in the regulated turnover of HMG-CoA reductase within the endoplasmic reticulum. 
+1374417	65	113	3- hydroxy-3-methylglutaryl coenzyme A reductase	Gene	25675
+1374417	891	907	Escherichia coli	Species	562
+1374417	1116	1119	rat	Species	10116
+1374417	1504	1511	HMG-CoA	Chemical	MESH:C008047
+1374417	1705	1708	Lys	Chemical	MESH:C026591
+1374417	785	792	HMG-CoA	Chemical	MESH:C008047
+1374417	976	983	sterols	Chemical	MESH:D013261
+1374417	306	344	3-hydroxy-3- methylglutaryl coenzyme A	Chemical	MESH:C008047
+1374417	1832	1838	sterol	Chemical	MESH:D013261
+1374417	717	724	sterols	Chemical	MESH:D013261
+1374417	1925	1932	HMG-CoA	Chemical	MESH:C008047
+1374417	346	353	HMG-CoA	Chemical	MESH:C008047
+1374417	1036	1043	HMG-CoA	Chemical	MESH:C008047
+1374417	1716	1722	Asp276	Chemical	MESH:C505981
+1374417	398	409	cholesterol	Chemical	MESH:D002784
+1374417	1148	1151	Thr	Chemical	MESH:C055175
+

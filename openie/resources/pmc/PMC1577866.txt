@@ -1,0 +1,5 @@
+1577866|t|Lattice defects in microtubules: protofilament numbers vary within individual microtubules 
+1577866|a|We have used cryo-electron microscopy of vitrified specimens to study microtubules assembled both from three cycle purified tubulin (3x- tubulin) and in cell free extracts of Xenopus eggs. In vitro assembled 3x-tubulin samples have a majority of microtubules with 14 protofilaments whereas in cell extracts most microtubules have 13 protofilaments. Microtubule polymorphism was observed in both cases. The number of protofilaments can change abruptly along individual microtubules usually by single increments but double increments also occur. For 3x-tubulin, increasing the magnesium concentration decreases the proportion of 14 protofilament microtubules and decreases the average separation between transitions in these microtubules. Protofilament discontinuities may correspond to dislocation-like defects in the microtubule surface lattice. 
+1577866	266	273	Xenopus	Species	8355
+1577866	666	675	magnesium	Chemical	MESH:D008274
+

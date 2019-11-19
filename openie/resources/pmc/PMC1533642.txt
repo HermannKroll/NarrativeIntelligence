@@ -1,0 +1,32 @@
+1533642|t|Requirement for p34cdc2 kinase is restricted to mitosis in the mammalian cdc2 mutant FT210 
+1533642|a|The mouse FT210 cell line is a temperature-sensitive cdc2 mutant. FT210 cells are found to arrest specifically in G2 phase and unlike many alleles of cdc2 and cdc28 mutants of yeasts, loss of p34cdc2 at the nonpermissive temperature has no apparent effect on cell cycle progression through the G1 and S phases of the division cycle. FT210 cells and the parent wild-type FM3A cell line each possess at least three distinct histone H1 kinases. H1 kinase activities in chromatography fractions were identified using a synthetic peptide substrate containing the consensus phosphorylation site of histone H1 and the kinase subunit compositions were determined immunochemically with antisera prepared against the "PSTAIR" peptide, the COOH-terminus of mammalian p34cdc2 and the human cyclins A and B1. The results show that p34cdc2 forms two separate complexes with cyclin A and with cyclin B1, both of which exhibit thermal lability at the non-permissive temperature in vitro and in vivo. A third H1 kinase with stable activity at the nonpermissive temperature is comprised of cyclin A and a cdc2-like 34-kD subunit, which is immunoreactive with anti-"PSTAIR" antiserum but is not recognized with antiserum specific for the COOH- terminus of p34cdc2. The cyclin A-associated kinases are active during S and G2 phases and earlier in the division cycle than the p34cdc2- cyclin B1 kinase. We show that mouse cells possess at least two cdc2- related gene products which form cell cycle regulated histone H1 kinases and we propose that the murine homolog of yeast p34cdc/CDC28 is essential only during the G2-to-M transition in FT210 cells. 
+1533642	16	23	p34cdc2	Gene	983
+1533642	73	77	cdc2	Gene	983
+1533642	63	72	mammalian	Species	9606
+1533642	144	148	cdc2	Gene	12534
+1533642	241	245	cdc2	Gene	12534
+1533642	250	255	cdc28	Gene	852457
+1533642	283	290	p34cdc2	Gene	983
+1533642	847	854	p34cdc2	Gene	983
+1533642	909	916	p34cdc2	Gene	983
+1533642	951	959	cyclin A	Gene	890
+1533642	969	978	cyclin B1	Gene	891
+1533642	1163	1171	cyclin A	Gene	890
+1533642	1328	1335	p34cdc2	Gene	983
+1533642	1341	1349	cyclin A	Gene	890
+1533642	1446	1453	p34cdc2	Gene	983
+1533642	1519	1523	cdc2	Gene	12534
+1533642	1653	1658	CDC28	Gene	852457
+1533642	95	100	mouse	Species	10090
+1533642	267	273	yeasts	Species	4932
+1533642	837	846	mammalian	Species	9606
+1533642	863	868	human	Species	9606
+1533642	1486	1491	mouse	Species	10090
+1533642	1622	1628	murine	Species	10090
+1533642	1640	1645	yeast	Species	4932
+1533642	461	465	FM3A	Species	10090
+1533642	1455	1464	cyclin B1	Gene	891
+1533642	1178	1182	cdc2	Gene	12534
+1533642	1310	1314	COOH	Chemical	MESH:C102887
+1533642	820	824	COOH	Chemical	MESH:C102887
+

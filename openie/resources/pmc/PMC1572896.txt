@@ -1,0 +1,12 @@
+1572896|t|Transforming growth factor-beta stimulates collagen VII expression by cutaneous cells in vitro 
+1572896|a|Collagen VII, the major component of cutaneous anchoring fibrils is expressed at a low level by normal human keratinocytes and fibroblasts in vitro. In cocultures of these two cell types, signals from fibroblasts enhance expression of collagen VII by keratinocytes and vice versa. In this study, the effects of a possible mediator of such a stimulation, transforming growth factor-beta (TGF-beta), were investigated. Its effect on the expression and deposition of the highly insoluble collagen VII was assessed in a semiquantitative manner by a newly developed enzyme-linked immunoassay which is based on immunoblotting. In keratinocyte monocultures, 0.5-20 ng/ml of TGF-beta 2 induced a dose-dependent stimulation of collagen VII expression as measured per microgram of DNA. The maximal enhancement was about sevenfold compared to controls. The effect of TGF-beta 2 was observed already after 12 h, with a steady increase at least up to 3 d. As previous studies have implicated, untreated cocultures of keratinocytes and fibroblasts exhibited a higher basic level of collagen VII expression, which could be further stimulated about twofold by TGF-beta 2. Fibroblasts alone synthesized very minor quantities of collagen VII and could be only weakly stimulated by TGF-beta 2. This growth factor seems a specific enhancer of collagen VII since the expression of laminin, collagen IV, as well as total protein was increased to a much lesser extent. Our data suggest that TGF-beta may be an important mediator of epithelial-mesenchymal interactions and may regulate the synthesis of the anchoring fibrils at the skin basement membrane zone. 
+1572896	0	31	Transforming growth factor-beta	Gene	7040
+1572896	449	480	transforming growth factor-beta	Gene	7040
+1572896	482	490	TGF-beta	Gene	7040
+1572896	762	772	TGF-beta 2	Gene	7042
+1572896	951	961	TGF-beta 2	Gene	7042
+1572896	1239	1249	TGF-beta 2	Gene	7042
+1572896	1358	1368	TGF-beta 2	Gene	7042
+1572896	1563	1571	TGF-beta	Gene	7040
+1572896	198	203	human	Species	9606
+

@@ -1,0 +1,229 @@
+25568634|t|Characteristics of Rotavirus Diarrhea in Hospitalized Children in Kosovo 
+25568634|a|Background: Diarrhea is a leading cause of child mortality worldwide. Rotavirus is one of the most common causes of severe diarrhea and dehydration in children. Authors reviewed epidemiological and clinical data of the rotavirus diarrhea in Kosovo. Methods: This is a prospective study carried between January 1st and December 31st 2011. All data, comprising demographics, nutrition, clinical presentation, laboratory findings, management and outcome of the rotavirus diarrhea are collected on the specially designed form. Results: 116 children with rotavirus diarrhea are included in the study. The majority boys (74.4%) and children aged 0 - 12 months (82.75%). Mean age of children in the study was 16.38 months. Almost every third child in the study was hypotrophic (29.2%). More than half of the infants (55.2%) were on mixed food, somewhat more than every third was breast feeding (36.45%), and every twelfth (8.33%) was on artificial milk (animal or formula). Apart from diarrhea, present in all patients, vomiting (97.41%) and fever (43.96%) were characteristics of the clinical presentation of the diarrhea. Two thirds of the children had mild grade dehydration (70.7%). All patients recovered with no sequels. Conclusion: Rotavirus continues to be responsible for a significant portion of acute diarrhea in Kosovo. Clinical features, epidemiological data and the agglutination test are safe enough to establish the diagnosis. Treated correctly rotavirus diarrhea has a favorable outcome. 
+25568634	54	62	Children	Species	9606
+25568634	19	37	Rotavirus Diarrhea	Disease	MESH:D012400
+25568634	116	121	child	Species	9606
+25568634	224	232	children	Species	9606
+25568634	85	93	Diarrhea	Disease	MESH:D003967
+25568634	209	220	dehydration	Disease	MESH:D003681
+25568634	196	204	diarrhea	Disease	MESH:D003967
+25568634	292	310	rotavirus diarrhea	Disease	MESH:D012400
+25568634	531	549	rotavirus diarrhea	Disease	MESH:D012400
+25568634	609	617	children	Species	9606
+25568634	682	686	boys	Species	9606
+25568634	699	707	children	Species	9606
+25568634	749	757	children	Species	9606
+25568634	808	813	child	Species	9606
+25568634	874	881	infants	Species	9606
+25568634	1076	1084	patients	Species	9606
+25568634	1208	1216	children	Species	9606
+25568634	1257	1265	patients	Species	9606
+25568634	1232	1243	dehydration	Disease	MESH:D003681
+25568634	1086	1094	vomiting	Disease	MESH:D014839
+25568634	1180	1188	diarrhea	Disease	MESH:D003967
+25568634	623	641	rotavirus diarrhea	Disease	MESH:D012400
+25568634	1108	1113	fever	Disease	MESH:D005334
+25568634	1051	1059	diarrhea	Disease	MESH:D003967
+25568634	831	842	hypotrophic	Disease	
+25568634	1529	1547	rotavirus diarrhea	Disease	MESH:D012400
+25568634	1380	1388	diarrhea	Disease	MESH:D003967
+25568634	1682	1690	children	Species	9606
+25568634	1909	1917	children	Species	9606
+25568634	2038	2046	patients	Species	9606
+25568634	2091	2099	children	Species	9606
+25568634	1743	1761	Rotavirus diarrhea	Disease	MESH:D012400
+25568634	1711	1725	acute diarrhea	Disease	MESH:D003967
+25568634	1894	1902	diarrhea	Disease	MESH:D003967
+25568634	1629	1638	rotavirus	Disease	MESH:D012400
+25568634	1985	1993	diarrhea	Disease	MESH:D003967
+25568634	2813	2831	rotavirus diarrhea	Disease	MESH:D012400
+25568634	2878	2888	Retrovirus	Species	31931
+25568634	2918	2926	patients	Species	9606
+25568634	3039	3047	children	Species	9606
+25568634	3083	3091	diarrhea	Disease	MESH:D003967
+25568634	3230	3238	children	Species	9606
+25568634	3257	3261	boys	Species	9606
+25568634	3273	3280	infants	Species	9606
+25568634	3306	3314	children	Species	9606
+25568634	3365	3370	child	Species	9606
+25568634	3441	3446	girls	Species	9606
+25568634	3455	3459	boys	Species	9606
+25568634	3384	3395	hypotrophic	Disease	
+25568634	3409	3419	hypotrophy	Disease	
+25568634	3485	3493	children	Species	9606
+25568634	3503	3510	infants	Species	9606
+25568634	3542	3549	infants	Species	9606
+25568634	3854	3861	patient	Species	9606
+25568634	3867	3885	rotavirus diarrhea	Disease	MESH:D012400
+25568634	3935	3943	patients	Species	9606
+25568634	4078	4082	boys	Species	9606
+25568634	4091	4096	girls	Species	9606
+25568634	4161	4169	patients	Species	9606
+25568634	4195	4198	boy	Species	9606
+25568634	4207	4211	girl	Species	9606
+25568634	4272	4283	convulsions	Disease	MESH:D012640
+25568634	4038	4046	diarrhea	Disease	MESH:D003967
+25568634	4223	4233	convulsion	Disease	MESH:D012640
+25568634	3910	3918	diarrhea	Disease	MESH:D003967
+25568634	3945	3953	vomiting	Disease	MESH:D014839
+25568634	3966	3971	fever	Disease	MESH:D005334
+25568634	4310	4318	patients	Species	9606
+25568634	4412	4419	patient	Species	9606
+25568634	4520	4525	girls	Species	9606
+25568634	4530	4534	boys	Species	9606
+25568634	4500	4511	dehydration	Disease	MESH:D003681
+25568634	4355	4366	dehydration	Disease	MESH:D003681
+25568634	4565	4583	rotavirus diarrhea	Disease	MESH:D012400
+25568634	4602	4613	dehydration	Disease	MESH:D003681
+25568634	4699	4706	patient	Species	9606
+25568634	4680	4691	dehydration	Disease	MESH:D003681
+25568634	4712	4730	rotavirus diarrhea	Disease	MESH:D012400
+25568634	4776	4784	patients	Species	9606
+25568634	4931	4939	patients	Species	9606
+25568634	5127	5132	girls	Species	9606
+25568634	5146	5151	girls	Species	9606
+25568634	4997	5031	upper respiratory tract infections	Disease	MESH:D012141
+25568634	4790	4808	rotavirus diarrhea	Disease	MESH:D012400
+25568634	4881	4897	bronchopneumonia	Disease	MESH:D001996
+25568634	5200	5208	patients	Species	9606
+25568634	5214	5232	rotavirus diarrhea	Disease	MESH:D012400
+25568634	5297	5304	patient	Species	9606
+25568634	5310	5328	rotavirus diarrhea	Disease	MESH:D012400
+25568634	5454	5462	patients	Species	9606
+25568634	5488	5495	patient	Species	9606
+25568634	5566	5571	girls	Species	9606
+25568634	5580	5584	boys	Species	9606
+25568634	5652	5660	patients	Species	9606
+25568634	5674	5681	patient	Species	9606
+25568634	5697	5718	neurological symptoms	Disease	MESH:D009422
+25568634	5720	5728	seizures	Disease	MESH:D012640
+25568634	5634	5641	ascites	Disease	MESH:D001201
+25568634	5398	5416	rotavirus diarrhea	Disease	MESH:D012400
+25568634	5342	5357	Paralytic ileus	Disease	MESH:D007418
+25568634	5761	5769	patients	Species	9606
+25568634	5839	5847	patients	Species	9606
+25568634	6016	6024	patients	Species	9606
+25568634	6072	6080	patients	Species	9606
+25568634	6184	6192	patients	Species	9606
+25568634	6252	6260	patients	Species	9606
+25568634	6227	6239	trimethoprim	Chemical	MESH:D014295
+25568634	6206	6222	sulfamethoxazole	Chemical	MESH:D013420
+25568634	6137	6145	Amikacin	Chemical	MESH:D000583
+25568634	6113	6121	amikacin	Chemical	MESH:D000583
+25568634	6095	6110	aminoglycosides	Chemical	MESH:D000617
+25568634	5916	5927	Ceftriaxone	Chemical	MESH:D002443
+25568634	6125	6135	gentamicin	Chemical	MESH:D005839
+25568634	6412	6420	patients	Species	9606
+25568634	6488	6496	amikacin	Chemical	MESH:D000583
+25568634	6426	6444	rotavirus diarrhea	Disease	MESH:D012400
+25568634	6500	6510	gentamicin	Chemical	MESH:D005839
+25568634	6723	6731	patients	Species	9606
+25568634	6558	6576	rotavirus diarrhea	Disease	MESH:D012400
+25568634	6788	6806	rotavirus diarrhea	Disease	MESH:D012400
+25568634	6870	6876	infant	Species	9606
+25568634	7004	7012	children	Species	9606
+25568634	7160	7168	children	Species	9606
+25568634	7276	7284	children	Species	9606
+25568634	6854	6862	diarrhea	Disease	MESH:D003967
+25568634	7145	7153	diarrhea	Disease	MESH:D003967
+25568634	7240	7257	rotavirus disease	Disease	MESH:D012400
+25568634	7313	7330	rotavirus disease	Disease	MESH:D012400
+25568634	6980	6997	Rotavirus disease	Disease	MESH:D012400
+25568634	7430	7438	children	Species	9606
+25568634	7668	7673	child	Species	9606
+25568634	7737	7754	rotavirus disease	Disease	MESH:D012400
+25568634	7581	7598	rotavirus disease	Disease	MESH:D012400
+25568634	7895	7912	rotavirus disease	Disease	MESH:D012400
+25568634	8271	8279	children	Species	9606
+25568634	8440	8449	toxicosis	Disease	MESH:C565846
+25568634	8395	8403	diarrhea	Disease	MESH:D003967
+25568634	8577	8591	acute diarrhea	Disease	MESH:D003967
+25568634	8008	8016	diarrhea	Disease	MESH:D003967
+25568634	8427	8438	dehydration	Disease	MESH:D003681
+25568634	8814	8819	virus	Species	12081
+25568634	8944	8952	diarrhea	Disease	MESH:D003967
+25568634	9446	9471	rotavirus gastroenteritis	Disease	MESH:D012400
+25568634	8992	9000	diarrhea	Disease	MESH:D003967
+25568634	9340	9347	Romania	Disease	
+25568634	9782	9790	children	Species	9606
+25568634	9829	9836	infants	Species	9606
+25568634	9847	9851	boys	Species	9606
+25568634	9888	9892	boys	Species	9606
+25568634	9802	9810	diarrhea	Disease	MESH:D003967
+25568634	9898	9916	rotavirus diarrhea	Disease	MESH:D012400
+25568634	10318	10326	children	Species	9606
+25568634	10350	10355	child	Species	9606
+25568634	10127	10135	diarrhea	Disease	MESH:D003967
+25568634	10362	10373	dehydration	Disease	MESH:D003681
+25568634	10287	10298	dehydration	Disease	MESH:D003681
+25568634	10435	10443	children	Species	9606
+25568634	10697	10705	children	Species	9606
+25568634	11045	11053	patients	Species	9606
+25568634	11127	11135	children	Species	9606
+25568634	10772	10810	rotavirus versus non-rotavirus disease	Disease	MESH:D012400
+25568634	10449	10460	dehydration	Disease	MESH:D003681
+25568634	11189	11200	dehydration	Disease	MESH:D003681
+25568634	10664	10675	dehydration	Disease	MESH:D003681
+25568634	11009	11020	dehydration	Disease	MESH:D003681
+25568634	11342	11357	gastroenteritis	Disease	MESH:D005759
+25568634	10740	10751	dehydration	Disease	MESH:D003681
+25568634	11290	11301	dehydration	Disease	MESH:D003681
+25568634	11659	11667	patients	Species	9606
+25568634	11744	11759	paralytic ileus	Disease	MESH:D007418
+25568634	11685	11701	bronchopneumonia	Disease	MESH:D001996
+25568634	11827	11835	children	Species	9606
+25568634	11884	11892	patients	Species	9606
+25568634	12077	12085	children	Species	9606
+25568634	12185	12193	patients	Species	9606
+25568634	11943	11961	rotavirus diarrhea	Disease	MESH:D012400
+25568634	11841	11859	rotavirus diarrhea	Disease	MESH:D012400
+25568634	12437	12441	girl	Species	9606
+25568634	12408	12422	encephalopathy	Disease	MESH:D001927
+25568634	12737	12745	patients	Species	9606
+25568634	12641	12659	rotavirus diarrhea	Disease	MESH:D012400
+25568634	12860	12876	bronchopneumonia	Disease	MESH:D001996
+25568634	12894	12912	Rotavirus diarrhea	Disease	MESH:D012400
+25568634	13032	13050	Rotavirus diarrhea	Disease	MESH:D012400
+25568634	13293	13298	Virus	Species	12081
+25568634	13353	13361	children	Species	9606
+25568634	13377	13386	bacterial	Species	2
+25568634	13387	13402	gastroenteritis	Disease	MESH:D005759
+25568634	13478	13486	children	Species	9606
+25568634	13502	13522	cholera immunisation	Disease	MESH:D002771
+25568634	13446	13465	diarrhoeal diseases	Disease	MESH:D030342
+25568634	13608	13616	Children	Species	9606
+25568634	13584	13601	Rotavirus Disease	Disease	MESH:D012400
+25568634	13690	13698	children	Species	9606
+25568634	13704	13713	toxicosis	Disease	MESH:C565846
+25568634	13775	13784	rotavirus	Disease	MESH:D012400
+25568634	13761	13769	diarrhea	Disease	MESH:D003967
+25568634	13795	13820	rotavirus gastroenteritis	Disease	MESH:D012400
+25568634	13916	13923	illness	Disease	MESH:D002908
+25568634	13971	14002	Rotavirus Acute Gastroenteritis	Disease	MESH:D012400
+25568634	14106	14115	rotavirus	Disease	MESH:D012400
+25568634	14092	14100	diarrhea	Disease	MESH:D003967
+25568634	14126	14190	diseases afecting gastrointestinal system in pediatric toxicosis	Disease	MESH:D005767
+25568634	14232	14251	pediatric toxicosis	Disease	MESH:C565846
+25568634	14297	14305	children	Species	9606
+25568634	14311	14381	diarrhea toxicosis.12th Congress of the pediatritian of the Yugoslavia	Disease	MESH:D003967
+25568634	14435	14454	rotavirus diarrhoea	Disease	MESH:D012400
+25568634	14485	14495	adenovirus	Species	10535
+25568634	14512	14520	patients	Species	9606
+25568634	14526	14547	acute gastroenteritis	Disease	MESH:D005759
+25568634	14662	14669	infants	Species	9606
+25568634	14675	14683	diarrhea	Disease	MESH:D003967
+25568634	14635	14655	adenovirus infection	Disease	MESH:D000257
+25568634	14735	14741	Turkey	Species	9103
+25568634	14714	14723	diarrhoea	Disease	MESH:D003967
+25568634	14889	14897	children	Species	9606
+25568634	14867	14885	rotavirus diarrhea	Disease	MESH:D012400
+25568634	14988	14996	children	Species	9606
+25568634	14965	14984	rotaviral diarrhoea	Disease	MESH:D003967
+25568634	15062	15070	children	Species	9606
+25568634	15046	15055	diarrhoea	Disease	MESH:D003967
+25568634	15134	15159	Rotavirus gastroenteritis	Disease	MESH:D012400
+25568634	15204	15229	rotavirus gastroenteritis	Disease	MESH:D012400
+25568634	15336	15355	rotavirus infection	Disease	MESH:D012400
+25568634	15465	15473	Children	Species	9606
+25568634	15485	15500	Gastroenteritis	Disease	MESH:D005759
+

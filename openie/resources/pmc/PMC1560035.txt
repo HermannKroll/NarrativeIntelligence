@@ -1,0 +1,11 @@
+1560035|t|Adhesion of T and B lymphocytes to extracellular matrix and endothelial cells can be regulated through the beta subunit of VLA 
+1560035|a|Investigating the regulation of very late antigen (VLA)-mediated functions, we found that TS2/16, a mAb directed against the beta chain of the VLA group of integrins, can induce binding of resting peripheral blood lymphocytes, cloned T lymphocytes, and Epstein Barr virus- transformed B cells to extracellular matrix components, fibronectin, laminin, and collagen, but not to fibrinogen. The antibody stimulates VLA-4-, VLA-5-, and VLA-6-mediated binding. Furthermore, it induces VLA- 4-mediated binding to vascular cell adhesion molecule-1 expressed by rTNF-alpha-stimulated endothelial cells, but it does not stimulate homotypic aggregation of cells as described for a number of anti-VLA-4 alpha antibodies (Bednarczyk, J.L., and B. W. McIntyre. 1990. J. Immunol. 144: 777-784; Campanero, M. R., R. Pulido, M. A. Ursa, M. Rodriguez-Moya, M. O. de Landazuri, and F. Sanchez-Madrid. 1990. J. Cell Biol. 110:2157-2165). Therefore, the stimulating activity of this anti-beta 1 antibody clearly contrasts with that of the anti-VLA-4 alpha antibodies, which induce homotypic cell aggregation, but not binding of cells to extracellular matrix components or endothelial cells, indicating that TS2/16 may generate different signals. The observation that also F(ab')2 or Fab fragments of this anti-beta 1 antibody stimulate binding to extracellular matrix components and endothelial cells excludes the possibility that binding requires receptor crosslinking, or is Fc receptor mediated. Induction of this adhesion is cation and energy dependent and requires an intact cytoskeleton. Although changes in the conformation of VLA integrins induced by this antibody may regulate their functional activity, the dependence on metabolic energy indicates that intracellular processes may also play a role. 
+1560035	547	552	VLA-5	Gene	3678
+1560035	559	564	VLA-6	Gene	3655
+1560035	634	667	vascular cell adhesion molecule-1	Gene	7412
+1560035	681	691	rTNF-alpha	Gene	24835
+1560035	1095	1101	beta 1	Gene	3779
+1560035	1390	1393	Fab	Gene	2187
+1560035	1417	1423	beta 1	Gene	3779
+1560035	380	398	Epstein Barr virus	Species	10376
+

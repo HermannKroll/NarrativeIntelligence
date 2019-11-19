@@ -1,0 +1,24 @@
+25568585|t|A Design Protocol to Develop Radiology Dashboards 
+25568585|a|ABSTRACT Aim: The main objective of this descriptive and development research was to introduce a design protocol to develop radiology dashboards. Material and methods: The first step was to determine key performance indicators for radiology department. The second step was to determine required infrastructure for implementation of radiology dashboards. Infrastructure was extracted from both data and technology perspectives. The third step was to determine main features of the radiology dashboards. The fourth step was to determine the key criteria for evaluating the dashboards. In all these steps, non-probability sampling methods including convenience and purposive were employed and sample size determined based on a persuasion model. Results: Results showed that there are 92 KPIs, 10 main features for designing dashboards and 53 key criteria for dashboards evaluation. As well as, a Prototype of radiology management dashboards in four aspects including services, clients, personnel and cost-income were implemented and evaluated. Applying such dashboards could help managers to enhance performance, productivity and quality of services in radiology department. 
+25568585	1339	1346	patient	Species	9606
+25568585	1697	1704	patient	Species	9606
+25568585	1806	1811	labor	Disease	MESH:D048949
+25568585	1922	1926	PACS	Chemical	MESH:C508168
+25568585	3077	3095	hospital infection	Disease	MESH:D003428
+25568585	3059	3067	diabetes	Disease	MESH:D003920
+25568585	5823	5827	KPIs	Disease	
+25568585	8897	8904	patient	Species	9606
+25568585	9688	9695	patient	Species	9606
+25568585	10814	10824	dashboards	Disease	
+25568585	12985	12990	drill	Species	9568
+25568585	16312	16337	dashboards implementation	Disease	
+25568585	17400	17403	HL7	CellLine	CVCL:2492
+25568585	19106	19110	PACS	Chemical	MESH:C508168
+25568585	19592	19600	diabetes	Disease	MESH:D003920
+25568585	19492	19511	diabetes dashboards	Disease	MESH:D003920
+25568585	19683	19693	infections	Disease	MESH:D007239
+25568585	19944	19951	quality	Disease	
+25568585	20473	20477	PACS	Chemical	MESH:C508168
+25568585	21555	21562	patient	Species	9606
+25568585	21847	21864	visual dashboards	Disease	MESH:D014786
+

@@ -1,0 +1,27 @@
+1577868|t|Ganglioside modulation of neural cell adhesion molecule and N-cadherin- dependent neurite outgrowth 
+1577868|a|We have used monolayers of control 3T3 cells and 3T3 cells expressing transfected human neural cell adhesion molecule (NCAM) or chick N- cadherin as a culture substrate for PC12 cells. NCAM and N-cadherin in the monolayer directly promote neurite outgrowth from PC12 cells via a G-protein-dependent activation of neuronal calcium channels. In the present study we show that ganglioside GM1 does not directly activate this pathway in PC12 cells. However, the presence of GM1 (12.5-100 micrograms/ml) in the co-culture was associated with a potentiation of NCAM and N-cadherin-dependent neurite outgrowth. Treatment of PC12 cells with GM1 (100 micrograms/ml) for 90 min led to trypsin-stable increases in both beta-cholera toxin binding to PC12 cells and an enhanced neurite outgrowth response to N-cadherin. The ganglioside response could be fully inhibited by treatment with pertussis toxin. These data are consistent with exogenous gangliosides enhancing neuritic growth by promoting cell adhesion molecule-induced calcium influx into neurons. 
+1577868	60	70	N-cadherin	Gene	83501
+1577868	26	55	neural cell adhesion molecule	Gene	24586
+1577868	0	11	Ganglioside	Chemical	MESH:D005732
+1577868	188	217	neural cell adhesion molecule	Gene	4684
+1577868	234	245	N- cadherin	Gene	414745
+1577868	285	289	NCAM	Gene	24586
+1577868	294	304	N-cadherin	Gene	83501
+1577868	655	659	NCAM	Gene	24586
+1577868	664	674	N-cadherin	Gene	83501
+1577868	895	905	N-cadherin	Gene	83501
+1577868	219	223	NCAM	Gene	4684
+1577868	182	187	human	Species	9606
+1577868	228	233	chick	Species	9031
+1577868	717	721	PC12	CellLine	CVCL:0481
+1577868	533	537	PC12	CellLine	CVCL:0481
+1577868	838	842	PC12	CellLine	CVCL:0481
+1577868	149	152	3T3	CellLine	CVCL:0594
+1577868	273	277	PC12	CellLine	CVCL:0481
+1577868	1116	1123	calcium	Chemical	MESH:D002118
+1577868	135	138	3T3	CellLine	CVCL:0594
+1577868	362	366	PC12	CellLine	CVCL:0481
+1577868	911	922	ganglioside	Chemical	MESH:D005732
+1577868	422	429	calcium	Chemical	MESH:D002118
+1577868	474	485	ganglioside	Chemical	MESH:D005732
+

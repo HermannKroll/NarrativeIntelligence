@@ -1,0 +1,15 @@
+1349609|t|Expression of SV-40 T antigen in the small intestinal epithelium of transgenic mice results in proliferative changes in the crypt and reentry of villus-associated enterocytes into the cell cycle but has no apparent effect on cellular differentiation programs and does not cause neoplastic transformation 
+1349609|a|The mouse intestinal epithelium represents a unique mammalian system for examining the relationship between cell division, commitment, and differentiation. Proliferation and differentiation are rapid, perpetual, and spatially well-organized processes that occur along the crypt-to-villus axis and involve clearly defined cell lineages derived from a common multipotent stem cell located near the base of each crypt. Nucleotides -1178 to +28 of the rat intestinal fatty acid binding protein gene were used to establish three pedigrees of transgenic mice that expressed SV-40 large T antigen (TAg) in epithelial cells situated in the uppermost portion of small intestinal crypts and in already committed, differentiating enterocytes as they exited these crypts and migrated up the villus. T antigen production was associated with increases in crypt cell proliferation but had no apparent effect on commitment to differentiate along enterocytic, enteroendocrine, or Paneth cell lineages. Single- and multilabel- immunocytochemical studies plus RNA blot hybridization analyses suggested that the differentiation programs of these lineages were similar in transgenic mice and their normal littermates. This included enterocytes which, based on the pattern of [3H]thymidine and 5-bromo-2'- deoxyuridine labeling and proliferating nuclear antigen expression, had reentered the cell cycle during their migration up the villus. The state of cellular differentiation and/or TAg production appeared to affect the nature of the cell cycle; analysis of the ratio of S-phase to M-phase cells (collected by metaphase arrest with vincristine) and of the intensities of labeling of nuclei by [3H]thymidine indicated that the duration of S phase was longer in differentiating, villus- associated enterocytes than in the less well-differentiated crypt epithelial cell population and that there may be a block at the G2/M boundary. Sustained increases in crypt and villus epithelial cell proliferation over a 9-mo period were not associated with the development of gut neoplasms--suggesting that tumorigenesis in the intestine may require that the initiated cell have many of the properties of the gut stem cell including functional anchorage. 
+1349609	68	83	transgenic mice	Species	10090
+1349609	278	303	neoplastic transformation	Disease	MESH:D002471
+1349609	308	313	mouse	Species	10090
+1349609	356	365	mammalian	Species	9606
+1349609	752	755	rat	Species	10116
+1349609	841	856	transgenic mice	Species	10090
+1349609	1455	1470	transgenic mice	Species	10090
+1349609	1488	1499	littermates	Species	10090
+1349609	1918	1929	vincristine	Chemical	MESH:D014750
+1349609	1576	1600	5-bromo-2'- deoxyuridine	Chemical	MESH:D001973
+1349609	1979	1992	[3H]thymidine	Chemical	MESH:D013936
+1349609	1558	1571	[3H]thymidine	Chemical	MESH:D013936
+

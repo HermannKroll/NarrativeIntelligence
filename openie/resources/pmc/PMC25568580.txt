@@ -1,0 +1,141 @@
+25568580|t|Telemetric Detection of Chronic Obstructive Pulmonary Disease and Investigation of Quality of Life for People Working in Shipbuilding Industry 
+25568580|a|ABSTRACT Introduction: Chronic Obstructive Pulmonary Disease (COPD) has a significant impact on quality of life-related health. Aim: It was the detection of Chronic Obstructive Pulmonary Disease by using telemetric methods and the investigation of the quality of life for people working in Shipbuilding Industry compared with a control group. Methods: A group of one hundred men working in the shipbuilding industry aged 51.8 +- 8.2 years old and a control group of one hundred men of the general population aged 51.1 +- 6.4 years were studied. All participants completed the General Health Questionnaire - 28, the Fagerstrom test and a form with demographic characteristics. Pulmonary function test results were electronically sent to a specialist for evaluation. Results: People working in the shipbuilding zone had significantly lower values (p<0.001) in FVC, FEV1 and FEV1/FVC compared with the general population participants. Worse social functionality was exhibited by workers in the shipbuilding zone, people with elementary education, unemployed and by those suffering from comorbidities (p <0.001). Conclusions: Health level and its individual dimensions are both associated with health self-assessment and occupational and economic status. The coexistence of chronic diseases and smoking dependence affects emotion and social functioning of individuals. 
+25568580	103	109	People	Species	9606
+25568580	205	209	COPD	Disease	MESH:D029424
+25568580	415	421	people	Species	9606
+25568580	518	521	men	Species	9606
+25568580	621	624	men	Species	9606
+25568580	692	704	participants	Species	9606
+25568580	919	925	People	Species	9606
+25568580	1063	1075	participants	Species	9606
+25568580	1155	1161	people	Species	9606
+25568580	1415	1431	chronic diseases	Disease	MESH:D002908
+25568580	1732	1738	people	Species	9606
+25568580	2082	2085	men	Species	9606
+25568580	2097	2102	women	Species	9606
+25568580	1903	1907	COPD	Disease	MESH:D029424
+25568580	1565	1569	COPD	Disease	MESH:D029424
+25568580	1761	1765	COPD	Disease	MESH:D029424
+25568580	1896	1901	death	Disease	MESH:D003643
+25568580	3189	3197	patients	Species	9606
+25568580	3366	3372	people	Species	9606
+25568580	2782	2786	COPD	Disease	MESH:D029424
+25568580	2549	2553	COPD	Disease	MESH:D029424
+25568580	3236	3244	diabetes	Disease	MESH:D003920
+25568580	3228	3234	asthma	Disease	MESH:D001249
+25568580	2418	2423	death	Disease	MESH:D003643
+25568580	2925	2929	COPD	Disease	MESH:D029424
+25568580	2295	2299	COPD	Disease	MESH:D029424
+25568580	2353	2375	multi systemic disease	Disease	MESH:C564969
+25568580	3203	3219	chronic diseases	Disease	MESH:D002908
+25568580	3249	3253	COPD	Disease	MESH:D029424
+25568580	3899	3905	people	Species	9606
+25568580	4136	4142	people	Species	9606
+25568580	3911	3915	COPD	Disease	MESH:D029424
+25568580	4254	4260	people	Species	9606
+25568580	4357	4363	people	Species	9606
+25568580	4412	4415	men	Species	9606
+25568580	5437	5455	airway obstruction	Disease	MESH:D000402
+25568580	5405	5421	mental disorders	Disease	MESH:D001523
+25568580	5249	5257	wheezing	Disease	MESH:D012135
+25568580	4963	4980	pulmonary disease	Disease	MESH:D008171
+25568580	5259	5266	dyspnea	Disease	MESH:D004417
+25568580	5341	5348	dyspnea	Disease	MESH:D004417
+25568580	5234	5239	cough	Disease	MESH:D003371
+25568580	5554	5562	nicotine	Chemical	MESH:D009538
+25568580	5752	5760	nicotine	Chemical	MESH:D009538
+25568580	6386	6398	Participants	Species	9606
+25568580	6533	6551	airway obstruction	Disease	MESH:D000402
+25568580	6250	6254	COPD	Disease	MESH:D029424
+25568580	6326	6344	airway obstruction	Disease	MESH:D000402
+25568580	7682	7688	people	Species	9606
+25568580	7831	7843	participants	Species	9606
+25568580	8036	8043	COPD 10	Gene	544442
+25568580	8213	8220	COPD 13	Gene	544417
+25568580	8196	8208	hypertension	Disease	MESH:D006973
+25568580	8223	8237	heart diseases	Disease	MESH:D006331
+25568580	8266	8283	diabetes mellitus	Disease	MESH:D003920
+25568580	8018	8030	hypertension	Disease	MESH:D006973
+25568580	8089	8106	diabetes mellitus	Disease	MESH:D003920
+25568580	8046	8060	heart diseases	Disease	MESH:D006331
+25568580	8304	8315	participant	Species	9606
+25568580	8376	8383	persons	Species	9606
+25568580	8424	8430	people	Species	9606
+25568580	8623	8635	participants	Species	9606
+25568580	8716	8728	participants	Species	9606
+25568580	8812	8816	COPD	Disease	MESH:D029424
+25568580	8702	8706	COPD	Disease	MESH:D029424
+25568580	9328	9334	people	Species	9606
+25568580	9497	9509	participants	Species	9606
+25568580	9613	9625	Participants	Species	9606
+25568580	9699	9711	participants	Species	9606
+25568580	9754	9766	Participants	Species	9606
+25568580	9903	9915	participants	Species	9606
+25568580	9953	9965	participants	Species	9606
+25568580	9410	9414	COPD	Disease	MESH:D029424
+25568580	10454	10466	participants	Species	9606
+25568580	10613	10625	participants	Species	9606
+25568580	10827	10839	participants	Species	9606
+25568580	10424	10428	COPD	Disease	MESH:D029424
+25568580	10377	10392	chronic disease	Disease	MESH:D002908
+25568580	11512	11519	patient	Species	9606
+25568580	11229	11233	COPD	Disease	MESH:D029424
+25568580	11924	11927	men	Species	9606
+25568580	12047	12050	men	Species	9606
+25568580	12009	12013	COPD	Disease	MESH:D029424
+25568580	11810	11814	COPD	Disease	MESH:D029424
+25568580	12659	12662	men	Species	9606
+25568580	12780	12786	people	Species	9606
+25568580	13222	13228	people	Species	9606
+25568580	12634	12638	COPD	Disease	MESH:D029424
+25568580	12225	12249	obstructive lung disease	Disease	MESH:D008173
+25568580	13039	13061	respiratory infections	Disease	MESH:D012141
+25568580	12966	12970	COPD	Disease	MESH:D029424
+25568580	13201	13205	COPD	Disease	MESH:D029424
+25568580	12458	12492	Burden of Obstructive Lung Disease	Disease	MESH:D008173
+25568580	12717	12721	COPD	Disease	MESH:D029424
+25568580	12545	12549	COPD	Disease	MESH:D029424
+25568580	13460	13464	COPD	Disease	MESH:D029424
+25568580	12304	12308	COPD	Disease	MESH:D029424
+25568580	12452	12456	BOLD	Disease	MESH:D008173
+25568580	13588	13600	participants	Species	9606
+25568580	13894	13900	people	Species	9606
+25568580	14337	14344	tobacco	Species	4097
+25568580	14540	14552	participants	Species	9606
+25568580	14673	14681	patients	Species	9606
+25568580	14687	14691	COPD	Disease	MESH:D029424
+25568580	15275	15282	patient	Species	9606
+25568580	15429	15435	person	Species	9606
+25568580	15400	15424	chronic diseases burdens	Disease	MESH:D002908
+25568580	15199	15219	psychosocial impacts	Disease	MESH:C535569
+25568580	15764	15776	Participants	Species	9606
+25568580	15930	15936	people	Species	9606
+25568580	16033	16045	participants	Species	9606
+25568580	16067	16073	people	Species	9606
+25568580	16446	16454	patients	Species	9606
+25568580	16621	16633	participants	Species	9606
+25568580	17575	17593	social dysfunction	Disease	OMIM:300082
+25568580	17647	17651	COPD	Disease	MESH:D029424
+25568580	17904	17908	COPD	Disease	MESH:D029424
+25568580	17972	18004	Chronic Obstructive Lung Disease	Disease	MESH:D029424
+25568580	18070	18074	COPD	Disease	MESH:D029424
+25568580	18106	18114	patients	Species	9606
+25568580	18120	18157	chronic obstructive pulmonary disease	Disease	MESH:D029424
+25568580	18178	18182	COPD	Disease	MESH:D029424
+25568580	18378	18382	COPD	Disease	MESH:D029424
+25568580	18547	18555	Nicotine	Chemical	MESH:D009538
+25568580	18744	18748	COPD	Disease	MESH:D029424
+25568580	18819	18843	obstructive lung disease	Disease	MESH:D008173
+25568580	18905	18937	Pulmonary Diseases and Disorders	Disease	MESH:D008171
+25568580	18938	18942	BOLD	Disease	MESH:D008173
+25568580	19280	19292	COPD disease	Disease	MESH:D029424
+25568580	19352	19360	patients	Species	9606
+25568580	19366	19403	chronic obstructive pulmonary disease	Disease	MESH:D029424
+25568580	19478	19482	COPD	Disease	MESH:D029424
+25568580	19563	19567	COPD	Disease	MESH:D029424
+25568580	19679	19687	patients	Species	9606
+25568580	19693	19718	diabetes mellitus type II	Disease	MESH:D003924
+25568580	19631	19645	Mood disorders	Disease	MESH:D019964
+25568580	19776	19813	chronic obstructive pulmonary disease	Disease	MESH:D029424
+25568580	19888	19896	patients	Species	9606
+

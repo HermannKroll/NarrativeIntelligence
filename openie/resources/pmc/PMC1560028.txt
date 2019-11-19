@@ -1,0 +1,11 @@
+1560028|t|Transport of the lysosomal membrane glycoprotein lgp120 (lgp-A) to lysosomes does not require appearance on the plasma membrane 
+1560028|a|We have used stably transfected CHO cell lines to characterize the pathway of intracellular transport of the lgp120 (lgp-A) to lysosomes. Using several surface labeling and internalization assays, our results suggest that lgp120 can reach its final destination with or without prior appearance on the plasma membrane. The extent to which lgp120 was transported via the cell surface was determined by two factors: expression level and the presence of a conserved glycine-tyrosine motif in the cytoplasmic tail. In cells expressing low levels of wild-type lgp120, the majority of newly synthesized molecules reached lysosomes without becoming accessible to antibody or biotinylation reagents added extracellularly at 4 degrees C. With increased expression levels, however, an increased fraction of transfected lgp120, as well as some endogenous lgp-B, appeared on the plasma membrane. The fraction of newly synthesized lgp120 reaching the cell surface was also increased by mutations affecting the cytoplasmic domain tyrosine or glycine residues. A substantial fraction of both mutants reached the surface even at low expression levels. However, only the lgp120G----A7 mutant was rapidly internalized and delivered from the plasma membrane to lysosomes. Taken together, our results show that the majority of newly synthesized wild-type lgp120 does not appear to pass through the cell surface en route to lysosomes. Instead, it is likely that lysosomal targeting involves a saturable intracellular sorting site whose affinity for lgp's is dependent on a glycine-tyrosine motif in the lgp120 cytoplasmic tail. 
+1560028	57	62	lgp-A	Gene	100689406
+1560028	245	250	lgp-A	Gene	100689406
+1560028	971	976	lgp-B	Gene	100689316
+1560028	160	174	CHO cell lines	Species	10029
+1560028	590	606	glycine-tyrosine	Chemical	MESH:D005998
+1560028	1143	1151	tyrosine	Chemical	
+1560028	1155	1162	glycine	Chemical	MESH:D005998
+1560028	1679	1695	glycine-tyrosine	Chemical	MESH:D005998
+

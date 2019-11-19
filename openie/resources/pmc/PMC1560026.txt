@@ -1,0 +1,7 @@
+1560026|t|The 17-residue transmembrane domain of beta-galactoside alpha 2,6- sialyltransferase is sufficient for Golgi retention 
+1560026|a|beta-Galactoside alpha 2,6-sialyltransferase (ST) is a type II integral membrane protein of the Golgi apparatus involved in the sialylation of N-linked glycans. A series of experiments has shown that the 17-residue transmembrane domain of ST is sufficient to confer localization to the Golgi apparatus when transferred to the corresponding region of a cell surface type II integral membrane protein. Lectin affinity chromatography of chimeric proteins bearing this 17-residue sequence suggests that these chimeric proteins are localized in the trans-Golgi cisternae and/or trans-Golgi network. Further experiments suggest that this 17-residue sequence functions as a retention signal for the Golgi apparatus. 
+1560026	39	55	beta-galactoside	Chemical	MESH:C007816
+1560026	103	118	Golgi retention	Disease	MESH:D016055
+1560026	262	263	N	Chemical	MESH:D009584
+1560026	119	135	beta-Galactoside	Chemical	MESH:C007816
+

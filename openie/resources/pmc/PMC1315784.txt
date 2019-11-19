@@ -1,0 +1,12 @@
+1315784|t|Purification, characterization, and immunofluorescence localization of Saccharomyces cerevisiae capping protein 
+1315784|a|Capping protein binds the barbed ends of actin filaments and nucleates actin filament assembly in vitro. We purified capping protein from Saccharomyces cervisiae. One of the two subunits is the product of the CAP2 gene, which we previously identified as the gene encoding the beta subunit of capping protein based on its sequence similarity to capping protein beta subunits in chicken and Dictyostelium (Amatruda, J. F., J. F. Cannon, K. Tatchell, C. Hug, and J. A. Cooper. 1990. Nature (Lond.) 344:352-354). Yeast capping protein has activity in critical concentration and low-shear viscometry assays consistent with barbed- end capping activity. Like chicken capping protein, yeast capping protein is inhibited by PIP2. By immunofluorescence microscopy yeast capping protein colocalizes with cortical actin spots at the site of bud emergence and at the tips of growing buds and shmoos. In contrast, capping protein does not colocalize with actin cables or with actin rings at the site of cytokinesis. 
+1315784	71	95	Saccharomyces cerevisiae	Species	4932
+1315784	321	325	CAP2	Gene	420847
+1315784	828	832	PIP2	Gene	854545
+1315784	250	263	Saccharomyces	Species	4932
+1315784	489	496	chicken	Species	9031
+1315784	621	626	Yeast	Species	4932
+1315784	765	772	chicken	Species	9031
+1315784	790	795	yeast	Species	4932
+1315784	867	872	yeast	Species	4932
+

@@ -1,0 +1,20 @@
+1577872|t|Dystrophin colocalizes with beta-spectrin in distinct subsarcolemmal domains in mammalian skeletal muscle 
+1577872|a|Duchenne's muscular dystrophy (DMD) is caused by the absence or drastic decrease of the structural protein, dystrophin, and is characterized by sarcolemmal lesions in skeletal muscle due to the stress of contraction. Dystrophin has been localized to the sarcolemma, but its organization there is not known. We report immunofluorescence studies which show that dystrophin is concentrated, along with the major muscle isoform of beta-spectrin, in three distinct domains at the sarcolemma: in elements overlying both I bands and M lines, and in occasional strands running along the longitudinal axis of the myofiber. Vinculin, which has previously been found at the sarcolemma overlying the I bands and in longitudinal strands, was present in the same three structures as spectrin and dystrophin. Controls demonstrated that the labeling was intracellular. Comparison to labeling of the lipid bilayer and of the extracellular matrix showed that the labeling for spectrin and dystrophin is associated with the intact sarcolemma and is not a result of processing artifacts. Dystrophin is not required for this lattice- like organization, as similar domains containing spectrin but not dystrophin are present in muscle from the mdx mouse and from humans with Duchenne's muscular dystrophy. We discuss the possibility that dystrophin and spectrin, along with vinculin, may function to link the contractile apparatus to the sarcolemma of normal skeletal muscle. 
+1577872	0	10	Dystrophin	Gene	1756
+1577872	80	89	mammalian	Species	9606
+1577872	214	224	dystrophin	Gene	1756
+1577872	466	476	dystrophin	Gene	1756
+1577872	720	728	Vinculin	Gene	7414
+1577872	888	898	dystrophin	Gene	1756
+1577872	1077	1087	dystrophin	Gene	1756
+1577872	1174	1184	Dystrophin	Gene	13405
+1577872	1421	1431	dystrophin	Gene	1756
+1577872	1457	1465	vinculin	Gene	7414
+1577872	323	333	Dystrophin	Gene	1756
+1577872	1331	1336	mouse	Species	10090
+1577872	1346	1352	humans	Species	9606
+1577872	1285	1295	dystrophin	Gene	1756
+1577872	1358	1387	Duchenne's muscular dystrophy	Disease	MESH:D020388
+1577872	137	140	DMD	Disease	MESH:D020388
+1577872	106	135	Duchenne's muscular dystrophy	Disease	MESH:D020388
+

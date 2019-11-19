@@ -1,0 +1,24 @@
+1607388|t|Cloning and expression of a human kinesin heavy chain gene: interaction of the COOH-terminal domain with cytoplasmic microtubules in transfected CV-1 cells 
+1607388|a|To understand the interactions between the microtubule-based motor protein kinesin and intracellular components, we have expressed the kinesin heavy chain and its different domains in CV-1 monkey kidney epithelial cells and examined their distributions by immunofluorescence microscopy. For this study, we cloned and sequenced cDNAs encoding a kinesin heavy chain from a human placental library. The human kinesin heavy chain exhibits a high level of sequence identity to the previously cloned invertebrate kinesin heavy chains; homologies between the COOH-terminal domain of human and invertebrate kinesins and the nonmotor domain of the Aspergillus kinesin-like protein bimC were also found. The gene encoding the human kinesin heavy chain also contains a small upstream open reading frame in a G-C rich 5' untranslated region, features that are associated with translational regulation in certain mRNAs. After transient expression in CV-1 cells, the kinesin heavy chain showed both a diffuse distribution and a filamentous staining pattern that coaligned with microtubules but not vimentin intermediate filaments. Altering the number and distribution of microtubules with taxol or nocodazole produced corresponding changes in the localization of the expressed kinesin heavy chain. The expressed NH2-terminal motor and the COOH-terminal tail domains, but not the alpha-helical coiled coil rod domain, also colocalized with microtubules. The finding that both the kinesin motor and tail domains can interact with cytoplasmic microtubules raises the possibility that kinesin could crossbridge and induce sliding between microtubules under certain circumstances. 
+1607388	34	53	kinesin heavy chain	Gene	3799
+1607388	28	33	human	Species	9606
+1607388	145	149	CV-1	CellLine	CVCL:0229
+1607388	79	83	COOH	Chemical	MESH:C102887
+1607388	500	519	kinesin heavy chain	Gene	3799
+1607388	562	581	kinesin heavy chain	Gene	3799
+1607388	878	897	kinesin heavy chain	Gene	3799
+1607388	527	532	human	Species	9606
+1607388	556	561	human	Species	9606
+1607388	732	737	human	Species	9606
+1607388	872	877	human	Species	9606
+1607388	1419	1438	kinesin heavy chain	Gene	3799
+1607388	1109	1128	kinesin heavy chain	Gene	3799
+1607388	291	310	kinesin heavy chain	Gene	3799
+1607388	340	344	CV-1	CellLine	CVCL:0229
+1607388	1340	1350	nocodazole	Chemical	MESH:D015739
+1607388	1093	1097	CV-1	CellLine	CVCL:0229
+1607388	1481	1485	COOH	Chemical	MESH:C102887
+1607388	1331	1336	taxol	Chemical	MESH:D017239
+1607388	708	712	COOH	Chemical	MESH:C102887
+1607388	1454	1457	NH2	Chemical	MESH:D000641
+

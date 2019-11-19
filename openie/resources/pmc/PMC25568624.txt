@@ -1,0 +1,279 @@
+25568624|t|Influence of Prognostic Factors on OverallSurvival in Myelodysplastic Syndromes 
+25568624|a|Background: Accurate prediction of a patient's prognosis is useful to define the risk posed by the disease. Age, gender, peripheral blood cytopenia, proportion of bone marrow (BM) blasts, performance status, comorbidities, transfusion dependence, specific karyotype abnormalities and molecular biomarkers can refine the prediction of prognosis in MDS. Aim: to assess the influence of the some prognostic factors like age, gender, cytopenia, BM blast percentage, transfusion dependence, ferritin, hemoglobin (Hb), lactate dehydrogenase (LDH), albumin and specific karyotype abnormalities in myelodysplastic syndromes on overall survival (OS). Patients and methods: we retrospectively analyzed the cohort of 108 patients diagnosed between 1.1.2011 and 31.12.2013 at the University Clinic of Hematology, Ss Cyril and Methodius University, Skopje, Macedonia. They were evaluated for clinical and hematologic features at diagnosis and at leukemic transformation. Results: in the study group 62 were man and 46 women. Male to female ratio was 1.35 to 1. The differences in OS between men and women were significant (p = .03015). The mean age at diagnosis was 66,6 years. According to the age OS was 16,4 months. FAB subtypes influenced OS significantly (p = .03015). OS inversely correlated with BM blast percentage (p= .02327). Cytopenia had no impact on OS (p=.33755). Hb as a whole and groups with different levels of Hb had no influence on OS (p = .12142) and (p= .07535), respectively. The group with ferritin <500 microg/L had better OS (p=.04720). Transfusion dependence, LDH and albumin had no impact on OS. Leukemic transformation was noticed in 10 (9,3%) patients. Mortality was 36,1%. Conclusion: gender, FAB subtypes, BM blast percentage and the serum levels of ferritin had an influence on OS, while age, hemoglobin level, transfusion dependence, LDH and albumin had no impact on OS. 
+25568624	54	79	Myelodysplastic Syndromes	Disease	MESH:D009190
+25568624	117	124	patient	Species	9606
+25568624	243	254	bone marrow	Disease	MESH:D001855
+25568624	346	359	abnormalities	Disease	MESH:D002869
+25568624	427	430	MDS	Disease	MESH:D009190
+25568624	256	258	BM	Disease	MESH:D001855
+25568624	212	227	blood cytopenia	Disease	MESH:D006402
+25568624	510	519	cytopenia	Disease	MESH:D006402
+25568624	593	600	lactate	Chemical	MESH:D019344
+25568624	670	695	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	521	523	BM	Disease	MESH:D001855
+25568624	722	730	Patients	Species	9606
+25568624	790	798	patients	Species	9606
+25568624	1013	1021	leukemic	Disease	MESH:D007938
+25568624	1074	1077	man	Species	9606
+25568624	1085	1090	women	Species	9606
+25568624	1092	1096	Male	Species	9606
+25568624	1158	1161	men	Species	9606
+25568624	1166	1171	women	Species	9606
+25568624	1739	1747	patients	Species	9606
+25568624	1370	1372	BM	Disease	MESH:D001855
+25568624	1403	1412	Cytopenia	Disease	MESH:D006402
+25568624	1804	1806	BM	Disease	MESH:D001855
+25568624	2261	2283	acute myeloid leukemia	Disease	MESH:D015470
+25568624	2076	2085	dysplasia	Disease	MESH:D015792
+25568624	1987	2012	Myelodysplastic syndromes	Disease	MESH:D009190
+25568624	2014	2018	MDSs	Disease	MESH:D009190
+25568624	2199	2219	peripheral cytopenia	Disease	MESH:D010523
+25568624	2285	2288	AML	Disease	MESH:D015470
+25568624	2503	2511	patients	Species	9606
+25568624	2551	2558	patient	Species	9606
+25568624	2864	2872	patients	Species	9606
+25568624	3040	3047	patient	Species	9606
+25568624	3469	3477	patients	Species	9606
+25568624	3570	3572	BM	Disease	MESH:D001855
+25568624	3761	3764	MDS	Disease	MESH:D009190
+25568624	3601	3640	cytopenia and cytogenetic abnormalities	Disease	MESH:D002869
+25568624	3394	3397	MDS	Disease	MESH:D009190
+25568624	3292	3295	MDS	Disease	MESH:D009190
+25568624	3852	3858	anemia	Disease	MESH:D000740
+25568624	4332	4335	B12	Gene	4709
+25568624	4402	4419	arsenic poisoning	Disease	MESH:D020261
+25568624	4024	4026	BM	Disease	MESH:D001855
+25568624	4343	4360	copper deficiency	Disease	MESH:C535468
+25568624	4362	4378	viral infections	Disease	MESH:D014777
+25568624	4200	4209	dysplasia	Disease	MESH:D015792
+25568624	4288	4307	erythroid dysplasia	Disease	MESH:C538442
+25568624	4336	4342	folate	Chemical	MESH:D005492
+25568624	4780	4784	RARS	Gene	5917
+25568624	4506	4514	children	Species	9606
+25568624	4785	4793	patients	Species	9606
+25568624	4773	4775	RA	Disease	MESH:D001172
+25568624	4576	4579	MDS	Disease	MESH:D009190
+25568624	4491	4494	MDS	Disease	MESH:D009190
+25568624	4443	4456	MDS increases	Disease	MESH:D009190
+25568624	4980	4985	males	Species	9606
+25568624	5016	5020	Male	Species	9606
+25568624	5021	5029	patients	Species	9606
+25568624	5172	5180	patients	Species	9606
+25568624	5127	5136	cytopenia	Disease	MESH:D006402
+25568624	4954	4957	MDS	Disease	MESH:D009190
+25568624	5313	5321	patients	Species	9606
+25568624	5369	5372	MDS	Disease	MESH:D009190
+25568624	5309	5312	MDS	Disease	MESH:D009190
+25568624	5433	5439	anemia	Disease	MESH:D000740
+25568624	5249	5258	cytopenia	Disease	MESH:D006402
+25568624	5553	5561	patients	Species	9606
+25568624	5549	5552	MDS	Disease	MESH:D009190
+25568624	5640	5670	OS and leukemic transformation	Disease	MESH:D011475
+25568624	5591	5593	BM	Disease	MESH:D001855
+25568624	5789	5797	patients	Species	9606
+25568624	5983	5991	patients	Species	9606
+25568624	5849	5852	MDS	Disease	MESH:D009190
+25568624	5764	5770	anemia	Disease	MESH:D000740
+25568624	5803	5806	MDS	Disease	MESH:D009190
+25568624	6263	6271	patients	Species	9606
+25568624	6284	6292	patients	Species	9606
+25568624	6327	6340	heart failure	Disease	MESH:D006333
+25568624	6364	6394	disorders of the thyroid gland	Disease	MESH:D013959
+25568624	6342	6350	diabetes	Disease	MESH:D003920
+25568624	6707	6715	patients	Species	9606
+25568624	6721	6724	MDS	Disease	MESH:D009190
+25568624	6549	6552	MDS	Disease	MESH:D009190
+25568624	6454	6461	Lactate	Chemical	MESH:D019344
+25568624	6726	6741	Hypoalbuminemia	Disease	MESH:D034141
+25568624	6477	6480	LDH	Disease	MESH:C580233
+25568624	6772	6775	MDS	Disease	MESH:D009190
+25568624	6891	6894	MDS	Disease	MESH:D009190
+25568624	6866	6869	MDS	Disease	MESH:D009190
+25568624	6792	6817	chromosomal abnormalities	Disease	MESH:D002869
+25568624	7587	7595	patients	Species	9606
+25568624	7628	7636	patients	Species	9606
+25568624	7601	7604	MDS	Disease	MESH:D009190
+25568624	7883	7891	patients	Species	9606
+25568624	8154	8157	MDS	Disease	MESH:D009190
+25568624	8330	8333	MDS	Disease	MESH:D009190
+25568624	7950	7962	hypertension	Disease	MESH:D006973
+25568624	8264	8272	diabetes	Disease	MESH:D003920
+25568624	8193	8225	chronic obstructive lung disease	Disease	MESH:D029424
+25568624	8164	8188	Congestive heart disease	Disease	MESH:D006333
+25568624	7879	7882	MDS	Disease	MESH:D009190
+25568624	7797	7810	MDS increases	Disease	MESH:D009190
+25568624	7964	7977	lung diseases	Disease	MESH:D008171
+25568624	7979	7987	diabetes	Disease	MESH:D003920
+25568624	8277	8302	cerebro-vascular diseases	Disease	MESH:D014652
+25568624	8023	8029	tumors	Disease	MESH:D009369
+25568624	7924	7948	Congestive heart disease	Disease	MESH:D006333
+25568624	7989	8002	liver failure	Disease	MESH:D017093
+25568624	8004	8012	bleeding	Disease	MESH:D006470
+25568624	8402	8410	patients	Species	9606
+25568624	8357	8360	MDS	Disease	MESH:D009190
+25568624	8416	8419	MDS	Disease	MESH:D009190
+25568624	8724	8733	cytopenia	Disease	MESH:D006402
+25568624	8684	8709	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	8735	8737	BM	Disease	MESH:D001855
+25568624	8818	8825	lactate	Chemical	MESH:D019344
+25568624	8901	8909	PATIENTS	Species	9606
+25568624	8968	8976	patients	Species	9606
+25568624	8981	8985	male	Species	9606
+25568624	9797	9805	patients	Species	9606
+25568624	9909	9917	patients	Species	9606
+25568624	9976	9984	patients	Species	9606
+25568624	9991	9999	patients	Species	9606
+25568624	10219	10227	patients	Species	9606
+25568624	10431	10439	patients	Species	9606
+25568624	10551	10554	MDS	Disease	MESH:D009190
+25568624	10514	10516	BM	Disease	MESH:D001855
+25568624	10116	10124	vitamins	Chemical	MESH:C059630
+25568624	9605	9614	cytopenia	Disease	MESH:D006402
+25568624	10126	10141	corticosteroids	Chemical	MESH:D000305
+25568624	10477	10502	hemorrhagic complications	Disease	MESH:D006470
+25568624	9691	9694	LDH	Disease	MESH:C580233
+25568624	10354	10359	death	Disease	MESH:D003643
+25568624	10143	10147	iron	Chemical	MESH:D007501
+25568624	9616	9618	BM	Disease	MESH:D001855
+25568624	9495	9499	iron	Chemical	MESH:D007501
+25568624	9212	9235	leukemic transformation	Disease	MESH:D007938
+25568624	9812	9814	BM	Disease	MESH:D001855
+25568624	11050	11054	RARS	Gene	5917
+25568624	10765	10773	patients	Species	9606
+25568624	10779	10782	men	Species	9606
+25568624	10795	10800	women	Species	9606
+25568624	10802	10806	Male	Species	9606
+25568624	10838	10843	Women	Species	9606
+25568624	10863	10866	men	Species	9606
+25568624	10929	10937	patients	Species	9606
+25568624	10969	10977	patients	Species	9606
+25568624	11021	11023	RA	Disease	MESH:D000753
+25568624	11162	11193	chronic myelomonocytic leukemia	Disease	MESH:D015477
+25568624	11106	11112	3-RAEB	Chemical	MESH:C065459
+25568624	11007	11009	RA	Disease	MESH:D000753
+25568624	11066	11068	RA	Disease	MESH:D000753
+25568624	10988	11005	refractory anemia	Disease	MESH:D000753
+25568624	11262	11270	patients	Species	9606
+25568624	11368	11376	patients	Species	9606
+25568624	11382	11384	RA	Disease	MESH:D000753
+25568624	11523	11531	patients	Species	9606
+25568624	11573	11581	patients	Species	9606
+25568624	11613	11621	patients	Species	9606
+25568624	11711	11719	patients	Species	9606
+25568624	11594	11605	bicytopenia	Disease	
+25568624	11559	11568	cytopenia	Disease	MESH:D006402
+25568624	11735	11744	cytopenia	Disease	MESH:D006402
+25568624	11462	11471	Cytopenia	Disease	MESH:D006402
+25568624	11635	11647	pancytopenia	Disease	MESH:D010198
+25568624	11773	11775	BM	Disease	MESH:D001855
+25568624	12272	12282	Hb <70 g/L	Gene	3956
+25568624	12178	12186	patients	Species	9606
+25568624	12321	12329	patients	Species	9606
+25568624	12366	12374	patients	Species	9606
+25568624	12450	12459	anemia-15	Disease	MESH:D000740
+25568624	12417	12426	anemia-14	Disease	MESH:D000740
+25568624	12264	12270	anemia	Disease	MESH:D000740
+25568624	12249	12255	anemia	Disease	MESH:D000740
+25568624	12294	12300	anemia	Disease	MESH:D000740
+25568624	12824	12832	ferritin	Chemical	MESH:C072979
+25568624	13369	13377	patients	Species	9606
+25568624	13423	13431	patients	Species	9606
+25568624	12881	12884	MDS	Disease	MESH:D009190
+25568624	14203	14211	patients	Species	9606
+25568624	14226	14234	patients	Species	9606
+25568624	14296	14303	patient	Species	9606
+25568624	14387	14395	patients	Species	9606
+25568624	15054	15062	Patients	Species	9606
+25568624	15042	15047	death	Disease	MESH:D003643
+25568624	15856	15860	RARS	Gene	5917
+25568624	15548	15551	men	Species	9606
+25568624	15570	15575	women	Species	9606
+25568624	15843	15850	patient	Species	9606
+25568624	16678	16686	patients	Species	9606
+25568624	16614	16629	Hypoalbuminemia	Disease	MESH:D034141
+25568624	15900	15909	Cytopenia	Disease	MESH:D006402
+25568624	16674	16677	MDS	Disease	MESH:D009190
+25568624	15769	15771	RA	Disease	MESH:D000753
+25568624	16066	16068	BM	Disease	MESH:D001855
+25568624	16823	16831	patients	Species	9606
+25568624	16916	16924	patients	Species	9606
+25568624	17191	17199	patients	Species	9606
+25568624	17287	17290	LDH	Disease	MESH:C580233
+25568624	17524	17552	myeloproliferative neoplasms	Disease	MESH:D009196
+25568624	17477	17522	myelodysplastic syndromes and myelodysplastic	Disease	MESH:D009190
+25568624	17603	17616	hematopoiesis	Disease	MESH:C536227
+25568624	17553	17568	Myelodysplastic	Disease	MESH:D009190
+25568624	17665	17690	Myelodysplastic Syndromes	Disease	MESH:D009190
+25568624	17731	17756	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	17814	17839	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	17932	17940	patients	Species	9606
+25568624	17893	17897	iron	Chemical	MESH:D007501
+25568624	17946	17949	MDS	Disease	MESH:D009190
+25568624	18049	18062	myelofibrosis	Disease	MESH:D055728
+25568624	17974	17980	anemia	Disease	MESH:D000740
+25568624	18011	18036	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18099	18107	patients	Species	9606
+25568624	18063	18087	Myelodysplastic syndrome	Disease	MESH:D009190
+25568624	18163	18188	Myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18231	18256	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18306	18314	patients	Species	9606
+25568624	18320	18345	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18281	18287	anemia	Disease	MESH:D000740
+25568624	18433	18458	Myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18584	18599	Myelodysplastic	Disease	MESH:D009190
+25568624	18676	18701	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	18658	18662	iron	Chemical	MESH:D007501
+25568624	18751	18783	Complications of Myelodysplastic	Disease	MESH:D009190
+25568624	18884	18892	patients	Species	9606
+25568624	18920	18923	MDS	Disease	MESH:D009190
+25568624	18928	18943	aplastic anemia	Disease	MESH:D000741
+25568624	18978	18982	iron	Chemical	MESH:D007501
+25568624	19032	19040	patients	Species	9606
+25568624	19068	19092	myelodysplastic syndrome	Disease	MESH:D009190
+25568624	19015	19019	Iron	Chemical	MESH:D007501
+25568624	19193	19201	patients	Species	9606
+25568624	19207	19232	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	19145	19152	lactate	Chemical	MESH:D019344
+25568624	19233	19250	Hypoalbuminenemia	Disease	
+25568624	19311	19336	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	19385	19410	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	19433	19438	ASXL1	Gene	171023
+25568624	19440	19443	CBL	Gene	867
+25568624	19445	19449	FLT3	Gene	2322
+25568624	19451	19455	IDH1	Gene	3417
+25568624	19456	19460	IDH2	Gene	3418
+25568624	19462	19466	JAK2	Gene	3717
+25568624	19468	19472	KRAS	Gene	3845
+25568624	19474	19478	NPM1	Gene	4869
+25568624	19480	19484	NRAS	Gene	4893
+25568624	19486	19491	RUNX1	Gene	861
+25568624	19493	19497	TET2	Gene	54790
+25568624	19502	19505	WT1	Gene	7490
+25568624	19515	19540	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	19551	19568	myeloid leukemias	Disease	MESH:D007951
+25568624	19596	19621	Myelodysplastic Syndromes	Disease	MESH:D009190
+25568624	19732	19756	myelodysplastic syndrome	Disease	MESH:D009190
+25568624	19867	19903	myeloid neoplasms and acute leukemia	Disease	MESH:D015470
+25568624	19937	19952	Myelodysplastic	Disease	MESH:D009190
+25568624	20055	20063	patients	Species	9606
+25568624	20093	20117	myelodysplastic syndrome	Disease	MESH:D009190
+25568624	20180	20200	myelogenous leukemia	Disease	MESH:D007951
+25568624	20225	20250	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	20295	20320	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	20375	20403	myeloproliferative disorders	Disease	MESH:D009196
+25568624	20337	20362	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	20630	20638	patients	Species	9606
+25568624	20644	20677	primary myelodysplastic syndromes	Disease	MESH:D009190
+25568624	20679	20682	MDS	Disease	MESH:D009190
+25568624	20737	20745	patients	Species	9606
+25568624	20759	20784	myelodysplastic syndromes	Disease	MESH:D009190
+25568624	20856	20872	thrombocytopenia	Disease	MESH:D013921
+25568624	20885	20909	myelodysplastic syndrome	Disease	MESH:D009190
+25568624	20793	20808	Myelodysplastic	Disease	MESH:D009190
+25568624	20914	20939	Myelodysplastic Syndromes	Disease	MESH:D009190
+25568624	21000	21008	patients	Species	9606
+25568624	21026	21041	myelodysplastic	Disease	MESH:D009190
+25568624	21065	21076	azacitidine	Chemical	MESH:D001374
+25568624	21119	21134	Myelodysplastic	Disease	MESH:D009190
+25568624	21242	21267	Myelodysplastic syndromes	Disease	MESH:D009190
+

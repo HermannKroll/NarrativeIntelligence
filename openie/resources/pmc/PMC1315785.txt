@@ -1,0 +1,6 @@
+1315785|t|Sister chromatid separation in frog egg extracts requires DNA topoisomerase II activity during anaphase 
+1315785|a|We have produced metaphase spindles and induced them to enter anaphase in vitro. Sperm nuclei were added to frog egg extracts, allowed to replicate their DNA, and driven into metaphase by the addition of cytoplasm containing active maturation promoting factor (MPF) and cytostatic factor (CSF), an activity that stabilizes MPF. Addition of calcium induces the inactivation of MPF, sister chromatid separation and anaphase chromosome movement. DNA topoisomerase II inhibitors prevent chromosome segregation at anaphase, demonstrating that the chromatids are catenated at metaphase and that decatenation occurs at the start of anaphase. Topoisomerase II activity towards exogenous substrates does not increase at the metaphase to anaphase transition, showing that chromosome separation at anaphase is not triggered by a bulk activation of topoisomerase II. 
+1315785	374	391	cytostatic factor	Gene	1437
+1315785	393	396	CSF	Gene	1437
+1315785	444	451	calcium	Chemical	MESH:D002118
+

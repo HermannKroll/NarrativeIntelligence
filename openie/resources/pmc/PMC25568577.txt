@@ -1,0 +1,210 @@
+25568577|t|Preoperative Kidney Tumor Embolization as Procedure for Therapy of Advanced Kidney Cancer 
+25568577|a|ABSTRACT Introduction: Preoperative kidney tumor embolization is standard procedure for therapy in advanced kidney cancer. Preoperative embolization has a goal to reduce intraoperative bleeding and also to shorten the time of surgery. Materials and methods: We retrospectively observed 50 patients between 2000-2011, in which the preoperative embolization was performed. Mean age of patients was 64 years. All patients with preoperative embolization were compared with the group of 51 patients from Urology Sarajevo, who underwent nephrectomy without preoperative embolization. Results: Symptoms that are dominating among patients were haematuria and pain. Analysis of mean size of tumors based on CT evaluation showed statistically significance in between the biggest size of tumors in group from Hamburg (9.11+-3cm) and the smallest size of tumors in Sarajevo group (4.94+-1.6cm) p=0.0001. Reason for this is difference in selection of patients for treatment in Hamburg from Sarajevo. Conclusion Kidney as functional finishing organ is extremely suitable for transcatheter therapeutic procedures. The gold standard in the treatment of advanced and metastatic tumor is the nephrectomy. As preparation for nephrectomy in metastatic cancer total capillary embolization is performed. After embolization, surgery is shorter, procedure can be done 24-48 hours after embolization or delayed nephrectomy done 2-3 weeks after the intervention. 
+25568577	76	89	Kidney Cancer	Disease	MESH:D007680
+25568577	13	25	Kidney Tumor	Disease	MESH:D007680
+25568577	260	283	intraoperative bleeding	Disease	MESH:D016063
+25568577	198	211	kidney cancer	Disease	MESH:D007680
+25568577	126	151	kidney tumor embolization	Disease	MESH:D009360
+25568577	379	387	patients	Species	9606
+25568577	473	481	patients	Species	9606
+25568577	500	508	patients	Species	9606
+25568577	575	583	patients	Species	9606
+25568577	712	720	patients	Species	9606
+25568577	1028	1036	patients	Species	9606
+25568577	867	873	tumors	Disease	MESH:D009369
+25568577	772	778	tumors	Disease	MESH:D009369
+25568577	933	939	tumors	Disease	MESH:D009369
+25568577	726	745	haematuria and pain	Disease	MESH:D010146
+25568577	1251	1256	tumor	Disease	MESH:D009369
+25568577	1452	1464	embolization	Disease	MESH:D004617
+25568577	1322	1328	cancer	Disease	MESH:D009369
+25568577	1713	1736	end stage kidney cancer	Disease	MESH:D007676
+25568577	1691	1704	kidney cancer	Disease	MESH:D007680
+25568577	1677	1683	tumors	Disease	MESH:D009369
+25568577	1655	1665	malignancy	Disease	MESH:D009369
+25568577	1576	1588	kidney tumor	Disease	MESH:D007680
+25568577	1543	1556	Kidney cancer	Disease	MESH:D007680
+25568577	2156	2162	humans	Species	9606
+25568577	2137	2151	tumor necrosis	Disease	MESH:D009336
+25568577	1932	1945	kidney cancer	Disease	MESH:D007680
+25568577	1866	1891	Kidney tumor embolization	Disease	MESH:D009360
+25568577	2321	2327	tumors	Disease	MESH:D009369
+25568577	2564	2572	patients	Species	9606
+25568577	2529	2547	tumor embolization	Disease	MESH:D009360
+25568577	2597	2602	tumor	Disease	MESH:D009369
+25568577	2663	2676	venous system	Disease	MESH:D020246
+25568577	2701	2714	kidney hillus	Disease	MESH:D007674
+25568577	2715	2732	Metastatic tumors	Disease	MESH:D018223
+25568577	2737	2745	Patients	Species	9606
+25568577	3008	3034	infiltration of renal vein	Disease	MESH:D059228
+25568577	2841	2864	intraoperative bleeding	Disease	MESH:D016063
+25568577	2995	3001	tumors	Disease	MESH:D009369
+25568577	2936	2941	tumor	Disease	MESH:D009369
+25568577	3115	3123	patients	Species	9606
+25568577	3213	3221	patients	Species	9606
+25568577	3312	3320	patients	Species	9606
+25568577	3368	3376	patients	Species	9606
+25568577	3396	3404	patients	Species	9606
+25568577	3410	3414	male	Species	9606
+25568577	3416	3424	Patients	Species	9606
+25568577	3462	3470	patients	Species	9606
+25568577	3540	3548	patients	Species	9606
+25568577	3480	3485	tumor	Disease	MESH:D009369
+25568577	3560	3582	bilateral kidney tumor	Disease	MESH:D007680
+25568577	3584	3592	Patients	Species	9606
+25568577	3632	3640	patients	Species	9606
+25568577	3726	3733	patient	Species	9606
+25568577	3769	3777	patients	Species	9606
+25568577	3923	3927	male	Species	9606
+25568577	4003	4011	patients	Species	9606
+25568577	4021	4029	Patients	Species	9606
+25568577	4096	4104	patients	Species	9606
+25568577	3677	3682	tumor	Disease	MESH:D009369
+25568577	3646	3651	tumor	Disease	MESH:D009369
+25568577	5009	5017	patients	Species	9606
+25568577	4713	4720	alcohol	Chemical	MESH:D000431
+25568577	5110	5117	alcohol	Chemical	MESH:D000431
+25568577	4753	4760	Alcohol	Chemical	MESH:D000431
+25568577	4992	4999	alcohol	Chemical	MESH:D000431
+25568577	4407	4413	tumors	Disease	MESH:D009369
+25568577	4844	4851	alcohol	Chemical	MESH:D000431
+25568577	5334	5339	tumor	Disease	MESH:D009369
+25568577	6159	6166	patient	Species	9606
+25568577	6225	6233	patients	Species	9606
+25568577	6271	6279	patients	Species	9606
+25568577	6313	6321	patients	Species	9606
+25568577	6421	6429	patients	Species	9606
+25568577	6443	6451	patients	Species	9606
+25568577	6518	6526	patients	Species	9606
+25568577	6598	6606	patients	Species	9606
+25568577	6657	6664	patient	Species	9606
+25568577	6842	6850	patients	Species	9606
+25568577	6899	6907	patients	Species	9606
+25568577	6993	7001	patients	Species	9606
+25568577	7266	7274	patients	Species	9606
+25568577	7299	7307	patients	Species	9606
+25568577	7380	7388	patients	Species	9606
+25568577	6719	6724	tumor	Disease	MESH:D009369
+25568577	7336	7346	metastases	Disease	MESH:D009362
+25568577	6832	6838	tumors	Disease	MESH:D009369
+25568577	7086	7096	metastases	Disease	MESH:D009362
+25568577	6476	6490	tumor thrombus	Disease	MESH:D013927
+25568577	7406	7416	Haematuria	Disease	MESH:D006417
+25568577	7443	7447	pain	Disease	MESH:D010146
+25568577	7497	7505	patients	Species	9606
+25568577	7871	7879	patients	Species	9606
+25568577	7922	7930	patients	Species	9606
+25568577	8100	8108	patients	Species	9606
+25568577	7832	7837	tumor	Disease	MESH:D009369
+25568577	8086	8091	tumor	Disease	MESH:D009369
+25568577	7787	7792	tumor	Disease	MESH:D009369
+25568577	8204	8212	patients	Species	9606
+25568577	8254	8262	patients	Species	9606
+25568577	8876	8883	alcohol	Chemical	MESH:D000431
+25568577	8895	8903	lipiodol	Chemical	MESH:D004998
+25568577	9072	9084	kidney tumor	Disease	MESH:D007680
+25568577	9184	9197	kidney cancer	Disease	MESH:D007680
+25568577	9422	9430	patients	Species	9606
+25568577	9665	9673	children	Species	9606
+25568577	9523	9534	Wilms tumor	Disease	MESH:D009396
+25568577	9536	9547	Wilms tumor	Disease	MESH:D009396
+25568577	9700	9712	renal cancer	Disease	MESH:D007680
+25568577	9650	9661	Wilms tumor	Disease	MESH:D009396
+25568577	9750	9760	blood loss	Disease	MESH:D006473
+25568577	9809	9814	tumor	Disease	MESH:D009369
+25568577	10444	10454	blood loss	Disease	MESH:D006473
+25568577	10067	10090	Intraoperative bleeding	Disease	MESH:D016063
+25568577	9915	9960	decisive loss of blood atypical blood vessels	Disease	MESH:D009383
+25568577	10260	10266	tumors	Disease	MESH:D009369
+25568577	11204	11212	patients	Species	9606
+25568577	11257	11265	patients	Species	9606
+25568577	10704	10721	venous thrombosis	Disease	MESH:D020246
+25568577	10584	10590	cancer	Disease	MESH:D009369
+25568577	10676	10681	tumor	Disease	MESH:D009369
+25568577	10596	10617	vascularized thrombus	Disease	MESH:D013927
+25568577	10502	10512	blood loss	Disease	MESH:D006473
+25568577	12088	12095	patient	Species	9606
+25568577	12741	12749	patients	Species	9606
+25568577	12765	12782	balloon occlusion	Disease	MESH:D054549
+25568577	12714	12721	alcohol	Chemical	MESH:D000431
+25568577	11883	11890	alcohol	Chemical	MESH:D000431
+25568577	12116	12133	balloon occlusion	Disease	MESH:D054549
+25568577	12325	12332	alcohol	Chemical	MESH:D000431
+25568577	11388	11395	Alcohol	Chemical	MESH:D000431
+25568577	12262	12269	alcohol	Chemical	MESH:D000431
+25568577	11371	11378	alcohol	Chemical	MESH:D000431
+25568577	11565	11572	Alcohol	Chemical	MESH:D000431
+25568577	12042	12049	alcohol	Chemical	MESH:D000431
+25568577	12503	12510	alcohol	Chemical	MESH:D000431
+25568577	12899	12906	alcohol	Chemical	MESH:D000431
+25568577	12798	12805	alcohol	Chemical	MESH:D000431
+25568577	12653	12675	branch of renal artery	Disease	MESH:D007674
+25568577	11489	11506	balloon occlusion	Disease	MESH:D054549
+25568577	11752	11766	tumor necrosis	Disease	MESH:D009336
+25568577	13332	13350	occlusion balloons	Disease	MESH:D054549
+25568577	12980	12987	alcohol	Chemical	MESH:D000431
+25568577	13139	13148	vasospasm	Disease	MESH:D020301
+25568577	13627	13634	alcohol	Chemical	MESH:D000431
+25568577	13016	13023	alcohol	Chemical	MESH:D000431
+25568577	13501	13520	Ivalon embolization	Disease	MESH:D004617
+25568577	13883	13891	patients	Species	9606
+25568577	13961	13969	patients	Species	9606
+25568577	14018	14026	patients	Species	9606
+25568577	14153	14161	patients	Species	9606
+25568577	14199	14207	patients	Species	9606
+25568577	14487	14495	patients	Species	9606
+25568577	14611	14619	patients	Species	9606
+25568577	14850	14858	patients	Species	9606
+25568577	14961	14969	patients	Species	9606
+25568577	15140	15148	patients	Species	9606
+25568577	15168	15176	patients	Species	9606
+25568577	14721	14729	Lipiodol	Chemical	MESH:D004998
+25568577	14432	14455	reduction of blood loss	Disease	MESH:D007022
+25568577	15304	15312	patients	Species	9606
+25568577	15392	15400	patients	Species	9606
+25568577	15448	15455	patient	Species	9606
+25568577	15601	15609	patients	Species	9606
+25568577	15661	15669	patients	Species	9606
+25568577	16634	16642	patients	Species	9606
+25568577	16775	16783	patients	Species	9606
+25568577	16805	16813	patients	Species	9606
+25568577	15920	15933	kidney cancer	Disease	MESH:D007680
+25568577	16220	16227	alcohol	Chemical	MESH:D000431
+25568577	16159	16166	alcohol	Chemical	MESH:D000431
+25568577	16311	16319	Lipiodol	Chemical	MESH:D004998
+25568577	16403	16421	thru less bleeding	Disease	MESH:D006470
+25568577	15719	15732	Kidney cancer	Disease	MESH:D007680
+25568577	16000	16011	small tumor	Disease	MESH:D058405
+25568577	15745	15750	tumor	Disease	MESH:D009369
+25568577	16030	16035	tumor	Disease	MESH:D009369
+25568577	17013	17019	tumors	Disease	MESH:D009369
+25568577	16992	16999	infarct	Disease	MESH:D007238
+25568577	17033	17053	renal adenocarcinoma	Disease	MESH:D002292
+25568577	17057	17099	embolic occlusion of the renal circulation	Disease	MESH:D007674
+25568577	17100	17122	Nierentumoremboisation	Disease	
+25568577	17147	17155	children	Species	9606
+25568577	17123	17143	Renal cell carcinoma	Disease	MESH:D002292
+25568577	17225	17233	children	Species	9606
+25568577	17201	17221	Renal cell carcinoma	Disease	MESH:D002292
+25568577	17258	17271	Nephroblastom	Disease	
+25568577	17365	17378	kidney tumors	Disease	MESH:D007680
+25568577	17379	17409	Preopertive renal embolization	Disease	MESH:D007674
+25568577	17478	17485	ethanol	Chemical	MESH:D000431
+25568577	17502	17517	renal carcinoma	Disease	MESH:D002292
+25568577	17555	17575	renal cell carcinoma	Disease	MESH:D002292
+25568577	17614	17634	renal cell carcinoma	Disease	MESH:D002292
+25568577	17719	17761	Embolization von Nierentumoren mit Athanol	Disease	MESH:D004617
+25568577	18050	18081	Nephrektomie wegen Hypernephrom	Disease	MESH:D014890
+25568577	18139	18159	renal cell carcinoma	Disease	MESH:D002292
+25568577	18314	18334	renal cell carcinoma	Disease	MESH:D002292
+25568577	18222	18247	renal artery embolization	Disease	MESH:D007674
+25568577	18535	18555	renal cell carcinoma	Disease	MESH:D002292
+25568577	18556	18605	Palliative capillary embolization renal carcinoma	Disease	MESH:D002292
+25568577	18706	18717	renal tumor	Disease	MESH:D007680
+25568577	18734	18753	capillary occlusion	Disease	OMIM:163000
+25568577	18814	18829	renal carcinoma	Disease	MESH:D002292
+25568577	18908	18920	Embolization	Disease	MESH:D004617
+25568577	18921	18953	Einfluss der Nierenocclusion auf	Disease	MESH:C535733
+25568577	19072	19084	renal tumors	Disease	MESH:D007680
+25568577	19085	19110	Renal artery embolization	Disease	MESH:D007674
+

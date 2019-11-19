@@ -1,0 +1,8 @@
+1618900|t|Nerve growth factor transcriptional control of c-fos promoter transfected in cultured spinal sensory neurons 
+1618900|a|High efficiency gene transfer (greater than 90%) in chicken dorsal root ganglion neurons has been obtained by DNA calcium phosphate co- precipitation, hence providing an important tool to study control of gene expression in primary neurons. Transfection with c-fos promoter sequences linked to the chloramphenicol acetyltransferase reporter gene showed that the serum responsive element functions as a strong transcriptional enhancer. Transcription from this element is developmentally regulated, and mediates the genetic response to nerve growth factor (NGF) in developing avian sensory neurons. Furthermore, NGF exerts a negative effect on transcription from the cyclic AMP responsive element, thereby supporting the involvement of tyrosine kinase activation by NGF in primary sensory neurons. 
+1618900	161	168	chicken	Species	9031
+1618900	843	851	tyrosine	Chemical	
+1618900	774	784	cyclic AMP	Chemical	MESH:D000242
+1618900	223	240	calcium phosphate	Chemical	MESH:C020243
+1618900	407	422	chloramphenicol	Chemical	MESH:D002701
+

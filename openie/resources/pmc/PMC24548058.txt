@@ -1,0 +1,158 @@
+24548058|t|Degradation of Benzodiazepines after 120 Days of EMS Deployment 
+24548058|a|Introduction EMS treatment of status epilepticus improves outcomes, but the benzodiazepine best suited for EMS use is unclear, given potential high environmental temperature exposures. Objective To describe the degradation of diazepam, lorazepam, and midazolam as a function of temperature exposure and time over 120 days of storage on active EMS units. Methods Study boxes containing vials of diazepam, lorazepam, and midazolam were distributed to 4 active EMS units in each of 2 EMS systems in the southwestern United States during May-August 2011. The boxes logged temperature every minute and were stored in EMS units per local agency policy. Two vials of each drug were removed from each box at 30-day intervals and underwent high-performance liquid chromatography to determine drug concentration. Concentration was analyzed as mean (and 95%CI) percent of initial labeled concentration as a function of time and mean kinetic temperature (MKT). Results 192 samples were collected (2 samples of each drug from each of 4 units per city at 4 time-points). After 120 days, the mean relative concentration (95%CI) of diazepam was 97.0% (95.7-98.2%) and of midazolam was 99.0% (97.7-100.2%). Lorazepam experienced modest degradation by 60 days (95.6% [91.6-99.5%]) and substantial degradation at 90 days (90.3% [85.2-95.4%]) and 120 days (86.5% [80.7-92.3%]). Mean MKT was 31.6 C (95%CI 27.1-36.1). Increasing MKT was associated with greater degradation of lorazepam, but not midazolam or diazepam. Conclusions Midazolam and diazepam experienced minimal degradation throughout 120 days of EMS deployment in high-heat environments. Lorazepam experienced significant degradation over 120 days and appeared especially sensitive to higher MKT exposure. 
+24548058	15	30	Benzodiazepines	Chemical	MESH:D001569
+24548058	94	112	status epilepticus	Disease	MESH:D013226
+24548058	140	154	benzodiazepine	Chemical	MESH:D001569
+24548058	315	324	midazolam	Chemical	MESH:D008874
+24548058	290	298	diazepam	Chemical	MESH:D003975
+24548058	300	309	lorazepam	Chemical	MESH:D008140
+24548058	458	466	diazepam	Chemical	MESH:D003975
+24548058	468	477	lorazepam	Chemical	MESH:D008140
+24548058	483	492	midazolam	Chemical	MESH:D008874
+24548058	1182	1190	diazepam	Chemical	MESH:D003975
+24548058	1553	1561	diazepam	Chemical	MESH:D003975
+24548058	1540	1549	midazolam	Chemical	MESH:D008874
+24548058	1521	1530	lorazepam	Chemical	MESH:D008140
+24548058	1256	1265	Lorazepam	Chemical	MESH:D008140
+24548058	1221	1230	midazolam	Chemical	MESH:D008874
+24548058	1706	1715	Lorazepam	Chemical	MESH:D008140
+24548058	1600	1608	diazepam	Chemical	MESH:D003975
+24548058	1586	1595	Midazolam	Chemical	MESH:D008874
+24548058	2369	2378	lorazepam	Chemical	MESH:D008140
+24548058	1883	1901	status epilepticus	Disease	MESH:D013226
+24548058	2313	2327	benzodiazepine	Chemical	MESH:D001569
+24548058	2356	2364	Diazepam	Chemical	MESH:D003975
+24548058	1997	2012	benzodiazepines	Chemical	MESH:D001569
+24548058	2014	2023	midazolam	Chemical	MESH:D008874
+24548058	2428	2437	midazolam	Chemical	MESH:D008874
+24548058	2063	2070	seizure	Disease	MESH:D012640
+24548058	1907	1922	benzodiazepines	Chemical	MESH:D001569
+24548058	2630	2638	diazepam	Chemical	MESH:D003975
+24548058	2655	2664	midazolam	Chemical	MESH:D008874
+24548058	2640	2649	lorazepam	Chemical	MESH:D008140
+24548058	3058	3067	lorazepam	Chemical	MESH:D008140
+24548058	3396	3411	benzodiazepines	Chemical	MESH:D001569
+24548058	3332	3340	diazepam	Chemical	MESH:D003975
+24548058	3487	3496	midazolam	Chemical	MESH:D008874
+24548058	3472	3481	lorazepam	Chemical	MESH:D008140
+24548058	3462	3470	diazepam	Chemical	MESH:D003975
+24548058	4064	4078	benzodiazepine	Chemical	MESH:D001569
+24548058	5413	5427	benzodiazepine	Chemical	MESH:D001569
+24548058	5932	5940	diazepam	Chemical	MESH:D003975
+24548058	5919	5928	midazolam	Chemical	MESH:D008874
+24548058	5897	5906	lorazepam	Chemical	MESH:D008140
+24548058	6585	6594	midazolam	Chemical	MESH:D008874
+24548058	6415	6423	Diazepam	Chemical	MESH:D003975
+24548058	6815	6824	lorazepam	Chemical	MESH:D008140
+24548058	6620	6629	Lorazepam	Chemical	MESH:D008140
+24548058	6546	6554	diazepam	Chemical	MESH:D003975
+24548058	6380	6395	benzodiazepines	Chemical	MESH:D001569
+24548058	6428	6437	midazolam	Chemical	MESH:D008874
+24548058	6245	6259	Benzodiazepine	Chemical	MESH:D001569
+24548058	7512	7520	diazepam	Chemical	MESH:D003975
+24548058	6917	6925	diazepam	Chemical	MESH:D003975
+24548058	7499	7508	midazolam	Chemical	MESH:D008874
+24548058	7539	7548	Lorazepam	Chemical	MESH:D008140
+24548058	7051	7060	lorazepam	Chemical	MESH:D008140
+24548058	7087	7096	lorazepam	Chemical	MESH:D008140
+24548058	6903	6912	Midazolam	Chemical	MESH:D008874
+24548058	7830	7838	diazepam	Chemical	MESH:D003975
+24548058	7816	7825	midazolam	Chemical	MESH:D008874
+24548058	7932	7941	Lorazepam	Chemical	MESH:D008140
+24548058	8204	8213	midazolam	Chemical	MESH:D008874
+24548058	8629	8637	diazepam	Chemical	MESH:D003975
+24548058	8726	8735	midazolam	Chemical	MESH:D008874
+24548058	8767	8776	lorazepam	Chemical	MESH:D008140
+24548058	8190	8199	lorazepam	Chemical	MESH:D008140
+24548058	8349	8358	midazolam	Chemical	MESH:D008874
+24548058	8396	8405	lorazepam	Chemical	MESH:D008140
+24548058	8655	8669	benzodiazepine	Chemical	MESH:D001569
+24548058	9139	9148	Lorazepam	Chemical	MESH:D008140
+24548058	9072	9080	diazepam	Chemical	MESH:D003975
+24548058	8894	8903	lorazepam	Chemical	MESH:D008140
+24548058	9015	9023	diazepam	Chemical	MESH:D003975
+24548058	8881	8889	diazepam	Chemical	MESH:D003975
+24548058	10068	10077	lorazepam	Chemical	MESH:D008140
+24548058	9510	9519	lorazepam	Chemical	MESH:D008140
+24548058	10351	10360	lorazepam	Chemical	MESH:D008140
+24548058	11152	11161	lorazepam	Chemical	MESH:D008140
+24548058	11241	11250	midazolam	Chemical	MESH:D008874
+24548058	10942	10951	lorazepam	Chemical	MESH:D008140
+24548058	11254	11262	diazepam	Chemical	MESH:D003975
+24548058	10966	10975	lorazepam	Chemical	MESH:D008140
+24548058	11470	11479	midazolam	Chemical	MESH:D008874
+24548058	11484	11493	lorazepam	Chemical	MESH:D008140
+24548058	12317	12332	benzodiazepines	Chemical	MESH:D001569
+24548058	12292	12301	lorazepam	Chemical	MESH:D008140
+24548058	12623	12632	lorazepam	Chemical	MESH:D008140
+24548058	12490	12499	Midazolam	Chemical	MESH:D008874
+24548058	12504	12512	diazepam	Chemical	MESH:D003975
+24548058	13644	13647	BSN	Chemical	MESH:C480682
+24548058	13602	13605	MPH	Chemical	MESH:C041626
+24548058	13789	13792	MPA	Chemical	MESH:C051945
+24548058	13937	13940	PhD	Chemical	MESH:C411141
+24548058	13882	13885	PhD	Chemical	MESH:C411141
+24548058	13863	13866	PhD	Chemical	MESH:C411141
+24548058	14040	14043	PhD	Chemical	MESH:C411141
+24548058	14002	14005	PhD	Chemical	MESH:C411141
+24548058	14019	14022	PhD	Chemical	MESH:C411141
+24548058	14368	14371	MPH	Chemical	MESH:C041626
+24548058	14476	14479	PhD	Chemical	MESH:C411141
+24548058	14168	14170	MS	Disease	MESH:D009103
+24548058	14216	14219	MPH	Chemical	MESH:C041626
+24548058	14507	14518	Detroit EMS	Disease	MESH:D004630
+24548058	14425	14431	O'Neil	Chemical	MESH:D008455
+24548058	14920	14933	Laura Heitsch	CellLine	
+24548058	14643	14646	BSN	Chemical	MESH:C480682
+24548058	14718	14721	MPA	Chemical	MESH:C051945
+24548058	15546	15549	PhD	Chemical	MESH:C411141
+24548058	15688	15708	MD Participating EMS	Disease	MESH:D009436
+24548058	15332	15335	MAS	Disease	MESH:D005359
+24548058	15750	15762	EMS Division	Disease	MESH:D004630
+24548058	15384	15387	BSN	Chemical	MESH:C480682
+24548058	15961	15989	Laura LaChance EMS Directors	Disease	MESH:D004630
+24548058	15946	15949	BSN	Chemical	MESH:C480682
+24548058	16028	16036	Didonato	Chemical	
+24548058	16527	16530	EMS	Disease	MESH:D004630
+24548058	16443	16445	Sr	Chemical	MESH:D013324
+24548058	16469	16472	MPH	Chemical	MESH:C041626
+24548058	16962	16965	BSN	Chemical	MESH:C480682
+24548058	17323	17330	Redwood	Species	28980
+24548058	17119	17121	MS	Disease	MESH:D009103
+24548058	17239	17259	MD Participating EMS	Disease	MESH:D009436
+24548058	17556	17563	CEP EMS	Chemical	MESH:D003281
+24548058	18211	18214	BSN	Chemical	MESH:C480682
+24548058	18335	18338	EMS	Disease	MESH:D004630
+24548058	18451	18459	Joseph T	Disease	MESH:D017827
+24548058	18703	18706	MBA	Chemical	MESH:C111608
+24548058	18677	18680	MFA	Chemical	MESH:C032354
+24548058	19163	19166	BSN	Chemical	MESH:C480682
+24548058	19783	19788	Lions	Species	9689
+24548058	19675	19695	MD Participating EMS	Disease	MESH:D009436
+24548058	19915	19918	MPH	Chemical	MESH:C041626
+24548058	19940	19943	MPH	Chemical	MESH:C041626
+24548058	20231	20234	PhD	Chemical	MESH:C411141
+24548058	20382	20385	PhD	Chemical	MESH:C411141
+24548058	20896	20900	Lion	Species	9689
+24548058	20901	20904	EMS	Disease	MESH:D004630
+24548058	21099	21103	Rice	Species	4530
+24548058	21364	21367	EMS	Disease	MESH:D004630
+24548058	21250	21270	MD Participating EMS	Disease	MESH:D009436
+24548058	21216	21232	Robert Rosenthal	Chemical	MESH:C015161
+24548058	21465	21483	status epilepticus	Disease	MESH:D013226
+24548058	21406	21414	diazepam	Chemical	MESH:D003975
+24548058	21395	21404	lorazepam	Chemical	MESH:D008140
+24548058	21542	21560	status epilepticus	Disease	MESH:D013226
+24548058	21631	21639	children	Species	9606
+24548058	21609	21627	status epilepticus	Disease	MESH:D013226
+24548058	21579	21587	diazepam	Chemical	MESH:D003975
+24548058	21562	21571	Midazolam	Chemical	MESH:D008874
+24548058	21891	21906	tranexamic acid	Chemical	MESH:D014148
+24548058	22161	22169	diazepam	Chemical	MESH:D003975
+24548058	22174	22183	lorazepam	Chemical	MESH:D008140
+24548058	22247	22256	lorazepam	Chemical	MESH:D008140
+24548058	22233	22242	midazolam	Chemical	MESH:D008874
+24548058	22397	22412	benzodiazepines	Chemical	MESH:D001569
+24548058	22534	22543	lorazepam	Chemical	MESH:D008140
+24548058	22837	22852	benzodiazepines	Chemical	MESH:D001569
+

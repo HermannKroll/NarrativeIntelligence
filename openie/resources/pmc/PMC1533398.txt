@@ -1,0 +1,12 @@
+1533398|t|The integrin alpha 6 beta 4 is a laminin receptor 
+1533398|a|In this study, the putative laminin receptor function of the alpha 6 beta 4 integrin was assessed. For this purpose, we used a human cell line, referred to as clone A, that was derived from a highly invasive, colon adenocarcinoma. This cell line, which expresses the alpha 6 beta 4 integrin, adheres to the E8 and not to the P1 fragment of laminin. The adhesion of clone A cells to laminin is extremely rapid with half- maximal adhesion observed at 5 min after plating. Adhesion to laminin is blocked by GoH3, and alpha 6 specific antibody (60% inhibition), as well as by A9, a beta 4 specific antibody (30% inhibition). Most importantly, we demonstrate that alpha 6 beta 4 binds specifically to laminin-Sepharose columns in the presence of either Mg2+ or Mn2+ and it is eluted from these columns with EDTA but not with NaCl. The alpha 6 beta 4 integrin does not bind to collagen-Sepharose, but the alpha 2 beta 1 integrin does bind. Clone A cells do not express alpha 6 beta 1 as evidenced by the following observations: (a) no beta 1 integrin is detected in beta 1 immunoblots of GoH3 immunoprecipitates; and (b) no alpha 6 beta 1 integrin is seen in GoH3 immunoprecipitates of clone A extracts that had been immunodepleted of all beta 4 containing integrin using the A9 antibody. These data establish that laminin is a ligand for the alpha 6 beta 4 integrin and that this integrin can function as a laminin receptor independently of alpha 6 beta 1. 
+1533398	1079	1094	beta 1 integrin	Gene	3688
+1533398	177	182	human	Species	9606
+1533398	1176	1191	beta 1 integrin	Gene	3688
+1533398	957	972	beta 1 integrin	Gene	3688
+1533398	259	279	colon adenocarcinoma	Disease	MESH:D015179
+1533398	806	810	Mn2+	Chemical	MESH:D008345
+1533398	798	802	Mg2+	Chemical	MESH:D008274
+1533398	852	856	EDTA	Chemical	MESH:D004492
+1533398	870	874	NaCl	Chemical	MESH:D012965
+

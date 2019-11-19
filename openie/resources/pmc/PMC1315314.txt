@@ -1,0 +1,28 @@
+1315314|t|Protein translocation across the ER requires a functional GTP binding site in the alpha subunit of the signal recognition particle receptor 
+1315314|a|The signal recognition particle (SRP)-mediated translocation of proteins across the RER is a GTP dependent process. Analysis of the primary amino acid sequence of one protein subunit of SRP (SRP54), as well as the alpha subunit of the SRP receptor (SR alpha), has indicated that these proteins contain predicted GTP binding sites. Several point mutations confined to the GTP binding consensus elements of SR alpha were constructed by site specific mutagenesis to define a role for the GTP binding site in SR alpha during protein translocation. The SR alpha mutants were analyzed using an in vitro system wherein SR alpha- deficient microsomal membranes were repopulated with SR alpha by in vitro translation of wild-type or mutant mRNA transcripts. SRP receptors containing SR alpha point mutants were analyzed for their ability to function in protein translocation and to form guanylyl-5'- imidodiphosphate (Gpp[NH]p) stabilized complexes with the SRP. Mutations in SR alpha produced SRP receptors that were either impaired or inactive in protein translocation. These SRP receptors were likewise unable to form Gpp(NH)p stabilized complexes with the SRP. One SR alpha point mutant, Thr 588 to Asn 588, required 50- to 100-fold higher concentrations of GTP relative to the wild-type SR alpha to function in protein translocation. This mutant has provided information on the reaction step in protein translocation that involves the GTP binding site in the alpha subunit of the SRP receptor. 
+1315314	331	336	SRP54	Gene	6729
+1315314	389	397	SR alpha	Gene	4481
+1315314	545	553	SR alpha	Gene	4481
+1315314	645	653	SR alpha	Gene	4481
+1315314	688	696	SR alpha	Gene	4481
+1315314	752	760	SR alpha	Gene	4481
+1315314	815	823	SR alpha	Gene	4481
+1315314	914	922	SR alpha	Gene	4481
+1315314	1089	1092	SRP	Gene	6729
+1315314	1107	1115	SR alpha	Gene	4481
+1315314	1125	1128	SRP	Gene	6729
+1315314	1209	1212	SRP	Gene	6729
+1315314	1423	1431	SR alpha	Gene	4481
+1315314	1291	1294	SRP	Gene	6729
+1315314	889	892	SRP	Gene	6729
+1315314	326	329	SRP	Gene	6729
+1315314	173	176	SRP	Gene	6729
+1315314	1300	1308	SR alpha	Gene	4481
+1315314	1616	1619	SRP	Gene	6729
+1315314	375	378	SRP	Gene	6729
+1315314	1256	1258	NH	Chemical	MESH:D000641
+1315314	1018	1047	guanylyl-5'- imidodiphosphate	Chemical	MESH:D006165
+1315314	1049	1057	Gpp[NH]p	Chemical	MESH:D006165
+1315314	1323	1337	Thr 588 to Asn	ProteinMutation	p.T588N
+1315314	1393	1396	GTP	Chemical	MESH:D006160
+
