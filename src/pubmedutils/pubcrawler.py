@@ -2,13 +2,14 @@ import urllib.request
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
 import time
+import argparse
 
-from .progress import chunks, printProgressBar
+from pubmedutils.progress import chunks, printProgressBar
 
 
 # Query pmid's from pmed
 # db: pubmed / pmc
-def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=20000):
+def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=30000):
 	"""
 	queries for PMIDs on pubmed by using a given query
 	:param query: given query term
@@ -97,7 +98,6 @@ def pubtator_crawl_pubtator_documents(pmids, format):
 
 	domain = 'https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/RESTful/tmTool.cgi/'
 	concept_mode = 'BioConcept'
-	
 
 	if len(pmids) <= 100:
 		# compute pmid str
@@ -106,7 +106,7 @@ def pubtator_crawl_pubtator_documents(pmids, format):
 			pmid_str += pmid + ','
 		pmid_str = pmid_str[:-1]
 
-		url = '{}/{}/{}/{}'.format(domain,concept_mode,pmid_str,format)
+		url = '{}/{}/{}/{}'.format(domain, concept_mode, pmid_str, format)
 		#print("Crawling {}".format(url))
 		# http get
 		contents = urllib.request.urlopen(url).read().decode('utf-8')
@@ -150,4 +150,13 @@ def pubtator_crawl_pubtator_documents_with_query(query, mail='ex@sample.com', to
 	return result
 
 
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+	parser.add_argument("query", help='query to send to pubmed')
+	parser.add_argument("output", help='output id file')
+	args = parser.parse_args()
 
+	pmids = pubmed_crawl_pmids(args.query)
+	with open(args.output, 'w') as f:
+		for p in pmids:
+			f.write('{}\n'.format(p))
