@@ -11,7 +11,7 @@ SQL_HEADER = "CREATE TABLE IF NOT EXISTS PREDICATION_OPENIE \
                   object_cui VARCHAR, \
                   object_name VARCHAR, \
                   object_semtype VARCHAR, \
-                  predication VARCHAR, \
+                  predicate VARCHAR, \
                   sentence VARCHAR );\n"
 SQL_INSERT_HEADER = 'INSERT INTO PREDICATION_OPENIE VALUES \n';
 
