@@ -15,44 +15,25 @@ def load_pubtator_file(pmid, pubtator_dir, prefix='PMC'):
     return doc
 
 
-def get_subject_and_object_entity(doc, sub, obj):
+def get_subject_and_object_entities(doc, sub, obj):
     # default not hit
-    sub_included = None
-    sub_id = None
-    sub_type = None
-    obj_included = None
-    obj_id = None
-    obj_type = None
+    subs_included = []
+    objs_included = []
     # compute lower case with empty spaces
     sub_text = ' {} '.format(sub.lower())
     obj_text = ' {} '.format(obj.lower())
 
-    # go trough entities in a single sentence
-    for sent, entities in doc.entities_by_sentence.items():
-        # at least two entities must be tagged
-        if len(entities) < 2:
-            continue
+    # check if an entity occurs within the sentence
+    for ent in doc.tags:
+        ent_txt = ' {} '.format(ent.text.lower())
+        if ent_txt in sub_text:
+            s_t = (ent_txt, ent.mesh, ent.type)
+            subs_included.append(s_t)
+        if ent_txt in obj_text:
+            o_t = (ent_txt, ent.mesh, ent.type)
+            objs_included.append(o_t)
 
-        # entity pair must occur within the same sentence
-        sub_included = None
-        sub_id = None
-        sub_type = None
-        obj_included = None
-        obj_id = None
-        obj_type = None
-
-        for ent in entities:
-            ent_txt = ' {} '.format(ent.text.lower())
-            if ent_txt in sub_text:
-                sub_included = ent_txt
-                sub_id = ent.mesh
-                sub_type = ent.type
-            if ent_txt in obj_text:
-                obj_included = ent_txt
-                obj_id = ent.mesh
-                obj_type = ent.type
-
-    return sub_included, sub_id, sub_type, obj_included, obj_id, obj_type
+    return subs_included, objs_included
 
 
 def clean_open_ie(input, output, pubtator_dir, logger, pubtator_prefix='PMC'):
@@ -61,6 +42,8 @@ def clean_open_ie(input, output, pubtator_dir, logger, pubtator_prefix='PMC'):
     tuples_cleaned = []
     # cached pubtator docs
     pubtator_cache = {}
+    # don't include the same tuple twice for a single sentence
+    already_included = set()
     # open the input open ie file
     with open(input, 'r') as f:
         # read all lines for a single doc
@@ -85,10 +68,16 @@ def clean_open_ie(input, output, pubtator_dir, logger, pubtator_prefix='PMC'):
                 pubtator_cache[pmid] = load_pubtator_file(pmid, pubtator_dir, prefix=pubtator_prefix)
             pubtator_doc = pubtator_cache[pmid]
 
-            sub_ent, sub_id, sub_type, obj_ent, obj_id, obj_type = get_subject_and_object_entity(pubtator_doc, subj, obj)
-            if sub_ent and obj_ent:
-                t = (pmid, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type)
-                tuples_cleaned.append(t)
+            # go trough all detected entities in the subject and object part of the open ie triple
+            sub_ents, obj_ents = get_subject_and_object_entities(pubtator_doc, subj, obj)
+            for s_txt, s_id, s_type in sub_ents:
+                for o_txt, o_id, o_type in obj_ents:
+                    # check if tuple is already extracted for sentence
+                    key = frozenset((pmid, s_id, o_id, pred, sent))
+                    if key not in already_included:
+                        t = (pmid, subj, pred, obj, sent, s_id, s_txt, s_type, o_id, o_txt, o_type)
+                        tuples_cleaned.append(t)
+                        already_included.add(key)
 
             if i % 10000 == 0:
                 progress = i * 100 / len_tuples
