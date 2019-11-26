@@ -109,7 +109,7 @@ venv.bak/
 .idea
 
 # Files
-preprocessing/config.json
+config/preprocess.json
 data/
 
 # macOS
@@ -123,5 +123,3 @@ venvlinux/
 tmp/
 logs/
 
-config/*
-!config/*.example.json
