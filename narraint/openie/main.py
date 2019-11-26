@@ -3,13 +3,15 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 from datetime import datetime
 from time import sleep
 
 from narraint.config import OPENIE_CONFIG
 
-PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)\n")
+PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)")
+FILENAME_REGEX = re.compile(r"(/[\w/.]+)\t")
 
 
 def prepare_files(input_dir):
@@ -45,13 +47,32 @@ def prepare_files(input_dir):
     return filelist_fn, out_fn, amount_files
 
 
-def run_process(core_nlp_dir, out_fn, filelist_fn):
+def get_progress(out_fn):
+    if not os.path.exists(out_fn):
+        return 0
+    else:
+        with open(out_fn) as f:
+            content = f.read()
+        match = FILENAME_REGEX.findall(content)
+        return len(set(match))
+
+
+def run_openie(core_nlp_dir, out_fn, filelist_fn):
+    start = datetime.now()
+    with open(filelist_fn) as f:
+        num_files = len(f.read().split("\n"))
+
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_fn, filelist_fn)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
     while process.poll() is None:
-        print("Still processing ...")
-        sleep(20)
+        sleep(30)
+        sys.stdout.write("\rProgress: {}/{} ...".format(get_progress(out_fn), num_files))
+        sys.stdout.flush()
+    sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
+        get_progress(out_fn), num_files, datetime.now() - start,
+    ))
+    sys.stdout.flush()
 
 
 def process_output(openie_out, outfile):
@@ -77,8 +98,8 @@ def main():
     :return:
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("input")
-    parser.add_argument("output")
+    parser.add_argument("input", help="Directory contains Pubtator files")
+    parser.add_argument("output", help="File with OpenIE results")
     parser.add_argument("--conf", default=OPENIE_CONFIG)
     args = parser.parse_args()
 
@@ -92,14 +113,13 @@ def main():
 
     if amount_files == 0:
         print('no files to process - stopping')
-        return
-    # Start
-    start = datetime.now()
-    run_process(core_nlp_dir, out_fn, filelist_fn)
-    print("Finished in {}".format(datetime.now() - start))
-
-    # Process output
-    process_output(out_fn, args.output)
+    else:
+        run_openie(core_nlp_dir, out_fn, filelist_fn)
+        print("Processing output ...", end="")
+        start = datetime.now()
+        # Process output
+        process_output(out_fn, args.output)
+        print(" done in {}".format(datetime.now() - start))
 
 
 if __name__ == "__main__":
