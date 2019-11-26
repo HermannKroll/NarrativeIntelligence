@@ -119,3 +119,7 @@ narrative/*.log
 venvlinux/
 tmp/
 logs/
+
+config/*
+!config/*.prod.json
+!config/*.example.json
