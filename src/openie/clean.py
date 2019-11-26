@@ -25,6 +25,10 @@ def get_subject_and_object_entities(doc, sub, obj):
 
     # check if an entity occurs within the sentence
     for ent in doc.tags:
+        # skip empty mesh ids
+        if ent.mesh == '-1' or ent.mesh == '':
+            continue
+
         ent_txt = ' {} '.format(ent.text.lower())
         if ent_txt in sub_text:
             s_t = (ent_txt, ent.mesh, ent.type)
