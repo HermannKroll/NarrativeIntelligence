@@ -117,8 +117,6 @@ data/
 ._.DS_Store
 
 narrative/*.log
-src/narrative/res
-src/narrative/.docs
 venvlinux/
 tmp/
 logs/
