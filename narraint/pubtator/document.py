@@ -8,6 +8,7 @@ MUTATION = "Mutation"
 CELLLINE = "CellLine"
 PROTEINMUTATION = "ProteinMutation"
 DNAMUTATION = "DNAMutation"
+SNP = "SNP"
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,
@@ -17,7 +18,8 @@ ENTITY_TYPES = dict(
     Mutation=MUTATION,
     CellLine=CELLLINE,
     ProteinMutation=PROTEINMUTATION,
-    DNAMutation=DNAMUTATION
+    DNAMutation=DNAMUTATION,
+    SNP=SNP
 )
 
 
@@ -27,6 +29,10 @@ class TaggedEntity:
         self.start = int(tag_tuple[1])
         self.end = int(tag_tuple[2])
         self.text = tag_tuple[3]
+
+        if tag_tuple[4] not in ENTITY_TYPES:
+            raise KeyError('entity type not supported yet: {}'.format(tag_tuple))
+
         self.type = ENTITY_TYPES[tag_tuple[4]]
         self.mesh = tag_tuple[5]
 
@@ -48,7 +54,16 @@ class TaggedDocument:
     REGEX_ABSTRACT = re.compile("\|a\|(.*?)\n")
     REGEX_TAGS = re.compile("(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 
-    def __init__(self, pubtator_content):
+    def __init__(self, pubtator_content, read_from_file=False):
+        """
+        initialize a pubtator document
+        :param pubtator_content: content of a pubtator file or a pubtator filename
+        :param read_from_file: if true, pubtator_content is treated as a filename
+        """
+        if read_from_file:
+            with open(pubtator_content, 'r') as f:
+                content = f.read()
+            pubtator_content = content
         self.id = int(pubtator_content[:pubtator_content.index("|")])
         self.title = self.REGEX_TITLE.findall(pubtator_content)[0]
         self.abstract = self.REGEX_ABSTRACT.findall(pubtator_content)[0]
@@ -94,3 +109,31 @@ class TaggedDocument:
 
     def __str__(self):
         return "<Document {} {}>".format(self.id, self.title)
+
+
+class TaggedDocumentCollection:
+
+    def __init__(self, filename):
+        self.docs = []
+        self.docs_by_id = {}
+
+        # read from a single pubtator file
+        with open(filename, 'r') as f:
+            doc_lines = []
+            for line in f:
+                # split at only '\n' (empty new line)
+                if line == '\n':
+                    # skip multiple new lines
+                    if len(doc_lines) == 0:
+                        continue
+                    self._add_doc_from_content(''.join(doc_lines))
+                    doc_lines = []
+                else:
+                    doc_lines.append(line)
+
+    def _add_doc_from_content(self, content):
+        doc = TaggedDocument(content)
+        self.docs.append(doc)
+        if doc.id in self.docs_by_id:
+            raise Exception('ID already included in collection')
+        self.docs_by_id[doc.id] = doc

@@ -1,0 +1,9 @@
+{
+  "POSTGRES_DB":   "semmeddb",
+  "POSTGRES_HOST" : "134.169.32.169",
+  "POSTGRES_PORT" : "5432",
+  "POSTGRES_USER" : "krollro",
+  "POSTGRES_PW" :  "homCCvY7xe7PUHHNEDzQ2aLDg",
+  "POSTGRES_SEMMED_SCHEMA" : "public"
+
+}
