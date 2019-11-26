@@ -1,4 +1,4 @@
-# PubMedSnorkel
+# Narrative Intelligence
 ## Getting Started
 Download ctd data for labeling training and test data. This download recommends 3GB of free disk space.
 
