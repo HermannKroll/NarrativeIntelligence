@@ -1,8 +1,8 @@
 {
-  "POSTGRES_DB": "johannes",
-  "POSTGRES_HOST": "localhost",
+  "POSTGRES_DB": "taggingdbowners",
+  "POSTGRES_HOST": "134.169.32.169",
   "POSTGRES_PORT": "5432",
-  "POSTGRES_USER": "ifis",
-  "POSTGRES_PW": "ifis",
-  "POSTGRES_SEMMED_SCHEMA": ""
+  "POSTGRES_USER": "tagginguser",
+  "POSTGRES_PW": "adsf0i92432kemrfwla",
+  "POSTGRES_SCHEMA": "public"
 }
