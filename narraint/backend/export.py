@@ -2,28 +2,75 @@ import argparse
 import logging
 import re
 
+from narraint.backend import types
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
+from narraint.backend.types import TAG_TYPE_MAPPING
 
 PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)\n")
 TAG_REGEX = re.compile(r"(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 PUBTATOR_CONTENT_REGEX = re.compile(r"\d+.*?\n\n", re.DOTALL)
 
-TAG_TYPE_MAPPING = dict(
-    DF="DosageForm",
-    C="Chemical",
-    M="Mutation",
-    G="Gene",
-    S="Species",
-    D="Disease",
-    A="ALL",
-)
+
+def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
+    if document_ids is None:
+        document_ids = []
+    session = Session.get()
+
+    if content and tag_types:
+        query = session.query(Document, Tag)
+        if collection:
+            query = query.filter_by(collection=collection)
+        if document_ids:
+            query = query.filter(Document.id.in_(document_ids))
+        query = query.join(Tag)
+        query = query.order_by(Document.collection, Document.id, Tag.id)
+    elif content:
+        query = session.query(Document)
+        if collection:
+            query = query.filter_by(collection=collection)
+        if document_ids:
+            query = query.filter(Document.id.in_(document_ids))
+        query = query.order_by(Document.collection, Document.id)
+    else:
+        query = session.query(Tag)
+        if collection:
+            query = query.filter_by(document_collection=collection)
+        if document_ids:
+            query = query.filter(Tag.document_id.in_(document_ids))
+        query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+
+    if tag_types and types.ALL != tag_types:
+        query = query.filter(Tag.type.in_(tag_types))
+
+    results = query.all()
+    print("Number of results: ", len(results))
+    if content and tag_types:
+        with open(out_fn, "w") as f:
+            doc = None
+            for document, tag in results:
+                if doc != document:
+                    if doc is not None:
+                        f.write("\n")
+                    f.write(document.to_pubtator())
+                    doc = document
+                f.write(tag.to_pubtator())
+    elif content:
+        with open(out_fn, "w") as f:
+            for document in results:
+                f.write(document.to_pubtator() + "\n")
+    else:
+        with open(out_fn, "w") as f:
+            for tag in results:
+                f.write(tag.to_pubtator())
+    print("Results written to {}".format(out_fn))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("output")
-    parser.add_argument("-c", "--collection", help="Collection(s)")
+    parser.add_argument("ids", nargs="*", metavar="DOC_ID")
+    parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
     parser.add_argument("--log", action="store_true")
@@ -36,50 +83,13 @@ def main():
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-    session = Session.get()
-    if args.document and args.tag:
-        query = session.query(Document, Tag)
-        if args.collection:
-            query = query.filter_by(collection=args.collection)
-        query = query.join(Tag)
-        if "A" not in args.tag:
-            query = query.filter(Tag.type.in_([TAG_TYPE_MAPPING[x] for x in args.tag]))
-        query = query.order_by(Document.collection, Document.id, Tag.id)
-    elif args.document:
-        query = session.query(Document)
-        if args.collection:
-            query = query.filter_by(collection=args.collection)
-        query = query.order_by(Document.collection, Document.id)
-    else:
-        query = session.query(Tag)
-        if args.collection:
-            query = query.filter_by(document_collection=args.collection)
-        query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+    tag_types = []
+    if args.tag:
+        tag_types = types.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
-    if args.tag and "A" not in args.tag:
-        query = query.filter(Tag.type.in_([TAG_TYPE_MAPPING[x] for x in args.tag]))
+    document_ids = [int(x) for x in args.ids]
 
-    results = query.all()
-    print("Number of results: ", len(results))
-    if args.document and args.tag:
-        with open(args.output, "w") as f:
-            doc = None
-            for document, tag in results:
-                if doc != document:
-                    if doc is not None:
-                        f.write("\n")
-                    f.write(document.to_pubtator())
-                    doc = document
-                f.write(tag.to_pubtator())
-    elif args.document:
-        with open(args.output, "w") as f:
-            for document in results:
-                f.write(document.to_pubtator() + "\n")
-    else:
-        with open(args.output, "w") as f:
-            for tag in results:
-                f.write(tag.to_pubtator())
-    print("Results written to {}".format(args.output))
+    export(args.output, tag_types, document_ids, collection=args.collection, content=args.document)
 
 
 if __name__ == "__main__":

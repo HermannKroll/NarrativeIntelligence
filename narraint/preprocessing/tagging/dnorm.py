@@ -4,75 +4,85 @@ import subprocess
 from datetime import datetime
 from time import sleep
 
+from narraint.backend import types
 from narraint.preprocessing.tagging.base import BaseTagger
-from narraint.preprocessing.tools import concat, count_documents
+from narraint.preprocessing.tools import count_documents
 
 
 class DNorm(BaseTagger):
-    def get_document_dict(self, pmid):
-        with open(os.path.join(self.translation_dir, "PMC{}.txt".format(pmid))) as f:
-            content = f.readlines()
-        title = re.sub(r"\d+\|t\| ", "", content[0]).rstrip("\n")
-        abstract = re.sub(r"\d+\|a\| ", "", content[1]).rstrip("\n")
-        return dict(
-            doc=title + abstract,
-            title_len=len(title),
-        )
+    """
+    DNorm is a diseases tagger.
 
-    def finalize(self):
-        documents = dict()
-        with open(self.out_file) as f:
+    Input: Single with with all documents. Similar to PubTator format except that the |t| and |a| are replaced
+    by an tab, so a line is <id>\t<content>.
+
+    Output: Single file with tags. Each line represents a tag consisting of five elements, which are separated by a tab.
+        Line format: <doc id> <start> <end> <string> <entity id>
+
+    .. note:
+
+       Output format does not include the type of the tag, i.e., disease
+    """
+    TYPES = (types.DISEASE,)
+    __version__ = "1.0.0"
+
+    def get_document_info(self, doc_id):
+        with open(self.file_mapping[doc_id]) as f:
             content = f.readlines()
-        with open(self.result_file, "w") as f_out:
-            for line in content:
-                if line.strip():
-                    new_line = line.strip().split("\t")
-                    # Add type
-                    if len(new_line) == 4 or len(new_line) == 5:
-                        new_line.insert(4, "Disease")
-                    if len(new_line) == 4:
-                        new_line.insert(5, "")
-                    # Read source document
-                    if new_line[0] not in documents:
-                        documents[new_line[0]] = self.get_document_dict(new_line[0])
-                    # Perform indexing check
-                    doc = documents[new_line[0]]["doc"]
-                    if doc[int(new_line[1]):int(new_line[2])] != new_line[3]:
-                        title_len = documents[new_line[0]]["title_len"]
-                        idx_left = int(new_line[1]) + title_len
-                        idx_right = int(new_line[2]) + title_len
-                        new_line[1] = str(idx_left)
-                        new_line[2] = str(idx_right)
-                    # Write result
-                    f_out.write("\t".join(new_line) + "\n")
+        title = re.sub(r"\d+\|t\|", "", content[0]).strip()
+        abstract = re.sub(r"\d+\|a\|", "", content[1]).strip()
+        return title + abstract, len(title)
+
+    def get_tags(self):
+        tags = []
+        documents = {}
+        if os.path.exists(self.out_file):
+            with open(self.out_file) as f:
+                for line in f:
+                    if line.strip():
+                        new_line = line.strip().split("\t")
+                        # Add type
+                        if len(new_line) == 4 or len(new_line) == 5:
+                            new_line.insert(4, types.DISEASE)
+                        if len(new_line) == 4:
+                            new_line.insert(5, "")
+                        # Read source document
+                        doc_id = int(new_line[0])
+                        if doc_id not in documents:
+                            documents[doc_id] = self.get_document_info(doc_id)
+                        # Perform indexing check
+                        document, title_len = documents[doc_id]
+                        if document[int(new_line[1]):int(new_line[2])] != new_line[3]:
+                            idx_left = int(new_line[1]) + title_len
+                            idx_right = int(new_line[2]) + title_len
+                            new_line[1] = str(idx_left)
+                            new_line[2] = str(idx_right)
+                        # Write result
+                        tags.append(new_line)
+        return tags
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.in_dir = os.path.join(self.root_dir, "dnorm_in")
-        self.out_dir = os.path.join(self.root_dir, "dnorm_out")
-        self.result_file = os.path.join(self.root_dir, "diseases.txt")
         self.log_file = os.path.join(self.log_dir, "dnorm.log")
-        self.in_file = os.path.join(self.in_dir, "dnorm_in.txt")
-        self.out_file = os.path.join(self.out_dir, "dnorm_out.txt")
+        self.in_file = os.path.join(self.root_dir, "dnorm_in.txt")
+        self.out_file = os.path.join(self.root_dir, "dnorm_out.txt")
 
     def prepare(self, resume=False):
         if not resume:
-            os.mkdir(self.in_dir)
-            os.mkdir(self.out_dir)
-            concat(self.translation_dir, self.in_file)
-            with open(self.in_file) as f:
-                content = f.read()
-            content = content.replace("|t| ", "\t")
-            content = content.replace("|a| ", "\t")
-            with open(self.in_file, "w") as f:
-                f.write(content)
+            with open(self.in_file, "w") as f_out:
+                for fn in self.files:
+                    with open(fn) as f_in:
+                        content = f_in.read()
+                    content = content.replace("|t| ", "\t")
+                    content = content.replace("|a| ", "\t")
+                    f_out.write(content)
         else:
-            # Here you must get the already processed IDs and create a new batch file with all the missing IDs.
+            # Here you must get the already processed IDs and create a new file with all the missing IDs.
             # You must rename the old output file and make sure its not overwritten
             raise NotImplementedError("Resuming DNorm is not implemented.")
 
     def run(self):
-        files_total = len(os.listdir(self.translation_dir))
+        files_total = len(os.listdir(self.input_dir))
         start_time = datetime.now()
 
         with open(self.log_file, "w") as f_log:
@@ -98,10 +108,7 @@ class DNorm(BaseTagger):
         )
 
     def get_progress(self):
-        if os.path.exists(self.out_file):
-            return count_documents(self.out_file)
-        else:
-            return 0
+        return count_documents(self.out_file) if os.path.exists(self.out_file) else 0
 
     def count_skipped_files(self):
         with open(self.log_file) as f:

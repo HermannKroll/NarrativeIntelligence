@@ -6,6 +6,7 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
+from narraint.backend import types
 from narraint.preprocessing.tagging.base import BaseTagger, finalize_dir
 
 
@@ -16,7 +17,10 @@ class NoRemainingDocumentError(Exception):
     pass
 
 
+# FIXME: Adapt to new API
 class TaggerOne(BaseTagger):
+    TYPES = (types.CHEMICAL, types.DISEASE)
+
     def finalize(self):
         finalize_dir(self.out_dir, self.result_file, batch_mode=True)
 
@@ -31,7 +35,7 @@ class TaggerOne(BaseTagger):
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.translation_dir, self.in_dir)
+            shutil.copytree(self.input_dir, self.in_dir)
             os.mkdir(self.out_dir)
             os.mkdir(self.batch_dir)
         else:
@@ -85,7 +89,7 @@ class TaggerOne(BaseTagger):
         :raises ValueError: if no IDs were found
         :raises NoRemainingDocumentError: if all documents are already processed
         """
-        translations = sorted(fn[:-4] for fn in os.listdir(self.translation_dir))
+        translations = sorted(fn[:-4] for fn in os.listdir(self.input_dir))
 
         processed_files = sorted(os.listdir(self.out_dir))
         if processed_files:

@@ -1,30 +1,27 @@
 import os
 import re
-import shutil
 from datetime import datetime
 
+from narraint import config
+from narraint.backend import types
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.base import BaseTagger, finalize_dir
+from narraint.preprocessing.tagging.base import BaseTagger, REGEX_TAG_LINE_NORMAL
 
 
 class DocumentError(Exception):
     pass
 
 
-# supports the following dosage forms:
-# D26.255 Dosage Forms
-# E02.319.300 Drug Delivery Systems
-# J01.637.512.600 Nanoparticles
-# J01.637.512.850 Nanotubes
-# J01.637.512.925 Nanowires
-
-
 class DosageFormTagger(BaseTagger):
-    # DOSAGE_FORM_ID = "D004304"
-
-    DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600", "J01.637.512.850", "J01.637.512.925"]
-    TYPE = "DosageForm"
-    MESH_FILE = "../data/desc2020.xml"
+    DOSAGE_FORM_TREE_NUMBERS = (
+        "D26.255",  # Dosage Forms
+        "E02.319.300",  # Drug Delivery Systems
+        "J01.637.512.600",  # Nanoparticles
+        "J01.637.512.850",  # Nanotubes
+        "J01.637.512.925",  # Nanowires
+    )
+    TYPES = (types.DOSAGE_FORM,)
+    __version__ = "1.0.0"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,11 +31,11 @@ class DosageFormTagger(BaseTagger):
         self.log_file = os.path.join(self.log_dir, "dosage.log")
         self.meshdb = None
         self.desc_by_term = {}
-        self.regex = re.compile(r"^(\d+)\|t\|\s(.*?)\n\d+\|a\|\s(.*?)$")
+        self.regex = re.compile(r"^(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)$")
 
     def prepare(self, resume=False):
         self.meshdb = MeSHDB.instance()
-        self.meshdb.load_xml(self.MESH_FILE)
+        self.meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
 
         for df_tn in self.DOSAGE_FORM_TREE_NUMBERS:
             dosage_form_header_node = self.meshdb.desc_by_tree_number(df_tn)
@@ -68,34 +65,35 @@ class DosageFormTagger(BaseTagger):
                         else:
                             continue
                     self.desc_by_term[term] = dosage_form.unique_id
-
+        # Create output directory
         if not resume:
-            shutil.copytree(self.translation_dir, self.in_dir)
             os.mkdir(self.out_dir)
         else:
-            raise NotImplementedError
+            raise NotImplementedError("Resuming DosageFormTagger is not implemented.")
 
-    def finalize(self):
-        finalize_dir(self.out_dir, self.result_file)
+    def get_tags(self):
+        tags = []
+        for fn in os.listdir(self.out_dir):
+            with open(os.path.join(self.out_dir, fn)) as f:
+                tags.extend(REGEX_TAG_LINE_NORMAL.findall(f.read()))
+        return tags
 
     def run(self):
         skipped_files = []
-        files_total = len(os.listdir(self.in_dir))
+        files_total = len(self.files)
         start_time = datetime.now()
 
-        for fn in os.listdir(self.in_dir):
-            if fn.endswith(".txt"):
-                in_file = os.path.join(self.in_dir, fn)
-                out_file = os.path.join(self.out_dir, fn)
+        for in_file in self.files:
+            if in_file.endswith(".txt"):
+                out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
                     self.tag(in_file, out_file)
                 except DocumentError:
                     skipped_files.append(in_file)
                     self.logger.info("DocumentError for {}".format(in_file))
-                os.remove(in_file)
                 self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
             else:
-                self.logger.debug("Ignoring {}: Suffix .txt missing".format(fn))
+                self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
 
         end_time = datetime.now()
         self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
@@ -112,11 +110,11 @@ class DosageFormTagger(BaseTagger):
         if not match:
             raise DocumentError
         pmid, title, abstact = match.group(1, 2, 3)
-        content = title + " " + abstact
+        content = title.strip() + " " + abstact.strip()
         content = content.lower()
 
         # Generate output
-        output = document.strip() + "\n"
+        output = ""
         for term, desc in self.desc_by_term.items():
             for match in re.finditer(term, content):
                 start = match.start()
@@ -140,10 +138,9 @@ class DosageFormTagger(BaseTagger):
                 occurrence = occurrence.rstrip(".,;")
 
                 line = "{id}\t{start}\t{end}\t{str}\t{type}\tMESH:{desc}\n".format(
-                    id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=self.TYPE, desc=desc
+                    id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=types.DOSAGE_FORM, desc=desc
                 )
                 output += line
-        output += "\n"
 
         # Write
         with open(out_file, "w") as f:

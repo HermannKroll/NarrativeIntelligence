@@ -5,11 +5,16 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from narraint.preprocessing.tagging.base import BaseTagger, get_pmcid_from_filename, get_exception_causing_file_from_log, \
+from narraint.backend import types
+from narraint.preprocessing.tagging.base import BaseTagger, get_pmcid_from_filename, \
+    get_exception_causing_file_from_log, \
     finalize_dir
 
 
+# FIXME: Adapt to new API
 class GNorm(BaseTagger):
+    TYPES = (types.GENE,)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "gnorm_in")
@@ -19,7 +24,7 @@ class GNorm(BaseTagger):
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.translation_dir, self.in_dir)
+            shutil.copytree(self.input_dir, self.in_dir)
             os.mkdir(self.out_dir)
         else:
             self.logger.info("Resuming")

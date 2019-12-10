@@ -4,10 +4,13 @@ import subprocess
 from datetime import datetime
 from time import sleep
 
+from narraint.backend import types
 from narraint.preprocessing.tagging.base import BaseTagger, finalize_dir
 
-
+# FIXME: Adapt to new API
 class TMChem(BaseTagger):
+    TYPES = (types.CHEMICAL,)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "tchem_in")
@@ -17,7 +20,7 @@ class TMChem(BaseTagger):
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.translation_dir, self.in_dir)
+            shutil.copytree(self.input_dir, self.in_dir)
             os.mkdir(self.out_dir)
         else:
             self.logger.info("Resuming")
