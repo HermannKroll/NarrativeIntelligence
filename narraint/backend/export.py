@@ -26,9 +26,11 @@ def main():
     parser.add_argument("-c", "--collection", help="Collection(s)")
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
-    parser.add_argument("--merge", action="store_true")
     parser.add_argument("--log", action="store_true")
     args = parser.parse_args()
+
+    if not (args.tag or args.document):
+        parser.error('No action requested, add -d or -t')
 
     if args.log:
         logging.basicConfig()
@@ -57,16 +59,27 @@ def main():
     if args.tag and "A" not in args.tag:
         query = query.filter(Tag.type.in_([TAG_TYPE_MAPPING[x] for x in args.tag]))
 
-    print("Query: ", query)
     results = query.all()
     print("Number of results: ", len(results))
-    # TODO: Write to disk (with merge feature)
     if args.document and args.tag:
-        pass
+        with open(args.output, "w") as f:
+            doc = None
+            for document, tag in results:
+                if doc != document:
+                    if doc is not None:
+                        f.write("\n")
+                    f.write(document.to_pubtator())
+                    doc = document
+                f.write(tag.to_pubtator())
     elif args.document:
-        pass
+        with open(args.output, "w") as f:
+            for document in results:
+                f.write(document.to_pubtator() + "\n")
     else:
-        pass
+        with open(args.output, "w") as f:
+            for tag in results:
+                f.write(tag.to_pubtator())
+    print("Results written to {}".format(args.output))
 
 
 if __name__ == "__main__":

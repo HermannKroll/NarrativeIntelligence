@@ -23,6 +23,9 @@ class Document(Base):
     def __repr__(self):
         return "<Document {}{}>".format(self.collection, self.id)
 
+    def to_pubtator(self):
+        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=self.id, tit=self.title, abs=self.abstract)
+
 
 class Tag(Base):
     __tablename__ = "tag"
@@ -48,3 +51,7 @@ class Tag(Base):
     def __hash__(self):
         return hash((self.type, self.start, self.end, self.ent_id, self.ent_str, self.document_id,
                      self.document_collection))
+
+    def to_pubtator(self):
+        return "{}\t{}\t{}\t{}\t{}\t{}\n".format(self.document_id, self.start, self.end, self.ent_str, self.type,
+                                                 self.ent_id)
