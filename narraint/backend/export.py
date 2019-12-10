@@ -44,7 +44,6 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         query = query.filter(Tag.type.in_(tag_types))
 
     results = query.all()
-    print("Number of results: ", len(results))
     if content and tag_types:
         with open(out_fn, "w") as f:
             doc = None

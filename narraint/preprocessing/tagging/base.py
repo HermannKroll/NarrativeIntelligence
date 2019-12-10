@@ -41,10 +41,17 @@ class BaseTagger(Thread):
     def get_progress(self):
         raise NotImplementedError
 
-    # FIXME: Tags are added multiple times (observed with DosageForm Tagger)
     def finalize(self):
         session = Session.get()
-        for tag in self.get_tags():
+        tags = set(self.get_tags())
+        tags_cleaned = tags.copy()
+        for tag1 in tags:
+            for tag2 in tags_cleaned:
+                if int(tag2[1]) < int(tag1[1]) and int(tag2[2]) > int(tag1[2]):
+                    tags_cleaned.remove(tag1)
+                    break
+
+        for tag in tags_cleaned:
             session.add(Tag(
                 start=tag[1],
                 end=tag[2],

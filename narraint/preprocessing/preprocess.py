@@ -1,9 +1,9 @@
 import logging
 import os
-import pprint
 import re
 import tempfile
 from argparse import ArgumentParser
+from typing import List
 
 from narraint.backend import types
 from narraint.backend.database import Session
@@ -13,6 +13,7 @@ from narraint.backend.models import Document, Tag
 from narraint.backend.types import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.config import Config
+from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.gnorm import GNorm
@@ -39,17 +40,17 @@ def init_logger(log_filename, log_level):
     return logger
 
 
-def rename_input_files(translation_dir, logger):
-    for fn in os.listdir(translation_dir):
-        if not fn.startswith(".") and not fn.endswith("/"):
-            doc_id = re.search(r"\d+", fn)
-            if doc_id:
-                target_name = "PMC{}.txt".format(doc_id.group())
-                if fn != target_name:
-                    os.rename(os.path.join(translation_dir, fn), os.path.join(translation_dir, target_name))
-            else:
-                os.remove(os.path.join(translation_dir, fn))
-                logger.debug("Removing file {}: No ID found".format(fn))
+# def rename_input_files(translation_dir, logger):
+#     for fn in os.listdir(translation_dir):
+#         if not fn.startswith(".") and not fn.endswith("/"):
+#             doc_id = re.search(r"\d+", fn)
+#             if doc_id:
+#                 target_name = "PMC{}.txt".format(doc_id.group())
+#                 if fn != target_name:
+#                     os.rename(os.path.join(translation_dir, fn), os.path.join(translation_dir, target_name))
+#             else:
+#                 os.remove(os.path.join(translation_dir, fn))
+#                 logger.debug("Removing file {}: No ID found".format(fn))
 
 
 def get_id(fn):
@@ -59,14 +60,14 @@ def get_id(fn):
     return int(match.group(1))
 
 
-def preprocess(corpus, in_dir, output_filename, conf, *tag_types,
+def preprocess(collection, in_dir, output_filename, conf, *tag_types,
                resume=False, console_log_level="INFO", workdir=None, use_tagger_one=False):
     """
-    Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
-    Method expects an ID file or an ID list if resume=False.
-    Method expects the working directory (temp-directory) of the processing to resume if resume=True.
+    Method creates a single PubTator file with the documents from in ``in_dir`` and its tags.
 
-    :param use_tagger_one:
+    :param in_dir: Input directory containing PubTator files to tag
+    :param collection: Collection ID (e.g., PMC)
+    :param use_tagger_one: Flag to use TaggerOne instead of tmChem and DNorm
     :param workdir: Working directory
     :param console_log_level: Log level for console output
     :param output_filename: Filename of PubTator to create
@@ -85,13 +86,8 @@ def preprocess(corpus, in_dir, output_filename, conf, *tag_types,
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
     logger = init_logger(os.path.join(log_dir, "preprocessing.log"), console_log_level)
-    logging.getLogger('sqlalchemy.engine').setLevel(console_log_level)
     logger.info("Project directory: {}".format(root_dir))
     logger.debug("Input directory: {}".format(input_dir))
-
-    # if not resume:
-    #    shutil.copytree(in_dir, input_dir)
-    #    rename_input_files(input_dir, logger)
 
     target_ids = set()
     file_id_mapping = dict()
@@ -104,25 +100,27 @@ def preprocess(corpus, in_dir, output_filename, conf, *tag_types,
         doc_id = get_id(abs_path)
         target_ids.add(doc_id)
         file_id_mapping[doc_id] = abs_path
+    logger.info("Preprocessing {} documents".format(len(target_ids)))
 
     # Get input documents for each tagger
     for tag_type in tag_types:
         result = session.query(Document).join(Tag).filter(
             Document.id.in_(target_ids),
-            Document.collection == corpus,
+            Document.collection == collection,
             Tag.type == tag_type,
         ).distinct().values(Document.id)
         present_ids = set(x[0] for x in result)
         missing_ids = target_ids.difference(present_ids)
         missing_files_type[tag_type] = frozenset(file_id_mapping[x] for x in missing_ids)
-
-    pprint.pprint(missing_files_type)
-    pprint.pprint(file_id_mapping)
+        task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
+        with open(task_list_fn, "w") as f:
+            f.write("\n".join(missing_files_type[tag_type]))
+        logger.info("Tasklist for {} contains {} documents".format(tag_type, len(missing_ids)))
 
     # Init taggers
-    kwargs = dict(collection=corpus, root_dir=root_dir, input_dir=input_dir,
+    kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
                   log_dir=log_dir, config=conf, file_mapping=file_id_mapping)
-    taggers = []
+    taggers: List[BaseTagger] = []
     if types.GENE in tag_types:
         taggers.append(GNorm(**kwargs))
     if types.DISEASE in tag_types and not use_tagger_one:
@@ -137,6 +135,7 @@ def preprocess(corpus, in_dir, output_filename, conf, *tag_types,
         for target_type in tagger.TYPES:
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
+    logger.info("Initialized taggers")
     print("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         tagger.start()
@@ -145,8 +144,7 @@ def preprocess(corpus, in_dir, output_filename, conf, *tag_types,
     print("=== STEP 3 - Post-processing ===")
     for tagger in taggers:
         tagger.finalize()
-    # TODO: Add clean step to expand overlapping tags
-    export(output_filename, tag_types, target_ids, collection=corpus, content=True)
+    export(output_filename, tag_types, target_ids, collection=collection, content=True)
     print("=== Finished ===")
 
 
@@ -195,8 +193,8 @@ def main():
     tag_types = types.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     # TODO: Add SQL logging
-    #logging.basicConfig()
-    #logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+    # logging.basicConfig()
+    # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     # Run actual preprocessing
     preprocess(args.corpus, in_dir, args.output, conf, *tag_types,
