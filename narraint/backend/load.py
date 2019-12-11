@@ -9,6 +9,7 @@ from narraint.backend.models import Document, Tag
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, CONTENT_RAW
 
 
+# TODO: Ignore empty tags
 def bulk_load(path, collection, tagger=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
@@ -18,7 +19,7 @@ def bulk_load(path, collection, tagger=None):
     :param str path: Path to file or directory
     :return:
     """
-    sys.stdout.write("Reading file ...")
+    sys.stdout.write("Reading files ...")
     sys.stdout.flush()
     if os.path.isdir(path):
         files = [os.path.join(path, fn) for fn in os.listdir(path) if not fn.startswith(".") and fn.endswith(".txt")]
@@ -30,17 +31,67 @@ def bulk_load(path, collection, tagger=None):
         with open(path) as f:
             content = f.read()
         content_list = CONTENT_RAW.findall(content)
-    sys.stdout.write(" done\n")
-    sys.stdout.write("Processing {} documents ... 0.0 %".format(len(content_list)))
+
+    document_ids = set()
+    documents = set()
+    tags = set()
+    for text in content_list:
+        m_tags = TAG_LINE_NORMAL.findall(text)
+        m_documents = CONTENT_ID_TIT_ABS.findall(text)
+        document_ids.update(int(m[0]) for m in m_documents)
+        documents.update((int(m[0]), m[1].strip(), m[2].strip()) for m in m_documents)
+        tags.update((int(m[0]), int(m[1]), int(m[2]), m[3].strip(), m[4].strip(), m[5].strip()) for m in m_tags)
+    total_items = len(documents) + len(tags)
+    sys.stdout.write(" {} documents and {} tags\n".format(len(documents), len(tags)))
+
+    sys.stdout.write("Retrieving ... ")
+    sys.stdout.flush()
+
+    session = Session.get()
+    session.execute("LOCK TABLE document IN EXCLUSIVE MODE")
+    session.execute("LOCK TABLE tag IN EXCLUSIVE MODE")
+    db_document_ids = set(
+        x[0] for x in session.query(Document).filter(Document.collection == collection).values(Document.id))
+    db_tags = set(session.query(Tag).filter(Tag.document_collection == collection).values(
+        Tag.document_id, Tag.start, Tag.end, Tag.ent_str, Tag.type, Tag.ent_id,
+    ))
+    sys.stdout.write("\rRetrieving ... {} documents and {} tags\n".format(len(db_document_ids), len(db_tags)))
+    sys.stdout.flush()
+
+    sys.stdout.write("Preparing ... 0.0 %")
     sys.stdout.flush()
     start = datetime.now()
-    for idx, content in enumerate(content_list):
-        load_single(content, collection, tagger)
-        sys.stdout.write("\rProcessing {} documents ... {:0.1f} %".format(
-            len(content_list),
-            (idx + 1.0) / len(content_list) * 100.0))
+    for idx, doc in enumerate(documents):
+        if doc[0] not in db_document_ids:
+            session.add(Document(
+                id=doc[0],
+                collection=collection,
+                title=doc[1],
+                abstract=doc[2],
+                date_inserted=datetime.now(),
+            ))
+        sys.stdout.write("\rPreparing ... {:0.1f} %".format((idx + 1.0) / total_items * 100.0))
         sys.stdout.flush()
-    sys.stdout.write(" in {}\n".format(datetime.now() - start))
+    for idx, tag in enumerate(tags):
+        if tag not in db_tags:
+            session.add(Tag(
+                start=tag[1],
+                end=tag[2],
+                type=tag[4],
+                ent_str=tag[3],
+                ent_id=tag[5],
+                document_id=tag[0],
+                document_collection=collection,
+                tagger=tagger,
+            ))
+        sys.stdout.write("\rPreparing ... {:0.1f} %".format((len(documents) + idx + 1.0) / total_items * 100.0))
+        sys.stdout.flush()
+    sys.stdout.write("\rPreparing ... done in {}\nCommitting ...".format(datetime.now() - start))
+    sys.stdout.flush()
+    start = datetime.now()
+    session.commit()
+    sys.stdout.write(" done in {}\n".format(datetime.now() - start))
+    sys.stdout.flush()
 
 
 def tag_kwargs_from_match(m, collection):
