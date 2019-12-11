@@ -7,7 +7,6 @@ from narraint.backend.database import Session
 from narraint.backend.models import Tag
 
 OUTPUT_INTERVAL = 30
-REGEX_TAG_LINE_NORMAL = re.compile(r"(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 
 
 class BaseTagger(Thread):

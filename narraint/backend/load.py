@@ -1,16 +1,12 @@
 import argparse
 import logging
 import os
-import re
 import sys
 from datetime import datetime
 
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
-
-PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)\n")
-TAG_REGEX = re.compile(r"(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
-PUBTATOR_CONTENT_REGEX = re.compile(r"\d+.*?\n\n", re.DOTALL)
+from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, CONTENT_RAW
 
 
 def bulk_load(path, collection, tagger=None):
@@ -33,7 +29,7 @@ def bulk_load(path, collection, tagger=None):
     else:
         with open(path) as f:
             content = f.read()
-        content_list = PUBTATOR_CONTENT_REGEX.findall(content)
+        content_list = CONTENT_RAW.findall(content)
     sys.stdout.write(" done\n")
     sys.stdout.write("Processing {} documents ... 0.0 %".format(len(content_list)))
     sys.stdout.flush()
@@ -73,10 +69,10 @@ def load_single(content, collection, tagger=None):
     :param str or None tagger: Name of the tagger
     """
     session = Session.get()
-    document_match = PUBTATOR_REGEX.match(content)
+    document_match = CONTENT_ID_TIT_ABS.match(content)
     document_id = int(document_match.group(1))
     q_document = session.query(Document).filter_by(id=document_id, collection=collection).exists()
-    tags_match = TAG_REGEX.findall(content)
+    tags_match = TAG_LINE_NORMAL.findall(content)
     tag_kwargs = [tag_kwargs_from_match(m, collection) for m in tags_match]
     q_tags = [session.query(Tag).filter_by(**kwargs).exists() for kwargs in tag_kwargs]
     results = session.query(q_document, *q_tags).all()[0]

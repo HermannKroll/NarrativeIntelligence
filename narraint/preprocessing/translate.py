@@ -36,6 +36,7 @@ class DocumentEmptyError(Exception):
     pass
 
 
+# TODO: Move to pubtator package
 class PMCCollector:
     def __init__(self, search_directory):
         self.search_directory = search_directory
@@ -71,6 +72,7 @@ class PMCCollector:
         return result_files
 
 
+# TODO: Rename to parsing
 class PMCTranslator:
     PATTERNS_TO_DELETE = (
         re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>

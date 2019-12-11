@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import tempfile
 from argparse import ArgumentParser
 from typing import List
@@ -20,9 +19,9 @@ from narraint.preprocessing.tagging.gnorm import GNorm
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.preprocessing.translate import PMCCollector, PMCTranslator
+from narraint.pubtator.document import get_document_id
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
-REGEX_PUBTATOR_ID = re.compile(r"(\d+)\|t\|")
 
 
 def init_logger(log_filename, log_level):
@@ -38,26 +37,6 @@ def init_logger(log_filename, log_level):
     logger.addHandler(fh)
     logger.addHandler(ch)
     return logger
-
-
-# def rename_input_files(translation_dir, logger):
-#     for fn in os.listdir(translation_dir):
-#         if not fn.startswith(".") and not fn.endswith("/"):
-#             doc_id = re.search(r"\d+", fn)
-#             if doc_id:
-#                 target_name = "PMC{}.txt".format(doc_id.group())
-#                 if fn != target_name:
-#                     os.rename(os.path.join(translation_dir, fn), os.path.join(translation_dir, target_name))
-#             else:
-#                 os.remove(os.path.join(translation_dir, fn))
-#                 logger.debug("Removing file {}: No ID found".format(fn))
-
-
-def get_id(fn):
-    with open(fn) as f:
-        line = f.readline()
-    match = REGEX_PUBTATOR_ID.match(line)
-    return int(match.group(1))
 
 
 def preprocess(collection, in_dir, output_filename, conf, *tag_types,
@@ -97,7 +76,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     # Gather target IDs
     for fn in os.listdir(input_dir):
         abs_path = os.path.join(input_dir, fn)
-        doc_id = get_id(abs_path)
+        doc_id = get_document_id(abs_path)
         target_ids.add(doc_id)
         file_id_mapping[doc_id] = abs_path
     logger.info("Preprocessing {} documents".format(len(target_ids)))

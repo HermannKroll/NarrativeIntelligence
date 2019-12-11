@@ -4,8 +4,9 @@ from datetime import datetime
 
 from narraint import config
 from narraint.backend import types
+from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.base import BaseTagger, REGEX_TAG_LINE_NORMAL
+from narraint.preprocessing.tagging.base import BaseTagger
 
 
 class DocumentError(Exception):
@@ -31,7 +32,6 @@ class DosageFormTagger(BaseTagger):
         self.log_file = os.path.join(self.log_dir, "dosage.log")
         self.meshdb = None
         self.desc_by_term = {}
-        self.regex = re.compile(r"^(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)$")
 
     def prepare(self, resume=False):
         self.meshdb = MeSHDB.instance()
@@ -75,7 +75,7 @@ class DosageFormTagger(BaseTagger):
         tags = []
         for fn in os.listdir(self.out_dir):
             with open(os.path.join(self.out_dir, fn)) as f:
-                tags.extend(REGEX_TAG_LINE_NORMAL.findall(f.read()))
+                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
         return tags
 
     def run(self):
@@ -106,7 +106,7 @@ class DosageFormTagger(BaseTagger):
     def tag(self, in_file, out_file):
         with open(in_file) as f:
             document = f.read()
-        match = self.regex.match(document.strip())
+        match = CONTENT_ID_TIT_ABS.match(document)
         if not match:
             raise DocumentError
         pmid, title, abstact = match.group(1, 2, 3)

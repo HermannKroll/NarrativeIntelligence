@@ -1,12 +1,12 @@
 import argparse
-import re
-import os
 import logging
+import re
 
 REGEX_TITLE_OR_ABSTRACT = re.compile("(\d+)\|[at]\|(.*?)\n")
-REGEX_TAGS = re.compile("(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 
-def extract_pubtator_docs(input, id_file, output, logger):
+
+# TODO: Replace by collector class
+def extract_pubtator_docs(collection_dir, id_file, output, logger):
     logger.info('opening id file {}...'.format(id_file))
     ids = set()
     with open(id_file, 'r') as f:
@@ -15,7 +15,7 @@ def extract_pubtator_docs(input, id_file, output, logger):
 
     logger.info('{} documents to extract...'.format(len(ids)))
     logger.info('processing input file...')
-    with open(input, 'r') as f:
+    with open(collection_dir, 'r') as f:
         with open(output, 'w') as f_out:
             doc_id = -1
             doc_lines = []

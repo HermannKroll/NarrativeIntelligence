@@ -1,15 +1,10 @@
 import argparse
 import logging
-import re
 
 from narraint.backend import types
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
 from narraint.backend.types import TAG_TYPE_MAPPING
-
-PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)\n")
-TAG_REGEX = re.compile(r"(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
-PUBTATOR_CONTENT_REGEX = re.compile(r"\d+.*?\n\n", re.DOTALL)
 
 
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True):

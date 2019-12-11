@@ -6,7 +6,7 @@ from time import sleep
 
 from narraint.backend import types
 from narraint.preprocessing.tagging.base import BaseTagger
-from narraint.preprocessing.tools import count_documents
+from narraint.pubtator.count import count_documents
 
 
 class DNorm(BaseTagger):

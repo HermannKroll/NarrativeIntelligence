@@ -2,7 +2,7 @@ import argparse
 import os
 import pickle
 
-from frontend.settings import base as settings
+from narraint.frontend.frontend.settings import base as settings
 from narraint.mesh.data import MeSHDB
 
 
