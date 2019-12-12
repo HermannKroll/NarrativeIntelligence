@@ -6,47 +6,70 @@ from datetime import datetime
 
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, CONTENT_RAW
+from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
+from narraint.tools import count_lines
 
 
-# TODO: Ignore empty tags
+def get_ids_contents_tags(pubtator_content):
+    m_tags = TAG_LINE_NORMAL.findall(pubtator_content)
+    m_documents = CONTENT_ID_TIT_ABS.findall(pubtator_content)
+    document_ids = set(int(m[0]) for m in m_documents)
+    documents = set((int(m[0]), m[1].strip(), m[2].strip()) for m in m_documents)
+    tags = set((int(m[0]), int(m[1]), int(m[2]), m[3].strip(), m[4].strip(), m[5].strip()) for m in m_tags)
+    return document_ids, documents, tags
+
+
 def bulk_load(path, collection, tagger=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
+
+    1. Read file memory-friendly and create sets for document ids, documents and tags
+    2. Retrieve existing documents and tags (lock table)
+    3. Prepare statements (check if documents/tags are) already in database)
+    4. Commit transaction
 
     :param str or None tagger: Name of the used tagger
     :param str collection: Identifier of the collection (e.g., PMC)
     :param str path: Path to file or directory
     :return:
     """
-    sys.stdout.write("Reading files ...")
+    sys.stdout.write("Reading files ... 0.0 %")
     sys.stdout.flush()
-    if os.path.isdir(path):
-        files = [os.path.join(path, fn) for fn in os.listdir(path) if not fn.startswith(".") and fn.endswith(".txt")]
-        content_list = []
-        for fn in files:
-            with open(fn) as f:
-                content_list.append(f.read())
-    else:
-        with open(path) as f:
-            content = f.read()
-        content_list = CONTENT_RAW.findall(content)
-
     document_ids = set()
     documents = set()
     tags = set()
-    for text in content_list:
-        m_tags = TAG_LINE_NORMAL.findall(text)
-        m_documents = CONTENT_ID_TIT_ABS.findall(text)
-        document_ids.update(int(m[0]) for m in m_documents)
-        documents.update((int(m[0]), m[1].strip(), m[2].strip()) for m in m_documents)
-        tags.update((int(m[0]), int(m[1]), int(m[2]), m[3].strip(), m[4].strip(), m[5].strip()) for m in m_tags)
+    if os.path.isdir(path):
+        files = [os.path.join(path, fn) for fn in os.listdir(path) if not fn.startswith(".") and fn.endswith(".txt")]
+        for fn in files:
+            with open(fn) as f:
+                d_ids, d_contents, d_tags = get_ids_contents_tags(f.read())
+                document_ids.update(d_ids)
+                documents.update(d_contents)
+                tags.update(d_tags)
+    else:
+        content = ""
+        line_count = count_lines(path)
+        last_percentage = 0
+        with open(path) as f:
+            for idx, line in enumerate(f):
+                if line.strip():
+                    content += line
+                else:
+                    d_ids, d_contents, d_tags = get_ids_contents_tags(content)
+                    document_ids.update(d_ids)
+                    documents.update(d_contents)
+                    tags.update(d_tags)
+                    content = ""
+                if int((idx + 1.0) / line_count * 1000.0) > last_percentage:
+                    last_percentage = int((idx + 1.0) / line_count * 1000.0)
+                    sys.stdout.write("\rReading files ... {:.1f} %".format(last_percentage / 10.0))
+                    sys.stdout.flush()
     total_items = len(documents) + len(tags)
     sys.stdout.write(" {} documents and {} tags\n".format(len(documents), len(tags)))
 
+    # Retrieving existing documents
     sys.stdout.write("Retrieving ... ")
     sys.stdout.flush()
-
     session = Session.get()
     session.execute("LOCK TABLE document IN EXCLUSIVE MODE")
     session.execute("LOCK TABLE tag IN EXCLUSIVE MODE")
@@ -58,9 +81,11 @@ def bulk_load(path, collection, tagger=None):
     sys.stdout.write("\rRetrieving ... {} documents and {} tags\n".format(len(db_document_ids), len(db_tags)))
     sys.stdout.flush()
 
+    # Preparing ORM objects
     sys.stdout.write("Preparing ... 0.0 %")
     sys.stdout.flush()
     start = datetime.now()
+    last_percentage = 0
     for idx, doc in enumerate(documents):
         if doc[0] not in db_document_ids:
             session.add(Document(
@@ -70,10 +95,12 @@ def bulk_load(path, collection, tagger=None):
                 abstract=doc[2],
                 date_inserted=datetime.now(),
             ))
-        sys.stdout.write("\rPreparing ... {:0.1f} %".format((idx + 1.0) / total_items * 100.0))
-        sys.stdout.flush()
+        if int((idx + 1.0) / total_items * 1000.0) > last_percentage:
+            last_percentage = int((idx + 1.0) / total_items * 1000.0)
+            sys.stdout.write("\rPreparing ... {:0.1f} %".format(last_percentage / 10.0))
+            sys.stdout.flush()
     for idx, tag in enumerate(tags):
-        if tag not in db_tags:
+        if tag not in db_tags and tag[5].strip():
             session.add(Tag(
                 start=tag[1],
                 end=tag[2],
@@ -88,6 +115,8 @@ def bulk_load(path, collection, tagger=None):
         sys.stdout.flush()
     sys.stdout.write("\rPreparing ... done in {}\nCommitting ...".format(datetime.now() - start))
     sys.stdout.flush()
+
+    # Committing to database
     start = datetime.now()
     session.commit()
     sys.stdout.write(" done in {}\n".format(datetime.now() - start))
@@ -124,7 +153,7 @@ def load_single(content, collection, tagger=None):
     document_id = int(document_match.group(1))
     q_document = session.query(Document).filter_by(id=document_id, collection=collection).exists()
     tags_match = TAG_LINE_NORMAL.findall(content)
-    tag_kwargs = [tag_kwargs_from_match(m, collection) for m in tags_match]
+    tag_kwargs = [tag_kwargs_from_match(m, collection) for m in tags_match if m[5].strip()]
     q_tags = [session.query(Tag).filter_by(**kwargs).exists() for kwargs in tag_kwargs]
     results = session.query(q_document, *q_tags).all()[0]
     exists_doc = results[0]

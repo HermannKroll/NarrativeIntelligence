@@ -6,6 +6,16 @@ from narraint.frontend.frontend.settings import base as settings
 from narraint.mesh.data import MeSHDB
 
 
+def count_lines(filename):
+    count = 0
+    with open(filename, 'rb') as f:
+        buffer = True
+        while buffer:
+            buffer = f.read(8192 * 1024)
+            count += buffer.count(b'\n')
+    return count
+
+
 def build_index():
     db = MeSHDB.instance()
     db.load_xml(settings.DESCRIPTOR_FILE, True, True)

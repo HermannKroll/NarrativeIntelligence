@@ -6,12 +6,11 @@ from shutil import copyfile
 from time import sleep
 
 from narraint.backend import types
-from narraint.preprocessing.tagging.base import BaseTagger, get_pmcid_from_filename, \
-    get_exception_causing_file_from_log, \
-    finalize_dir
+from narraint.preprocessing.tagging.base import BaseTagger, get_exception_causing_file_from_log
+from narraint.pubtator.document import get_document_id
+from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
-# FIXME: Adapt to new API
 class GNorm(BaseTagger):
     TYPES = (types.GENE,)
 
@@ -24,13 +23,20 @@ class GNorm(BaseTagger):
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.input_dir, self.in_dir)
+            os.mkdir(self.in_dir)
+            for fn in self.files:
+                target = os.path.join(self.in_dir, fn.split("/")[-1])
+                shutil.copy(fn, target)
             os.mkdir(self.out_dir)
         else:
             self.logger.info("Resuming")
 
-    def finalize(self):
-        finalize_dir(self.out_dir, self.result_file)
+    def get_tags(self):
+        tags = []
+        for fn in os.listdir(self.out_dir):
+            with open(os.path.join(self.out_dir, fn)) as f:
+                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
+        return tags
 
     def run(self):
         """
@@ -64,10 +70,10 @@ class GNorm(BaseTagger):
                 # Java Exception
                 last_file = get_exception_causing_file_from_log(self.log_file)
                 if last_file:
-                    last_pmcid = get_pmcid_from_filename(last_file)
+                    last_id = get_document_id(last_file)
                     skipped_files.append(last_file)
                     self.logger.debug("Exception in file {}".format(last_file))
-                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_pmcid))
+                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_id))
                     os.remove(last_file)
                 else:
                     # No file processed, assume another error
@@ -77,10 +83,11 @@ class GNorm(BaseTagger):
                 keep_tagging = False
 
         end_time = datetime.now()
-        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(end_time - start_time,
-                                                                                                 self.get_progress(),
-                                                                                                 files_total,
-                                                                                                 len(skipped_files)))
+        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
+            end_time - start_time,
+            self.get_progress(),
+            files_total,
+            len(skipped_files)))
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

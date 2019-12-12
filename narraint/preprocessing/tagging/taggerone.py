@@ -7,7 +7,8 @@ from shutil import copyfile
 from time import sleep
 
 from narraint.backend import types
-from narraint.preprocessing.tagging.base import BaseTagger, finalize_dir
+from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
 class NoRemainingDocumentError(Exception):
@@ -17,12 +18,15 @@ class NoRemainingDocumentError(Exception):
     pass
 
 
-# FIXME: Adapt to new API
 class TaggerOne(BaseTagger):
     TYPES = (types.CHEMICAL, types.DISEASE)
 
-    def finalize(self):
-        finalize_dir(self.out_dir, self.result_file, batch_mode=True)
+    def get_tags(self):
+        tags = []
+        for fn in os.listdir(self.out_dir):
+            with open(os.path.join(self.out_dir, fn)) as f:
+                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
+        return tags
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,7 +39,10 @@ class TaggerOne(BaseTagger):
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.input_dir, self.in_dir)
+            os.mkdir(self.in_dir)
+            for fn in self.files:
+                target = os.path.join(self.in_dir, fn.split("/")[-1])
+                shutil.copy(fn, target)
             os.mkdir(self.out_dir)
             os.mkdir(self.batch_dir)
         else:
@@ -52,7 +59,7 @@ class TaggerOne(BaseTagger):
         skipped = []
         for fn in batch:
             filename = os.path.join(self.in_dir, fn)
-            if os.path.exists(filename):  # Important if file was delted
+            if os.path.exists(filename):  # Important if file was deleted
                 with open(filename) as f_doc:
                     with open(batch_file, "a+") as f_batch:
                         f_batch.write(f_doc.read())
@@ -77,6 +84,7 @@ class TaggerOne(BaseTagger):
 
         return next_pivot
 
+    # TODO: Adapt to API
     def get_next_document_id(self):
         """
         Method searches the already tagged documents and returns the next document to start with.
@@ -93,15 +101,14 @@ class TaggerOne(BaseTagger):
 
         processed_files = sorted(os.listdir(self.out_dir))
         if processed_files:
-            last_batch_file = processed_files[-1]
-            last_batch_path = os.path.join(self.out_dir, last_batch_file)
-            with open(last_batch_path) as f:
+            last_batch_file = os.path.join(self.out_dir, processed_files[-1])
+            with open(last_batch_file) as f:
                 content = f.read()
             finished_ids = re.findall(r"(\d+)\|t\|", content)
             if finished_ids:
                 last_id = "PMC{}".format(finished_ids[-1])
             else:
-                raise ValueError("TaggerOne result {} is empty. Please remove manually.".format(last_batch_path))
+                raise ValueError("TaggerOne result {} is empty. Please remove manually.".format(last_batch_file))
             last_idx = translations.index(last_id)
             if last_idx == len(translations) - 1:
                 raise NoRemainingDocumentError
@@ -109,6 +116,7 @@ class TaggerOne(BaseTagger):
         else:
             return translations[0]
 
+    # TODO: Adapt to API
     def run(self, start_with=None):
         """
         Use TaggerOne to tag chemicals and diseases for PubMedCentral documents contained in ``translation_dir``.
