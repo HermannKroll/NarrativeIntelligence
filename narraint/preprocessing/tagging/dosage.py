@@ -28,7 +28,6 @@ class DosageFormTagger(BaseTagger):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "dosage_in")
         self.out_dir = os.path.join(self.root_dir, "dosage_out")
-        self.result_file = os.path.join(self.root_dir, "dosage.txt")
         self.log_file = os.path.join(self.log_dir, "dosage.log")
         self.meshdb = None
         self.desc_by_term = {}
@@ -72,11 +71,7 @@ class DosageFormTagger(BaseTagger):
             raise NotImplementedError("Resuming DosageFormTagger is not implemented.")
 
     def get_tags(self):
-        tags = []
-        for fn in os.listdir(self.out_dir):
-            with open(os.path.join(self.out_dir, fn)) as f:
-                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
-        return tags
+        self._get_tags(self.out_dir)
 
     def run(self):
         skipped_files = []

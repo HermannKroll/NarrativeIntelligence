@@ -19,6 +19,8 @@ from typing import List
 from lxml import etree, html
 from lxml.etree import ParserError
 
+from narraint.preprocessing.collect import PMCCollector
+
 MAX_CONTENT_LENGTH = 500000
 FMT_EPA_TTL = "TIB-EPA"
 FMT_PMC_XML = "PMC-XML"
@@ -36,44 +38,7 @@ class DocumentEmptyError(Exception):
     pass
 
 
-# TODO: Move to pubtator package
-class PMCCollector:
-    def __init__(self, search_directory):
-        self.search_directory = search_directory
-
-    def get_ids(self, id_list_or_filename):
-        if isinstance(id_list_or_filename, str):
-            with open(id_list_or_filename) as f:
-                ids = set(line.strip() for line in f)
-        else:
-            ids = set(id_list_or_filename)
-        return ids
-
-    def collect(self, id_list_or_filename):
-        """
-        Method searches ``search_directory`` recursively for files starting with a specific id.
-        Method either takes a filename or a list. The file should contain the ids (one id per line).
-        Method returns a list of absolute paths to the files starting with the specific id.
-
-        :param id_list_or_filename: List of ids / filename to a file containing the ids
-        :return: List of absolute paths to found files
-        """
-        sys.stdout.write("Collecting files ...")
-        sys.stdout.flush()
-        ids = self.get_ids(id_list_or_filename)
-
-        result_files = []
-        for root, dirs, files in os.walk(self.search_directory):
-            result_files.extend(os.path.join(root, fname) for fname in files if fname[:-5] in ids)
-
-        sys.stdout.write(" done.\n")
-        sys.stdout.flush()
-
-        return result_files
-
-
-# TODO: Rename to parsing
-class PMCTranslator:
+class PMCConverter:
     PATTERNS_TO_DELETE = (
         re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>
         re.compile(r"<inline-formula\s.*?</inline-formula>"),  # <inline-formula>
@@ -108,7 +73,7 @@ class PMCTranslator:
         text = self.clean_text(text)
         return text
 
-    def translate_single(self, in_file, out_file):
+    def convert(self, in_file, out_file):
         """
         Method takes a filename from an PMC-xml-file and returns the string in the PubTator format
         (e.g., <PMCID>|t| <Title> and <PMCID>|a| <Content>).
@@ -180,9 +145,9 @@ class PMCTranslator:
         else:
             raise DocumentEmptyError
 
-    def translate_multiple(self, filename_list: List[str], output_dir, err_file=None):
+    def convert_bulk(self, filename_list: List[str], output_dir, err_file=None):
         """
-        Method translates a set of PubMedCentral XML files to the PubTator format.
+        Method converts a set of PubMedCentral XML files to the PubTator format.
 
         :param err_file:
         :param filename_list: List of absolute paths to PMC files
@@ -197,7 +162,7 @@ class PMCTranslator:
             try:
                 out_file = os.path.join(output_dir, f"{pmcid}.txt")
                 try:
-                    self.translate_single(fn, out_file)
+                    self.convert(fn, out_file)
                 except (DocumentEmptyError, DocumentTooLargeError):
                     pass
                 else:
@@ -208,10 +173,10 @@ class PMCTranslator:
             # Output
             if ((current + 1) / count * 100.0) > last_percent:
                 last_percent = int((current + 1) / count * 100.0)
-                sys.stdout.write("\rTranslating ... {} %".format(last_percent))
+                sys.stdout.write("\rConverting ... {} %".format(last_percent))
                 sys.stdout.flush()
 
-        sys.stdout.write("\nDone ({} files processed, {} errors)\n".format(count, len(ignored_files)))
+        sys.stdout.write(" done ({} files processed, {} errors)\n".format(count, len(ignored_files)))
 
         if err_file:
             with open(err_file, "w") as f:
@@ -219,11 +184,11 @@ class PMCTranslator:
             print("See {} for a list of ignored files.".format(err_file))
 
 
-class TIBTranslator:
+class PatentConverter:
     REGEX_ID = re.compile(r"^\d+$")
     COUNTRIES = {"AU", "CN", "WO", "GB", "US", "EP", "CA"}
 
-    def translate(self, in_file, out_dir):
+    def convert(self, in_file, out_dir):
         """
         `in_file` is the file preprocessed by the Academic library of the TU Braunschweig.
 
@@ -271,7 +236,7 @@ class TIBTranslator:
 
 
 def main():
-    parser = ArgumentParser(description="Tool to translate PubMedCentral XML files/Patent files to Pubtator format")
+    parser = ArgumentParser(description="Tool to convert PubMedCentral XML files/Patent files to Pubtator format")
 
     parser.add_argument("-c", "--collect", metavar="DIR", help="Collect PubMedCentral files from DIR")
     parser.add_argument("-f", "--format", help="Format of input files", default=FMT_PMC_XML,
@@ -282,21 +247,21 @@ def main():
     args = parser.parse_args()
 
     if args.format == FMT_PMC_XML:
-        t = PMCTranslator()
+        t = PMCConverter()
         if args.collect:
             collector = PMCCollector(args.collect)
             files = collector.collect(args.input)
-            t.translate_multiple(files, args.output)
+            t.convert_bulk(files, args.output)
         else:
             if os.path.isdir(args.input):
                 files = [os.path.join(args.input, fn) for fn in os.listdir(args.input) if fn.endswith(".nxml")]
-                t.translate_multiple(files, args.output)
+                t.convert_bulk(files, args.output)
             else:
-                t.translate_single(args.input, args.output)
+                t.convert(args.input, args.output)
 
     if args.format == FMT_EPA_TTL:
-        t = TIBTranslator()
-        t.translate(args.input, args.output)
+        t = PatentConverter()
+        t.convert(args.input, args.output)
 
 
 if __name__ == "__main__":

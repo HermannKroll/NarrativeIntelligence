@@ -18,7 +18,8 @@ from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.gnorm import GNorm
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.preprocessing.translate import PMCCollector, PMCTranslator
+from narraint.pubtator.convert import PMCConverter
+from narraint.preprocessing.collect import PMCCollector
 from narraint.pubtator.document import get_document_id
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
@@ -162,8 +163,8 @@ def main():
         error_file = os.path.join(in_dir, "conversion_errors.txt")
         collector = PMCCollector(conf.pmc_dir)
         files = collector.collect(args.input)
-        translator = PMCTranslator()
-        translator.translate_multiple(files, in_dir, error_file)
+        translator = PMCConverter()
+        translator.convert_bulk(files, in_dir, error_file)
 
     # Add documents to database
     bulk_load(in_dir, args.corpus)

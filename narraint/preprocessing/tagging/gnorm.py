@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import subprocess
 from datetime import datetime
@@ -6,9 +7,8 @@ from shutil import copyfile
 from time import sleep
 
 from narraint.backend import types
-from narraint.preprocessing.tagging.base import BaseTagger, get_exception_causing_file_from_log
+from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import get_document_id
-from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
 class GNorm(BaseTagger):
@@ -18,8 +18,17 @@ class GNorm(BaseTagger):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "gnorm_in")
         self.out_dir = os.path.join(self.root_dir, "gnorm_out")
-        self.result_file = os.path.join(self.root_dir, "genes.txt")
         self.log_file = os.path.join(self.log_dir, "gnorm.log")
+
+    # TODO: Test if function works
+    def get_exception_causing_file_from_log(self):
+        with open(self.log_file) as f_log:
+            content = f_log.read()
+        processed_files = re.findall(r"/.*?\d+\.txt", content)
+        if processed_files:
+            return processed_files[-1]
+        else:
+            return None
 
     def prepare(self, resume=False):
         if not resume:
@@ -32,11 +41,7 @@ class GNorm(BaseTagger):
             self.logger.info("Resuming")
 
     def get_tags(self):
-        tags = []
-        for fn in os.listdir(self.out_dir):
-            with open(os.path.join(self.out_dir, fn)) as f:
-                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
-        return tags
+        self._get_tags(self.out_dir)
 
     def run(self):
         """
@@ -68,7 +73,7 @@ class GNorm(BaseTagger):
 
             if process.poll() == 1:
                 # Java Exception
-                last_file = get_exception_causing_file_from_log(self.log_file)
+                last_file = self.get_exception_causing_file_from_log()
                 if last_file:
                     last_id = get_document_id(last_file)
                     skipped_files.append(last_file)

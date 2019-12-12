@@ -1,10 +1,10 @@
 import logging
 import os
-import re
 from threading import Thread
 
 from narraint.backend.database import Session
 from narraint.backend.models import Tag
+from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 OUTPUT_INTERVAL = 30
 
@@ -69,34 +69,11 @@ class BaseTagger(Thread):
         Tuple consists of (document ID, start pos., end pos., matched text, tag type, entity ID)
         :return: List of 6-tuples
         """
-        raise NotImplementedError
 
-
-# TODO: Remove in future versions
-def finalize_dir(files_dir, result_file, batch_mode=False, keep_incomplete_lines=False):
-    file_list = sorted(os.path.join(files_dir, fn) for fn in os.listdir(files_dir) if fn.endswith(".txt"))
-    with open(result_file, "w") as f_out:
-        for fn in file_list:
-            if batch_mode:
-                content = []
-                with open(fn) as f_in:
-                    documents = f_in.read().strip().split("\n\n")
-                for doc in documents:
-                    doc_content = doc.strip().split("\n")
-                    content += doc_content[2:]
-            else:
-                with open(fn) as f_in:
-                    content = f_in.read().strip().split("\n")
-                content = content[2:]
-            # Write to file
-            f_out.writelines(line + "\n" for line in content if line.count("\t") == 5 or keep_incomplete_lines)
-
-
-def get_exception_causing_file_from_log(log_file):
-    with open(log_file) as f_log:
-        content = f_log.read()
-    processed_files = re.findall(r"/.*?PMC\d+\.txt", content)
-    if processed_files:
-        return processed_files[-1]
-    else:
-        return None
+    @staticmethod
+    def _get_tags(directory):
+        tags = []
+        for fn in os.listdir(directory):
+            with open(os.path.join(directory, fn)) as f:
+                tags.extend(TAG_LINE_NORMAL.findall(f.read()))
+        return tags
