@@ -12,8 +12,8 @@ def get_document_ids(path):
                 ids.update(get_document_ids(os.path.join(path, fn)))
     else:
         with open(path) as f:
-            content = f.read()
-        ids = set(DOCUMENT_ID.findall(content))
+            for line in f:
+                ids.update(DOCUMENT_ID.findall(line))
     return ids
 
 
@@ -40,7 +40,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("input", help="PubTator file", metavar="FILE")
     args = parser.parse_args()
-    print("Found {} documents".format(count_documents(args.count)))
+    print("Found {} documents".format(count_documents(args.input)))
 
 
 if __name__ == "__main__":
