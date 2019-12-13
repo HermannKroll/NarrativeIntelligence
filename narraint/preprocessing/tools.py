@@ -45,6 +45,30 @@ def split(input_file, output_dir):
                 f.write(document + "\n\n")
 
 
+def split_large(input_file, output_dir):
+    i = 0
+    with open(input_file) as f:
+        doc_lines = []
+        for line in f:
+            if line != '\n':
+                doc_lines.append(line)
+            else:
+                document = ''.join(doc_lines)
+                doc_lines = []
+                # some pubtator files include empty lines or end with a empty line
+                if document == '\n':
+                    print('skipping empty line')
+                    continue
+                did = document[0:document.index("|")]
+                with open(os.path.join(output_dir, "PMC{}.txt".format(did)), "w") as f:
+                    f.write(document + "\n\n")
+
+                i += 1
+                if i % 1000 == 0:
+                    print('{} documents split...\r'.format(i), end="")
+    print('{} documents split - finish'.format(i))
+
+
 # TODO: Add doc
 def concat(input_dir, output_file):
     sys.stdout.write("Concatenating files ...")
@@ -64,8 +88,10 @@ def concat(input_dir, output_file):
 def main():
     parser = ArgumentParser()
     parser.add_argument("--count", help="Count the number of PMC documents in a PubTator file", metavar="FILE")
-    parser.add_argument("--split", nargs=2, help="Split the PubTator file into its contained documents",
-                        metavar=("FILE", "OUTPUT_DIR"))
+    parser.add_argument("--split", nargs=2, help="Split the PubTator file into its contained documents (more memory "
+                                                 "needed)", metavar=("FILE", "OUTPUT_DIR"))
+    parser.add_argument("--split_large", nargs=2, help="Split the PubTator file into its contained documents (less "
+                                                       "memory but slower)", metavar=("FILE", "OUTPUT_DIR"))
     parser.add_argument("--concat", nargs=2,
                         help="Concat PubTator files of directory into a single file (DIR, OUTPUT)")
     parser.add_argument("--merge", nargs="*", metavar="FILE")
@@ -81,6 +107,12 @@ def main():
         sys.stdout.write("Begin splitting ...")
         sys.stdout.flush()
         split(args.split[0], args.split[1])
+        sys.stdout.write(" done\n")
+
+    if args.split_large:
+        sys.stdout.write("Begin large splitting ...\n")
+        sys.stdout.flush()
+        split_large(args.split_large[0], args.split_large[1])
         sys.stdout.write(" done\n")
 
     if args.concat:
