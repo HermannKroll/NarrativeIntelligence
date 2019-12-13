@@ -1,0 +1,23 @@
+FIDX1	coated tablet	Film-coated tablet;Film coated tablet;Dragée;Dragee;sugar-coated tablet;sugar coated tablet
+FIDX2	Effervescent tablet	fizzy tablet
+FIDX3	soluble tablet
+FIDX4	dispersible tablet	rapidly disintegration tablets;rapidly dissolving tablets
+FIDX5	orodispersible tablet
+FIDX6	Tablets for use in the oral cavity	Buccal tablet;Lozenge;troches;sublingual tablet;Chewable tablet
+FIDX7	modified release tablets	matrix tablet;immediate release tablets;rapidly melting tablet;Controlled Release  tablet;Delayed Release  tablet;Sustained Release  tablet;Controlled  tablet;Sustained  tablet;Sustained-Release  tablet;modified-release  tablet;modified release  tablet;Delayed-Release  tablet;Timed-Release  tablet;Timed Release  tablet;Sustained-Release tablet;Prolonged-release  tablet;prolonged release  tablet;extended-release  tablet;extended release  tablet;repeat release  tablet;repeat-release  tablet;repeat action  tablet;repeat-action  tablet
+FIDX8	mucoadhesive preparations	mucoadhesive polymer;mucoadhesive tablet;mucoadhesive drug delivery system;mucoadhesive
+FIDX9	granulate	Instant Granules;Granules;effervescent granules;effervescent granulate;effervescent granulated salts;granulated
+FIDX10	films	orodispersible films
+FIDX11	syrups	dry syrup
+FIDX12	foams
+FIDX13	patches	drug patches;active-ingredient patches;medicated plasters;plasters;cutaneous patches;patch
+FIDX14	sticks	nasal sticks;sticks
+FIDX15	Pharmaceutical tampons  ear tampons;tampons;rectal tampons
+FIDX16	Spray	ear sprays
+FIDX17	ophthalmic inserts
+FIDX19	shampoos and soaps  shampoos;soaps
+FIDX20	pellets
+FIDX21	elixirs
+FIDX22	tinctures
+FIDX23	lollipop
+FIDX24	poultices
