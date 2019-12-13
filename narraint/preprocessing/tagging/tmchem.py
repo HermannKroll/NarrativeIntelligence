@@ -13,9 +13,9 @@ class TMChem(BaseTagger):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.in_dir = os.path.join(self.root_dir, "tchem_in")
-        self.out_dir = os.path.join(self.root_dir, "tchem_out")
-        self.log_file = os.path.join(self.log_dir, "tchem.log")
+        self.in_dir = os.path.join(self.root_dir, "tmchem_in")
+        self.out_dir = os.path.join(self.root_dir, "tmchem_out")
+        self.log_file = os.path.join(self.log_dir, "tmchem.log")
 
     def prepare(self, resume=False):
         if not resume:

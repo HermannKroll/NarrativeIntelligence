@@ -23,16 +23,6 @@ def count_documents(path):
     :param path: Path to directory or file
     :return: Number of distinct document IDs
     """
-    # count = 0
-    # if os.path.isdir(path):
-    #     for fn in os.listdir(path):
-    #         if fn.endswith(".txt"):
-    #             count += count_documents(os.path.join(path, fn))
-    # else:
-    #     with open(path) as f:
-    #         content = f.read()
-    #     count = len(set(DOCUMENT_ID.findall(content)))
-    # return count
     return len(get_document_ids(path))
 
 

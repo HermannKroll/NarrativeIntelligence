@@ -76,4 +76,4 @@ class Config:
 
     @property
     def tmchem_script(self):
-        return os.path.join(self.dnorm_root, "run.sh")
+        return os.path.join(self.tmchem_root, "run.sh")

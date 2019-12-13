@@ -8,7 +8,7 @@ from narraint.tools import count_lines
 def write_content(content, out_dir):
     doc_ids = DOCUMENT_ID.findall(content)
     if doc_ids:
-        filename = f"{doc_ids[0]}.txt" if doc_ids[0] == doc_ids[-1] else f"{doc_ids[0]}.{doc_ids[-1]}.txt"
+        filename = f"{doc_ids[0]}.txt" if doc_ids[0] == doc_ids[-1] else f"{doc_ids[0]}-{doc_ids[-1]}.txt"
         with open(os.path.join(out_dir, filename), "w") as f:
             f.write(content)
     else:
