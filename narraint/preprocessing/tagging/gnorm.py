@@ -1,31 +1,47 @@
 import os
+import re
 import shutil
 import subprocess
 from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from narraint.preprocessing.tagging.base import BaseTagger, get_pmcid_from_filename, get_exception_causing_file_from_log, \
-    finalize_dir
+from narraint.backend import types
+from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.pubtator.document import get_document_id
 
 
 class GNorm(BaseTagger):
+    TYPES = (types.GENE,)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_dir = os.path.join(self.root_dir, "gnorm_in")
         self.out_dir = os.path.join(self.root_dir, "gnorm_out")
-        self.result_file = os.path.join(self.root_dir, "genes.txt")
         self.log_file = os.path.join(self.log_dir, "gnorm.log")
+
+    # TODO: Test if function works
+    def get_exception_causing_file_from_log(self):
+        with open(self.log_file) as f_log:
+            content = f_log.read()
+        processed_files = re.findall(r"/.*?\d+\.txt", content)
+        if processed_files:
+            return processed_files[-1]
+        else:
+            return None
 
     def prepare(self, resume=False):
         if not resume:
-            shutil.copytree(self.translation_dir, self.in_dir)
+            os.mkdir(self.in_dir)
+            for fn in self.files:
+                target = os.path.join(self.in_dir, fn.split("/")[-1])
+                shutil.copy(fn, target)
             os.mkdir(self.out_dir)
         else:
             self.logger.info("Resuming")
 
-    def finalize(self):
-        finalize_dir(self.out_dir, self.result_file)
+    def get_tags(self):
+        self._get_tags(self.out_dir)
 
     def run(self):
         """
@@ -57,12 +73,12 @@ class GNorm(BaseTagger):
 
             if process.poll() == 1:
                 # Java Exception
-                last_file = get_exception_causing_file_from_log(self.log_file)
+                last_file = self.get_exception_causing_file_from_log()
                 if last_file:
-                    last_pmcid = get_pmcid_from_filename(last_file)
+                    last_id = get_document_id(last_file)
                     skipped_files.append(last_file)
                     self.logger.debug("Exception in file {}".format(last_file))
-                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_pmcid))
+                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_id))
                     os.remove(last_file)
                 else:
                     # No file processed, assume another error
@@ -72,10 +88,11 @@ class GNorm(BaseTagger):
                 keep_tagging = False
 
         end_time = datetime.now()
-        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(end_time - start_time,
-                                                                                                 self.get_progress(),
-                                                                                                 files_total,
-                                                                                                 len(skipped_files)))
+        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
+            end_time - start_time,
+            self.get_progress(),
+            files_total,
+            len(skipped_files)))
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

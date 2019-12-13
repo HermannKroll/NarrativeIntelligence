@@ -1,4 +1,4 @@
-import re
+from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 CHEMICAL = "Chemical"
 DISEASE = "Disease"
@@ -50,9 +50,6 @@ class Sentence:
 
 
 class TaggedDocument:
-    REGEX_TITLE = re.compile("\|t\|(.*?)\n")
-    REGEX_ABSTRACT = re.compile("\|a\|(.*?)\n")
-    REGEX_TAGS = re.compile("(\d+)\t(\d+)\t(\d+)\t(.*?)\t(.*?)\t(.*?)\n")
 
     def __init__(self, pubtator_content, read_from_file=False):
         """
@@ -64,11 +61,9 @@ class TaggedDocument:
             with open(pubtator_content, 'r') as f:
                 content = f.read()
             pubtator_content = content
-        self.id = int(pubtator_content[:pubtator_content.index("|")])
-        self.title = self.REGEX_TITLE.findall(pubtator_content)[0]
-        self.abstract = self.REGEX_ABSTRACT.findall(pubtator_content)[0]
+        self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
         self.content = self.title + self.abstract
-        self.tags = [TaggedEntity(t) for t in self.REGEX_TAGS.findall(pubtator_content)]
+        self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
         self.entity_names = {t.text.lower() for t in self.tags}
         # Indexes
         # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
@@ -137,3 +132,10 @@ class TaggedDocumentCollection:
         if doc.id in self.docs_by_id:
             raise Exception('ID already included in collection')
         self.docs_by_id[doc.id] = doc
+
+
+def get_document_id(fn):
+    with open(fn) as f:
+        line = f.readline()
+    match = DOCUMENT_ID.match(line)
+    return int(match.group(1))

@@ -1,39 +1,65 @@
 # Narrative Intelligence
+
+This project can be used to process documents using Narratives.
+
 ## Getting Started
-Download ctd data for labeling training and test data. This download recommends 3GB of free disk space.
+Download the CTD data and the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
 
 ```
-./download_ctd_data.sh
+./download_data.sh
+pip install -r requirements.txt
 ```
 
 ### Data directory
 The ``data`` directory contains application data for **all** packages.
-Application data should **never** be stored inside the ``src`` directory.
-
+Application data should **never** be stored inside the project models.
 Application data includes:
 - MESH descriptor files
 - UMLS data
 - TIB EPA dump
+- CTD data
+
+### Configuration
+*All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
+
+## Project structure
+The projects core, the `narraint` package, consists of several Python packages and modules with do a certain job:
+
+| Package | Task |
+|-----------------|-----------------------------------------------------------------------------------------------|
+| `backend` | Connection to database, loading and exporting |
+| `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
+| `graph` | ? |
+| `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
+| `narrative` | Implementation of the Narrative querying |
+| `openie` | OpenIE for PubTator documents using Standford NLP |
+| `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
+| `pubmedutils` | ? |
+| `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
+| `semmeddb` | ? |
+| `stories` | ? |
 
 
-## Preprocessing for PubMedCentral
+## Named Entity Recognition
 
-If you want to use the full text of the PubMedCentral documents, you can use the ``preprocessing`` package to create a document collection with tagged chemicals, diseases, genes and species in the PubTator format.
+To perform Named Entity Recognition of documents use the `preprocessing` package. The documents must first be converted to the PubTator format ([example file](https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator?pmids=19894120)). Please note that the PubTator format is the central unit for this project and that all tools work with this format.
 
-You need the following requirements to use the package:
+The entry point `preprocess.py` takes a directory of PubTator files and generates a single file with all documents and tags.
+The documents and tags are all inserted into the database for later processing and retrieval.
 
-- TaggerOne v0.2.1 with a model for recognizing chemicals and diseases (e.g. model_BC5CDRJ)
-- GNormPlusJava
-- Python 3.6.x with ``lxml`` 4.3.3
+Currently, the following entity types can be detected:
 
-The package also requires the PubMedCentral Open Access Document Collection in the ``xml`` format.
+- Chemicals
+- Diseases
+- Genes
+- Species
+- Dosage Forms
 
-1. Install the Python requirements:
+The package provides APIs for several third-party taggers:
 
-       pip install -r requirements.txt
-    
-1. Copy the ``config.example.json`` to ``config.json`` and adjust the settings 
-
-1. Start the pipeline using
-
-       python preprocess.py ids.txt tagged_documents.txt
+| Tagger | Entity types |
+|-------------------|-------------------|
+| TaggerOne (0.2.1) | Chemical, Disease |
+| GNormPlus | Gene |
+| DNorm | Disease |
+| tmChem | Chemical |

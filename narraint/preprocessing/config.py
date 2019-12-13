@@ -2,8 +2,11 @@ import json
 import os
 
 
-# TODO: Add doc
 class Config:
+    """
+    Wrapper class for JSON config file. Wraps base configuration and tagger configuration.
+    """
+
     def __init__(self, config_file):
         with open(config_file) as f:
             self.config = json.load(f)
@@ -73,4 +76,4 @@ class Config:
 
     @property
     def tmchem_script(self):
-        return os.path.join(self.dnorm_root, "run.sh")
+        return os.path.join(self.tmchem_root, "run.sh")

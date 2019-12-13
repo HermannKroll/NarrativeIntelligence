@@ -31,3 +31,6 @@ GRAPH_GV = os.path.join(DATA_DIR, "graph/graph.gv")
 
 # OpenIE
 OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
+
+# OpenIE
+BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")

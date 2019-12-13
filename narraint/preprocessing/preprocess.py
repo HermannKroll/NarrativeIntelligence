@@ -1,143 +1,145 @@
 import logging
 import os
-import re
-import shutil
 import tempfile
 from argparse import ArgumentParser
+from typing import List
 
+from narraint.backend import types
+from narraint.backend.database import Session
+from narraint.backend.export import export
+from narraint.backend.load import bulk_load
+from narraint.backend.models import Document, Tag
+from narraint.backend.types import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.config import Config
-from narraint.preprocessing.tagging.base import merge_result_files
+from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.gnorm import GNorm
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.preprocessing.translate import PMCCollector, PMCTranslator
+from narraint.pubtator.convert import PMCConverter
+from narraint.preprocessing.collect import PMCCollector
+from narraint.pubtator.document import get_document_id
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
 
-def rename_input_files(translation_dir, logger):
-    for fn in os.listdir(translation_dir):
-        if not fn.startswith(".") and not fn.endswith("/"):
-            doc_id = re.search(r"\d+", fn)
-            if doc_id:
-                target_name = "PMC{}.txt".format(doc_id.group())
-                if fn != target_name:
-                    os.rename(os.path.join(translation_dir, fn), os.path.join(translation_dir, target_name))
-            else:
-                os.remove(os.path.join(translation_dir, fn))
-                logger.debug("Removing file {}: No ID found".format(fn))
-
-
-def preprocess(input_file_dir_list, output_filename, conf,
-               tag_chemicals=False, tag_diseases=False, tag_dosage_forms=False, tag_genes=False,
-               resume=False, console_log_level="INFO", workdir=None, skip_translation=False, use_tagger_one=False):
-    """
-    Method creates a full-tagged PubTator file with the documents from in ``input_file_dir_list``.
-    Method expects an ID file or an ID list if resume=False.
-    Method expects the working directory (temp-directory) of the processing to resume if resume=True.
-
-    :param use_tagger_one:
-    :param tag_dosage_forms: flat, whether to tag dosage forms
-    :param workdir: Working directory
-    :param console_log_level: Log level for console output
-    :param input_file_dir_list: File or list with IDs or directory with tagging to resume
-    :param output_filename: Filename of PubTator to create
-    :param conf: config object
-    :param tag_genes: flag, whether to tag genes
-    :param tag_chemicals: flag, wheter to tag chemicals
-    :param tag_diseases: flag, wheter to tag diseases
-    :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
-    be set accordingly)
-    :param skip_translation: Flag whether to skip the translation/collection of files. `input_file_dir_list` is a
-        directory with PubTator files to process.
-    """
-    print("=== STEP 1 - Preparation ===")
-    # Create paths
-    tmp_root = input_file_dir_list if resume else (os.path.abspath(workdir) if workdir else tempfile.mkdtemp())
-    if not os.path.exists(tmp_root):
-        os.mkdir(tmp_root)
-    tmp_translation = os.path.abspath(os.path.join(tmp_root, "translation"))
-    tmp_log = os.path.abspath(os.path.join(tmp_root, "log"))
-    translation_err_file = os.path.abspath(os.path.join(tmp_root, "translation_errors.txt"))
-    # Create directories
-    if not resume:
-        if not skip_translation:
-            os.mkdir(tmp_translation)
-        os.mkdir(tmp_log)
-    # Init logger
+def init_logger(log_filename, log_level):
     formatter = logging.Formatter(LOGGING_FORMAT)
     logger = logging.getLogger("preprocessing")
     logger.setLevel("DEBUG")
-    fh = logging.FileHandler(os.path.join(tmp_log, "preprocessing.log"), mode="a+")
+    fh = logging.FileHandler(log_filename, mode="a+")
     fh.setLevel("DEBUG")
     fh.setFormatter(formatter)
     ch = logging.StreamHandler()
-    ch.setLevel(console_log_level)
+    ch.setLevel(log_level)
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
-    logger.info("Project directory: {}".format(tmp_root))
-    logger.debug("Translation output directory: {}".format(tmp_translation))
-    if not resume:
-        if skip_translation:
-            shutil.copytree(input_file_dir_list, tmp_translation)
-            rename_input_files(tmp_translation, logger)
-        else:
-            collector = PMCCollector(conf.pmc_dir)
-            files = collector.collect(input_file_dir_list)
-            translator = PMCTranslator()
-            translator.translate_multiple(files, tmp_translation, translation_err_file)
+    return logger
+
+
+def preprocess(collection, in_dir, output_filename, conf, *tag_types,
+               resume=False, console_log_level="INFO", workdir=None, use_tagger_one=False):
+    """
+    Method creates a single PubTator file with the documents from in ``in_dir`` and its tags.
+
+    :param in_dir: Input directory containing PubTator files to tag
+    :param collection: Collection ID (e.g., PMC)
+    :param use_tagger_one: Flag to use TaggerOne instead of tmChem and DNorm
+    :param workdir: Working directory
+    :param console_log_level: Log level for console output
+    :param output_filename: Filename of PubTator to create
+    :param conf: config object
+    :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
+    be set accordingly)
+    """
+    print("=== STEP 1 - Preparation ===")
+    root_dir = os.path.abspath(workdir) if workdir or resume else tempfile.mkdtemp()
+    input_dir = in_dir  # os.path.abspath(os.path.join(root_dir, "input"))
+    log_dir = os.path.abspath(os.path.join(root_dir, "log"))
+    if not os.path.exists(root_dir):
+        os.mkdir(root_dir)
+    if not os.path.exists(input_dir):
+        os.mkdir(input_dir)
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+    logger = init_logger(os.path.join(log_dir, "preprocessing.log"), console_log_level)
+    logger.info("Project directory: {}".format(root_dir))
+    logger.debug("Input directory: {}".format(input_dir))
+
+    target_ids = set()
+    file_id_mapping = dict()
+    missing_files_type = dict()
+    session = Session.get()
+
+    # Gather target IDs
+    for fn in os.listdir(input_dir):
+        abs_path = os.path.join(input_dir, fn)
+        doc_id = get_document_id(abs_path)
+        target_ids.add(doc_id)
+        file_id_mapping[doc_id] = abs_path
+    logger.info("Preprocessing {} documents".format(len(target_ids)))
+
+    # Get input documents for each tagger
+    for tag_type in tag_types:
+        result = session.query(Document).join(Tag).filter(
+            Document.id.in_(target_ids),
+            Document.collection == collection,
+            Tag.type == tag_type,
+        ).distinct().values(Document.id)
+        present_ids = set(x[0] for x in result)
+        missing_ids = target_ids.difference(present_ids)
+        missing_files_type[tag_type] = frozenset(file_id_mapping[x] for x in missing_ids)
+        task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
+        with open(task_list_fn, "w") as f:
+            f.write("\n".join(missing_files_type[tag_type]))
+        logger.info("Tasklist for {} contains {} documents".format(tag_type, len(missing_ids)))
+
     # Init taggers
-    kwargs = dict(root_dir=tmp_root, translation_dir=tmp_translation, log_dir=tmp_log, config=conf)
-    taggers = []
-    if tag_genes:
-        t = GNorm(**kwargs)
-        taggers.append(t)
-    if tag_diseases and not use_tagger_one:
-        t = DNorm(**kwargs)
-        taggers.append(t)
-    if tag_chemicals and not use_tagger_one:
-        t = TMChem(**kwargs)
-        taggers.append(t)
-    if tag_chemicals and tag_diseases and use_tagger_one:
-        t = TaggerOne(**kwargs)
-        taggers.append(t)
-    if tag_dosage_forms:
-        t = DosageFormTagger(**kwargs)
-        taggers.append(t)
+    kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
+                  log_dir=log_dir, config=conf, file_mapping=file_id_mapping)
+    taggers: List[BaseTagger] = []
+    if types.GENE in tag_types:
+        taggers.append(GNorm(**kwargs))
+    if types.DISEASE in tag_types and not use_tagger_one:
+        taggers.append(DNorm(**kwargs))
+    if types.CHEMICAL in tag_types and not use_tagger_one:
+        taggers.append(TMChem(**kwargs))
+    if types.CHEMICAL in tag_types and types.DISEASE in tag_types and use_tagger_one:
+        taggers.append(TaggerOne(**kwargs))
+    if types.DOSAGE_FORM in tag_types:
+        taggers.append(DosageFormTagger(**kwargs))
     for tagger in taggers:
+        for target_type in tagger.TYPES:
+            tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
+    logger.info("Initialized taggers")
     print("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         tagger.start()
     for tagger in taggers:
         tagger.join()
     print("=== STEP 3 - Post-processing ===")
-    result_files = []
     for tagger in taggers:
         tagger.finalize()
-        result_files.append(tagger.result_file)
-    # TODO: Add clean step to expand overlapping tags
-    merge_result_files(tmp_translation, output_filename, *result_files)
+    export(output_filename, tag_types, target_ids, collection=collection, content=True)
     print("=== Finished ===")
 
 
 def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
+    # TODO: Fix API
     parser.add_argument("--resume", action="store_true",
                         help="Resume tagging (input: temp-directory, output: result file)")
-    parser.add_argument("--skip-translation", action="store_true",
-                        help="Skip translation. INPUT is the directory with PubTator files to tag.")
+    parser.add_argument("--ids", action="store_true",
+                        help="Collect documents from directory (e.g., for PubMedCentral) and convert to PubTator")
 
     group_tag = parser.add_argument_group("Tagging")
-    group_tag.add_argument("-G", "--gene", action="store_true", help="Tag genes")
-    group_tag.add_argument("-D", "--disease", action="store_true", help="Tag diseases")
-    group_tag.add_argument("-C", "--chemical", action="store_true", help="Tag chemicals")
-    group_tag.add_argument("-F", "--dosage", action="store_true", help="Tag dosage forms")
+    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
+    parser.add_argument("-c", "--corpus", required=True)
     group_tag.add_argument("--tagger-one", action="store_true",
                            help="Tag diseases and chemicals with TaggerOne instead of DNorm and tmChem.")
 
@@ -147,16 +149,37 @@ def main():
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
 
-    parser.add_argument("input", help="ID file / Workdir / Directory with PMC files", metavar="INPUT_FILE_OR_DIR")
-    parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
+    parser.add_argument("input", help="Directory with PubTator files (can be a file if --ids is set)", metavar="IN_DIR")
+    parser.add_argument("output", help="Output file", metavar="OUT_FILE")
     args = parser.parse_args()
 
+    # Create configuration wrapper
     conf = Config(args.config)
 
-    preprocess(args.input, args.output, conf,
-               args.chemical, args.disease, args.dosage, args.gene,
-               resume=args.resume, console_log_level=args.loglevel.upper(), workdir=args.workdir,
-               skip_translation=args.skip_translation, use_tagger_one=args.tagger_one)
+    # Perform collection and conversion
+    in_dir = args.input
+    if args.ids and args.corpus == "PMC":
+        in_dir = tempfile.mkdtemp()
+        error_file = os.path.join(in_dir, "conversion_errors.txt")
+        collector = PMCCollector(conf.pmc_dir)
+        files = collector.collect(args.input)
+        translator = PMCConverter()
+        translator.convert_bulk(files, in_dir, error_file)
+
+    # Add documents to database
+    bulk_load(in_dir, args.corpus)
+
+    # Create list of tagging ent types
+    tag_types = types.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
+
+    # TODO: Add SQL logging
+    # logging.basicConfig()
+    # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+    # Run actual preprocessing
+    preprocess(args.corpus, in_dir, args.output, conf, *tag_types,
+               resume=args.resume, console_log_level=args.loglevel.upper(),
+               workdir=args.workdir, use_tagger_one=args.tagger_one)
 
 
 if __name__ == "__main__":
