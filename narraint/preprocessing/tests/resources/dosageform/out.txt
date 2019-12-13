@@ -1,0 +1,48 @@
+1|t| A Multicenter, Open-Label, Safety Study of Meloxicam SoluMatrix™ Capsules in Subjects With Osteoarthritis of the Knee or Hip
+1|a| The purpose of this study is to evaluate the safety of Meloxicam SoluMatrix Capsules for up to 52 weeks in subjects with pain due to osteoarthritis (OA) of the knee or hip
+1	65	73	capsules	DosageForm	MESH:D002214
+1	201	209	capsules	DosageForm	MESH:D002214
+
+2|t| A Phase III Randomized, Evaluator-Blind, Parallel Group Study of the Safety and Efficacy of Itraconazole Tablets, Itraconazole Capsules and Placebo in the Treatment of Onychomycosis of the Toenail.
+2|a| Onychomycosis is common and accounts for about half of all nail disorders. Usually the cause is due to dermatophytes, either Trichophyton rubrum (71%) or Trichophyton mentagrophytes (20%) but may also be due to yeast infection, usually Candida albicans. The prevalence of onychomycosis in the United States population as a whole is 13% and is more prevalent in the elderly (60%). Onychomycosis of the toenail recurs and is thought to have a genetic component. Onychomycosis can result in permanent nail deformity. This disease has a significant impact on the patient's quality of life (e.g., concern with the appearance of the toenails and fingernails, interference with wearing shoes, walking and sports activities). Itraconazole has been approved for the treatment of onychomycosis in the United States since the mid-nineteen-nineties. The approved dosage regimen for treatment of onychomycosis of the toenail is once daily (QD) treatment with 200 mg of itraconazole (Sporanox®, Janssen Pharmaceutical Products, L.P., Titusville, NJ, USA) for 12 weeks. The approved dosage form is a 100mg capsule. Barrier Therapeutics has developed a 200mg tablet which could be used in a more convenient one-tablet-per-day dosing regimen. This clinical trial will compare the efficacy and safety of this new tablet formulation with itraconazole capsules and placebo.
+2	105	112	tablets	DosageForm	MESH:D013607
+2	127	135	capsules	DosageForm	MESH:D002214
+2	1266	1277	dosage form	DosageForm	MESH:D004304
+2	1289	1296	capsule	DosageForm	MESH:D002214
+2	1341	1347	tablet	DosageForm	MESH:D013607
+2	1389	1407	one-tablet-per-day	DosageForm	MESH:D013607
+2	1493	1499	tablet	DosageForm	MESH:D013607
+2	1530	1538	capsules	DosageForm	MESH:D002214
+
+3|t| A Phase II Trial of Neoadjuvant Chemotherapy With Nanoparticle Albumin-bound Paclitaxel and Fluorouracil Followed by Surgery in Patients With Locally Advanced Squamous Cell Carcinoma of Esophagus
+3|a| In the past decade, clinical trials have evaluated the role of neoadjuvant chemotherapy, radiation, or both, for patients with surgically resectable esophageal carcinoma, but have all failed to demonstrate a consistent survival benefit. In Eastern countries, preoperative chemotherapy followed by radical surgery became one of the treatment strategies for resectable, clinical stage II or III esophageal cancer. In an effort to improve the efficacy of systemic chemotherapy, we conducted a prospective study to evaluate the regimen of nanoparticle albumin-bound paclitaxel plus 5-fluorouracil as perioperative therapy for patients with resectable esophageal carcinoma.
+3	50	62	nanoparticle	DosageForm	MESH:D053758
+3	731	743	nanoparticle	DosageForm	MESH:D053758
+
+4|t| Phase III, Open-Label Study to Evaluate Efficacy and Safety of Histrelin Subdermal Implant in Children With Central Precocious Puberty
+4|a| Thirty-two (32) patients will receive a histrelin subdermal implant under the anesthesia deemed appropriate by the administering physician. Ten-twelve (10-12) sites will enroll 2-3 patients per site. It is anticipated that half the patients will be receiving GnRH analog treatment and the other half will be treatment naïve. All patients will undergo selective PK sampling post-implantation to assess histrelin profile. At 12 months, provided that the patient continues to meet the safety and efficacy parameters, the original implant will be removed and the patient can receive a new implant. At 13 months, patients who receive new implants will be evaluated at the study site and administratively transferred to the initial extension study. At Month 24), the implants inserted at Month 12 will be removed. At this time, patients who have completed the initial extension study and who wish to continue therapy with the histrelin implant will be eligible to receive a new (ie, third) implant and to enter an additional 12-month extended access phase at the discretion of the investigator. At Month 36, the implants inserted at Month 24 for the Extended Access Phase will be removed. At this time, patients who have completed the Extended Access Phase and who wish to continue therapy with the histrelin implant will be eligible to receive a new (ie, fourth) implant and to enter the Long Term Extended Access Phase (referred to as the Implant Treatment Phase) at the discretion of the investigator. The purpose of this phase is to provide patients with the opportunity to continue to receive a new implant at the end of each 12-month period until the patient no longer requires hormone suppression. Once implant therapy is discontinued, all patients are eligible to enter the Long Term Follow Up Phase (Post Implant Phase) of the study.
+4	905	913	inserted	DosageForm	MESH:D013488
+4	1250	1258	inserted	DosageForm	MESH:D013488
+
+5|t| Treatment of Vitiligo With Narrowband UVB (TL01) Combined With Tacrolimus (0.1%) Versus Placebo Ointment, a Randomized Right/Left Double Blind Comparative Study
+5|a| BACKGROUND Vitiligo is a common, often distressing condition. Many of the patients do not achieve sufficient effect from what is regarded as the treatment of choice at present, narrow band(NB)UVB(Tl01). There are reports on some patients partly successfully treated with Tacrolimus ointment. AIM OF THE STUDY We want to study whether Tacrolimus ointment may give an additive effect on symmetric vitiligo in combination with NB-UVB. METHODS This is a double blind left/right comparative study with 6 months treatment time. Patients are treated with whole body NB-UVB x 2 or x 3 weekly, in addition to Tacrolimus ointment versus placebo every night on affected half body sites. To measure effects we use photodocumentation in addition to morphometric registration of symmetric target lesions every 6 weeks.
+5	96	104	ointment	DosageForm	MESH:D009824
+5	443	451	ointment	DosageForm	MESH:D009824
+5	506	514	ointment	DosageForm	MESH:D009824
+5	772	780	ointment	DosageForm	MESH:D009824
+
+6|t| films tinctures test test
+6|a| tinctures dry syrup rapidly disintegration tablets nanoparticles nano-particles nano particles nanoparticle nano-particle
+6	0	5	films	DosageForm	FIDX10
+6	6	15	tinctures	DosageForm	FIDX22
+6	26	35	tinctures	DosageForm	FIDX22
+6	36	45	dry syrup	DosageForm	FIDX11
+6	40	45	syrup	DosageForm	FIDX11
+6	46	76	rapidly disintegration tablets	DosageForm	FIDX4
+6	69	76	tablets	DosageForm	MESH:D013607
+6	77	90	nanoparticles	DosageForm	MESH:D053758
+6	91	105	nano-particles	DosageForm	MESH:D053758
+6	106	120	nano particles	DosageForm	MESH:D053758
+6	121	133	nanoparticle	DosageForm	MESH:D053758
+6	134	147	nano-particle	DosageForm	MESH:D053758
+
