@@ -1,21 +1,15 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
 
-class EntityType(Base):
-    __tablename__ = "tagger"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-
-
 class Document(Base):
     __tablename__ = "document"
 
     collection = Column(String, primary_key=True)
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     title = Column(String, nullable=False)
     abstract = Column(String, nullable=False)
     fulltext = Column(String)
@@ -45,7 +39,7 @@ class Tag(Base):
     end = Column(Integer, nullable=False)
     ent_id = Column(String, nullable=False)
     ent_str = Column(String, nullable=False)
-    document_id = Column(Integer, nullable=False)
+    document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
     tagger = Column(String)
 
@@ -70,6 +64,6 @@ class ProcessedFor(Base):
         PrimaryKeyConstraint("document_id", "document_collection", "ent_type"),
     )
 
-    document_id = Column(Integer, nullable=False)
+    document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
     ent_type = Column(String, nullable=False)
