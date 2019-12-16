@@ -41,7 +41,7 @@ class GNorm(BaseTagger):
             self.logger.info("Resuming")
 
     def get_tags(self):
-        self._get_tags(self.out_dir)
+        return self._get_tags(self.out_dir)
 
     def run(self):
         """

@@ -4,9 +4,10 @@ from datetime import datetime
 
 from narraint import config
 from narraint.backend import types
-from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
+from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
 
 class DocumentError(Exception):
@@ -14,13 +15,6 @@ class DocumentError(Exception):
 
 
 class DosageFormTagger(BaseTagger):
-
-    FILE_ADDITIONAL_DESCS = "../resources/df_additional_descs.txt"
-    FILE_ADDITIONAL_DESCS_TERMS = "../resources/df_additional_descs_terms.txt"
-    FILE_FID_DESCS = "../resources/df_fid_descriptors.txt"
-
-    TYPE = "DosageForm"
-    MESH_FILE = "../data/desc2020.xml"
     DOSAGE_FORM_TREE_NUMBERS = (
         "D26.255",  # Dosage Forms
         "E02.319.300",  # Drug Delivery Systems
@@ -43,14 +37,11 @@ class DosageFormTagger(BaseTagger):
         self.regex_intra = re.compile(r'intra[a-z]')
 
     def load_additional_descs(self):
-        if not os.path.isfile(self.FILE_ADDITIONAL_DESCS):
-            raise Exception('additional descriptor terms file not found: {}'.format(self.FILE_ADDITIONAL_DESCS))
-
         # as a dict -
         # just key -> just add the descriptor
         # with values -> combine them to one descriptor
         additional_descs = {}
-        with open(self.FILE_ADDITIONAL_DESCS, 'r') as f:
+        with open(DOSAGE_ADDITIONAL_DESCS, 'r') as f:
             for l in f:
                 l_s = l.strip()
                 if '/' in l_s:
@@ -68,11 +59,8 @@ class DosageFormTagger(BaseTagger):
         return additional_descs
 
     def load_additional_descs_terms(self):
-        if not os.path.isfile(self.FILE_ADDITIONAL_DESCS_TERMS):
-            raise Exception('additional descriptor file not found: {}'.format(self.FILE_ADDITIONAL_DESCS_TERMS))
-
         desc_terms = {}
-        with open(self.FILE_ADDITIONAL_DESCS_TERMS, 'r') as f:
+        with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'r') as f:
             for l in f:
                 components = l.strip().split('\t')
                 desc = components[0]
@@ -84,11 +72,8 @@ class DosageFormTagger(BaseTagger):
         return desc_terms
 
     def load_fid_descriptors(self):
-        if not os.path.isfile(self.FILE_FID_DESCS):
-            raise Exception('FID descriptor file not found: {}'.format(self.FILE_FID_DESCS))
-
         desc_terms = {}
-        with open(self.FILE_FID_DESCS, 'r') as f:
+        with open(DOSAGE_FID_DESCS, 'r') as f:
             for l in f:
                 components = l.strip().split('\t')
                 desc = components[0]
@@ -169,7 +154,9 @@ class DosageFormTagger(BaseTagger):
 
                 dosage_forms_all.append((df.unique_id, terms))
 
-        self.logger.info('{} descriptors loaded (contains duplicates because some additional terms where added manually)'.format(len(dosage_forms_all)))
+        self.logger.info(
+            '{} descriptors loaded (contains duplicates because some additional terms where added manually)'.format(
+                len(dosage_forms_all)))
 
         # create invers index
         for dosage_form, dosage_form_terms in dosage_forms_all:
@@ -218,7 +205,7 @@ class DosageFormTagger(BaseTagger):
             raise NotImplementedError("Resuming DosageFormTagger is not implemented.")
 
     def get_tags(self):
-        self._get_tags(self.out_dir)
+        return self._get_tags(self.out_dir)
 
     def run(self):
         skipped_files = []
@@ -287,10 +274,10 @@ class DosageFormTagger(BaseTagger):
                         desc_str = desc
 
                     line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=self.TYPE, desc=desc_str
+                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=types.DOSAGE_FORM,
+                        desc=desc_str
                     )
                     output += line
-
 
         # Write
         with open(out_file, "w") as f:

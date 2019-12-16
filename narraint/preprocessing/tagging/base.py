@@ -69,6 +69,7 @@ class BaseTagger(Thread):
         Tuple consists of (document ID, start pos., end pos., matched text, tag type, entity ID)
         :return: List of 6-tuples
         """
+        raise NotImplementedError
 
     @staticmethod
     def _get_tags(directory):

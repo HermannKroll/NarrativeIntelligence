@@ -11,6 +11,7 @@ from narraint.backend.load import bulk_load
 from narraint.backend.models import Document, Tag
 from narraint.backend.types import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
+from narraint.preprocessing.collect import PMCCollector
 from narraint.preprocessing.config import Config
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
@@ -19,7 +20,6 @@ from narraint.preprocessing.tagging.gnorm import GNorm
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.convert import PMCConverter
-from narraint.preprocessing.collect import PMCCollector
 from narraint.pubtator.document import get_document_id
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
@@ -131,9 +131,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
 def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
-    # TODO: Fix API
-    parser.add_argument("--resume", action="store_true",
-                        help="Resume tagging (input: temp-directory, output: result file)")
+    parser.add_argument("--resume", action="store_true", help="Resume tagging")
     parser.add_argument("--ids", action="store_true",
                         help="Collect documents from directory (e.g., for PubMedCentral) and convert to PubTator")
 
@@ -149,7 +147,9 @@ def main():
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
 
-    parser.add_argument("input", help="Directory with PubTator files (can be a file if --ids is set)", metavar="IN_DIR")
+    parser.add_argument("input", help="Directory with PubTator files "
+                                      "(can be a file if --ids is set or a directory if --resume is set)",
+                        metavar="IN_DIR")
     parser.add_argument("output", help="Output file", metavar="OUT_FILE")
     args = parser.parse_args()
 

@@ -6,6 +6,7 @@ import os
 GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 DATA_DIR = os.path.join(GIT_ROOT_DIR, "data")
+RESOURCE_DIR = os.path.join(GIT_ROOT_DIR, "resources")
 CONFIG_DIR = os.path.join(GIT_ROOT_DIR, "config")
 LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
@@ -34,3 +35,8 @@ OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
 
 # OpenIE
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
+
+# DosageForm Tagger
+DOSAGE_ADDITIONAL_DESCS = os.path.join(RESOURCE_DIR, "df_additional_descs.txt")
+DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_terms.txt")
+DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")

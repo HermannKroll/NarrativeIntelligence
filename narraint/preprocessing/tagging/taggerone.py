@@ -27,7 +27,7 @@ class TaggerOne(BaseTagger):
     TYPES = (types.CHEMICAL, types.DISEASE)
 
     def get_tags(self):
-        self._get_tags(self.out_dir)
+        return self._get_tags(self.out_dir)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

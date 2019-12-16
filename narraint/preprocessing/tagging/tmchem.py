@@ -59,4 +59,4 @@ class TMChem(BaseTagger):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])
 
     def get_tags(self):
-        self._get_tags(self.out_dir)
+        return self._get_tags(self.out_dir)
