@@ -1,4 +1,5 @@
 import argparse
+import gc
 import logging
 import os
 import sys
@@ -8,6 +9,8 @@ from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
 from narraint.tools import count_lines
+
+MAX_BULK_SIZE = 100000
 
 
 def get_ids_contents_tags(pubtator_content):
@@ -19,7 +22,7 @@ def get_ids_contents_tags(pubtator_content):
     return document_ids, documents, tags
 
 
-def bulk_load(path, collection, tagger=None):
+def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
 
@@ -28,6 +31,7 @@ def bulk_load(path, collection, tagger=None):
     3. Prepare statements (check if documents/tags are) already in database)
     4. Commit transaction
 
+    :param max_bulk: Number of tuples after which an insert is performed
     :param str or None tagger: Name of the used tagger
     :param str collection: Identifier of the collection (e.g., PMC)
     :param str path: Path to file or directory
@@ -64,7 +68,6 @@ def bulk_load(path, collection, tagger=None):
                     last_percentage = int((idx + 1.0) / line_count * 1000.0)
                     sys.stdout.write("\rReading files ... {:.1f} %".format(last_percentage / 10.0))
                     sys.stdout.flush()
-    total_items = len(documents) + len(tags)
     sys.stdout.write(" {} documents and {} tags\n".format(len(documents), len(tags)))
 
     # Retrieving existing documents
@@ -82,26 +85,33 @@ def bulk_load(path, collection, tagger=None):
     sys.stdout.flush()
 
     # Preparing ORM objects
-    sys.stdout.write("Preparing ... 0.0 %")
+    sys.stdout.write("Adding documents ... 0.0 %")
     sys.stdout.flush()
+    n_docs = len(documents)
     start = datetime.now()
-    last_percentage = 0
+    objects = []
     for idx, doc in enumerate(documents):
         if doc[0] not in db_document_ids:
-            session.add(Document(
+            objects.append(Document(
                 id=doc[0],
                 collection=collection,
                 title=doc[1],
                 abstract=doc[2],
                 date_inserted=datetime.now(),
             ))
-        if int((idx + 1.0) / total_items * 1000.0) > last_percentage:
-            last_percentage = int((idx + 1.0) / total_items * 1000.0)
-            sys.stdout.write("\rPreparing ... {:0.1f} %".format(last_percentage / 10.0))
-            sys.stdout.flush()
+        if len(objects) > MAX_BULK_SIZE:
+            session.bulk_save_objects(objects)
+            objects = []
+            gc.collect()
+        sys.stdout.write("\rAdding documents ... {:0.1f} %".format(int((idx + 1.0) / n_docs * 100.0)))
+        sys.stdout.flush()
+
+    sys.stdout.write("\nAdding tags ... 0.0 %")
+    sys.stdout.flush()
+    n_tags = len(tags)
     for idx, tag in enumerate(tags):
         if tag not in db_tags and tag[5].strip():
-            session.add(Tag(
+            objects.append(Tag(
                 start=tag[1],
                 end=tag[2],
                 type=tag[4],
@@ -111,13 +121,18 @@ def bulk_load(path, collection, tagger=None):
                 document_collection=collection,
                 tagger=tagger,
             ))
-        sys.stdout.write("\rPreparing ... {:0.1f} %".format((len(documents) + idx + 1.0) / total_items * 100.0))
+        sys.stdout.write("\rAdding tags ... {:0.1f} %".format((idx + 1.0) / n_tags * 100.0))
         sys.stdout.flush()
-    sys.stdout.write("\rPreparing ... done in {}\nCommitting ...".format(datetime.now() - start))
+        if len(objects) > MAX_BULK_SIZE:
+            session.bulk_save_objects(objects)
+            objects = []
+
+    sys.stdout.write("\nDone in {}\nCommitting ...".format(datetime.now() - start))
     sys.stdout.flush()
 
     # Committing to database
     start = datetime.now()
+    session.bulk_save_objects(objects)
     session.commit()
     sys.stdout.write(" done in {}\n".format(datetime.now() - start))
     sys.stdout.flush()
@@ -180,6 +195,7 @@ def main():
     parser.add_argument("--tagger", help="Name of the tagger", default=None)
     parser.add_argument("--bulk", action="store_true")
     parser.add_argument("--log", action="store_true")
+    parser.add_argument("--max-bulk", type=int, default=MAX_BULK_SIZE, help="Max bulk size")
     args = parser.parse_args()
 
     if args.log:
@@ -187,7 +203,7 @@ def main():
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     if args.bulk:
-        bulk_load(args.input, args.collection, args.tagger)
+        bulk_load(args.input, args.collection, args.tagger, args.max_bulk)
     else:
         with open(args.input) as f:
             content = f.read()

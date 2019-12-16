@@ -83,9 +83,9 @@ class DosageFormTagger(BaseTagger):
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
                     self.tag(in_file, out_file)
-                except DocumentError:
+                except DocumentError as e:
                     skipped_files.append(in_file)
-                    self.logger.info("DocumentError for {}".format(in_file))
+                    self.logger.info(e)
                 self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
             else:
                 self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
@@ -103,7 +103,7 @@ class DosageFormTagger(BaseTagger):
             document = f.read()
         match = CONTENT_ID_TIT_ABS.match(document)
         if not match:
-            raise DocumentError
+            raise DocumentError(f"No match in {in_file}")
         pmid, title, abstact = match.group(1, 2, 3)
         content = title.strip() + " " + abstact.strip()
         content = content.lower()
