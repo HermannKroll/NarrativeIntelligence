@@ -3,7 +3,7 @@ import os
 from threading import Thread
 
 from narraint.backend.database import Session
-from narraint.backend.models import Tag
+from narraint.backend.models import Tag, ProcessedFor
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 OUTPUT_INTERVAL = 30
@@ -15,7 +15,7 @@ class BaseTagger(Thread):
     __version__ = None
 
     def __init__(self, *args, collection=None, root_dir=None, input_dir=None, log_dir=None, config=None,
-                 file_mapping=None, **kwargs):
+                 mapping_id_file=None, mapping_file_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.collection = collection
         self.root_dir = root_dir
@@ -26,10 +26,13 @@ class BaseTagger(Thread):
         self.logger = logging.getLogger("preprocessing")
         self.name = self.__class__.__name__
         self.files = set()
-        self.file_mapping = file_mapping
+        self.mapping_id_file = mapping_id_file
+        self.mapping_file_id = mapping_file_id
+        self.id_set = set()
 
     def add_files(self, *files):
         self.files.update(files)
+        self.id_set.update(self.mapping_file_id[fn] for fn in files)
 
     def prepare(self, resume=False):
         raise NotImplementedError
@@ -61,6 +64,24 @@ class BaseTagger(Thread):
                 document_collection=self.collection,
                 tagger="{}/{}".format(self.name, self.__version__),
             ))
+
+        # Add processed documents
+        Session.lock_tables("processed_for")
+        processed = set((did, self.collection, ent_type) for ent_type in self.TYPES for did in self.id_set)
+        processed_db = set(
+            session.query(ProcessedFor).filter(ProcessedFor.document_collection == self.collection).values(
+                ProcessedFor.document_id, ProcessedFor.document_collection, ProcessedFor.ent_type
+            )
+        )
+        processed_missing = processed.difference(processed_db)
+        for doc_id, doc_collection, ent_type in processed_missing:
+            session.add(ProcessedFor(
+                document_id=doc_id,
+                document_collection=self.collection,
+                ent_type=ent_type,
+            ))
+
+        # Commit
         session.commit()
 
     def get_tags(self):

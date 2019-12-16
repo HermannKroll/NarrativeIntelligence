@@ -8,7 +8,7 @@ from narraint.backend import types
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.load import bulk_load
-from narraint.backend.models import Document, Tag
+from narraint.backend.models import ProcessedFor
 from narraint.backend.types import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.collect import PMCCollector
@@ -20,7 +20,7 @@ from narraint.preprocessing.tagging.gnorm import GNorm
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.convert import PMCConverter
-from narraint.pubtator.document import get_document_id
+from narraint.pubtator.document import get_document_id, DocumentError
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
@@ -70,28 +70,33 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     logger.debug("Input directory: {}".format(input_dir))
 
     target_ids = set()
-    file_id_mapping = dict()
+    mapping_id_file = dict()
+    mapping_file_id = dict()
     missing_files_type = dict()
     session = Session.get()
 
     # Gather target IDs
     for fn in os.listdir(input_dir):
         abs_path = os.path.join(input_dir, fn)
-        doc_id = get_document_id(abs_path)
-        target_ids.add(doc_id)
-        file_id_mapping[doc_id] = abs_path
+        try:
+            doc_id = get_document_id(abs_path)
+            target_ids.add(doc_id)
+            mapping_id_file[doc_id] = abs_path
+            mapping_file_id[abs_path] = doc_id
+        except DocumentError as e:
+            logger.warning(e)
     logger.info("Preprocessing {} documents".format(len(target_ids)))
 
     # Get input documents for each tagger
     for tag_type in tag_types:
-        result = session.query(Document).join(Tag).filter(
-            Document.id.in_(target_ids),
-            Document.collection == collection,
-            Tag.type == tag_type,
-        ).distinct().values(Document.id)
+        result = session.query(ProcessedFor).filter(
+            ProcessedFor.document_id.in_(target_ids),
+            ProcessedFor.document_collection == collection,
+            ProcessedFor.ent_type == tag_type,
+        ).values(ProcessedFor.document_id)
         present_ids = set(x[0] for x in result)
         missing_ids = target_ids.difference(present_ids)
-        missing_files_type[tag_type] = frozenset(file_id_mapping[x] for x in missing_ids)
+        missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
         with open(task_list_fn, "w") as f:
             f.write("\n".join(missing_files_type[tag_type]))
@@ -99,7 +104,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
 
     # Init taggers
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
-                  log_dir=log_dir, config=conf, file_mapping=file_id_mapping)
+                  log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = []
     if types.GENE in tag_types:
         taggers.append(GNorm(**kwargs))
@@ -165,6 +170,8 @@ def main():
         files = collector.collect(args.input)
         translator = PMCConverter()
         translator.convert_bulk(files, in_dir, error_file)
+    elif args.ids:
+        raise ValueError("Providing an ID set is only supported for PMC collection")
 
     # Add documents to database
     bulk_load(in_dir, args.corpus)

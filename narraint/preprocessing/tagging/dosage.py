@@ -7,11 +7,8 @@ from narraint.backend import types
 from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
-
-
-class DocumentError(Exception):
-    pass
 
 
 class DosageFormTagger(BaseTagger):
@@ -214,6 +211,7 @@ class DosageFormTagger(BaseTagger):
 
         for in_file in self.files:
             if in_file.endswith(".txt"):
+                self.logger.debug("Processing {}".format(in_file))
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
                     self.tag(in_file, out_file)

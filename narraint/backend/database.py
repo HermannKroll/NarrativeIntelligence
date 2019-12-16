@@ -35,3 +35,8 @@ class Session:
         if not cls._instance:
             cls._instance = Session()
         return cls._instance.session
+
+    @classmethod
+    def lock_tables(cls, *tables):
+        for table in tables:
+            cls.get().execute(f"LOCK TABLE {table} IN EXCLUSIVE MODE")

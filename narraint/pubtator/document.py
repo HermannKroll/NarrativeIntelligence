@@ -23,6 +23,10 @@ ENTITY_TYPES = dict(
 )
 
 
+class DocumentError(Exception):
+    pass
+
+
 class TaggedEntity:
     def __init__(self, tag_tuple):
         self.document = int(tag_tuple[0])
@@ -137,5 +141,8 @@ class TaggedDocumentCollection:
 def get_document_id(fn):
     with open(fn) as f:
         line = f.readline()
-    match = DOCUMENT_ID.match(line)
-    return int(match.group(1))
+    try:
+        match = DOCUMENT_ID.match(line)
+        return int(match.group(1))
+    except AttributeError:
+        raise DocumentError(f"No ID found for {fn}")

@@ -82,11 +82,11 @@ class TaggerOne(BaseTagger):
         Method returns the first ID of the batch (also called *pivot*) and the location of the batch file.
         :return:
         """
-        all_ids = set(k for k, v in self.file_mapping.items() if v in self.files)
+        all_ids = set(k for k, v in self.mapping_id_file.items() if v in self.files)
         finished_ids = self.get_finished_ids()
         unfinished_ids = list(all_ids.difference(finished_ids))
         batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
-        batch = [self.file_mapping[doc_id] for doc_id in batch_ids]
+        batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
         pivot_id = None
         batch_file = None
         if batch:
@@ -143,7 +143,7 @@ class TaggerOne(BaseTagger):
         matches = re.findall(r"INFO (\d+)-\d+", content)
         self.logger.debug("Searching log file {} ({} matches found)".format(self.log_file, len(matches)))
         if matches:
-            last_file = self.file_mapping[matches[-1]]
+            last_file = self.mapping_id_file[matches[-1]]
             self.skipped_files.append(last_file)
             self.logger.debug("TaggerOne exception in file {}".format(last_file))
             copyfile(self.log_file, "{}.{}".format(self.log_file, len(self.skipped_files)))

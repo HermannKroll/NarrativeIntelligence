@@ -27,7 +27,7 @@ class DNorm(BaseTagger):
     __version__ = "1.0.0"
 
     def get_document_info(self, doc_id):
-        with open(self.file_mapping[doc_id]) as f:
+        with open(self.mapping_id_file[doc_id]) as f:
             content = f.readlines()
         title = re.sub(r"\d+\|t\|", "", content[0]).strip()
         abstract = re.sub(r"\d+\|a\|", "", content[1]).strip()

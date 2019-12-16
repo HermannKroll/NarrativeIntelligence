@@ -73,9 +73,8 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     # Retrieving existing documents
     sys.stdout.write("Retrieving ... ")
     sys.stdout.flush()
+    Session.lock_tables("document", "tag")
     session = Session.get()
-    session.execute("LOCK TABLE document IN EXCLUSIVE MODE")
-    session.execute("LOCK TABLE tag IN EXCLUSIVE MODE")
     db_document_ids = set(
         x[0] for x in session.query(Document).filter(Document.collection == collection).values(Document.id))
     db_tags = set(session.query(Tag).filter(Tag.document_collection == collection).values(

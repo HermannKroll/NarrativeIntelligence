@@ -1,8 +1,14 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKeyConstraint
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
+
+
+class EntityType(Base):
+    __tablename__ = "tagger"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
 
 
 class Document(Base):
@@ -55,3 +61,15 @@ class Tag(Base):
     def to_pubtator(self):
         return "{}\t{}\t{}\t{}\t{}\t{}\n".format(self.document_id, self.start, self.end, self.ent_str, self.type,
                                                  self.ent_id)
+
+
+class ProcessedFor(Base):
+    __tablename__ = "processed_for"
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint("document_id", "document_collection", "ent_type"),
+    )
+
+    document_id = Column(Integer, nullable=False)
+    document_collection = Column(String, nullable=False)
+    ent_type = Column(String, nullable=False)
