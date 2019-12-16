@@ -185,15 +185,32 @@ class PMCConverter:
 
 
 class PatentConverter:
+    """
+    Convert TIB patents dump to collection of PubTator documents.
+
+    .. note:
+
+       Patents are identified using a country code and an ID, which are only unique in combination. Since PubTator
+       IDs need to be digits, we replace the country code with a unique digit.
+    """
     REGEX_ID = re.compile(r"^\d+$")
     COUNTRIES = {"AU", "CN", "WO", "GB", "US", "EP", "CA"}
+    COUNTY_PREFIX = dict(
+        AU=1,
+        CN=2,
+        WO=3,
+        GB=4,
+        US=5,
+        EP=6,
+        CA=7,
+    )
 
     def convert(self, in_file, out_dir):
         """
         `in_file` is the file preprocessed by the Academic library of the TU Braunschweig.
 
-        :param in_file:
-        :param out_dir:
+        :param in_file: File for the TIB dump
+        :param out_dir: Directory with PubTator files for TIB
         :return:
         """
         if not os.path.exists(out_dir):
@@ -206,33 +223,35 @@ class PatentConverter:
             for idx, line in enumerate(f):
                 id_part, body = line.strip().split("|", maxsplit=1)
                 did = id_part[id_part.rindex(":") + 1:]
-                if did[:2] in self.COUNTRIES and self.REGEX_ID.fullmatch(did[2:]):
+                country_code = did[:2]
+                patent_id = did[2:]
+                if country_code in self.COUNTRIES and self.REGEX_ID.fullmatch(patent_id):
                     count += 1
-                    did = did[2:]
+                    did = "{}{}".format(self.COUNTY_PREFIX[country_code], patent_id)
                     if idx % 2 == 0:
                         title_by_id[did] = body.title()
                     else:
                         abstract_by_id[did] = body
 
-        print("Writing {}/{} patents ...".format(int(count / 2), int((idx + 1) / 2)))
+        sys.stdout.write("Writing {}/{} patents ...".format(int(count / 2), int((idx + 1) / 2)))
         total = len(title_by_id.keys())
         count = 0
         last_percentage = 0
         for did, title in title_by_id.items():
             if did in abstract_by_id:
-                # FIXME: This hack is required for most taggers since they check if a file starts with "PMC"
-                out_fn = os.path.join(out_dir, "PMC{}.txt".format(did))
+                out_fn = os.path.join(out_dir, "{}.txt".format(did))
                 with open(out_fn, "w") as f:
-                    f.write("{}|t| {}\n".format(did, title))
-                    f.write("{}|a| {}\n\n".format(did, abstract_by_id[did]))
-                current_percentage = int(count / total * 100.0)
-                if current_percentage > last_percentage:
-                    sys.stdout.write("\r{} %".format(current_percentage))
-                    last_percentage = current_percentage
+                    f.write("{}|t|{}\n".format(did, title))
+                    f.write("{}|a|{}\n\n".format(did, abstract_by_id[did]))
             else:
                 print("WARNING: Document {} has no abstract".format(did))
+            current_percentage = int((count + 1.0) / total * 100.0)
+            if current_percentage > last_percentage:
+                sys.stdout.write("\rWriting {}/{} patents ... {} %".format(count + 1, total,
+                                                                           current_percentage))
+                last_percentage = current_percentage
             count += 1
-        print("\nDone.")
+        print(" done")
 
 
 def main():
@@ -260,6 +279,8 @@ def main():
                 t.convert(args.input, args.output)
 
     if args.format == FMT_EPA_TTL:
+        if args.collect:
+            print("WARNING: Ignoring --collect")
         t = PatentConverter()
         t.convert(args.input, args.output)
 
