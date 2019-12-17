@@ -84,9 +84,8 @@ class TaggerOne(BaseTagger):
         Method returns the first ID of the batch (also called *pivot*) and the location of the batch file.
         :return:
         """
-        all_ids = set(k for k, v in self.mapping_id_file.items() if v in self.files)
         finished_ids = self.get_finished_ids()
-        unfinished_ids = list(all_ids.difference(finished_ids))
+        unfinished_ids = list(self.id_set.difference(finished_ids))
         batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
         pivot_id = None
@@ -104,7 +103,7 @@ class TaggerOne(BaseTagger):
                 else:
                     self.skipped_files.append(filename)
                     num_skipped += 1
-            self.logger.debug("Created batch ({}}, {} files, {} skipped)".format(pivot_id, len(batch), num_skipped))
+            self.logger.debug("Created batch ({}, {} files, {} skipped)".format(pivot_id, len(batch), num_skipped))
         return pivot_id, batch_file
 
     def run_tagging(self, pivot_id, batch_file):
@@ -116,7 +115,7 @@ class TaggerOne(BaseTagger):
         :return: Exit status of TaggerOne
         """
         with open(self.log_file, "w") as f_log:
-            command = "{} PubTator {} {input} {out}".format(
+            command = "{} Pubtator {} {input} {out}".format(
                 self.config.tagger_one_script,
                 self.config.tagger_one_model,
                 input=batch_file,
@@ -131,7 +130,7 @@ class TaggerOne(BaseTagger):
                 sleep(self.OUTPUT_INTERVAL)
                 progress = self.get_progress()
                 self.logger.info("TaggerOne progress {}/{}".format(progress, len(self.files)))
-                self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
+            self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
         return process.poll()
 
     def handle_error(self):
@@ -181,7 +180,7 @@ class TaggerOne(BaseTagger):
 
         # Generate first batch
         pivot_id, batch_file = self.create_batch()
-        while keep_tagging:
+        while keep_tagging and pivot_id:
             # Start Tagging
             self.log_file = os.path.join(self.log_dir, "taggerone.{}.log".format(pivot_id))
             exit_code = self.run_tagging(pivot_id, batch_file)

@@ -10,6 +10,7 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
+
 class DosageFormTagger(BaseTagger):
     PROGRESS_BATCH = 100
     DOSAGE_FORM_TREE_NUMBERS = (

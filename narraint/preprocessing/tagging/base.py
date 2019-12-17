@@ -6,8 +6,6 @@ from narraint.backend.database import Session
 from narraint.backend.models import Tag, ProcessedFor
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
-OUTPUT_INTERVAL = 30
-
 
 class BaseTagger(Thread):
     OUTPUT_INTERVAL = 30

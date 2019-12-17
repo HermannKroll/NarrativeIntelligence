@@ -57,7 +57,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     """
     print("=== STEP 1 - Preparation ===")
     root_dir = os.path.abspath(workdir) if workdir or resume else tempfile.mkdtemp()
-    input_dir = in_dir  # os.path.abspath(os.path.join(root_dir, "input"))
+    input_dir = os.path.abspath(in_dir)
     log_dir = os.path.abspath(os.path.join(root_dir, "log"))
     if not os.path.exists(root_dir):
         os.mkdir(root_dir)

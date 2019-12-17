@@ -98,7 +98,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
                 abstract=doc[2],
                 date_inserted=datetime.now(),
             ))
-        if len(objects) > MAX_BULK_SIZE:
+        if len(objects) > max_bulk:
             session.bulk_save_objects(objects)
             objects = []
             gc.collect()
@@ -122,7 +122,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
             ))
         sys.stdout.write("\rAdding tags ... {:0.1f} %".format((idx + 1.0) / n_tags * 100.0))
         sys.stdout.flush()
-        if len(objects) > MAX_BULK_SIZE:
+        if len(objects) > max_bulk:
             session.bulk_save_objects(objects)
             objects = []
             gc.collect()
