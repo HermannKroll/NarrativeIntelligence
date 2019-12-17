@@ -10,8 +10,8 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
-
 class DosageFormTagger(BaseTagger):
+    PROGRESS_BATCH = 100
     DOSAGE_FORM_TREE_NUMBERS = (
         "D26.255",  # Dosage Forms
         "E02.319.300",  # Drug Delivery Systems
@@ -209,7 +209,7 @@ class DosageFormTagger(BaseTagger):
         files_total = len(self.files)
         start_time = datetime.now()
 
-        for in_file in self.files:
+        for idx, in_file in enumerate(self.files):
             if in_file.endswith(".txt"):
                 self.logger.debug("Processing {}".format(in_file))
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
@@ -218,7 +218,8 @@ class DosageFormTagger(BaseTagger):
                 except DocumentError as e:
                     skipped_files.append(in_file)
                     self.logger.info(e)
-                self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
+                if idx % self.PROGRESS_BATCH == 0:
+                    self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
             else:
                 self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
 

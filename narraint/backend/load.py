@@ -10,7 +10,7 @@ from narraint.backend.models import Document, Tag
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
 from narraint.tools import count_lines
 
-MAX_BULK_SIZE = 100000
+MAX_BULK_SIZE = 50000
 
 
 def get_ids_contents_tags(pubtator_content):
@@ -125,6 +125,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
         if len(objects) > MAX_BULK_SIZE:
             session.bulk_save_objects(objects)
             objects = []
+            gc.collect()
 
     sys.stdout.write("\nDone in {}\nCommitting ...".format(datetime.now() - start))
     sys.stdout.flush()

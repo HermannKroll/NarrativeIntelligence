@@ -61,10 +61,12 @@ class TaggerOne(BaseTagger):
         in the log file (which are currently not written but processed)
         :return: Set of IDs
         """
-        with open(self.log_file) as f:
-            content = f.read()
-        ids_log = set(re.findall(r"INFO (\d+)-\d+\n", content))
         ids_dir = get_document_ids(self.out_dir)
+        ids_log = set()
+        if os.path.exists(self.log_file):
+            with open(self.log_file) as f:
+                content = f.read()
+            ids_log = set(re.findall(r"INFO (\d+)-\d+\n", content))
         return ids_dir.union(ids_log)
 
     def get_progress(self):

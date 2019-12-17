@@ -117,10 +117,10 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     if types.DOSAGE_FORM in tag_types:
         taggers.append(DosageFormTagger(**kwargs))
     for tagger in taggers:
+        logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.TYPES:
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
-    logger.info("Initialized taggers")
     print("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         tagger.start()
