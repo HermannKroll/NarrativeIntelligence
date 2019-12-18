@@ -44,12 +44,14 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     tags = set()
     if os.path.isdir(path):
         files = [os.path.join(path, fn) for fn in os.listdir(path) if not fn.startswith(".") and fn.endswith(".txt")]
-        for fn in files:
+        for idx, fn in enumerate(files):
             with open(fn) as f:
                 d_ids, d_contents, d_tags = get_ids_contents_tags(f.read())
                 document_ids.update(d_ids)
                 documents.update(d_contents)
                 tags.update(d_tags)
+            sys.stdout.write("\rReading files ... {:.1f} %".format((idx + 1.0) / len(files) * 100.0))
+            sys.stdout.flush()
     else:
         content = ""
         line_count = count_lines(path)
@@ -203,7 +205,7 @@ def main():
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     if args.bulk:
-        bulk_load(args.input, args.collection, args.tagger, args.max_bulk)
+        bulk_load(args.input, args.collection, tagger=args.tagger, max_bulk=args.max_bulk)
     else:
         with open(args.input) as f:
             content = f.read()
