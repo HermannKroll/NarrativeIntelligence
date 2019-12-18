@@ -25,6 +25,7 @@ class TaggerOne(BaseTagger):
     The pivot is the first document which in a batch.
     """
     TYPES = (types.CHEMICAL, types.DISEASE)
+    __version__ = "0.2.1"
 
     def get_tags(self):
         return self._get_tags(self.out_dir)
