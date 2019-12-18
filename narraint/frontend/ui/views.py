@@ -9,9 +9,9 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 
 from narraint.graph.labeled import LabeledGraph
-from narraint.mesh import MeSHDB
+from narraint.mesh.data import MeSHDB
 from narraint.semmeddb.dbconnection import SemMedDB
-from narraint.stories import MeshTagger
+from narraint.stories.story import MeshTagger
 
 # BEGIN Preparation
 # lg = LibraryGraph()
@@ -126,7 +126,7 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
 
 
 class SearchView(TemplateView):
-    template_name = "ui/templates/ui/search.html"
+    template_name = "ui/search.html"
 
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
@@ -135,6 +135,7 @@ class SearchView(TemplateView):
             if "query" in request.GET:
                 try:
                     query = self.request.GET.get("query", "").strip()
+
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger,
                                                                                                   semmed.predicates)
