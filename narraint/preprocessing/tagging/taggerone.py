@@ -66,7 +66,7 @@ class TaggerOne(BaseTagger):
         if os.path.exists(self.log_file):
             with open(self.log_file) as f:
                 content = f.read()
-            ids_log = set(re.findall(r"INFO (\d+)-\d+\n", content))
+            ids_log = set(int(x) for x in re.findall(r"INFO (\d+)-\d+\n", content))
         return ids_dir.union(ids_log)
 
     def get_progress(self):
@@ -88,12 +88,25 @@ class TaggerOne(BaseTagger):
         unfinished_ids = list(self.id_set.difference(finished_ids))
         batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
+        self.logger.debug(f"Variable finished_ids contains {len(finished_ids)} elements")
+        self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
         pivot_id = None
         batch_file = None
         if batch:
             num_skipped = 0
             pivot_id = batch_ids[0]
-            batch_file = os.path.join(self.batch_dir, "batch.{}.txt".format(pivot_id))
+            self.logger.debug(f"Variable pivot_id = {pivot_id}")
+            batch_fn = "batch.{}.txt".format(pivot_id)
+            batch_file = os.path.join(self.batch_dir, batch_fn)
+            # Handle duplicate pivot_id
+            if os.path.exists(batch_file):
+                self.logger.warning("Batch file {} already exists".format(batch_file))
+                out_file = os.path.join(self.out_dir, batch_fn)
+                if os.path.exists(out_file):
+                    out_file_new = batch_fn + f"{pivot_id}.txt"
+                    self.logger.warning(f"Renaming {out_file} to {out_file_new}")
+                    os.rename(out_file, os.path.join(self.out_dir, out_file_new))
+            # Write batch
             for fn in batch:
                 filename = os.path.join(self.in_dir, fn)
                 if os.path.exists(filename):  # Important if file was deleted
@@ -197,6 +210,9 @@ class TaggerOne(BaseTagger):
                 # Process terminated by user
                 self.logger.info("Received SIGKILL. Stopping TaggerOne ...")
                 keep_tagging = False
+
+            # Create new batch
+            pivot_id, batch_file = self.create_batch()
 
         end_time = datetime.now()
         self.logger.info("TaggerOne finished in {} ({} files total, {} errors)".format(

@@ -13,7 +13,7 @@ def get_document_ids(path):
     else:
         with open(path) as f:
             for line in f:
-                ids.update(DOCUMENT_ID.findall(line))
+                ids.update(int(x) for x in DOCUMENT_ID.findall(line))
     return ids
 
 
