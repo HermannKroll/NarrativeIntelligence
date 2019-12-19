@@ -44,13 +44,33 @@ class BaseTagger(Thread):
     def finalize(self):
         session = Session.get()
         tags = set(self.get_tags())
-        tags_cleaned = tags.copy()
-        for tag1 in tags:
-            for tag2 in tags_cleaned:
-                if int(tag2[1]) < int(tag1[1]) and int(tag2[2]) > int(tag1[2]):
-                    tags_cleaned.remove(tag1)
-                    break
 
+        self.logger.info('cleaning tags...')
+        # clean tags (remove smaller tags which are included in larger tags)
+        # we do this document wise now
+        # create a dict and map tags to their documents
+        doc2tags = {}
+        for t in tags:
+            did = t[0]
+            if did not in doc2tags:
+                doc2tags[did] = [t]
+            else:
+                doc2tags[did].append(t)
+
+        tags_cleaned = []
+        # go through all tags in each doc
+        for did, doc_tags in doc2tags.items():
+            # create a copy of tags and clean it
+            doc_tags_cleaned = list(doc_tags).copy()
+            for t1 in doc_tags:
+                for t2 in doc_tags_cleaned:
+                    if int(t2[1]) < int(t1[1]) and int(t2[2]) > int(t1[2]):
+                        doc_tags_cleaned.remove(t1)
+                        break
+            # append only the cleaned tags
+            tags_cleaned.extend(doc_tags_cleaned)
+
+        self.logger.info('preparing commit...')
         for tag in tags_cleaned:
             session.add(Tag(
                 start=tag[1],
@@ -63,6 +83,7 @@ class BaseTagger(Thread):
                 tagger="{}/{}".format(self.name, self.__version__),
             ))
 
+        self.logger.info('locking table processed_for')
         # Add processed documents
         Session.lock_tables("processed_for")
         processed = set((did, self.collection, ent_type) for ent_type in self.TYPES for did in self.id_set)
@@ -81,6 +102,7 @@ class BaseTagger(Thread):
 
         # Commit
         session.commit()
+        self.logger.info("process for committed")
 
     def get_tags(self):
         """
