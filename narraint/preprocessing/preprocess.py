@@ -88,6 +88,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     logger.info("Preprocessing {} documents".format(len(target_ids)))
 
     # Get input documents for each tagger
+    # TODO: Encapsulate this part for a cleaner interface, e.g., backend.utils (?)
     for tag_type in tag_types:
         result = session.query(ProcessedFor).filter(
             ProcessedFor.document_id.in_(target_ids),
@@ -123,11 +124,13 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
         tagger.prepare(resume)
     print("=== STEP 2 - Tagging ===")
     for tagger in taggers:
+        logger.info("Starting {}".format(tagger.name))
         tagger.start()
     for tagger in taggers:
         tagger.join()
     print("=== STEP 3 - Post-processing ===")
     for tagger in taggers:
+        logger.info("Finalizing {}".format(tagger.name))
         tagger.finalize()
     export(output_filename, tag_types, target_ids, collection=collection, content=True)
     print("=== Finished ===")

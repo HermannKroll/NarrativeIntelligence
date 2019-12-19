@@ -36,7 +36,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
 
     if tag_types and types.ALL != tag_types:
-        query = query.filter(Tag.type.in_(tag_types))
+        query = query.filter(Tag.ent_type.in_(tag_types))
 
     results = query.all()
     if content and tag_types:

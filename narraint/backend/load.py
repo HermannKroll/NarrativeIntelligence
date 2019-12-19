@@ -6,7 +6,7 @@ import sys
 from datetime import datetime
 
 from narraint.backend.database import Session
-from narraint.backend.models import Document, Tag
+from narraint.backend.models import Document, Tag, ProcessedFor
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
 from narraint.tools import count_lines
 
@@ -22,6 +22,8 @@ def get_ids_contents_tags(pubtator_content):
     return document_ids, documents, tags
 
 
+# TODO: Add processed_by relation
+# TODO: Take schema change into account
 def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
@@ -80,7 +82,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     db_document_ids = set(
         x[0] for x in session.query(Document).filter(Document.collection == collection).values(Document.id))
     db_tags = set(session.query(Tag).filter(Tag.document_collection == collection).values(
-        Tag.document_id, Tag.start, Tag.end, Tag.ent_str, Tag.type, Tag.ent_id,
+        Tag.document_id, Tag.start, Tag.end, Tag.ent_str, Tag.ent_type, Tag.ent_id,
     ))
     sys.stdout.write("\rRetrieving ... {} documents and {} tags\n".format(len(db_document_ids), len(db_tags)))
     sys.stdout.flush()
@@ -98,7 +100,6 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
                 collection=collection,
                 title=doc[1],
                 abstract=doc[2],
-                date_inserted=datetime.now(),
             ))
         if len(objects) > max_bulk:
             session.bulk_save_objects(objects)
@@ -107,6 +108,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
         sys.stdout.write("\rAdding documents ... {:0.1f} %".format(int((idx + 1.0) / n_docs * 100.0)))
         sys.stdout.flush()
 
+    # TODO: Take schema change into account
     sys.stdout.write("\nAdding tags ... 0.0 %")
     sys.stdout.flush()
     n_tags = len(tags)
@@ -115,7 +117,7 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
             objects.append(Tag(
                 start=tag[1],
                 end=tag[2],
-                type=tag[4],
+                ent_type=tag[4],
                 ent_str=tag[3],
                 ent_id=tag[5],
                 document_id=tag[0],
@@ -140,9 +142,10 @@ def bulk_load(path, collection, max_bulk=MAX_BULK_SIZE, tagger=None):
     sys.stdout.flush()
 
 
+# TODO: Move to backend.utils (?) because model parameters are used
 def tag_kwargs_from_match(m, collection):
     return dict(
-        type=m[4],
+        ent_type=m[4],
         start=int(m[1]),
         end=int(m[2]),
         ent_id=m[5],
@@ -152,6 +155,7 @@ def tag_kwargs_from_match(m, collection):
     )
 
 
+# TODO: Take schema change into account
 def load_single(content, collection, tagger=None):
     """
     Loads a single PubTator file into the database. The method is designed to make as few database calls as possible.
@@ -165,29 +169,45 @@ def load_single(content, collection, tagger=None):
     :param str collection: Identifier of the collection (e.g., PMC)
     :param str or None tagger: Name of the tagger
     """
+    Session.lock_tables("document", "tag", "processed_for")
     session = Session.get()
     document_match = CONTENT_ID_TIT_ABS.match(content)
     document_id = int(document_match.group(1))
-    q_document = session.query(Document).filter_by(id=document_id, collection=collection).exists()
-    tags_match = TAG_LINE_NORMAL.findall(content)
-    tag_kwargs = [tag_kwargs_from_match(m, collection) for m in tags_match if m[5].strip()]
-    q_tags = [session.query(Tag).filter_by(**kwargs).exists() for kwargs in tag_kwargs]
-    results = session.query(q_document, *q_tags).all()[0]
-    exists_doc = results[0]
-    exists_tags = results[1:]
-    if not exists_doc:
+
+    if not session.query(session.query(Document).filter_by(id=document_id, collection=collection).exists()).scalar():
         session.add(Document(
             id=document_id,
             collection=collection,
             title=document_match.group(2).strip(),
             abstract=document_match.group(3).strip(),
-            date_inserted=datetime.now(),
         ))
-    for result, kwargs in zip(exists_tags, tag_kwargs):
-        if not result:
-            session.add(Tag(**kwargs, tagger=tagger))
-    if not all(results):
-        session.commit()
+    else:
+        print("Document already exists.")
+
+    # TODO: Take schema change into account
+    tags_match = TAG_LINE_NORMAL.findall(content)
+    tag_kwargs = [tag_kwargs_from_match(m, collection) for m in tags_match if m[5].strip()]
+    q_tags = [session.query(Tag).filter_by(**kwargs).exists() for kwargs in tag_kwargs]
+    if q_tags:
+        results = session.query(*q_tags).all()[0]
+        for result, kwargs in zip(results, tag_kwargs):
+            if not result:
+                session.add(Tag(**kwargs, tagger=tagger))
+
+    # TODO: Take schema change into account
+    ent_types = set(kwargs["ent_type"] for kwargs in tag_kwargs)
+    for ent_type in ent_types:
+        query = session.query(ProcessedFor).filter_by(
+            document_id=document_id, document_collection=collection, ent_type=ent_type,
+        ).exists()
+        if not session.query(query).scalar():
+            session.add(ProcessedFor(
+                document_id=document_id,
+                document_collection=collection,
+                ent_type=ent_type,
+            ))
+
+    session.commit()
 
 
 def main():

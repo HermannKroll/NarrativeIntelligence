@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import subprocess
+import uuid
 from datetime import datetime
 from shutil import copyfile
 from time import sleep
@@ -18,11 +19,10 @@ class NoRemainingDocumentError(Exception):
     pass
 
 
+# TODO: Ensure that documents are not processed twice. List with processed IDs/files?
 class TaggerOne(BaseTagger):
     """
     TaggerOne can tag chemicals and diseases.
-
-    The pivot is the first document which in a batch.
     """
     TYPES = (types.CHEMICAL, types.DISEASE)
     __version__ = "0.2.1"
@@ -82,8 +82,8 @@ class TaggerOne(BaseTagger):
         First, the set of not processed IDs is created, converted to a list and the first k IDs are chosen.
         Then, the list of filenames is created and if its non-empty, the batch file is written.
 
-        Method returns the first ID of the batch (also called *pivot*) and the location of the batch file.
-        :return:
+        Method returns the batch ID and the location of the batch file.
+        :return: Tuple of batch ID and batch
         """
         finished_ids = self.get_finished_ids()
         unfinished_ids = list(self.id_set.difference(finished_ids))
@@ -91,22 +91,12 @@ class TaggerOne(BaseTagger):
         batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
         self.logger.debug(f"Variable finished_ids contains {len(finished_ids)} elements")
         self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
-        pivot_id = None
+        batch_id = None
         batch_file = None
         if batch:
             num_skipped = 0
-            pivot_id = batch_ids[0]
-            self.logger.debug(f"Variable pivot_id = {pivot_id}")
-            batch_fn = "batch.{}.txt".format(pivot_id)
-            batch_file = os.path.join(self.batch_dir, batch_fn)
-            # Handle duplicate pivot_id
-            if os.path.exists(batch_file):
-                self.logger.warning("Batch file {} already exists".format(batch_file))
-                out_file = os.path.join(self.out_dir, batch_fn)
-                if os.path.exists(out_file):
-                    out_file_new = batch_fn + f"{pivot_id}.txt"
-                    self.logger.warning(f"Renaming {out_file} to {out_file_new}")
-                    os.rename(out_file, os.path.join(self.out_dir, out_file_new))
+            batch_id = uuid.uuid1()
+            batch_file = self.get_batch_file(batch_id)
             # Write batch
             for fn in batch:
                 filename = os.path.join(self.in_dir, fn)
@@ -117,14 +107,20 @@ class TaggerOne(BaseTagger):
                 else:
                     self.skipped_files.append(filename)
                     num_skipped += 1
-            self.logger.debug("Created batch ({}, {} files, {} skipped)".format(pivot_id, len(batch), num_skipped))
-        return pivot_id, batch_file
+            self.logger.debug("Created batch ({}, {} files, {} skipped)".format(batch_id, len(batch), num_skipped))
+        return batch_id, batch_file
 
-    def run_tagging(self, pivot_id, batch_file):
+    def get_output_file(self, batch_id):
+        return os.path.join(self.out_dir, "batch.{}.txt".format(batch_id))
+
+    def get_batch_file(self, batch_id):
+        return os.path.join(self.batch_dir, "batch.{}.txt".format(batch_id))
+
+    def run_tagging(self, batch_id, batch_file):
         """
         Method runs the actual tagging process and returns the TaggerOne exit code.
 
-        :param pivot_id: Document ID of first document in batch
+        :param batch_id: Document ID of first document in batch
         :param batch_file: Path to batch file
         :return: Exit status of TaggerOne
         """
@@ -133,7 +129,7 @@ class TaggerOne(BaseTagger):
                 self.config.tagger_one_script,
                 self.config.tagger_one_model,
                 input=batch_file,
-                out=os.path.join(self.out_dir, "batch.{}.txt".format(pivot_id)),
+                out=self.get_output_file(batch_id),
             )
             sp_args = ["/bin/bash", "-c", command]
             process = subprocess.Popen(sp_args, cwd=self.config.tagger_one_root, stdout=f_log, stderr=f_log)
@@ -171,10 +167,10 @@ class TaggerOne(BaseTagger):
             # No file processed, assume another error
             self.logger.error("No files processed")
             # Generate batch
-            pivot_id, batch_file = self.create_batch()
-            if not pivot_id:
+            batch_id, batch_file = self.create_batch()
+            if not batch_id:
                 keep_tagging = False
-                self.logger.info("Stopping due to no new pivot found")
+                self.logger.info("Stopping due to no new batch created")
         return keep_tagging
 
     def run(self):
@@ -193,11 +189,11 @@ class TaggerOne(BaseTagger):
         start_time = datetime.now()
 
         # Generate first batch
-        pivot_id, batch_file = self.create_batch()
-        while keep_tagging and pivot_id:
+        batch_id, batch_file = self.create_batch()
+        while keep_tagging and batch_id:
             # Start Tagging
-            self.log_file = os.path.join(self.log_dir, "taggerone.{}.log".format(pivot_id))
-            exit_code = self.run_tagging(pivot_id, batch_file)
+            self.log_file = os.path.join(self.log_dir, "taggerone.{}.log".format(batch_id))
+            exit_code = self.run_tagging(batch_id, batch_file)
 
             # Check process exit code
             if exit_code == 0:
@@ -213,7 +209,7 @@ class TaggerOne(BaseTagger):
                 keep_tagging = False
 
             # Create new batch
-            pivot_id, batch_file = self.create_batch()
+            batch_id, batch_file = self.create_batch()
 
         end_time = datetime.now()
         self.logger.info("TaggerOne finished in {} ({} files total, {} errors)".format(
