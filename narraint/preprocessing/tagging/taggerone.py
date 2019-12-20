@@ -25,6 +25,7 @@ class TaggerOne(BaseTagger):
     TaggerOne can tag chemicals and diseases.
     """
     TYPES = (types.CHEMICAL, types.DISEASE)
+    __name__ = "TaggerOne"
     __version__ = "0.2.1"
 
     def get_tags(self):

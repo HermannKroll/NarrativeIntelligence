@@ -3,7 +3,7 @@ import os
 from threading import Thread
 
 from narraint.backend.database import Session
-from narraint.backend.models import Tag, ProcessedFor
+from narraint.backend.models import Tag, Tagger, DocTaggedBy
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
@@ -11,6 +11,7 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL
 class BaseTagger(Thread):
     OUTPUT_INTERVAL = 30
     TYPES = None
+    __name__ = None
     __version__ = None
 
     def __init__(self, *args, collection=None, root_dir=None, input_dir=None, log_dir=None, config=None,
@@ -42,7 +43,6 @@ class BaseTagger(Thread):
     def get_progress(self):
         raise NotImplementedError
 
-    # TODO: Take schema change into account
     def finalize(self):
         """
         Add tags into database. First, clean tags, i.e., remove smaller tag ranges which are included in a larger tag.
@@ -54,6 +54,7 @@ class BaseTagger(Thread):
         tags = set(self.get_tags())
 
         self.logger.info('Cleaning tags')
+        # clean tags (remove smaller tags which are included in larger tags)
         doc2tags = {}
         for t in tags:
             did = t[0]
@@ -61,6 +62,7 @@ class BaseTagger(Thread):
                 doc2tags[did] = []
             doc2tags[did].append(t)
 
+        # compare just the tags within a document
         tags_cleaned = []
         for did, doc_tags in doc2tags.items():
             doc_tags_cleaned = doc_tags.copy()
@@ -72,7 +74,15 @@ class BaseTagger(Thread):
             tags_cleaned.extend(doc_tags_cleaned)
 
         self.logger.info('Prepare commit')
-        # TODO: Take schema change into account
+        # check whether the tagger is included in the tagger table
+        query = session.query(Tagger).filter_by(name=self.__name__, version=self.__version__).exists()
+        if not session.query(query).scalar():
+            session.add(Tagger(
+                name=self.__name__,
+                version=self.__version__
+            ))
+
+        # add cleaned tags to the DB
         for tag in tags_cleaned:
             session.add(Tag(
                 start=tag[1],
@@ -82,24 +92,26 @@ class BaseTagger(Thread):
                 ent_id=tag[5],
                 document_id=tag[0],
                 document_collection=self.collection,
-                tagger="{}/{}".format(self.name, self.__version__),
+                tagger_name=self.__name__,
+                tagger_version=self.__version__,
             ))
 
         # Add processed documents
-        # TODO: Take schema change into account
-        self.logger.info('Locking table processed_for')
-        Session.lock_tables("processed_for")
+        self.logger.info('Locking table doc_tagged_by')
+        Session.lock_tables("doc_tagged_by")
         processed = set((did, self.collection, ent_type) for ent_type in self.TYPES for did in self.id_set)
         processed_db = set(
-            session.query(ProcessedFor).filter(ProcessedFor.document_collection == self.collection).values(
-                ProcessedFor.document_id, ProcessedFor.document_collection, ProcessedFor.ent_type
+            session.query(DocTaggedBy).filter(DocTaggedBy.document_collection == self.collection).values(
+                DocTaggedBy.document_id, DocTaggedBy.document_collection, DocTaggedBy.ent_type
             )
         )
         processed_missing = processed.difference(processed_db)
         for doc_id, doc_collection, ent_type in processed_missing:
-            session.add(ProcessedFor(
+            session.add(DocTaggedBy(
                 document_id=doc_id,
                 document_collection=self.collection,
+                tagger_name=self.__name__,
+                tagger_version=self.__version__,
                 ent_type=ent_type,
             ))
 

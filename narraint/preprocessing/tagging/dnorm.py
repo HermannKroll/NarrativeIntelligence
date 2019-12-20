@@ -24,6 +24,7 @@ class DNorm(BaseTagger):
        Output format does not include the type of the tag, i.e., disease
     """
     TYPES = (types.DISEASE,)
+    __name__ = "DNorm"
     __version__ = "0.0.7"
 
     def get_document_info(self, doc_id):

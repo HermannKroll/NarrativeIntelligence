@@ -8,7 +8,7 @@ from narraint.backend import types
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.load import bulk_load
-from narraint.backend.models import ProcessedFor
+from narraint.backend.models import DocTaggedBy
 from narraint.backend.types import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.collect import PMCCollector
@@ -23,6 +23,7 @@ from narraint.pubtator.convert import PMCConverter
 from narraint.pubtator.document import get_document_id, DocumentError
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
+
 
 
 def init_logger(log_filename, log_level):
@@ -89,12 +90,13 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
 
     # Get input documents for each tagger
     # TODO: Encapsulate this part for a cleaner interface, e.g., backend.utils (?)
+    # Todo: We need to check whether the tagger and the tagger version matches here
     for tag_type in tag_types:
-        result = session.query(ProcessedFor).filter(
-            ProcessedFor.document_id.in_(target_ids),
-            ProcessedFor.document_collection == collection,
-            ProcessedFor.ent_type == tag_type,
-        ).values(ProcessedFor.document_id)
+        result = session.query(DocTaggedBy).filter(
+            DocTaggedBy.document_id.in_(target_ids),
+            DocTaggedBy.document_collection == collection,
+            DocTaggedBy.ent_type == tag_type,
+        ).values(DocTaggedBy.document_id)
         present_ids = set(x[0] for x in result)
         missing_ids = target_ids.difference(present_ids)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)

@@ -10,6 +10,7 @@ from narraint.preprocessing.tagging.base import BaseTagger
 
 class TMChem(BaseTagger):
     TYPES = (types.CHEMICAL,)
+    __name__ = "tmChem"
     __version__ = "0.0.2"
 
     def __init__(self, *args, **kwargs):

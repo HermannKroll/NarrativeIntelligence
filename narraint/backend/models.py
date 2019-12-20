@@ -28,15 +28,23 @@ class Document(Base):
         return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=self.id, tit=self.title, abs=self.abstract)
 
 
-class ProcessedFor(Base):
-    __tablename__ = "processed_for"
+class Tagger(Base):
+    __tablename__ = "tagger"
+    name = Column(String, primary_key=True)
+    version = Column(String, primary_key=True)
+
+
+class DocTaggedBy(Base):
+    __tablename__ = "doc_tagged_by"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        PrimaryKeyConstraint("document_id", "document_collection", "ent_type"),
+        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')),
+        PrimaryKeyConstraint('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
     )
-
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
+    tagger_name = Column(String, nullable=False)
+    tagger_version = Column(String, nullable=False)
     ent_type = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
@@ -44,11 +52,13 @@ class ProcessedFor(Base):
 class Tag(Base):
     __tablename__ = "tag"
     __table_args__ = (
-        ForeignKeyConstraint(
-            ('document_id', 'document_collection', 'ent_type'),
-            ('processed_for.document_id', 'processed_for.document_collection', 'processed_for.ent_type'),
-        ),
-        UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')),
+        # Todo: think about these constraints
+ #       ForeignKeyConstraint(('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
+ #                            ('doc_tagged_by.document_id', 'doc_tagged_by.collection', 'doc_tagged_by.tagger_name',
+ #                             'doc_tagged_by.tagger_version', 'doc_tagged_by.ent_type')),
+ #       UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
     )
 
     id = Column(Integer, primary_key=True)
@@ -59,7 +69,8 @@ class Tag(Base):
     ent_str = Column(String, nullable=False)
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
-    tagger = Column(String)
+    tagger_name = Column(String, nullable=False)
+    tagger_version = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     def __eq__(self, other):

@@ -21,6 +21,7 @@ class DosageFormTagger(BaseTagger):
         "J01.637.512.925",  # Nanowires
     )
     TYPES = (types.DOSAGE_FORM,)
+    __name__ = "DosageFormTagger"
     __version__ = "1.0.0"
 
     def __init__(self, *args, **kwargs):
