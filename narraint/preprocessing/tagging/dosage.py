@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 
 from narraint import config
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.base import BaseTagger
@@ -20,7 +20,7 @@ class DosageFormTagger(BaseTagger):
         "J01.637.512.850",  # Nanotubes
         "J01.637.512.925",  # Nanowires
     )
-    TYPES = (types.DOSAGE_FORM,)
+    TYPES = (enttypes.DOSAGE_FORM,)
     __name__ = "DosageFormTagger"
     __version__ = "1.0.0"
 
@@ -275,7 +275,7 @@ class DosageFormTagger(BaseTagger):
                         desc_str = desc
 
                     line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=types.DOSAGE_FORM,
+                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=enttypes.DOSAGE_FORM,
                         desc=desc_str
                     )
                     output += line

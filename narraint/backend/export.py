@@ -1,12 +1,13 @@
 import argparse
 import logging
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag
-from narraint.backend.types import TAG_TYPE_MAPPING
+from narraint.backend.enttypes import TAG_TYPE_MAPPING
 
 
+# TODO: Make memory-sensitive
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
     if document_ids is None:
         document_ids = []
@@ -35,7 +36,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
             query = query.filter(Tag.document_id.in_(document_ids))
         query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
 
-    if tag_types and types.ALL != tag_types:
+    if tag_types and enttypes.ALL != tag_types:
         query = query.filter(Tag.ent_type.in_(tag_types))
 
     results = query.all()
@@ -79,7 +80,7 @@ def main():
 
     tag_types = []
     if args.tag:
-        tag_types = types.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
+        tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     document_ids = [int(x) for x in args.ids]
 

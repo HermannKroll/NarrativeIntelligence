@@ -4,12 +4,12 @@ import subprocess
 from datetime import datetime
 from time import sleep
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 
 
 class TMChem(BaseTagger):
-    TYPES = (types.CHEMICAL,)
+    TYPES = (enttypes.CHEMICAL,)
     __name__ = "tmChem"
     __version__ = "0.0.2"
 

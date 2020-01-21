@@ -6,13 +6,13 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import get_document_id
 
 
 class GNorm(BaseTagger):
-    TYPES = (types.GENE,)
+    TYPES = (enttypes.GENE,)
     __name__ = "GNormPlus"
     __version__ = "1.0.0"
 

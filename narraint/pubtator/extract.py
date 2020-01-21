@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import re
 
 REGEX_TITLE_OR_ABSTRACT = re.compile("(\d+)\|[at]\|(.*?)\n")
@@ -64,3 +65,21 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def read_pubtator_documents(path):
+    if os.path.isdir(path):
+        for fn in os.listdir(path):
+            if not fn.startswith(".") and fn.endswith(".txt"):
+                abs_path = os.path.join(path, fn)
+                with open(abs_path) as f:
+                    yield f.read()
+    else:
+        content = ""
+        with open(path) as f:
+            for idx, line in enumerate(f):
+                if line.strip():
+                    content += line
+                else:
+                    yield content
+                    content = ""

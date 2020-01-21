@@ -4,12 +4,12 @@ import tempfile
 from argparse import ArgumentParser
 from typing import List
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.load import bulk_load
 from narraint.backend.models import DocTaggedBy
-from narraint.backend.types import TAG_TYPE_MAPPING
+from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.collect import PMCCollector
 from narraint.preprocessing.config import Config
@@ -109,15 +109,15 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = []
-    if types.GENE in tag_types:
+    if enttypes.GENE in tag_types:
         taggers.append(GNorm(**kwargs))
-    if types.DISEASE in tag_types and not use_tagger_one:
+    if enttypes.DISEASE in tag_types and not use_tagger_one:
         taggers.append(DNorm(**kwargs))
-    if types.CHEMICAL in tag_types and not use_tagger_one:
+    if enttypes.CHEMICAL in tag_types and not use_tagger_one:
         taggers.append(TMChem(**kwargs))
-    if types.CHEMICAL in tag_types and types.DISEASE in tag_types and use_tagger_one:
+    if enttypes.CHEMICAL in tag_types and enttypes.DISEASE in tag_types and use_tagger_one:
         taggers.append(TaggerOne(**kwargs))
-    if types.DOSAGE_FORM in tag_types:
+    if enttypes.DOSAGE_FORM in tag_types:
         taggers.append(DosageFormTagger(**kwargs))
     for tagger in taggers:
         logger.info("Preparing {}".format(tagger.name))
@@ -182,7 +182,7 @@ def main():
     bulk_load(in_dir, args.corpus)
 
     # Create list of tagging ent types
-    tag_types = types.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
+    tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     # TODO: Add SQL logging
     # logging.basicConfig()

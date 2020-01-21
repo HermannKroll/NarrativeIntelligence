@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 from time import sleep
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.count import count_documents
 
@@ -23,7 +23,7 @@ class DNorm(BaseTagger):
 
        Output format does not include the type of the tag, i.e., disease
     """
-    TYPES = (types.DISEASE,)
+    TYPES = (enttypes.DISEASE,)
     __name__ = "DNorm"
     __version__ = "0.0.7"
 
@@ -44,7 +44,7 @@ class DNorm(BaseTagger):
                         new_line = line.strip().split("\t")
                         # Add type
                         if len(new_line) == 4 or len(new_line) == 5:
-                            new_line.insert(4, types.DISEASE)
+                            new_line.insert(4, enttypes.DISEASE)
                         if len(new_line) == 4:
                             new_line.insert(5, "")
                         # Read source document

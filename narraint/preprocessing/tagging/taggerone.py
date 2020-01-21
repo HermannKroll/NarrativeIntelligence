@@ -7,7 +7,7 @@ from datetime import datetime
 from shutil import copyfile
 from time import sleep
 
-from narraint.backend import types
+from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.count import get_document_ids
 
@@ -24,7 +24,7 @@ class TaggerOne(BaseTagger):
     """
     TaggerOne can tag chemicals and diseases.
     """
-    TYPES = (types.CHEMICAL, types.DISEASE)
+    TYPES = (enttypes.CHEMICAL, enttypes.DISEASE)
     __name__ = "TaggerOne"
     __version__ = "0.2.1"
 
