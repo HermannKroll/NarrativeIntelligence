@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Tuple, Dict, Set
 
 from sqlalchemy.dialects.postgresql import insert
@@ -13,6 +13,8 @@ from narraint.backend.models import Document, Tag, Tagger, DocTaggedBy
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
+
+PRINT_ETA_EVERY_K_DOCUMENTS = 100
 
 
 def read_tagger_mapping(filename: str) -> Dict[str, Tuple[str, str]]:
@@ -81,6 +83,7 @@ def bulk_load(path, collection, tagger_mapping):
     n_docs = count_documents(path)
 
     start_time = datetime.now()
+    eta = "N/A"
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
         tagged_ent_types = set()
         doc_ic, d_content, d_tags = get_id_content_tag(pubtator_content)
@@ -129,10 +132,17 @@ def bulk_load(path, collection, tagger_mapping):
             )
             session.execute(insert_doc_tagged_by)
         session.commit()
-        sys.stdout.write("\rAdding documents ... {:0.1f} %".format(int((idx + 1.0) / n_docs * 100.0)))
+
+        percentage = (idx + 1.0) / n_docs * 100.0
+        if idx % PRINT_ETA_EVERY_K_DOCUMENTS == 0:
+            elapsed_seconds = (datetime.now() - start_time).seconds + 1
+            seconds_per_doc = elapsed_seconds / (idx + 1.0)
+            remaining_seconds = (n_docs - idx) * seconds_per_doc
+            eta = start_time + timedelta(seconds=remaining_seconds)
+        sys.stdout.write("\rAdding {} documents ... {:0.1f} (ETA {})%".format(n_docs, percentage, eta))
         sys.stdout.flush()
 
-    sys.stdout.write("\rAdding documents ... done in {}".format(datetime.now() - start_time))
+    sys.stdout.write("\rAdding {} documents ... done in {}".format(n_docs, datetime.now() - start_time))
 
 
 def main():

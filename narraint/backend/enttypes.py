@@ -4,6 +4,8 @@ MUTATION = "Mutation"
 GENE = "Gene"
 SPECIES = "Species"
 DISEASE = "Disease"
+VARIANT = "Variant"
+CELLLINE = "CellLine"
 
 ALL = (
     DOSAGE_FORM,
@@ -11,7 +13,9 @@ ALL = (
     MUTATION,
     GENE,
     SPECIES,
-    DISEASE
+    DISEASE,
+    VARIANT,
+    CELLLINE,
 )
 
 TAG_TYPE_MAPPING = dict(
@@ -21,5 +25,7 @@ TAG_TYPE_MAPPING = dict(
     G=GENE,
     S=SPECIES,
     D=DISEASE,
+    V=VARIANT,
+    CL=CELLLINE,
     A="ALL",
 )
