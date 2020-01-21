@@ -36,9 +36,9 @@ def read_tagger_mapping(filename: str) -> Dict[str, Tuple[str, str]]:
 
 def get_tagger_for_enttype(tagger_mapping, ent_type):
     if ent_type not in tagger_mapping:
-        return UNKNOWN_TAGGER
+        return UNKNOWN_TAGGER[0],UNKNOWN_TAGGER[1]
     else:
-        return tagger_mapping[ent_type]
+        return tagger_mapping[ent_type][0], tagger_mapping[ent_type][1]
 
 
 def insert_taggers(tagger_list):
@@ -114,7 +114,7 @@ def bulk_load(path, collection, tagger_mapping):
 
         # Add tags
         for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-            [tagger_name, tagger_version] = get_tagger_for_enttype(tagger_mapping, ent_type)
+            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
             tagged_ent_types.add(ent_type)
 
             insert_tag = insert(Tag).values(
@@ -134,7 +134,7 @@ def bulk_load(path, collection, tagger_mapping):
 
         # Add DocTaggedBy
         for ent_type in tagged_ent_types:
-            [tagger_name, tagger_version] = get_tagger_for_enttype(tagger_mapping, ent_type)
+            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
             insert_doc_tagged_by = insert(DocTaggedBy).values(
                 document_id=doc_ic,
                 document_collection=collection,
