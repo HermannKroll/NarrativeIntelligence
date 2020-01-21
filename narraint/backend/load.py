@@ -15,6 +15,7 @@ from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
 
 PRINT_ETA_EVERY_K_DOCUMENTS = 100
+UNKNOWN_TAGGER = ["Unknown", "unknown"]
 
 
 def read_tagger_mapping(filename: str) -> Dict[str, Tuple[str, str]]:
@@ -33,15 +34,22 @@ def read_tagger_mapping(filename: str) -> Dict[str, Tuple[str, str]]:
     return mapping
 
 
-def insert_taggers_from_mapping(tagger_mapping):
-    """
-    Inserts the taggers from the tagger mapping into the database.
+def get_tagger_for_enttype(tagger_mapping, ent_type):
+    if ent_type not in tagger_mapping:
+        return UNKNOWN_TAGGER
+    else:
+        return tagger_mapping[ent_type]
 
-    :param tagger_mapping:
+
+def insert_taggers(tagger_list):
+    """
+    Inserts the taggers from the list.
+
+    :param tagger_list: List consisting of Pairs with tagger name and tagger version
     :return:
     """
     session = Session.get()
-    for ent_type, tagger in tagger_mapping.items():
+    for tagger in tagger_list:
         insert_stmt = insert(Tagger).values(
             name=tagger[0],
             version=tagger[1],
@@ -80,7 +88,12 @@ def bulk_load(path, collection, tagger_mapping):
     :return:
     """
     session = Session.get()
+
+    sys.stdout.write("Counting documents ...")
+    sys.stdout.flush()
     n_docs = count_documents(path)
+    sys.stdout.write("Counting documents ... found {}".format(n_docs))
+    sys.stdout.flush()
 
     start_time = datetime.now()
     eta = "N/A"
@@ -101,7 +114,7 @@ def bulk_load(path, collection, tagger_mapping):
 
         # Add tags
         for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-            [tagger_name, tagger_version] = tagger_mapping[ent_type]
+            [tagger_name, tagger_version] = get_tagger_for_enttype(tagger_mapping, ent_type)
             tagged_ent_types.add(ent_type)
 
             insert_tag = insert(Tag).values(
@@ -121,11 +134,12 @@ def bulk_load(path, collection, tagger_mapping):
 
         # Add DocTaggedBy
         for ent_type in tagged_ent_types:
+            [tagger_name, tagger_version] = get_tagger_for_enttype(tagger_mapping, ent_type)
             insert_doc_tagged_by = insert(DocTaggedBy).values(
                 document_id=doc_ic,
                 document_collection=collection,
-                tagger_name=tagger_mapping[ent_type][0],
-                tagger_version=tagger_mapping[ent_type][1],
+                tagger_name=tagger_name,
+                tagger_version=tagger_version,
                 ent_type=ent_type,
             ).on_conflict_do_nothing(
                 index_elements=('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
@@ -139,10 +153,10 @@ def bulk_load(path, collection, tagger_mapping):
             seconds_per_doc = elapsed_seconds / (idx + 1.0)
             remaining_seconds = (n_docs - idx) * seconds_per_doc
             eta = start_time + timedelta(seconds=remaining_seconds)
-        sys.stdout.write("\rAdding {} documents ... {:0.1f} (ETA {})%".format(n_docs, percentage, eta))
+        sys.stdout.write("\rAdding documents ... {:0.1f} (ETA {})%".format(percentage, eta))
         sys.stdout.flush()
 
-    sys.stdout.write("\rAdding {} documents ... done in {}".format(n_docs, datetime.now() - start_time))
+    sys.stdout.write("\rAdding documents ... done in {}".format(datetime.now() - start_time))
 
 
 def main():
@@ -155,7 +169,9 @@ def main():
     args = parser.parse_args()
 
     tagger_mapping = read_tagger_mapping(args.tagger_map)
-    insert_taggers_from_mapping(tagger_mapping)
+    tagger_list = list(tagger_mapping.values())
+    tagger_list.append(UNKNOWN_TAGGER)
+    insert_taggers(tagger_list)
 
     if args.log:
         logging.basicConfig()
