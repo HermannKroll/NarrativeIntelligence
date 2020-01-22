@@ -25,7 +25,11 @@ class Document(Base):
         return "<Document {}{}>".format(self.collection, self.id)
 
     def to_pubtator(self):
-        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=self.id, tit=self.title, abs=self.abstract)
+        return Document.create_pubtator(self.title, self.abstract)
+
+    @staticmethod
+    def create_pubtator(did, title, abstract):
+        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title, abs=abstract)
 
 
 class Tagger(Base):
@@ -82,6 +86,9 @@ class Tag(Base):
         return hash((self.ent_type, self.start, self.end, self.ent_id, self.ent_str, self.document_id,
                      self.document_collection))
 
+    @staticmethod
+    def create_pubtator(did, start, end, ent_str, ent_type, ent_id):
+        return "{}\t{}\t{}\t{}\t{}\t{}\n".format(did, start, end, ent_str, ent_type, ent_id)
+
     def to_pubtator(self):
-        return "{}\t{}\t{}\t{}\t{}\t{}\n".format(self.document_id, self.start, self.end, self.ent_str, self.ent_type,
-                                                 self.ent_id)
+        return Tag.create_pubtator(self.document_id, self.start, self.end, self.ent_str, self.ent_type, self.ent_id)

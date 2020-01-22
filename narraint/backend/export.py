@@ -3,11 +3,10 @@ import logging
 
 from narraint.backend import enttypes
 from narraint.backend.database import Session
-from narraint.backend.models import Document, Tag
 from narraint.backend.enttypes import TAG_TYPE_MAPPING
+from narraint.backend.models import Document, Tag
 
 
-# TODO: Make memory-sensitive
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
     if document_ids is None:
         document_ids = []
@@ -39,25 +38,25 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
     if tag_types and enttypes.ALL != tag_types:
         query = query.filter(Tag.ent_type.in_(tag_types))
 
-    results = query.all()
+    results = session.execute(query)
     if content and tag_types:
         with open(out_fn, "w") as f:
-            doc = None
-            for document, tag in results:
-                if doc != document:
-                    if doc is not None:
+            doc_id = None
+            for row in results:
+                if doc_id != row[1]:  # row[1] is document ID
+                    if doc_id:
                         f.write("\n")
-                    f.write(document.to_pubtator())
-                    doc = document
-                f.write(tag.to_pubtator())
+                    f.write(Document.create_pubtator(row[1], row[2], row[3]))
+                    doc_id = row[1]
+                f.write(Tag.create_pubtator(row[1], row[8], row[9], row[11], row[7], row[10]))
     elif content:
         with open(out_fn, "w") as f:
-            for document in results:
-                f.write(document.to_pubtator() + "\n")
+            for row in results:
+                f.write(Document.create_pubtator(row[1], row[2], row[3]) + "\n")
     else:
         with open(out_fn, "w") as f:
-            for tag in results:
-                f.write(tag.to_pubtator())
+            for row in results:
+                f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
     print("Results written to {}".format(out_fn))
 
 

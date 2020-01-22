@@ -92,7 +92,7 @@ def bulk_load(path, collection, tagger_mapping):
     sys.stdout.write("Counting documents ...")
     sys.stdout.flush()
     n_docs = count_documents(path)
-    sys.stdout.write("Counting documents ... found {}".format(n_docs))
+    sys.stdout.write("\rCounting documents ... found {}\n".format(n_docs))
     sys.stdout.flush()
 
     start_time = datetime.now()
@@ -152,8 +152,8 @@ def bulk_load(path, collection, tagger_mapping):
             elapsed_seconds = (datetime.now() - start_time).seconds + 1
             seconds_per_doc = elapsed_seconds / (idx + 1.0)
             remaining_seconds = (n_docs - idx) * seconds_per_doc
-            eta = start_time + timedelta(seconds=remaining_seconds)
-        sys.stdout.write("\rAdding documents ... {:0.1f} (ETA {})%".format(percentage, eta))
+            eta = (start_time + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
+        sys.stdout.write("\rAdding documents ... {:0.1f} % (ETA {})".format(percentage, eta))
         sys.stdout.flush()
 
     sys.stdout.write("\rAdding documents ... done in {}".format(datetime.now() - start_time))
