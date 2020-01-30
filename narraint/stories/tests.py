@@ -1,8 +1,8 @@
 import unittest
 
 from narraint.stories.library_graph import LibraryGraph
-from narraint.stories import GraphQuery
-from narraint.stories import StoryProcessor
+from narraint.stories.story import GraphQuery
+from narraint.stories.story import StoryProcessor
 
 
 class QueryTests(unittest.TestCase):

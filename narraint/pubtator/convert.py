@@ -167,7 +167,7 @@ class PMCConverter:
                     pass
                 else:
                     ignored_files.append(fn)
-            except ParserError:
+            except:
                 ignored_files.append(fn)
 
             # Output

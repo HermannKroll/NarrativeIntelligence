@@ -29,15 +29,15 @@ The projects core, the `narraint` package, consists of several Python packages a
 |-----------------|-----------------------------------------------------------------------------------------------|
 | `backend` | Connection to database, loading and exporting |
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
-| `graph` | ? |
+| `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
 | `narrative` | Implementation of the Narrative querying |
 | `openie` | OpenIE for PubTator documents using Standford NLP |
 | `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
-| `pubmedutils` | ? |
+| `pubmedutils` | Tools to query PMIDs from PubMed and PubTator files from Pubtator  |
 | `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
-| `semmeddb` | ? |
-| `stories` | ? |
+| `semmeddb` | Connection Handling for a SemMedDB. Currently our prototype queries SemMedDB via this package for fact retrieval |
+| `stories` | Some experimental stuff to derive stories from documents |
 
 
 ## Named Entity Recognition
