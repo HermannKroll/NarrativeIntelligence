@@ -3,7 +3,7 @@
 This project can be used to process documents using Narratives.
 
 ## Getting Started
-Download the CTD data and the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
+Download the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
 
 ```
 ./download_data.sh
@@ -17,7 +17,6 @@ Application data includes:
 - MESH descriptor files
 - UMLS data
 - TIB EPA dump
-- CTD data
 
 ### Configuration
 *All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
