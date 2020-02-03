@@ -27,18 +27,18 @@ def get_nodes_from_treenumbers(tree_numbers):
     return nodes
 
 
-def export_mesh_headings_as_list(meshdb, tree_numbers, output_file):
-    nodes = get_nodes_from_treenumbers(tree_numbers)
-    export_str = '["{}"'.format(nodes[0].heading)
+def export_mesh_headings_for_teamproject(meshdb, output_file):
+    nodes = meshdb.get_all_descs()
+    print('{} nodes fetched from mesh'.format(len(nodes)))
+    export_str = 'Heading\tMESH Descriptor'
     for n in nodes[1:]:
-        export_str += ',"{}"'.format(n.heading)
-    export_str += ']'
+        export_str += '\n{}\tMESH:{}'.format(n.heading, n.unique_id)
     with open(output_file, 'w') as f:
         f.write(export_str)
 
+
 def export_mesh_subtrees_as_tsv(meshdb, tree_numbers, output_file):
     nodes = get_nodes_from_treenumbers(tree_numbers)
-
     with open(output_file, 'w') as f:
         f.write('MESH Descriptor\tHeading\tTerms\n')
         for n in nodes:
@@ -54,24 +54,11 @@ def export_mesh_subtrees_as_tsv(meshdb, tree_numbers, output_file):
 
 
 DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600", "J01.637.512.850", "J01.637.512.925"]
-ALL_TREES = []#["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "V", "Z"]
-
-for i in range(1, 10):
-    ALL_TREES.append('C0{}'.format(i))
-    ALL_TREES.append('D0{}'.format(i))
-
-for i in range(10,26):
-    ALL_TREES.append('C{}'.format(i))
-    ALL_TREES.append('D{}'.format(i))
-
-ALL_TREES.append('D27')
-
-print(ALL_TREES)
 
 print('load mesh file...')
 meshdb = MeSHDB.instance()
 meshdb.load_xml(MESH_DESCRIPTORS_FILE)
 print('beginning export...')
 #export_mesh_subtrees_as_tsv(meshdb, DOSAGE_FORM_TREE_NUMBERS, 'dosage_forms_dict2020.tsv')
-export_mesh_headings_as_list(meshdb, ALL_TREES, 'mesh_list.txt')
+export_mesh_headings_for_teamproject(meshdb, 'mesh_list.txt')
 print('export finished')
