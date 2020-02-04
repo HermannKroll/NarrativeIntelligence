@@ -146,6 +146,8 @@ class PMCConverter:
         if pubtator_abstract.strip() and title:
             content = "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
             content = content.replace(pmcid, pmid)
+            # ensures that no \t are included
+            content = content.replace('\t', ' ')
             with open(out_file, "w") as f:
                 f.write("{}\n".format(content))
         else:
