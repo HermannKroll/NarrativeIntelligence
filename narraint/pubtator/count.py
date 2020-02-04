@@ -14,7 +14,6 @@ def get_document_ids(path):
         with open(path) as f:
             for line in f:
                 ids.update(int(x) for x in DOCUMENT_ID.findall(line))
-                ids.update(int(x[0]) for x in TAG_LINE_NORMAL.findall(line))
     return ids
 
 
