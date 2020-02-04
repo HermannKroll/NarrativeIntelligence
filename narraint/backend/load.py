@@ -101,6 +101,10 @@ def bulk_load(path, collection, tagger_mapping=None):
         tagged_ent_types = set()
         doc_ic, d_content, d_tags = get_id_content_tag(pubtator_content)
 
+        # skip document because content is not there
+        if not doc_ic or not d_content:
+            continue
+
         # Add document
         insert_document = insert(Document).values(
             collection=collection,
@@ -112,8 +116,8 @@ def bulk_load(path, collection, tagger_mapping=None):
         )
         session.execute(insert_document)
 
-        # if no tagger mapping is set, no tags will be inserted
-        if not tagger_mapping:
+        # only if tagger mapping is set, tags will be inserted
+        if tagger_mapping and d_tags:
             # Add tags
             for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
                 tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)

@@ -166,7 +166,7 @@ class PMCConverter:
         last_percent = 0
 
         for current, fn in enumerate(filename_list):
-            pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
+            pmcid = ".".join(fn.split("/")[-1].split(".")[:-1]).replace('PMC', '')
             if pmcid in pmcid2pmid:
                 try:
                     pmid = pmcid2pmid[pmcid]
