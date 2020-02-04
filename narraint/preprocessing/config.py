@@ -18,6 +18,10 @@ class Config:
     def pmc_dir(self):
         return self.config["pmc_dir"]
 
+    @property
+    def pmcid2pmid(self):
+        return self.config["pmcid2pmid"]
+
     # TaggerOne
     @property
     def tagger_one_root(self):

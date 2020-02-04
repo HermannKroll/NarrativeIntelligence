@@ -76,7 +76,7 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
     return document_id, document, tags
 
 
-def bulk_load(path, collection, tagger_mapping):
+def bulk_load(path, collection, tagger_mapping=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
 
@@ -112,39 +112,42 @@ def bulk_load(path, collection, tagger_mapping):
         )
         session.execute(insert_document)
 
-        # Add tags
-        for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
-            tagged_ent_types.add(ent_type)
+        # if no tagger mapping is set, no tags will be inserted
+        if not tagger_mapping:
+            # Add tags
+            for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                tagged_ent_types.add(ent_type)
 
-            insert_tag = insert(Tag).values(
-                ent_type=ent_type,
-                start=start,
-                end=end,
-                ent_id=ent_id,
-                ent_str=ent_str,
-                document_id=d_id,
-                document_collection=collection,
-                tagger_name=tagger_name,
-                tagger_version=tagger_version,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
-            )
-            session.execute(insert_tag)
+                insert_tag = insert(Tag).values(
+                    ent_type=ent_type,
+                    start=start,
+                    end=end,
+                    ent_id=ent_id,
+                    ent_str=ent_str,
+                    document_id=d_id,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                ).on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+                )
+                session.execute(insert_tag)
 
-        # Add DocTaggedBy
-        for ent_type in tagged_ent_types:
-            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
-            insert_doc_tagged_by = insert(DocTaggedBy).values(
-                document_id=doc_ic,
-                document_collection=collection,
-                tagger_name=tagger_name,
-                tagger_version=tagger_version,
-                ent_type=ent_type,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
-            )
-            session.execute(insert_doc_tagged_by)
+            # Add DocTaggedBy
+            for ent_type in tagged_ent_types:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                insert_doc_tagged_by = insert(DocTaggedBy).values(
+                    document_id=doc_ic,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                    ent_type=ent_type,
+                ).on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
+                )
+                session.execute(insert_doc_tagged_by)
+
         session.commit()
 
         percentage = (idx + 1.0) / n_docs * 100.0

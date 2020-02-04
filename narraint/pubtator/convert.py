@@ -73,7 +73,7 @@ class PMCConverter:
         text = self.clean_text(text)
         return text
 
-    def convert(self, in_file, out_file):
+    def convert(self, in_file, out_file, pmcid, pmid):
         """
         Method takes a filename from an PMC-xml-file and returns the string in the PubTator format
         (e.g., <PMCID>|t| <Title> and <PMCID>|a| <Content>).
@@ -108,6 +108,8 @@ class PMCConverter:
 
         :param str out_file: Output
         :param str in_file: Filename to the PMC-document in xml-format.
+        :param str pmcid: PubMed Central Document ID
+        :param str pmid: PubMed ID (PMCID ID will be replaced by PMID)
         :return: String for the PubTator representation
         """
         with open(in_file) as f:
@@ -132,7 +134,10 @@ class PMCConverter:
         pubtator_abstract = pubtator_abstract.strip()
 
         filename = in_file.split("/")[-1]
-        pmcid = filename[3:filename.rindex(".")]
+        pmcid_in_doc = filename[3:filename.rindex(".")]
+
+        if pmcid_in_doc != pmcid:
+            raise ValueError("PMCID in document does not match the expected PMCID...")
 
         # Finish
         if len(pubtator_abstract) > MAX_CONTENT_LENGTH:
@@ -140,12 +145,13 @@ class PMCConverter:
 
         if pubtator_abstract.strip() and title:
             content = "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
+            content = content.replace(pmcid, pmid)
             with open(out_file, "w") as f:
                 f.write("{}\n".format(content))
         else:
             raise DocumentEmptyError
 
-    def convert_bulk(self, filename_list: List[str], output_dir, err_file=None):
+    def convert_bulk(self, filename_list: List[str], output_dir, pmcid2pmid, err_file=None):
         """
         Method converts a set of PubMedCentral XML files to the PubTator format.
 
@@ -159,16 +165,20 @@ class PMCConverter:
 
         for current, fn in enumerate(filename_list):
             pmcid = ".".join(fn.split("/")[-1].split(".")[:-1])
-            try:
-                out_file = os.path.join(output_dir, f"{pmcid}.txt")
+            if pmcid in pmcid2pmid:
                 try:
-                    self.convert(fn, out_file)
-                except (DocumentEmptyError, DocumentTooLargeError):
-                    pass
-                else:
+                    pmid = pmcid2pmid[pmcid]
+                    out_file = os.path.join(output_dir, f"{pmid}.txt")
+                    try:
+                        self.convert(fn, out_file, pmcid, pmid)
+                    except (DocumentEmptyError, DocumentTooLargeError):
+                        pass
+                    else:
+                        ignored_files.append(fn)
+                except:
                     ignored_files.append(fn)
-            except:
-                ignored_files.append(fn)
+            else:
+                ignored_files.append('pmcid to pmid missing for {}'.format(fn))
 
             # Output
             if ((current + 1) / count * 100.0) > last_percent:

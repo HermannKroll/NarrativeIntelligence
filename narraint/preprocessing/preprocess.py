@@ -21,6 +21,7 @@ from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.convert import PMCConverter
 from narraint.pubtator.document import get_document_id, DocumentError
+from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
@@ -165,6 +166,10 @@ def main():
 
     # Create configuration wrapper
     conf = Config(args.config)
+
+    if args.corpus == "PMC":
+        print('loading pmcid to pmid translation file...')
+        pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
 
     # Perform collection and conversion
     in_dir = args.input
