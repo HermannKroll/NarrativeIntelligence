@@ -179,7 +179,7 @@ def main():
         collector = PMCCollector(conf.pmc_dir)
         files = collector.collect(args.input)
         translator = PMCConverter()
-        translator.convert_bulk(files, in_dir, error_file)
+        translator.convert_bulk(files, in_dir, pmcid2pmid, error_file)
     elif args.ids:
         raise ValueError("Providing an ID set is only supported for PMC collection")
 
