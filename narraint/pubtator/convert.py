@@ -177,6 +177,7 @@ class PMCConverter:
                         pass
                     else:
                         ignored_files.append(fn)
+                # Todo: Fix this except here, in general is not good
                 except:
                     ignored_files.append(fn)
             else:
