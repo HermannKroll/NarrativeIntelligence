@@ -10,8 +10,7 @@ from narraint.preprocessing.config import Config
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL
-
-PRINT_ETA_EVERY_K_DOCUMENTS = 100
+from narraint.progress import print_progress_with_eta
 
 
 def load_pmcids_to_pmid_index(index_file):
@@ -86,14 +85,7 @@ def convert_pmcids_files_to_pmid_files(input, output, pmcid2pmid):
                 is_open = True
             output_f.write(pubtator_content_new)
 
-        percentage = (idx + 1.0) / n_docs * 100.0
-        if idx % PRINT_ETA_EVERY_K_DOCUMENTS == 0:
-            elapsed_seconds = (datetime.now() - start_time).seconds + 1
-            seconds_per_doc = elapsed_seconds / (idx + 1.0)
-            remaining_seconds = (n_docs - idx) * seconds_per_doc
-            eta = (start_time + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
-        sys.stdout.write("\rconverting documents ... {:0.1f} % (ETA {})".format(percentage, eta))
-        sys.stdout.flush()
+        print_progress_with_eta("converting documents", idx, n_docs, start_time)
 
     sys.stdout.write("\rconverting documents ... done in {}".format(datetime.now() - start_time))
     # close output file
