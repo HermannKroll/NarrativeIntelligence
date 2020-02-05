@@ -8,10 +8,12 @@ import tempfile
 from datetime import datetime
 from time import sleep
 
-from narraint.config import OPENIE_CONFIG
 
-PUBTATOR_REGEX = re.compile(r"(\d+)\|t\|(.*?)\n\d+\|a\|(.*?)")
+from narraint.config import OPENIE_CONFIG
+from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
+
 FILENAME_REGEX = re.compile(r"(/[\w/.]+)\t")
+OPENIE_VERSION = "1.0.0"
 
 
 def prepare_files(input_dir):
@@ -27,7 +29,7 @@ def prepare_files(input_dir):
     for fn in os.listdir(input_dir):
         with open(os.path.join(input_dir, fn)) as f:
             document = f.read().strip()
-        match = PUBTATOR_REGEX.match(document)
+        match = CONTENT_ID_TIT_ABS.match(document)
         if not match:
             amount_skipped_files += 1
             print(f"WARNING: Ignoring {fn} (no pubtator format found)")
