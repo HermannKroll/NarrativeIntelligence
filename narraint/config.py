@@ -12,7 +12,7 @@ LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
 
 # UMLS
-UMLS_DATA = os.path.join(DATA_DIR, "umls/MRCONSO.RRF")
+UMLS_DATA = os.path.join(DATA_DIR, "umls/MRCONSO.RRF.gz")
 UMLS_MAPPING = os.path.join(DATA_DIR, "umls/mapping.json")
 
 # SemMed

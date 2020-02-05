@@ -6,6 +6,7 @@ Use dataset: 2019AA UMLS Metathesaurus Files
 - [Information](https://www.ncbi.nlm.nih.gov/books/NBK9685/#ch03.sec3.3.4)
 """
 import json
+import gzip
 from datetime import datetime
 
 from narraint.config import UMLS_DATA, UMLS_MAPPING
@@ -15,7 +16,7 @@ def main():
     mapping = dict()
 
     start = datetime.now()
-    with open(UMLS_DATA) as f:
+    with gzip.open(UMLS_DATA) as f:
         for idx, line in enumerate(f):
             fields = line.split("|")
             if fields[11] == "MSH":
