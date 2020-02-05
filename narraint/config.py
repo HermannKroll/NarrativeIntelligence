@@ -33,7 +33,7 @@ GRAPH_GV = os.path.join(DATA_DIR, "graph/graph.gv")
 # OpenIE
 OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
 
-# OpenIE
+# Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
 # DosageForm Tagger
