@@ -1,5 +1,5 @@
 {
-  "POSTGRES_DB":   "semmeddb",
+  "POSTGRES_DB":   "semmeddb2019",
   "POSTGRES_HOST" : "134.169.32.169",
   "POSTGRES_PORT" : "5432",
   "POSTGRES_USER" : "krollro",
