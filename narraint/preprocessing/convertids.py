@@ -6,6 +6,7 @@ import re
 
 from datetime import datetime, timedelta
 
+from narraint.preprocessing.config import Config
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL
@@ -55,6 +56,9 @@ def convert_pmcids_files_to_pmid_files(input, output, pmcid2pmid):
     start_time = datetime.now()
     eta = "N/A"
     for idx, pubtator_content in enumerate(read_pubtator_documents(input)):
+        # skip empty documents
+        if pubtator_content == "":
+            continue
         if re.match(DOCUMENT_ID, pubtator_content):
             pmcid = pubtator_content.split('|')[0]
         elif re.match(TAG_LINE_NORMAL, pubtator_content):
@@ -82,33 +86,35 @@ def convert_pmcids_files_to_pmid_files(input, output, pmcid2pmid):
                 is_open = True
             output_f.write(pubtator_content_new)
 
-
         percentage = (idx + 1.0) / n_docs * 100.0
         if idx % PRINT_ETA_EVERY_K_DOCUMENTS == 0:
             elapsed_seconds = (datetime.now() - start_time).seconds + 1
             seconds_per_doc = elapsed_seconds / (idx + 1.0)
             remaining_seconds = (n_docs - idx) * seconds_per_doc
             eta = (start_time + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
-        sys.stdout.write("\radding documents ... {:0.1f} % (ETA {})".format(percentage, eta))
+        sys.stdout.write("\rconverting documents ... {:0.1f} % (ETA {})".format(percentage, eta))
         sys.stdout.flush()
 
-    sys.stdout.write("\radding documents ... done in {}".format(datetime.now() - start_time))
+    sys.stdout.write("\rconverting documents ... done in {}".format(datetime.now() - start_time))
     # close output file
     if is_open:
         output_f.close()
 
     sys.stdout.write("\nskipped {} documents due to missing id translation".format(skipped))
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
     parser.add_argument("output")
-    parser.add_argument("-t", "--translation-file", required=True, help="TSV file that includes PMCID to PMID Mapping")
     parser.add_argument("--log", action="store_true")
     args = parser.parse_args()
 
+    # Create configuration wrapper
+    conf = Config(args.config)
+
     print('loading pmcid to pmid translation file...')
-    pmcid2pmid = load_pmcids_to_pmid_index(args.translation_file)
+    pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
 
     if args.log:
         logging.basicConfig()
