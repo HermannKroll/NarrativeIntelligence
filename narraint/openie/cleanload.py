@@ -153,11 +153,6 @@ def clean_open_ie(input, output, collection, pmcid2pmid):
 
     logging.info('cleaning finished...')
 
-    logging.info('writing results...')
-    with open(output, "w") as f:
-        f.write("\n".join('\t'.join(str(t)) for t in tuples_cleaned))
-    logging.info('results written')
-
     insert_predications_into_db(tuples_cleaned, collection)
 
 
@@ -168,7 +163,6 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help='OpenIE export file')
-    parser.add_argument("output", help='Cleaned OpenIE export file')
     parser.add_argument("-c", "--collection", required=True, help='collection to which the ids belong')
 
     args = parser.parse_args()
