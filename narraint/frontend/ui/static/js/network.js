@@ -1,1226 +1,1104 @@
 var query = "";
-var tags;
-var predicates;
-var mod2 = document.getElementById("mod2");
-var mod1 = document.getElementById("mod1");
-var mod3 = document.getElementById("mod3");
-var pos = 0;
-var cursorX = 0;
-var cursorY = 0;
-var cursorPosition = {'x': 0, 'y': 0};
-var oldQuery = "";
-var oldQuery = "";
-
-
-/*$('#mynetwork').click(function(e) {
-  //  console.log("x: " + cursorX + ", y: " + cursorY);
-  //  console.log(network.DOMtoCanvas({x:e.pageX, y:e.pageY}).x, network.DOMtoCanvas({x:e.pageX, y:e.pageY}).y);
-  //    cursorX = network.DOMtoCanvas({x:e.pageX, y:e.pageY}).x;
-  //    cursorY = network.DOMtoCanvas({x:e.pageX, y:e.pageY}).y;
-  cursorPosition = {'x':e.pageX, 'y':e.pageY};//network.DOMtoCanvas({x:e.pageX, y:e.pageY});
-  cursorX = network.CanvastoDOM(cursorPosition).x;
-  cursorY = network.CanvastoDOM(cursorPosition).y;
-  //console.log("x: " + cursorPosition.x + ", y: " + cursorPosition.y);
-})*/
-
-$('#inpnode').keypress(function (e) {
-    var key = e.which;
-    if (key == 13)  // the enter key code
-    {
-        $('#btnsub').click();
-        return false;
-    }
-});
-
-$("#inpnode").on("change paste keyup", function () {
-    var text = document.getElementById("inpnode").value;
-//  console.log(text);
-    if (text[0] == "?") {
-        if (document.getElementById('checknode').checked == false) {
-            document.getElementById("newNodeType").disabled = false;
-        } else {
-            document.getElementById("newNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("newNodeType").disabled = true;
-    }
-});
-$("#ex2").on("click", function () {
-    var text = document.getElementById("inprename").value;
-    console.log(text);
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
-
-$("#inprename").on("change paste keyup", function () {
-    var text = document.getElementById("inprename").value;
-    console.log(text);
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
-$("#renamemod").on("click", function () {
-    var text = document.getElementById("inprename").value;
-    console.log(text);
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
-
-
-$('#inpedge').keypress(function (e) {
-    var key = e.which;
-    if (key == 13)  // the enter key code
-    {
-        $('#btnsubedge').click();
-        return false;
-    }
-});
-
-$('#inprenameedge').keypress(function (e) {
-    var key = e.which;
-    if (key == 13)  // the enter key code
-    {
-        $('#btnsubrenameedge').click();
-        return false;
-    }
-});
-
-$('#inprename').keypress(function (e) {
-    var key = e.which;
-    if (key == 13)  // the enter key code
-    {
-        $('#btnsubrename').click();
-        return false;
-    }
-});
-
-$('#inprenamecluster').keypress(function (e) {
-    var key = e.which;
-    if (key == 13)  // the enter key code
-    {
-        $('#btnsubrenamecluster').click();
-        return false;
-    }
-});
-
-
-/*document.getElementById('checknode').onchange = function() {
-    document.getElementById('newNodeType').disabled = this.checked;
-};
-
-document.getElementById('checkrename').onchange = function() {
-    document.getElementById('RenameNodeType').disabled = this.checked;
-};*/
-
-
-$(function () { // function to pull the wordlist from data.txt and save it in variable data
-
-    $.ajax({
-        url: "/static/ac_entities.txt",
-        type: "GET",
-        success: function (data) {
-            tags = data.split(",");
-            $("#inpnode").autocomplete({ // autocompletion for the new node window
-                source: tags,
-                appendTo: document.getElementById("ex2"),
-                minLength: 3
-            });
-            $("#inprename").autocomplete({ // autocompletion for the rename window
-                source: tags,
-                appendTo: document.getElementById("renamemod"),
-                minLength: 3
-            });
-        }
-    });
-});
-
-$(function () { // pulls the predicate names
-    $.ajax({
-        url: "/static/ac_predicates.txt",
-        type: "GET",
-        success: function (data) { // autocompletion for edges
-            predicates = data.split(",");
-            $("#inpedge").autocomplete({
-                source: predicates,
-                appendTo: document.getElementById("edgemod"),
-                minLength: 1
-            });
-            $("#inprenameedge").autocomplete({
-                source: predicates,
-                appendTo: document.getElementById("renameedgemod"),
-                minLength: 1
-            });
-        }
-    });
-});
-
+var tags; // Node labels
+var predicates; // predicate labels
+var edgeMod = document.getElementById("edgeMod"); // mod for showing the edge create form
+var nodeMod = document.getElementById("nodeMod"); // mod for showing the node create form
+var renameNodeMod = document.getElementById("renameNodeMod"); // mod for showing the node renaming form
+var pos = 0; // used to avoid placing nodes on top of each other
+var cursorPosition = {'x':0, 'y':0};
+var oldquery = "";
+var cid = 0; // cluster id
+var nodeId = 0;
 var tmpFrom = "";
 var tmpTo = "";
-var tmpNode = "";
-var tmpEdgeRename = "";
+var tmpNode ="";
+var tmpEdgeRename ="";
+var url_data = "/static/ac_entities.txt"
+var url_predicates = "/static/ac_predicates.txt"
+var dict_LabelMesh = {}; // key value pairs for the labels and mesh ID's
+var newEdgePrefix = "";
+var renameEdgePrefix = "";
+var newNodePrefix = "";
+var renameNodePrefix = "";
+var inpedge = document.getElementById("inpedge");
+var inpnode = document.getElementById("inpnode");
+
+
+// array with the undoable actions
 var his_undo = [];
+
+// array with the redoable actions
 var his_redo = [];
+
+// head in the undo array
 var count_undo = 0;
+
+// head in the redo array
 var count_redo = 0;
 
 
+$("#inpnode").on("change paste keyup", function() { // deciding if the Type dropdown of nodeMod should be enabled or not when typing in textfield
+  var text = inpnode.value;
+
+  if(text[0] == "?") {
+    if(document.getElementById('checknode').checked == false) {
+      document.getElementById("newNodeType").disabled = false;
+    } else {
+      document.getElementById("newNodeType").disabled = true;
+    }
+  } else {
+    document.getElementById("newNodeType").disabled = true;
+  }
+});
+
+$("#nodemod").on("click", function() { // deciding if the Type dropdown of nodeMod should be enabled or not when showing the form
+  var text = document.getElementById("inprename").value;
+  if(text[0] == "?") {
+    if(document.getElementById('checkrename').checked == false) {
+      document.getElementById("RenameNodeType").disabled = false;
+    } else {
+      document.getElementById("RenameNodeType").disabled = true;
+    }
+  } else {
+    document.getElementById("RenameNodeType").disabled = true;
+  }
+});
+
+$("#inprename").on("change paste keyup", function() { // deciding if the Type dropdown of renameMod should be enabled or not when typing in the textfield
+  var text = document.getElementById("inprename").value;
+  if(text[0] == "?") {
+    if(document.getElementById('checkrename').checked == false) {
+      document.getElementById("RenameNodeType").disabled = false;
+    } else {
+      document.getElementById("RenameNodeType").disabled = true;
+    }
+  } else {
+    document.getElementById("RenameNodeType").disabled = true;
+  }
+});
+
+$("#renamemod").on("click", function() { // deciding if the Type dropdown of renameMod should be enabled or not when showing the form
+  var text = document.getElementById("inprename").value;
+  if(text[0] == "?") {
+    if(document.getElementById('checkrename').checked == false) {
+      document.getElementById("RenameNodeType").disabled = false;
+    } else {
+      document.getElementById("RenameNodeType").disabled = true;
+    }
+  } else {
+    document.getElementById("RenameNodeType").disabled = true;
+  }
+});
+
+$('#inpnode').keypress(function (e) { // for pressing enter in input field of naming Node
+  return clickSubmit("inpnode", e.which);
+});
+
+$('#inpedge').keypress(function (e) { // for pressing enter in input field of naming Edge
+  return clickSubmit("inpedge", e.which);
+});
+
+$('#inprenameedge').keypress(function (e) { // for pressing enter in input field of renaming Edge
+  return clickSubmit("inprenameedge", e.which);
+});
+
+$('#inprename').keypress(function (e) { // for pressing enter in input field of renaming Node
+  return clickSubmit("inprename", e.which);
+});
+
+$('#inprenamecluster').keypress(function (e) { // for pressing enter in input field of renaming Cluster
+  return clickSubmit("inprenamecluster", e.which);
+});
+
+function clickSubmit(whichForm, keyCode) { // switch case for enter in the input fields above
+  if(keyCode == 13) {
+    switch(whichForm) {
+      case "inpnode":
+      $('#btnsub').click();
+      return false;
+      case "inpedge":
+      $('#btnsubedge').click();
+      return false;
+      case "inprenameedge":
+      $('#btnsubrenameedge').click();
+      return false;
+      case "inprename":
+      $('#btnsubrename').click();
+      return false;
+      case "inprenamecluster":
+      $('#btnsubrenamecluster').click();
+      return false;
+    }
+  }
+}
+
+$( function() { // function to pull the wordlist from url_data and save it in variable data
+  $.ajax({
+    url: url_data,
+    type: "GET",
+    success: function(data) {
+      tags = data.split("\n"); // split data into an array of tags
+      for(i = 0; i < tags.length; i++) { // create key value pairs from the labels and the mesh id's
+        dict_LabelMesh[tags[i].split("\t")[0]] = tags[i].split("\t")[1];
+        tags[i] = tags[i].split("\t")[0];
+      }
+      tags.sort(); // alphabetical order
+      $( "#inpnode" ).autocomplete({ // autocompletion for the new node window
+        source: tags,
+        appendTo : document.getElementById("nodemod"),
+        minLength: 1
+      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+        var that = this;
+        var val = that.element.val();
+        newNodePrefix = inpnode.value.toLowerCase();
+        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+          return value.label.toLowerCase().startsWith(newNodePrefix);
+        });
+        if(items.length == 0) { // if the input is a substring but no prefix, the input is shown as an autocomplete option
+          items.push({label:inpnode.value, value: inpnode.value});
+        } else if(items.length > 5) { // show only five results at a time
+          items.splice(5, items.length-5);
+        }
+
+        $.each(items, function(index, item) {
+          if(items.length != 0) {
+            that._renderItemData(ul, item);
+          }
+        });
+      };
+      $( "#inprename" ).autocomplete({ // autocompletion for the new node window
+        source: tags,
+        appendTo : document.getElementById("renamemod"),
+        minLength: 1
+      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+        var that = this;
+        var val = that.element.val();
+
+        renameNodePrefix = document.getElementById("inprename").value.toLowerCase();
+        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+          return value.label.toLowerCase().startsWith(renameNodePrefix);
+        });
+        if(items.length == 0) { // if the input is a substring but no prefix, the input is shown as an autocomplete option
+          items.push({label:document.getElementById("inprename").value, value: document.getElementById("inprename").value});
+        } else if(items.length > 5) {
+          items.splice(5, items.length-5);
+        }
+        $.each(items, function(index, item) {
+          that._renderItemData(ul, item);
+        });
+      };
+    }
+  });
+});
+
+$(function() { // pulls the predicate names
+  $.ajax({
+    url: url_predicates,
+    type: "GET",
+    success: function(data) { // autocompletion for edges
+      predicates = data.split(",");
+      $( "#inpedge" ).autocomplete({
+        source: predicates,
+        appendTo : document.getElementById("edgemod"),
+        minLength: 1
+      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+        var that = this;
+        var val = that.element.val();
+
+        newEdgePrefix = inpedge.value.toLowerCase();
+        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+          return value.label.toLowerCase().startsWith(newEdgePrefix);
+        });
+        if(items.length == 0) { // if the input is a substring but no prefix, the input is shown as an autocomplete option
+          items.push({label:inpedge.value, value: inpedge.value});
+        } else if(items.length > 5) {
+          items.splice(5, items.length-5);
+        }
+        $.each(items, function(index, item) {
+          that._renderItemData(ul, item);
+        });
+      };
+      $( "#inprenameedge" ).autocomplete({
+        source: predicates,
+        appendTo : document.getElementById("renameedgemod"),
+        minLength: 1
+      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+        var that = this;
+        var val = that.element.val();
+
+        renameEdgePrefix = document.getElementById("inprenameedge").value.toLowerCase();
+        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+          return value.label.toLowerCase().startsWith(renameEdgePrefix);
+        });
+        if(items.length == 0) {  // if the input is a substring but no prefix, the input is shown as an autocomplete option
+          items.push({label:document.getElementById("inprenameedge").value, value: document.getElementById("inprenameedge").value});
+        } else if(items.length > 5) {
+          items.splice(5, items.length-5);
+        }
+        $.each(items, function(index, item) {
+          that._renderItemData(ul, item);
+        });
+      };
+    }
+  });
+});
+
 // create an array with nodes
-var nodes = new vis.DataSet([
-    /*  {id: 5, label: 'Node 1', 'cid': -1},
-      {id: 6, label: 'Node 2', 'cid': -1},
-      {id: 3, label: 'Node 3'},
-      {id: 4, label: 'Node 4'},
-      {id: 5, label: 'Node 5'} */
-]);
+var nodes = new vis.DataSet([]);
 
 // create an array with edges
-var edges = new vis.DataSet([
-    /*{from: 5, to: 6, label: 'edge2', arrows:'to'},
-    {from: 1, to: 3, label: 'edge1', arrows:'to'},
-    {from: 2, to: 4, label: 'edge3', arrows:'to'},
-    {from: 2, to: 5, label: 'edge4', arrows:'to'},
-    {from: 3, to: 3, label: 'edge5', arrows:'to'} */
-]);
+var edges = new vis.DataSet([]);
 
 // create a network
 var container = document.getElementById('mynetwork');
 var data = {
-    nodes: nodes,
-    edges: edges
+  nodes: nodes,
+  edges: edges
 };
 
-nodeId = 0;
 var options = {
-    interaction: {
-        multiselect: true,
-        hover: true,
+  interaction: {
+    multiselect: true,
+    hover: true,
+  },
+  physics:{
+    enabled: true,
+    barnesHut: {
+      gravitationalConstant: -3000,
+      centralGravity: 0.0,
+      springLength: 140,
+      springConstant: 0.03,
+      damping: 0.70,
+      avoidOverlap: 0.3
     },
-    physics: {
-        enabled: true,
-        barnesHut: {
-            gravitationalConstant: -5000,
-            centralGravity: 0.0,
-            springLength: 100,
-            springConstant: 0.03,
-            damping: 0.70,
-            avoidOverlap: 0.3
-        },
-        stabilization: {
-            enabled: true,
-            iterations: 1000,
-            updateInterval: 100,
-            onlyDynamicEdges: false,
-            fit: true
-        },
+    stabilization: {
+      enabled: true,
+      iterations: 1000,
+      updateInterval: 100,
+      onlyDynamicEdges: false,
+      fit: true
     },
-    manipulation: {
-        enabled: true,
-        addNode: function (nodeData, callback) {
-            nodeData, cid = -1;
-            nodeData.id = nodeId;
-            console.log(nodeData.id);
-            console.log(nodeData);
-            var myElement = document.getElementById("mod1");
-            console.log(myElement);
-            myElement.click();
-            network.unselectAll();
-            document.getElementById("inpnode").focus();
-            document.getElementById("inpnode").value = "";/*
-      nodeData.label = prompt("Please enter name of the node", ""); // opens prompt for user input
-      if (name != null) {
-        nodeId++;
-        callback(nodeData);
-      }*/
-        },
-        addEdge: function (edgeData, callback) {
-            tmpFrom = edgeData.from;
-            tmpTo = edgeData.to;
-            mod2.click();
-            network.unselectAll();
-            document.getElementById("inpedge").focus();
-            document.getElementById("inpedge").value = "";
-            /*edgeData.arrows = 'to';
-              edgeData.label = prompt("Please enter name of the edge", "");
-              if (edgeData.label != null && edgeData.label != "") {
-                callback(edgeData);
-              }*/
-
-        }
-    }
+  },
+  manipulation: {
+    enabled: true,
+    addNode: function(nodeData, callback) {
+      nodeData.cid = -1;
+      nodeData.id = nodeId;
+      nodeMod.click();
+      network.unselectAll();
+      inpnode.focus();
+      inpnode.value = "";
+    },
+    addEdge: function(edgeData, callback) {
+      tmpFrom = edgeData.from;
+      tmpTo = edgeData.to;
+      edgeMod.click();
+      network.unselectAll();
+      inpedge.focus();
+      inpedge.value = "";
+    },
+    deleteNode: false
+  }
 };
+
 var network = new vis.Network(container, data, options);
 
 function dialogReName() { // this function is used to rename existing nodes
-    var label = document.getElementById("inprename").value;
-    if (label != "") {
-        if ((tags.includes(label) || label[0] == "?") && !(document.getElementById("checkrename").checked)) {
-            if (label[0] == "?") {
-                label = label + "(" + document.getElementById("RenameNodeType").value + ")";
-            } else {
-                label = label //+ "_Type:" +document.getElementById("newNodeType").value;
-            }
-            initializeUndo();
-            let tempNode = nodes.get(tmpNode);
-            tempNode.code = 2;
-            tempNode.old_label = nodes.get(tmpNode).label;
-            tempNode.label = label;
-            tempNode.old_color = '#97C2FC';
-            tempNode.color = '#97C2FC';
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodes.update({id: tmpNode, label: label, color: '#97C2FC'});
-        } else if (document.getElementById("checkrename").checked) {
-            initializeUndo();
-            let tempNode = nodes.get(tmpNode);
-            tempNode.code = 2;
-            tempNode.old_label = nodes.get(tmpNode).label;
-            tempNode.label = label;
-            tempNode.old_color = '#97C2FC';
-            tempNode.color = '#FF3898';
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodes.update({id: tmpNode, label: label, color: '#FF3898'});
-        } else {
-            setTimeout(function () {
-                    alert('Der Name muss in der Liste der Wörter enthalten sein!');
-                    mod1.click();
-                    document.getElementById("inpnode").focus();
-                }
-                , 1);
-        }
+  var label = document.getElementById("inprename").value;
+  if(label != "" && label != "?") { // if there is no text in the textfield
+    if((tags.includes(label) || label[0] == "?")&& !(document.getElementById("checkrename").checked)) {
+      if(label[0] == "?") { // if it's a variable
+        label = label + "(" +document.getElementById("RenameNodeType").value + ")";
+      } else {  // if it's an entity
+        label = label
+      }
+      initializeUndo();
+      let tempNode = nodes.get(tmpNode);
+      tempNode.code = 2;
+      tempNode.old_label = nodes.get(tmpNode).label;
+      tempNode.label = label;
+      tempNode.old_color = nodes.get(tmpNode).color;
+      tempNode.color = '#97C2FC';
+      his_undo[count_undo].push(tempNode);
+      count_undo++;
+      nodes.update({id: tmpNode, label: label, color: '#97C2FC', 'title':dict_LabelMesh[label]}); // update the node
+    } else if(document.getElementById("checkrename").checked) { // if it's a literal
+      initializeUndo();
+      let tempNode = nodes.get(tmpNode);
+      tempNode.code = 2;
+      tempNode.old_label = nodes.get(tmpNode).label;
+      tempNode.label = label;
+      tempNode.old_color = nodes.get(tmpNode).color;
+      tempNode.color = '#FF3898';
+      his_undo[count_undo].push(tempNode);
+      count_undo++;
+      nodes.update({id: tmpNode, label: label, color:'#FF3898', 'title':dict_LabelMesh[label]}); // update the node
     } else {
-        setTimeout(function () {
-                alert('Der Name des Knotens darf nicht leer sein!');
-                mod1.click();
-                document.getElementById("inpnode").focus();
-            }
-            , 1);
+      setTimeout(function() { // show an alert
+        alert('The label should be in the list.');
+        renameNodeMod.click();
+        document.getElementById("inprename").focus();
+      }
+      , 1);
     }
-    $("#checkrename").removeAttr("checked");
-    createQuery();
-    console.log(query);
-}
-
-function deleteNode() { //delete node
-    network.deleteSelected();
+  } else {
+    setTimeout(function() { // show an alert
+      alert('The label cannot be empty.');
+      renameNodeMod.click();
+      document.getElementById("inprename").focus();
+    }
+    , 1);
+  }
+  $("#checkrename").removeAttr("checked");
+  createQuery();
 }
 
 function dialogRenameCluster() {
-    var label = document.getElementById("inprenamecluster").value;
-    if (label != "") {
-        initializeUndo();
-        let tempNode = nodes.get(tmpNode);
-        tempNode.code = 2;
-        tempNode.old_label = nodes.get(tmpNode).label;
-        tempNode.label = label;
-        tempNode.old_color = '#97C2FC';
-        tempNode.color = '#97C2FC';
-        his_undo[count_undo].push(tempNode);
-        count_undo++;
-        nodes.update({id: tmpNode, label: label, color: '#97C2FC', cid: nodes.get(tmpNode).cid});
-
-    } else {
-        setTimeout(function () {
-                alert('Der Name des Clusters darf nicht leer sein!');
-                mod1.click();
-                document.getElementById("inprenamecluster").focus();
-            }
-            , 1);
+  var label = document.getElementById("inprenamecluster").value;
+  if(label != "") {
+    initializeUndo();
+    let tempNode = nodes.get(tmpNode);
+    tempNode.code = 2;
+    tempNode.old_label = nodes.get(tmpNode).label;
+    tempNode.label = label;
+    tempNode.old_color = nodes.get(tmpNode).color;
+    tempNode.color = '#97C2FC';
+    his_undo[count_undo].push(tempNode);
+    count_undo++;
+    nodes.update({id: tmpNode, label: label, color: '#97C2FC', cid: nodes.get(tmpNode).cid});
+  } else {
+    setTimeout(function() {
+      alert('The label of the clusters cannot be empty.');
+      renameClusterMod.click();
+      document.getElementById("inprenamecluster").focus();
     }
-    createQuery();
-    console.log(query);
+    , 1);
+  }
+  createQuery();
 }
 
 function dialogNameNode() { // this function is used to name a new node
-    var label = document.getElementById("inpnode").value;
-    if (label != "") {
-        if ((tags.includes(label) || label[0] == "?") && !(document.getElementById("checknode").checked)) {
-            initializeUndo();
-            if (label[0] == "?") {
-                label = label + "(" + document.getElementById("newNodeType").value + ")";
-            } else {
-                label = label //+ "_Type:" +document.getElementById("newNodeType").value;
-            }
-            let node = {'id': nodeId, 'label': label, 'cid': -1, 'x': cursorPosition.x, 'y': cursorPosition.y};
-            pos += 40;
-            network.fit()
-            //console.log("before add")
-            nodes.add(node);
-            //console.log("after add")
-            let tempNode = node;
-            tempNode.code = 1;
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodeId++;
-        } else if (document.getElementById("checknode").checked) {
-            initializeUndo();
-            let node = {
-                'id': nodeId,
-                'label': label,
-                'cid': -1,
-                color: '#FF3898',
-                'x': cursorPosition.x,
-                'y': cursorPosition.y
-            };
-            nodes.add(node);
-            cursorPosition.x += 40;
-            cursorPosition.y += 40;
-            setTimeout(function () {
-                    centerNetwork()
-                }
-                , 600);
-            let tempNode = node;
-            tempNode.code = 1;
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodeId++;
-        } else {
-            setTimeout(function () {
-                    alert('Der Name muss in der Liste der Wörter enthalten sein!');
-                    mod1.click();
-                    document.getElementById("inpnode").focus();
-                }
-                , 1);
-        }
-    } else {
-        setTimeout(function () {
-                alert('Der Name des Knotens darf nicht leer sein!');
-                mod1.click();
-                document.getElementById("inpnode").focus();
-            }
-            , 1);
-    }
-    $("#checknode").removeAttr("checked");
-    createQuery();
+  var label = inpnode.value;
+  if(label != "" && label != "?") {
+    if((tags.includes(label) || label[0] == "?") && !(document.getElementById("checknode").checked)) {
+      initializeUndo();
+      if(label[0] == "?") {
+        label = label + "(" +document.getElementById("newNodeType").value + ")";
+      } else {
+        label = label;
+      }
+      let node = {'id': nodeId, 'label': label, 'cid': -1, color: '#97C2FC', 'x': cursorPosition.x, 'y': cursorPosition.y, 'title':dict_LabelMesh[label]};
 
-    //console.log(query);
+      cursorPosition.x += 40;
+      cursorPosition.y += 40;
+      network.fit()
+      nodes.add(node);
+      let tempNode = node;
+      tempNode.code = 1;
+      his_undo[count_undo].push(tempNode);
+      count_undo++;
+      nodeId++;
+    } else if(document.getElementById("checknode").checked) {
+      initializeUndo();
+      let node = {'id': nodeId, 'label': label, 'cid': -1, color:'#FF3898', 'x': cursorPosition.x, 'y': cursorPosition.y, 'title':dict_LabelMesh[label]};
+      nodes.add(node);
+      cursorPosition.x += 40;
+      cursorPosition.y += 40;
+      setTimeout(function() {
+        centerNetwork();
+      }
+      , 600);
+
+      let tempNode = node;
+      tempNode.code = 1;
+      his_undo[count_undo].push(tempNode);
+      count_undo++;
+      nodeId++;
+    } else {
+      setTimeout(function() {
+        alert('The label should be in the list.');
+        nodeMod.click();
+        inpnode.focus();
+      }
+      , 1);
+    }
+  } else {
+    setTimeout(function() {
+      alert('The label cannot be empty.');
+      nodeMod.click();
+      inpnode.focus();
+    }
+    , 1);
+  }
+  $("#checknode").removeAttr("checked");
+  createQuery();
 }
 
+// places the network in the middle of the working space
 function centerNetwork() {
-    network.fit({
-        animation: true
-    })
+  network.fit({
+    animation: true
+  })
 }
 
 function dialogNameEdge() { // name a new edges
-    var label = document.getElementById("inpedge").value;
-    if (label != "") {
-        if (predicates.includes(label)) {
-            initializeUndo();
-            let edge = {from: tmpFrom, to: tmpTo, label: label, arrows: 'to'};
-            edges.add(edge);
-            let tempEdge = edge;
-            tempEdge.code = 1;
-            his_undo[count_undo].push(tempEdge);
-            count_undo++;
-        } else {
-            setTimeout(function () {
-                    alert('Der Name muss in der Liste der Wörter enthalten sein!');
-                    mod2.click();
-                    document.getElementById("inpedge").focus();
-                }
-                , 1);
-        }
+  var label = inpedge.value; // get the input text
+  if(label != "") { // if the textfield is empty
+    if(predicates.includes(label)) { // if label is in list of predicates
+      initializeUndo();
+      let edge = {from: tmpFrom, to: tmpTo, label: label, arrows:'to'}; // create the edge
+      edges.add(edge);
+      let tempEdge = edge;
+      tempEdge.code = 1;
+      his_undo[count_undo].push(tempEdge);
+      count_undo++;
     } else {
-        setTimeout(function () {
-                alert('Der Name der Kante darf nicht leer sein!');
-                mod2.click();
-                document.getElementById("inpedge").focus();
-            }
-            , 1);
+      setTimeout(function() { // alert if name is not in list
+        alert('The label should be in the list!');
+        edgeMod.click();
+        inpedge.focus();
+      }
+      , 1);
     }
-    createQuery();
-    console.log(query);
+  } else {
+    setTimeout(function() { // alert if input is empty
+      alert('The label cannot be empty.');
+      edgeMod.click();
+      inpedge.focus();
+    }
+    , 1);
+  }
+  createQuery();
 }
 
 function dialogRenameEdge() { //rename existing edge
-    var label = document.getElementById("inprenameedge").value;
-    if (label != "") {
-        if (predicates.includes(label)) {
+  var label = document.getElementById("inprenameedge").value;
+  if(label != "") {
+    if(predicates.includes(label)) {
 
-            initializeUndo();
-            let edge_temp = edges.get(tmpEdgeRename);
-            edge_temp.code = 2;
-            edge_temp.old_label = edge_temp.label;
-            edge_temp.label = label;
-            his_undo[count_undo].push(edge_temp);
-            count_undo++;
-            edges.update({label: label, id: tmpEdgeRename});
+      initializeUndo();
+      let edge_temp = edges.get(tmpEdgeRename);
+      edge_temp.code = 2;
+      edge_temp.old_label = edge_temp.label;
+      edge_temp.label = label;
+      his_undo[count_undo].push(edge_temp);
+      count_undo++;
+      edges.update({label: label,  id: tmpEdgeRename});
 
-        } else {
-            setTimeout(function () {
-                    alert('Der Name muss in der Liste der Wörter enthalten sein!');
-                    mod4.click();
-                    document.getElementById("inprenameedge").focus();
-                }
-                , 1);
-        }
     } else {
-        setTimeout(function () {
-                alert('Der Name der Kante darf nicht leer sein!');
-                mod4.click();
-                document.getElementById("inprenameedge").focus();
-            }
-            , 1);
+      setTimeout(function() {
+        alert('The label should be in the list.');
+        renameEdgeMod.click();
+        document.getElementById("inprenameedge").focus();
+      }
+      , 1);
     }
-    createQuery();
-    console.log(query);
+  } else {
+    setTimeout(function() {
+      alert('The label cannot be empty.');
+      renameEdgeMod.click();
+      document.getElementById("inprenameedge").focus();
+    }
+    , 1);
+  }
+  createQuery();
 }
 
-function calculateCenterX() {
-    var tmpx = 0;
-    if (nodes.length == 0) {
-        tmpx = 0;
-    } else if (nodes.length == 1) {
-        tmpx = nodes.get(0).x + 20;
-    } else {
-        for (i of nodes.getIds()) { // iterate over all nodes
-            tmpx += nodes.get(i).x;
-        }
-        tmpx /= nodes.length;
-    }
-    return tmpx;
-}
-
-function calculateCenterY() {
-    var tmpy = 0;
-    if (nodes.length == 0) {
-        tmpy = 0;
-    } else if (nodes.length == 1) {
-        tmpy = nodes.get(0).y + 20;
-    } else {
-        console.log("test1");
-        for (i of nodes.getIds()) { // iterate over all nodes
-            console.log("test" + i);
-            tmpy += nodes.get(i).y;
-        }
-        console.log("last");
-        tmpy /= nodes.length;
-    }
-    console.log("lastlast");
-    return tmpy;
-}
 
 function load() { // load a graph from an NT file
-    var cid = 0;
-    /*
-    initializeUndo();
-        for (i of edges.getIds()) { // iterate over all edges
-          let edge = edges.get(i);
-          edge.code = 0;
-          his_undo[count_undo].push(edge);
-          edges.remove(i);
-        }
-        for (i of nodes.getIds()) { // iterate over all edges
-          let node = nodes.get(i);
-          node.code = 0;
-          his_undo[count_undo].push(node);
-          nodes.remove(i);
-        }
-        */
-    clear_all();
-    count_undo--;
-
-    var labels = new Set();
-    var tmpid1;
-    var tmpid2;
-    const file = document.getElementById('tFile').files[0];
-    console.log(file);
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
-        // Reading line by line
-        allLines.forEach((line) => {
-            let a = line.split('\t');
-            console.log(a);
-            if (a.length == 4) {
-                if (a[0].includes("<")) { // if the subject is an entity
-                    var string1 = a[0];
-                    string1 = string1.replace('<', '');
-                    string1 = string1.replace('>', '');
-                    if (!labels.has(string1)) { // if the node doesnt exist yet we create it
-                        let node = {'id': nodeId, 'label': string1, 'cid': -1};
-                        nodes.add(node);
-
-                        //add to undo array
-                        node.code = 1;
-                        his_undo[count_undo].push(node);
-
-                        tmpid1 = nodeId;
-                        nodeId++;
-                        labels.add(string1);
-                    } else { // else we search the node
-                        for (i of nodes.getIds()) { // iterate over all nodes
-                            if (nodes.get(i).label == string1) {
-                                tmpid1 = i;
-                            }
-                        }
-                    }
-                    if (a[2].includes("<")) { // if the object is an entity
-                        string1 = a[2];
-                        string1 = string1.replace('<', '');
-                        string1 = string1.replace('>', '');
-                        if (!labels.has(string1)) { // if the node doesnt exist yet we ceate it
-                            if (a[1].replace('<', '').replace('>', '') == 'part_of') { //is the entity a cluster?
-                                let node = {'id': nodeId, 'label': string1, 'cid': cid};
-                                nodes.add(node);
-
-                                //add to undo array
-                                node.code = 1;
-                                his_undo[count_undo].push(node);
-
-                                cid++;
-                                tmpid2 = nodeId;
-                                nodeId++;
-                                labels.add(string1);
-                            } else { // if not
-                                let node = {'id': nodeId, 'label': string1, 'cid': -1}
-                                nodes.add(node);
-
-                                //add to undo array
-                                node.code = 1;
-                                his_undo[count_undo].push(node);
-
-                                tmpid2 = nodeId;
-                                nodeId++;
-                                labels.add(string1);
-                            }
-                            for (i of nodes.getIds()) { // iterate over all nodes
-                                if (nodes.get(i).label == string1) {
-                                    tmpid2 = i;
-                                }
-                            }
-                        }
-                        let edge = {
-                            from: tmpid1,
-                            to: tmpid2,
-                            label: a[1].replace('<', '').replace('>', ''),
-                            arrows: 'to'
-                        };
-                        edges.add([edge]);
-
-                        //add to undo array
-                        edge.code = 1;
-                        his_undo[count_undo].push(edge);
-
-                    } else { //if the object is a literal
-                        string1 = a[2];
-                        string1 = string1.replace('<', '');
-                        string1 = string1.replace('>', '');
-                        if (!labels.has(string1)) { // if the node doesnt exist yet we ceate it
-                            let node = {'id': nodeId, 'label': string1, 'cid': -1, color: '#FF3898'};
-                            nodes.add(node);
-
-                            //add to undo array
-                            node.code = 1;
-                            his_undo[count_undo].push(node);
-
-                            tmpid2 = nodeId;
-                            nodeId++;
-                            labels.add(string1);
-                        } else {
-                            for (i of nodes.getIds()) { // iterate over all nodes
-                                if (nodes.get(i).label == string1) {
-                                    tmpid2 = i;
-                                }
-                            }
-                        }
-                        let edge = {
-                            from: tmpid1,
-                            to: tmpid2,
-                            label: a[1].replace('<', '').replace('>', ''),
-                            arrows: 'to'
-                        };
-                        edges.add([edge]);
-
-                        //add to undo array
-                        edge.code = 1;
-                        his_undo[count_undo].push(edge);
-
-                    }
-
-                } else { // if the subject is a literal
-
-                    var string1 = a[0];
-                    string1 = string1.replace('<', '');
-                    string1 = string1.replace('>', '');
-                    if (!labels.has(string1)) { // if the node doesnt exist yet we ceate it
-                        let node = {'id': nodeId, 'label': string1, 'cid': -1, color: '#FF3898'};
-                        nodes.add(node);
-
-                        //add to undo array
-                        node.code = 1;
-                        his_undo[count_undo].push(node);
-
-                        tmpid1 = nodeId;
-                        nodeId++;
-                        labels.add(string1);
-                    } else { // else we search the node
-                        for (i of nodes.getIds()) { // iterate over all nodes
-                            if (nodes.get(i).label == string1) {
-                                tmpid1 = i;
-                            }
-                        }
-                    }
-                    if (a[2].includes("<")) { // if the object is an entity
-                        string1 = a[2];
-                        string1 = string1.replace('<', '');
-                        string1 = string1.replace('>', '');
-
-                        if (!labels.has(string1)) { // if the node doesnt exist yet we ceate it
-
-                            if (a[1].replace('<', '').replace('>', '') == 'part_of') { //is the entity a cluster?
-                                let node = {'id': nodeId, 'label': string1, 'cid': cid};
-                                nodes.add(node);
-
-                                //add to undo array
-                                node.code = 1;
-                                his_undo[count_undo].push(node);
-
-                                cid++;
-                                tmpid2 = nodeId;
-                                nodeId++;
-                                labels.add(string1);
-                            } else { // if not
-                                let node = {'id': nodeId, 'label': string1, 'cid': -1};
-                                nodes.add(node);
-
-                                //add to undo array
-                                node.code = 1;
-                                his_undo[count_undo].push(node);
-
-                                tmpid2 = nodeId;
-                                nodeId++;
-                                labels.add(string1);
-                            }
-                        } else {
-                            for (i of nodes.getIds()) { // iterate over all nodes
-                                if (nodes.get(i).label == string1) {
-                                    tmpid2 = i;
-                                }
-                            }
-                        }
-                        let edge = {
-                            from: tmpid1,
-                            to: tmpid2,
-                            label: a[1].replace('<', '').replace('>', ''),
-                            arrows: 'to'
-                        };
-                        edges.add([edge]);
-
-                        //add to undo array
-                        edge.code = 1;
-                        his_undo[count_undo].push(edge);
-
-                    } else { //if the object is a literal
-                        string1 = a[2];
-                        string1 = string1.replace('<', '');
-                        string1 = string1.replace('>', '');
-                        if (!labels.has(string1)) { // if the node doesnt exist yet we ceate it
-                            let node = {'id': nodeId, 'label': string1, 'cid': -1, color: '#FF3898'};
-                            nodes.add(node);
-
-                            //add to undo array
-                            node.code = 1;
-                            his_undo[count_undo].push(node);
-
-                            tmpid2 = nodeId;
-                            nodeId++;
-                            labels.add(string1);
-                        } else {
-                            for (i of nodes.getIds()) { // iterate over all nodes
-                                if (nodes.get(i).label == string1) {
-                                    tmpid2 = i;
-                                }
-                            }
-                        }
-
-                        let edge = {
-                            from: tmpid1,
-                            to: tmpid2,
-                            label: a[1].replace('<', '').replace('>', ''),
-                            arrows: 'to'
-                        };
-                        edges.add([edge]);
-
-                        //add to undo array
-                        edge.code = 1;
-                        his_undo[count_undo].push(edge);
-
-                    }
-                }
-
+  var chid = 0;
+  clear_all(); // delete Current Graph
+  count_undo--;
+  var labels = new Set(); // Create a set for the labels to check if a node already exists
+  var tmpid1;
+  var tmpid2;
+  const file = document.getElementById('tFile').files[0]; // load file from input
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const file = event.target.result;
+    const allLines = file.split(/\r\n|\n/); // Split the nt file at all lines
+    // Reading line by line
+    allLines.forEach((line) => {
+      let a = line.split('\t'); // split the lines at tab
+      if(a.length == 4) { // if the line is a correct NT line
+        if(a[0].includes("<")) { // if the subject is an entity
+          var string1 = a[0];
+          string1 = string1.replace('<', '');
+          string1 = string1.replace('>', '');
+          if(!labels.has(string1)) { // if the node doesnt exist yet we create it
+            let node = {'id': nodeId, 'label':string1, 'cid': -1, 'title':dict_LabelMesh[string1]};
+            nodes.add(node);
+            //add to undo array
+            node.code = 1;
+            his_undo[count_undo].push(node);
+            tmpid1 = nodeId;
+            nodeId++;
+            labels.add(string1);
+          } else { // else we search the node
+            for(i of nodes.getIds()) { // iterate over all nodes
+              if(nodes.get(i).label == string1) {
+                tmpid1 = i;
+              }
             }
-        });
-        createQuery();
-        console.log(query);
+          }
+          if(a[2].includes("<")) { // if the object is an entity
+            string1 = a[2];
+            string1 = string1.replace('<', '');
+            string1 = string1.replace('>', '');
+            if(!labels.has(string1)) { // if the node doesnt exist yet we ceate it
+              if(a[1].replace('<', '').replace('>', '') == 'part_of') { //is the entity a cluster?
+                let node = {'id': nodeId, 'label':string1, 'cid': cid}; // new clusternode
+                nodes.add(node);
+                node.code = 1; // node was added
+                his_undo[count_undo].push(node); //add to undo array
+                cid++;
+                tmpid2 = nodeId;
+                nodeId++;
+                labels.add(string1); // add the node label to the Set
+              } else { // if not
+                let node = {'id': nodeId, 'label':string1, 'cid': -1, 'title':dict_LabelMesh[string1]} // new entity
+                nodes.add(node);
+                node.code = 1; // node was added
+                his_undo[count_undo].push(node); //add to undo array
+                tmpid2 = nodeId;
+                nodeId++;
+                labels.add(string1); // add the node label to the Set
+              }
+            } else { // if node already exists
+              for(i of nodes.getIds()) { // iterate over all nodes
+                if(nodes.get(i).label == string1) {
+                  tmpid2 = i;
+                }
+              }
+            }
+            let edge = {from: tmpid1, to: tmpid2, label: a[1].replace('<', '').replace('>', ''), arrows:'to'}; // create edge
+            edges.add([edge]);
+            edge.code = 1; // edge was added
+            his_undo[count_undo].push(edge); //add to undo array
+          } else { //if the object is a literal
+            string1 = a[2];
+            string1 = string1.replace('<', '');
+            string1 = string1.replace('>', '');
+            if(!labels.has(string1)) { // if the node doesnt exist yet we ceate it
+              let node = {'id': nodeId, 'label':string1, 'cid': -1, color:'#FF3898'};
+              nodes.add(node);
+              node.code = 1; // node was added
+              his_undo[count_undo].push(node);  //add to undo array
+              tmpid2 = nodeId;
+              nodeId++;
+              labels.add(string1);
+            } else {
+              for(i of nodes.getIds()) { // iterate over all nodes
+                if(nodes.get(i).label == string1) {
+                  tmpid2 = i;
+                }
+              }
+            }
+            let edge = {from: tmpid1, to: tmpid2, label: a[1].replace('<', '').replace('>', ''), arrows:'to'};
+            edges.add([edge]);
+            edge.code = 1; // edge was added
+            his_undo[count_undo].push(edge); //add to undo array
+          }
+        } else { // if the subject is a literal
+          var string1 = a[0];
+          string1 = string1.replace('<', '');
+          string1 = string1.replace('>', '');
+          if(!labels.has(string1)) { // if the node doesnt exist yet we ceate it
+            let node = {'id': nodeId, 'label':string1, 'cid': -1, color:'#FF3898'};
+            nodes.add(node);
+            node.code = 1; // node was added
+            his_undo[count_undo].push(node);   //add to undo array
+            tmpid1 = nodeId;
+            nodeId++;
+            labels.add(string1);
+          } else { // else we search the node
+            for(i of nodes.getIds()) { // iterate over all nodes
+              if(nodes.get(i).label == string1) {
+                tmpid1 = i;
+              }
+            }
+          }
+          if(a[2].includes("<")) { // if the object is an entity
+            string1 = a[2];
+            string1 = string1.replace('<', '');
+            string1 = string1.replace('>', '');
+            if(!labels.has(string1)) { // if the node doesnt exist yet we ceate it
+              if(a[1].replace('<', '').replace('>', '') == 'part_of') { //is the entity a cluster?
+                let node = {'id': nodeId, 'label':string1, 'cid': cid};
+                nodes.add(node);
+                node.code = 1; // node was added
+                his_undo[count_undo].push(node); //add to undo array
+                cid++;
+                tmpid2 = nodeId;
+                nodeId++;
+                labels.add(string1);
+              } else { // if not
+                let node = {'id': nodeId, 'label':string1, 'cid': -1, 'title':dict_LabelMesh[string1]};
+                nodes.add(node);
+                node.code = 1; // node was added
+                his_undo[count_undo].push(node); //add to undo array
+                tmpid2 = nodeId;
+                nodeId++;
+                labels.add(string1);
+              }
+            } else {
+              for(i of nodes.getIds()) { // iterate over all nodes
+                if(nodes.get(i).label == string1) {
+                  tmpid2 = i;
+                }
+              }
+            }
+            let edge = {from: tmpid1, to: tmpid2, label: a[1].replace('<', '').replace('>', ''), arrows:'to'};
+            edges.add([edge]);
+            edge.code = 1; // edge was added
+            his_undo[count_undo].push(edge);  //add to undo array
 
-        count_undo++;
-    };
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+          } else { //if the object is a literal
+            string1 = a[2];
+            string1 = string1.replace('<', '');
+            string1 = string1.replace('>', '');
+            if(!labels.has(string1)) { // if the node doesnt exist yet we ceate it
+              let node = {'id': nodeId, 'label':string1, 'cid': -1, color:'#FF3898'};
+              nodes.add(node);
+              node.code = 1; // node was added
+              his_undo[count_undo].push(node); //add to undo array
 
-    reader.readAsText(file);
+              tmpid2 = nodeId;
+              nodeId++;
+              labels.add(string1);
+            } else {
+              for(i of nodes.getIds()) { // iterate over all nodes
+                if(nodes.get(i).label == string1) {
+                  tmpid2 = i;
+                }
+              }
+            }
 
+            let edge = {from: tmpid1, to: tmpid2, label: a[1].replace('<', '').replace('>', ''), arrows:'to'};
+            edges.add([edge]);
+            edge.code = 1; // edge was added
+            his_undo[count_undo].push(edge); //add to undo array
+          }
+        }
 
+      }
+    });
+    createQuery(); // update the query
+    count_undo++;
+  };
+  reader.onerror = (event) => { // if something goes wrong
+    alert(event.target.error.name);
+  };
+
+  reader.readAsText(file);
 }
 
 function save() { // downloading the current Graph in NT format
-    var text = "";
-    for (i of edges.getIds()) { // iterate over all edges
-        if (nodes.get(edges.get(i).from).color == '#FF3898') {
-            text = text.concat(nodes.get(edges.get(i).from).label)
-            text = text + "\t<"
-        } else {
-            nodeId.code = 0;
-            text = text + "<"
-            text = text.concat(nodes.get(edges.get(i).from).label)
-            text = text + ">\t<"
-        }
-        text = text.concat(edges.get(i).label)
-        text = text + ">\t"
-
-        if (nodes.get(edges.get(i).to).color == '#FF3898') {
-            text = text.concat(nodes.get(edges.get(i).to).label)
-            text = text + "\t.\n"
-        } else {
-            text = text + "<"
-            text = text.concat(nodes.get(edges.get(i).to).label)
-            text = text + ">\t.\n"
-        }
-
-
-        var file_name_to_download = "graph"
-        var file = new File([text], file_name_to_download + ".nt", {type: "application/octet-stream"}); // create a file for the download
-        var blobUrl = (URL || webkitURL).createObjectURL(file);
-        window.location = blobUrl;
+  var text = "";
+  for(i of edges.getIds()) { // iterate over all edges
+    if(nodes.get(edges.get(i).from).color == '#FF3898') { // if first node is a literal
+      text = text.concat(nodes.get(edges.get(i).from).label)
+      text = text +"\t<"
+    } else { // if first node is Entity
+      text = text + "<"
+      text = text.concat(nodes.get(edges.get(i).from).label)
+      text = text +">\t<"
     }
+    text = text.concat(edges.get(i).label) // save the edge
+    text = text +">\t"
+    if(nodes.get(edges.get(i).to).color == '#FF3898') { // if second node is literal
+      text = text.concat(nodes.get(edges.get(i).to).label)
+      text = text + "\t.\n"
+    } else { // if second node is entity
+      text = text + "<"
+      text = text.concat(nodes.get(edges.get(i).to).label)
+      text = text + ">\t.\n"
+    }
+  }
+  var filename = "Graph"
+  var file = new File([text], filename + ".nt", {type: "application/octet-stream"}); // create a file for the download
+  var blobUrl = (URL || webkitURL).createObjectURL(file);
+  window.onbeforeunload = null;
+  window.location = blobUrl;
+  window.onbeforeunload = function() {
+    return "You are about to refresh the page and all progress will be lost, are you sure?";
+  }
 }
 
-// cluster the selected nodes (hold to multiple select)
-var cid = 0;
-
+// cluster the selected nodes
 function clusterSelected() {
-    if (network.getSelectedNodes().length < 2) {
-        console.log("not enough nodes");
-        return;
-    }
-    initializeUndo();
-    var node = {id: nodeId, label: "cluster " + cid, cid: cid,};
-    nodes.add(node);
-    node.code = 1; //hinzufügen
-    his_undo[count_undo].push(node);
-    console.log("cluster mit cid " + nodes.get(nodeId).cid + " hinzugefügt")
-    for (i of network.getSelectedNodes()) {
-        var edge = {from: i, to: nodeId, label: "part_of", arrows: 'to'};
-        edges.add([edge]);
-        edge.code = 1; //hinzufügen
-        his_undo[count_undo].push(edge);
-    }
+  if(network.getSelectedNodes().length < 2) {
+    return;
+  }
+  initializeUndo();
+  var node = {id: nodeId, label: "cluster " + cid, cid: cid, };
+  nodes.add(node);
+  node.code = 1; //hinzufügen
+  his_undo[count_undo].push(node);
+  for(i of network.getSelectedNodes()) {
+    var edge = {from: i, to: nodeId, label: "part_of", arrows:'to'};
+    edges.add([edge]);
+    edge.code = 1; //hinzufügen
+    his_undo[count_undo].push(edge);
+  }
 
-    nodeId++;
-    cid++;
+  nodeId++;
+  cid++;
 
-    count_undo++;
+  count_undo++;
 
-// print
-    for (var i = 0; i < nodes.length; i++) {
-        var node = nodes.get(i);
-        console.log(node);
-    }
+  // print
+  for(var i = 0; i < nodes.length ; i++) {
+    var node = nodes.get(i);
+  }
 
 }
 
+// create a subarray in the undo array and the redo array
 function initializeUndo() {
-    if (!his_undo[count_undo]) {
-        his_undo[count_undo] = [];
-        console.log("Initialization of Undo successful");
-    }
-    // TODO: clean redo when und is initialized
-    his_redo = [];
-    count_redo = 0;
+  if(!his_undo[count_undo]) {
+    his_undo[count_undo] = [];
+  }
+  his_redo = [];
+  count_redo = 0;
 }
 
+// create a subarray in the redo array
 function initializeRedo() {
-    if (!his_redo[count_redo]) {
-        his_redo[count_redo] = [];
-        console.log("Initialization of Redo successful");
-    }
+  if(!his_redo[count_redo]) {
+    his_redo[count_redo] = [];
+  }
 }
 
-// Delete with backspace/delete button
+// Shortcuts
 document.addEventListener('keydown', function (params) {
-    if (event.keyCode == 8 || event.keyCode == 46) {
-        if (network.getSelectedNodes().length > 1) {
-            initializeUndo();
-            for (let i = network.getSelectedNodes().length - 1; i >= 0; i--) {
-                let nodeId = network.getSelectedNodes()[0];
-                let tempNode = nodes.get(network.getSelectedNodes()[0]);
-                tempNode.code = 0;
-                his_undo[count_undo].push(tempNode);
-                nodes.remove(nodeId);
+  // Keycode for deleting nodes/edges (delete/backspace)
+  if(event.keyCode == 8 || event.keyCode == 46) {
+    if(network.getSelectedNodes().length > 1) {
+      initializeUndo();
+      for(let i = network.getSelectedNodes().length - 1; i >= 0 ; i--) {
+        let nodeId = network.getSelectedNodes()[0];
+        let tempNode = nodes.get(network.getSelectedNodes()[0]);
+        tempNode.code = 0;
+        his_undo[count_undo].push(tempNode);
+        nodes.remove(nodeId);
 
-                // Entfernen von Array
-                for (e of edges.getIds()) {
-                    if (edges.get(e).from == nodeId || edges.get(e).to == nodeId) {
-                        let tempEdge = edges.get(e);
-                        tempEdge.code = 0;
-                        his_undo[count_undo].push(tempEdge);
-                        edges.remove(e);
-                    }
-                }
-            }
-            count_undo++;
-        } else if (network.getSelectedNodes().length == 1) {
-            initializeUndo();
-            let nodeId = network.getSelectedNodes()[0];
-            let tempNode = nodes.get(nodeId);
-            tempNode.code = 0;
-            his_undo[count_undo].push(tempNode);
-            nodes.remove(nodeId);
-
-            // Entfernen von Array
-            for (e of edges.getIds()) {
-                if (edges.get(e).from == nodeId || edges.get(e).to == nodeId) {
-                    let tempEdge = edges.get(e);
-                    tempEdge.code = 0;
-                    his_undo[count_undo].push(tempEdge);
-                    edges.remove(e);
-                }
-            }
-            count_undo++;
-        } else if (network.getSelectedEdges().length == 1) {
-            initializeUndo();
-            let edgeId = network.getSelectedEdges()[0];
-            let tempEdge = edges.get(edgeId);
+        // Entfernen von Array
+        for(e of edges.getIds()) {
+          if(edges.get(e).from == nodeId || edges.get(e).to == nodeId) {
+            let tempEdge = edges.get(e);
             tempEdge.code = 0;
             his_undo[count_undo].push(tempEdge);
-            edges.remove(edgeId);
-            count_undo++;
-        } else if (network.getSelectedEdges().length > 1) {
-            initializeUndo();
-            let tempEdge;
-            console.log(network.getSelectedEdges(0));
-            for (let i = network.getSelectedEdges().length - 1; i >= 0; i--) {
-                tempEdge = edges.get(network.getSelectedEdges()[0]);
-                tempEdge.code = 0;
-                his_undo[count_undo].push(tempEdge);
-                edges.remove(network.getSelectedEdges(i)[0]);
-            }
-            count_undo++;
+            edges.remove(e);
+          }
         }
-
-    } else if (event.keyCode == 88) {
-        console.log("Count Undo: " + count_undo);
-
-        console.log("his_undo");
-        console.log(his_undo);
-
-        for (let i = 0; i < count_undo; i++) {
-            for (let j = 0; j < his_undo[i].length; j++) {
-                console.log("i: " + i + " j: " + j);
-                console.log(his_undo[i][j]);
-            }
-        }
-
-        console.log("Count Redo: " + count_redo);
-
-        console.log("his_redo");
-        console.log(his_redo);
-
-        for (let i = 0; i < count_redo; i++) {
-            for (let j = 0; j < his_redo[i].length; j++) {
-                console.log("i: " + i + " j: " + j);
-                console.log(his_redo[i][j]);
-            }
-        }
-    } else if (event.keyCode == 78 && !(document.activeElement == document.getElementById("inpnode")) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == document.getElementById("inpedge")) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
-        var myElement = document.getElementById("mod1");
-        myElement.click();
-        network.unselectAll();
-        document.getElementById("inpnode").focus();
-        setTimeout(function () {
-                document.getElementById("inpnode").value = "";
-            }
-            , 1);
-    } else if (event.keyCode == 69 && !(document.activeElement == document.getElementById("inpnode")) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == document.getElementById("inpedge")) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
-        network.addEdgeMode();
-    } else if (event.keyCode == 27) {
-        network.disableEditMode();
+      }
+      count_undo++;
     }
 
-    // add to cluster
-    else if (event.keyCode == 66 || event.keyCode == 32) {
-        clusterSelected();
+    else if(network.getSelectedNodes().length == 1) {
+      initializeUndo();
+      let nodeId = network.getSelectedNodes()[0];
+      let tempNode = nodes.get(nodeId);
+      tempNode.code = 0;
+      his_undo[count_undo].push(tempNode);
+      nodes.remove(nodeId);
+
+      // Entfernen von Array
+      for(e of edges.getIds()) {
+        if(edges.get(e).from == nodeId || edges.get(e).to == nodeId) {
+          let tempEdge = edges.get(e);
+          tempEdge.code = 0;
+          his_undo[count_undo].push(tempEdge);
+          edges.remove(e);
+        }
+      }
+      count_undo++;
     }
 
-    createQuery();
+    else if(network.getSelectedEdges().length == 1) {
+      initializeUndo();
+      let edgeId = network.getSelectedEdges()[0];
+      let tempEdge = edges.get(edgeId);
+      tempEdge.code = 0;
+      his_undo[count_undo].push(tempEdge);
+      edges.remove(edgeId);
+      count_undo++;
+    }
+
+    else if(network.getSelectedEdges().length > 1) {
+      initializeUndo();
+      let tempEdge;
+      for(let i = network.getSelectedEdges().length - 1; i >= 0 ; i--) {
+        tempEdge = edges.get(network.getSelectedEdges()[0]);
+        tempEdge.code = 0;
+        his_undo[count_undo].push(tempEdge);
+        edges.remove(network.getSelectedEdges(i)[0]);
+      }
+      count_undo++;
+    }
+
+  }
+  // Keycode for adding new node (n)
+  else if(event.keyCode == 78 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
+    var myElement = document.getElementById("nodeMod");
+    myElement.click();
+    network.unselectAll();
+    inpnode.focus();
+    setTimeout(function() {
+      inpnode.value = "";
+    }
+    , 1);
+  }
+  // Keycode for adding new edge (e)
+  else if(event.keyCode == 69 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
+    network.addEdgeMode();
+  }
+
+  else if(event.keyCode == 27) {
+    network.disableEditMode();
+  }
+
+  // Keycode for clustering nodes (c)
+  else if(event.keyCode == 67) {
+    clusterSelected();
+  }
+
+  createQuery();
 });
 
 //Rename node or edge with double click
-network.on('doubleClick', function (properties) {
-    if (network.getSelectedNodes().length == 1) {
-        tmpNode = network.getSelectedNodes()[0];
-        if (nodes.get(tmpNode).cid > -1) {
-            var myElement = document.getElementById("mod5");
-            console.log(myElement);
-            myElement.click();
-            network.unselectAll();
-            document.getElementById("inprenamecluster").focus();
-            document.getElementById("inprenamecluster").value = nodes.get(tmpNode).label;
+network.on('doubleClick', function(properties) {
+  if(network.getSelectedNodes().length == 1) {
+    tmpNode = network.getSelectedNodes()[0];
+    if(nodes.get(tmpNode).cid > -1) {
+      var myElement = document.getElementById("renameClusterMod");
+      myElement.click();
+      network.unselectAll();
+      document.getElementById("inprenamecluster").focus();
+      document.getElementById("inprenamecluster").value = nodes.get(tmpNode).label;
 
-        } else {
-            var myElement = document.getElementById("mod3");
-            console.log(myElement);
-            myElement.click();
-            network.unselectAll();
-            document.getElementById("inprename").focus();
-            document.getElementById("inprename").value = nodes.get(tmpNode).label.replace('(Any)', '').replace('(Any)', '').replace('(Disease)', '').replace('(Drug)', '').replace('(Gene)', '').replace('(Species)', '').replace('(Mutation)', '').replace('(CellLine)', '');
-            //var name = prompt("Enter new name of node: ");
-            //nodes.update({id: nodeId, label: name});
-        }
-    } else if (edges.get(network.getSelectedEdges()[0]).label == "part_of") {
-        console.log("nothing happens");
-        return 0;
-    } else if (network.getSelectedEdges().length == 1) {
-        console.log("testets");
-        //var edgeId = network.getSelectedEdges()[0];
-        tmpEdgeRename = network.getSelectedEdges()[0];
-        var myElement = document.getElementById("mod4");
-        myElement.click();
-        network.unselectAll();
-        document.getElementById("inprenameedge").focus();
-        document.getElementById("inprenameedge").value = edges.get(tmpEdgeRename).label;
-        /*
-        let tempEdge = edges.get(edgeId);
-        var name = prompt("Enter new name of edge: ");
-        if (name != null && name != "") {
-          edges.update({label: name,  id: edgeId});
-          initializeUndo();
-          his_undo[count_undo].push(tempEdge);
-          count_undo++;
-        }*/
+    } else {
+      var myElement = document.getElementById("renameNodeMod");
+      myElement.click();
+      network.unselectAll();
+      document.getElementById("inprename").focus();
+      document.getElementById("inprename").value = nodes.get(tmpNode).label.replace('(Any)', '').replace('(Any)', '').replace('(Disease)', '').replace('(Drug)', '').replace('(Gene)', '').replace('(Species)', '').replace('(Mutation)', '').replace('(CellLine)', '');
     }
+  }
+  else if(edges.get(network.getSelectedEdges()[0]).label == "part_of") {
+    return 0;
+  }
+  else if(network.getSelectedEdges().length == 1) {
+    //var edgeId = network.getSelectedEdges()[0];
+    tmpEdgeRename = network.getSelectedEdges()[0];
+    var myElement = document.getElementById("renameEdgeMod");
+    myElement.click();
+    network.unselectAll();
+    document.getElementById("inprenameedge").focus();
+    document.getElementById("inprenameedge").value = edges.get(tmpEdgeRename).label;
+  }
 });
 
+// Undoes the last action
 function undo() {
-    if (his_undo.length == 0) {
-        console.log("nothing to undo");
-        return;
-    }
+  if(his_undo.length == 0) {
+    return;
+  }
 
-    initializeRedo();
+  initializeRedo();
 
-    for (e of his_undo.pop()) {
-        console.log("e.id, pushed to redo: " + e.id);
-        switch (e.code) {
-            case 0:
-                if (e.id > -1) {
-                    nodes.add(e);
-                    his_redo[count_redo].push(e);
-                } else {
-                    edges.add(e);
-                    his_redo[count_redo].push(e);
-                }
-                break;
-            case 1:
-                if (e.id > -1) {
-                    console.log("e.id, removed id: " + e.id);
-                    nodes.remove(e);
-                    his_redo[count_redo].push(e);
-                } else {
-                    edges.remove(e);
-                    his_redo[count_redo].push(e);
-                }
-                break;
-            case 2:
-                if (e.id > -1) {
-                    //color
-                    if (e.old_color != "") {
-                        let temp_color = e.color;
-                        e.color = e.old_color;
-                        e.old_color = temp_color;
-                    }
-
-                    //label
-                    if (e.old_label != "") {
-                        let temp_label = e.label;
-                        e.label = e.old_label;
-                        e.old_label = temp_label;
-                    }
-
-                    nodes.update(e);
-                    his_redo[count_redo].push(e);
-                } else {
-                    console.log("e.id, updated id: " + e.id);
-
-                    //label
-                    if (e.old_label != "") {
-                        let temp_label = e.label;
-                        e.label = e.old_label;
-                        e.old_label = temp_label;
-                    }
-
-                    edges.update(e);
-                    his_redo[count_redo].push(e);
-                }
-                break;
+  for(e of his_undo.pop()) {
+    switch (e.code) {
+      case 0: // deleted
+      if(e.id >-1) {
+        nodes.add(e);
+        his_redo[count_redo].push(e);
+      } else {
+        edges.add(e);
+        his_redo[count_redo].push(e);
+      }
+      break;
+      case 1: // added
+      if(e.id >-1) {
+        nodes.remove(e);
+        his_redo[count_redo].push(e);
+      } else {
+        edges.remove(e);
+        his_redo[count_redo].push(e);
+      }
+      break;
+      case 2: // edited
+      if(e.id >-1) {
+        //color
+        if
+        (e.old_color != "") {
+          let temp_color = e.color;
+          e.color = e.old_color;
+          e.old_color = temp_color;
         }
+
+        //label
+        if(e.old_label != "") {
+          let temp_label = e.label;
+          e.label = e.old_label;
+          e.old_label = temp_label;
+        }
+
+        nodes.update(e);
+        his_redo[count_redo].push(e);
+      } else {
+        //label
+        if(e.old_label != "") {
+          let temp_label = e.label;
+          e.label = e.old_label;
+          e.old_label = temp_label;
+        }
+
+        edges.update(e);
+        his_redo[count_redo].push(e);
+      }
+      break;
     }
-    if (count_undo > 0) {
-        count_undo--;
-    }
-    count_redo++;
-    createQuery();
+  }
+  if(count_undo > 0) {
+    count_undo--;
+  }
+  count_redo++;
+  createQuery();
 }
 
+// Redoes the last undo
 function redo() {
-    if (his_redo.length == 0) {
-        console.log("nothing to redo");
-        return;
-    }
-    console.log("his_redo");
-    console.log(his_redo);
+  if(his_redo.length == 0) {
+    return;
+  }
 
-// initialize undo
-    if (!his_undo[count_undo]) {
-        his_undo[count_undo] = [];
-        console.log("Initialization of Undo successful");
-    }
+  // initialize undo
+  if(!his_undo[count_undo]) {
+    his_undo[count_undo] = [];
+  }
 
-    for (e of his_redo.pop()) {
-        console.log(e);
-        switch (e.code) {
-            case 0:
-                if (e.id > -1) {
-                    console.log("e.id, removed id, redo: " + e.id);
-                    nodes.remove(e);
-                    his_undo[count_undo].push(e);
-                } else {
-                    console.log("e.id, removed id, redo: " + e.id);
-                    edges.remove(e);
-                    his_undo[count_undo].push(e);
-                }
-                break;
-            case 1:
-                if (e.id > -1) {
-                    console.log("e.id, removed id, redo: " + e.id);
-                    nodes.add(e);
-                    his_undo[count_undo].push(e);
-                } else {
-                    console.log("e.id, removed id, redo: " + e.id);
-                    edges.add(e);
-                    his_undo[count_undo].push(e);
-                }
-                break;
-            case 2:
+  for(e of his_redo.pop()) {
+    switch (e.code) {
+      case 0: // deleted
+      if(e.id >-1) {
+        nodes.remove(e);
+        his_undo[count_undo].push(e);
+      } else {
+        edges.remove(e);
+        his_undo[count_undo].push(e);
+      }
+      break;
+      case 1: // added
+      if(e.id >-1) {
+        nodes.add(e);
+        his_undo[count_undo].push(e);
+      } else {
+        edges.add(e);
+        his_undo[count_undo].push(e);
+      }
+      break;
+      case 2: // renamed
 
-                if (e.id > -1) { // e is node
-                    console.log("e.id, updated id, redo: " + e.id);
+      if(e.id >-1) { // e is node
 
-                    //color
-                    if (e.old_color != "") {
-                        let temp_color = e.color;
-                        e.color = e.old_color;
-                        e.old_color = temp_color;
-                    }
-
-                    //label
-                    if (e.old_label != "") {
-                        let temp_label = e.label;
-                        e.label = e.old_label;
-                        e.old_label = temp_label;
-                    }
-
-                    nodes.update(e);
-                    his_undo[count_undo].push(e);
-                } else { // e is edge
-                    console.log("e.id, updated id, redo: " + e.id);
-
-                    //label
-                    if (e.old_label != "") {
-                        let temp_label = e.label;
-                        e.label = e.old_label;
-                        e.old_label = temp_label;
-                    }
-
-                    edges.update(e);
-                    his_undo[count_undo].push(e);
-                }
-                break;
+        //color
+        if(e.old_color != "") {
+          let temp_color = e.color;
+          e.color = e.old_color;
+          e.old_color = temp_color;
         }
+
+        //label
+        if(e.old_label != "") {
+          let temp_label = e.label;
+          e.label = e.old_label;
+          e.old_label = temp_label;
+        }
+
+        nodes.update(e);
+        his_undo[count_undo].push(e);
+      } else { // e is edge
+
+        //label
+        if(e.old_label != "") {
+          let temp_label = e.label;
+          e.label = e.old_label;
+          e.old_label = temp_label;
+        }
+
+        edges.update(e);
+        his_undo[count_undo].push(e);
+      }
+      break;
     }
-    if (count_redo > 0) {
-        count_redo--;
-    }
-    count_undo++;
-    createQuery();
+  }
+  if(count_redo > 0) {
+    count_redo--;
+  }
+  count_undo++;
+  createQuery();
 }
-
-network.on('click', function (params) {
-    cursorPosition = {'x': params.pointer.canvas.x, 'y': params.pointer.canvas.y};
-
-    console.log("x: " + cursorPosition.x + ", y: " + cursorPosition.y);
-})
 
 function createQuery() {
-    query = "";
-    for (i of edges.getIds()) { // iterate over all edges
-        query = query.concat(nodes.get(edges.get(i).from).label.replace(' ', '_'))
-        query = query + " "
-        query = query.concat(edges.get(i).label)
-        query = query + " "
-        query = query.concat(nodes.get(edges.get(i).to).label.replace(' ', '_'))
-        query = query + ";"
-    }
-    // remove last ;
-    query = query.substring(0, query.length - 1);
-    if (query != oldQuery) {
-
-        document.getElementById("id_keywords").value = query;
-        oldQuery = query;
-    }
-
-
+  query = "";
+  for(i of edges.getIds()) { // iterate over all edges
+    query = query.concat(nodes.get(edges.get(i).from).label.replace(/ /g, '_')); // replace all " " with "_"
+    query = query +" ";
+    query = query.concat(edges.get(i).label);
+    query = query +" "
+    query = query.concat(nodes.get(edges.get(i).to).label.replace(/ /g, '_')); // replace all " " with "_"
+    query = query + "; ";
+  }
+  //remove last
+  query = query.substring(0, query.length-2);
+  if(query != oldquery) {
+    document.getElementById("id_keywords").value = query;
+    oldquery = query;
+  }
 }
 
 // delete all the nodes and edges on the screen
 function clear_all() {
-    initializeUndo();
-    for (i of edges.getIds()) { // iterate over all edges
-        let edge = edges.get(i);
-        edge.code = 0;
-        his_undo[count_undo].push(edge);
-        edges.remove(i);
-    }
-    for (i of nodes.getIds()) { // iterate over all edges
-        let node = nodes.get(i);
-        node.code = 0;
-        his_undo[count_undo].push(node);
-        nodes.remove(i);
-    }
-    count_undo++;
+  initializeUndo();
+  for(i of edges.getIds()) { // iterate over all edges
+    let edge = edges.get(i);
+    edge.code = 0;
+    his_undo[count_undo].push(edge);
+    edges.remove(i);
+  }
+  for(i of nodes.getIds()) { // iterate over all edges
+    let node = nodes.get(i);
+    node.code = 0;
+    his_undo[count_undo].push(node);
+    nodes.remove(i);
+  }
+  count_undo++;
+  createQuery();
 }
+
+//drag dialog windows
+$(function() {
+  $("#nodemod").draggable();
+});
+
+$(function() {
+  $("#renamemod").draggable();
+});
+
+$(function() {
+  $("#renameedgemod").draggable();
+});
+
+$(function() {
+  $("#edgemod").draggable();
+});
+
+$(function() {
+  $("#nodemod").draggable();
+});
+
+$(function() {
+  $("#renamecluster").draggable();
+});

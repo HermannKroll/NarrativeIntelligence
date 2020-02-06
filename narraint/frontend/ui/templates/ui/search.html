@@ -15,51 +15,55 @@
 
 {% block content %}
 
-
-    <input type="file" id="tFile" style="display: none;" onchange=load()></input>
+    <a id="nodeMod" onClick="network.unselectAll();" href="#nodemod" rel="modal:open" style="display: none">Open
+        Modal</a>
+    <a id="edgeMod" onClick="network.unselectAll();" href="#edgemod" rel="modal:open" style="display: none">Open
+        Modal</a>
+    <a id="renameNodeMod" onClick="network.unselectAll();" href="#renamemod" rel="modal:open" style="display: none">Open
+        Modal</a>
+    <a id="renameEdgeMod" onClick="network.unselectAll();" href="#renameedgemod" rel="modal:open" style="display: none">Open
+        Modal</a>
+    <a id="renameClusterMod" onClick="network.unselectAll();" href="#renamecluster" rel="modal:open"
+       style="display: none">Open Modal</a>
+    <input type='file' onChange=load() id="tFile" style="display: none"/>
     <div id="App">
+
         <div class="help-tip">
-            <p>- Click and hold on free space to add a node <br>
-                - Click and drag from one node to another to add an edge <br>
-                - Click on node to select it <br>
+            <p>- Click on node/edge to select it <br>
                 - Click the "Center-Button" to center your network <br>
                 - Click the "Clear-Button" to delete the network <br>
-                - To select multiple nodes, click and hold each node <br>
-                - Select multiple nodes to Cluster them <br>
-                - Press backspace to delete nodes <br></p>
+                - For multiple select, hold ctrl and click on nodes/edges <br>
+                - Shortcuts: <br>
+                - n: create new node <br>
+                - e: create new edge <br>
+                - c: cluster <br>
+                - backspace/delete: to delete nodes or edges <br></p>
         </div>
-
-        <a id="mod1" onClick="network.unselectAll();" href="#ex2" rel="modal:open" style="display: none">Open Modal</a>
-        <a id="mod2" onClick="network.unselectAll();" href="#edgemod" rel="modal:open" style="display: none">Open
-            Modal</a>
-        <a id="mod3" onClick="network.unselectAll();" href="#renamemod" rel="modal:open" style="display: none">Open
-            Modal</a>
-        <a id="mod4" onClick="network.unselectAll();" href="#renameedgemod" rel="modal:open" style="display: none">Open
-            Modal</a>
-        <a id="mod5" onClick="network.unselectAll();" href="#renamecluster" rel="modal:open" style="display: none">Open
-            Modal</a>
-        <input type="textarea" name="fileName" id="tFileName" onClick="network.unselectAll();" class="input fileName"
-               placeholder="Name der Datei" style="padding-top: 10px;padding-bottom: 10px;">
-        <input type='file' onChange=load() id="tFile" style="display: none"/>
-
         <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
         ");">
     </div>
-    <button class="button" id="cluster" onClick=clusterSelected()></button>
-    <button class="button" id="load" onClick="document.getElementById('tFile').click();"></button>
-    <button class="button" id="save" onClick=save()></button>
-    <button class="button" id="undo" onClick=undo()></button>
-    <button class="button" id="redo" onClick=redo()></button>
-    <button class="button" id="center" onClick=centerNetwork()></button>
-    <button class="button" id="clear" onClick=clear_all()></button>
-
-
+    <button class="button" id="cluster" onClick=clusterSelected() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Cluster"></button>
+    <button class="button" id="load" onClick="document.getElementById('tFile').click();" class="btn btn-secondary"
+            data-toggle="tooltip" data-placement="left" title="Load"></button>
+    <button class="button" id="save" onClick=save() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Save"></button>
+    <button class="button" id="undo" onClick=undo() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Undo"></button>
+    <button class="button" id="redo" onClick=redo() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Redo"></button>
+    <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Center"></button>
+    <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary" data-toggle="tooltip"
+            data-placement="left" title="Clear"></button>
 
     </div>
-    <form action="" class="login_form modal" id="ex2" style="display: none;">
-        <h3>neuen Knoten benennen</h3>
-        <p><label>Knotenname: </label><input id="inpnode" type="text"></p>
-        <label>Knotentyp: </label>
+
+    <form action="" class="login_form long" id="nodemod" style="display: none;">
+        <div class="divheaders" id="mydivheader">New Node</div>
+        <br>
+        <p><label>Label: </label><input id="inpnode" type="text"></p><br>
+        <label>Entity Type: </label>
         <select id="newNodeType" disabled>
             <option value="Any" selected="selected">Any</option>
             <option value="Drug">Drug</option>
@@ -70,37 +74,40 @@
             <option value="CellLine">CellLine</option>
         </select>
         <br></br>
-        <input id="checknode" type="checkbox">Literal?</input>
+        <!--  <input id="checknode" type="checkbox">Literal?</input> -->
+        <label>Literal?</label>
+        <input type="checkbox" id="checknode"/>
+
         <br></br>
-        <a id="btnsub" onclick="dialogNameNode()" href="#close-modal" rel="modal:close">OK</a>
-        <a href="#close-modal" rel="modal:close">Cancel</a>
+        <a class="okbtn" id="btnsub" onclick="dialogNameNode()" href="#close-modal" rel="modal:close">OK</a>
+        <a class="cancelbtn" id="canBtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
 
-    <form action="" class="login_form modal" id="edgemod" style="display: none;">
-        <h3>neue Kante benennen</h3>
-        <p><label>Kantenname: </label><input id="inpedge" type="text"></p>
-        <a id="btnsubedge" onclick="dialogNameEdge()" href="#close-modal" rel="modal:close">OK</a>
-        <a href="#close-modal" rel="modal:close">Cancel</a>
+    <form action="" class="login_form short" id="edgemod" style="display: none;">
+        <div class="divheaders">New Edge</div>
+        <p><label>Label: </label><input id="inpedge" type="text"></p>
+        <a class="okbtn" id="btnsubedge" onclick="dialogNameEdge()" href="#close-modal" rel="modal:close">OK</a>
+        <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
 
-    <form action="" class="login_form modal" id="renameedgemod" style="display: none;">
-        <h3>Kante umbenennen</h3>
-        <p><label>Kantenname: </label><input id="inprenameedge" type="text"></p>
-        <a id="btnsubrenameedge" onclick="dialogRenameEdge()" href="#close-modal" rel="modal:close">OK</a>
-        <a href="#close-modal" rel="modal:close">Cancel</a>
+    <form action="" class="login_form short" id="renameedgemod" style="display: none;">
+        <div class="divheaders">Rename Edge</div>
+        <p><label>Edge Label: </label><input id="inprenameedge" type="text"></p>
+        <a class="okbtn" id="btnsubrenameedge" onclick="dialogRenameEdge()" href="#close-modal" rel="modal:close">OK</a>
+        <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
 
-    <form action="" class="login_form modal" id="renamecluster" style="display: none;">
-        <h3>Cluster umbenennen</h3>
+    <form action="" class="login_form short" id="renamecluster" style="display: none;">
+        <div class="divheaders">Rename Cluster</div>
         <p><label>Clustername: </label><input id="inprenamecluster" type="text"></p>
-        <a id="btnsubrenamecluster" onclick="dialogRenameCluster()" href="#close-modal" rel="modal:close">OK</a>
-        <a href="#close-modal" rel="modal:close">Cancel</a>
+        <a class="okbtn" id="btnsubrenamecluster" onclick="dialogRenameCluster()" href="#close-modal" rel="modal:close">OK</a>
+        <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
 
-    <form action="" class="login_form modal" id="renamemod" style="display: none;">
-        <h3>neuen Namen eingeben</h3>
-        <p><label>Knotenname:</label><input id="inprename" type="text"></p>
-        <label>Knotentyp: </label>
+    <form action="" class="login_form long" id="renamemod" style="display: none;">
+        <div class="divheaders">Rename Node</div>
+        <p><label>Label:</label><input id="inprename" type="text"></p>
+        <label>Entity Type: </label>
         <select id="RenameNodeType" disabled>
             <option value="Any" selected="selected">Any</option>
             <option value="Drug">Drug</option>
@@ -111,13 +118,12 @@
             <option value="CellLine">CellLine</option>
         </select>
         <br></br>
+
         <input id="checkrename" type="checkbox">Literal?</input>
-        <br></br>
-        <a id="btnsubrename" onclick="dialogReName()" href="#close-modal" rel="modal:close">OK</a>
-        <a href="#close-modal" rel="modal:close">Cancel</a>
+        <br><br>
+        <a class="okbtn" id="btnsubrename" onclick="dialogReName()" href="#close-modal" rel="modal:close">OK</a>
+        <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
-
-
 
 
     <!-- own development starts here: -->
@@ -126,13 +132,17 @@
     <div class="container margin-top">
         <div class="row">
             <div class="col">
-                 <div class="help-tip">
+                <div class="help-tip">
                     <p> - Please type in the keywords you want to query <br>
-                        - Currently, only entities in Mesh are supported. They can be entered by as a keyword or as a Mesh Identifier (beginning with MESH:): Simvastatin or MESH:DD019821 <br>
-                        - Entities including empty spaces must be encoded like follows: Cytochrome_P-450_CYP3A or Diabetes_Mellitus <br>
+                        - Currently, only entities in Mesh are supported. They can be entered by as a keyword or as a
+                        Mesh Identifier (beginning with MESH:): Simvastatin or MESH:DD019821 <br>
+                        - Entities including empty spaces must be encoded like follows: Cytochrome_P-450_CYP3A or
+                        Diabetes_Mellitus <br>
                         - Predicates must stem from a predifined set of predicates (see below) <br>
-                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin CAUSES ?X <br>
-                        - Multiple facts are queried as follows (seperated by a ';'): Simvastatin CAUSES ?X; ?X AFFECTS ?<br>
+                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin CAUSES ?X
+                        <br>
+                        - Multiple facts are queried as follows (seperated by a ';'): Simvastatin CAUSES ?X; ?X AFFECTS
+                        ?<br>
                 </div>
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}

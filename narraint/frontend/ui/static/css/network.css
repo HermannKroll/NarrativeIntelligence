@@ -6,11 +6,24 @@ body {
     position: relative;
 }
 
-#mynetwork {
-    position: relative;
-    max-height: 500px;
+#logo {
+    height: 35px;
 }
 
+#mynetwork {
+    position: relative;
+    cursor: crosshair;
+    width: 100%;
+    height: 70vh;
+    border: 1px solid lightgray;
+    background-color: #FFF;
+}
+
+#id_keywords {
+    resize: none;
+    width: 100%;
+    height: 100%;
+}
 
 .button {
     display: inline-block;
@@ -19,11 +32,6 @@ body {
     height: 50px;
     opacity: 0.5;
 }
-
-/*#tools {
-  height: 5vh;
-}*/
-
 
 .input {
     width: 55px;
@@ -51,11 +59,17 @@ body {
     transition: all 0.3s ease 0s;
 }
 
-.button:hover {
-    color: #ffffff;
-    border-radius: 50px;
-    border-color: #000000;
-    transition: all 0.3s ease 0s;
+.button#center {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 125px;
+    right: 10px;
+    background: url('/static/icons/png/center.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
 }
 
 .button#cluster {
@@ -63,22 +77,9 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 50px;
+    top: 175px;
     right: 10px;
     background: url('/static/icons/png/cluster.png');
-    background-size: contain;
-    border: 0px;
-    opacity: 100%;
-}
-
-.button#center {
-    height: 35px;
-    width: 35px;
-    z-index: 1;
-    position: absolute;
-    top: 100px;
-    right: 10px;
-    background: url('/static/icons/png/center.png');
     background-size: contain;
     border: 0px;
     opacity: 100%;
@@ -89,7 +90,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 150px;
+    top: 225px;
     right: 10px;
     background: url('/static/icons/png/undo.png');
     background-size: contain;
@@ -102,7 +103,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 200px;
+    top: 275px;
     right: 10px;
     background: url('/static/icons/png/redo.png');
     background-size: contain;
@@ -115,7 +116,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 250px;
+    top: 325px;
     right: 10px;
     background: url('/static/icons/png/load.png');
     background-size: contain;
@@ -128,7 +129,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 300px;
+    top: 375px;
     right: 10px;
     background: url('/static/icons/png/save.png');
     background-size: contain;
@@ -141,7 +142,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 350px;
+    top: 425px;
     right: 10px;
     background: url('/static/icons/png/clear.png');
     background-size: contain;
@@ -149,85 +150,23 @@ body {
     opacity: 100%;
 }
 
-/*
-.button.printNodes {
-  right: 0px;
-  top: 180px;
+.button:hover {
+    transform: scale(1.3, 1.3);
 }
 
-.button.printEdges {
-  right: 0px;
-  top: 200px;
-}
-
-.button.cluster {
-  right: 10px;
-}
-
-.button.load {
-  left: 10px;
-}
-
-.button.save {
-  left: 350px;
-}
-*/
-.input.fileName {
-    width: 165px;
-    height: 20px;
-    font-size: 17px;
-    text-align: center;
-}
-
-/*#tFile {
-  position: relative;
-  left: 0px;
-  top: 10px;
-  font-size: 12px;
-}*/
 
 #exp {
-    margin-left: 110px;
+    border: 1px solid lightgray;
     position: relative;
     left: 0px;
     bottom: 0px;
 }
 
-#exp1 {
-    position: fixed;
-    left: 110px;
-    bottom: 0px;
-}
-
-#exp2 {
-    position: fixed;
-    left: 480px;
-    bottom: 0px;
-}
-
-#exp3 {
-    position: fixed;
-    left: 800px;
-    bottom: 0px;
-}
-
-#exp ul {
-    font-size: 14px;
-}
-
-#mynetwork {
-    cursor: crosshair;
-    width: 100%;
-    height: 90vh;
-    border: 1px solid lightgray;
-    background-color: #FFF;
-}
-
 .help-tip {
     z-index: 2;
     position: absolute;
-    top: 18px;
-    right: 10px;
+    top: 10px;
+    right: 15px;
     text-align: center;
     background-color: #20418b;
     border-radius: 50%;
@@ -241,7 +180,7 @@ body {
 .help-tip:before {
     content: '?';
     font-weight: bold;
-    color: #66b54a;
+    color: #88c057; /*66b54a;*/
 }
 
 .help-tip:hover p {
@@ -253,6 +192,26 @@ body {
     animation: fadeIn 0.01s ease-in-out;
 
 }
+
+.login_form.long {
+    height: 250px;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+}
+
+.login_form.short {
+    height: 200px;
+    right: 37%;
+    top: 30%;
+    position: absolute;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+}
+
 
 .help-tip p { /* The tooltip */
     display: none;
@@ -310,4 +269,69 @@ body {
     100% {
         opacity: 100%;
     }
+}
+
+#inpnode {
+    border-color: lightgray;
+}
+
+
+#edgemod {
+    position: absolute;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    z-index: 9;
+    right: 37%;
+    top: 30%;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+    height: 200px;
+}
+
+#nodemod {
+    position: absolute;
+    height: 250px;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+    z-index: 9;
+    right: 37%;
+    top: 30%;
+    padding-bottom: 285px;
+}
+
+.cancelbtn {
+    position: absolute;
+    border-radius: 25px;
+    bottom: 10px;
+    background-color: white;
+    border: 1px solid gray;
+    text-align: center;
+    width: 70px;
+    color: black;
+}
+
+.okbtn {
+    position: absolute;
+    border-radius: 25px;
+    right: 10px;
+    bottom: 10px;
+    background-color: white;
+    border: 1px solid gray;
+    text-align: center;
+    width: 70px;
+    color: black; /*#20418b*/
+}
+
+.divheaders {
+    border-radius: 25px;
+    padding: 10px;
+    cursor: move;
+    z-index: 10;
+    background-color: #66b54a;
+    color: #fff;
+    text-align: center;
+    font-size: 170%;
+    color: black;
 }
