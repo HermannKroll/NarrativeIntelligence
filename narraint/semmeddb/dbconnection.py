@@ -185,23 +185,22 @@ class SemMedDB:
             i += 1
 
         # add where
-        sql += 'WHERE \n'
+        # always check for sentence type (title)
+        sql += 'WHERE \n S.type = \'ti\' '
 
         # first pattern
         # s, p, o = fact_patterns[0]
 
         # dictionary of variables in fact patterns
         vars_dict = {}
-        # iterate over all fact patterns
         i = 0
+        # iterate over all fact patterns
         for f in fact_patterns:
             s, p, o = f
             # first compute the given predication
             pred = 'P{}'.format(i)
-            if i == 0:
-                sql += "{}.predicate = '{}' ".format(pred, p)
-            else:
-                sql += "AND {}.predicate = '{}' ".format(pred, p)
+
+            sql += "AND {}.predicate = '{}' ".format(pred, p)
             # we just need to include specific entities.
             # variables means we need to join later
             vars_in_fact = []
@@ -223,7 +222,6 @@ class SemMedDB:
                     vars_dict[v].append((t, pred))
 
             sql += '\n'
-            i += 1
 
         # self.logger.info(vars_dict)
 
@@ -254,9 +252,9 @@ class SemMedDB:
         # add projection
         var_names = []
         if len(vars_dict) == 0:
-            sql_header = 'SELECT DISTINCT P0.pmid FROM PREDICATION P0 \n'
+            sql_header = 'SELECT DISTINCT P0.pmid, S.sentence FROM PREDICATION P0 JOIN SENTENCE S ON (P0.pmid = S.pmid) \n'
         else:
-            sql_header = 'SELECT DISTINCT P0.pmid '
+            sql_header = 'SELECT DISTINCT P0.pmid, S.sentence '
             for var, occurrences in vars_dict.items():
                 var_names.append(var)
                 type, pred = occurrences[0]
@@ -265,9 +263,10 @@ class SemMedDB:
                 elif type == 'obj':
                     sql_header += ', {}.{} , {}.{} '.format(pred, 'object_name', pred, 'object_cui')
 
-            sql_header += 'FROM PREDICATION P0 \n'
+            sql_header += 'FROM PREDICATION P0 JOIN SENTENCE S ON (P0.pmid = S.pmid)\n'
 
-        return sql_header + sql, var_names
+        sql_final = sql_header + sql + " ORDER BY P0.pmid DESC"
+        return sql_final, var_names
 
     def query_for_fact_patterns(self, fact_patterns, keyword_query=''):
         fact_patterns_cui = self.__translate_fact_pattern_mesh_ids_to_cuis(fact_patterns)
@@ -275,11 +274,13 @@ class SemMedDB:
 
         rows, time_needed = self.__execute_select_query(sql)
         pmids = []
+        titles = []
         var_subs = []
         for r in rows:
             pmids.append(r[0])
+            titles.append(r[1])
             # extract var substitutions for pmid
-            i = 1
+            i = 2
             var_sub = {}
             for v in var_names:
                 # add name as well as cui to substitution
@@ -291,4 +292,4 @@ class SemMedDB:
         if self.log_enabled:
             self.semmed_logger.write_log(time_needed, keyword_query, fact_patterns, sql.replace('\n', ''), pmids)
 
-        return pmids, var_subs, var_names
+        return pmids, titles, var_subs, var_names
