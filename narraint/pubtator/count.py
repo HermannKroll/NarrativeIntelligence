@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 
-from narraint.pubtator.regex import DOCUMENT_ID
+from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL
 
 
 def get_document_ids(path):

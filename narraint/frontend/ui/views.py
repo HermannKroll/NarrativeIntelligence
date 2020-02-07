@@ -144,10 +144,10 @@ class SearchView(TemplateView):
                         results_converted = []
                         logger.error('parsing error')
                     else:
-                        pmids, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns, query)
+                        pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns, query)
                         docs = []
                         for i in range(0, len(pmids) - 1):
-                            docs.append((pmids[i], var_subs[i], var_names))
+                            docs.append((pmids[i], titles[i], var_subs[i], var_names))
                         results_converted.append((query_fact_patterns, docs))
                 except Exception as e:
                     results_converted = []

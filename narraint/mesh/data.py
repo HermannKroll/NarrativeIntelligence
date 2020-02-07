@@ -97,6 +97,15 @@ class MeSHDB:
             sys.stdout.write("\rIndexing ... done\n")
             sys.stdout.flush()
 
+    def get_all_descs(self):
+        descs = []
+        records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
+        for idx, record in enumerate(records):
+            desc = Descriptor.from_element(record)
+            descs.append(desc)
+        return descs
+
+
     def add_desc(self, desc_obj):
         """
         Adds an descriptor to the indexes.

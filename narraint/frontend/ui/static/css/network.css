@@ -1,0 +1,337 @@
+body {
+    font: 1em "Helvetica", sans-serif;
+}
+
+#App {
+    position: relative;
+}
+
+#logo {
+    height: 35px;
+}
+
+#mynetwork {
+    position: relative;
+    cursor: crosshair;
+    width: 100%;
+    height: 70vh;
+    border: 1px solid lightgray;
+    background-color: #FFF;
+}
+
+#id_keywords {
+    resize: none;
+    width: 100%;
+    height: 100%;
+}
+
+.button {
+    display: inline-block;
+    background: none;
+    width: 50px;
+    height: 50px;
+    opacity: 0.5;
+}
+
+.input {
+    width: 55px;
+    position: absolute;
+    background-color: #FFF;
+    border: 0;
+    padding: 4px 0px;
+    cursor: text;
+    margin-bottom: 6px;
+    font-size: 2vh;
+}
+
+.button {
+    position: absolute;
+    background: #000000;
+    border: 4px solid #000000;
+    border-radius: 4px;
+    color: #ffffff;
+    display: inline-block;
+    font-size: 14px;
+    padding: 2px 2px;
+    cursor: pointer;
+    vertical-align: middle;
+    top: 10px;
+    transition: all 0.3s ease 0s;
+}
+
+.button#center {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 125px;
+    right: 10px;
+    background: url('/static/icons/png/center.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#cluster {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 175px;
+    right: 10px;
+    background: url('/static/icons/png/cluster.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#undo {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 225px;
+    right: 10px;
+    background: url('/static/icons/png/undo.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#redo {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 275px;
+    right: 10px;
+    background: url('/static/icons/png/redo.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#load {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 325px;
+    right: 10px;
+    background: url('/static/icons/png/load.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#save {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 375px;
+    right: 10px;
+    background: url('/static/icons/png/save.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button#clear {
+    height: 35px;
+    width: 35px;
+    z-index: 1;
+    position: absolute;
+    top: 425px;
+    right: 10px;
+    background: url('/static/icons/png/clear.png');
+    background-size: contain;
+    border: 0px;
+    opacity: 100%;
+}
+
+.button:hover {
+    transform: scale(1.3, 1.3);
+}
+
+
+#exp {
+    border: 1px solid lightgray;
+    position: relative;
+    left: 0px;
+    bottom: 0px;
+}
+
+.help-tip {
+    z-index: 2;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    text-align: center;
+    background-color: #20418b;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 26px;
+    cursor: default;
+}
+
+.help-tip:before {
+    content: '?';
+    font-weight: bold;
+    color: #88c057; /*66b54a;*/
+}
+
+.help-tip:hover p {
+    opacity: 0.5;
+    display: block;
+    transform-origin: 100% 0%;
+
+    -webkit-animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.01s ease-in-out;
+
+}
+
+.login_form.long {
+    height: 250px;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+}
+
+.login_form.short {
+    height: 200px;
+    right: 37%;
+    top: 30%;
+    position: absolute;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+}
+
+
+.help-tip p { /* The tooltip */
+    display: none;
+    text-align: left;
+    background-color: #1E2021;
+    padding: 20px;
+    width: 500px;
+    position: absolute;
+    border-radius: 3px;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    right: -4px;
+    color: #FFF;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.help-tip p:before { /* The pointer of the tooltip */
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-bottom-color: #1E2021;
+    right: 10px;
+    top: -12px;
+}
+
+.help-tip p:after { /* Prevents the tooltip from being hidden */
+    width: 100%;
+    height: 40px;
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 0;
+}
+
+/* CSS animation */
+
+@-webkit-keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    100% {
+        opacity: 100%;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 100%;
+    }
+}
+
+#inpnode {
+    border-color: lightgray;
+}
+
+
+#edgemod {
+    position: absolute;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    z-index: 9;
+    right: 37%;
+    top: 30%;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+    height: 200px;
+}
+
+#nodemod {
+    position: absolute;
+    height: 250px;
+    border-radius: 25px;
+    box-shadow: 10px 10px 5px black;
+    background-color: lightgray;
+    border: 1px solid #d3d3d3;
+    z-index: 9;
+    right: 37%;
+    top: 30%;
+    padding-bottom: 285px;
+}
+
+.cancelbtn {
+    position: absolute;
+    border-radius: 25px;
+    bottom: 10px;
+    background-color: white;
+    border: 1px solid gray;
+    text-align: center;
+    width: 70px;
+    color: black;
+}
+
+.okbtn {
+    position: absolute;
+    border-radius: 25px;
+    right: 10px;
+    bottom: 10px;
+    background-color: white;
+    border: 1px solid gray;
+    text-align: center;
+    width: 70px;
+    color: black; /*#20418b*/
+}
+
+.divheaders {
+    border-radius: 25px;
+    padding: 10px;
+    cursor: move;
+    z-index: 10;
+    background-color: #66b54a;
+    color: #fff;
+    text-align: center;
+    font-size: 170%;
+    color: black;
+}

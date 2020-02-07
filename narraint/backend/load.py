@@ -13,6 +13,7 @@ from narraint.backend.models import Document, Tag, Tagger, DocTaggedBy
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL
+from narraint.progress import print_progress_with_eta
 
 PRINT_ETA_EVERY_K_DOCUMENTS = 100
 UNKNOWN_TAGGER = ["Unknown", "unknown"]
@@ -76,7 +77,7 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
     return document_id, document, tags
 
 
-def bulk_load(path, collection, tagger_mapping):
+def bulk_load(path, collection, tagger_mapping=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
 
@@ -101,6 +102,10 @@ def bulk_load(path, collection, tagger_mapping):
         tagged_ent_types = set()
         doc_ic, d_content, d_tags = get_id_content_tag(pubtator_content)
 
+        # skip document because content is not there
+        if not doc_ic or not d_content:
+            continue
+
         # Add document
         insert_document = insert(Document).values(
             collection=collection,
@@ -112,49 +117,44 @@ def bulk_load(path, collection, tagger_mapping):
         )
         session.execute(insert_document)
 
-        # Add tags
-        for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
-            tagged_ent_types.add(ent_type)
+        # only if tagger mapping is set, tags will be inserted
+        if tagger_mapping and d_tags:
+            # Add tags
+            for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                tagged_ent_types.add(ent_type)
 
-            insert_tag = insert(Tag).values(
-                ent_type=ent_type,
-                start=start,
-                end=end,
-                ent_id=ent_id,
-                ent_str=ent_str,
-                document_id=d_id,
-                document_collection=collection,
-                tagger_name=tagger_name,
-                tagger_version=tagger_version,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
-            )
-            session.execute(insert_tag)
+                insert_tag = insert(Tag).values(
+                    ent_type=ent_type,
+                    start=start,
+                    end=end,
+                    ent_id=ent_id,
+                    ent_str=ent_str,
+                    document_id=d_id,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                ).on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+                )
+                session.execute(insert_tag)
 
-        # Add DocTaggedBy
-        for ent_type in tagged_ent_types:
-            tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
-            insert_doc_tagged_by = insert(DocTaggedBy).values(
-                document_id=doc_ic,
-                document_collection=collection,
-                tagger_name=tagger_name,
-                tagger_version=tagger_version,
-                ent_type=ent_type,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
-            )
-            session.execute(insert_doc_tagged_by)
+            # Add DocTaggedBy
+            for ent_type in tagged_ent_types:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                insert_doc_tagged_by = insert(DocTaggedBy).values(
+                    document_id=doc_ic,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                    ent_type=ent_type,
+                ).on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
+                )
+                session.execute(insert_doc_tagged_by)
+
         session.commit()
-
-        percentage = (idx + 1.0) / n_docs * 100.0
-        if idx % PRINT_ETA_EVERY_K_DOCUMENTS == 0:
-            elapsed_seconds = (datetime.now() - start_time).seconds + 1
-            seconds_per_doc = elapsed_seconds / (idx + 1.0)
-            remaining_seconds = (n_docs - idx) * seconds_per_doc
-            eta = (datetime.now() + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
-        sys.stdout.write("\rAdding documents ... {:0.1f} % (ETA {})".format(percentage, eta))
-        sys.stdout.flush()
+        print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
 
     sys.stdout.write("\rAdding documents ... done in {}".format(datetime.now() - start_time))
 

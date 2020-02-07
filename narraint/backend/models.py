@@ -92,3 +92,33 @@ class Tag(Base):
 
     def to_pubtator(self):
         return Tag.create_pubtator(self.document_id, self.start, self.end, self.ent_str, self.ent_type, self.ent_id)
+
+
+class Predication(Base):
+    __tablename__ = "predication"
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        UniqueConstraint('document_id', 'document_collection', 'subject_id', 'predicate', 'object_id', 'sentence')
+    )
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    document_id = Column(BigInteger, nullable=False)
+    document_collection = Column(String, nullable=False)
+    subject_openie = Column(String, nullable=False)
+    subject_id = Column(String, nullable=False)
+    subject_str = Column(String, nullable=False)
+    subject_type = Column(String, nullable=False)
+    predicate = Column(String, nullable=False)
+    object_openie = Column(String, nullable=False)
+    object_id = Column(String, nullable=False)
+    object_str = Column(String, nullable=False)
+    object_type = Column(String, nullable=False)
+    sentence = Column(String, nullable=False)
+    openie_version = Column(String, nullable=False)
+    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
+
+    def __str__(self):
+        return "<{}>\t<{}>\t<{}>".format(self.subject_id, self.predicate, self.object_id)
+
+    def __repr__(self):
+        return "<Predication {}>".format(self.id)

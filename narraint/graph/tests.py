@@ -162,16 +162,3 @@ class GraphTest(unittest.TestCase):
         self.assertIsNone(target1.get_node('b'))
         self.assertIsNone(target1.get_node('d'))
         self.assertEqual(2, len(target1))
-
-    def test_save_to_dot(self):
-        g1 = LabeledGraph()
-        g1.add_edge('l1', 'a', 'b')
-        g1.add_edge('l2', 'b', 'c')
-        g1.add_edge('l3', 'b', 'd')
-        tmp_file = tempfile.mkstemp("out.gv")[1]
-        g1.save_to_dot(tmp_file)
-        with open(tmp_file) as f:
-            content_created = f.read()
-        with open(GRAPH_GV) as f:
-            content_expected = f.read()
-        self.assertEqual(content_expected, content_created)

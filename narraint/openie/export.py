@@ -1,46 +1,30 @@
 import argparse
 import json
 import logging
+from datetime import datetime
 
-SQL_HEADER = "CREATE TABLE IF NOT EXISTS PREDICATION_OPENIE \
-                 (predication_id INTEGER PRIMARY KEY, \
-                  pmid INTEGER, \
-                  subject_cui VARCHAR, \
-                  subject_name VARCHAR, \
-                  subject_semtype VARCHAR, \
-                  object_cui VARCHAR, \
-                  object_name VARCHAR, \
-                  object_semtype VARCHAR, \
-                  predicate VARCHAR, \
-                  sentence VARCHAR );\n"
-SQL_INSERT_HEADER = 'INSERT INTO PREDICATION_OPENIE VALUES \n';
+from narraint.backend.database import Session
+from narraint.backend.models import Predication
+from narraint.progress import print_progress_with_eta
 
 
-def read_input_tuples(input, logger):
-    # open the input open ie file
-    # read all lines for a single doc
-    tuples_cached = []
-    logger.info('reading input file {}'.format(input))
-    with open(input, 'r') as f:
-        for line in f:
-            components = line.replace('\n', '').split("\t")
-            pmid = components[0]
-            subj = components[1]
-            pred = components[2]
-            obj = components[3]
-            sent = components[4]
-            sub_id = components[5]
-            sub_ent = components[6]
-            sub_type = components[7]
-            obj_id = components[8]
-            obj_ent = components[9]
-            obj_type = components[10]
-            tuples_cached.append((pmid, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type))
-    return tuples_cached
+def load_tuples_from_db():
+    session = Session.get()
+    query = session.query(Predication.document_id, Predication.subject_openie, Predication.predicate,
+                          Predication.object_openie, Predication.sentence,
+                          Predication.subject_id, Predication.subject_str, Predication.subject_type,
+                          Predication.object_id, Predication.object_str, Predication.object_type)
+    logging.info("loading predication tuples from db...")
+    rows = session.execute(query)
+    tuples = []
+    for r in rows:
+        tuples.append(r)
+    logging.info('{} tuples load from db'.format(len(tuples)))
+    return tuples
 
 
-def aggregate_triples(tuples, logger):
-    logger.info('aggregatign of {} tuples by subject, predicate and object...'.format(len(tuples)))
+def aggregate_triples(tuples):
+    logging.info('aggregating of {} tuples by subject, predicate and object...'.format(len(tuples)))
     # go trough all cached triples
     aggregation = {}
     for pmid, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type in tuples:
@@ -54,11 +38,13 @@ def aggregate_triples(tuples, logger):
     return aggregation
 
 
-def export_to_cesi(input, output, logger):
-    tuples_cached = read_input_tuples(input, logger)
-    aggregation = aggregate_triples(tuples_cached, logger)
+def export_to_cesi(output):
+    tuples_cached = load_tuples_from_db()
+    aggregation = aggregate_triples(tuples_cached)
 
-    logger.info('exporting {} entries in CESI format to {}'.format(len(aggregation), output))
+    logging.info('exporting {} entries in CESI format to {}'.format(len(aggregation), output))
+    start_time = datetime.now()
+    size = len(aggregation)
     with open(output, 'w') as f:
         id_counter = 0
         for _, value in aggregation.items():
@@ -75,36 +61,29 @@ def export_to_cesi(input, output, logger):
             json_str = json.dumps(json_data)
             f.write('{}\n'.format(json_str))
             id_counter += 1
-    logger.info('export finished')
+
+            print_progress_with_eta("exporting", id_counter, size, start_time)
+
+    logging.info('export finished')
 
 
-def export_to_sql(input, output, logger):
-    tuples = read_input_tuples(input, logger)
+def export_to_tsv(output):
+    tuples = load_tuples_from_db()
+    tuples_len = len(tuples)
+    logging.info('exporting {} entries in TSV format to {}'.format(tuples_len, output))
+    start_time = datetime.now()
 
-    logger.info('exporting {} entries in SQL format to {}'.format(len(tuples), output))
     with open(output, 'w') as f:
-        f.write(SQL_HEADER)
-        f.write(SQL_INSERT_HEADER)
-        id_counter = 0
-        for pmid, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type in tuples:
-            sub_ent_t = sub_ent.replace('\'', '\'\'')
-            obj_ent_t = obj_ent.replace('\'', '\'\'')
-            pred_t = pred.replace('\'', '\'\'')
-            sent_t = sent.replace('\'', '\'\'')
-            # ('1', '1', 'D01', 'Simvastatin', 'Drug', 'D02', 'CYP', 'Gene', 'metabolised_by'),
-            insert_into = "({}, {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(id_counter, pmid,
-                                                                                            sub_id, sub_ent_t, sub_type,
-                                                                                            obj_id, obj_ent_t, obj_type,
-                                                                                            pred_t, sent_t)
-            if id_counter != len(tuples) - 1:
-                insert_into += ',\n'
+        f.write('doc_id\tsubject_openie\tpredicate\tobject_openie\tsub_id\tsub_str\tsub_type\tobj_id\tobj_str'
+                '\tobject_type\tsentence')
+        for i, t in enumerate(tuples):
+            doc_id, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type = t
+            f.write('\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(doc_id, subj, pred, obj, sub_id, sub_ent,
+                                                                          sub_type, obj_id, obj_ent, obj_type, sent))
 
-            f.write(insert_into)
+            print_progress_with_eta("exporting", i, tuples_len, start_time)
 
-            id_counter += 1
-        f.write(';')
-
-    logger.info('export finished')
+    logging.info('export finished')
 
 
 def main():
@@ -114,25 +93,21 @@ def main():
     :return:
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help='OpenIE export file to read')
     parser.add_argument("output", help='export file')
-    parser.add_argument("-f", "--format", dest='format', action='store', help='export format (supported: CESI | SQL)',
-                        required=True)
+    parser.add_argument("-f", "--format",  action='store', choices=["CESI", "TSV"],
+                        help='export format (supported: CESI | TSV)', required=True)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    logger = logging.getLogger(__name__)
-
-    ex_format = args.format
-    if ex_format == 'CESI':
+    if args.format == 'CESI':
         logging.info('exporting in CESI format...')
-        export_to_cesi(args.input, args.output, logger)
-    if ex_format == 'SQL':
-        logging.info("exporting to SQL statements...")
-        export_to_sql(args.input, args.output, logger)
+        export_to_cesi(args.output)
+    elif args.format == 'TSV':
+        logging.info("exporting in TSV format...")
+        export_to_tsv(args.output)
 
 
 if __name__ == "__main__":

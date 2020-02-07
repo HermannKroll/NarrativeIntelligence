@@ -3,7 +3,7 @@
 This project can be used to process documents using Narratives.
 
 ## Getting Started
-Download the CTD data and the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
+Download the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
 
 ```
 ./download_data.sh
@@ -17,7 +17,6 @@ Application data includes:
 - MESH descriptor files
 - UMLS data
 - TIB EPA dump
-- CTD data
 
 ### Configuration
 *All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
@@ -29,15 +28,15 @@ The projects core, the `narraint` package, consists of several Python packages a
 |-----------------|-----------------------------------------------------------------------------------------------|
 | `backend` | Connection to database, loading and exporting |
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
-| `graph` | ? |
+| `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
 | `narrative` | Implementation of the Narrative querying |
 | `openie` | OpenIE for PubTator documents using Standford NLP |
 | `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
-| `pubmedutils` | ? |
+| `pubmedutils` | Tools to query PMIDs from PubMed and PubTator files from Pubtator  |
 | `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
-| `semmeddb` | ? |
-| `stories` | ? |
+| `semmeddb` | Connection Handling for a SemMedDB. Currently our prototype queries SemMedDB via this package for fact retrieval |
+| `stories` | Some experimental stuff to derive stories from documents |
 
 
 ## Named Entity Recognition
