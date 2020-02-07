@@ -14,7 +14,7 @@ from narraint.pubtator.document import get_document_id
 class GNorm(BaseTagger):
     TYPES = (enttypes.GENE,)
     __name__ = "GNormPlus"
-    __version__ = "1.0.0"
+    __version__ = "unknown"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
