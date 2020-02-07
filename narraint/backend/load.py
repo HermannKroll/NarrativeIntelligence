@@ -152,7 +152,7 @@ def bulk_load(path, collection, tagger_mapping):
             elapsed_seconds = (datetime.now() - start_time).seconds + 1
             seconds_per_doc = elapsed_seconds / (idx + 1.0)
             remaining_seconds = (n_docs - idx) * seconds_per_doc
-            eta = (start_time + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
+            eta = (datetime.now() + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
         sys.stdout.write("\rAdding documents ... {:0.1f} % (ETA {})".format(percentage, eta))
         sys.stdout.flush()
 
