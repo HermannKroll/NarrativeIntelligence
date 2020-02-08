@@ -165,7 +165,7 @@ def bulk_load(path, collection, tagger_mapping=None):
         session.commit()
         print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
 
-    sys.stdout.write("\rAdding documents ... done in {}".format(datetime.now() - start_time))
+    sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
 
 
 def main():
