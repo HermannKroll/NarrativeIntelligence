@@ -19,7 +19,7 @@ def print_progress_with_eta(text, current_idx, size, start_time, print_every_k=1
         elapsed_seconds = (datetime.now() - start_time).seconds + 1
         seconds_per_doc = elapsed_seconds / (current_idx + 1.0)
         remaining_seconds = (size - current_idx) * seconds_per_doc
-        eta = (start_time + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
+        eta = (datetime.now() + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
 
         sys.stdout.write("\r{} ... {:0.1f} % (ETA {})".format(text, percentage, eta))
         sys.stdout.flush()
