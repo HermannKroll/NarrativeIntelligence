@@ -94,7 +94,7 @@ def insert_predications_into_db(tuples_cleaned, collection):
     session.commit()
 
 
-def clean_open_ie(input, output, collection, pmcid2pmid):
+def clean_open_ie(input, collection, pmcid2pmid):
     logging.info('beginning cleaning step...')
     doc_ids = set()
     tuples_cached = []
@@ -179,7 +179,7 @@ def main():
         print('loading pmcid to pmid translation file...')
         pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
 
-    clean_open_ie(args.input, args.output, args.collection, pmcid2pmid)
+    clean_open_ie(args.input, args.collection, pmcid2pmid)
 
 
 if __name__ == "__main__":
