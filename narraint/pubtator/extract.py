@@ -72,8 +72,7 @@ def read_pubtator_documents(path):
         for fn in os.listdir(path):
             if not fn.startswith(".") and fn.endswith(".txt"):
                 abs_path = os.path.join(path, fn)
-                with open(abs_path) as f:
-                    yield f.read()
+                yield from read_pubtator_documents(abs_path)
     else:
         content = ""
         with open(path) as f:

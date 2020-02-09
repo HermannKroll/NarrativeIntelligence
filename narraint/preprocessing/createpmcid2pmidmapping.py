@@ -2,6 +2,8 @@ import argparse
 import logging
 
 
+# TODO: Is this a duplicate of "convertids.py"?
+# TODO: Move this to "tools" or "pubmedutils"
 def create_pmcid2pmid_index_from_tsv(input, output):
     first = False
     with open(input, "r") as f_in:
@@ -17,7 +19,6 @@ def create_pmcid2pmid_index_from_tsv(input, output):
                     f_out.write('{}\t{}'.format(pmcid, pmid))
                 else:
                     f_out.write('\n{}\t{}'.format(pmcid, pmid))
-
 
 
 def main():
@@ -36,9 +37,6 @@ def main():
     create_pmcid2pmid_index_from_tsv(args.input, args.output)
     print('output written in {}'.format(args.output))
 
+
 if __name__ == "__main__":
     main()
-
-
-
-

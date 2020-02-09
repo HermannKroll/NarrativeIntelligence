@@ -59,7 +59,7 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     return tagger_by_ent_type
 
 
-def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls):
+def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls, logger):
     session = Session.get()
     result = session.query(DocTaggedBy).filter(
         DocTaggedBy.document_id.in_(target_ids),
@@ -69,6 +69,10 @@ def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cl
         DocTaggedBy.tagger_version == tagger_cls.__version__,
     ).values(DocTaggedBy.document_id)
     present_ids = set(x[0] for x in result)
+    logger.debug(
+        "Retrieved {} ids (ent_type={},collection={},tagger={}/{})".format(
+            len(present_ids), ent_type, collection, tagger_cls.__name__, tagger_cls.__version__
+        ))
     missing_ids = target_ids.difference(present_ids)
     return missing_ids
 
@@ -125,17 +129,18 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     # Get input documents for each tagger
     for tag_type in tag_types:
         tagger_cls = tagger_by_ent_type[tag_type]
-        missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls)
+        missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls, logger)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
         with open(task_list_fn, "w") as f:
             f.write("\n".join(missing_files_type[tag_type]))
+        logger.debug("Tasklist for {} written to:".format(tag_type, task_list_fn))
         logger.info("Tasklist for {} contains {} documents".format(tag_type, len(missing_ids)))
 
     # Init taggers
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
-    taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in tagger_by_ent_type.values()]
+    taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
     for tagger in taggers:
         logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.TYPES:
@@ -183,13 +188,11 @@ def main():
     # Create configuration wrapper
     conf = Config(args.config)
 
-    if args.corpus == "PMC":
-        print('loading pmcid to pmid translation file...')
-        pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
-
     # Perform collection and conversion
     in_dir = args.input
     if args.ids and args.corpus == "PMC":
+        print('loading pmcid to pmid translation file...')
+        pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
         in_dir = tempfile.mkdtemp()
         error_file = os.path.join(in_dir, "conversion_errors.txt")
         collector = PMCCollector(conf.pmc_dir)

@@ -155,8 +155,8 @@ def bulk_load(path, collection, tagger_mapping=None):
                         tagger_version=tagger_version,
                         ent_type=ent_type,
                     ).on_conflict_do_nothing(
-                        index_elements=(
-                        'document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
+                        index_elements=('document_id', 'document_collection',
+                                        'tagger_name', 'tagger_version', 'ent_type'),
                     )
                     session.execute(insert_doc_tagged_by)
             else:
