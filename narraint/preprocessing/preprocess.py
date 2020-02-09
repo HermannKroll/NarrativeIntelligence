@@ -178,6 +178,8 @@ def main():
                                 help="Configuration file (default: {})".format(PREPROCESS_CONFIG))
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
+    group_settings.add_argument("--skip-load", action='store_true',
+                                help="Skip bulk load of documents on start (expert setting)")
 
     parser.add_argument("input", help="Directory with PubTator files "
                                       "(can be a file if --ids is set or a directory if --resume is set)",
@@ -203,7 +205,10 @@ def main():
         raise ValueError("Providing an ID set is only supported for PMC collection")
 
     # Add documents to database
-    bulk_load(in_dir, args.corpus)
+    if  args.skip_load:
+        print("INFO: Skipping bulk load")
+    else:
+        bulk_load(in_dir, args.corpus)
 
     # Create list of tagging ent types
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
