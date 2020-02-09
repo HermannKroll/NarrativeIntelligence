@@ -17,7 +17,7 @@ from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
-from narraint.preprocessing.tagging.gnorm import GNorm
+from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.convert import PMCConverter
@@ -45,7 +45,7 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     tagger_by_ent_type = {}
 
     if enttypes.GENE in tag_types:
-        tagger_by_ent_type[enttypes.GENE] = GNorm
+        tagger_by_ent_type[enttypes.GENE] = GNormPlus
     if enttypes.DISEASE in tag_types and not use_tagger_one:
         tagger_by_ent_type[enttypes.DISEASE] = DNorm
     if enttypes.CHEMICAL in tag_types and not use_tagger_one:

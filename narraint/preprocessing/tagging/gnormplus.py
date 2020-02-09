@@ -11,7 +11,7 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import get_document_id
 
 
-class GNorm(BaseTagger):
+class GNormPlus(BaseTagger):
     TYPES = (enttypes.GENE,)
     __name__ = "GNormPlus"
     __version__ = "unknown"

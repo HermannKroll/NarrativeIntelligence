@@ -95,6 +95,7 @@ def bulk_load(path, collection, tagger_mapping=None):
     session = Session.get()
 
     if tagger_mapping is None:
+        # TODO: Add logging
         print("WARNING: No tagger mapping provided. Tags are ignored")
 
     sys.stdout.write("Counting documents ...")
@@ -160,6 +161,7 @@ def bulk_load(path, collection, tagger_mapping=None):
                     )
                     session.execute(insert_doc_tagged_by)
             else:
+                # TODO: Add logging
                 print("WARNING: Document {} {} not in DB".format(collection, doc_id))
 
         session.commit()
