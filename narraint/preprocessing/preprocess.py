@@ -6,13 +6,14 @@ from typing import List
 
 from narraint.backend import enttypes
 from narraint.backend.database import Session
+from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.export import export
 from narraint.backend.load import bulk_load
 from narraint.backend.models import DocTaggedBy
-from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.collect import PMCCollector
 from narraint.preprocessing.config import Config
+from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
@@ -21,10 +22,8 @@ from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.convert import PMCConverter
 from narraint.pubtator.document import get_document_id, DocumentError
-from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
-
 
 
 def init_logger(log_filename, log_level):
@@ -40,6 +39,38 @@ def init_logger(log_filename, log_level):
     logger.addHandler(fh)
     logger.addHandler(ch)
     return logger
+
+
+def get_tagger_by_ent_type(tag_types, use_tagger_one):
+    tagger_by_ent_type = {}
+
+    if enttypes.GENE in tag_types:
+        tagger_by_ent_type[enttypes.GENE] = GNorm
+    if enttypes.DISEASE in tag_types and not use_tagger_one:
+        tagger_by_ent_type[enttypes.DISEASE] = DNorm
+    if enttypes.CHEMICAL in tag_types and not use_tagger_one:
+        tagger_by_ent_type[enttypes.CHEMICAL] = TMChem
+    if enttypes.CHEMICAL in tag_types and enttypes.DISEASE in tag_types and use_tagger_one:
+        tagger_by_ent_type[enttypes.CHEMICAL] = TaggerOne
+        tagger_by_ent_type[enttypes.DISEASE] = TaggerOne
+    if enttypes.DOSAGE_FORM in tag_types:
+        tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
+
+    return tagger_by_ent_type
+
+
+def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls):
+    session = Session.get()
+    result = session.query(DocTaggedBy).filter(
+        DocTaggedBy.document_id.in_(target_ids),
+        DocTaggedBy.document_collection == collection,
+        DocTaggedBy.ent_type == ent_type,
+        DocTaggedBy.tagger_name == tagger_cls.__name__,
+        DocTaggedBy.tagger_version == tagger_cls.__version__,
+    ).values(DocTaggedBy.document_id)
+    present_ids = set(x[0] for x in result)
+    missing_ids = target_ids.difference(present_ids)
+    return missing_ids
 
 
 def preprocess(collection, in_dir, output_filename, conf, *tag_types,
@@ -75,7 +106,9 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     mapping_id_file = dict()
     mapping_file_id = dict()
     missing_files_type = dict()
-    session = Session.get()
+
+    # Get tagger classes
+    tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
 
     # Gather target IDs
     for fn in os.listdir(input_dir):
@@ -90,16 +123,9 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     logger.info("Preprocessing {} documents".format(len(target_ids)))
 
     # Get input documents for each tagger
-    # TODO: Encapsulate this part for a cleaner interface, e.g., backend.utils (?)
-    # Todo: We need to check whether the tagger and the tagger version matches here
     for tag_type in tag_types:
-        result = session.query(DocTaggedBy).filter(
-            DocTaggedBy.document_id.in_(target_ids),
-            DocTaggedBy.document_collection == collection,
-            DocTaggedBy.ent_type == tag_type,
-        ).values(DocTaggedBy.document_id)
-        present_ids = set(x[0] for x in result)
-        missing_ids = target_ids.difference(present_ids)
+        tagger_cls = tagger_by_ent_type[tag_type]
+        missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
         with open(task_list_fn, "w") as f:
@@ -109,17 +135,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
     # Init taggers
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
-    taggers: List[BaseTagger] = []
-    if enttypes.GENE in tag_types:
-        taggers.append(GNorm(**kwargs))
-    if enttypes.DISEASE in tag_types and not use_tagger_one:
-        taggers.append(DNorm(**kwargs))
-    if enttypes.CHEMICAL in tag_types and not use_tagger_one:
-        taggers.append(TMChem(**kwargs))
-    if enttypes.CHEMICAL in tag_types and enttypes.DISEASE in tag_types and use_tagger_one:
-        taggers.append(TaggerOne(**kwargs))
-    if enttypes.DOSAGE_FORM in tag_types:
-        taggers.append(DosageFormTagger(**kwargs))
+    taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in tagger_by_ent_type.values()]
     for tagger in taggers:
         logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.TYPES:

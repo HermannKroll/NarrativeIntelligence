@@ -1,7 +1,7 @@
 DOSAGE_FORM = "DosageForm"
 CHEMICAL = "Chemical"
 MUTATION = "Mutation"
-GENE = "Gene"
+GENE:str = "Gene"
 SPECIES = "Species"
 DISEASE = "Disease"
 VARIANT = "Variant"
