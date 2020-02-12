@@ -12,6 +12,7 @@ from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.progress import print_progress_with_eta
 
 COMMIT_AFTER_INSERTS = 1000
+MAX_SENTENCE_LENGTH = 3000
 
 
 def get_subject_and_object_entities(doc_tags, sub, obj):
@@ -65,8 +66,15 @@ def insert_predications_into_db(tuples_cleaned, collection):
     len_tuples = len(tuples_cleaned)
     logging.info('inserting {} tuples to database...'.format(len_tuples))
     start_time = datetime.now()
+    skipped_docs = set()
+    skipped_facts = 0
     for i, t in enumerate(tuples_cleaned):
         doc_id, subj, pred, obj, sent, s_id, s_txt, s_type, o_id, o_txt, o_type = t
+
+        if len(sent) > MAX_SENTENCE_LENGTH:
+            skipped_docs.add(doc_id)
+            skipped_facts += 1
+            continue
 
         insert_pred = insert(Predication).values(
             document_id=doc_id,
@@ -91,6 +99,8 @@ def insert_predications_into_db(tuples_cleaned, collection):
 
         print_progress_with_eta("inserting", i, len_tuples, start_time)
 
+    logging.warning('{} facts skipped (too long sentences) in docs: {}'.format(skipped_facts, skipped_docs))
+    logging.info('insert finished')
     session.commit()
 
 
@@ -114,7 +124,7 @@ def clean_open_ie(input, collection, pmcid2pmid):
             tuples_cached.append((int(pmid), subj, pred, obj, sent))
 
     if len(skipped_doc_ids) > 0:
-        logging.warning('skipping the following document ids: {}'.format(skipped_doc_ids))
+        logging.warning('skipping the following document ids (no pmcid2pmid mapping): {}'.format(skipped_doc_ids))
     logging.info('{} OpenIE tuples read...'.format(len(tuples_cached)))
 
     if len(doc_ids) == 0:
