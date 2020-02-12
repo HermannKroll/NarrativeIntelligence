@@ -2,8 +2,6 @@ import argparse
 import logging
 
 
-# TODO: Is this a duplicate of "convertids.py"?
-# TODO: Move this to "tools" or "pubmedutils"
 def create_pmcid2pmid_index_from_tsv(input, output):
     first = False
     with open(input, "r") as f_in:
