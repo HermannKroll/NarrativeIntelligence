@@ -2,10 +2,14 @@ import argparse
 import json
 import logging
 from datetime import datetime
+import random
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.progress import print_progress_with_eta
+
+# 80% are valid and 20% are valid
+SPLIT_THRESHOLD_FOR_TEST_AND_VALID = 0.8
 
 
 def load_tuples_from_db():
@@ -45,7 +49,13 @@ def export_to_cesi(output):
     logging.info('exporting {} entries in CESI format to {}'.format(len(aggregation), output))
     start_time = datetime.now()
     size = len(aggregation)
+
+    filename_test = '{}_test'.format(output)
+    filename_valid = '{}_valid'.format(output)
     with open(output, 'w') as f:
+        f_test = open(filename_test, 'w')
+        f_valid = open(filename_valid, 'w')
+
         id_counter = 0
         for _, value in aggregation.items():
             t, sentences = value
@@ -58,11 +68,19 @@ def export_to_cesi(output):
                          'kbp_info': [],
                          'src_sentences': sentences}
 
-            json_str = json.dumps(json_data)
-            f.write('{}\n'.format(json_str))
+            json_str = '{}\n'.format(json.dumps(json_data))
+            f.write(json_str)
+            if random.random() > SPLIT_THRESHOLD_FOR_TEST_AND_VALID:
+                f_valid.write(json_str)
+            else:
+                f_test.write(json_str)
+
             id_counter += 1
 
             print_progress_with_eta("exporting", id_counter, size, start_time)
+
+        f_test.close()
+        f_valid.close()
 
     logging.info('export finished')
 
@@ -93,7 +111,7 @@ def main():
     :return:
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("output", help='export file')
+    parser.add_argument("output", help='export file (if CESI _test and _valid will also be created)')
     parser.add_argument("-f", "--format",  action='store', choices=["CESI", "TSV"],
                         help='export format (supported: CESI | TSV)', required=True)
     args = parser.parse_args()
