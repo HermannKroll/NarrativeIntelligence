@@ -7,8 +7,9 @@ import sys
 import tempfile
 from datetime import datetime
 from time import sleep
+import logging
 
-
+from narraint.progress import print_progress_with_eta
 from narraint.config import OPENIE_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
@@ -26,13 +27,13 @@ def prepare_files(input_dir):
 
     amount_skipped_files = 0
     amount_files = 0
+    logging.info('counting files to process....')
     for fn in os.listdir(input_dir):
         with open(os.path.join(input_dir, fn)) as f:
-            document = f.read().strip()
+            document = f.read()
         match = CONTENT_ID_TIT_ABS.match(document)
         if not match:
             amount_skipped_files += 1
-            print(f"WARNING: Ignoring {fn} (no pubtator format found)")
         else:
             amount_files += 1
             pmid, title, abstract = match.group(1, 2, 3)
@@ -42,7 +43,7 @@ def prepare_files(input_dir):
             with open(input_file, "w") as f:
                 f.write(content)
 
-    print('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
+    logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
     with open(filelist_fn, "w") as f:
         f.write("\n".join(input_files))
 
@@ -67,10 +68,10 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_fn, filelist_fn)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
+    start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        sys.stdout.write("\rProgress: {}/{} ...".format(get_progress(out_fn), num_files))
-        sys.stdout.flush()
+        print_progress_with_eta('OpenIE running...', get_progress(out_fn), num_files, start_time)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_fn), num_files, datetime.now() - start,
     ))
@@ -82,12 +83,15 @@ def process_output(openie_out, outfile):
     with open(openie_out) as f:
         for line in f:
             components = line.strip().split("\t")
-            pmid = components[0].split("/")[-1][:-4]
+            # e.g. first line looks like /tmp/tmpwi57otrk/input/1065332.txt (so pmid is between last / and .)
+            pmid = components[0].split("/")[-1].split('.')[0]
+
+            subj = components[2].lower()
+            pred = components[3].lower()
+            obj = components[4].lower()
             sent = components[-5]
-            subj = components[-3]
-            pred = components[-2]
-            obj = components[-1]
-            lines.append((pmid, subj, pred, obj, sent))
+            pred_lemma = components[-2]
+            lines.append((pmid, subj, pred, pred_lemma, obj, sent))
 
     with open(outfile, "w") as f:
         f.write("\n".join("\t".join(t) for t in lines))
@@ -104,6 +108,10 @@ def main():
     parser.add_argument("output", help="File with OpenIE results")
     parser.add_argument("--conf", default=OPENIE_CONFIG)
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
 
     # Read config
     with open(args.conf) as f:
