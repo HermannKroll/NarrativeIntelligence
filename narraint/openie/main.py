@@ -13,7 +13,6 @@ from narraint.progress import print_progress_with_eta
 from narraint.config import OPENIE_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
-FILENAME_REGEX = re.compile(r"(/[\w/.]+)\t")
 OPENIE_VERSION = "1.0.0"
 
 
@@ -55,9 +54,11 @@ def get_progress(out_fn):
         return 0
     else:
         with open(out_fn) as f:
-            content = f.read()
-        match = FILENAME_REGEX.findall(content)
-        return len(set(match))
+            doc_names = []
+            for line in f:
+                d = line.split('\t', 1)[0]
+                doc_names.append(d)
+            return len(set(doc_names))
 
 
 def run_openie(core_nlp_dir, out_fn, filelist_fn):
