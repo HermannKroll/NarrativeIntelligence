@@ -13,6 +13,7 @@ Some documents do not follow this schema (e.g., PMC3153655, which is a schedule 
 import os
 import re
 import sys
+import traceback
 from argparse import ArgumentParser
 from typing import List
 
@@ -148,6 +149,7 @@ class PMCConverter:
             content = content.replace(pmcid, pmid)
             # ensures that no \t are included
             content = content.replace('\t', ' ')
+            print(f"{pmcid}: {title}")
             with open(out_file, "w") as f:
                 f.write("{}\n".format(content))
         else:
@@ -168,18 +170,17 @@ class PMCConverter:
         for current, fn in enumerate(filename_list):
             pmcid = ".".join(fn.split("/")[-1].split(".")[:-1]).replace('PMC', '')
             if pmcid in pmcid2pmid:
+                pmid = pmcid2pmid[pmcid]
                 try:
-                    pmid = pmcid2pmid[pmcid]
                     out_file = os.path.join(output_dir, f"{pmid}.txt")
-                    try:
-                        self.convert(fn, out_file, pmcid, pmid)
-                    except (DocumentEmptyError, DocumentTooLargeError):
-                        pass
-                    else:
-                        ignored_files.append(fn)
-                # Todo: Fix this except here, in general is not good
+                    self.convert(fn, out_file, pmcid, pmid)
+                except (DocumentEmptyError, DocumentTooLargeError):
+                    ignored_files.append(f"{fn} \n Too large or empty!")
+                except ValueError :
+                    ignored_files.append(f"{fn}\n Mismatched ID: \n {traceback.format_exc()}")
+                #TODO: Add more specific cases if encountered
                 except:
-                    ignored_files.append(fn)
+                    ignored_files.append(f"{fn} \n Raised an exception: \n {traceback.format_exc()}")
             else:
                 ignored_files.append('pmcid to pmid missing for {}'.format(fn))
 
