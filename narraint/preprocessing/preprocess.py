@@ -205,7 +205,7 @@ def main():
         raise ValueError("Providing an ID set is only supported for PMC collection")
 
     # Add documents to database
-    if  args.skip_load:
+    if args.skip_load:
         print("INFO: Skipping bulk load")
     else:
         bulk_load(in_dir, args.corpus)
