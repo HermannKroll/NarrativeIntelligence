@@ -149,7 +149,6 @@ class PMCConverter:
             content = content.replace(pmcid, pmid)
             # ensures that no \t are included
             content = content.replace('\t', ' ')
-            print(f"{pmcid}: {title}")
             with open(out_file, "w") as f:
                 f.write("{}\n".format(content))
         else:
