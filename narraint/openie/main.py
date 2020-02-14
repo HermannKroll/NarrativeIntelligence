@@ -71,7 +71,7 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        print_progress_with_eta('OpenIE running...', get_progress(out_fn), num_files, start_time)
+        print_progress_with_eta('OpenIE running...', get_progress(out_fn), num_files, start_time, print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_fn), num_files, datetime.now() - start,
     ))
