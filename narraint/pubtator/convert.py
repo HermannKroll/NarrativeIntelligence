@@ -38,8 +38,10 @@ class DocumentTooLargeError(Exception):
 class DocumentEmptyError(Exception):
     pass
 
+
 class NoTitleError(Exception):
     pass
+
 
 class NoAbstractError(Exception):
     pass
@@ -191,7 +193,7 @@ class PMCConverter:
                     ignored_files.append(f"{fn}\nDocument is too large!")
                 except ValueError :
                     ignored_files.append(f"{fn}\n Mismatched ID: \n {traceback.format_exc()}")
-                #TODO: Add more specific cases if encountered
+                # TODO: Add more specific cases if encountered
                 except:
                     ignored_files.append(f"{fn} \n Raised an exception: \n {traceback.format_exc()}")
             else:
