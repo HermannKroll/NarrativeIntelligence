@@ -38,6 +38,12 @@ class DocumentTooLargeError(Exception):
 class DocumentEmptyError(Exception):
     pass
 
+class NoTitleError(Exception):
+    pass
+
+class NoAbstractError(Exception):
+    pass
+
 
 class PMCConverter:
     PATTERNS_TO_DELETE = (
@@ -91,7 +97,7 @@ class PMCConverter:
         .. note::
 
             The abstract and the body sections are merged into the "abstract" field of the PubTator file.
-            If no abstract is found, only the title is returned.
+            If either abstract or title are missing an exception is thrown.
 
         .. seealso::
 
@@ -118,13 +124,13 @@ class PMCConverter:
 
         # Select title
         e_title = tree.xpath("/article/front/article-meta/title-group/article-title")
-        title = e_title[0].text
+        title = ''.join(e_title[0].itertext())
         if title:
             title = self.clean_text(title)
 
         # Select abstract (observation: abstract could have multiple paragraphs)
         e_abstract = tree.xpath("/article/front/article-meta/abstract//p")
-        abstract = " ".join(self.clean_p_element(p) for p in e_abstract)
+        abstract = ''.join(self.clean_p_element(p) for p in e_abstract)
 
         # Select content (skip tables)
         e_content = tree.xpath("/article/body//p[parent::sec]")
@@ -144,15 +150,17 @@ class PMCConverter:
         if len(pubtator_abstract) > MAX_CONTENT_LENGTH:
             raise DocumentTooLargeError
 
-        if pubtator_abstract.strip() and title:
+        if not title:
+            raise NoTitleError
+        elif not pubtator_abstract:
+            raise NoAbstractError
+        else:
             content = "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
             content = content.replace(pmcid, pmid)
             # ensures that no \t are included
             content = content.replace('\t', ' ')
             with open(out_file, "w") as f:
                 f.write("{}\n".format(content))
-        else:
-            raise DocumentEmptyError
 
     def convert_bulk(self, filename_list: List[str], output_dir, pmcid2pmid, err_file=None):
         """
@@ -173,6 +181,10 @@ class PMCConverter:
                 try:
                     out_file = os.path.join(output_dir, f"{pmid}.txt")
                     self.convert(fn, out_file, pmcid, pmid)
+                except NoTitleError:
+                    ignored_files.append(f"{fn}\nNo title was found!")
+                except NoAbstractError:
+                    ignored_files.append(f"{fn}\nNo Abstract was found!")
                 except DocumentEmptyError:
                     ignored_files.append(f"{fn}\nDocument is empty!")
                 except DocumentTooLargeError:
