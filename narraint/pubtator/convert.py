@@ -173,8 +173,10 @@ class PMCConverter:
                 try:
                     out_file = os.path.join(output_dir, f"{pmid}.txt")
                     self.convert(fn, out_file, pmcid, pmid)
-                except (DocumentEmptyError, DocumentTooLargeError):
-                    ignored_files.append(f"{fn} \n Too large or empty!")
+                except DocumentEmptyError:
+                    ignored_files.append(f"{fn}\nDocument is empty!")
+                except DocumentTooLargeError:
+                    ignored_files.append(f"{fn}\nDocument is too large!")
                 except ValueError :
                     ignored_files.append(f"{fn}\n Mismatched ID: \n {traceback.format_exc()}")
                 #TODO: Add more specific cases if encountered

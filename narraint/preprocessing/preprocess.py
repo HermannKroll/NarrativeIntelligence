@@ -168,7 +168,7 @@ def main():
                         help="Collect documents from directory (e.g., for PubMedCentral) and convert to PubTator")
 
     group_tag = parser.add_argument_group("Tagging")
-    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
+    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
     parser.add_argument("-c", "--corpus", required=True)
     group_tag.add_argument("--tagger-one", action="store_true",
                            help="Tag diseases and chemicals with TaggerOne instead of DNorm and tmChem.")
@@ -210,18 +210,20 @@ def main():
     else:
         bulk_load(in_dir, args.corpus)
 
-    # Create list of tagging ent types
-    tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
+    if args.tag is not None:
+        # Create list of tagging ent types
+        tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
-    # TODO: Add SQL logging
-    # logging.basicConfig()
-    # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+        # TODO: Add SQL logging
+        # logging.basicConfig()
+        # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-    # Run actual preprocessing
-    preprocess(args.corpus, in_dir, args.output, conf, *tag_types,
-               resume=args.resume, console_log_level=args.loglevel.upper(),
-               workdir=args.workdir, use_tagger_one=args.tagger_one)
-
+        # Run actual preprocessing
+        preprocess(args.corpus, in_dir, args.output, conf, *tag_types,
+                   resume=args.resume, console_log_level=args.loglevel.upper(),
+                   workdir=args.workdir, use_tagger_one=args.tagger_one)
+    else:
+        print("INFO: No --tag option provided, skipping tagging")
 
 if __name__ == "__main__":
     main()
