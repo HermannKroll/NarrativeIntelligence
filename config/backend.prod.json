@@ -1,0 +1,8 @@
+{
+  "POSTGRES_DB": "taggingdb",
+  "POSTGRES_HOST": "134.169.32.169",
+  "POSTGRES_PORT": "5432",
+  "POSTGRES_USER": "tagginguser",
+  "POSTGRES_PW": "adsf0i92432kemrfwla",
+  "POSTGRES_SCHEMA": "public"
+}
