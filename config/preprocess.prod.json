@@ -1,0 +1,10 @@
+{
+  "pmc_dir": "/hdd2/datasets/pubmed_central",
+  "taggerOne": {
+    "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
+    "model": "models/model_BC5CDRJ_011.bin",
+    "batchSize": 10000
+  },
+  "gnormPlus": "/home/kroll/tools/tagger/GNormPlusJava",
+  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7"
+}
