@@ -14,13 +14,17 @@ import os
 import re
 import sys
 import traceback
+import logging
 from argparse import ArgumentParser
 from typing import List
 
 from lxml import etree, html
 from lxml.etree import ParserError
 
+from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.collect import PMCCollector
+from narraint.preprocessing.config import Config
+from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 
 MAX_CONTENT_LENGTH = 500000
 FMT_EPA_TTL = "TIB-EPA"
@@ -289,6 +293,8 @@ def main():
     parser.add_argument("-c", "--collect", metavar="DIR", help="Collect PubMedCentral files from DIR")
     parser.add_argument("-f", "--format", help="Format of input files", default=FMT_PMC_XML,
                         choices=FMT_CHOICES)
+    parser.add_argument("--config", default=PREPROCESS_CONFIG,
+                        help="Configuration file (default: {})".format(PREPROCESS_CONFIG))
 
     parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
@@ -296,14 +302,20 @@ def main():
 
     if args.format == FMT_PMC_XML:
         t = PMCConverter()
+        # Create configuration wrapper
+        conf = Config(args.config)
+
+        logging.info('loading pmcid to pmid translation file...')
+        pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
+
         if args.collect:
             collector = PMCCollector(args.collect)
             files = collector.collect(args.input)
-            t.convert_bulk(files, args.output)
+            t.convert_bulk(files, args.output, pmcid2pmid)
         else:
             if os.path.isdir(args.input):
                 files = [os.path.join(args.input, fn) for fn in os.listdir(args.input) if fn.endswith(".nxml")]
-                t.convert_bulk(files, args.output)
+                t.convert_bulk(files, args.output, pmcid2pmid)
             else:
                 t.convert(args.input, args.output)
 
