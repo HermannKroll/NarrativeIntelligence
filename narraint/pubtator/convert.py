@@ -80,6 +80,11 @@ class PMCConverter:
         """
         xml_str = etree.tostring(p_element).decode("utf-8")
         xml_str = xml_str.strip().replace("\n", " ")
+
+        # Long sentence fix
+        xml_str = xml_str.replace("</p>", ".</p>")
+        xml_str = xml_str.replace("<p>", "<p>.")
+
         for pattern in self.PATTERNS_TO_DELETE:
             xml_str = pattern.sub("", xml_str)
         text = html.fragment_fromstring(xml_str).text_content()
@@ -140,7 +145,7 @@ class PMCConverter:
 
         # Select content (skip tables)
         e_content = tree.xpath("/article/body//p[parent::sec]")
-        content = " ".join(self.clean_p_element(p) for p in e_content)
+        content = ".".join(self.clean_p_element(p) for p in e_content)
 
         # Merge abstract and content
         pubtator_abstract = "{} {}".format(abstract, content)
@@ -195,7 +200,7 @@ class PMCConverter:
                     ignored_files.append(f"{fn}\nDocument is empty!")
                 except DocumentTooLargeError:
                     ignored_files.append(f"{fn}\nDocument is too large!")
-                except ValueError :
+                except ValueError:
                     ignored_files.append(f"{fn}\n Mismatched ID: \n {traceback.format_exc()}")
                 # TODO: Add more specific cases if encountered
                 except:
