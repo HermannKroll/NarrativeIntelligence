@@ -79,10 +79,46 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
     sys.stdout.flush()
 
 
+def match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
+    """
+    matches the predicate tokens in the sentence and extracts the correct pos tags
+    :param pred: predicate string
+    :param pos_tags: list of pos tags of the whole sentence
+    :param pred_start: start position of the predicate in the sentence
+    :param pred_end: end position of the predicate in the sentence
+    :param sent: the whole sentence
+    :return: a list of pos tags if matched is successful, else None
+    """
+    # the format seems to be strange some times
+    if pred_end < pred_start:
+        temp = pred_start
+        pred_start = pred_end
+        pred_end = temp
+
+    if pred_start == pred_end:
+        return pos_tags[pred_start]
+    else:
+        tokens_sent = sent.lower().split(' ')[pred_start:pred_end]
+        tokens_pred = pred.split(' ')
+        pred_pos_tags_list = []
+
+        # try to match all pred tokens in the sentence tokens
+        for p_tok in tokens_pred:
+            for idx, s_tok in enumerate(tokens_sent):
+                if p_tok == s_tok:
+                    pred_pos_tags_list.append(pos_tags[idx])
+
+        if len(pred_pos_tags_list) != len(tokens_pred):
+            return None
+        return ' '.join(pred_pos_tags_list)
+
+
 def process_output(openie_out, outfile):
     lines = []
+    tuples = 0
     with open(openie_out) as f:
         for line in f:
+            tuples += 1
             components = line.strip().split("\t")
             # e.g. first line looks like /tmp/tmpwi57otrk/input/1065332.txt (so pmid is between last / and .)
             pmid = components[0].split("/")[-1].split('.')[0]
@@ -90,13 +126,15 @@ def process_output(openie_out, outfile):
             subj = components[2].lower()
             pred = components[3].lower()
             obj = components[4].lower()
+            conf = components[11].replace(',', '.')
             sent = components[-5]
             pred_lemma = components[-2]
-            lines.append((pmid, subj, pred, pred_lemma, obj, sent))
+            lines.append((pmid, subj, pred, pred_lemma, obj, conf, sent))
 
     with open(outfile, "w") as f:
         f.write("\n".join("\t".join(t) for t in lines))
 
+    logging.info('{} lines written'.format(tuples))
 
 def main():
     """
@@ -114,6 +152,11 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
+    logging.info('converting...')
+    process_output(args.input, args.output)
+    logging.info('finished!')
+
+    return 0
     # Read config
     with open(args.conf) as f:
         conf = json.load(f)
