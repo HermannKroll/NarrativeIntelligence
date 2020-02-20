@@ -43,13 +43,22 @@ $(document).ready(function () {
 const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
+    let data_source = ""
+    if(document.getElementById('radio_semmeddb').checked){
+        data_source = "semmeddb"
+    } else {
+        data_source = "openie"
+    }
+
     console.log("Query: " + query);
+    console.log("Data source: " + data_source)
     setButtonSearching(true);
 
     let request = $.ajax({
         url: search_url,
         data: {
-            query: query
+            query: query,
+            data_source: data_source
         }
     });
 

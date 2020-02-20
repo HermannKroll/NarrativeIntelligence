@@ -191,6 +191,7 @@ $( function() { // function to pull the wordlist from url_data and save it in va
   });
 });
 
+/*
 $(function() { // pulls the predicate names
   $.ajax({
     url: url_predicates,
@@ -242,6 +243,7 @@ $(function() { // pulls the predicate names
     }
   });
 });
+ */
 
 // create an array with nodes
 var nodes = new vis.DataSet([]);
@@ -444,7 +446,7 @@ function centerNetwork() {
 function dialogNameEdge() { // name a new edges
   var label = inpedge.value; // get the input text
   if(label != "") { // if the textfield is empty
-    if(predicates.includes(label)) { // if label is in list of predicates
+   // if(predicates.includes(label)) { // if label is in list of predicates
       initializeUndo();
       let edge = {from: tmpFrom, to: tmpTo, label: label, arrows:'to'}; // create the edge
       edges.add(edge);
@@ -452,14 +454,14 @@ function dialogNameEdge() { // name a new edges
       tempEdge.code = 1;
       his_undo[count_undo].push(tempEdge);
       count_undo++;
-    } else {
+    /*}  else {
       setTimeout(function() { // alert if name is not in list
         alert('The label should be in the list!');
         edgeMod.click();
         inpedge.focus();
       }
       , 1);
-    }
+    } */
   } else {
     setTimeout(function() { // alert if input is empty
       alert('The label cannot be empty.');
@@ -474,7 +476,7 @@ function dialogNameEdge() { // name a new edges
 function dialogRenameEdge() { //rename existing edge
   var label = document.getElementById("inprenameedge").value;
   if(label != "") {
-    if(predicates.includes(label)) {
+    //if(predicates.includes(label)) {
 
       initializeUndo();
       let edge_temp = edges.get(tmpEdgeRename);
@@ -485,14 +487,14 @@ function dialogRenameEdge() { //rename existing edge
       count_undo++;
       edges.update({label: label,  id: tmpEdgeRename});
 
-    } else {
+  /*  } else {
       setTimeout(function() {
         alert('The label should be in the list.');
         renameEdgeMod.click();
         document.getElementById("inprenameedge").focus();
       }
       , 1);
-    }
+    } */
   } else {
     setTimeout(function() {
       alert('The label cannot be empty.');
@@ -772,6 +774,7 @@ function initializeRedo() {
 
 // Shortcuts
 document.addEventListener('keydown', function (params) {
+
   // Keycode for deleting nodes/edges (delete/backspace)
   if(event.keyCode == 8 || event.keyCode == 46) {
     if(network.getSelectedNodes().length > 1) {
@@ -839,6 +842,8 @@ document.addEventListener('keydown', function (params) {
     }
 
   }
+
+  /*
   // Keycode for adding new node (n)
   else if(event.keyCode == 78 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
     var myElement = document.getElementById("nodeMod");
@@ -863,7 +868,7 @@ document.addEventListener('keydown', function (params) {
   else if(event.keyCode == 67) {
     clusterSelected();
   }
-
+*/
   createQuery();
 });
 

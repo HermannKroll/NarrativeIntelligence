@@ -13,6 +13,8 @@ from narraint.mesh.data import MeSHDB
 from narraint.semmeddb.dbconnection import SemMedDB
 from narraint.stories.story import MeshTagger
 
+from narraint.openie.query_engine import query_with_graph_query
+
 # BEGIN Preparation
 # lg = LibraryGraph()
 # lg.read_from_tsv(settings.LIBRARY_GRAPH_FILE)
@@ -90,12 +92,13 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
             logger.error('error unknown object: {}'.format(o_t))
             return None, explanation_str
 
-        if p_t in allowed_predicates:
-            p = p_t
-        else:
-            explanation_str += "error unknown predicate: {}\n".format(p_t)
-            logger.error("error unknown predicate: {}".format(p_t))
-            return None, explanation_str
+        p = p_t
+      #  if p_t in allowed_predicates:
+      #      p = p_t
+      #  else:
+      #      explanation_str += "error unknown predicate: {}\n".format(p_t)
+      #      logger.error("error unknown predicate: {}".format(p_t))
+      #      return None, explanation_str
 
         explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt, s, p, o)
         fact_patterns.append((s, p, o))
@@ -135,7 +138,8 @@ class SearchView(TemplateView):
             if "query" in request.GET:
                 try:
                     query = self.request.GET.get("query", "").strip()
-
+                    data_source = self.request.GET.get("data_source", "").strip()
+                    logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger,
                                                                                                   semmed.predicates)
@@ -144,7 +148,12 @@ class SearchView(TemplateView):
                         results_converted = []
                         logger.error('parsing error')
                     else:
-                        pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns, query)
+                        if data_source == 'semmeddb':
+                            pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
+                                                                                                query)
+                        else:
+                            pmids, titles, var_subs, var_names = query_with_graph_query(query_fact_patterns)
+
                         docs = []
                         for i in range(0, len(pmids) - 1):
                             docs.append((pmids[i], titles[i], var_subs[i], var_names))
