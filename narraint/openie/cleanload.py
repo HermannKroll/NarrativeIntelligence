@@ -74,6 +74,9 @@ def insert_predications_into_db(tuples_cleaned, collection):
     start_time = datetime.now()
     for i, t in enumerate(tuples_cleaned):
         doc_id, subj, pred, pred_cleaned, p_pos_tags, obj, conf, sent, s_id, s_txt, s_type, o_id, o_txt, o_type = t
+        # enforce inserting none
+        if not pred_cleaned:
+            pred_cleaned = None
 
         insert_pred = insert(Predication).values(
             document_id=doc_id,
