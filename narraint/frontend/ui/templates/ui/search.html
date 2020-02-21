@@ -150,7 +150,7 @@
                     <div class="form-group">
                         <label for="id_keywords"><strong>Keywords</strong></label>
                         <textarea class="form-control" id="id_keywords" rows="3"
-                                  name="keywords">Simvastatin CAUSES Rhabdomyolysis</textarea>
+                                  name="keywords">Simvastatin cause Rhabdomyolysis</textarea>
 
                         <label><strong>Data Source:</strong></label><br>
                         <input type="radio" id="radio_openie" name="data_source" value="OpenIE" checked="checked">
@@ -158,6 +158,7 @@
                         <input type="radio" id="radio_semmeddb" name="data_source" value="SemMedDB2019">
                         <label for="radio_semmeddb">SemMedDB2019 (PubMed Abstracts + Titles, 31.12.2018)</label><br>
 
+                        <!--
                         <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
                             'ADMINISTERED_TO', 'AFFECTS', 'ASSOCIATED_WITH', 'AUGMENTS', 'CAUSES', 'COEXISTS_WITH',
@@ -172,36 +173,25 @@
                             'STIMULATES', 'TREATS', 'USES', 'compared_with', 'different_from', 'higher_than',
                             'lower_than', 'same_as'
                         </small>
+                        -->
                     </div>
                     <button type="submit" class="btn btn-primary" id="btn_search">
-                        Search patterns
+                        Search
                     </button>
                     <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
                         Please be patient. This process can take up to one minute.
                     </p>
                 </form>
             </div>
-            <div class="col">
-                <label for="query_translation"><strong>Query Translation</strong></label>
-                <div id="query_translation">No query translation available.</div>
-            </div>
         </div>
-
-        <div class="row margin-top">
-            <div class="col">
-                <h2>Graph patterns</h2>
-
-                <form id="graph-patterns"></form>
-            </div>
+        <div>
+            <label for="query_translation"><strong>Query Translation</strong></label>
+            <div id="query_translation">No query translation available.</div>
         </div>
-
         <div class="row margin-top" id="div_wrapper_documents">
-            <div class="col-md-6">
-                <h2>Documents</h2>
-
-                <div id="div_documents"></div>
-            </div>
-        </div>
+            <h2>Documents</h2>
+            <div id="div_documents"></div>
+     </div>
 
     </div>
 {% endblock %}

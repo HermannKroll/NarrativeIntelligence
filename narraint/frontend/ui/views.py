@@ -67,8 +67,9 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
     facts_txt = fact_txt.strip().split(';')
     fact_patterns = []
     # explanation_str = 'Query Translation'
-    explanation_str = 60 * '==' + '\n'
-    explanation_str += 60 * '==' + '\n\n'
+    explanation_str = ""
+  #  explanation_str = 30 * '==' + '\n'
+   # explanation_str += 30 * '==' + '\n\n'
     for fact_txt in facts_txt:
         split = fact_txt.strip().split(' ')
         # check whether the text forms a triple
@@ -114,17 +115,17 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
         return None, explanation_str
 
     # check if the query is one connected graph
-    g = LabeledGraph()
-    for s, p, o in fact_patterns:
-        g.add_edge(p, s, o)
+  #  g = LabeledGraph()
+  #  for s, p, o in fact_patterns:
+  #      g.add_edge(p, s, o)
     # there are multiple connected components - stop
-    con_comp = g.compute_connectivity_components()
-    if len(con_comp) != 1:
-        explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
-        return None, explanation_str
+  #  con_comp = g.compute_connectivity_components()
+  #  if len(con_comp) != 1:
+  #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
+   #     return None, explanation_str
 
-    explanation_str += '\n' + 60 * '==' + '\n'
-    explanation_str += 60 * '==' + '\n'
+ #   explanation_str += '\n' + 30 * '==' + '\n'
+ #   explanation_str += 30 * '==' + '\n'
     return fact_patterns, explanation_str
 
 
@@ -161,6 +162,7 @@ class SearchView(TemplateView):
                 except Exception as e:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
+                    logger.error(e)
 
             return JsonResponse(dict(results=results_converted, query_translation=query_trans_string))
         return super().get(request, *args, **kwargs)

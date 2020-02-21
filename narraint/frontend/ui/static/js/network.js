@@ -1056,6 +1056,7 @@ function createQuery() {
     query = query.concat(nodes.get(edges.get(i).to).label.replace(/ /g, '_')); // replace all " " with "_"
     query = query + "; ";
   }
+  query = query.replace('(Any)', '')
   //remove last
   query = query.substring(0, query.length-2);
   if(query != oldquery) {
