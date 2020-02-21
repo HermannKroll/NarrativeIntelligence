@@ -7,6 +7,8 @@ from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
+QUERY_LIMIT = 100
+VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
 
@@ -44,14 +46,18 @@ def __construct_query(session, graph_query, doc_collection):
             if not s.startswith('?'):
                 query = query.filter(pred.subject_id == s)
             else:
+                var_name = VAR_NAME.search(s)
+                if not var_name:
+                    raise ValueError('Variable name does not match regex: {}'.format(s))
+                var_name = var_name.group(1)
                 var_type = VAR_TYPE.search(s)
                 if var_type:
                     query = query.filter(pred.subject_type == var_type.group(1))
-                if s not in var_dict:
-                    var_names.append((s, 'subject', idx))
-                    var_dict[s] = (pred, 'subject')
+                if var_name not in var_dict:
+                    var_names.append((var_name, 'subject', idx))
+                    var_dict[var_name] = (pred, 'subject')
                 else:
-                    last_pred, t = var_dict[s]
+                    last_pred, t = var_dict[var_name]
                     if t == 'subject':
                         query = query.filter(pred.subject_id == last_pred.subject_id)
                     elif t == 'object':
@@ -61,14 +67,18 @@ def __construct_query(session, graph_query, doc_collection):
             if not o.startswith('?'):
                 query = query.filter(pred.object_id == o)
             else:
+                var_name = VAR_NAME.search(o)
+                if not var_name:
+                    raise ValueError('Variable name does not match regex: {}'.format(o))
+                var_name = var_name.group(1)
                 var_type = VAR_TYPE.search(o)
                 if var_type:
                     query = query.filter(pred.object_type == var_type.group(1))
-                if o not in var_dict:
-                    var_names.append((o, 'object', idx))
-                    var_dict[o] = (pred, 'object')
+                if var_name not in var_dict:
+                    var_names.append((var_name, 'object', idx))
+                    var_dict[var_name] = (pred, 'object')
                 else:
-                    last_pred, t = var_dict[o]
+                    last_pred, t = var_dict[var_name]
                     if t == 'object':
                         query = query.filter(pred.object_id == last_pred.object_id)
                     elif t == 'subject':
@@ -96,8 +106,9 @@ def __construct_query(session, graph_query, doc_collection):
         else:
             query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_cleaned == p)
 
-    # order by document id descending
-    query = query.order_by(document.id.desc())
+    # order by document id descending and limit results to 100
+    query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
+
     return query, var_names
 
 
