@@ -1,34 +1,34 @@
 import logging
+import re
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import Select
 
-from narraint.graph.labeled import LabeledGraph
-from narraint.backend.models import Predication
+from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
-from narraint.mesh.data import MeSHDB
 from sqlalchemy.dialects import postgresql
+
+VAR_TYPE = re.compile(r'\((\w+)\)')
+VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
 
 
 def __construct_query(session, graph_query, doc_collection):
     var_names = []
     var_dict = {}
+
+    document = aliased(Document, name='D')
     predication_aliases = []
     for idx, _ in enumerate(graph_query):
         predication_aliases.append(aliased(Predication, name='P{}'.format(idx)))
 
-    projection_list = []
-    p = predication_aliases[0]
-    projection_list.extend([p.document_id, p.subject_id, p.subject_str, p.subject_type, p.predicate_cleaned,
-                            p.object_id, p.object_str, p.object_type])
-    for p in predication_aliases[1:]:
+    projection_list = [document.id, document.title]
+    for p in predication_aliases:
         projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_cleaned, p.object_id,
-                                p.object_str, p.object_type])
+                                p.object_str, p.object_type, p.confidence])
 
     query = session.query(*projection_list)
-    pred0 = predication_aliases[0]
-    for pred in predication_aliases[1:]:
-        query = query.filter(pred0.document_id == pred.document_id)
+    query = query.filter(document.collection == doc_collection)
+    for pred in predication_aliases:
+        query = query.filter(document.id == pred.document_id)
 
     for idx, (s, p, o) in enumerate(graph_query):
         pred = predication_aliases[idx]
@@ -44,6 +44,9 @@ def __construct_query(session, graph_query, doc_collection):
             if not s.startswith('?'):
                 query = query.filter(pred.subject_id == s)
             else:
+                var_type = VAR_TYPE.search(s)
+                if var_type:
+                    query = query.filter(pred.subject_type == var_type.group(1))
                 if s not in var_dict:
                     var_names.append((s, 'subject', idx))
                     var_dict[s] = (pred, 'subject')
@@ -58,6 +61,9 @@ def __construct_query(session, graph_query, doc_collection):
             if not o.startswith('?'):
                 query = query.filter(pred.object_id == o)
             else:
+                var_type = VAR_TYPE.search(o)
+                if var_type:
+                    query = query.filter(pred.object_type == var_type.group(1))
                 if o not in var_dict:
                     var_names.append((o, 'object', idx))
                     var_dict[o] = (pred, 'object')
@@ -73,6 +79,11 @@ def __construct_query(session, graph_query, doc_collection):
             if not p.startswith('?'):
                 query = query.filter(pred.predicate_cleaned == p)
             else:
+                query = query.filter(pred.predicate_cleaned.isnot(None))
+                var_type = VAR_TYPE_PREDICATE.search(p)
+                if var_type:
+                    query = query.filter(pred.subject_type == var_type.group(1))
+                    query = query.filter(pred.object_type == var_type.group(2))
                 if p not in var_dict:
                     var_names.append((p, 'predicate', idx))
                     var_dict[p] = (pred, 'predicate')
@@ -85,6 +96,8 @@ def __construct_query(session, graph_query, doc_collection):
         else:
             query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_cleaned == p)
 
+    # order by document id descending
+    query = query.order_by(document.id.desc())
     return query, var_names
 
 
@@ -101,20 +114,26 @@ def query_with_graph_query(graph_query, doc_collection='PMC'):
         var_names.append(v)
     for r in session.execute(query):
         pmids.append(r[0])
-        titles.append("test") # r[1])
+        titles.append(r[1])
         # extract var substitutions for pmid
         var_sub = {}
         for v, t, pred_pos in var_info:
-            offset = 1 + pred_pos * 5
+            offset = 2 + pred_pos * 8
             if t == 'subject':
-                var_sub[v] = '{} ({} : {})'.format(r[offset], r[offset+1], r[offset+2])
+                var_sub[v] = '{} ({} : {})'.format(r[offset+1], r[offset], r[offset+2])
             elif t == 'object':
-                var_sub[v] = '{} ({} : {})'.format(r[offset+4], r[offset+5], r[offset+6])
+                var_sub[v] = '{} ({} : {})'.format(r[offset+5], r[offset+4], r[offset+6])
             elif t == 'predicate':
                 var_sub[v] = '{}'.format(r[offset+3])
             else:
                 raise ValueError('Unknown position in query projection')
+
+        conf = 0
+        for i in range(0, len(graph_query)):
+            conf += float(r[2+7+i*8])
+        var_sub["conf"] = '{:4.2f} / {}'.format(conf, len(graph_query))
         var_subs.append(var_sub)
+    #var_names.append("conf")
 
     logging.info("{} hits: {}".format(len(pmids), pmids))
     return pmids, titles, var_subs, var_names
