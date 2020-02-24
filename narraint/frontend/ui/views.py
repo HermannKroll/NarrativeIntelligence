@@ -15,11 +15,6 @@ from narraint.stories.story import MeshTagger
 
 from narraint.openie.query_engine import query_with_graph_query
 
-# BEGIN Preparation
-# lg = LibraryGraph()
-# lg.read_from_tsv(settings.LIBRARY_GRAPH_FILE)
-
-# story = StoryProcessor(lg, [MeshTagger(db)])
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
@@ -30,20 +25,23 @@ db = MeSHDB.instance()
 db.load_xml(settings.DESCRIPTOR_FILE, False, True)
 mesh_tagger = MeshTagger(db)
 
+
+
 semmed = SemMedDB(config_file=settings.SEMMEDDB_CONFIG, log_enabled=True, log_dir=settings.SEMMEDDB_LOG_DIR)
 semmed.connect_to_db()
 semmed.load_umls_dictionary()
 semmed.load_predicates()
 
-if os.path.exists(settings.MESHDB_INDEX):
-    start = datetime.now()
-    with open(settings.MESHDB_INDEX, "rb") as f:
-        index = pickle.load(f)
-    db.set_index(index)
-    end = datetime.now()
-    logger.info("Index loaded in {}".format(end - start))
-else:
-    logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
+#if os.path.exists(settings.MESHDB_INDEX):
+#    start = datetime.now()
+#    with open(settings.MESHDB_INDEX, "rb") as f:
+#        index = pickle.load(f)
+#    db.set_index(index)
+#    end = datetime.now()
+#    logger.info("Index loaded in {}".format(end - start))
+#else:
+#
+#       logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
 
 
 # END Preparation
@@ -51,6 +49,9 @@ else:
 
 def convert_text_to_entity(text, tagger):
     text = text.replace('_', ' ')
+    if text == 'CYP3A4':
+        return "1576", "Gene"
+
     if text.startswith('?'):
         s, s_type = text, 'VAR'
     elif text.startswith('MESH:'):
@@ -107,7 +108,7 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
     # check for at least 1 entity
     entity_check = False
     for s, p, o in fact_patterns:
-        if s.startswith('MESH:') or o.startswith('MESH:'):
+        if not s.startswith('?') or not o.startswith('?'):
             entity_check = True
             break
     if not entity_check:
@@ -156,7 +157,7 @@ class SearchView(TemplateView):
                             pmids, titles, var_subs, var_names = query_with_graph_query(query_fact_patterns)
 
                         docs = []
-                        for i in range(0, len(pmids) - 1):
+                        for i in range(0, len(pmids)):
                             docs.append((pmids[i], titles[i], var_subs[i], var_names))
                         results_converted.append((query_fact_patterns, docs))
                 except Exception as e:
