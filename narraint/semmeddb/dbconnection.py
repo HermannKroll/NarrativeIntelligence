@@ -8,6 +8,7 @@ from datetime import datetime
 import psycopg2
 
 from narraint.config import TMP_DIR, UMLS_DATA, SEMMEDDB_CONFIG, LOG_DIR
+from narraint.openie.querylogger import QueryLogger
 
 WORKING_DIR = TMP_DIR
 UMLS_MESH2CUI_INDEX_TMP_FILE = os.path.join(WORKING_DIR, "umls_mesh2cui_index.pickle")
@@ -17,34 +18,6 @@ PREDICATES_TMP_FILE = os.path.join(WORKING_DIR, "predicates.pickle")
 QUERY_PREDICATES = 'SELECT predicate, COUNT(*) FROM PREDICATION GROUP BY predicate'
 QUERY_CUIS = '(SELECT subject_cui AS CUI FROM PREDICATION) UNION (SELECT object_cui AS CUI FROM PREDICATION)'
 QUERY_FACTS = 'SELECT pmid, subject_cui, predicate, object_cui FROM PREDICATION LIMIT 10000'
-
-
-class SemMedDBLogger:
-
-    def __init__(self, log_dir=LOG_DIR):
-        if not os.path.isdir(log_dir):
-            os.mkdir(log_dir)
-        if not os.path.isdir(log_dir):
-            raise Exception('no log dir avaiable {}'.format(log_dir))
-        self.log_dir = log_dir
-        self.log_header = 'timestamp\ttime needed\tquery keywords\tfact patterns\tsql statement\tpmids result\n'
-        self.logger = logging.getLogger(__name__)
-
-    def write_log(self, time_needed, keywords, fact_patterns, sql_statement, pmids_results):
-        log_file_name = os.path.join(self.log_dir, '{}-queries.log'.format(time.strftime("%Y-%m-%d")))
-        timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
-        log_entry = '{}\t{}\t{}\t{}\t{}\t{}\n'.format(timestr, time_needed, keywords, fact_patterns, sql_statement,
-                                                      pmids_results)
-
-        if not os.path.isfile(log_file_name):
-            self.logger.info('creating new log file: {}'.format(log_file_name))
-            with open(log_file_name, 'w') as f:
-                f.write(self.log_header)
-                f.write(log_entry)
-        else:
-            self.logger.info('appending to log file: {}'.format(log_file_name))
-            with open(log_file_name, 'a') as f:
-                f.write(log_entry)
 
 
 class SemMedDB:
@@ -60,7 +33,7 @@ class SemMedDB:
         self.log_dir = log_dir
 
         if self.log_enabled:
-            self.semmed_logger = SemMedDBLogger(self.log_dir)
+            self.semmed_logger = QueryLogger(self.log_dir)
 
         if not os.path.isfile(config_file):
             raise ValueError('no config file for semmed found under {}'.format(config_file))
@@ -290,6 +263,7 @@ class SemMedDB:
 
         self.logger.info("{} hits: {}".format(len(pmids), pmids))
         if self.log_enabled:
-            self.semmed_logger.write_log(time_needed, keyword_query, fact_patterns, sql.replace('\n', ''), pmids)
+            self.semmed_logger.write_log(time_needed, 'semmeddb', keyword_query, fact_patterns, sql.replace('\n', ''),
+                                         pmids)
 
         return pmids, titles, var_subs, var_names
