@@ -1,5 +1,6 @@
 import logging
 import re
+from datetime import datetime
 
 from sqlalchemy.orm import aliased
 
@@ -7,10 +8,14 @@ from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
+from narraint.openie.querylogger import QueryLogger
+
 QUERY_LIMIT = 100
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
+
+query_logger = QueryLogger()
 
 
 def __construct_query(session, graph_query, doc_collection):
@@ -27,7 +32,7 @@ def __construct_query(session, graph_query, doc_collection):
         projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_cleaned, p.object_id,
                                 p.object_str, p.object_type, p.confidence])
 
-    query = session.query(*projection_list)
+    query = session.query(*projection_list).distinct()
     query = query.filter(document.collection == doc_collection)
     for pred in predication_aliases:
         query = query.filter(document.id == pred.document_id)
@@ -87,7 +92,8 @@ def __construct_query(session, graph_query, doc_collection):
                         raise ValueError('Variable cannot be used as predicate and subject / object.')
 
             if not p.startswith('?'):
-                query = query.filter(pred.predicate_cleaned == p)
+                search_term = "%{}%".format(p)
+                query = query.filter(pred.predicate_cleaned.like(search_term))
             else:
                 query = query.filter(pred.predicate_cleaned.isnot(None))
                 var_type = VAR_TYPE_PREDICATE.search(p)
@@ -104,7 +110,8 @@ def __construct_query(session, graph_query, doc_collection):
                     else:
                         raise ValueError('Variable cannot be used as predicate and subject / object.')
         else:
-            query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_cleaned == p)
+            search_term = "%{}%".format(p)
+            query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_cleaned.like(search_term))
 
     # order by document id descending and limit results to 100
     query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
@@ -112,15 +119,17 @@ def __construct_query(session, graph_query, doc_collection):
     return query, var_names
 
 
-def query_with_graph_query(graph_query, doc_collection='PMC'):
+def query_with_graph_query(graph_query, keyword_query='', doc_collection='PMC'):
     if len(graph_query) == 0:
         raise ValueError('graph query must contain at least one fact')
 
     session = Session.get()
     query, var_info = __construct_query(session, graph_query, doc_collection)
 
-    print(str(query.statement.compile(dialect=postgresql.dialect())))
+    sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
+    logging.info('executing sql statement: {}'.format(sql_query))
     pmids, titles, var_subs, var_names = [], [], [], []
+    start = datetime.now()
     for v, _, _ in var_info:
         var_names.append(v)
     for r in session.execute(query):
@@ -145,6 +154,8 @@ def query_with_graph_query(graph_query, doc_collection='PMC'):
         var_sub["conf"] = '{:4.2f} / {}'.format(conf, len(graph_query))
         var_subs.append(var_sub)
     #var_names.append("conf")
+    time_needed = datetime.now() - start
+    query_logger.write_log(time_needed, 'openie', keyword_query, graph_query, sql_query.replace('\n', ' '), pmids)
 
     logging.info("{} hits: {}".format(len(pmids), pmids))
     return pmids, titles, var_subs, var_names
