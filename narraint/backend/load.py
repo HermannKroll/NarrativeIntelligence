@@ -81,12 +81,13 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
     return document_id, document, tags
 
 
-def bulk_load(path, collection, tagger_mapping=None):
+def bulk_load(path, collection, logger, tagger_mapping=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
 
     Iterate over PubTator documents and add Document, Tag and DocTaggedBy objects. Commit after every document.
 
+    :param logger: Logger instance
     :param str path: Path to file or directory
     :param str collection: Identifier of the collection (e.g., PMC)
     :param dict tagger_mapping: Mapping from entity type to tuple (tagger name, tagger version)
@@ -95,14 +96,14 @@ def bulk_load(path, collection, tagger_mapping=None):
     session = Session.get()
 
     if tagger_mapping is None:
-        # TODO: Add logging
-        print("WARNING: No tagger mapping provided. Tags are ignored")
+        logger.warning("No tagger mapping provided. Tags are ignored")
 
     sys.stdout.write("Counting documents ...")
     sys.stdout.flush()
     n_docs = count_documents(path)
     sys.stdout.write("\rCounting documents ... found {}\n".format(n_docs))
     sys.stdout.flush()
+    logger.info("Found {} documents".format(n_docs))
 
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
@@ -161,13 +162,13 @@ def bulk_load(path, collection, tagger_mapping=None):
                     )
                     session.execute(insert_doc_tagged_by)
             else:
-                # TODO: Add logging
-                print("WARNING: Document {} {} not in DB".format(collection, doc_id))
+                logger.warning("Document {} {} not in DB".format(collection, doc_id))
 
         session.commit()
         print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
 
     sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
+    logger.info("Added documents in {}".format(datetime.now() - start_time))
 
 
 def main():
@@ -189,8 +190,11 @@ def main():
     if args.log:
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+        logger = logging.getLogger(__name__).setLevel(logging.INFO)
+    else:
+        logger = logging.getLogger(__name__).setLevel(logging.CRITICAL)
 
-    bulk_load(args.input, args.collection, tagger_mapping)
+    bulk_load(args.input, args.collection, logger, tagger_mapping)
 
 
 if __name__ == "__main__":

@@ -43,6 +43,7 @@ class BaseTagger(Thread):
     def get_progress(self):
         raise NotImplementedError
 
+    # TODO: Adjust to DB schema
     def finalize(self):
         """
         Add tags into database. First, clean tags, i.e., remove smaller tag ranges which are included in a larger tag.
@@ -97,7 +98,7 @@ class BaseTagger(Thread):
             ))
 
         # Add processed documents
-        self.logger.info('Locking table doc_tagged_by')
+        self.logger.debug('Locking table doc_tagged_by')
         Session.lock_tables("doc_tagged_by")
         processed = set((did, self.collection, ent_type) for ent_type in self.TYPES for did in self.id_set)
         processed_db = set(
@@ -116,7 +117,7 @@ class BaseTagger(Thread):
             ))
 
         # Commit
-        self.logger.info("Start commit")
+        self.logger.debug("Start commit")
         session.commit()
         self.logger.info("Committed successfully")
 

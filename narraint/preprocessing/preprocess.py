@@ -26,7 +26,17 @@ from narraint.pubtator.document import get_document_id, DocumentError
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
 
-def init_logger(log_filename, log_level):
+def init_sqlalchemy_logger(log_filename, log_level=logging.INFO):
+    formatter = logging.Formatter(LOGGING_FORMAT)
+    logger = logging.getLogger('sqlalchemy.engine')
+    logger.setLevel(log_level)
+    fh = logging.FileHandler(log_filename, mode="a+")
+    fh.setLevel(log_level)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+
+def init_preprocess_logger(log_filename, log_level):
     formatter = logging.Formatter(LOGGING_FORMAT)
     logger = logging.getLogger("preprocessing")
     logger.setLevel("DEBUG")
@@ -77,35 +87,23 @@ def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cl
     return missing_ids
 
 
-def preprocess(collection, in_dir, output_filename, conf, *tag_types,
-               resume=False, console_log_level="INFO", workdir=None, use_tagger_one=False):
+def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename, conf, *tag_types,
+               resume=False, use_tagger_one=False):
     """
     Method creates a single PubTator file with the documents from in ``in_dir`` and its tags.
 
-    :param in_dir: Input directory containing PubTator files to tag
+    :param logger: Logger instance
+    :param log_dir: Directory for logs
+    :param root_dir: Root directory (i.e., working directory)
+    :param input_dir: Input directory containing PubTator files to tag
     :param collection: Collection ID (e.g., PMC)
     :param use_tagger_one: Flag to use TaggerOne instead of tmChem and DNorm
-    :param workdir: Working directory
-    :param console_log_level: Log level for console output
     :param output_filename: Filename of PubTator to create
     :param conf: config object
     :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
     be set accordingly)
     """
     print("=== STEP 1 - Preparation ===")
-    root_dir = os.path.abspath(workdir) if workdir or resume else tempfile.mkdtemp()
-    input_dir = os.path.abspath(in_dir)
-    log_dir = os.path.abspath(os.path.join(root_dir, "log"))
-    if not os.path.exists(root_dir):
-        os.mkdir(root_dir)
-    if not os.path.exists(input_dir):
-        os.mkdir(input_dir)
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
-    logger = init_logger(os.path.join(log_dir, "preprocessing.log"), console_log_level)
-    logger.info("Project directory: {}".format(root_dir))
-    logger.debug("Input directory: {}".format(input_dir))
-
     target_ids = set()
     mapping_id_file = dict()
     mapping_file_id = dict()
@@ -134,7 +132,7 @@ def preprocess(collection, in_dir, output_filename, conf, *tag_types,
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
         with open(task_list_fn, "w") as f:
             f.write("\n".join(missing_files_type[tag_type]))
-        logger.debug("Tasklist for {} written to:".format(tag_type, task_list_fn))
+        logger.debug("Tasklist for {} written to: {}".format(tag_type, task_list_fn))
         logger.info("Tasklist for {} contains {} documents".format(tag_type, len(missing_ids)))
 
     # Init taggers
@@ -190,10 +188,24 @@ def main():
     # Create configuration wrapper
     conf = Config(args.config)
 
+    # Prepare directories and logging
+    root_dir = os.path.abspath(args.workdir) if args.workdir or args.resume else tempfile.mkdtemp()
+    input_dir = os.path.abspath(args.input)
+    log_dir = os.path.abspath(os.path.join(root_dir, "log"))
+    if not os.path.exists(root_dir):
+        os.mkdir(root_dir)
+    if not os.path.exists(input_dir):
+        os.mkdir(input_dir)
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+    logger = init_preprocess_logger(os.path.join(log_dir, "preprocessing.log"), args.loglevel.upper())
+    init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
+    logger.info("Project directory: {}".format(root_dir))
+    logger.debug("Input directory: {}".format(input_dir))
+
     # Perform collection and conversion
-    in_dir = args.input
     if args.ids and args.corpus == "PMC":
-        print('loading pmcid to pmid translation file...')
+        logger.info('Load PMCID to PMID translation file')
         pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
         in_dir = tempfile.mkdtemp()
         error_file = os.path.join(in_dir, "conversion_errors.txt")
@@ -202,25 +214,20 @@ def main():
         translator = PMCConverter()
         translator.convert_bulk(files, in_dir, pmcid2pmid, error_file)
     elif args.ids:
-        raise ValueError("Providing an ID set is only supported for PMC collection")
+        raise logger.exception("Providing an ID set is only supported for PMC collection")
 
     # Add documents to database
-    if  args.skip_load:
-        print("INFO: Skipping bulk load")
+    if args.skip_load:
+        logger.info("Skipping bulk load")
     else:
-        bulk_load(in_dir, args.corpus)
+        bulk_load(input_dir, args.corpus, logger)
 
     # Create list of tagging ent types
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
-    # TODO: Add SQL logging
-    # logging.basicConfig()
-    # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
     # Run actual preprocessing
-    preprocess(args.corpus, in_dir, args.output, conf, *tag_types,
-               resume=args.resume, console_log_level=args.loglevel.upper(),
-               workdir=args.workdir, use_tagger_one=args.tagger_one)
+    preprocess(args.corpus, root_dir, input_dir, log_dir, logger, args.output, conf, *tag_types,
+               resume=args.resume, use_tagger_one=args.tagger_one)
 
 
 if __name__ == "__main__":

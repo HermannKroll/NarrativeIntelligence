@@ -58,10 +58,6 @@ class Tag(Base):
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
         ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')),
-        # Todo: think about these constraints
-        #       ForeignKeyConstraint(('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
-        #                            ('doc_tagged_by.document_id', 'doc_tagged_by.collection', 'doc_tagged_by.tagger_name',
-        #                             'doc_tagged_by.tagger_version', 'doc_tagged_by.ent_type')),
         UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
     )
 
