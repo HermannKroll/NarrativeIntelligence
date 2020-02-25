@@ -42,7 +42,7 @@ def get_tagger_for_enttype(tagger_mapping, ent_type):
         return tagger_mapping[ent_type][0], tagger_mapping[ent_type][1]
 
 
-def insert_taggers(tagger_list):
+def insert_taggers(*tagger_list):
     """
     Inserts the taggers from the list.
 
@@ -127,6 +127,9 @@ def bulk_load(path, collection, logger, tagger_mapping=None):
             q_exists = session.query(Document) \
                 .filter(Document.id == doc_id, Document.collection == collection).exists()
             if session.query(q_exists).scalar():
+                # Filter tags (remove empty IDs)
+                d_tags = {x for x in d_tags if x[-1]}
+
                 # Add tags
                 for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
                     tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
@@ -185,7 +188,7 @@ def main():
         tagger_mapping = read_tagger_mapping(args.tagger_map)
         tagger_list = list(tagger_mapping.values())
         tagger_list.append(UNKNOWN_TAGGER)
-        insert_taggers(tagger_list)
+        insert_taggers(*tagger_list)
 
     if args.log:
         logging.basicConfig()

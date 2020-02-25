@@ -2,8 +2,11 @@ import logging
 import os
 from threading import Thread
 
+from sqlalchemy.dialects.postgresql import insert
+
 from narraint.backend.database import Session
-from narraint.backend.models import Tag, Tagger, DocTaggedBy
+from narraint.backend.load import insert_taggers
+from narraint.backend.models import Tag, DocTaggedBy
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
@@ -43,7 +46,6 @@ class BaseTagger(Thread):
     def get_progress(self):
         raise NotImplementedError
 
-    # TODO: Adjust to DB schema
     def finalize(self):
         """
         Add tags into database. First, clean tags, i.e., remove smaller tag ranges which are included in a larger tag.
@@ -55,7 +57,7 @@ class BaseTagger(Thread):
         tags = set(self.get_tags())
 
         self.logger.info('Cleaning tags')
-        # clean tags (remove smaller tags which are included in larger tags)
+        # Clean tags (remove smaller tags which are included in larger tags)
         doc2tags = {}
         for t in tags:
             did = t[0]
@@ -74,51 +76,44 @@ class BaseTagger(Thread):
                         break
             tags_cleaned.extend(doc_tags_cleaned)
 
-        self.logger.info('Prepare commit')
-        # check whether the tagger is included in the tagger table
-        query = session.query(Tagger).filter_by(name=self.__name__, version=self.__version__).exists()
-        if not session.query(query).scalar():
-            session.add(Tagger(
-                name=self.__name__,
-                version=self.__version__
-            ))
+        self.logger.info('Add tagger')
+        tagger_name = self.__name__
+        tagger_version = self.__version__
+        insert_taggers((tagger_name, tagger_version))
 
-        # add cleaned tags to the DB
-        for tag in tags_cleaned:
-            session.add(Tag(
-                start=tag[1],
-                end=tag[2],
-                ent_type=tag[4],
-                ent_str=tag[3],
-                ent_id=tag[5],
-                document_id=tag[0],
-                document_collection=self.collection,
-                tagger_name=self.__name__,
-                tagger_version=self.__version__,
-            ))
-
-        # Add processed documents
-        self.logger.debug('Locking table doc_tagged_by')
-        Session.lock_tables("doc_tagged_by")
-        processed = set((did, self.collection, ent_type) for ent_type in self.TYPES for did in self.id_set)
-        processed_db = set(
-            session.query(DocTaggedBy).filter(DocTaggedBy.document_collection == self.collection).values(
-                DocTaggedBy.document_id, DocTaggedBy.document_collection, DocTaggedBy.ent_type
-            )
-        )
-        processed_missing = processed.difference(processed_db)
-        for doc_id, doc_collection, ent_type in processed_missing:
-            session.add(DocTaggedBy(
-                document_id=doc_id,
-                document_collection=self.collection,
-                tagger_name=self.__name__,
-                tagger_version=self.__version__,
+        self.logger.info("Add tags")
+        for d_id, start, end, ent_str, ent_type, ent_id in tags_cleaned:
+            insert_tag = insert(Tag).values(
                 ent_type=ent_type,
-            ))
+                start=start,
+                end=end,
+                ent_id=ent_id,
+                ent_str=ent_str,
+                document_id=d_id,
+                document_collection=self.collection,
+                tagger_name=tagger_name,
+                tagger_version=tagger_version,
+            ).on_conflict_do_nothing(
+                index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+            )
+            session.execute(insert_tag)
+            session.commit()
 
-        # Commit
-        self.logger.debug("Start commit")
-        session.commit()
+        self.logger.info("Add doc_tagged_by")
+        processed_ent_types = set((did, ent_type) for ent_type in self.TYPES for did in self.id_set)
+        for did, ent_type in processed_ent_types:
+            insert_doc_tagged_by = insert(DocTaggedBy).values(
+                document_id=did,
+                document_collection=self.collection,
+                tagger_name=tagger_name,
+                tagger_version=tagger_version,
+                ent_type=ent_type,
+            ).on_conflict_do_nothing(
+                index_elements=('document_id', 'document_collection',
+                                'tagger_name', 'tagger_version', 'ent_type'),
+            )
+            session.execute(insert_doc_tagged_by)
+
         self.logger.info("Committed successfully")
 
     def get_tags(self):
