@@ -7,12 +7,12 @@ import sys
 import tempfile
 from datetime import datetime
 from time import sleep
+import logging
 
-
+from narraint.progress import print_progress_with_eta
 from narraint.config import OPENIE_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
-FILENAME_REGEX = re.compile(r"(/[\w/.]+)\t")
 OPENIE_VERSION = "1.0.0"
 
 
@@ -26,13 +26,13 @@ def prepare_files(input_dir):
 
     amount_skipped_files = 0
     amount_files = 0
+    logging.info('counting files to process....')
     for fn in os.listdir(input_dir):
         with open(os.path.join(input_dir, fn)) as f:
-            document = f.read().strip()
+            document = f.read()
         match = CONTENT_ID_TIT_ABS.match(document)
         if not match:
             amount_skipped_files += 1
-            print(f"WARNING: Ignoring {fn} (no pubtator format found)")
         else:
             amount_files += 1
             pmid, title, abstract = match.group(1, 2, 3)
@@ -42,7 +42,7 @@ def prepare_files(input_dir):
             with open(input_file, "w") as f:
                 f.write(content)
 
-    print('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
+    logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
     with open(filelist_fn, "w") as f:
         f.write("\n".join(input_files))
 
@@ -54,9 +54,11 @@ def get_progress(out_fn):
         return 0
     else:
         with open(out_fn) as f:
-            content = f.read()
-        match = FILENAME_REGEX.findall(content)
-        return len(set(match))
+            doc_names = []
+            for line in f:
+                d = line.split('\t', 1)[0]
+                doc_names.append(d)
+            return len(set(doc_names))
 
 
 def run_openie(core_nlp_dir, out_fn, filelist_fn):
@@ -67,31 +69,72 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_fn, filelist_fn)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
+    start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        sys.stdout.write("\rProgress: {}/{} ...".format(get_progress(out_fn), num_files))
-        sys.stdout.flush()
+        print_progress_with_eta('OpenIE running...', get_progress(out_fn), num_files, start_time, print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_fn), num_files, datetime.now() - start,
     ))
     sys.stdout.flush()
 
 
+def match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
+    """
+    matches the predicate tokens in the sentence and extracts the correct pos tags
+    :param pred: predicate string
+    :param pos_tags: list of pos tags of the whole sentence
+    :param pred_start: start position of the predicate in the sentence
+    :param pred_end: end position of the predicate in the sentence
+    :param sent: the whole sentence
+    :return: a list of pos tags if matched is successful, else None
+    """
+    # the format seems to be strange some times
+    if pred_end < pred_start:
+        temp = pred_start
+        pred_start = pred_end
+        pred_end = temp
+
+    if pred_start == pred_end:
+        return pos_tags[pred_start]
+    else:
+        tokens_sent = sent.lower().split(' ')[pred_start:pred_end]
+        tokens_pred = pred.split(' ')
+        pred_pos_tags_list = []
+
+        # try to match all pred tokens in the sentence tokens
+        for p_tok in tokens_pred:
+            for idx, s_tok in enumerate(tokens_sent):
+                if p_tok == s_tok:
+                    pred_pos_tags_list.append(pos_tags[idx])
+
+        if len(pred_pos_tags_list) != len(tokens_pred):
+            return None
+        return ' '.join(pred_pos_tags_list)
+
+
 def process_output(openie_out, outfile):
     lines = []
+    tuples = 0
     with open(openie_out) as f:
         for line in f:
+            tuples += 1
             components = line.strip().split("\t")
-            pmid = components[0].split("/")[-1][:-4]
+            # e.g. first line looks like /tmp/tmpwi57otrk/input/1065332.txt (so pmid is between last / and .)
+            pmid = components[0].split("/")[-1].split('.')[0]
+
+            subj = components[2].lower()
+            pred = components[3].lower()
+            obj = components[4].lower()
+            conf = components[11].replace(',', '.')
             sent = components[-5]
-            subj = components[-3]
-            pred = components[-2]
-            obj = components[-1]
-            lines.append((pmid, subj, pred, obj, sent))
+            pred_lemma = components[-2]
+            lines.append((pmid, subj, pred, pred_lemma, obj, conf, sent))
 
     with open(outfile, "w") as f:
         f.write("\n".join("\t".join(t) for t in lines))
 
+    logging.info('{} lines written'.format(tuples))
 
 def main():
     """
@@ -105,6 +148,15 @@ def main():
     parser.add_argument("--conf", default=OPENIE_CONFIG)
     args = parser.parse_args()
 
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
+
+    logging.info('converting...')
+    process_output(args.input, args.output)
+    logging.info('finished!')
+
+    return 0
     # Read config
     with open(args.conf) as f:
         conf = json.load(f)

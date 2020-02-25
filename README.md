@@ -62,3 +62,4 @@ The package provides APIs for several third-party taggers:
 | GNormPlus | Gene |
 | DNorm | Disease |
 | tmChem | Chemical |
+| DosageFormTagger (own) | DosageForm

@@ -13,11 +13,8 @@ from narraint.mesh.data import MeSHDB
 from narraint.semmeddb.dbconnection import SemMedDB
 from narraint.stories.story import MeshTagger
 
-# BEGIN Preparation
-# lg = LibraryGraph()
-# lg.read_from_tsv(settings.LIBRARY_GRAPH_FILE)
+from narraint.openie.query_engine import query_with_graph_query
 
-# story = StoryProcessor(lg, [MeshTagger(db)])
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
@@ -28,20 +25,23 @@ db = MeSHDB.instance()
 db.load_xml(settings.DESCRIPTOR_FILE, False, True)
 mesh_tagger = MeshTagger(db)
 
+
+
 semmed = SemMedDB(config_file=settings.SEMMEDDB_CONFIG, log_enabled=True, log_dir=settings.SEMMEDDB_LOG_DIR)
 semmed.connect_to_db()
 semmed.load_umls_dictionary()
 semmed.load_predicates()
 
-if os.path.exists(settings.MESHDB_INDEX):
-    start = datetime.now()
-    with open(settings.MESHDB_INDEX, "rb") as f:
-        index = pickle.load(f)
-    db.set_index(index)
-    end = datetime.now()
-    logger.info("Index loaded in {}".format(end - start))
-else:
-    logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
+#if os.path.exists(settings.MESHDB_INDEX):
+#    start = datetime.now()
+#    with open(settings.MESHDB_INDEX, "rb") as f:
+#        index = pickle.load(f)
+#    db.set_index(index)
+#    end = datetime.now()
+#    logger.info("Index loaded in {}".format(end - start))
+#else:
+#
+#       logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
 
 
 # END Preparation
@@ -49,6 +49,9 @@ else:
 
 def convert_text_to_entity(text, tagger):
     text = text.replace('_', ' ')
+    if text == 'CYP3A4':
+        return "1576", "Gene"
+
     if text.startswith('?'):
         s, s_type = text, 'VAR'
     elif text.startswith('MESH:'):
@@ -65,8 +68,9 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
     facts_txt = fact_txt.strip().split(';')
     fact_patterns = []
     # explanation_str = 'Query Translation'
-    explanation_str = 60 * '==' + '\n'
-    explanation_str += 60 * '==' + '\n\n'
+    explanation_str = ""
+  #  explanation_str = 30 * '==' + '\n'
+   # explanation_str += 30 * '==' + '\n\n'
     for fact_txt in facts_txt:
         split = fact_txt.strip().split(' ')
         # check whether the text forms a triple
@@ -90,12 +94,13 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
             logger.error('error unknown object: {}'.format(o_t))
             return None, explanation_str
 
-        if p_t in allowed_predicates:
-            p = p_t
-        else:
-            explanation_str += "error unknown predicate: {}\n".format(p_t)
-            logger.error("error unknown predicate: {}".format(p_t))
-            return None, explanation_str
+        p = p_t
+      #  if p_t in allowed_predicates:
+      #      p = p_t
+      #  else:
+      #      explanation_str += "error unknown predicate: {}\n".format(p_t)
+      #      logger.error("error unknown predicate: {}".format(p_t))
+      #      return None, explanation_str
 
         explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt, s, p, o)
         fact_patterns.append((s, p, o))
@@ -103,7 +108,7 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
     # check for at least 1 entity
     entity_check = False
     for s, p, o in fact_patterns:
-        if s.startswith('MESH:') or o.startswith('MESH:'):
+        if not s.startswith('?') or not o.startswith('?'):
             entity_check = True
             break
     if not entity_check:
@@ -111,17 +116,17 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
         return None, explanation_str
 
     # check if the query is one connected graph
-    g = LabeledGraph()
-    for s, p, o in fact_patterns:
-        g.add_edge(p, s, o)
+  #  g = LabeledGraph()
+  #  for s, p, o in fact_patterns:
+  #      g.add_edge(p, s, o)
     # there are multiple connected components - stop
-    con_comp = g.compute_connectivity_components()
-    if len(con_comp) != 1:
-        explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
-        return None, explanation_str
+  #  con_comp = g.compute_connectivity_components()
+  #  if len(con_comp) != 1:
+  #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
+   #     return None, explanation_str
 
-    explanation_str += '\n' + 60 * '==' + '\n'
-    explanation_str += 60 * '==' + '\n'
+ #   explanation_str += '\n' + 30 * '==' + '\n'
+ #   explanation_str += 30 * '==' + '\n'
     return fact_patterns, explanation_str
 
 
@@ -135,7 +140,8 @@ class SearchView(TemplateView):
             if "query" in request.GET:
                 try:
                     query = self.request.GET.get("query", "").strip()
-
+                    data_source = self.request.GET.get("data_source", "").strip()
+                    logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger,
                                                                                                   semmed.predicates)
@@ -144,14 +150,20 @@ class SearchView(TemplateView):
                         results_converted = []
                         logger.error('parsing error')
                     else:
-                        pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns, query)
+                        if data_source == 'semmeddb':
+                            pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
+                                                                                                query)
+                        else:
+                            pmids, titles, var_subs, var_names = query_with_graph_query(query_fact_patterns)
+
                         docs = []
-                        for i in range(0, len(pmids) - 1):
+                        for i in range(0, len(pmids)):
                             docs.append((pmids[i], titles[i], var_subs[i], var_names))
                         results_converted.append((query_fact_patterns, docs))
                 except Exception as e:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
+                    logger.error(e)
 
             return JsonResponse(dict(results=results_converted, query_translation=query_trans_string))
         return super().get(request, *args, **kwargs)

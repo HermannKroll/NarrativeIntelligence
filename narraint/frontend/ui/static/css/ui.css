@@ -33,12 +33,15 @@
  * https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons
  */
 
+/*
 [type=radio] {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
+
+ */
 
 [type=radio] + div {
     cursor: pointer;
@@ -71,3 +74,4 @@
 #help_search {
     display: none;
 }
+

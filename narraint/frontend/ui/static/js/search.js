@@ -30,7 +30,7 @@ const setButtonSearching = isSearching => {
             .prop("disabled", true);
         help.fadeIn();
     } else {
-        btn.append("Search patterns")
+        btn.append("Search")
             .prop("disabled", false);
         help.fadeOut();
     }
@@ -43,13 +43,22 @@ $(document).ready(function () {
 const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
+    let data_source = ""
+    if(document.getElementById('radio_semmeddb').checked){
+        data_source = "semmeddb"
+    } else {
+        data_source = "openie"
+    }
+
     console.log("Query: " + query);
+    console.log("Data source: " + data_source)
     setButtonSearching(true);
 
     let request = $.ajax({
         url: search_url,
         data: {
-            query: query
+            query: query,
+            data_source: data_source
         }
     });
 
@@ -74,12 +83,13 @@ const search = (event) => {
             console.log(graph, results);
 
             // Create graph pattern selection
-            createCheckbox(graph, results, idx, form);
+        //    createCheckbox(graph, results, idx, form);
 
             // Create documents DIV
             let divList = createDocumentList(results, idx);
             divDocuments.append(divList);
         });
+
 
         // Disable button
         setButtonSearching(false);
@@ -152,7 +162,8 @@ const createCheckbox = (graph, results, pIdx, targetElement) => {
 };
 
 const createDocumentList = (results, idx) => {
-    let divList = $(`<div class="list-group list-group-flush" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
+    //let divList = $(`<div class="list-group list-group-flush" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
+    let divList = $(`<div class="list-group list-group-flush" data-by="p-${idx}" id="d-${idx}"></div>`);
     results.forEach(document => {
         let doc_id = document[0];
         let title = document[1];
@@ -163,13 +174,13 @@ const createDocumentList = (results, idx) => {
             //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
             '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
             'class="list-group-item list-group-item-action" target="_blank">' +
-            'P' + doc_id + '  (' + title + ')'+ '</a>'
+            'P' + doc_id + '<br> ' + title + '</a>'
         );
 
         var_names.forEach(name => {
             divList.append(
                 '<a class="list-group-item">' +
-                 name + ' : ' + var_sub[name] +  '</a>'
+                 name + ': ' + var_sub[name] +  '</a>'
             );
         }); 
 
@@ -177,62 +188,3 @@ const createDocumentList = (results, idx) => {
     return divList;
 };
 
-/*
-const createGraph = (graph, patternIdx, targetContainerId) => {
-    let graphId = `graph-${patternIdx}`;
-    let divGraph = $(`<div id="${graphId}" class="graph-pattern"></div>`);
-    $(`#${targetContainerId}`).append(divGraph);
-
-    let elements = [];
-    graph.forEach((triple, tripleIdx) => {
-        let s = triple[0];
-        let p = triple[1];
-        let o = triple[2];
-
-        // Add subject
-        if (!elements.includes(s)) {
-            elements.push({
-                data: {id: s}
-            });
-        }
-
-        // Add object
-        if (!elements.includes(o)) {
-            elements.push({
-                data: {id: o}
-            });
-        }
-
-        // Add edge
-        elements.push({
-            data: {id: `triple-${tripleIdx}`, source: s, target: o}
-        });
-    });
-
-    cytoscape({
-        container: $(`#${graphId}`),
-        elements: elements,
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'background-color': '#8EB72B',
-                    'label': 'data(id)'
-                }
-            },
-            {
-                selector: 'edge',
-                style: {
-                    'width': 3,
-                    'line-color': '#ccc',
-                    'target-arrow-color': '#ccc',
-                    'target-arrow-shape': 'triangle',
-                    'label': 'data(id)'
-                }
-            }
-        ],
-        layout: {
-            name: 'circle'
-        }
-    });
-};*/

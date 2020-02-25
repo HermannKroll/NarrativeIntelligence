@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, BigInteger, \
+from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, BigInteger, \
     UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -105,10 +106,12 @@ class Predication(Base):
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False)
+    predicate_cleaned = Column(String, nullable=True)
     object_openie = Column(String, nullable=False)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
     object_type = Column(String, nullable=False)
+    confidence = Column(Float, nullable=True)
     sentence = Column(String, nullable=False)
     openie_version = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)

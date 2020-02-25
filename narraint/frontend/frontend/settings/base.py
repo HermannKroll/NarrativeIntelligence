@@ -19,7 +19,6 @@ from narraint.config import DATA_DIR, SEMMEDDB_CONFIG, LOG_DIR
 DJANGO_PROJ_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Directories
-LIBRARY_GRAPH_FILE = os.path.join(DATA_DIR, 'lg_pmc_sim_ami_108.tsv')
 DESCRIPTOR_FILE = os.path.join(DATA_DIR, 'desc2020.xml')
 MESHDB_INDEX = os.path.join(DATA_DIR, 'meshdb.index.desc2020.bin')
 SEMMEDDB_LOG_DIR = LOG_DIR
