@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from narraint.pubtator.regex import DOCUMENT_ID
-from narraint.tools import count_lines
+from narraint.pubtator.extract import read_pubtator_documents
 
 
 def write_content(content, out_dir):
@@ -18,20 +18,15 @@ def write_content(content, out_dir):
 def split(filename, out_dir, batch_size=1):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
-    line_count = count_lines(filename)
-    with open(filename) as fin:
-        content = ""
-        docs_in_batch = 0
-        for idx, line in enumerate(fin):
-            if line.strip():
-                content += line
-            else:
-                docs_in_batch += 1
-                content += "\n"
-                if docs_in_batch >= batch_size or idx == line_count - 1:
-                    write_content(content, out_dir)
-                    content = ""
-                    docs_in_batch = 0
+
+    docs_in_batch = 0
+    print('splitting file (batch size is {})...'.format(batch_size))
+    for doc_content in read_pubtator_documents(filename):
+        docs_in_batch += 1
+        if docs_in_batch >= batch_size:
+            write_content(doc_content, out_dir)
+            docs_in_batch = 0
+    print('finished')
 
 
 def main():
