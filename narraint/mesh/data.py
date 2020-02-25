@@ -65,19 +65,20 @@ class MeSHDB:
         else:
             MeSHDB.__instance = self
 
-    def load_xml(self, filename, prefetch_all=False, verbose=False):
-        start = datetime.now()
-        with open(filename) as f:
-            self.tree = etree.parse(f)
-        end = datetime.now()
-        if verbose:
-            print("XML loaded in {}".format(end - start))
-        if prefetch_all:
+    def load_xml(self, filename, prefetch_all=False, verbose=False, force_load=False):
+        if not self._desc_by_id or force_load:
             start = datetime.now()
-            self.prefetch_all(verbose)
+            with open(filename) as f:
+                self.tree = etree.parse(f)
             end = datetime.now()
             if verbose:
-                print("All descriptors loaded in {}".format(end - start))
+                print("XML loaded in {}".format(end - start))
+            if prefetch_all:
+                start = datetime.now()
+                self.prefetch_all(verbose)
+                end = datetime.now()
+                if verbose:
+                    print("All descriptors loaded in {}".format(end - start))
 
     def prefetch_all(self, verbose=False):
         records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
