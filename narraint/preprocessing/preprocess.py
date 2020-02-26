@@ -166,7 +166,7 @@ def main():
                         help="Collect documents from directory (e.g., for PubMedCentral) and convert to PubTator")
 
     group_tag = parser.add_argument_group("Tagging")
-    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
+    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
     parser.add_argument("-c", "--corpus", required=True)
     group_tag.add_argument("--tagger-one", action="store_true",
                            help="Tag diseases and chemicals with TaggerOne instead of DNorm and tmChem.")
@@ -178,6 +178,7 @@ def main():
     group_settings.add_argument("--workdir", default=None)
     group_settings.add_argument("--skip-load", action='store_true',
                                 help="Skip bulk load of documents on start (expert setting)")
+    group_settings.add_argument("--workers",default=1, help="Number of processes for parallelized preprocessing")
 
     parser.add_argument("input", help="Directory with PubTator files "
                                       "(can be a file if --ids is set or a directory if --resume is set)",
@@ -190,18 +191,18 @@ def main():
 
     # Prepare directories and logging
     root_dir = os.path.abspath(args.workdir) if args.workdir or args.resume else tempfile.mkdtemp()
-    input_dir = os.path.abspath(args.input)
+    in_dir = os.path.abspath(args.input)
     log_dir = os.path.abspath(os.path.join(root_dir, "log"))
     if not os.path.exists(root_dir):
         os.mkdir(root_dir)
-    if not os.path.exists(input_dir):
-        os.mkdir(input_dir)
+    if not os.path.exists(in_dir):
+        os.mkdir(in_dir)
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
     logger = init_preprocess_logger(os.path.join(log_dir, "preprocessing.log"), args.loglevel.upper())
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
     logger.info("Project directory: {}".format(root_dir))
-    logger.debug("Input directory: {}".format(input_dir))
+    logger.debug("Input directory: {}".format(in_dir))
 
     # Perform collection and conversion
     if args.ids and args.corpus == "PMC":
@@ -220,19 +221,13 @@ def main():
     if args.skip_load:
         logger.info("Skipping bulk load")
     else:
-        bulk_load(input_dir, args.corpus, logger)
+        bulk_load(in_dir, args.corpus, logger)
+    # Create list of tagging ent types
+    tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
-    # TODO: Why is this necessary? Extraction and bulk loading are isolated
-    if args.tag is not None:
-        # Create list of tagging ent types
-        tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
-
-        # Run actual preprocessing
-        preprocess(args.corpus, root_dir, input_dir, log_dir, logger, args.output, conf, *tag_types,
-                   resume=args.resume, use_tagger_one=args.tagger_one)
-    else:
-        print("INFO: No --tag option provided, skipping tagging")
-
+    # Run actual preprocessing
+    preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
+               resume=args.resume, use_tagger_one=args.tagger_one)
 
 if __name__ == "__main__":
     main()
