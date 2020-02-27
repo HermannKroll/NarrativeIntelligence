@@ -64,7 +64,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 125px;
+    top: 75px;
     right: 10px;
     background: url('/static/icons/png/center.png');
     background-size: contain;
@@ -77,7 +77,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 175px;
+    top: 125px;
     right: 10px;
     background: url('/static/icons/png/cluster.png');
     background-size: contain;
@@ -90,7 +90,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 225px;
+    top: 175px;
     right: 10px;
     background: url('/static/icons/png/undo.png');
     background-size: contain;
@@ -103,7 +103,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 275px;
+    top: 225px;
     right: 10px;
     background: url('/static/icons/png/redo.png');
     background-size: contain;
@@ -116,7 +116,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 325px;
+    top: 275px;
     right: 10px;
     background: url('/static/icons/png/load.png');
     background-size: contain;
@@ -129,7 +129,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 375px;
+    top: 325px;
     right: 10px;
     background: url('/static/icons/png/save.png');
     background-size: contain;
@@ -142,7 +142,7 @@ body {
     width: 35px;
     z-index: 1;
     position: absolute;
-    top: 425px;
+    top: 375px;
     right: 10px;
     background: url('/static/icons/png/clear.png');
     background-size: contain;

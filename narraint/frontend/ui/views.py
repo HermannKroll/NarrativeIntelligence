@@ -13,7 +13,12 @@ from narraint.mesh.data import MeSHDB
 from narraint.semmeddb.dbconnection import SemMedDB
 from narraint.stories.story import MeshTagger
 
-from narraint.openie.query_engine import query_with_graph_query
+
+from narraint.queryengine.engine import QueryEngine
+from narraint.queryengine.result import QueryResultAggregate
+
+import traceback
+import sys
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -21,27 +26,31 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 
 logger = logging.getLogger(__name__)
 
+query_engine = QueryEngine()
+
 db = MeSHDB.instance()
 db.load_xml(settings.DESCRIPTOR_FILE, False, True)
 mesh_tagger = MeshTagger(db)
 
 
+#semmed = SemMedDB(config_file=settings.SEMMEDDB_CONFIG, log_enabled=True, log_dir=settings.SEMMEDDB_LOG_DIR)
+#semmed.connect_to_db()
+#semmed.load_umls_dictionary()
+#semmed.load_predicates()
 
-semmed = SemMedDB(config_file=settings.SEMMEDDB_CONFIG, log_enabled=True, log_dir=settings.SEMMEDDB_LOG_DIR)
-semmed.connect_to_db()
-semmed.load_umls_dictionary()
-semmed.load_predicates()
-
-#if os.path.exists(settings.MESHDB_INDEX):
-#    start = datetime.now()
-#    with open(settings.MESHDB_INDEX, "rb") as f:
-#        index = pickle.load(f)
-#    db.set_index(index)
-#    end = datetime.now()
-#    logger.info("Index loaded in {}".format(end - start))
-#else:
-#
-#       logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
+try:
+    if os.path.exists(settings.MESHDB_INDEX):
+        start = datetime.now()
+        print(settings.MESHDB_INDEX)
+        with open(settings.MESHDB_INDEX, "rb") as f:
+             index = pickle.load(f)
+        db.set_index(index)
+        end = datetime.now()
+        logger.info("Index loaded in {}".format(end - start))
+    else:
+        logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
+except Exception:
+    traceback.print_exc(file=sys.stdout)
 
 
 # END Preparation
@@ -49,13 +58,13 @@ semmed.load_predicates()
 
 def convert_text_to_entity(text, tagger):
     text = text.replace('_', ' ')
-    if text == 'CYP3A4':
-        return "1576", "Gene"
-
     if text.startswith('?'):
         s, s_type = text, 'VAR'
     elif text.startswith('MESH:'):
         s, s_type = text, 'MESH_MANUAL'
+    elif text.startswith('GENE:'):
+        return text.split(":", 1)[1],"GENE_Manual"
+
     else:
         s, s_type = tagger.tag_entity(text)
 
@@ -129,6 +138,12 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
  #   explanation_str += 30 * '==' + '\n'
     return fact_patterns, explanation_str
 
+def convert_graph_patterns_to_nt(graph_patters):
+    nt_string = ""
+    for s, p, o in graph_patters:
+        nt_string += "<{}>\t<{}>\t<{}>\t.\n".format(s, p, o)
+    return nt_string[0:-1] # remove last \n
+
 
 class SearchView(TemplateView):
     template_name = "ui/search.html"
@@ -141,29 +156,33 @@ class SearchView(TemplateView):
                 try:
                     query = self.request.GET.get("query", "").strip()
                     data_source = self.request.GET.get("data_source", "").strip()
-                    logging.info("Selected data source is {}".format(data_source))
+                    #logging.info("Selected data source is {}".format(data_source))
 
-                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger,
-                                                                                                  semmed.predicates)
+                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger, [])
+                                                                                                  #semmed.predicates)
 
                     if query_fact_patterns is None:
                         results_converted = []
                         logger.error('parsing error')
                     else:
-                        if data_source == 'semmeddb':
-                            pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
-                                                                                                query)
-                        else:
-                            pmids, titles, var_subs, var_names = query_with_graph_query(query_fact_patterns)
 
-                        docs = []
-                        for i in range(0, len(pmids)):
-                            docs.append((pmids[i], titles[i], var_subs[i], var_names))
-                        results_converted.append((query_fact_patterns, docs))
-                except Exception as e:
+                      #  if data_source == 'semmeddb':
+                      #      results_converted = []
+                     #       query_trans_string = "currently not supported"
+                        #  pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
+                           #                                                                     query)
+                    #    else:
+                        results_converted = []
+                        aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query)
+                        for var_names, var_subs, d_ids, titles in aggregated_result.get_and_rank_results()[0:25]:
+                            results_converted.append(list((var_names, var_subs, d_ids, titles)))
+
+                        nt_string = convert_graph_patterns_to_nt(query_fact_patterns)
+
+                except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
-                    logger.error(e)
+                    traceback.print_exc(file=sys.stdout)
 
-            return JsonResponse(dict(results=results_converted, query_translation=query_trans_string))
+            return JsonResponse(dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)

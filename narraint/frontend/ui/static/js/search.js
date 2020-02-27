@@ -40,15 +40,31 @@ $(document).ready(function () {
     $("#search_form").submit(search);
 });
 
+function add_collapsable_events() {
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        });
+    }
+}
+
 const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
-    let data_source = ""
-    if(document.getElementById('radio_semmeddb').checked){
+    let data_source = "openie"
+   /* if (document.getElementById('radio_semmeddb').checked) {
         data_source = "semmeddb"
     } else {
         data_source = "openie"
-    }
+    }*/
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
@@ -71,24 +87,37 @@ const search = (event) => {
         let divDocuments = $('#div_documents');
         divDocuments.empty();
 
+
+        // Update graphical network representation
+        let nt_string = response["nt_string"];
+        load_from_string(nt_string);
+
         // Print query translation
         let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
         query_translation.text(query_trans_string);
+        let results = response["results"];
+        // Create documents DIV
+        let divList = createDocumentList(results);
+        divDocuments.append(divList);
+        add_collapsable_events();
+        /*
+         // Print patterns and documents
+         response["results"].forEach((item, idx) => {
+             let graph = item[0];
+             let results = item[1];
+             console.log(graph, results);
 
-        // Print patterns and documents
-        response["results"].forEach((item, idx) => {
-            let graph = item[0];
-            let results = item[1];
-            console.log(graph, results);
+             // Create graph pattern selection
+         //    createCheckbox(graph, results, idx, form);
 
-            // Create graph pattern selection
-        //    createCheckbox(graph, results, idx, form);
+             // Create documents DIV
+             let divList = createDocumentList(results, idx);
+             divDocuments.append(divList);
+         });
 
-            // Create documents DIV
-            let divList = createDocumentList(results, idx);
-            divDocuments.append(divList);
-        });
+
+         */
 
 
         // Disable button
@@ -161,28 +190,47 @@ const createCheckbox = (graph, results, pIdx, targetElement) => {
     }
 };
 
-const createDocumentList = (results, idx) => {
+const createDocumentList = (results) => {
     //let divList = $(`<div class="list-group list-group-flush" style="display: none;" data-by="p-${idx}" id="d-${idx}"></div>`);
-    let divList = $(`<div class="list-group list-group-flush" data-by="p-${idx}" id="d-${idx}"></div>`);
-    results.forEach(document => {
-        let doc_id = document[0];
-        let title = document[1];
-        let var_sub = document[2];
-        let var_names = document[3];
+    let divList = $(`<div class="list-group list-group-flush"></div>`);
+    results.forEach(res => {
+        let var_names = res[0];
+        let var_subs = res[1];
+        let doc_ids = res[2];
+        let doc_titles = res[3];
+        let i = 0;
 
-        divList.append(
-            //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
-            '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
-            'class="list-group-item list-group-item-action" target="_blank">' +
-            'P' + doc_id + '<br> ' + title + '</a>'
-        );
+        let button_string = doc_ids.length + ' Documents';
+        if (var_names.length > 0) {
+            button_string += ' ['
+            var_names.forEach(name => {
+                if (i == 0) {
+                    button_string += name + ': ' + var_subs[i];
+                } else {
+                    button_string += ', ' + name + ': ' + var_subs[i];
+                }
 
-        var_names.forEach(name => {
-            divList.append(
-                '<a class="list-group-item">' +
-                 name + ': ' + var_sub[name] +  '</a>'
-            );
-        }); 
+                i += 1;
+            });
+            button_string += ']';
+        }
+
+
+        divList.append('<button class="collapsible">' + button_string + '</button>');
+
+        i = 0;
+        var document_div_string = "";
+        doc_ids.forEach(doc_id => {
+            let title = doc_titles[i];
+            i += 1;
+            document_div_string +=
+                //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
+                '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
+                'class="list-group-item list-group-item-action" target="_blank">' +
+                'P' + doc_id + '<br> ' + title + '</a>'
+        });
+
+        divList.append('<div class="content">' + document_div_string + '</div>');
 
     });
     return divList;

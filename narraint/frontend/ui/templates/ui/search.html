@@ -26,38 +26,8 @@
     <a id="renameClusterMod" onClick="network.unselectAll();" href="#renamecluster" rel="modal:open"
        style="display: none">Open Modal</a>
     <input type='file' onChange=load() id="tFile" style="display: none"/>
-    <div id="App">
 
-        <div class="help-tip">
-            <p>- Click on node/edge to select it <br>
-                - Click the "Center-Button" to center your network <br>
-                - Click the "Clear-Button" to delete the network <br>
-                - For multiple select, hold ctrl and click on nodes/edges <br>
-                - Shortcuts: <br>
-                - n: create new node <br>
-                - e: create new edge <br>
-                - c: cluster <br>
-                - backspace/delete: to delete nodes or edges <br></p>
-        </div>
-        <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
-        ");">
-    </div>
-    <button class="button" id="cluster" onClick=clusterSelected() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Cluster"></button>
-    <button class="button" id="load" onClick="document.getElementById('tFile').click();" class="btn btn-secondary"
-            data-toggle="tooltip" data-placement="left" title="Load"></button>
-    <button class="button" id="save" onClick=save() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Save"></button>
-    <button class="button" id="undo" onClick=undo() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Undo"></button>
-    <button class="button" id="redo" onClick=redo() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Redo"></button>
-    <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Center"></button>
-    <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary" data-toggle="tooltip"
-            data-placement="left" title="Clear"></button>
 
-    </div>
 
     <form action="" class="login_form long" id="nodemod" style="display: none;">
         <div class="divheaders" id="mydivheader">New Node</div>
@@ -148,15 +118,16 @@
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="id_keywords"><strong>Keywords</strong></label>
+                        <!--<label for="id_keywords"><strong>Search</strong></label> -->
                         <textarea class="form-control" id="id_keywords" rows="3"
                                   name="keywords">Simvastatin cause Rhabdomyolysis</textarea>
 
+                        <!--
                         <label><strong>Data Source:</strong></label><br>
                         <input type="radio" id="radio_openie" name="data_source" value="OpenIE" checked="checked">
                         <label for="radio_openie">OpenIE (12k PMC Documents including Simvastatin)</label><br>
                         <input type="radio" id="radio_semmeddb" name="data_source" value="SemMedDB2019">
-                        <label for="radio_semmeddb">SemMedDB2019 (PubMed Abstracts + Titles, 31.12.2018)</label><br>
+                        <label for="radio_semmeddb">SemMedDB2019 (PubMed Abstracts + Titles, 31.12.2018)</label><br> -->
 
                         <!--
                         <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
@@ -184,6 +155,39 @@
                 </form>
             </div>
         </div>
+        <div id="App">
+            <div class="help-tip">
+                <p>- Click on node/edge to select it <br>
+                    - Click the "Center-Button" to center your network <br>
+                    - Click the "Clear-Button" to delete the network <br>
+                    - For multiple select, hold ctrl and click on nodes/edges <br>
+                    - Shortcuts: <br>
+                    - n: create new node <br>
+                    - e: create new edge <br>
+                    - c: cluster <br>
+                    - backspace/delete: to delete nodes or edges <br></p>
+            </div>
+
+            <button class="button" id="cluster" onClick=clusterSelected() class="btn btn-secondary"
+                    data-toggle="tooltip"
+                    data-placement="left" title="Cluster"></button>
+            <button class="button" id="load" onClick="document.getElementById('tFile').click();"
+                    class="btn btn-secondary"
+                    data-toggle="tooltip" data-placement="left" title="Load"></button>
+            <button class="button" id="save" onClick=save() class="btn btn-secondary" data-toggle="tooltip"
+                    data-placement="left" title="Save"></button>
+            <button class="button" id="undo" onClick=undo() class="btn btn-secondary" data-toggle="tooltip"
+                    data-placement="left" title="Undo"></button>
+            <button class="button" id="redo" onClick=redo() class="btn btn-secondary" data-toggle="tooltip"
+                    data-placement="left" title="Redo"></button>
+            <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary" data-toggle="tooltip"
+                    data-placement="left" title="Center"></button>
+            <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary" data-toggle="tooltip"
+                    data-placement="left" title="Clear"></button>
+            <div id="mynetwork" onchange="createQuery();console.log(query + " onchange");">
+
+
+        </div>
         <div>
             <label for="query_translation"><strong>Query Translation</strong></label>
             <div id="query_translation">No query translation available.</div>
@@ -192,7 +196,7 @@
             <h2>Documents</h2>
             <br>
             <div id="div_documents"></div>
-     </div>
+        </div>
 
     </div>
 {% endblock %}
