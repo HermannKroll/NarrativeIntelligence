@@ -2,13 +2,12 @@ import json
 import logging
 import os
 import pickle
-import time
 from datetime import datetime
 
 import psycopg2
 
-from narraint.config import TMP_DIR, UMLS_DATA, SEMMEDDB_CONFIG, LOG_DIR
-from narraint.openie.querylogger import QueryLogger
+from narraint.config import TMP_DIR, UMLS_DATA, SEMMEDDB_CONFIG
+from narraint.queryengine.logger import QueryLogger
 
 WORKING_DIR = TMP_DIR
 UMLS_MESH2CUI_INDEX_TMP_FILE = os.path.join(WORKING_DIR, "umls_mesh2cui_index.pickle")
