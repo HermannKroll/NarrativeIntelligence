@@ -138,9 +138,14 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
  #   explanation_str += 30 * '==' + '\n'
     return fact_patterns, explanation_str
 
-def convert_graph_patterns_to_nt(graph_patters):
+
+def convert_graph_patterns_to_nt(query_txt):
+    fact_txt = re.sub('\s+', ' ', query_txt).strip()
+    facts_split = fact_txt.strip().split(';')
     nt_string = ""
-    for s, p, o in graph_patters:
+    for f in facts_split:
+        split = f.split(' ')
+        s, p, o = split[0], split[1], split[2]
         nt_string += "<{}>\t<{}>\t<{}>\t.\n".format(s, p, o)
     return nt_string[0:-1] # remove last \n
 
@@ -163,6 +168,7 @@ class SearchView(TemplateView):
 
                     if query_fact_patterns is None:
                         results_converted = []
+                        nt_string = ""
                         logger.error('parsing error')
                     else:
 
@@ -177,7 +183,7 @@ class SearchView(TemplateView):
                         for var_names, var_subs, d_ids, titles in aggregated_result.get_and_rank_results()[0:25]:
                             results_converted.append(list((var_names, var_subs, d_ids, titles)))
 
-                        nt_string = convert_graph_patterns_to_nt(query_fact_patterns)
+                        nt_string = convert_graph_patterns_to_nt(query)
 
                 except Exception:
                     results_converted = []
