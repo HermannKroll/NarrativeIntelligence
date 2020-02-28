@@ -107,6 +107,7 @@ class Predication(Base):
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False)
     predicate_cleaned = Column(String, nullable=True)
+    predicate_canonicalized = Column(String, nullable=True)
     object_openie = Column(String, nullable=False)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
