@@ -24,8 +24,8 @@ class QueryResultAggregate:
         self.results.append(result)
         self.doc_ids.append(result.doc_id)
         # build a key consisting of a list of variable substitutions
+        values = []
         if self.var_names:
-            values = []
             for name in self.var_names:
                 values.append(result.var2substitution[name])
             key = frozenset(tuple(values))
@@ -35,21 +35,20 @@ class QueryResultAggregate:
         if key in self.aggregation:
             # skip already included documents
             if result.doc_id not in self.__doc_ids_per_aggregation[key]:
-                self.aggregation[key].append(result)
+                self.aggregation[key][0].append(result)
                 self.__doc_ids_per_aggregation[key].add(result.doc_id)
         else:
             self.__doc_ids_per_aggregation[key] = set()
             self.__doc_ids_per_aggregation[key].add(result.doc_id)
-            self.aggregation[key] = [result]
+            self.aggregation[key] = ([result], values)
 
     def get_doc_ids_per_substitution(self):
-        for subs, results in self.aggregation.items():
+        for _, (results, var_subs) in self.aggregation.items():
             doc_ids = []
             doc_titles = []
             for r in results:
                 doc_ids.append(r.doc_id)
                 doc_titles.append(r.title)
-            var_subs = list(subs)
             yield self.var_names, var_subs, doc_ids, doc_titles
 
     def get_and_rank_results(self):
@@ -60,5 +59,5 @@ class QueryResultAggregate:
         ranked_results.sort(key=lambda x: x[0], reverse=True)
         converted_results = []
         for _, var_subs, doc_ids, doc_titles in ranked_results:
-            converted_results.append(((self.var_names, var_subs, doc_ids, doc_titles)))
+            converted_results.append((self.var_names, var_subs, doc_ids, doc_titles))
         return converted_results
