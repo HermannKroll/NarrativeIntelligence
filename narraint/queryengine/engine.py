@@ -164,5 +164,34 @@ class QueryEngine:
         logging.info("{} hits: {}".format(results.result_size, results.doc_ids))
         return results
 
+    @staticmethod
+    def query_predicates():
+        session = Session.get()
+        query = session.query(Predication.predicate_cleaned.distinct()).filter(Predication.predicate_cleaned.isnot(None))
+        predicates = []
+        start_time = datetime.now()
+        for r in session.execute(query):
+            predicates.append(r[0])
 
+        logging.info('{} predicates queried in {}s'.format(len(predicates), datetime.now() - start_time))
+        return predicates
+
+    @staticmethod
+    def query_entities():
+        session = Session.get()
+        query_subjects = session.query(Predication.subject_id, Predication.subject_str).distinct()
+        query_objects = session.query(Predication.object_id, Predication.object_str).distinct()
+        query = query_subjects.union(query_objects).distinct()
+
+        entities = []
+        entity_set = set()
+        start_time = datetime.now()
+        for r in session.execute(query):
+            ent_id, ent_str = r[0], r[1]
+            if ent_id not in entity_set:
+                entity_set.add(ent_id)
+                entities.append((ent_id, ent_str))
+
+        logging.info('{} entities queried in {}s'.format(len(entities), datetime.now() - start_time))
+        return entities
 
