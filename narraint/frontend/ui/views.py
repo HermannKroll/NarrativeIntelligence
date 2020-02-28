@@ -74,7 +74,7 @@ def convert_text_to_entity(text, tagger):
 def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
     # split query into facts by ';'
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
-    facts_txt = fact_txt.strip().split(';')
+    facts_txt = fact_txt.strip().split('.')
     fact_patterns = []
     # explanation_str = 'Query Translation'
     explanation_str = ""
@@ -141,7 +141,7 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
 
 def convert_graph_patterns_to_nt(query_txt):
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
-    facts_split = fact_txt.strip().split(';')
+    facts_split = fact_txt.strip().split('.')
     nt_string = ""
     for f in facts_split:
         split = f.strip().split(' ')
