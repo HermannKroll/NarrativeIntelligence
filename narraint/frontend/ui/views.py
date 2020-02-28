@@ -144,7 +144,7 @@ def convert_graph_patterns_to_nt(query_txt):
     facts_split = fact_txt.strip().split(';')
     nt_string = ""
     for f in facts_split:
-        split = f.split(' ')
+        split = f.strip().split(' ')
         s, p, o = split[0], split[1], split[2]
         nt_string += "<{}>\t<{}>\t<{}>\t.\n".format(s, p, o)
     return nt_string[0:-1] # remove last \n
