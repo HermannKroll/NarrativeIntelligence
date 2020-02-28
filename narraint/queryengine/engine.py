@@ -33,7 +33,7 @@ class QueryEngine:
 
         projection_list = [document.id, document.title]
         for p in predication_aliases:
-            projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_cleaned, p.object_id,
+            projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized, p.object_id,
                                     p.object_str, p.object_type, p.confidence])
 
         query = session.query(*projection_list).distinct()
@@ -96,10 +96,9 @@ class QueryEngine:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
 
                 if not p.startswith('?'):
-                    search_term = "%{}%".format(p)
-                    query = query.filter(pred.predicate_cleaned.like(search_term))
+                    query = query.filter(pred.predicate_canonicalized == p)
                 else:
-                    query = query.filter(pred.predicate_cleaned.isnot(None))
+                    query = query.filter(pred.predicate_canonicalized.isnot(None))
                     var_type = VAR_TYPE_PREDICATE.search(p)
                     if var_type:
                         query = query.filter(pred.subject_type == var_type.group(1))
@@ -110,12 +109,11 @@ class QueryEngine:
                     else:
                         last_pred, t = var_dict[p]
                         if t == 'predicate':
-                            query = query.filter(pred.predicate_cleaned == last_pred.predicate_cleaned)
+                            query = query.filter(pred.predicate_canonicalized == last_pred.predicate_canonicalized)
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                search_term = "%{}%".format(p)
-                query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_cleaned.like(search_term))
+                query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_canonicalized == p)
 
         # order by document id descending and limit results to 100
         query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
@@ -165,7 +163,7 @@ class QueryEngine:
         return results
 
     @staticmethod
-    def query_predicates():
+    def query_predicates_cleaned():
         session = Session.get()
         query = session.query(Predication.predicate_cleaned.distinct()).filter(Predication.predicate_cleaned.isnot(None))
         predicates = []

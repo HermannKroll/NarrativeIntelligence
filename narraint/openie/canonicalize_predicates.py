@@ -92,7 +92,7 @@ def main():
     pred_vocab = create_predicate_vocab()
     logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
     logging.info('Retrieving predicates from db...')
-    predicates = QueryEngine.query_predicates()
+    predicates = QueryEngine.query_predicates_cleaned()
     logging.info('{} predicates retrieved'.format(len(predicates)))
     logging.info('Matching predicates...')
     best_matches = match_predicates(model, predicates, pred_vocab)
