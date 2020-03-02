@@ -20,6 +20,13 @@ from narraint.queryengine.result import QueryResultAggregate
 import traceback
 import sys
 
+allowed_predicates = ['administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists with',
+                      'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
+                      'location of', 'manifestation of', 'method of', 'occurs in', 'part of', 'precedes', 'predisposes',
+                      'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with',
+                      'different from', 'higher than', 'lower than', 'same as']
+
+
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
@@ -71,15 +78,12 @@ def convert_text_to_entity(text, tagger):
     return s, s_type
 
 
-def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
+def convert_query_text_to_fact_patterns(query_txt, tagger):
     # split query into facts by ';'
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
     facts_txt = fact_txt.strip().split('.')
     fact_patterns = []
-    # explanation_str = 'Query Translation'
     explanation_str = ""
-  #  explanation_str = 30 * '==' + '\n'
-   # explanation_str += 30 * '==' + '\n\n'
     for fact_txt in facts_txt:
         split = fact_txt.strip().split(' ')
         # check whether the text forms a triple
@@ -103,13 +107,11 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
             logger.error('error unknown object: {}'.format(o_t))
             return None, explanation_str
 
-        p = p_t
-      #  if p_t in allowed_predicates:
-      #      p = p_t
-      #  else:
-      #      explanation_str += "error unknown predicate: {}\n".format(p_t)
-      #      logger.error("error unknown predicate: {}".format(p_t))
-      #      return None, explanation_str
+        p = p_t.lower().replace('_', ' ')
+        if p not in allowed_predicates:
+            explanation_str += "error unknown predicate: {}\n".format(p_t)
+            logger.error("error unknown predicate: {}".format(p_t))
+            return None, explanation_str
 
         explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt, s, p, o)
         fact_patterns.append((s, p, o))
@@ -134,8 +136,6 @@ def convert_query_text_to_fact_patterns(query_txt, tagger, allowed_predicates):
   #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
    #     return None, explanation_str
 
- #   explanation_str += '\n' + 30 * '==' + '\n'
- #   explanation_str += 30 * '==' + '\n'
     return fact_patterns, explanation_str
 
 
@@ -163,8 +163,7 @@ class SearchView(TemplateView):
                     data_source = self.request.GET.get("data_source", "").strip()
                     #logging.info("Selected data source is {}".format(data_source))
 
-                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger, [])
-                                                                                                  #semmed.predicates)
+                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
 
                     if query_fact_patterns is None:
                         results_converted = []
@@ -183,8 +182,7 @@ class SearchView(TemplateView):
                         for var_names, var_subs, d_ids, titles in aggregated_result.get_and_rank_results()[0:25]:
                             results_converted.append(list((var_names, var_subs, d_ids, titles)))
 
-                        nt_string = convert_graph_patterns_to_nt(query)
-
+                    nt_string = convert_graph_patterns_to_nt(query)
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"

@@ -194,7 +194,7 @@ $(function () { // function to pull the wordlist from url_data and save it in va
     });
 });
 
-/*
+
 $(function() { // pulls the predicate names
   $.ajax({
     url: url_predicates,
@@ -246,7 +246,7 @@ $(function() { // pulls the predicate names
     }
   });
 });
- */
+
 
 // create an array with nodes
 var nodes = new vis.DataSet([]);
