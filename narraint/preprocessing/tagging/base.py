@@ -1,39 +1,56 @@
 import logging
 import os
 from threading import Thread
+from typing import List, Tuple, Dict, Set
 
 from sqlalchemy.dialects.postgresql import insert
 
 from narraint.backend.database import Session
 from narraint.backend.load import insert_taggers
 from narraint.backend.models import Tag, DocTaggedBy
+from narraint.preprocessing.config import Config
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
-# TODO: Add estimation when tagging is done (?)
+# TODO: Add estimation when tagging is done
 class BaseTagger(Thread):
+    """
+    Tagger base class. Provides basic functionality like
+    - the initialization of logging,
+    - adding tags to the database
+    - selecting all tags which were found
+    """
     OUTPUT_INTERVAL = 30
     TYPES = None
     __name__ = None
     __version__ = None
 
-    def __init__(self, *args, collection=None, root_dir=None, input_dir=None, log_dir=None, config=None,
-                 mapping_id_file=None, mapping_file_id=None, **kwargs):
+    def __init__(
+            self, *args,
+            collection: str = None,
+            root_dir: str = None,
+            input_dir: str = None,
+            log_dir: str = None,
+            config: Config = None,
+            mapping_id_file: Dict[int, str] = None,
+            mapping_file_id: Dict[str, int] = None,
+            **kwargs
+    ):
         super().__init__(*args, **kwargs)
-        self.collection = collection
-        self.root_dir = root_dir
-        self.input_dir = input_dir
-        self.log_dir = log_dir
-        self.config = config
+        self.collection: str = collection
+        self.root_dir: str = root_dir
+        self.input_dir: str = input_dir
+        self.log_dir: str = log_dir
+        self.config: Config = config
         self.thread = None
         self.logger = logging.getLogger("preprocessing")
         self.name = self.__class__.__name__
         self.files = set()
-        self.mapping_id_file = mapping_id_file
-        self.mapping_file_id = mapping_file_id
-        self.id_set = set()
+        self.mapping_id_file: Dict[int, str] = mapping_id_file
+        self.mapping_file_id: Dict[str, int] = mapping_file_id
+        self.id_set: Set[int] = set()
 
-    def add_files(self, *files):
+    def add_files(self, *files: str):
         self.files.update(files)
         self.id_set.update(self.mapping_file_id[fn] for fn in files)
 
@@ -125,8 +142,15 @@ class BaseTagger(Thread):
         raise NotImplementedError
 
     @staticmethod
-    def _get_tags(directory):
+    def _get_tags(directory: str) -> List[Tuple[int, int, int, str, str, str]]:
+        """
+        Function returns list of tags (6-tuples) contained in all files in a certain directory.
+
+        :param directory: Path to directory containing PubTator files
+        :return: List of tag-tuples
+        """
         tags = []
+        # TODO: This function could (!) be too memory-intensive
         for fn in os.listdir(directory):
             with open(os.path.join(directory, fn)) as f:
                 tags.extend(TAG_LINE_NORMAL.findall(f.read()))

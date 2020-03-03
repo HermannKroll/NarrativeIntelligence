@@ -19,7 +19,6 @@ class NoRemainingDocumentError(Exception):
     pass
 
 
-# TODO: Ensure that documents are not processed twice. List with processed IDs/files?
 class TaggerOne(BaseTagger):
     """
     TaggerOne can tag chemicals and diseases.
@@ -42,7 +41,7 @@ class TaggerOne(BaseTagger):
     def prepare(self, resume=False):
         """
         Copy files into the input directory, because we delete them if they cause TaggerOne to fail.
-        :param resume: Flag wheter to resume the tagging
+        :param resume: Flag whether to resume the tagging
         """
         if not resume:
             os.mkdir(self.in_dir)
@@ -155,9 +154,10 @@ class TaggerOne(BaseTagger):
         matches = re.findall(r"INFO (\d+)-\d+", content)
         self.logger.debug("Searching log file {} ({} matches found)".format(self.log_file, len(matches)))
         if matches:
-            last_file = self.mapping_id_file[matches[-1]]
-            self.skipped_files.append(last_file)
+            self.logger.debug("Last match: {}".format(matches[-1]))
+            last_file = self.mapping_id_file[int(matches[-1])]
             self.logger.debug("TaggerOne exception in file {}".format(last_file))
+            self.skipped_files.append(last_file)
             copyfile(self.log_file, "{}.{}".format(self.log_file, len(self.skipped_files)))
             if os.path.exists(last_file):
                 os.remove(last_file)
