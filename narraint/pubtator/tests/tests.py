@@ -1,5 +1,6 @@
 from unittest import TestCase
-from pubtator.document import TaggedDocument, TaggedDocumentCollection
+
+from narraint.pubtator.document import TaggedDocument, TaggedDocumentCollection
 
 
 class PubTatorDocTestCase(TestCase):

@@ -66,6 +66,7 @@ class TaggedDocument:
                 content = f.read()
             pubtator_content = content
         self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
+        self.id = int(self.id)
         self.content = self.title + self.abstract
         self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
         self.entity_names = {t.text.lower() for t in self.tags}

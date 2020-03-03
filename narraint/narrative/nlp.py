@@ -200,7 +200,7 @@ def main():
 
     print("Processing ...")
     start = datetime.now()
-    for idx, (doc_id, doc) in enumerate(DOC_BY_ID.items()):
+    for idx, (_, doc) in enumerate(DOC_BY_ID.items()):
         print("Processing document {}/{}: {}".format(idx + 1, len(docs), doc))
         process_document(nlp, doc)
     end = datetime.now()
