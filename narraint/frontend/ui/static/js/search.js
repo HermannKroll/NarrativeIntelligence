@@ -198,6 +198,7 @@ const createDocumentList = (results) => {
         let var_subs = res[1];
         let doc_ids = res[2];
         let doc_titles = res[3];
+        let explanations = res[4];
         let i = 0;
 
         let button_string = doc_ids.length + ' Documents';
@@ -215,19 +216,27 @@ const createDocumentList = (results) => {
             button_string += ']';
         }
 
-
         divList.append('<button class="collapsible">' + button_string + '</button>');
 
         i = 0;
-        var document_div_string = "";
+        let document_div_string = "";
         doc_ids.forEach(doc_id => {
             let title = doc_titles[i];
+            let explanations_for_doc = explanations[i];
             i += 1;
+
+            let e_string = "<br><br>Provenance: <br>";
+            let j = 1;
+            explanations_for_doc.forEach(e => {
+                e_string += j + '. ' + e + '<br>';
+                j += 1;
+            });
+
             document_div_string +=
                 //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
                 '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
                 'class="list-group-item list-group-item-action" target="_blank">' +
-                'P' + doc_id + '<br> ' + title + '</a>'
+                'P' + doc_id + '<br> ' + title + e_string + '</a>'
         });
 
         divList.append('<div class="content">' + document_div_string + '</div>');

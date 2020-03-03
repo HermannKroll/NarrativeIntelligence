@@ -81,7 +81,7 @@ def convert_text_to_entity(text, tagger):
 def convert_query_text_to_fact_patterns(query_txt, tagger):
     # split query into facts by ';'
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
-    facts_txt = fact_txt.strip().split('.')
+    facts_txt = fact_txt.strip().replace(';', '.').split('.')
     fact_patterns = []
     explanation_str = ""
     for fact_txt in facts_txt:
@@ -139,15 +139,45 @@ def convert_query_text_to_fact_patterns(query_txt, tagger):
     return fact_patterns, explanation_str
 
 
+VAR_NAME = re.compile(r'(\?\w+)')
+VAR_TYPE = re.compile(r'\((\w+)\)')
+
+
 def convert_graph_patterns_to_nt(query_txt):
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
-    facts_split = fact_txt.strip().split('.')
+    facts_split = fact_txt.strip().replace(';', '.').split('.')
     nt_string = ""
+    var_dict = {}
     for f in facts_split:
         split = f.strip().split(' ')
         s, p, o = split[0], split[1], split[2]
+
+        if s.startswith('?'):
+            var_name = VAR_NAME.search(s).group(1)
+            var_type = VAR_TYPE.search(s)
+            if var_name not in var_dict:
+                var_dict[var_name] = '{}'.format(var_name)
+            if var_type:
+                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+        if o.startswith('?'):
+            var_name = VAR_NAME.search(o).group(1)
+            var_type = VAR_TYPE.search(o)
+            if var_name not in var_dict:
+                var_dict[var_name] = '{}'.format(var_name)
+            if var_type:
+                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+
+    for f in facts_split:
+        split = f.strip().split(' ')
+        s, p, o = split[0], split[1], split[2]
+
+        if s.startswith('?'):
+            s = var_dict[VAR_NAME.search(s).group(1)]
+        if o.startswith('?'):
+            o = var_dict[VAR_NAME.search(o).group(1)]
+
         nt_string += "<{}>\t<{}>\t<{}>\t.\n".format(s, p, o)
-    return nt_string[0:-1] # remove last \n
+    return nt_string[0:-1]  # remove last \n
 
 
 class SearchView(TemplateView):
@@ -164,6 +194,7 @@ class SearchView(TemplateView):
                     #logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
+                    nt_string = convert_graph_patterns_to_nt(query)
 
                     if query_fact_patterns is None:
                         results_converted = []
@@ -179,10 +210,10 @@ class SearchView(TemplateView):
                     #    else:
                         results_converted = []
                         aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query)
-                        for var_names, var_subs, d_ids, titles in aggregated_result.get_and_rank_results()[0:25]:
-                            results_converted.append(list((var_names, var_subs, d_ids, titles)))
+                        for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[0:25]:
+                            results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
 
-                    nt_string = convert_graph_patterns_to_nt(query)
+
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
