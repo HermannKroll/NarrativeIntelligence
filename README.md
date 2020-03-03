@@ -66,5 +66,4 @@ The package provides APIs for several third-party taggers:
 
 ## Database scheme
 
-![DB Scheme](./docs/dbdiagram.svg)
-<img src="./docs/dbdiagram.svg">
+![DB Scheme](./docs/dbdiagram.png)
