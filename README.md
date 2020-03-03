@@ -63,3 +63,8 @@ The package provides APIs for several third-party taggers:
 | DNorm | Disease |
 | tmChem | Chemical |
 | DosageFormTagger (own) | DosageForm
+
+## Database scheme
+
+![DB Scheme](./docs/dbdiagram.svg)
+<img src="./docs/dbdiagram.svg">
