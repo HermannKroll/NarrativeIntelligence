@@ -9,7 +9,7 @@ from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
 from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.result import QueryResult, QueryResultAggregate
+from narraint.queryengine.result import QueryFactExplanation, QueryResult, QueryResultAggregate
 
 QUERY_LIMIT = 1000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -34,7 +34,7 @@ class QueryEngine:
         projection_list = [document.id, document.title]
         for p in predication_aliases:
             projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized, p.object_id,
-                                    p.object_str, p.object_type, p.confidence])
+                                    p.object_str, p.object_type, p.confidence, p.predicate, p.sentence])
 
         query = session.query(*projection_list).distinct()
         query = query.filter(document.collection == doc_collection)
@@ -139,7 +139,7 @@ class QueryEngine:
             # extract var substitutions for pmid
             var_sub = {}
             for v, t, pred_pos in var_info:
-                offset = 2 + pred_pos * 8
+                offset = 2 + pred_pos * 10
                 if t == 'subject':
                     var_sub[v] = '{} ({} : {})'.format(r[offset+1], r[offset], r[offset+2])
                 elif t == 'object':
@@ -149,12 +149,18 @@ class QueryEngine:
                 else:
                     raise ValueError('Unknown position in query projection')
 
-            # compute confidence score
+            # extract confidence & explanation for facts
+            explanations = []
             conf = 0
             for i in range(0, len(graph_query)):
-                conf += float(r[2+7+i*8])
+                offset = 2 + i * 10
+                predicate_canonicalized = r[offset + 3]
+                predicate = r[offset + 8]
+                sentence = r[offset + 9]
+                explanations.append(QueryFactExplanation(sentence, predicate, predicate_canonicalized))
+                conf += float(r[offset+7])
             # create query result
-            results.add_query_result(QueryResult(r[0], r[1], var_sub, conf))
+            results.add_query_result(QueryResult(r[0], r[1], var_sub, conf, explanations))
             time_needed = datetime.now() - start
 
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
@@ -182,13 +188,10 @@ class QueryEngine:
         query = query_subjects.union(query_objects).distinct()
 
         entities = []
-        entity_set = set()
         start_time = datetime.now()
         for r in session.execute(query):
             ent_id, ent_str = r[0], r[1]
-            if ent_id not in entity_set:
-                entity_set.add(ent_id)
-                entities.append((ent_id, ent_str))
+            entities.append((ent_id, ent_str))
 
         logging.info('{} entities queried in {}s'.format(len(entities), datetime.now() - start_time))
         return entities
