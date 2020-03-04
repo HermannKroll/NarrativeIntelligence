@@ -18,13 +18,15 @@ def write_content(content, out_dir):
 def split(filename, out_dir, batch_size=1):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
-
     docs_in_batch = 0
     print('splitting file (batch size is {})...'.format(batch_size))
+    doc_group_content = []
     for doc_content in read_pubtator_documents(filename):
         docs_in_batch += 1
+        doc_group_content.append(doc_content)
         if docs_in_batch >= batch_size:
-            write_content(doc_content, out_dir)
+            write_content('\n'.join(doc_group_content), out_dir)
+            doc_group_content = []
             docs_in_batch = 0
     print('finished')
 
