@@ -150,7 +150,7 @@ def distribute_workload(input_dir, output_root, workers_number:int, subdirs_name
 
 
 def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename, conf, *tag_types,
-               resume=False, use_tagger_one=False):
+               resume=False, use_tagger_one=False, verbose=True):
     """
     Method creates a single PubTator file with the documents from in ``in_dir`` and its tags.
 
@@ -165,7 +165,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
     be set accordingly)
     """
-    print("=== STEP 1 - Preparation ===")
+    if verbose: print("=== STEP 1 - Preparation ===")
     target_ids = set()
     mapping_id_file = dict()
     mapping_file_id = dict()
@@ -173,6 +173,9 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
     # Get tagger classes
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
+
+    if not verbose:
+        logger.setLevel(logging.WARNING)
 
     # Gather target IDs
     for fn in os.listdir(input_dir):
@@ -206,18 +209,18 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
         for target_type in tagger.TYPES:
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
-    print("=== STEP 2 - Tagging ===")
+    if verbose: print("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         logger.info("Starting {}".format(tagger.name))
         tagger.start()
     for tagger in taggers:
         tagger.join()
-    print("=== STEP 3 - Post-processing ===")
+    if verbose: print("=== STEP 3 - Post-processing ===")
     for tagger in taggers:
         logger.info("Finalizing {}".format(tagger.name))
         tagger.finalize()
     export(output_filename, tag_types, target_ids, collection=collection, content=True)
-    print("=== Finished ===")
+    if verbose: print("=== Finished ===")
 
 
 def main():
@@ -279,17 +282,6 @@ def main():
     elif args.ids:
         raise logger.exception("Providing an ID set is only supported for PMC collection")
 
-    if not int(args.workers) == 1:
-        logger.info('splitting up workload for multiple threads')
-        distribute_workload(in_dir,os.path.join(root_dir,"inputDirs"),int(args.workers))
-        create_parallel_dirs(root_dir,int(args.workers),"worker", "logs")
-        #processes = []
-        #for n in range(int(args.workers)):
-            #sublogger = init_preprocess_logger(os.path.join(root_dir,"log","preprocessing.log"), args.loglevel.upper())
-            #args = (args.corpus, os.joi)
-            #processes.append(multiprocessing.Process(target = preprocess()))
-
-
 
     # Add documents to database
     if args.skip_load:
@@ -300,8 +292,25 @@ def main():
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     # Run actual preprocessing
-    preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
-               resume=args.resume, use_tagger_one=args.tagger_one)
+    if not int(args.workers) <= 1:
+        logger.info('splitting up workload for multiple threads')
+        distribute_workload(in_dir,os.path.join(root_dir,"inputDirs"),int(args.workers))
+        create_parallel_dirs(root_dir,int(args.workers),"worker", "log")
+        processes=[]
+        for n in range(int(args.workers)):
+            sub_in_dir=os.path.join(root_dir, "inputDirs", f"batch{n}")
+            sub_root_dir=os.path.join(root_dir, f"worker{n}")
+            sub_log_dir=os.path.join(sub_root_dir, "log")
+            sub_logger = init_preprocess_logger(os.path.join(sub_log_dir,"preprocessing.log"), args.loglevel.upper())
+            process_args = (args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger, args.output, conf, *tag_types)
+            kwargs = dict(resume=args.resume, use_tagger_one=args.tagger_one, verbose=False)
+            process=multiprocessing.Process(target = preprocess, args=process_args, kwargs=kwargs)
+            processes.append(process)
+            process.start()
+        map(lambda p: p.join(), processes)
+    else:
+        preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
+                   resume=args.resume, use_tagger_one=args.tagger_one)
 
 if __name__ == "__main__":
     main()
