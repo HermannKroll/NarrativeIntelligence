@@ -283,7 +283,6 @@ def main():
     elif args.ids:
         raise logger.exception("Providing an ID set is only supported for PMC collection")
 
-
     # Add documents to database
     if args.skip_load:
         logger.info("Skipping bulk load")
