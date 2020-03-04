@@ -130,6 +130,7 @@ class BaseTagger(Thread):
                                 'tagger_name', 'tagger_version', 'ent_type'),
             )
             session.execute(insert_doc_tagged_by)
+            session.commit()
 
         self.logger.info("Committed successfully")
 
