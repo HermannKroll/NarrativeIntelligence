@@ -243,7 +243,8 @@ def main():
     group_settings.add_argument("--workdir", default=None)
     group_settings.add_argument("--skip-load", action='store_true',
                                 help="Skip bulk load of documents on start (expert setting)")
-    group_settings.add_argument("-w", "--workers",default=1, help="Number of processes for parallelized preprocessing")
+    group_settings.add_argument("-w", "--workers",default=1, help="Number of processes for parallelized preprocessing",
+                                type=int)
 
     parser.add_argument("input", help="Directory with PubTator files "
                                       "(can be a file if --ids is set or a directory if --resume is set)",
@@ -292,7 +293,7 @@ def main():
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     # Run actual preprocessing
-    if not int(args.workers) <= 1:
+    if not args.workers <= 1:
         logger.info('splitting up workload for multiple threads')
         distribute_workload(in_dir,os.path.join(root_dir,"inputDirs"),int(args.workers))
         create_parallel_dirs(root_dir,int(args.workers),"worker", "log")
