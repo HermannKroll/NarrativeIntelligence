@@ -13,6 +13,7 @@ import warnings
 from sqlalchemy import event
 from sqlalchemy import exc
 
+
 def add_engine_pidguard(engine):
     """Add multiprocessing guards.
 
