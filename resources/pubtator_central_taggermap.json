@@ -1,0 +1,10 @@
+{
+  "Chemical" : ["TaggerOne", "0.2.1"],
+  "Disease" : ["TaggerOne", "0.2.1"],
+  "DosageForm": ["DosageFormTagger" , "1.0.0"],
+  "Gene" : ["GNormPlus", "unknown"],
+  "Species" : ["SR4GN", "unknown" ],
+  "CellLine" : ["TaggerOne", "0.2.1"],
+  "Variant" : [ "tmVar", "2.0"]
+
+}
