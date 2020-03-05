@@ -90,6 +90,7 @@ def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cl
     missing_ids = target_ids.difference(present_ids)
     return missing_ids
 
+
 def create_parallel_dirs(root, number, prefix, *subdirs):
     """
     Creates number identical subdirectories named <prefix><index> containing subdirectories specified with the names
@@ -108,7 +109,8 @@ def create_parallel_dirs(root, number, prefix, *subdirs):
             if not os.path.exists(subdir_path):
                 os.makedirs(subdir_path)
 
-def distribute_workload(input_dir, output_root, workers_number:int, subdirs_name="batch", ):
+
+def distribute_workload(input_dir, output_root, workers_number: int, subdirs_name="batch", ):
     """
     Takes an input directory filled with files, each containing one or multiple pubtator documents. Then creates
     workers_number subdirectories in output_root and distributes the documents equally among them.
@@ -118,35 +120,36 @@ def distribute_workload(input_dir, output_root, workers_number:int, subdirs_name
     :param workers_number: the number of workers to distribute the workload on
     :param subdirs_name: the prefix to the batch subdirs
     """
-    #create subdirectories
+    # create subdirectories
     tmp_path = os.path.join(output_root, "tmp")
     os.makedirs(tmp_path)
     create_parallel_dirs(output_root, workers_number, subdirs_name)
     paths = (os.path.join(input_dir, file) for file in os.listdir(input_dir))
     file_sizes = {path: os.path.getsize(path) for path in paths if os.path.isfile(path)}
     total_workload = sum(file_sizes.values())
-    workload_per_worker = total_workload // (workers_number-1)
+    workload_per_worker = total_workload // (workers_number - 1)
 
-    current_worker_id=0
-    current_worker_workload=0
+    current_worker_id = 0
+    current_worker_workload = 0
     for file, file_size in file_sizes.items():
-        #TODO: check after adding -> too much workload, checking before adding -> leftover workload. to be fixed
+        # TODO: check after adding -> too much workload, checking before adding -> leftover workload. to be fixed
         if file_size < workload_per_worker:
-            copy(file, os.path.join(output_root,f"{subdirs_name}{current_worker_id}"))
+            copy(file, os.path.join(output_root, f"{subdirs_name}{current_worker_id}"))
             current_worker_workload += file_size
             if current_worker_workload > workload_per_worker:
-                current_worker_id = (current_worker_id+1)%workers_number
-                current_worker_workload=0
+                current_worker_id = (current_worker_id + 1) % workers_number
+                current_worker_workload = 0
         else:
-            avg_size_per_doc = file_size//count_documents(file)
-            batch_size = workload_per_worker//avg_size_per_doc
-            split(file,tmp_path,batch_size)
+            avg_size_per_doc = file_size // count_documents(file)
+            batch_size = workload_per_worker // avg_size_per_doc
+            split(file, tmp_path, batch_size)
             current_worker_id = (current_worker_id + 1) % workers_number
             for batch in os.listdir(tmp_path):
-                batch = os.path.join(tmp_path,batch)
-                os.rename(batch, os.path.join(output_root,f"{subdirs_name}{current_worker_id}",os.path.basename(batch)))
+                batch = os.path.join(tmp_path, batch)
+                os.rename(batch,
+                          os.path.join(output_root, f"{subdirs_name}{current_worker_id}", os.path.basename(batch)))
                 current_worker_id = (current_worker_id + 1) % workers_number
-            current_worker_workload=0
+            current_worker_workload = 0
 
 
 def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename, conf, *tag_types,
@@ -243,7 +246,7 @@ def main():
     group_settings.add_argument("--workdir", default=None)
     group_settings.add_argument("--skip-load", action='store_true',
                                 help="Skip bulk load of documents on start (expert setting)")
-    group_settings.add_argument("-w", "--workers",default=1, help="Number of processes for parallelized preprocessing",
+    group_settings.add_argument("-w", "--workers", default=1, help="Number of processes for parallelized preprocessing",
                                 type=int)
 
     parser.add_argument("input", help="Directory with PubTator files "
@@ -292,25 +295,27 @@ def main():
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
     # Run actual preprocessing
-    if not args.workers <= 1:
+    if args.workers > 1:
         logger.info('splitting up workload for multiple threads')
-        distribute_workload(in_dir,os.path.join(root_dir,"inputDirs"),int(args.workers))
-        create_parallel_dirs(root_dir,int(args.workers),"worker", "log")
-        processes=[]
+        distribute_workload(in_dir, os.path.join(root_dir, "inputDirs"), int(args.workers))
+        create_parallel_dirs(root_dir, int(args.workers), "worker", "log")
+        processes = []
         for n in range(int(args.workers)):
-            sub_in_dir=os.path.join(root_dir, "inputDirs", f"batch{n}")
-            sub_root_dir=os.path.join(root_dir, f"worker{n}")
-            sub_log_dir=os.path.join(sub_root_dir, "log")
-            sub_logger = init_preprocess_logger(os.path.join(sub_log_dir,"preprocessing.log"), args.loglevel.upper())
-            process_args = (args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger, args.output, conf, *tag_types)
+            sub_in_dir = os.path.join(root_dir, "inputDirs", f"batch{n}")
+            sub_root_dir = os.path.join(root_dir, f"worker{n}")
+            sub_log_dir = os.path.join(sub_root_dir, "log")
+            sub_logger = init_preprocess_logger(os.path.join(sub_log_dir, "preprocessing.log"), args.loglevel.upper())
+            process_args = (
+            args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger, args.output, conf, *tag_types)
             kwargs = dict(resume=args.resume, use_tagger_one=args.tagger_one, verbose=False)
-            process=multiprocessing.Process(target = preprocess, args=process_args, kwargs=kwargs)
+            process = multiprocessing.Process(target=preprocess, args=process_args, kwargs=kwargs)
             processes.append(process)
             process.start()
         map(lambda p: p.join(), processes)
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
                    resume=args.resume, use_tagger_one=args.tagger_one)
+
 
 if __name__ == "__main__":
     main()
