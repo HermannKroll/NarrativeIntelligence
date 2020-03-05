@@ -1,4 +1,5 @@
 import os
+import math
 from shutil import copy
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.split import split
@@ -33,31 +34,32 @@ def distribute_workload(input_dir, output_root, workers_number: int, subdirs_nam
     """
     # create subdirectories
     tmp_path = os.path.join(output_root, "tmp")
+    distributed_batches=[]
     os.makedirs(tmp_path)
     create_parallel_dirs(output_root, workers_number, subdirs_name)
     paths = (os.path.join(input_dir, file) for file in os.listdir(input_dir))
     file_sizes = {path: os.path.getsize(path) for path in paths if os.path.isfile(path)}
+    file_sizes = {file: size for file, size in sorted(file_sizes.items(), key=lambda item: item[1])}
     total_workload = sum(file_sizes.values())
-    workload_per_worker = total_workload // (workers_number - 1)
+    workload_per_worker = math.ceil(total_workload / workers_number)
+    distribution = [[] for i in range(workers_number)]
 
-    current_worker_id = 0
-    current_worker_workload = 0
-    for file, file_size in file_sizes.items():
-        # TODO: check after adding -> too much workload, checking before adding -> leftover workload. to be fixed
-        if file_size < workload_per_worker:
-            copy(file, os.path.join(output_root, f"{subdirs_name}{current_worker_id}"))
-            current_worker_workload += file_size
-            if current_worker_workload > workload_per_worker:
-                current_worker_id = (current_worker_id + 1) % workers_number
-                current_worker_workload = 0
+    for file, size in file_sizes.items():
+        if size < workload_per_worker:
+            min(distribution, key=lambda l: len(l)).append(file)
         else:
-            avg_size_per_doc = file_size // count_documents(file)
-            batch_size = workload_per_worker // avg_size_per_doc
-            split(file, tmp_path, batch_size)
-            current_worker_id = (current_worker_id + 1) % workers_number
-            for batch in os.listdir(tmp_path):
-                batch = os.path.join(tmp_path, batch)
-                os.rename(batch,
-                          os.path.join(output_root, f"{subdirs_name}{current_worker_id}", os.path.basename(batch)))
-                current_worker_id = (current_worker_id + 1) % workers_number
-            current_worker_workload = 0
+            not_full_workers=[worker for worker in distribution if len(worker)<workload_per_worker]
+            docs_per_worker=math.ceil(size/not_full_workers)
+            split(file, tmp_path, docs_per_worker)
+            batches = (os.path.join(tmp_path, file) for file in os.listdir(tmp_path) if not file in distributed_batches)
+            distributed_batches.extend(batches)
+            for worker, batch in zip(not_full_workers, batches):
+                worker.append(batch)
+
+    for i, worker in enumerate(distribution):
+        worker_dir=os.path.join(output_root,f"{subdirs_name}{i}")
+        for file in worker:
+            if os.path.basename(file) in distributed_batches:
+                os.rename(file,os.path.join(output_root,subdirs_name,os.path.basename(file)))
+            else:
+                copy(file, worker_dir)
