@@ -81,14 +81,13 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
     return document_id, document, tags
 
 
-def bulk_load(path, collection, logger, tagger_mapping=None):
+def bulk_load(path, collection, tagger_mapping=None):
     """
     Bulk load a file in PubTator Format or a directory of PubTator files into the database.
 
     Iterate over PubTator documents and add Document, Tag and DocTaggedBy objects. Commit after every document.
 
-    :param logger: Logger instance
-    :param str path: Path to file or directory
+     :param str path: Path to file or directory
     :param str collection: Identifier of the collection (e.g., PMC)
     :param dict tagger_mapping: Mapping from entity type to tuple (tagger name, tagger version)
     :return:
@@ -96,14 +95,14 @@ def bulk_load(path, collection, logger, tagger_mapping=None):
     session = Session.get()
 
     if tagger_mapping is None:
-        logger.warning("No tagger mapping provided. Tags are ignored")
+        logging.warning("No tagger mapping provided. Tags are ignored")
 
     sys.stdout.write("Counting documents ...")
     sys.stdout.flush()
     n_docs = count_documents(path)
     sys.stdout.write("\rCounting documents ... found {}\n".format(n_docs))
     sys.stdout.flush()
-    logger.info("Found {} documents".format(n_docs))
+    logging.info("Found {} documents".format(n_docs))
 
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
@@ -165,13 +164,13 @@ def bulk_load(path, collection, logger, tagger_mapping=None):
                     )
                     session.execute(insert_doc_tagged_by)
             else:
-                logger.warning("Document {} {} not in DB".format(collection, doc_id))
+                logging.warning("Document {} {} not in DB".format(collection, doc_id))
 
         session.commit()
         print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
 
     sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
-    logger.info("Added documents in {}".format(datetime.now() - start_time))
+    logging.info("Added documents in {}".format(datetime.now() - start_time))
 
 
 def main():
@@ -180,7 +179,7 @@ def main():
     parser.add_argument("collection")
     parser.add_argument("-t", "--tagger-map", help="JSON file containing mapping from entity type "
                                                    "to tuple with tagger name and tagger version")
-    parser.add_argument("--log", action="store_true")
+    parser.add_argument("--logsql", action="store_true", help='logs sql statements')
     args = parser.parse_args()
 
     tagger_mapping = None
@@ -190,14 +189,13 @@ def main():
         tagger_list.append(UNKNOWN_TAGGER)
         insert_taggers(*tagger_list)
 
-    if args.log:
+    if args.logsql:
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-        logger = logging.getLogger(__name__).setLevel(logging.INFO)
     else:
-        logger = logging.getLogger(__name__).setLevel(logging.CRITICAL)
+        logging.basicConfig()
 
-    bulk_load(args.input, args.collection, logger, tagger_mapping)
+    bulk_load(args.input, args.collection, tagger_mapping)
 
 
 if __name__ == "__main__":
