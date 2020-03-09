@@ -8,7 +8,7 @@ from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
 
 
-def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
+def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=None):
     logging.info("beginning export...")
     if document_ids is None:
         document_ids = []
@@ -16,6 +16,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         logging.info('using {} ids for a filter condition'.format(len(document_ids)))
 
     session = Session.get()
+
     if content and tag_types:
         query = session.query(Document, Tag)
         if collection:
@@ -61,7 +62,8 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         with open(out_fn, "w") as f:
             for row in results:
                 f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
-    logging.info("Results written to {}".format(out_fn))
+    #TODO: Is this bad style or ok?
+    (logger.info if logger is not None else print)("Results written to {}".format(out_fn))
 
 
 def main():

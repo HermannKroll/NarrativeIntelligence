@@ -38,9 +38,9 @@ def init_sqlalchemy_logger(log_filename, log_level=logging.INFO):
     logger.addHandler(fh)
 
 
-def init_preprocess_logger(log_filename, log_level):
-    formatter = logging.Formatter(LOGGING_FORMAT)
-    logger = logging.getLogger("preprocessing")
+def init_preprocess_logger(log_filename, log_level, log_format = LOGGING_FORMAT, worker_id:int = None):
+    formatter = logging.Formatter(log_format)
+    logger = logging.getLogger("preprocess" if worker_id is None else f"preprocess-w{worker_id}")
     logger.setLevel("DEBUG")
     fh = logging.FileHandler(log_filename, mode="a+")
     fh.setLevel("DEBUG")
@@ -90,7 +90,7 @@ def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cl
 
 
 def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename, conf, *tag_types,
-               resume=False, use_tagger_one=False, verbose=True):
+               resume=False, use_tagger_one=False):
     """
     Method creates a single PubTator file with the documents from in ``in_dir`` and its tags.
 
@@ -105,7 +105,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     :param resume: flag, if method should resume (if True, tag_genes, tag_chemicals and tag_diseases must
     be set accordingly)
     """
-    if verbose: print("=== STEP 1 - Preparation ===")
+    logger.info("=== STEP 1 - Preparation ===")
     target_ids = set()
     mapping_id_file = dict()
     mapping_file_id = dict()
@@ -113,9 +113,6 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
     # Get tagger classes
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
-
-    if not verbose:
-        logger.setLevel(logging.WARNING)
 
     # Gather target IDs
     for fn in os.listdir(input_dir):
@@ -149,18 +146,18 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
         for target_type in tagger.TYPES:
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
-    if verbose: print("=== STEP 2 - Tagging ===")
+    logger.info("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         logger.info("Starting {}".format(tagger.name))
         tagger.start()
     for tagger in taggers:
         tagger.join()
-    if verbose: print("=== STEP 3 - Post-processing ===")
+    logger.info("=== STEP 3 - Post-processing ===")
     for tagger in taggers:
         logger.info("Finalizing {}".format(tagger.name))
         tagger.finalize()
-    export(output_filename, tag_types, target_ids, collection=collection, content=True)
-    if verbose: print("=== Finished ===")
+    export(output_filename, tag_types, target_ids, collection=collection, content=True, logger=logger)
+    logger.info("=== Finished ===")
 
 
 def main():

@@ -4,6 +4,7 @@ from shutil import copy
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.split import split
 
+
 def create_parallel_dirs(root, number, prefix, *subdirs):
     """
     Creates number identical subdirectories named <prefix><index> containing subdirectories specified with the names
@@ -22,6 +23,7 @@ def create_parallel_dirs(root, number, prefix, *subdirs):
             if not os.path.exists(subdir_path):
                 os.makedirs(subdir_path)
 
+
 def distribute_workload(input_dir, output_root, workers_number: int, subdirs_name="batch", ):
     """
     Takes an input directory filled with files, each containing one or multiple pubtator documents. Then creates
@@ -34,7 +36,7 @@ def distribute_workload(input_dir, output_root, workers_number: int, subdirs_nam
     """
     # create subdirectories
     tmp_path = os.path.join(output_root, "tmp")
-    distributed_batches=[]
+    distributed_batches = []
     os.makedirs(tmp_path)
     create_parallel_dirs(output_root, workers_number, subdirs_name)
     paths = (os.path.join(input_dir, file) for file in os.listdir(input_dir))
@@ -48,8 +50,9 @@ def distribute_workload(input_dir, output_root, workers_number: int, subdirs_nam
         if size < workload_per_worker:
             min(distribution, key=lambda l: len(l)).append(file)
         else:
-            not_full_workers=[worker for worker in distribution if len(worker)<workload_per_worker]
-            docs_per_worker=math.ceil(size/not_full_workers)
+            not_full_workers = [worker for worker in distribution
+                                if sum(file_sizes[f] for f in worker) < workload_per_worker]
+            docs_per_worker = math.ceil(size / len(not_full_workers))
             split(file, tmp_path, docs_per_worker)
             batches = (os.path.join(tmp_path, file) for file in os.listdir(tmp_path) if not file in distributed_batches)
             distributed_batches.extend(batches)
@@ -57,9 +60,9 @@ def distribute_workload(input_dir, output_root, workers_number: int, subdirs_nam
                 worker.append(batch)
 
     for i, worker in enumerate(distribution):
-        worker_dir=os.path.join(output_root,f"{subdirs_name}{i}")
+        worker_dir = os.path.join(output_root, f"{subdirs_name}{i}")
         for file in worker:
             if os.path.basename(file) in distributed_batches:
-                os.rename(file,os.path.join(output_root,subdirs_name,os.path.basename(file)))
+                os.rename(file, os.path.join(output_root, subdirs_name, os.path.basename(file)))
             else:
                 copy(file, worker_dir)
