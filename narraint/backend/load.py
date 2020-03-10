@@ -15,6 +15,7 @@ from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, TAG_DOCUMENT_ID
 
+BULK_LOAD_COMMIT_AFTER = 10000
 PRINT_ETA_EVERY_K_DOCUMENTS = 100
 UNKNOWN_TAGGER = ["Unknown", "unknown"]
 
@@ -83,7 +84,112 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
 
 def bulk_load(path, collection, tagger_mapping=None):
     """
-    Bulk load a file in PubTator Format or a directory of PubTator files into the database.
+       Bulk load a file in PubTator Format or a directory of PubTator files into the database.
+       Locks the table and will release it if process is finished
+
+       Iterate over PubTator documents and add Document, Tag and DocTaggedBy objects. Commit after every document.
+
+        :param str path: Path to file or directory
+       :param str collection: Identifier of the collection (e.g., PMC)
+       :param dict tagger_mapping: Mapping from entity type to tuple (tagger name, tagger version)
+       :return:
+       """
+    session = Session.get()
+
+    if tagger_mapping is None:
+        logging.warning("No tagger mapping provided. Tags are ignored")
+
+    logging.info('Bulk loading documents into database...')
+    sys.stdout.write("Counting documents ...")
+    sys.stdout.flush()
+    n_docs = count_documents(path)
+    sys.stdout.write("\rCounting documents ... found {}\n".format(n_docs))
+    sys.stdout.flush()
+    logging.info("Found {} documents".format(n_docs))
+
+    logging.info('Retrieving document ids from database...')
+    query = session.query(Document.id).filter_by(collection=collection)
+    db_doc_ids = set()
+    for r in session.execute(query):
+        db_doc_ids.add(r[0])
+    logging.info('{} documents are already inserted'.format(len(db_doc_ids)))
+    start_time = datetime.now()
+
+    document_inserts = []
+    tag_inserts = []
+    doc_tagged_by_inserts = []
+    for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
+        tagged_ent_types = set()
+        doc_id, d_content, d_tags = get_id_content_tag(pubtator_content)
+
+        # skip included documents
+        if doc_id in db_doc_ids:
+            continue
+
+        # Add document if its not already included
+        if d_content:
+            db_doc_ids.add(doc_id)
+            document_inserts.append(dict(
+                collection=collection,
+                id=d_content[0],
+                title=d_content[1],
+                abstract=d_content[2],
+            ))
+        # only if tagger mapping is set, tags will be inserted
+        if d_tags and tagger_mapping and doc_id in db_doc_ids:
+            # Filter tags (remove empty IDs)
+            d_tags = {x for x in d_tags if x[-1]}
+
+            # Add tags
+            for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                tagged_ent_types.add(ent_type)
+
+                tag_inserts.append(dict(
+                    ent_type=ent_type,
+                    start=start,
+                    end=end,
+                    ent_id=ent_id,
+                    ent_str=ent_str,
+                    document_id=d_id,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                ))
+
+            # Add DocTaggedBy
+            for ent_type in tagged_ent_types:
+                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
+                doc_tagged_by_inserts.append(dict(
+                    document_id=doc_id,
+                    document_collection=collection,
+                    tagger_name=tagger_name,
+                    tagger_version=tagger_version,
+                    ent_type=ent_type,
+                ))
+        else:
+            logging.warning("Document {} {} not in DB".format(collection, doc_id))
+
+        if idx % BULK_LOAD_COMMIT_AFTER == 0:
+            session.bulk_insert_mappings(Document, document_inserts)
+            session.bulk_insert_mappings(Tag, tag_inserts)
+            session.bulk_insert_mappings(DocTaggedBy, doc_tagged_by_inserts)
+
+            document_inserts = []
+            tag_inserts = []
+            doc_tagged_by_inserts = []
+
+            session.commit()
+        print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
+
+    sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
+    logging.info("Added documents in {}".format(datetime.now() - start_time))
+
+
+def load(path, collection, tagger_mapping=None):
+    """
+    Load a file in PubTator Format or a directory of PubTator files into the database.
+    Works if multiple inserts run parallel
 
     Iterate over PubTator documents and add Document, Tag and DocTaggedBy objects. Commit after every document.
 
@@ -97,6 +203,7 @@ def bulk_load(path, collection, tagger_mapping=None):
     if tagger_mapping is None:
         logging.warning("No tagger mapping provided. Tags are ignored")
 
+    logging.info('Load documents into database...')
     sys.stdout.write("Counting documents ...")
     sys.stdout.flush()
     n_docs = count_documents(path)
@@ -177,6 +284,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
     parser.add_argument("collection")
+    parser.add_argument("-b", "--bulk", action="store_true", help="Enforcing bulk load - Duplicated documents "
+                                                                  "will be skipped. WARNING: will not handle errors if"
+                                                                  " duplicate values are inserted, "
+                                                                  "e.g. tags already exists. ")
     parser.add_argument("-t", "--tagger-map", help="JSON file containing mapping from entity type "
                                                    "to tuple with tagger name and tagger version")
     parser.add_argument("--logsql", action="store_true", help='logs sql statements')
@@ -190,12 +301,19 @@ def main():
         insert_taggers(*tagger_list)
 
     if args.logsql:
-        logging.basicConfig()
+        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%Y-%m-%d:%H:%M:%S',
+                            level=logging.INFO)
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
     else:
-        logging.basicConfig()
+        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%Y-%m-%d:%H:%M:%S',
+                            level=logging.INFO)
 
-    bulk_load(args.input, args.collection, tagger_mapping)
+    if args.bulk:
+        bulk_load(args.input, args.collection, tagger_mapping)
+    else:
+        load(args.input, args.collection, tagger_mapping)
 
 
 if __name__ == "__main__":
