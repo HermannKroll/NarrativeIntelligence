@@ -15,7 +15,7 @@ from narraint.pubtator.count import count_documents
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, TAG_DOCUMENT_ID
 
-BULK_LOAD_COMMIT_AFTER = 10000
+BULK_LOAD_COMMIT_AFTER = 50000
 PRINT_ETA_EVERY_K_DOCUMENTS = 100
 UNKNOWN_TAGGER = ["Unknown", "unknown"]
 
@@ -85,7 +85,7 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
 def bulk_load(path, collection, tagger_mapping=None):
     """
        Bulk load a file in PubTator Format or a directory of PubTator files into the database.
-       Locks the table and will release it if process is finished
+       Do not use this method for parallel load - it will not check whether conflicts exists
 
        Iterate over PubTator documents and add Document, Tag and DocTaggedBy objects. Commit after every document.
 
@@ -135,6 +135,9 @@ def bulk_load(path, collection, tagger_mapping=None):
                 title=d_content[1],
                 abstract=d_content[2],
             ))
+
+        if doc_id not in db_doc_ids:
+            logging.warning("Document {} {} not in DB".format(collection, doc_id))
         # only if tagger mapping is set, tags will be inserted
         if d_tags and tagger_mapping and doc_id in db_doc_ids:
             # Filter tags (remove empty IDs)
@@ -167,8 +170,6 @@ def bulk_load(path, collection, tagger_mapping=None):
                     tagger_version=tagger_version,
                     ent_type=ent_type,
                 ))
-        else:
-            logging.warning("Document {} {} not in DB".format(collection, doc_id))
 
         if idx % BULK_LOAD_COMMIT_AFTER == 0:
             session.bulk_insert_mappings(Document, document_inserts)
@@ -178,9 +179,13 @@ def bulk_load(path, collection, tagger_mapping=None):
             document_inserts = []
             tag_inserts = []
             doc_tagged_by_inserts = []
-
             session.commit()
         print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
+
+    session.bulk_insert_mappings(Document, document_inserts)
+    session.bulk_insert_mappings(Tag, tag_inserts)
+    session.bulk_insert_mappings(DocTaggedBy, doc_tagged_by_inserts)
+    session.commit()
 
     sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
     logging.info("Added documents in {}".format(datetime.now() - start_time))
