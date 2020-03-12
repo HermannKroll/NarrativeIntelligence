@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from collections import namedtuple
 
 from sqlalchemy.orm import aliased
 
@@ -15,6 +16,7 @@ QUERY_LIMIT = 1000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
+SUBSTITUTION = namedtuple('Substitution', ['entity_str', 'entity_id', 'entity_type'])
 
 
 class QueryEngine:
@@ -129,7 +131,6 @@ class QueryEngine:
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.info('executing sql statement: {}'.format(sql_query))
-
         var_names = []
         for v, _, _ in var_info:
             var_names.append(v)
@@ -137,15 +138,18 @@ class QueryEngine:
         start = datetime.now()
         for r in session.execute(query):
             # extract var substitutions for pmid
-            var_sub = {}
+            var2sub = {}
             for v, t, pred_pos in var_info:
                 offset = 2 + pred_pos * 10
+
                 if t == 'subject':
-                    var_sub[v] = '{} ({} : {})'.format(r[offset+1], r[offset], r[offset+2])
+                    # it's ent_str, ent_id, ent_type
+                    var2sub[v] = SUBSTITUTION(r[offset+1], r[offset], r[offset+2])
                 elif t == 'object':
-                    var_sub[v] = '{} ({} : {})'.format(r[offset+5], r[offset+4], r[offset+6])
+                    # it's ent_str, ent_id, ent_type
+                    var2sub[v] = SUBSTITUTION(r[offset+5], r[offset+4], r[offset+6])
                 elif t == 'predicate':
-                    var_sub[v] = '{}'.format(r[offset+3])
+                    var2sub[v] = SUBSTITUTION(r[offset+3], 'predicate', 'predicate')
                 else:
                     raise ValueError('Unknown position in query projection')
 
@@ -160,7 +164,7 @@ class QueryEngine:
                 explanations.append(QueryFactExplanation(sentence, predicate, predicate_canonicalized))
                 conf += float(r[offset+7])
             # create query result
-            results.add_query_result(QueryResult(r[0], r[1], var_sub, conf, explanations))
+            results.add_query_result(QueryResult(r[0], r[1], var2sub, conf, explanations))
             time_needed = datetime.now() - start
 
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,

@@ -20,6 +20,15 @@ SEMMEDDB_CONFIG = os.path.join(CONFIG_DIR, 'semmed.json')
 
 # MESH
 MESH_DESCRIPTORS_FILE = os.path.join(DATA_DIR, "desc2020.xml")
+MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2020_id2heading.pkl')
+
+# GENE
+GENE_FILE = os.path.join(RESOURCE_DIR, 'gene_names_2020.gz')
+GENE_INDEX_FILE = os.path.join(TMP_DIR, 'gene_names_2020_id2name.pkl')
+
+# Taxonomy Names 2020
+TAXONOMY_FILE = os.path.join(RESOURCE_DIR, 'taxonomy_names_2020.gz')
+TAXONOMY_INDEX_FILE = os.path.join(TMP_DIR, 'taxonomy_name_index.pkl')
 
 # Preprocessing
 PREPROCESS_CONFIG = os.path.join(CONFIG_DIR, 'preprocess.json')

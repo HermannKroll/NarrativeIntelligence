@@ -1,3 +1,7 @@
+from collections import defaultdict
+
+from narraint.queryengine.entityresolver import EntityResolver
+
 
 class QueryFactExplanation:
 
@@ -26,9 +30,10 @@ class QueryResultAggregate:
         self.result_size = 0
         self.var_names = var_names
         self.aggregation = {}
-        self.__doc_ids_per_aggregation = {}
+        self.__doc_ids_per_aggregation = defaultdict(set)
         self.results = []
         self.doc_ids = []
+        self.entity_resolver = EntityResolver.instance()
 
     def add_query_result(self, result: QueryResult):
         self.result_size += 1
@@ -38,7 +43,7 @@ class QueryResultAggregate:
         values = []
         if self.var_names:
             for name in self.var_names:
-                values.append(result.var2substitution[name])
+                values.append(result.var2substitution[name].entity_id)
             key = frozenset(tuple(values))
         else:
             key = "DEFAULT"
@@ -49,12 +54,18 @@ class QueryResultAggregate:
                 self.aggregation[key][0].append(result)
                 self.__doc_ids_per_aggregation[key].add(result.doc_id)
         else:
-            self.__doc_ids_per_aggregation[key] = set()
             self.__doc_ids_per_aggregation[key].add(result.doc_id)
-            self.aggregation[key] = ([result], values)
+            self.aggregation[key] = ([result], result.var2substitution)
+
+    def __entity_to_str(self, entity):
+        ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
+        # if no name was found - return tagged name
+        if ent_name == entity.entity_id:
+            ent_name = entity.entity_str
+        return '{} ({} {})'.format(ent_name, entity.entity_id, entity.entity_type)
 
     def get_doc_ids_per_substitution(self):
-        for _, (results, var_subs) in self.aggregation.items():
+        for _, (results, var2subs) in self.aggregation.items():
             doc_ids = []
             doc_titles = []
             explanations = []
@@ -67,7 +78,11 @@ class QueryResultAggregate:
                     explanations_for_doc.append(str(e))
                 explanations.append(explanations_for_doc)
 
-            yield self.var_names, var_subs, doc_ids, doc_titles, explanations
+            var_substitution_strings = []
+            for v in self.var_names:
+                var_substitution_strings.append(self.__entity_to_str(var2subs[v]))
+
+            yield self.var_names, var_substitution_strings, doc_ids, doc_titles, explanations
 
     def get_and_rank_results(self):
         ranked_results = []
