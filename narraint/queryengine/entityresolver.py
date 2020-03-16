@@ -89,7 +89,7 @@ class SpeciesResolver:
         start_time = datetime.now()
         with open(index_file, 'rb') as f:
             self.speciesid2name = pickle.load(f)
-        logging.info('Gene index load in {}'.format(datetime.now() - start_time))
+        logging.info('Species index load in {}'.format(datetime.now() - start_time))
 
     def species_id_to_name(self, species_id):
         return self.speciesid2name[species_id]
