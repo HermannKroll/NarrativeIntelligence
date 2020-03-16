@@ -12,11 +12,12 @@ import logging
 from narraint.progress import print_progress_with_eta
 from narraint.config import OPENIE_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
+from narraint.pubtator.extract import read_pubtator_documents
 
 OPENIE_VERSION = "1.0.0"
 
 
-def prepare_files(input_dir):
+def prepare_files(input):
     temp_dir = tempfile.mkdtemp()
     temp_in_dir = os.path.join(temp_dir, "input")
     filelist_fn = os.path.join(temp_dir, "filelist.txt")
@@ -27,10 +28,8 @@ def prepare_files(input_dir):
     amount_skipped_files = 0
     amount_files = 0
     logging.info('counting files to process....')
-    for fn in os.listdir(input_dir):
-        with open(os.path.join(input_dir, fn)) as f:
-            document = f.read()
-        match = CONTENT_ID_TIT_ABS.match(document)
+    for document_content in read_pubtator_documents(input):
+        match = CONTENT_ID_TIT_ABS.match(document_content)
         if not match:
             amount_skipped_files += 1
         else:
@@ -143,7 +142,8 @@ def main():
     :return:
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="Directory contains Pubtator files")
+    parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
+                                      "pubtator files")
     parser.add_argument("output", help="File with OpenIE results")
     parser.add_argument("--conf", default=OPENIE_CONFIG)
     args = parser.parse_args()
@@ -152,11 +152,6 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    logging.info('converting...')
-    process_output(args.input, args.output)
-    logging.info('finished!')
-
-    return 0
     # Read config
     with open(args.conf) as f:
         conf = json.load(f)
