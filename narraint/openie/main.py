@@ -131,7 +131,12 @@ def process_output(openie_out, outfile):
             lines.append((pmid, subj, pred, pred_lemma, obj, conf, sent))
 
     with open(outfile, "w") as f:
-        f.write("\n".join("\t".join(t) for t in lines))
+        for idx, line in enumerate(lines):
+            tuple_str = ''.join("\t".join(t) for t in line)
+            if idx == 0:
+                f.write(tuple_str)
+            else:
+                f.write('\n' + tuple_str)
 
     logging.info('{} lines written'.format(tuples))
 
