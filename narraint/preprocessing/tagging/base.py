@@ -34,6 +34,7 @@ class BaseTagger(Thread):
             config: Config = None,
             mapping_id_file: Dict[int, str] = None,
             mapping_file_id: Dict[str, int] = None,
+            logger = None,
             **kwargs
     ):
         super().__init__(*args, **kwargs)
@@ -43,7 +44,7 @@ class BaseTagger(Thread):
         self.log_dir: str = log_dir
         self.config: Config = config
         self.thread = None
-        self.logger = logging.getLogger("preprocessing")
+        self.logger = logger if logger else logging.getLogger("preprocessing")
         self.name = self.__class__.__name__
         self.files = set()
         self.mapping_id_file: Dict[int, str] = mapping_id_file

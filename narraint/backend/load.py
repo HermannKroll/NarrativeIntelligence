@@ -191,7 +191,7 @@ def bulk_load(path, collection, tagger_mapping=None):
     logging.info("Added documents in {}".format(datetime.now() - start_time))
 
 
-def load(path, collection, tagger_mapping=None):
+def load(path, collection, tagger_mapping=None, logger=None):
     """
     Load a file in PubTator Format or a directory of PubTator files into the database.
     Works if multiple inserts run parallel
@@ -206,15 +206,16 @@ def load(path, collection, tagger_mapping=None):
     session = Session.get()
 
     if tagger_mapping is None:
+        #if logger: logger.warning("No tagger mapping provided. Tags are ignored")
         logging.warning("No tagger mapping provided. Tags are ignored")
 
-    logging.info('Load documents into database...')
-    sys.stdout.write("Counting documents ...")
+    if logger: logger.info('Load documents into database...')
+    if logger: logger.info("Counting documents ...")
     sys.stdout.flush()
     n_docs = count_documents(path)
-    sys.stdout.write("\rCounting documents ... found {}\n".format(n_docs))
+    if logger: logger.info("Counting documents ... found {}".format(n_docs))
     sys.stdout.flush()
-    logging.info("Found {} documents".format(n_docs))
+    if logger: logger.info("Found {} documents".format(n_docs))
 
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
@@ -276,13 +277,13 @@ def load(path, collection, tagger_mapping=None):
                     )
                     session.execute(insert_doc_tagged_by)
             else:
-                logging.warning("Document {} {} not in DB".format(collection, doc_id))
+                if logger: logger.warning("Document {} {} not in DB".format(collection, doc_id))
 
         session.commit()
-        print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS)
+        if logger: print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS,
+                                logger=logger)
 
-    sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
-    logging.info("Added documents in {}".format(datetime.now() - start_time))
+    if logger: logger.info("Added documents in {}".format(datetime.now() - start_time))
 
 
 def main():

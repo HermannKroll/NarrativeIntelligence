@@ -32,16 +32,18 @@ def init_sqlalchemy_logger(log_filename, log_level=logging.INFO):
     formatter = logging.Formatter(LOGGING_FORMAT)
     logger = logging.getLogger('sqlalchemy.engine')
     logger.setLevel(log_level)
+    logger.propagate = False
     fh = logging.FileHandler(log_filename, mode="a+")
     fh.setLevel(log_level)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
 
-def init_preprocess_logger(log_filename, log_level, log_format = LOGGING_FORMAT, worker_id:int = None):
+def init_preprocess_logger(log_filename, log_level, log_format=LOGGING_FORMAT, worker_id: int = None):
     formatter = logging.Formatter(log_format)
     logger = logging.getLogger("preprocess" if worker_id is None else f"preprocess-w{worker_id}")
     logger.setLevel("DEBUG")
+    logger.propagate = False
     fh = logging.FileHandler(log_filename, mode="a+")
     fh.setLevel("DEBUG")
     fh.setFormatter(formatter)
@@ -138,7 +140,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
         logger.info("Tasklist for {} contains {} documents".format(tag_type, len(missing_ids)))
 
     # Init taggers
-    kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir,
+    kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir, logger=logger,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
     for tagger in taggers:
@@ -224,7 +226,7 @@ def main():
     if args.skip_load:
         logger.info("Skipping bulk load")
     else:
-        load(in_dir, args.corpus, logger)
+        load(in_dir, args.corpus, logger=logger)
     # Create list of tagging ent types
     tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
@@ -239,21 +241,26 @@ def main():
             sub_in_dir = os.path.join(root_dir, "inputDirs", f"batch{n}")
             sub_root_dir = os.path.join(root_dir, f"worker{n}")
             sub_log_dir = os.path.join(sub_root_dir, "log")
-            sub_logger = init_preprocess_logger(os.path.join(sub_log_dir, "preprocessing.log"), args.loglevel.upper())
+            sub_logger = init_preprocess_logger(
+                os.path.join(sub_log_dir, "preprocessing.log"),
+                args.loglevel.upper(),
+                worker_id=n,
+                log_format='%(asctime)s %(levelname)s %(name)s %(module)s:%(lineno)d %(message)s')
+            sub_logger.propagate = False
             sub_output = os.path.join(sub_root_dir, "output.txt")
             output_paths.append(sub_output)
             process_args = (
                 args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger,
                 sub_output, conf, *tag_types
             )
-            kwargs = dict(resume=args.resume, use_tagger_one=args.tagger_one, verbose=False)
+            kwargs = dict(resume=args.resume, use_tagger_one=args.tagger_one)
             process = multiprocessing.Process(target=preprocess, args=process_args, kwargs=kwargs)
             processes.append(process)
             process.start()
         for process in processes:
             process.join()
-        #merge output files
-        print(f"merging sub output files to {args.output}")
+        # merge output files
+        logger.info(f"merging sub output files to {args.output}")
         with open(args.output, "w+") as output_file:
             for sub_out_path in output_paths:
                 with open(sub_out_path) as sub_out_file:
