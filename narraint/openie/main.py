@@ -113,32 +113,28 @@ def match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
 
 
 def process_output(openie_out, outfile):
-    lines = []
     tuples = 0
-    with open(openie_out) as f:
-        for line in f:
+    with open(openie_out, 'r') as f_out, open(outfile, 'w') as f_conv:
+        for idx, line in enumerate(f_out):
             tuples += 1
             components = line.strip().split("\t")
             # e.g. first line looks like /tmp/tmpwi57otrk/input/1065332.txt (so pmid is between last / and .)
             pmid = components[0].split("/")[-1].split('.')[0]
-
             subj = components[2].lower()
             pred = components[3].lower()
             obj = components[4].lower()
             conf = components[11].replace(',', '.')
             sent = components[-5]
             pred_lemma = components[-2]
-            lines.append((pmid, subj, pred, pred_lemma, obj, conf, sent))
 
-    with open(outfile, "w") as f:
-        for idx, line in enumerate(lines):
-            tuple_str = ''.join("\t".join(t) for t in line)
+            res = [pmid, subj, pred, pred_lemma, obj, conf, sent]
             if idx == 0:
-                f.write(tuple_str)
+                f_conv.write('\t'.join(t for t in res))
             else:
-                f.write('\n' + tuple_str)
+                f_conv.write('\n' + '\t'.join(t for t in res))
 
     logging.info('{} lines written'.format(tuples))
+
 
 def main():
     """
