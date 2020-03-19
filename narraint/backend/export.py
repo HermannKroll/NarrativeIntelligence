@@ -8,7 +8,8 @@ from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
 
 
-def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
+
+def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=None):
     logging.info("Beginning export...")
     if document_ids is None:
         document_ids = []
@@ -16,6 +17,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         logging.info('Using {} ids for a filter condition'.format(len(document_ids)))
 
     session = Session.get()
+
     if content and tag_types:
         query = session.query(Document, Tag)
         if collection:
@@ -61,7 +63,8 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
         with open(out_fn, "w") as f:
             for row in results:
                 f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
-    logging.info("Results written to {}".format(out_fn))
+    if logger:
+    	logger.info("Results written to {}".format(out_fn))
 
 
 def main():
@@ -84,6 +87,7 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
+    logger = logging.getLogger("export")
     if args.sqllog:
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
@@ -94,14 +98,14 @@ def main():
     if args.ids:
         document_ids = [int(x) for x in args.ids]
     elif args.idfile:
-        logging.info('reading id file: {}'.format(args.idfile))
+        logger.info('reading id file: {}'.format(args.idfile))
         with open(args.idfile, 'r') as f:
             document_ids = list(set([int(line.strip()) for line in f]))
-        logging.info('{} ids retrieved from id file..'.format(len(document_ids)))
+        logger.info('{} ids retrieved from id file..'.format(len(document_ids)))
     else:
         document_ids = None
 
-    export(args.output, tag_types, document_ids, collection=args.collection, content=args.document)
+    export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
 
 
 if __name__ == "__main__":

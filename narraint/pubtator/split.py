@@ -15,11 +15,11 @@ def write_content(content, out_dir):
         raise ValueError("No ID for {}".format(content))
 
 
-def split(filename, out_dir, batch_size=1):
+def split(filename, out_dir, batch_size=1, logger=None):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
     docs_in_batch = 0
-    print('splitting file (batch size is {})...'.format(batch_size))
+    if logger: logger.debug('splitting file (batch size is {})...'.format(batch_size))
     doc_group_content = []
     for doc_content in read_pubtator_documents(filename):
         docs_in_batch += 1
@@ -28,7 +28,7 @@ def split(filename, out_dir, batch_size=1):
             write_content('\n'.join(doc_group_content), out_dir)
             doc_group_content = []
             docs_in_batch = 0
-    print('finished')
+    if logger: logger.debug('finished')
 
 
 def main():
