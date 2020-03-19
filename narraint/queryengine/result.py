@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from narraint.queryengine.entityresolver import EntityResolver
+from narraint.entity.entityresolver import EntityResolver
 
 
 class QueryFactExplanation:
