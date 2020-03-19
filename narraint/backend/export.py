@@ -9,11 +9,11 @@ from narraint.backend.models import Document, Tag
 
 
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True):
-    logging.info("beginning export...")
+    logging.info("Beginning export...")
     if document_ids is None:
         document_ids = []
     else:
-        logging.info('using {} ids for a filter condition'.format(len(document_ids)))
+        logging.info('Using {} ids for a filter condition'.format(len(document_ids)))
 
     session = Session.get()
     if content and tag_types:

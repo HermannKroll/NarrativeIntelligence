@@ -122,3 +122,11 @@ class Predication(Base):
 
     def __repr__(self):
         return "<Predication {}>".format(self.id)
+
+
+class DocProcessedByOpenIE(Base):
+    __tablename__ = "doc_processed_by_openie"
+
+    document_id = Column(BigInteger, primary_key=True)
+    document_collection = Column(String, primary_key=True)
+    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
