@@ -10,9 +10,6 @@ class Config:
     def __init__(self, config_file):
         with open(config_file) as f:
             self.config = json.load(f)
-        # Validate
-        if not os.path.exists(self.pmc_dir) or not os.path.isdir(self.pmc_dir):
-            raise ValueError(f"PubMedCentral directory not found: {self.pmc_dir} does not exist or is not a directory")
 
     @property
     def pmc_dir(self):
