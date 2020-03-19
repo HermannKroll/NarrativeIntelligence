@@ -27,6 +27,7 @@ The projects core, the `narraint` package, consists of several Python packages a
 | Package | Task |
 |-----------------|-----------------------------------------------------------------------------------------------|
 | `backend` | Connection to database, loading and exporting |
+| `enitity` | Entity stuff like mapping entity ids to vocabulary headings|
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
 | `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
@@ -35,6 +36,7 @@ The projects core, the `narraint` package, consists of several Python packages a
 | `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
 | `pubmedutils` | Tools to query PMIDs from PubMed and PubTator files from Pubtator  |
 | `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
+| `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (extracted by openie)  |
 | `semmeddb` | Connection Handling for a SemMedDB. Currently our prototype queries SemMedDB via this package for fact retrieval |
 | `stories` | Some experimental stuff to derive stories from documents |
 
@@ -47,7 +49,6 @@ The entry point `preprocess.py` takes a directory of PubTator files and generate
 The documents and tags are all inserted into the database for later processing and retrieval.
 
 Currently, the following entity types can be detected:
-
 - Chemicals
 - Diseases
 - Genes
@@ -68,3 +69,7 @@ The package provides APIs for several third-party taggers:
 
 ![DB Scheme](./docs/dbdiagram.png)
 created with app.quickdatabasediagrams.com
+
+
+## Meeting Protocols
+- [2020_03_19](meetings/2020_03_19.md)
