@@ -31,7 +31,7 @@ def retrieve_document_ids_to_process(idfile, document_collection):
 
     logging.info('{} document ids are in the database'.format(len(processed_ids)))
     missing_ids = document_ids.difference(processed_ids)
-    logging.info('{} ids have already be processed and will be skipped'.format(len(document_ids)-len(missing_ids)))
+    logging.info('{} ids have already been processed and will be skipped'.format(len(document_ids)-len(missing_ids)))
     logging.info('{} remaining document ids to process...'.format(len(missing_ids)))
     return missing_ids
 
