@@ -21,6 +21,18 @@ Application data includes:
 ### Configuration
 *All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
 
+The database can be configure with the file ``backend.json`` and using environment variables. The environment variables
+are favoured over the `json`-configuration. 
+
+| Name | Function |
+| ------ | ------ |
+| `NI_POSTGRES_USER` | Username |
+| `NI_POSTGRES_PW` | Password |
+| `NI_POSTGRES_HOST` | Host |
+| `NI_POSTGRES_POST` | Port number |
+| `NI_POSTGRES_DB` | Database name |
+
+
 ## Project structure
 The projects core, the `narraint` package, consists of several Python packages and modules with do a certain job:
 

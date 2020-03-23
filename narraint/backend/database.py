@@ -1,17 +1,16 @@
 import json
+import os
+import warnings
+from os import environ
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import event
+from sqlalchemy import exc
 from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 from narraint.backend.models import Base
 from narraint.config import BACKEND_CONFIG
-
-import os
-import warnings
-
-from sqlalchemy import event
-from sqlalchemy import exc
 
 
 def add_engine_pidguard(engine):
@@ -47,14 +46,24 @@ def add_engine_pidguard(engine):
 class Session:
     _instance = None
 
+    def _load_config(self):
+        with open(BACKEND_CONFIG) as f:
+            config = json.load(f)
+        self.config = dict(
+            POSTGRES_USER=environ.get("NI_POSTGRES_USER", config["POSTGRES_USER"]),
+            POSTGRES_PW=environ.get("NI_POSTGRES_PW", config["POSTGRES_PW"]),
+            POSTGRES_HOST=environ.get("NI_POSTGRES_HOST", config["POSTGRES_HOST"]),
+            POSTGRES_PORT=environ.get("NI_POSTGRES_PORT", config["POSTGRES_PORT"]),
+            POSTGRES_DB=environ.get("NI_POSTGRES_DB", config["POSTGRES_DB"]),
+        )
+
     def __init__(self):
         if not self._instance:
-            with open(BACKEND_CONFIG) as f:
-                self.config = json.load(f)
+            self._load_config()
             self.engine = create_engine(self.get_conn_uri())
             add_engine_pidguard(self.engine)
             session_cls = sessionmaker(bind=self.engine)
-            self.session = scoped_session(session_cls) #session_cls()
+            self.session = scoped_session(session_cls)  # session_cls()
             Base.metadata.create_all(self.engine)
         else:
             raise ValueError("Instance already exists: Use get()")
