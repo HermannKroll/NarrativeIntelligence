@@ -9,6 +9,7 @@ from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TER
     DOSAGE_FORM_TAGGER_INDEX_CACHE, TMP_DIR
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.progress import print_progress_with_eta
 from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
@@ -22,7 +23,7 @@ class DosageFormTaggerIndex:
 
 
 class DosageFormTagger(BaseTagger):
-    PROGRESS_BATCH = 100
+    PROGRESS_BATCH = 1000
     DOSAGE_FORM_TREE_NUMBERS = (
         "D26.255",  # Dosage Forms
         "E02.319.300",  # Drug Delivery Systems
@@ -272,7 +273,9 @@ class DosageFormTagger(BaseTagger):
                     skipped_files.append(in_file)
                     self.logger.info(e)
                 if idx % self.PROGRESS_BATCH == 0:
-                    self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
+                    # be sure to count files not every print (thus idx % self.PROGRESS_BATCH)
+                    print_progress_with_eta("tagging", self.get_progress(), files_total, start_time, print_every_k=1,
+                                            logger=self.logger)
             else:
                 self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
 
