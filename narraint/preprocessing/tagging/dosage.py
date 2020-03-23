@@ -274,8 +274,8 @@ class DosageFormTagger(BaseTagger):
                     self.logger.info(e)
                 if idx % self.PROGRESS_BATCH == 0:
                     # be sure to count files not every print (thus idx % self.PROGRESS_BATCH)
-                    print_progress_with_eta("tagging", self.get_progress(), files_total, start_time, print_every_k=1,
-                                            logger=self.logger)
+                    print_progress_with_eta("DosageFormTagger tagging", self.get_progress(), files_total, start_time,
+                                            print_every_k=1, logger=self.logger)
             else:
                 self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
 

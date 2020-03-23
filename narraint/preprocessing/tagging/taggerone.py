@@ -9,6 +9,7 @@ from time import sleep
 
 from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import get_document_ids
 
 
@@ -124,6 +125,7 @@ class TaggerOne(BaseTagger):
         :param batch_file: Path to batch file
         :return: Exit status of TaggerOne
         """
+        start_time = datetime.now()
         with open(self.log_file, "w") as f_log:
             command = "{} Pubtator {} {input} {out}".format(
                 self.config.tagger_one_script,
@@ -138,8 +140,8 @@ class TaggerOne(BaseTagger):
             # Wait until finished
             while process.poll() is None:
                 sleep(self.OUTPUT_INTERVAL)
-                progress = self.get_progress()
-                self.logger.info("TaggerOne progress {}/{}".format(progress, len(self.files)))
+                print_progress_with_eta("TaggerOne tagging", self.get_progress(), len(self.files), start_time,
+                                        print_every_k=1, logger=self.logger)
             self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
         return process.poll()
 

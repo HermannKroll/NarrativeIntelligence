@@ -6,6 +6,7 @@ from time import sleep
 
 from narraint.backend import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
+from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
 
 
@@ -97,7 +98,8 @@ class DNorm(BaseTagger):
         # Wait until finished
         while process.poll() is None:
             sleep(self.OUTPUT_INTERVAL)
-            self.logger.info("Progress {}/{}".format(self.get_progress(), files_total))
+            print_progress_with_eta("DNorm tagging", self.get_progress(), files_total, start_time, print_every_k=1,
+                                    logger=self.logger)
         self.logger.debug("Exited with code {}".format(process.poll()))
 
         end_time = datetime.now()
