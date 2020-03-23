@@ -60,7 +60,7 @@ class DNorm(BaseTagger):
                             new_line[1] = str(idx_left)
                             new_line[2] = str(idx_right)
                         # Write result
-                        tags.append(new_line)
+                        tags.append(tuple(new_line))
         return tags
 
     def __init__(self, *args, **kwargs):
