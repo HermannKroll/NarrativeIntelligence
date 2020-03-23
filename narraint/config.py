@@ -46,6 +46,7 @@ OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
 # DosageForm Tagger
+DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "df_index_cache.pkl")
 DOSAGE_ADDITIONAL_DESCS = os.path.join(RESOURCE_DIR, "df_additional_descs.txt")
 DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_terms.txt")
 DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")

@@ -1,14 +1,24 @@
 import os
+import pickle
 import re
 from datetime import datetime
 
 from narraint import config
 from narraint.backend import enttypes
-from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS
+from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS, \
+    DOSAGE_FORM_TAGGER_INDEX_CACHE, TMP_DIR
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
+
+
+class DosageFormTaggerIndex:
+
+    def __init__(self):
+        self.mesh_file = ""
+        self.tagger_version = DosageFormTagger.__version__
+        self.desc_by_term = {}
 
 
 class DosageFormTagger(BaseTagger):
@@ -29,7 +39,6 @@ class DosageFormTagger(BaseTagger):
         self.in_dir = os.path.join(self.root_dir, "dosage_in")
         self.out_dir = os.path.join(self.root_dir, "dosage_out")
         self.log_file = os.path.join(self.log_dir, "dosage.log")
-        self.meshdb = None
         self.desc_by_term = {}
 
         self.regex_micro = re.compile(r'micro[a-z]')
@@ -54,7 +63,7 @@ class DosageFormTagger(BaseTagger):
                     if l_s in additional_descs:
                         raise KeyError('descriptor already included: {}'.format(l_s))
                     additional_descs[l_s] = []
-        self.logger.info('{} additional descs loaded'.format(len(additional_descs)))
+        self.logger.debug('{} additional descs loaded'.format(len(additional_descs)))
         return additional_descs
 
     def load_additional_descs_terms(self):
@@ -67,7 +76,7 @@ class DosageFormTagger(BaseTagger):
                 if desc in desc_terms:
                     raise KeyError('descriptor already included: {}'.format(desc))
                 desc_terms[desc] = terms
-        self.logger.info('{} additional terms for descriptors added'.format(len(desc_terms)))
+        self.logger.debug('{} additional terms for descriptors added'.format(len(desc_terms)))
         return desc_terms
 
     def load_fid_descriptors(self):
@@ -88,7 +97,7 @@ class DosageFormTagger(BaseTagger):
                 if desc in desc_terms:
                     raise KeyError('descriptor already included: {}'.format(desc))
                 desc_terms[desc] = terms
-        self.logger.info('{} FID terms for descriptors added'.format(len(desc_terms)))
+        self.logger.debug('{} FID terms for descriptors added'.format(len(desc_terms)))
         return desc_terms
 
     def apply_term_rules(self, term):
@@ -108,9 +117,46 @@ class DosageFormTagger(BaseTagger):
 
         return new_terms
 
+    def _check_for_index(self):
+        if os.path.isfile(DOSAGE_FORM_TAGGER_INDEX_CACHE):
+            index = pickle.load(open(DOSAGE_FORM_TAGGER_INDEX_CACHE, 'rb'))
+            if not isinstance(index, DosageFormTaggerIndex):
+                self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
+                                    .format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
+                pass
+
+            if index.tagger_version != DosageFormTagger.__version__:
+                self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
+                                    .format(index.tagger_version, DosageFormTagger.__version__))
+                pass
+
+            if index.mesh_file != config.MESH_DESCRIPTORS_FILE:
+                self.logger.warning('Ignore index: index created with another mesh file ({} index vs. {} tagger)'
+                                    .format(index.mesh_file, config.MESH_DESCRIPTORS_FILE))
+                pass
+
+            self.logger.debug('Use precached index from {}'.format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
+            self.desc_by_term = index.desc_by_term
+            return index
+        pass
+
+    def _create_index(self):
+        index = DosageFormTaggerIndex()
+        index.mesh_file = config.MESH_DESCRIPTORS_FILE
+        index.tagger_version = DosageFormTagger.__version__
+        index.desc_by_term = self.desc_by_term
+        if not os.path.isdir(TMP_DIR):
+            os.mkdir(TMP_DIR)
+        self.logger.debug('Storing DosageFormTagerIndex cache to: {}'.format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
+        pickle.dump(index, open(DOSAGE_FORM_TAGGER_INDEX_CACHE, 'wb'))
+
     def prepare(self, resume=False):
-        self.meshdb = MeSHDB.instance()
-        self.meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
+        if self._check_for_index():
+            self.logger.info('DosageFormTagger initialized from cache ({} term mappings) - ready to start'
+                             .format(len(self.desc_by_term.keys())))
+            pass
+        meshdb = MeSHDB.instance()
+        meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
 
         # all dosage form descriptors
         # (id, terms) pairs are included
@@ -127,23 +173,23 @@ class DosageFormTagger(BaseTagger):
         # load additional descs manual from file
         additional_descs = self.load_additional_descs()
         for desc, to_combine in additional_descs.items():
-            d_node = self.meshdb.desc_by_id(desc)
+            d_node = meshdb.desc_by_id(desc)
             d_node_terms = []
             for t in d_node.terms:
                 d_node_terms.append(t.string.lower())
             # combine all additional terms
             if len(to_combine) > 0:
                 for combine_desc in to_combine:
-                    combine_desc_node = self.meshdb.desc_by_id(combine_desc)
+                    combine_desc_node = meshdb.desc_by_id(combine_desc)
                     for t in combine_desc_node.terms:
                         d_node_terms.add(t.string.lower())
             dosage_forms_all.append((d_node.unique_id, d_node_terms))
 
-        self.logger.info('loading subtrees...')
+        self.logger.debug('loading subtrees...')
         # load descriptors from subtrees
         for df_tn in self.DOSAGE_FORM_TREE_NUMBERS:
-            dosage_form_header_node = self.meshdb.desc_by_tree_number(df_tn)
-            dosage_forms = self.meshdb.descs_under_tree_number(df_tn)
+            dosage_form_header_node = meshdb.desc_by_tree_number(df_tn)
+            dosage_forms = meshdb.descs_under_tree_number(df_tn)
             dosage_forms.append(dosage_form_header_node)
 
             for df in dosage_forms:
@@ -153,7 +199,7 @@ class DosageFormTagger(BaseTagger):
 
                 dosage_forms_all.append((df.unique_id, terms))
 
-        self.logger.info(
+        self.logger.debug(
             '{} descriptors loaded (contains duplicates because some additional terms where added manually)'.format(
                 len(dosage_forms_all)))
 
@@ -185,7 +231,7 @@ class DosageFormTagger(BaseTagger):
                 if term in self.desc_by_term:
                     term_descs = self.desc_by_term[term]
                     if dosage_form not in term_descs:
-                        self.logger.warn(
+                        self.logger.debug(
                             "term duplicate found {} with different descriptors ({} vs {})".format(term,
                                                                                                    term_descs,
                                                                                                    dosage_form))
@@ -196,6 +242,11 @@ class DosageFormTagger(BaseTagger):
                     self.desc_by_term[term] = [dosage_form]
                 else:
                     self.desc_by_term[term].append(dosage_form)
+
+        # Store Tagger information in cache
+        self._create_index()
+        self.logger.info('DosageFormTagger initialized from data ({} term mappings) - ready to start'
+                         .format(len(self.desc_by_term.keys())))
 
         # Create output directory
         if not resume:
