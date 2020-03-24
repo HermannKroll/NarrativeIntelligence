@@ -246,10 +246,11 @@ class PatentConverter:
 
     @staticmethod
     def decode_patent_country_code(patent_id):
-        c_code, rest = patent_id[0], patent_id[1:]
-        if c_code == 0 or c_code > len(PatentConverter.COUNTY_PREFIX_REVERS) - 1:
+        patent_str = str(patent_id)
+        c_code, rest = int(patent_str[0]), patent_str[1:]
+        if c_code == 0 or c_code > len(PatentConverter.COUNTY_PREFIX_REVERS):
             raise ValueError('Country Code {} is unknown'.format(c_code))
-        return PatentConverter.COUNTY_PREFIX_REVERS[c_code-1], rest
+        return PatentConverter.COUNTY_PREFIX_REVERS[c_code-1] + rest
 
     def convert(self, in_file, out_dir):
         """

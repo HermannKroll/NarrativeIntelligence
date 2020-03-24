@@ -113,7 +113,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
                         doc_id = str(PatentConverter.decode_patent_country_code(doc_id))
                     else:
                         doc_id = str(doc_id)
-                    doc_xml_content.append("\t\t<id>{}</id>\n".format())
+                    doc_xml_content.append("\t\t<id>{}</id>\n".format(doc_id))
                     count_translated = 0
                     for e_id, e_type in tags_for_doc:
                         try:
