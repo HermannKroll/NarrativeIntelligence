@@ -774,8 +774,6 @@ document.addEventListener('keydown', function (params) {
         }
 
     }
-
-    /*
     // Keycode for adding new node (n)
     else if(event.keyCode == 78 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
       var myElement = document.getElementById("nodeMod");
@@ -791,16 +789,6 @@ document.addEventListener('keydown', function (params) {
     else if(event.keyCode == 69 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
       network.addEdgeMode();
     }
-
-    else if(event.keyCode == 27) {
-      network.disableEditMode();
-    }
-
-    // Keycode for clustering nodes (c)
-    else if(event.keyCode == 67) {
-      clusterSelected();
-    }
-  */
     createQuery();
 });
 

@@ -16,7 +16,15 @@ from narraint.queryengine.engine import QueryEngine
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 
-allowed_variable_types = ["Chemical", "Disease", "DosageForm", "Gene", "Species"]
+variable_type_mappings = {"chemical": "Chemical",
+                          "chemicals": "Chemical",
+                          "disease": "Disease",
+                          "diseases": "Disease",
+                          "dosageform": "DosageForm",
+                          "dosageforms": "DosageForm",
+                          "gene": "Gene",
+                          "genes": "Gene",
+                          "species": "Species"}
 
 allowed_predicates = ['administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists with',
                       'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
@@ -49,15 +57,17 @@ except Exception:
     traceback.print_exc(file=sys.stdout)
 
 
-# END Preparation
 def check_and_convert_variable(text):
     var_name = VAR_NAME.search(text).group(1)
     m = VAR_TYPE.search(text)
     if m:
-        t = m.group(1).capitalize()
-        if t not in allowed_variable_types:
-            raise ValueError('"{}" as Variable Type unknown (supported: {})'.format(t, allowed_variable_types))
-        return '{}({})'.format(var_name, t)
+        t = m.group(1).lower()
+        if t not in variable_type_mappings:
+            raise ValueError('"{}" as Variable Type unknown (supported: {})'
+                             .format(t, list(variable_type_mappings.values())))
+        return '{}({})'.format(var_name, variable_type_mappings[t])
+    else:
+        return var_name
 
 
 def convert_text_to_entity(text, tagger):
@@ -121,9 +131,9 @@ def convert_query_text_to_fact_patterns(query_txt, tagger):
         if not s.startswith('?') or not o.startswith('?'):
             entity_check = True
             break
-    if not entity_check:
-        explanation_str += "no entity included in query - error\n"
-        return None, explanation_str
+    # if not entity_check:
+    #    explanation_str += "no entity included in query - error\n"
+    #   return None, explanation_str
 
     # check if the query is one connected graph
     #  g = LabeledGraph()
@@ -151,16 +161,16 @@ def convert_graph_patterns_to_nt(query_txt):
             var_name = VAR_NAME.search(s).group(1)
             var_type = VAR_TYPE.search(s)
             if var_name not in var_dict:
-                var_dict[var_name] = '{}'.format(var_name)
+                var_dict[var_name] = check_and_convert_variable(s)
             if var_type:
-                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+                var_dict[var_name] = check_and_convert_variable(s)
         if o.startswith('?'):
             var_name = VAR_NAME.search(o).group(1)
             var_type = VAR_TYPE.search(o)
             if var_name not in var_dict:
-                var_dict[var_name] = '{}'.format(var_name)
+                var_dict[var_name] = check_and_convert_variable(o)
             if var_type:
-                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+                var_dict[var_name] = check_and_convert_variable(o)
 
     for f in facts_split:
         split = f.strip().split(' ')
@@ -186,7 +196,7 @@ class SearchView(TemplateView):
                 try:
                     query = self.request.GET.get("query", "").strip()
                     data_source = self.request.GET.get("data_source", "").strip()
-                    # logging.info("Selected data source is {}".format(data_source))
+                    logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
                     if query_fact_patterns is None:
@@ -195,19 +205,11 @@ class SearchView(TemplateView):
                         logger.error('parsing error')
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
-                        #  if data_source == 'semmeddb':
-                        #      results_converted = []
-                        #       query_trans_string = "currently not supported"
-                        #  pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
-                        #                                                                     query)
-                        #    else:
                         results_converted = []
                         aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query)
                         for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
-                                                                                0:25]:
+                                                                                0:30]:
                             results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
-
-
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
