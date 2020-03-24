@@ -98,7 +98,7 @@ class DNorm(BaseTagger):
         # Wait until finished
         while process.poll() is None:
             sleep(self.OUTPUT_INTERVAL)
-            print_progress_with_eta("DNorm tagging", self.get_progress(), files_total, start_time, print_every_k=1,
+            print_progress_with_eta("DNorm tagging", self.get_progress()-1, files_total, start_time, print_every_k=1,
                                     logger=self.logger)
         self.logger.debug("Exited with code {}".format(process.poll()))
 
