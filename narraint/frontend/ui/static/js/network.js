@@ -22,6 +22,7 @@ var newNodePrefix = "";
 var renameNodePrefix = "";
 var inpedge = document.getElementById("inpedge");
 var inpnode = document.getElementById("inpnode");
+var network = document.getElementById("mynetwork");
 
 
 // array with the undoable actions
@@ -36,59 +37,6 @@ var count_undo = 0;
 // head in the redo array
 var count_redo = 0;
 
-
-$("#inpnode").on("change paste keyup", function () { // deciding if the Type dropdown of nodeMod should be enabled or not when typing in textfield
-    var text = inpnode.value;
-
-    if (text[0] == "?") {
-        if (document.getElementById('checknode').checked == false) {
-            document.getElementById("newNodeType").disabled = false;
-        } else {
-            document.getElementById("newNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("newNodeType").disabled = true;
-    }
-});
-
-$("#nodemod").on("click", function () { // deciding if the Type dropdown of nodeMod should be enabled or not when showing the form
-    var text = document.getElementById("inprename").value;
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
-
-$("#inprename").on("change paste keyup", function () { // deciding if the Type dropdown of renameMod should be enabled or not when typing in the textfield
-    var text = document.getElementById("inprename").value;
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
-
-$("#renamemod").on("click", function () { // deciding if the Type dropdown of renameMod should be enabled or not when showing the form
-    var text = document.getElementById("inprename").value;
-    if (text[0] == "?") {
-        if (document.getElementById('checkrename').checked == false) {
-            document.getElementById("RenameNodeType").disabled = false;
-        } else {
-            document.getElementById("RenameNodeType").disabled = true;
-        }
-    } else {
-        document.getElementById("RenameNodeType").disabled = true;
-    }
-});
 
 $('#inpnode').keypress(function (e) { // for pressing enter in input field of naming Node
     return clickSubmit("inpnode", e.which);
@@ -311,7 +259,7 @@ var network = new vis.Network(container, data, options);
 function dialogReName() { // this function is used to rename existing nodes
     var label = document.getElementById("inprename").value;
     if (label != "" && label != "?") { // if there is no text in the textfield
-        if ((tags.includes(label) || label[0] == "?") && !(document.getElementById("checkrename").checked)) {
+        if (tags.includes(label) || label[0] == "?") {
             if (label[0] == "?") { // if it's a variable
                 label = label + "(" + document.getElementById("RenameNodeType").value + ")";
             } else {  // if it's an entity
@@ -327,18 +275,7 @@ function dialogReName() { // this function is used to rename existing nodes
             his_undo[count_undo].push(tempNode);
             count_undo++;
             nodes.update({id: tmpNode, label: label, color: '#97C2FC', 'title': dict_LabelMesh[label]}); // update the node
-        } else if (document.getElementById("checkrename").checked) { // if it's a literal
-            initializeUndo();
-            let tempNode = nodes.get(tmpNode);
-            tempNode.code = 2;
-            tempNode.old_label = nodes.get(tmpNode).label;
-            tempNode.label = label;
-            tempNode.old_color = nodes.get(tmpNode).color;
-            tempNode.color = '#FF3898';
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodes.update({id: tmpNode, label: label, color: '#FF3898', 'title': dict_LabelMesh[label]}); // update the node
-        } else {
+        }  else {
             setTimeout(function () { // show an alert
                     alert('The label should be in the list.');
                     renameNodeMod.click();
@@ -354,7 +291,6 @@ function dialogReName() { // this function is used to rename existing nodes
             }
             , 1);
     }
-    $("#checkrename").removeAttr("checked");
     createQuery();
 }
 
@@ -385,7 +321,7 @@ function dialogRenameCluster() {
 function dialogNameNode() { // this function is used to name a new node
     var label = inpnode.value;
     if (label != "" && label != "?") {
-        if ((tags.includes(label) || label[0] == "?") && !(document.getElementById("checknode").checked)) {
+        if (tags.includes(label) || label[0] == "?") {
             initializeUndo();
             if (label[0] == "?") {
                 label = label + "(" + document.getElementById("newNodeType").value + ")";
@@ -411,30 +347,6 @@ function dialogNameNode() { // this function is used to name a new node
             his_undo[count_undo].push(tempNode);
             count_undo++;
             nodeId++;
-        } else if (document.getElementById("checknode").checked) {
-            initializeUndo();
-            let node = {
-                'id': nodeId,
-                'label': label,
-                'cid': -1,
-                color: '#FF3898',
-                'x': cursorPosition.x,
-                'y': cursorPosition.y,
-                'title': dict_LabelMesh[label]
-            };
-            nodes.add(node);
-            cursorPosition.x += 40;
-            cursorPosition.y += 40;
-            setTimeout(function () {
-                    centerNetwork();
-                }
-                , 600);
-
-            let tempNode = node;
-            tempNode.code = 1;
-            his_undo[count_undo].push(tempNode);
-            count_undo++;
-            nodeId++;
         } else {
             setTimeout(function () {
                     alert('The label should be in the list.');
@@ -451,7 +363,6 @@ function dialogNameNode() { // this function is used to name a new node
             }
             , 1);
     }
-    $("#checknode").removeAttr("checked");
     createQuery();
 }
 
@@ -798,6 +709,9 @@ function initializeRedo() {
 
 // Shortcuts
 document.addEventListener('keydown', function (params) {
+    // check whether the network has the focus
+    if (document.activeElement !== network && document.activeElement.className !== "vis-network")
+        return;
 
     // Keycode for deleting nodes/edges (delete/backspace)
     if (event.keyCode == 8 || event.keyCode == 46) {
@@ -906,7 +820,7 @@ network.on('doubleClick', function (properties) {
             myElement.click();
             network.unselectAll();
             document.getElementById("inprename").focus();
-            document.getElementById("inprename").value = nodes.get(tmpNode).label.replace('(Any)', '').replace('(Any)', '').replace('(Disease)', '').replace('(Drug)', '').replace('(Gene)', '').replace('(Species)', '').replace('(Mutation)', '').replace('(CellLine)', '');
+            document.getElementById("inprename").value = nodes.get(tmpNode).label.replace('(Any)', '').replace('(Any)', '').replace('(Disease)', '').replace('(Chemical)', '').replace('(Gene)', '').replace('(Species)', '').replace('(Mutation)', '').replace('(CellLine)', '');
         }
     } else if (edges.get(network.getSelectedEdges()[0]).label == "part_of") {
         return 0;

@@ -34,20 +34,13 @@
         <br>
         <p><label>Label: </label><input id="inpnode" type="text"></p><br>
         <label>Entity Type: </label>
-        <select id="newNodeType" disabled>
+        <select id="newNodeType">
             <option value="Any" selected="selected">Any</option>
-            <option value="Drug">Drug</option>
+            <option value="Chemical">Chemical</option>
             <option value="Disease">Disease</option>
             <option value="Gene">Gene</option>
             <option value="Species">Species</option>
-            <option value="Mutation">Mutation</option>
-            <option value="CellLine">CellLine</option>
         </select>
-        <br></br>
-        <!--  <input id="checknode" type="checkbox">Literal?</input> -->
-        <label>Literal?</label>
-        <input type="checkbox" id="checknode"/>
-
         <br></br>
         <a class="okbtn" id="btnsub" onclick="dialogNameNode()" href="#close-modal" rel="modal:close">OK</a>
         <a class="cancelbtn" id="canBtn" href="#close-modal" rel="modal:close">Cancel</a>
@@ -78,19 +71,14 @@
         <div class="divheaders">Rename Node</div>
         <p><label>Label:</label><input id="inprename" type="text"></p>
         <label>Entity Type: </label>
-        <select id="RenameNodeType" disabled>
+        <select id="RenameNodeType">
             <option value="Any" selected="selected">Any</option>
-            <option value="Drug">Drug</option>
+            <option value="Chemical">Chemical</option>
             <option value="Disease">Disease</option>
             <option value="Gene">Gene</option>
             <option value="Species">Species</option>
-            <option value="Mutation">Mutation</option>
-            <option value="CellLine">CellLine</option>
         </select>
         <br></br>
-
-        <input id="checkrename" type="checkbox">Literal?</input>
-        <br><br>
         <a class="okbtn" id="btnsubrename" onclick="dialogReName()" href="#close-modal" rel="modal:close">OK</a>
         <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
@@ -109,8 +97,10 @@
                         - Entities including empty spaces must be encoded like follows: Cytochrome_P-450_CYP3A or
                         Diabetes_Mellitus <br>
                         - Predicates must stem from a predefined set of predicates (see below) <br>
-                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin CAUSES ?X
+                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin causes ?X
                         <br>
+                        - You can type variables by writing their type in brackets directly behind the variable, e.g.
+                        ?X(Disease), ?X(Species) (Choose from Chemical, Disease, DosageForm, Gene and Species)  <br>
                         - Multiple facts are queried as follows (separated by a '.'): Simvastatin causes ?X. ?X affects
                         ?<br>
                 </div>
@@ -120,16 +110,7 @@
                     <div class="form-group">
                         <!--<label for="id_keywords"><strong>Search</strong></label> -->
                         <textarea class="form-control" id="id_keywords" rows="3"
-                                  name="keywords">Simvastatin causes Rhabdomyolysis</textarea>
-
-                        <!--
-                        <label><strong>Data Source:</strong></label><br>
-                        <input type="radio" id="radio_openie" name="data_source" value="OpenIE" checked="checked">
-                        <label for="radio_openie">OpenIE (12k PMC Documents including Simvastatin)</label><br>
-                        <input type="radio" id="radio_semmeddb" name="data_source" value="SemMedDB2019">
-                        <label for="radio_semmeddb">SemMedDB2019 (PubMed Abstracts + Titles, 31.12.2018)</label><br> -->
-
-
+                                  name="keywords">Simvastatin causes ?X(Disease)</textarea>
                         <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
                        'administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists_with',
@@ -138,7 +119,11 @@
                             'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with', 'different_from',
                             'higher_than', 'lower_than', 'same_as'
                         </small>
-
+                        <label><strong>Data Source:</strong></label><br>
+                        <input type="radio" id="radio_openie" name="data_source" value="PMC" checked="checked">
+                        <label for="radio_openie">PubMedCentral Sample (12k Fulltext Documents including Simvastatin)</label><br>
+                        <input type="radio" id="radio_semmeddb" name="data_source" value="PubMed">
+                        <label for="radio_semmeddb">PubMed Sample (1 Million Document Titles and Abstracts)</label><br>
                     </div>
                     <button type="submit" class="btn btn-primary" id="btn_search">
                         Search
@@ -162,9 +147,6 @@
                     - backspace/delete: to delete nodes or edges <br></p>
             </div>
 
-            <button class="button" id="cluster" onClick=clusterSelected() class="btn btn-secondary"
-                    data-toggle="tooltip"
-                    data-placement="left" title="Cluster"></button>
             <button class="button" id="load" onClick="document.getElementById('tFile').click();"
                     class="btn btn-secondary"
                     data-toggle="tooltip" data-placement="left" title="Load"></button>
