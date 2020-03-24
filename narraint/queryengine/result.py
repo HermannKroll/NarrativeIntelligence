@@ -58,9 +58,9 @@ class QueryResultAggregate:
             self.aggregation[key] = ([result], result.var2substitution)
 
     def __entity_to_str(self, entity):
-        ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
-        # if no name was found - return tagged name
-        if ent_name == entity.entity_id:
+        try:
+            ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
+        except KeyError:
             ent_name = entity.entity_str
         return '{} ({} {})'.format(ent_name, entity.entity_id, entity.entity_type)
 
