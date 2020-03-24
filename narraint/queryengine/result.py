@@ -58,6 +58,8 @@ class QueryResultAggregate:
             self.aggregation[key] = ([result], result.var2substitution)
 
     def __entity_to_str(self, entity):
+        if entity.entity_type == 'predicate':
+            return entity.entity_id  # id is already the name
         try:
             ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
         except KeyError:

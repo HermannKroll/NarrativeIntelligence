@@ -178,9 +178,6 @@ class EntityResolver:
         return EntityResolver.__instance
 
     def get_name_for_var_ent_id(self, entity_id, entity_type):
-        if entity_type == 'predicate':
-            return entity_id  # id is already the name
-       # try:
         if entity_type in ['Chemical', 'Disease']:
             return self._mesh.descriptor_to_heading(entity_id)
         if entity_type in ['Gene']:
@@ -200,15 +197,6 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-
-    entity = EntityResolver()
-   # entity.get_name_for_var_ent_id("MESH:D001847", "Disease")
-    #entity.get_name_for_var_ent_id("MESH:C045463", "Chemical")
-    print(entity.get_name_for_var_ent_id("69820", "Species"))
-
-
-    return
-
 
     mesh = MeshResolver()
     mesh.build_index(MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE,
