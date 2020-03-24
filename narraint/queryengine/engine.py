@@ -165,8 +165,8 @@ class QueryEngine:
                 conf += float(r[offset+7])
             # create query result
             results.add_query_result(QueryResult(r[0], r[1], var2sub, conf, explanations))
-            time_needed = datetime.now() - start
 
+        time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
                                     sql_query.replace('\n', ' '), results.doc_ids)
         logging.info("{} hits: {}".format(results.result_size, results.doc_ids))
