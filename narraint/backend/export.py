@@ -6,6 +6,7 @@ from narraint.backend.database import Session
 from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
 from narraint.entity.entityresolver import EntityResolver
+from narraint.pubtator.convert import PatentConverter
 
 
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging):
@@ -66,8 +67,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
         logger.info("Results written to {}".format(out_fn))
 
 
-
-def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=None):
+def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=None, patent_ids=False):
     logging.info("Beginning XML export...")
     if document_ids is None:
         document_ids = []
@@ -109,7 +109,11 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
                 if tags_for_doc:
                     # create element with all tags for this document
                     doc_xml_content.append("\t<document>\n")
-                    doc_xml_content.append("\t\t<id>{}</id>\n".format(str(doc_id)))
+                    if patent_ids:
+                        doc_id = str(PatentConverter.decode_patent_country_code(doc_id))
+                    else:
+                        doc_id = str(doc_id)
+                    doc_xml_content.append("\t\t<id>{}</id>\n".format())
                     count_translated = 0
                     for e_id, e_type in tags_for_doc:
                         try:
@@ -117,7 +121,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
                                                    .format(entity_resolver.get_name_for_var_ent_id(e_id, e_type)))
                             count_translated += 1
                         except KeyError:
-                            missing_ent_ids.add((e_id, ent_type))
+                            missing_ent_ids.add((e_id, e_type))
                             translation_errors += 1
                             continue
                             # logger.warning('Does not know how to translate: {}'.format(e_id))
@@ -130,7 +134,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
         f.write("</documents>")
     if logger:
         logger.warning('the following entity ids are missing: {}'.format(missing_ent_ids))
-        logger.warning('{} entity skips due to missing translations'.format(translation_errors))
+        logger.warning('{} entity tags skips due to missing translations'.format(translation_errors))
         logger.info("{} documents with their tags written to {}".format(doc_count, out_fn))
 
 
@@ -140,6 +144,7 @@ def main():
     parser.add_argument("--ids", nargs="*", metavar="DOC_ID")
     parser.add_argument("--idfile", help='file containing document ids (one id per line)')
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
+    parser.add_argument("-p", "--patents", action="store_true", help="Will replace the patent prefix ids by country codes")
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
     parser.add_argument("--sqllog", action="store_true", help='logs sql commands')
@@ -174,11 +179,21 @@ def main():
         document_ids = None
 
     if args.format == 'Pubtator':
+        if args.patents:
+            parser.error('Does not support patent ids replacement in pubtator mode')
+
         export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
     elif args.format == 'XML':
         if args.document:
             parser.error('Does not support document content in XML mode')
-        export_xml(args.output, tag_types, document_ids, collection=args.collection, logger=logger)
+        if args.patents:
+            export_xml(args.output, tag_types, document_ids, collection=args.collection, logger=logger,
+                       patent_ids=True)
+        else:
+            export_xml(args.output, tag_types, document_ids, collection=args.collection, logger=logger,
+                       patent_ids=False)
+
+
     else:
         parser.error('Does not support unknown format: {}'.format(args.format))
 

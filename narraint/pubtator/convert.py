@@ -242,6 +242,14 @@ class PatentConverter:
         EP=6,
         CA=7,
     )
+    COUNTY_PREFIX_REVERS = ["AU", "CN", "WO", "GB", "US", "EP", "CA"]
+
+    @staticmethod
+    def decode_patent_country_code(patent_id):
+        c_code, rest = patent_id[0], patent_id[1:]
+        if c_code == 0 or c_code > len(PatentConverter.COUNTY_PREFIX_REVERS) - 1:
+            raise ValueError('Country Code {} is unknown'.format(c_code))
+        return PatentConverter.COUNTY_PREFIX_REVERS[c_code-1], rest
 
     def convert(self, in_file, out_dir):
         """
