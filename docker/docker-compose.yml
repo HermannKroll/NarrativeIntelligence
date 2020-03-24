@@ -1,0 +1,26 @@
+version: '3'
+services:
+  narraint:
+    image: "narraint:latest"
+    depends_on:
+      - "psql"
+    environment:
+      NI_POSTGRES_USER: example
+      NI_POSTGRES_PW: example
+      NI_POSTGRES_HOST: psql
+      NI_POSTGRES_PORT: 5432
+      NI_POSTGRES_DB: taggingdb
+
+  psql:
+    image: "postgres:10.12-alpine"
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: taggingdb
+      POSTGRES_PORT: 5432
+    volumes:
+      - narraint_postgres:/var/lib/postgresql/data
+
+volumes:
+  narraint_postgres:
+    external: true

@@ -123,3 +123,8 @@ logs/
 config/*
 !config/*.prod.json
 !config/*.example.json
+
+# Docker
+docker/*.tgz
+docker/GNormPlusJava.zip
+docker/TaggerOne/models

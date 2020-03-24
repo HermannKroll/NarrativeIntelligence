@@ -1,0 +1,11 @@
+{
+  "pmc_dir": "",
+  "taggerOne": {
+    "root": "/app/tagger/TaggerOne-0.2.1",
+    "model": "models/model_BC5CDRJ_011.bin",
+    "batchSize": 10000
+  },
+  "gnormPlus": "/app/tagger/GNormPlusJava",
+  "dnorm": "/app/tagger/DNorm-0.0.7",
+  "tmchem": "/app/tagger/tmChemM1-0.0.2"
+}
