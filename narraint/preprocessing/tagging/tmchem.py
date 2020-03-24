@@ -43,11 +43,17 @@ class TMChem(BaseTagger):
             self.logger.debug("Starting {}".format(process.args))
 
             # Wait until finished
-            while process.poll() is None:
+            done = False
+            while not done:
                 sleep(self.OUTPUT_INTERVAL)
-                print_progress_with_eta("tmChem tagging", self.get_progress(), files_total, start_time,
+                progress = self.get_progress()
+                print_progress_with_eta("tmChem tagging", progress-1 if progress > 0 else 0, files_total, start_time,
                                         print_every_k=1, logger=self.logger)
-            self.logger.debug("Exited with code {}".format(process.poll()))
+                if progress >= files_total:
+                    lastline = get_last_line(self.log_file)
+                    done = lastline == b'Waiting for input\n' #hacky, might break in the next tmchem version
+            self.logger.debug("Terminating tmChem tagger")
+            process.terminate()
 
             # Problem:
             # Automatically resuming tmChem is not as easy as it looks because the application does not log which
@@ -64,3 +70,11 @@ class TMChem(BaseTagger):
 
     def get_tags(self):
         return self._get_tags(self.out_dir)
+
+def get_last_line(logfile):
+    with open(logfile, "rb") as f:
+        first = f.readline()  # Read the first line.
+        f.seek(-2, os.SEEK_END)  # Jump to the second last byte.
+        while f.read(1) != b"\n":  # Until EOL is found...
+            f.seek(-2, os.SEEK_CUR)  # ...jump back the read byte plus one more.
+        return f.readline()

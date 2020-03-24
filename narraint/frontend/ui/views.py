@@ -2,23 +2,29 @@ import logging
 import os
 import pickle
 import re
+import traceback
+import sys
 from datetime import datetime
 
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-
-from narraint.graph.labeled import LabeledGraph
 from narraint.mesh.data import MeSHDB
-from narraint.semmeddb.dbconnection import SemMedDB
 from narraint.stories.story import MeshTagger
-
-
 from narraint.queryengine.engine import QueryEngine
-from narraint.queryengine.result import QueryResultAggregate
 
-import traceback
-import sys
+VAR_NAME = re.compile(r'(\?\w+)')
+VAR_TYPE = re.compile(r'\((\w+)\)')
+
+variable_type_mappings = {"chemical": "Chemical",
+                          "chemicals": "Chemical",
+                          "disease": "Disease",
+                          "diseases": "Disease",
+                          "dosageform": "DosageForm",
+                          "dosageforms": "DosageForm",
+                          "gene": "Gene",
+                          "genes": "Gene",
+                          "species": "Species"}
 
 allowed_predicates = ['administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists with',
                       'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
@@ -26,31 +32,22 @@ allowed_predicates = ['administered to', 'affects', 'associated with', 'augments
                       'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with',
                       'different from', 'higher than', 'lower than', 'same as']
 
-
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-
 query_engine = QueryEngine()
-
 db = MeSHDB.instance()
 db.load_xml(settings.DESCRIPTOR_FILE, False, True)
 mesh_tagger = MeshTagger(db)
-
-
-#semmed = SemMedDB(config_file=settings.SEMMEDDB_CONFIG, log_enabled=True, log_dir=settings.SEMMEDDB_LOG_DIR)
-#semmed.connect_to_db()
-#semmed.load_umls_dictionary()
-#semmed.load_predicates()
 
 try:
     if os.path.exists(settings.MESHDB_INDEX):
         start = datetime.now()
         print(settings.MESHDB_INDEX)
         with open(settings.MESHDB_INDEX, "rb") as f:
-             index = pickle.load(f)
+            index = pickle.load(f)
         db.set_index(index)
         end = datetime.now()
         logger.info("Index loaded in {}".format(end - start))
@@ -60,21 +57,33 @@ except Exception:
     traceback.print_exc(file=sys.stdout)
 
 
-# END Preparation
+def check_and_convert_variable(text):
+    var_name = VAR_NAME.search(text).group(1)
+    m = VAR_TYPE.search(text)
+    if m:
+        t = m.group(1).lower()
+        if t not in variable_type_mappings:
+            raise ValueError('"{}" as Variable Type unknown (supported: {})'
+                             .format(t, list(variable_type_mappings.values())))
+        return '{}({})'.format(var_name, variable_type_mappings[t])
+    else:
+        return var_name
 
 
 def convert_text_to_entity(text, tagger):
-    text = text.replace('_', ' ')
+    text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
-        s, s_type = text, 'VAR'
-    elif text.startswith('MESH:'):
-        s, s_type = text, 'MESH_MANUAL'
-    elif text.startswith('GENE:'):
-        return text.split(":", 1)[1],"GENE_Manual"
-
+        s, s_type = check_and_convert_variable(text), 'Variable'
+    elif text.startswith('mesh:'):
+        s, s_type = text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH'
+    elif text.startswith('gene:'):
+        s, s_type = text.split(":", 1)[1], "Gene"
+    elif text.startswith('species:'):
+        s, s_type = text.split(":", 1)[1], "Species"
     else:
         s, s_type = tagger.tag_entity(text)
-
+    if not s:
+        raise ValueError("Don't know how to understand: {}".format(text))
     return s, s_type
 
 
@@ -93,18 +102,18 @@ def convert_query_text_to_fact_patterns(query_txt, tagger):
             return None, explanation_str
 
         s_t, p_t, o_t = split[0], split[1], split[2]
-
-        s, s_type = convert_text_to_entity(s_t, tagger)
-        o, o_type = convert_text_to_entity(o_t, tagger)
-
-        if s is None:
-            explanation_str += 'error unknown subject: {}\n'.format(s_t)
-            logger.error('error unknown subject: {}'.format(s_t))
+        try:
+            s, s_type = convert_text_to_entity(s_t, tagger)
+        except ValueError as e:
+            explanation_str += 'error unknown subject: {}\n'.format(e)
+            logger.error('error unknown subject: {}'.format(e))
             return None, explanation_str
 
-        if o is None:
-            explanation_str += 'error unknown object: {}\n'.format(o_t)
-            logger.error('error unknown object: {}'.format(o_t))
+        try:
+            o, o_type = convert_text_to_entity(o_t, tagger)
+        except ValueError as e:
+            explanation_str += 'error unknown object: {}\n'.format(e)
+            logger.error('error unknown object: {}'.format(e))
             return None, explanation_str
 
         p = p_t.lower().replace('_', ' ')
@@ -122,25 +131,21 @@ def convert_query_text_to_fact_patterns(query_txt, tagger):
         if not s.startswith('?') or not o.startswith('?'):
             entity_check = True
             break
-    if not entity_check:
-        explanation_str += "no entity included in query - error\n"
-        return None, explanation_str
+    # if not entity_check:
+    #    explanation_str += "no entity included in query - error\n"
+    #   return None, explanation_str
 
     # check if the query is one connected graph
-  #  g = LabeledGraph()
-  #  for s, p, o in fact_patterns:
-  #      g.add_edge(p, s, o)
+    #  g = LabeledGraph()
+    #  for s, p, o in fact_patterns:
+    #      g.add_edge(p, s, o)
     # there are multiple connected components - stop
-  #  con_comp = g.compute_connectivity_components()
-  #  if len(con_comp) != 1:
-  #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
-   #     return None, explanation_str
+    #  con_comp = g.compute_connectivity_components()
+    #  if len(con_comp) != 1:
+    #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
+    #     return None, explanation_str
 
     return fact_patterns, explanation_str
-
-
-VAR_NAME = re.compile(r'(\?\w+)')
-VAR_TYPE = re.compile(r'\((\w+)\)')
 
 
 def convert_graph_patterns_to_nt(query_txt):
@@ -156,16 +161,16 @@ def convert_graph_patterns_to_nt(query_txt):
             var_name = VAR_NAME.search(s).group(1)
             var_type = VAR_TYPE.search(s)
             if var_name not in var_dict:
-                var_dict[var_name] = '{}'.format(var_name)
+                var_dict[var_name] = check_and_convert_variable(s)
             if var_type:
-                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+                var_dict[var_name] = check_and_convert_variable(s)
         if o.startswith('?'):
             var_name = VAR_NAME.search(o).group(1)
             var_type = VAR_TYPE.search(o)
             if var_name not in var_dict:
-                var_dict[var_name] = '{}'.format(var_name)
+                var_dict[var_name] = check_and_convert_variable(o)
             if var_type:
-                var_dict[var_name] = '{}({})'.format(var_name, var_type.group(1))
+                var_dict[var_name] = check_and_convert_variable(o)
 
     for f in facts_split:
         split = f.strip().split(' ')
@@ -191,33 +196,25 @@ class SearchView(TemplateView):
                 try:
                     query = self.request.GET.get("query", "").strip()
                     data_source = self.request.GET.get("data_source", "").strip()
-                    #logging.info("Selected data source is {}".format(data_source))
+                    logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
-                    nt_string = convert_graph_patterns_to_nt(query)
-
                     if query_fact_patterns is None:
                         results_converted = []
                         nt_string = ""
                         logger.error('parsing error')
                     else:
-
-                      #  if data_source == 'semmeddb':
-                      #      results_converted = []
-                     #       query_trans_string = "currently not supported"
-                        #  pmids, titles, var_subs, var_names = semmed.query_for_fact_patterns(query_fact_patterns,
-                           #                                                                     query)
-                    #    else:
+                        nt_string = convert_graph_patterns_to_nt(query)
                         results_converted = []
                         aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query)
-                        for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[0:25]:
+                        for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
+                                                                                0:30]:
                             results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
-
-
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
                     traceback.print_exc(file=sys.stdout)
 
-            return JsonResponse(dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
+            return JsonResponse(
+                dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)

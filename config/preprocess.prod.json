@@ -6,5 +6,6 @@
     "batchSize": 10000
   },
   "gnormPlus": "/home/kroll/tools/tagger/GNormPlusJava",
-  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7"
+  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
+  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
 }
