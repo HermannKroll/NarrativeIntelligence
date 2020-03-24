@@ -1,20 +1,19 @@
 import argparse
 import logging
-import os
 
 from narraint.backend import enttypes
 from narraint.backend.database import Session
 from narraint.backend.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
+from narraint.entity.entityresolver import EntityResolver
 
 
-
-def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=None):
-    logging.info("Beginning export...")
+def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging):
+    logger.info("Beginning export...")
     if document_ids is None:
         document_ids = []
     else:
-        logging.info('Using {} ids for a filter condition'.format(len(document_ids)))
+        logger.info('Using {} ids for a filter condition'.format(len(document_ids)))
 
     session = Session.get()
 
@@ -64,7 +63,75 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
             for row in results:
                 f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
     if logger:
-    	logger.info("Results written to {}".format(out_fn))
+        logger.info("Results written to {}".format(out_fn))
+
+
+
+def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=None):
+    logging.info("Beginning XML export...")
+    if document_ids is None:
+        document_ids = []
+    else:
+        logging.info('Using {} ids for a filter condition'.format(len(document_ids)))
+
+    session = Session.get()
+    query = session.query(Tag.document_id, Tag.ent_id, Tag.ent_type)
+    if collection:
+        query = query.filter_by(document_collection=collection)
+    if document_ids:
+        query = query.filter(Tag.document_id.in_(document_ids))
+    query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+
+    if tag_types and enttypes.ALL != tag_types:
+        query = query.filter(Tag.ent_type.in_(tag_types))
+
+    results = session.execute(query)
+    entity_resolver = EntityResolver()
+    tags_for_doc = set()
+    last_doc_id = -1
+    doc_count = 0
+    translation_errors = 0
+    missing_ent_ids = set()
+    with open(out_fn, 'wt', encoding="utf-8") as f:
+        f.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        f.write("<documents>\n")
+        for row in results:
+            doc_id, ent_id, ent_type = row
+            # collect tags for document (as long as tags are for the same document)
+            if last_doc_id == -1:
+                last_doc_id = doc_id
+            if doc_id == last_doc_id:
+                tags_for_doc.add((ent_id, ent_type))
+                continue
+            else:
+                doc_count += 1
+                doc_xml_content = []
+                if tags_for_doc:
+                    # create element with all tags for this document
+                    doc_xml_content.append("\t<document>\n")
+                    doc_xml_content.append("\t\t<id>{}</id>\n".format(str(doc_id)))
+                    count_translated = 0
+                    for e_id, e_type in tags_for_doc:
+                        try:
+                            doc_xml_content.append("\t\t<tag>{}</tag>\n"
+                                                   .format(entity_resolver.get_name_for_var_ent_id(e_id, e_type)))
+                            count_translated += 1
+                        except KeyError:
+                            missing_ent_ids.add((e_id, ent_type))
+                            translation_errors += 1
+                            continue
+                            # logger.warning('Does not know how to translate: {}'.format(e_id))
+                    doc_xml_content.append("\t</document>\n")
+                    doc_xml_temp = "".join(doc_xml_content)
+                    if count_translated:
+                        f.write(doc_xml_temp)
+                last_doc_id = doc_id
+                tags_for_doc = set()
+        f.write("</documents>")
+    if logger:
+        logger.warning('the following entity ids are missing: {}'.format(missing_ent_ids))
+        logger.warning('{} entity skips due to missing translations'.format(translation_errors))
+        logger.info("{} documents with their tags written to {}".format(doc_count, out_fn))
 
 
 def main():
@@ -76,6 +143,7 @@ def main():
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
     parser.add_argument("--sqllog", action="store_true", help='logs sql commands')
+    parser.add_argument("-f", "--format", help="Export format (Pubtator / XML)", default="Pubtator")
     args = parser.parse_args()
 
     if not (args.tag or args.document):
@@ -105,7 +173,14 @@ def main():
     else:
         document_ids = None
 
-    export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
+    if args.format == 'Pubtator':
+        export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
+    elif args.format == 'XML':
+        if args.document:
+            parser.error('Does not support document content in XML mode')
+        export_xml(args.output, tag_types, document_ids, collection=args.collection, logger=logger)
+    else:
+        parser.error('Does not support unknown format: {}'.format(args.format))
 
 
 if __name__ == "__main__":
