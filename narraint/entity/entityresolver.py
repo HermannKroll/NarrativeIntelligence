@@ -1,6 +1,7 @@
 import gzip
 import logging
 import pickle
+from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 
@@ -89,20 +90,27 @@ class GeneResolver:
 
 class SpeciesResolver:
 
-    NAME_TO_LOOK_FOR = 'genbank common name'
+    NAME_COMMON = 'genbank common name'
+    NAME_COMMON_SHORTCUT = "c"
+    NAME_SCIENTIFIC = "scientific name"
+    NAME_SCIENTIFIC_SHORTCUT = "s"
 
     def __init__(self):
-        self.speciesid2name = {}
+        self.speciesid2name = defaultdict(dict)
 
     def build_index(self, species_input, index_file):
         logging.info('Reading species input file: {}'.format(species_input))
         with gzip.open(species_input, 'rt') as f:
             for line in islice(f, 1, None):
-                if self.NAME_TO_LOOK_FOR in line:
+                if self.NAME_COMMON in line or self.NAME_SCIENTIFIC in line:
                     components = line.split('\t')
                     species_id = components[0]
                     name = components[2]
-                    self.speciesid2name[species_id] = name
+
+                    if self.NAME_COMMON in line:
+                        self.speciesid2name[species_id][self.NAME_COMMON_SHORTCUT] = name
+                    else:
+                        self.speciesid2name[species_id][self.NAME_SCIENTIFIC_SHORTCUT] = name
 
         logging.info('Writing index to: {}'.format(index_file))
         with open(index_file, 'wb') as f:
@@ -115,7 +123,15 @@ class SpeciesResolver:
         logging.info('Species index ({} keys) load in {}s'.format(len(self.speciesid2name), datetime.now() - start_time))
 
     def species_id_to_name(self, species_id):
-        return self.speciesid2name[species_id]
+        sp2name = self.speciesid2name[species_id]
+        name = []
+        if self.NAME_COMMON_SHORTCUT in sp2name:
+            name.append(sp2name[self.NAME_COMMON_SHORTCUT])
+        if self.NAME_SCIENTIFIC_SHORTCUT in sp2name:
+            if name:
+                name.append('/')
+            name.append(sp2name[self.NAME_SCIENTIFIC_SHORTCUT])
+        return ''.join(name)
 
 
 class DosageFormResolver:
@@ -186,12 +202,12 @@ def main():
                         level=logging.DEBUG)
 
     entity = EntityResolver()
-    entity.get_name_for_var_ent_id("MESH:D001847", "Disease")
-    entity.get_name_for_var_ent_id("MESH:C045463", "Chemical")
-    entity.get_name_for_var_ent_id("11096", "Species")
+   # entity.get_name_for_var_ent_id("MESH:D001847", "Disease")
+    #entity.get_name_for_var_ent_id("MESH:C045463", "Chemical")
+    print(entity.get_name_for_var_ent_id("69820", "Species"))
 
 
-    pass
+    return
 
 
     mesh = MeshResolver()
