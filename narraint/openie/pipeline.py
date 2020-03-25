@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 import logging
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.models import DocProcessedByOpenIE

@@ -6,6 +6,9 @@ SPECIES = "Species"
 DISEASE = "Disease"
 VARIANT = "Variant"
 CELLLINE = "CellLine"
+SNP = "SNP"
+PROTEINMUTATION = "ProteinMutation"
+DNAMUTATION = "DNAMutation"
 
 ALL = (
     DOSAGE_FORM,
@@ -16,7 +19,11 @@ ALL = (
     DISEASE,
     VARIANT,
     CELLLINE,
+    SNP,
+    PROTEINMUTATION,
+    DNAMUTATION
 )
+
 
 TAG_TYPE_MAPPING = dict(
     DF=DOSAGE_FORM,
@@ -28,4 +35,18 @@ TAG_TYPE_MAPPING = dict(
     V=VARIANT,
     CL=CELLLINE,
     A="ALL",
+)
+
+ENTITY_TYPES = dict(
+    Chemical=CHEMICAL,
+    Disease=DISEASE,
+    Gene=GENE,
+    Species=SPECIES,
+    Mutation=MUTATION,
+    CellLine=CELLLINE,
+    Variant=VARIANT,
+    ProteinMutation=PROTEINMUTATION,
+    DNAMutation=DNAMUTATION,
+    SNP=SNP,
+    DosageForm=DOSAGE_FORM
 )
