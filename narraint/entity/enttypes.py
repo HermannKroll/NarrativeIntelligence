@@ -9,6 +9,7 @@ CELLLINE = "CellLine"
 SNP = "SNP"
 PROTEINMUTATION = "ProteinMutation"
 DNAMUTATION = "DNAMutation"
+DOMAINMOTIF = "DomainMotif"
 
 ALL = (
     DOSAGE_FORM,
@@ -21,7 +22,8 @@ ALL = (
     CELLLINE,
     SNP,
     PROTEINMUTATION,
-    DNAMUTATION
+    DNAMUTATION,
+    DOMAINMOTIF
 )
 
 
@@ -48,5 +50,6 @@ ENTITY_TYPES = dict(
     ProteinMutation=PROTEINMUTATION,
     DNAMutation=DNAMUTATION,
     SNP=SNP,
-    DosageForm=DOSAGE_FORM
+    DosageForm=DOSAGE_FORM,
+    DomainMotiv=DOMAINMOTIF
 )
