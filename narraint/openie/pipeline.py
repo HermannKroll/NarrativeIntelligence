@@ -96,6 +96,7 @@ def main():
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
 
+    time_start = datetime.now()
     working_dir = tempfile.mkdtemp()
     document_export_file = os.path.join(working_dir, 'document_export.pubtator')
     openie_input_dir = os.path.join(working_dir, 'openie')
@@ -112,9 +113,11 @@ def main():
     ids_to_process = retrieve_document_ids_to_process(args.idfile, args.collection)
     # export them with their tags
     export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
+    time_exported = datetime.now()
     # now filter these documents
     amount_openie_docs = filter_document_sentences_without_tags(ids_to_process, document_export_file, openie_input_dir,
                                                                 openie_filelist_file)
+    time_filtered = datetime.now()
     # run openie
     if amount_openie_docs == 0:
         logging.info('No files to process for OpenIE - stopping')
@@ -126,8 +129,12 @@ def main():
         process_output(openie_output_file, args.output)
         logging.info("Done in {}".format(datetime.now() - start))
 
+    time_open_ie = datetime.now()
     # add document as processed to database
     # mark_document_as_processed_by_openie(ids_to_process, args.collection)
+    logging.info('Process finished in {}s ({}s export, {}s filtering and {}s openie)'
+                 .format(time_open_ie-time_start, time_exported-time_start, time_filtered-time_exported,
+                         time_open_ie-time_filtered))
 
 
 if __name__ == "__main__":
