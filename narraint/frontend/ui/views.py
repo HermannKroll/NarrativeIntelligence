@@ -194,19 +194,24 @@ class SearchView(TemplateView):
             query_trans_string = ""
             if "query" in request.GET:
                 try:
-                    query = self.request.GET.get("query", "").strip()
-                    data_source = self.request.GET.get("data_source", "").strip()
+                    query = str(self.request.GET.get("query", "").strip())
+                    data_source = str(self.request.GET.get("data_source", "").strip())
                     logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
-                    if query_fact_patterns is None:
+                    if data_source not in ["PMC", "PubMed"]:
+                        results_converted = []
+                        query_trans_string = "Data source is unknown"
+                        nt_string = ""
+                        logger.error('parsing error')
+                    elif query_fact_patterns is None:
                         results_converted = []
                         nt_string = ""
                         logger.error('parsing error')
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
                         results_converted = []
-                        aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query)
+                        aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query, data_source)
                         for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
                                                                                 0:30]:
                             results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))

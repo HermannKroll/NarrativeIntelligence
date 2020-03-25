@@ -60,11 +60,11 @@ const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
     let data_source = "openie"
-   /* if (document.getElementById('radio_semmeddb').checked) {
-        data_source = "semmeddb"
+    if (document.getElementById('radio_pmc').checked) {
+        data_source = "PMC"
     } else {
-        data_source = "openie"
-    }*/
+        data_source = "PubMed"
+    }
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)

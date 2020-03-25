@@ -184,7 +184,7 @@ body {
 }
 
 .help-tip:hover p {
-    opacity: 0.5;
+    opacity: 1.0;
     display: block;
     transform-origin: 100% 0%;
 
