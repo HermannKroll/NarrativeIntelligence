@@ -51,5 +51,5 @@ ENTITY_TYPES = dict(
     DNAMutation=DNAMUTATION,
     SNP=SNP,
     DosageForm=DOSAGE_FORM,
-    DomainMotiv=DOMAINMOTIF
+    DomainMotif=DOMAINMOTIF
 )
