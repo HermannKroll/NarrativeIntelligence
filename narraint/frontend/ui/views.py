@@ -74,7 +74,7 @@ def convert_text_to_entity(text, tagger):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         s, s_type = check_and_convert_variable(text), 'Variable'
-    elif text.startswith('mesh:'):
+    elif text_low.startswith('mesh:'):
         s, s_type = text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH'
     elif text.startswith('gene:'):
         s, s_type = text.split(":", 1)[1], "Gene"
