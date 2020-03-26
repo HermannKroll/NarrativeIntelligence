@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, BigInteger, \
-    UniqueConstraint
+from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
+    BigInteger, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -115,6 +115,7 @@ class Predication(Base):
     confidence = Column(Float, nullable=True)
     sentence = Column(String, nullable=False)
     openie_version = Column(String, nullable=False)
+    mirrored = Column(Boolean, nullable=False, default=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     def __str__(self):
