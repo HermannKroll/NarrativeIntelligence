@@ -158,17 +158,16 @@ class EntityResolver:
     __instance = None
 
     def __init__(self):
-        self._mesh = MeshResolver()
-        self._mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
-        self._gene = GeneResolver()
-        self._gene.load_index(GENE_INDEX_FILE)
-        self._species = SpeciesResolver()
-        self._species.load_index(TAXONOMY_INDEX_FILE)
-        self._dosageform = DosageFormResolver(self._mesh)
-
-        if self.__instance is not None:
+        if EntityResolver.__instance is not None:
             raise Exception('This class is a singleton - use EntityResolver.instance()')
         else:
+            self._mesh = MeshResolver()
+            self._mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
+            self._gene = GeneResolver()
+            self._gene.load_index(GENE_INDEX_FILE)
+            self._species = SpeciesResolver()
+            self._species.load_index(TAXONOMY_INDEX_FILE)
+            self._dosageform = DosageFormResolver(self._mesh)
             EntityResolver.__instance = self
 
     @staticmethod
