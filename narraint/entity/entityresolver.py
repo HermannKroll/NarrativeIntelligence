@@ -178,9 +178,9 @@ class EntityResolver:
         return EntityResolver.__instance
 
     def get_name_for_var_ent_id(self, entity_id, entity_type):
-        if entity_type in ['Chemical', 'Disease']:
+        if entity_id.startswith('MESH:') and entity_type in ['Chemical', 'Disease']:
             return self._mesh.descriptor_to_heading(entity_id)
-        if entity_type in ['Gene']:
+        if entity_type == "Gene":
             return self._gene.gene_id_to_name(entity_id)
         if entity_type == 'Species':
             return self._species.species_id_to_name(entity_id)
