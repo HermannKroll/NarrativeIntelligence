@@ -1,6 +1,6 @@
 import argparse
 import logging
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from datetime import datetime
 from typing import List
 
@@ -61,16 +61,13 @@ def load_tags_for_doc_ids(doc_ids, collection):
     query = query.filter(Tag.document_collection == collection)
     query = query.filter(Tag.document_id.in_(doc_ids))
 
-    doc2tags = {}
+    doc2tags = defaultdict(list)
     results = session.execute(query)
     counter = 0
     for row in results:
         ent_str = ' {} '.format(row[2]).lower()
         t = (row[1], ent_str, row[3])
-        if row[0] not in doc2tags:
-            doc2tags[row[0]] = [t]
-        else:
-            doc2tags[row[0]].append(t)
+        doc2tags[row[0]].append(t)
         counter += 1
     logging.info('{} tags load from db'.format(counter))
     return doc2tags
@@ -218,17 +215,17 @@ def clean_open_ie(input, collection):
     # go trough all cached triples
     start_time = datetime.now()
     for openie_t in tuples_cached:
-        if openie_t.pmid not in doc2tags:
+        if openie_t.doc_id not in doc2tags:
             continue
-        doc_tags = doc2tags[openie_t.pmid]
+        doc_tags = doc2tags[openie_t.doc_id]
         # go trough all detected entities in the subject and object part of the open ie triple
         sub_ents, obj_ents = get_subject_and_object_entities(doc_tags, openie_t.subj, openie_t.obj)
         for s_txt, s_id, s_type in sub_ents:
             for o_txt, o_id, o_type in obj_ents:
                 # check if tuple is already extracted for sentence
-                key = frozenset((openie_t.pmid, s_id, o_id, openie_t.pred, openie_t.sent))
+                key = frozenset((openie_t.doc_id, s_id, o_id, openie_t.pred, openie_t.sent))
                 if key not in already_included:
-                    t = PRED(openie_t.pmid, openie_t.subj, openie_t.pred, openie_t.pred_lemma, openie_t.obj,
+                    t = PRED(openie_t.doc_id, openie_t.subj, openie_t.pred, openie_t.pred_lemma, openie_t.obj,
                              openie_t.conf, openie_t.sent, s_id, s_txt, s_type, o_id, o_txt, o_type)
                     tuples_with_ent.append(t)
                     already_included.add(key)
