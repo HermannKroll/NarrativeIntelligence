@@ -16,7 +16,7 @@ def print_progress_with_eta(text, current_idx, size, start_time, print_every_k=1
     :return:
     """
     if current_idx % print_every_k == 0:
-        if current_idx < 0:
+        if current_idx < 0 or size == 0:
             percentage = 0
             eta = "--"
         else:

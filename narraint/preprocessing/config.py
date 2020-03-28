@@ -39,7 +39,11 @@ class Config:
     # GNormPlus
     @property
     def gnorm_root(self):
-        return self.config["gnormPlus"]
+        return self.config["gnormPlus"]["root"]
+
+    @property
+    def gnorm_java_args(self):
+        return self.config["gnormPlus"]["javaArgs"].split()
 
     @property
     def gnorm_setup(self):

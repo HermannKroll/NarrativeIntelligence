@@ -188,7 +188,7 @@ def bulk_load(path, collection, tagger_mapping=None):
     session.commit()
 
     sys.stdout.write("\rAdding documents ... done in {}\n".format(datetime.now() - start_time))
-    logging.info("Added documents in {}".format(datetime.now() - start_time))
+    logging.info("Added {} documents in {}".format(n_docs, datetime.now() - start_time))
 
 
 def load(path, collection, tagger_mapping=None, logger=None):
@@ -206,7 +206,7 @@ def load(path, collection, tagger_mapping=None, logger=None):
     session = Session.get()
 
     if tagger_mapping is None:
-        #if logger: logger.warning("No tagger mapping provided. Tags are ignored")
+        # if logger: logger.warning("No tagger mapping provided. Tags are ignored")
         logging.warning("No tagger mapping provided. Tags are ignored")
 
     if logger: logger.info('Load documents into database...')
@@ -280,8 +280,9 @@ def load(path, collection, tagger_mapping=None, logger=None):
                 if logger: logger.warning("Document {} {} not in DB".format(collection, doc_id))
 
         session.commit()
-        if logger: print_progress_with_eta("Adding documents", idx, n_docs, start_time, print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS,
-                                logger=logger)
+        if logger: print_progress_with_eta("Adding documents", idx, n_docs, start_time,
+                                           print_every_k=PRINT_ETA_EVERY_K_DOCUMENTS,
+                                           logger=logger)
 
     if logger: logger.info("Added documents in {}".format(datetime.now() - start_time))
 

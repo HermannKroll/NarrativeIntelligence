@@ -1,11 +1,8 @@
 FROM ubuntu:18.04
 
-# TODO: Set memory limits tmChem
-# TODO: Set memory limits TaggerOne
-# TODO: Set memory limits DNorm
-# TODO: Set memory limits GNormPlus (this is contained inside the Python code)
-
 RUN apt-get update && apt-get -y upgrade
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y install \
     python3 \
@@ -16,7 +13,9 @@ RUN apt-get -y install \
     make \
     postgresql \
     postgresql-contrib \
-    libpq-dev
+    libpq-dev \
+    openjdk-8-jre-headless \
+    unzip
 
 
 # Setup Ab3P
@@ -48,7 +47,9 @@ COPY docker/TaggerOne/models TaggerOne-0.2.1/models
 
 
 # Setup GNormPlus
-ADD docker/GNormPlusJava.zip .
+COPY docker/GNormPlusJava.zip .
+
+RUN unzip GNormPlusJava.zip && rm -f GNormPlusJava.zip
 
 ADD docker/GNormPlus/CRF++-0.58.tar.gz GNormPlusJava
 
@@ -69,19 +70,23 @@ COPY requirements requirements
 RUN pip3 install -r requirements/docker.txt
 
 
-# Setup Configuration
+# Setup Narrative Intelligence
 COPY docker/config/backend.json config/
 
 COPY docker/config/preprocess.json config/
 
-COPY resources .
+COPY resources resources/
 
 COPY data/desc2020.xml data/desc2020.xml
 
-COPY tmp .
+COPY tmp tmp/
 
-COPY narraint .
+COPY narraint narraint/
 
 
+# Setup container configuration
+ENV PYTHONPATH=/app
 
-ENTRYPOINT ["python3", "narraint/preprocessing/preprocess.py", "--tagger-one", "/input", "/output"]
+ENV LANG=C.UTF-8
+
+ENTRYPOINT ["python3", "narraint/preprocessing/preprocess.py", "--tagger-one", "-w", "1", "/input", "/output/out.txt"]

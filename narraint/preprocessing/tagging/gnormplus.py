@@ -63,8 +63,8 @@ class GNormPlus(BaseTagger):
         while keep_tagging:
             with open(self.log_file, "w") as f_log:
                 # Start GNormPlus
-                sp_args = ["java", "-Xmx100G", "-Xms30G", "-jar", self.config.gnorm_jar, self.in_dir, self.out_dir,
-                           self.config.gnorm_setup]
+                sp_args = ["java", *self.config.gnorm_java_args, "-jar", self.config.gnorm_jar, self.in_dir,
+                           self.out_dir, self.config.gnorm_setup]
                 process = subprocess.Popen(sp_args, cwd=self.config.gnorm_root, stdout=f_log, stderr=f_log)
                 self.logger.debug("Starting {}".format(process.args))
 
@@ -72,7 +72,7 @@ class GNormPlus(BaseTagger):
                 while process.poll() is None:
                     sleep(self.OUTPUT_INTERVAL)
                     print_progress_with_eta("GNormPlus tagging", self.get_progress(), files_total, start_time,
-                                            print_every_k=1,logger=self.logger)
+                                            print_every_k=1, logger=self.logger)
                 self.logger.debug("Exited with code {}".format(process.poll()))
 
             if process.poll() == 1:

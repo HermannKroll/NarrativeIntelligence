@@ -43,9 +43,9 @@ cd docker
 
 mkdir -p build
 
-docker save narraint:latest | gzip >build/narraint-image.tar.gz
+docker save narraint:latest | gzip > build/narraint-image.tar.gz
 
 
 echo "Building archive ..."
 
-tar -zcvf build/narraint-deploy.tar.gz narraint-image.tar.gz docker-compose.ymp
+tar -zcvf build/narraint-deploy.tar.gz build/narraint-image.tar.gz docker-compose.yml README.md

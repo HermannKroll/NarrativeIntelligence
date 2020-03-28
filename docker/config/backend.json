@@ -1,7 +1,7 @@
 {
-  "POSTGRES_DB": "",
-  "POSTGRES_HOST": "",
-  "POSTGRES_PORT": "",
-  "POSTGRES_USER": "",
+  "POSTGRES_DB": "postgres",
+  "POSTGRES_HOST": "psql",
+  "POSTGRES_PORT": 5432,
+  "POSTGRES_USER": "postgres",
   "POSTGRES_PW": ""
 }

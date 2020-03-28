@@ -1,5 +1,4 @@
 #!/bin/sh
-# TODO: Change Memory limits
 CP=libs/taggerOne.jar
 CP=${CP}:libs/trove-3.0.3.jar
 CP=${CP}:libs/dragontool.jar
@@ -32,4 +31,4 @@ OPT="${OPT} --abbreviationPostProcessingArgs 1|1|false"
 OPT="${OPT} --consistencyPostProcessingArgs 10|1"
 OPT="${OPT} --abbreviationSource ncbi.taggerOne.abbreviation.Ab3PAbbreviationSource|${AB3P_COMMAND}|${AB3P_DIR}|${TEMP}|${Ab3P_TIMEOUT}"
 echo ${OPT}
-java ${PR} -Xmx100G -Xms30G -XX:-UseGCOverheadLimit -cp ${CP} ncbi.taggerOne.ProcessText ${OPT}
+java ${PR} -Xmx30G -Xms10G -XX:-UseGCOverheadLimit -cp ${CP} ncbi.taggerOne.ProcessText ${OPT}

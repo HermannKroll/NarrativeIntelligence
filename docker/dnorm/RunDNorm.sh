@@ -1,4 +1,3 @@
-# TODO: Change memory limits
 CP=libs/dnorm.jar
 CP=${CP}:libs/colt.jar
 CP=${CP}:libs/lucene-analyzers-3.6.0.jar

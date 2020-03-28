@@ -85,3 +85,12 @@ created with app.quickdatabasediagrams.com
 
 ## Meeting Protocols
 - [2020_03_19](meetings/2020_03_19.md)
+
+## Docker
+The preprocessing-pipeline can be used as Docker container.
+To build the container, switch inside the `docker` subdirectory and run
+`./deploy.sh` The script will download the required taggers and copy the TaggerOne models
+into the directory due to Docker internals.
+
+The script creates a file called `narraint-deploy.tar.gz` inside the `build` directory.
+This file contains the compressed Docker image, the README and the docker-compose file.

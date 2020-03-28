@@ -5,7 +5,10 @@
     "model": "models/model_BC5CDRJ_011.bin",
     "batchSize": 10000
   },
-  "gnormPlus": "/home/kroll/tools/tagger/GNormPlusJava",
+  "gnormPlus": {
+    "root": "/home/kroll/tools/tagger/GNormPlusJava",
+    "javaArgs": "-Xmx100G -Xms30G"
+  },
   "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
   "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
 }
