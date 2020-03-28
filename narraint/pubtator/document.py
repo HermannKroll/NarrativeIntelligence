@@ -1,26 +1,5 @@
+from narraint.entity.enttypes import ENTITY_TYPES
 from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
-
-CHEMICAL = "Chemical"
-DISEASE = "Disease"
-GENE = "Gene"
-SPECIES = "Species"
-MUTATION = "Mutation"
-CELLLINE = "CellLine"
-PROTEINMUTATION = "ProteinMutation"
-DNAMUTATION = "DNAMutation"
-SNP = "SNP"
-
-ENTITY_TYPES = dict(
-    Chemical=CHEMICAL,
-    Disease=DISEASE,
-    Gene=GENE,
-    Species=SPECIES,
-    Mutation=MUTATION,
-    CellLine=CELLLINE,
-    ProteinMutation=PROTEINMUTATION,
-    DNAMutation=DNAMUTATION,
-    SNP=SNP
-)
 
 
 class DocumentError(Exception):

@@ -7,7 +7,7 @@ from typing import Tuple, Dict, Set
 
 from sqlalchemy.dialects.postgresql import insert
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag, Tagger, DocTaggedBy
 from narraint.progress import print_progress_with_eta

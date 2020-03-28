@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 import logging
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.models import DocProcessedByOpenIE
@@ -40,7 +40,6 @@ def filter_document_sentences_without_tags(document_ids, input_file, output_dir,
     doc_size = len(document_ids)
     logging.info('Filtering {} documents (keep only document sentences with tags)'.format(doc_size))
     amount_skipped_files = 0
-    amount_files = 0
     openie_files = []
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(input_file)):
@@ -62,7 +61,7 @@ def filter_document_sentences_without_tags(document_ids, input_file, output_dir,
 
         print_progress_with_eta('filtering documents...', idx, doc_size, start_time)
 
-    logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
+    logging.info('{} files need to be processed. {} files skipped.'.format(len(openie_files), amount_skipped_files))
     with open(openie_filelist, "w") as f:
         f.write("\n".join(openie_files))
     return len(openie_filelist)
@@ -96,7 +95,8 @@ def main():
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
 
-    working_dir = tempfile.mkdtemp()
+    time_start = datetime.now()
+    working_dir = "/tmp/tmpbaejhnwf" #tempfile.mkdtemp()
     document_export_file = os.path.join(working_dir, 'document_export.pubtator')
     openie_input_dir = os.path.join(working_dir, 'openie')
     openie_filelist_file = os.path.join(working_dir, 'openie_filelist.txt')
@@ -111,10 +111,12 @@ def main():
     # first get a list of all document ids which have to be processed
     ids_to_process = retrieve_document_ids_to_process(args.idfile, args.collection)
     # export them with their tags
-    export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
+   # export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
+    time_exported = datetime.now()
     # now filter these documents
     amount_openie_docs = filter_document_sentences_without_tags(ids_to_process, document_export_file, openie_input_dir,
                                                                 openie_filelist_file)
+    time_filtered = datetime.now()
     # run openie
     if amount_openie_docs == 0:
         logging.info('No files to process for OpenIE - stopping')
@@ -126,8 +128,12 @@ def main():
         process_output(openie_output_file, args.output)
         logging.info("Done in {}".format(datetime.now() - start))
 
+    time_open_ie = datetime.now()
     # add document as processed to database
-    # mark_document_as_processed_by_openie(ids_to_process, args.collection)
+    mark_document_as_processed_by_openie(ids_to_process, args.collection)
+    logging.info('Process finished in {}s ({}s export, {}s filtering and {}s openie)'
+                 .format(time_open_ie-time_start, time_exported-time_start, time_filtered-time_exported,
+                         time_open_ie-time_filtered))
 
 
 if __name__ == "__main__":

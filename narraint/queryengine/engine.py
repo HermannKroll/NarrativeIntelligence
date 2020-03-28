@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.result import QueryFactExplanation, QueryResult, QueryResultAggregate
 
-QUERY_LIMIT = 1000
+QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')

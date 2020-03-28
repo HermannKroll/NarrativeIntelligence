@@ -84,6 +84,7 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_03_25](meetings/2020_03_25.md)
 - [2020_03_19](meetings/2020_03_19.md)
 
 ## Docker

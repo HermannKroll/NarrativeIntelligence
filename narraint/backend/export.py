@@ -1,9 +1,9 @@
 import argparse
 import logging
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.backend.database import Session
-from narraint.backend.enttypes import TAG_TYPE_MAPPING
+from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
 from narraint.entity.entityresolver import EntityResolver
 from narraint.pubtator.convert import PatentConverter

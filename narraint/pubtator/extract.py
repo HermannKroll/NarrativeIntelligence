@@ -5,8 +5,6 @@ import re
 
 from narraint.pubtator.regex import DOCUMENT_ID
 
-REGEX_TITLE_OR_ABSTRACT = re.compile("(\d+)\|[at]\|(.*?)\n")
-
 
 # TODO: This method should be unit-tested because its used a lot
 def read_pubtator_documents(path):
@@ -38,7 +36,7 @@ def extract_pubtator_docs(input_file, id_file, output, logger):
     logger.info('processing input file...')
     with open(output, 'w') as f_out:
         for document_content in read_pubtator_documents(input_file):
-            doc_id = DOCUMENT_ID.find(document_content)
+            doc_id = DOCUMENT_ID.search(document_content)
             if doc_id in ids:
                 f_out.write(document_content)
 

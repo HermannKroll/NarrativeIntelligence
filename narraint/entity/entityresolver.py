@@ -158,17 +158,16 @@ class EntityResolver:
     __instance = None
 
     def __init__(self):
-        self._mesh = MeshResolver()
-        self._mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
-        self._gene = GeneResolver()
-        self._gene.load_index(GENE_INDEX_FILE)
-        self._species = SpeciesResolver()
-        self._species.load_index(TAXONOMY_INDEX_FILE)
-        self._dosageform = DosageFormResolver(self._mesh)
-
-        if self.__instance is not None:
+        if EntityResolver.__instance is not None:
             raise Exception('This class is a singleton - use EntityResolver.instance()')
         else:
+            self._mesh = MeshResolver()
+            self._mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
+            self._gene = GeneResolver()
+            self._gene.load_index(GENE_INDEX_FILE)
+            self._species = SpeciesResolver()
+            self._species.load_index(TAXONOMY_INDEX_FILE)
+            self._dosageform = DosageFormResolver(self._mesh)
             EntityResolver.__instance = self
 
     @staticmethod
@@ -178,9 +177,9 @@ class EntityResolver:
         return EntityResolver.__instance
 
     def get_name_for_var_ent_id(self, entity_id, entity_type):
-        if entity_type in ['Chemical', 'Disease']:
+        if entity_id.startswith('MESH:') and entity_type in ['Chemical', 'Disease']:
             return self._mesh.descriptor_to_heading(entity_id)
-        if entity_type in ['Gene']:
+        if entity_type == "Gene":
             return self._gene.gene_id_to_name(entity_id)
         if entity_type == 'Species':
             return self._species.species_id_to_name(entity_id)

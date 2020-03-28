@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 from time import sleep
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents

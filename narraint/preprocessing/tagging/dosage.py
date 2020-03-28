@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 
 from narraint import config
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS, \
     DOSAGE_FORM_TAGGER_INDEX_CACHE, TMP_DIR
 from narraint.mesh.data import MeSHDB

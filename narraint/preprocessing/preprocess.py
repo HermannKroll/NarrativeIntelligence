@@ -5,9 +5,9 @@ from argparse import ArgumentParser
 from typing import List
 import multiprocessing
 
-from narraint.backend import enttypes
+from narraint.entity import enttypes
 from narraint.backend.database import Session
-from narraint.backend.enttypes import TAG_TYPE_MAPPING
+from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.export import export
 from narraint.backend.load import load
 from narraint.backend.models import DocTaggedBy

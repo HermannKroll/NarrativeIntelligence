@@ -970,9 +970,9 @@ function createQuery() {
         query = query.concat(nodes.get(edges.get(i).from).label.replace(/ /g, '_')); // replace all " " with "_"
         query = query + " ";
         query = query.concat(edges.get(i).label);
-        query = query + " "
+        query = query + " ";
         query = query.concat(nodes.get(edges.get(i).to).label.replace(/ /g, '_')); // replace all " " with "_"
-        query = query + "; ";
+        query = query + ". ";
     }
     query = query.replace('(Any)', '')
     //remove last
