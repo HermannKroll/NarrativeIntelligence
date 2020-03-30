@@ -12,16 +12,13 @@ from narraint.backend.export import export
 from narraint.backend.load import load
 from narraint.backend.models import DocTaggedBy
 from narraint.config import PREPROCESS_CONFIG
-from narraint.preprocessing.collect import PMCCollector
 from narraint.preprocessing.config import Config
-from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.pubtator.convert import PMCConverter
 from narraint.pubtator.document import get_document_id, DocumentError
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs
 
@@ -174,8 +171,6 @@ def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
-    parser.add_argument("--ids", action="store_true",
-                        help="Collect documents from directory (e.g., for PubMedCentral) and convert to PubTator")
 
     group_tag = parser.add_argument_group("Tagging")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
@@ -193,9 +188,7 @@ def main():
     group_settings.add_argument("-w", "--workers", default=1, help="Number of processes for parallelized preprocessing",
                                 type=int)
 
-    parser.add_argument("input", help="Directory with PubTator files "
-                                      "(can be a file if --ids is set or a directory if --resume is set)",
-                        metavar="IN_DIR")
+    parser.add_argument("input", help="Directory with PubTator files ", metavar="IN_DIR")
     parser.add_argument("output", help="Output file", metavar="OUT_FILE")
     args = parser.parse_args()
 
@@ -216,19 +209,6 @@ def main():
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
     logger.info("Project directory: {}".format(root_dir))
     logger.debug("Input directory: {}".format(in_dir))
-
-    # Perform collection and conversion
-    if args.ids and args.corpus == "PMC":
-        logger.info('Load PMCID to PMID translation file')
-        pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
-        in_dir = tempfile.mkdtemp()
-        error_file = os.path.join(in_dir, "conversion_errors.txt")
-        collector = PMCCollector(conf.pmc_dir)
-        files = collector.collect(args.input)
-        translator = PMCConverter()
-        translator.convert_bulk(files, in_dir, pmcid2pmid, error_file)
-    elif args.ids:
-        raise logger.exception("Providing an ID set is only supported for PMC collection")
 
     # Add documents to database
     if args.skip_load:
