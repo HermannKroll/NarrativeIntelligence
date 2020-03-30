@@ -964,17 +964,23 @@ function redo() {
     createQuery();
 }
 
+function escapeTripleSequence(str){
+    if(str.includes(" ")){
+        return "\"" + str + "\"";
+    } else {
+        return str;
+    }
+}
+
 function createQuery() {
     query = "";
     for (i of edges.getIds()) { // iterate over all edges
-        query = query.concat(nodes.get(edges.get(i).from).label.replace(/ /g, '_')); // replace all " " with "_"
-        query = query + " ";
-        query = query.concat(edges.get(i).label);
-        query = query + " ";
-        query = query.concat(nodes.get(edges.get(i).to).label.replace(/ /g, '_')); // replace all " " with "_"
-        query = query + ". ";
+        let s = escapeTripleSequence(nodes.get(edges.get(i).from).label);
+        let p = escapeTripleSequence(edges.get(i).label);
+        let o = escapeTripleSequence(nodes.get(edges.get(i).to).label);
+        query += s + " " + p + " " + o + ". ";
     }
-    query = query.replace('(Any)', '')
+    query = query.replace('(Any)', '');
     //remove last
     query = query.substring(0, query.length - 2);
     if (query != oldquery) {
