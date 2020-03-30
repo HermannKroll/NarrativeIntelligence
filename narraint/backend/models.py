@@ -1,3 +1,4 @@
+from collections import namedtuple
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
@@ -89,6 +90,14 @@ class Tag(Base):
 
     def to_pubtator(self):
         return Tag.create_pubtator(self.document_id, self.start, self.end, self.ent_str, self.ent_type, self.ent_id)
+
+
+PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "document_collection",
+                                                     "subject_openie", "subject_id", "subject_str", "subject_type",
+                                                     "predicate", "predicate_cleaned", "predicate_canonicalized",
+                                                     "object_openie", "object_id", "object_str", "object_type",
+                                                     "confidence", "sentence", "openie_version", "mirrored",
+                                                     "date_inserted"])
 
 
 class Predication(Base):
