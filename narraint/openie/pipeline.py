@@ -96,7 +96,7 @@ def main():
         core_nlp_dir = conf["corenlp"]
 
     time_start = datetime.now()
-    working_dir = "/tmp/tmpbaejhnwf" #tempfile.mkdtemp()
+    working_dir = tempfile.mkdtemp()
     document_export_file = os.path.join(working_dir, 'document_export.pubtator')
     openie_input_dir = os.path.join(working_dir, 'openie')
     openie_filelist_file = os.path.join(working_dir, 'openie_filelist.txt')
@@ -111,7 +111,7 @@ def main():
     # first get a list of all document ids which have to be processed
     ids_to_process = retrieve_document_ids_to_process(args.idfile, args.collection)
     # export them with their tags
-   # export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
+    export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
     time_exported = datetime.now()
     # now filter these documents
     amount_openie_docs = filter_document_sentences_without_tags(ids_to_process, document_export_file, openie_input_dir,
