@@ -26,6 +26,15 @@ ALL = (
     DOMAINMOTIF
 )
 
+# set of all tags which are supported by our taggers
+ENT_TYPES_SUPPORTED_BY_TAGGERS = (
+    DOSAGE_FORM,
+    CHEMICAL,
+    GENE,
+    SPECIES,
+    DISEASE
+)
+
 
 TAG_TYPE_MAPPING = dict(
     DF=DOSAGE_FORM,
