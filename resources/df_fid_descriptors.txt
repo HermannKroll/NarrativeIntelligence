@@ -12,7 +12,7 @@ FIDX11	syrups	dry syrup
 FIDX12	foams
 FIDX13	patches	drug patches;active-ingredient patches;medicated plasters;plasters;cutaneous patches;patch
 FIDX14	sticks	nasal sticks;sticks
-FIDX15	Pharmaceutical tampons  ear tampons;tampons;rectal tampons
+FIDX15	Pharmaceutical tampons	ear tampons;tampons;rectal tampons
 FIDX16	Spray	ear sprays
 FIDX17	ophthalmic inserts
 FIDX19	shampoos and soaps  shampoos;soaps
