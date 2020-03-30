@@ -9,6 +9,7 @@ from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
+from narraint.entity.enttypes import GENE, SPECIES
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.result import QueryFactExplanation, QueryResult, QueryResultAggregate
 
@@ -43,7 +44,7 @@ class QueryEngine:
         for pred in predication_aliases:
             query = query.filter(document.id == pred.document_id)
 
-        for idx, (s, p, o) in enumerate(graph_query):
+        for idx, (s, s_t, p, o, o_t) in enumerate(graph_query):
             pred = predication_aliases[idx]
             query = query.filter(pred.document_collection == doc_collection)
 
@@ -56,6 +57,8 @@ class QueryEngine:
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
                     query = query.filter(pred.subject_id == s)
+                    if s_t in [GENE, SPECIES]:
+                        query = query.filter(pred.subject_type == s_t)
                 else:
                     var_name = VAR_NAME.search(s)
                     if not var_name:
@@ -77,6 +80,8 @@ class QueryEngine:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
                     query = query.filter(pred.object_id == o)
+                    if o_t in [GENE, SPECIES]:
+                        query = query.filter(pred.object_type == o_t)
                 else:
                     var_name = VAR_NAME.search(o)
                     if not var_name:
@@ -116,8 +121,12 @@ class QueryEngine:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
                 query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_canonicalized == p)
+                if s_t in [GENE, SPECIES]:
+                    query = query.filter(pred.subject_type == s_t)
+                if o_t in [GENE, SPECIES]:
+                    query = query.filter(pred.object_type == o_t)
 
-        # order by document id descending and limit results to 100
+                    # order by document id descending and limit results to 100
         query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
 
         return query, var_names
@@ -187,15 +196,15 @@ class QueryEngine:
     @staticmethod
     def query_entities():
         session = Session.get()
-        query_subjects = session.query(Predication.subject_id, Predication.subject_str).distinct()
-        query_objects = session.query(Predication.object_id, Predication.object_str).distinct()
+        query_subjects = session.query(Predication.subject_id, Predication.subject_str, Predication.subject_type).distinct()
+        query_objects = session.query(Predication.object_id, Predication.object_str, Predication.object_type).distinct()
         query = query_subjects.union(query_objects).distinct()
 
-        entities = []
+        entities = set()
         start_time = datetime.now()
         for r in session.execute(query):
-            ent_id, ent_str = r[0], r[1]
-            entities.append((ent_id, ent_str))
+            ent_id, ent_str, ent_type = r[0], r[1], r[2]
+            entities.add((ent_id, ent_str, ent_type))
 
         logging.info('{} entities queried in {}s'.format(len(entities), datetime.now() - start_time))
         return entities

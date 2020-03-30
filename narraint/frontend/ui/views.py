@@ -9,6 +9,9 @@ from datetime import datetime
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+
+from narraint.entity.entitytagger import EntityTagger
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.mesh.data import MeSHDB
 from narraint.stories.story import MeshTagger
 from narraint.queryengine.engine import QueryEngine
@@ -30,7 +33,7 @@ allowed_predicates = ['administered to', 'affects', 'associated with', 'augments
                       'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
                       'location of', 'manifestation of', 'method of', 'occurs in', 'part of', 'precedes', 'predisposes',
                       'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with',
-                      'different from', 'higher than', 'lower than', 'same as']
+                      'different from', 'higher than', 'lower than', 'same as', "uses", "dosageform"]
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -38,23 +41,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 
 logger = logging.getLogger(__name__)
 query_engine = QueryEngine()
-db = MeSHDB.instance()
-db.load_xml(settings.DESCRIPTOR_FILE, False, True)
-mesh_tagger = MeshTagger(db)
-
-try:
-    if os.path.exists(settings.MESHDB_INDEX):
-        start = datetime.now()
-        print(settings.MESHDB_INDEX)
-        with open(settings.MESHDB_INDEX, "rb") as f:
-            index = pickle.load(f)
-        db.set_index(index)
-        end = datetime.now()
-        logger.info("Index loaded in {}".format(end - start))
-    else:
-        logger.warning("WARNING: Index file {} not found. Please create one manually.".format(settings.MESHDB_INDEX))
-except Exception:
-    traceback.print_exc(file=sys.stdout)
+entity_tagger = EntityTagger()
 
 
 def check_and_convert_variable(text):
@@ -70,67 +57,99 @@ def check_and_convert_variable(text):
         return var_name
 
 
-def convert_text_to_entity(text, tagger):
+def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         s, s_type = check_and_convert_variable(text), 'Variable'
     elif text_low.startswith('mesh:'):
         s, s_type = text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH'
-    elif text.startswith('gene:'):
-        s, s_type = text.split(":", 1)[1], "Gene"
-    elif text.startswith('species:'):
-        s, s_type = text.split(":", 1)[1], "Species"
+    elif text_low.startswith('gene:'):
+        s, s_type = text.split(":", 1)[1], GENE
+    elif text_low.startswith('species:'):
+        s, s_type = text.split(":", 1)[1], SPECIES
+    elif text_low.startswith('fidx'):
+        s, s_type = text.upper(), DOSAGE_FORM
     else:
-        s, s_type = tagger.tag_entity(text)
-    if not s:
-        raise ValueError("Don't know how to understand: {}".format(text))
+        try:
+            s, s_type = entity_tagger.tag_entity(text)
+        except KeyError:
+            raise ValueError("Don't know how to understand: {}".format(text))
     return s, s_type
 
 
-def convert_query_text_to_fact_patterns(query_txt, tagger):
-    # split query into facts by ';'
+def align_triple(text: str):
+    # first greedy search the predicate
+    text_lower = text.lower().replace('\"', "")
+    text_without_quotes = text.replace('\"', "")
+
+    p_found = False
+    pred_start, pred_len = 0, 0
+    for pred in allowed_predicates:
+        search = ' {} '.format(pred)
+        pos = text_lower.find(search)
+        if pos > 0:
+            pred_start = pos
+            pred_len = len(pred)
+            p_found = True
+            break
+    if not p_found:
+        raise ValueError('Cannot find a predicate in: {}'.format(text))
+
+    subj = text_without_quotes[0:pred_start].strip()
+    pred = text_without_quotes[pred_start:pred_start+pred_len+1].strip()
+    obj = text_without_quotes[pred_start+pred_len+1:].strip()
+    return subj, pred, obj
+
+
+def convert_query_text_to_fact_patterns(query_txt):
+    # remove too many spaces
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
+    # split query into facts by '.'
     facts_txt = fact_txt.strip().replace(';', '.').split('.')
     fact_patterns = []
     explanation_str = ""
     for fact_txt in facts_txt:
-        split = fact_txt.strip().split(' ')
-        # check whether the text forms a triple
-        if len(split) is not 3:
-            explanation_str += 'is not a triple: split:{} text:{}\n'.format(split, fact_txt)
-            logger.error('is not a triple: split:{} text:{}'.format(split, fact_txt))
+        # skip empty facts
+        if not fact_txt.strip():
+            continue
+        s_t, p_t, o_t = None, None, None
+        try:
+            # check whether the text forms a triple
+            s_t, p_t, o_t = align_triple(fact_txt)
+        except ValueError:
+            explanation_str += 'Cannot find a predicate in: {}'.format(fact_txt)
+            logger.error('Cannot find a predicate in: {}'.format(fact_txt))
             return None, explanation_str
 
-        s_t, p_t, o_t = split[0], split[1], split[2]
         try:
-            s, s_type = convert_text_to_entity(s_t, tagger)
+            s, s_type = convert_text_to_entity(s_t)
         except ValueError as e:
             explanation_str += 'error unknown subject: {}\n'.format(e)
             logger.error('error unknown subject: {}'.format(e))
             return None, explanation_str
 
         try:
-            o, o_type = convert_text_to_entity(o_t, tagger)
+            o, o_type = convert_text_to_entity(o_t)
         except ValueError as e:
             explanation_str += 'error unknown object: {}\n'.format(e)
             logger.error('error unknown object: {}'.format(e))
             return None, explanation_str
 
-        p = p_t.lower().replace('_', ' ')
+        p = p_t.lower()
         if p not in allowed_predicates:
             explanation_str += "error unknown predicate: {}\n".format(p_t)
             logger.error("error unknown predicate: {}".format(p_t))
             return None, explanation_str
 
-        explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt, s, p, o)
-        fact_patterns.append((s, p, o))
+        explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt.strip(), s, p, o)
+        fact_patterns.append((s, s_type, p, o, o_type))
 
     # check for at least 1 entity
-    entity_check = False
-    for s, p, o in fact_patterns:
-        if not s.startswith('?') or not o.startswith('?'):
-            entity_check = True
-            break
+ #   entity_check = False
+  #  for s, p, o in fact_patterns:
+   #     if not s.startswith('?') or not o.startswith('?'):
+    #        entity_check = True
+     #       break
     # if not entity_check:
     #    explanation_str += "no entity included in query - error\n"
     #   return None, explanation_str
@@ -154,8 +173,10 @@ def convert_graph_patterns_to_nt(query_txt):
     nt_string = ""
     var_dict = {}
     for f in facts_split:
-        split = f.strip().split(' ')
-        s, p, o = split[0], split[1], split[2]
+        # skip empty facts
+        if not f.strip():
+            continue
+        s, p, o = align_triple(f.strip())
 
         if s.startswith('?'):
             var_name = VAR_NAME.search(s).group(1)
@@ -173,8 +194,10 @@ def convert_graph_patterns_to_nt(query_txt):
                 var_dict[var_name] = check_and_convert_variable(o)
 
     for f in facts_split:
-        split = f.strip().split(' ')
-        s, p, o = split[0], split[1], split[2]
+        # skip empty facts
+        if not f.strip():
+            continue
+        s, p, o = align_triple(f.strip())
 
         if s.startswith('?'):
             s = var_dict[VAR_NAME.search(s).group(1)]
@@ -198,7 +221,7 @@ class SearchView(TemplateView):
                     data_source = str(self.request.GET.get("data_source", "").strip())
                     logging.info("Selected data source is {}".format(data_source))
 
-                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query, mesh_tagger)
+                    query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
                     if data_source not in ["PMC", "PubMed"]:
                         results_converted = []
                         query_trans_string = "Data source is unknown"
