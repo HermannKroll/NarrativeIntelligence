@@ -67,6 +67,8 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     if enttypes.CHEMICAL in tag_types and enttypes.DISEASE in tag_types and use_tagger_one:
         tagger_by_ent_type[enttypes.CHEMICAL] = TaggerOne
         tagger_by_ent_type[enttypes.DISEASE] = TaggerOne
+    if (enttypes.CHEMICAL in tag_types != enttypes.DISEASE in tag_types) and use_tagger_one:
+        raise ValueError("Tagger One only doesn't support Tagging of chemicals or diseases separately!")
     if enttypes.DOSAGE_FORM in tag_types:
         tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
 

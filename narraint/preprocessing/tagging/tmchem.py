@@ -10,6 +10,14 @@ from narraint.progress import print_progress_with_eta
 
 
 class TMChem(BaseTagger):
+    """
+    Class representing the TMChem Tagger
+    Known Issue: The tmchem subprocess doesn't terminate automatically. Therefore, it is checked if all output files
+    have been created and if the last line in the logfile is 'Waiting for input'. If both applies, the subprocess is
+    terminated. This is quite fragile and will break if tmchems logging or behaviour should ever change.
+    """
+
+    FILE_FINISHED_FLAG =  b'Waiting for input\n'
     TYPES = (enttypes.CHEMICAL,)
     __name__ = "tmChem"
     __version__ = "0.0.2"
@@ -51,7 +59,7 @@ class TMChem(BaseTagger):
                                         print_every_k=1, logger=self.logger)
                 if progress >= files_total:
                     lastline = get_last_line(self.log_file)
-                    done = lastline == b'Waiting for input\n' #hacky, might break in the next tmchem version
+                    done = lastline == self.FILE_FINISHED_FLAG #hacky, might break in the next tmchem version
             self.logger.debug("Terminating tmChem tagger")
             process.terminate()
 

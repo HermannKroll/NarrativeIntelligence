@@ -77,6 +77,10 @@ The package provides APIs for several third-party taggers:
 | tmChem | Chemical |
 | DosageFormTagger (own) | DosageForm
 
+ Known Issue: The tmchem subprocess doesn't terminate automatically. Therefore, it is checked if all output files 
+ have been created and if the last line in the logfile is 'Waiting for input'. If both applies, the subprocess is
+ terminated. This is quite fragile and will break if tmchems logging or behaviour should ever change.
+
 ## Database scheme
 
 ![DB Scheme](./docs/dbdiagram.png)
