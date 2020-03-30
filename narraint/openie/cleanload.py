@@ -223,7 +223,7 @@ def clean_open_ie(input, collection):
         for s_txt, s_id, s_type in sub_ents:
             for o_txt, o_id, o_type in obj_ents:
                 # check if tuple is already extracted for sentence
-                key = frozenset((openie_t.doc_id, s_id, o_id, openie_t.pred, openie_t.sent))
+                key = (openie_t.doc_id, s_id, o_id, openie_t.pred, openie_t.sent)
                 if key not in already_included:
                     t = PRED(openie_t.doc_id, openie_t.subj, openie_t.pred, openie_t.pred_lemma, openie_t.obj,
                              openie_t.conf, openie_t.sent, s_id, s_txt, s_type, o_id, o_txt, o_type)
