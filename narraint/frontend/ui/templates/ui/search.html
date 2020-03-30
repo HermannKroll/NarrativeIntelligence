@@ -92,38 +92,40 @@
             <div class="col">
                 <div class="help-tip">
                     <p> - Please type in the keywords you want to query <br>
-                        - Currently, only entities in Mesh are supported. They can be entered by as a keyword or as a
-                        Mesh Identifier (beginning with MESH:): Simvastatin or MESH:DD019821 <br>
-                        - Entities including empty spaces must be encoded like follows: Cytochrome_P-450_CYP3A or
-                        Diabetes_Mellitus <br>
+                        - EntityTagger includes MeSH, Genes and Species <br>
+                        - You can specify a entity by it's heading such as Simvastatin or it's ID MESH:DD019821 <br>
+                        - Entities including empty spaces must be escaped by quotes, e.g. "Diabetes Mellitus" <br>
                         - Predicates must stem from a predefined set of predicates (see below) <br>
                         - You can also use variables in your query by adding a question mark, e.g. Simvastatin causes ?X
                         <br>
-                        - You can type variables by writing their type in brackets directly behind the variable, e.g.
+                        - You can type variables by state the variable type in brackets, e.g.
                         ?X(Disease), ?X(Species) (Choose from Chemical, Disease, DosageForm, Gene and Species)  <br>
                         - Multiple facts are queried as follows (separated by a '.'): Simvastatin causes ?X. ?X affects
-                        ?<br>
+                        ?Y<br>
                 </div>
 
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-group">
                         <!--<label for="id_keywords"><strong>Search</strong></label> -->
-                        <textarea class="form-control" id="id_keywords" rows="3"
-                                  name="keywords">Simvastatin causes ?X(Disease)</textarea>
+                        <textarea class="form-control" id="id_keywords" rows="1"
+                                  name="keywords">Simvastatin causes ?X(Disease)</textarea><br>
                         <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
-                            'administered_to', 'affects', 'associated_with', 'augments', 'causes', 'coexists_with',
-                            'complicates', 'converts_to', 'diagnoses', 'disrupts', 'inhibits', 'interacts_with', 'isa',
-                            'location_of', 'manifestation_of', 'method_of', 'occurs_in', 'part of', 'precedes', 'predisposes',
-                            'prevents', 'process_of', 'produces', 'stimulates', 'treats', 'uses', 'compared_with', 'different_from',
-                            'higher_than', 'lower_than', 'same_as'
+                            'administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists with',
+                            'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
+                            'location of', 'manifestation of', 'method of', 'occurs in', 'part of', 'precedes', 'predisposes',
+                            'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with', 'different from',
+                            'higher than', 'lower than', 'same as'
+                        </small>
+                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                            'dosageform' (symmetric)
                         </small>
                         <label><strong>Data Source:</strong></label><br>
                         <input type="radio" id="radio_pmc" name="data_source" value="PMC" checked="checked">
                         <label for="radio_pmc">PubMedCentral Sample (12k Fulltext Documents including Simvastatin)</label><br>
                         <input type="radio" id="radio_pubmed" name="data_source" value="PubMed">
-                        <label for="radio_pubmed">PubMed Sample (1 Million Document Titles and Abstracts)</label><br>
+                        <label for="radio_pubmed">PubMed Sample (500k Document Titles and Abstracts)</label><br>
                     </div>
                     <button type="submit" class="btn btn-primary" id="btn_search">
                         Search
@@ -189,6 +191,7 @@
             type="text/javascript"></script>
     <script type="text/javascript">
         const search_url = "{% url 'search' %}";
+
     </script>
     <script src="{% static 'js/../../static/js/../../static/js/search.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/../../static/js/../../static/js/network.js' %}" type="text/javascript"></script>

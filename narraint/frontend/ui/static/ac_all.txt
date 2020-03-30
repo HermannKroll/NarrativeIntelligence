@@ -1,3 +1,35 @@
+administered to	predicate
+affects	predicate
+associated with	predicate
+augments	predicate
+causes	predicate
+coexists with	predicate
+complicates	predicate
+converts to	predicate
+diagnoses	predicate
+disrupts	predicate
+inhibits	predicate
+interacts with	predicate
+isa	predicate
+location of	predicate
+manifestation of	predicate
+method of	predicate
+occurs in	predicate
+part of	predicate
+precedes	predicate
+predisposes	predicate
+prevents	predicate
+process of	predicate
+produces	predicate
+stimulates	predicate
+treats	predicate
+uses	predicate
+compared with	predicate
+different from	predicate
+higher than	predicate
+lower than	predicate
+same as	predicate
+dosageform	predicate
 human	9606
 Homo sapiens	9606
 Dimethyl Sulfoxide	MESH:D004121
