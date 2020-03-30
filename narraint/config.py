@@ -25,8 +25,8 @@ MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2020_id2heading.pkl')
 MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'supp2020_id2heading.pkl')
 
 # GENE
-GENE_FILE = os.path.join(RESOURCE_DIR, 'gene_names_2020.gz')
-GENE_INDEX_FILE = os.path.join(TMP_DIR, 'gene_names_2020_id2name.pkl')
+GENE_FILE = os.path.join(DATA_DIR, 'gene_info_2020.gz')
+GENE_INDEX_FILE = os.path.join(TMP_DIR, 'gene_info_2020_id2name.pkl')
 
 # Taxonomy Names 2020
 TAXONOMY_FILE = os.path.join(RESOURCE_DIR, 'taxonomy_names_2020.gz')

@@ -5,9 +5,12 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 
+from narraint.backend.database import Session
+from narraint.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
     MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE
+from narraint.entity.enttypes import GENE
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
 
@@ -64,17 +67,36 @@ class GeneResolver:
     def __init__(self):
         self.geneid2name = {}
 
+    def get_reverse_index(self):
+        term2entity = {}
+        for e_id, (gene_focus, gene_name) in self.geneid2name.items():
+            term2entity[gene_focus.strip().lower()] = str(e_id)
+            term2entity[gene_name.strip().lower()] = str(e_id)
+        return term2entity
+
     def build_index(self, gene_input, index_file):
+        logging.info('Querying entity ids in db...')
+        session = Session.get()
+        gene_ids_in_db = set()
+        q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_type == GENE)
+        for r in session.execute(q):
+            try:
+                gene_ids_in_db.add(int(r[0]))
+            except ValueError:
+                continue
+        logging.info('{} gene ids retrieved'.format(len(gene_ids_in_db)))
+
         logging.info('Reading gene input file: {}'.format(gene_input))
         with gzip.open(gene_input, 'rt') as f:
             for line in islice(f, 1, None):
                 components = line.strip().split('\t')
-                if len(components) == 5:
-                    gene_id = components[4]
-                    name = components[2]
-                    self.geneid2name[gene_id] = name
+                gene_id = int(components[1])
+                if gene_id in gene_ids_in_db:
+                    gene_locus = components[2]
+                    description = components[8]
+                    self.geneid2name[gene_id] = (gene_locus, description)
 
-        logging.info('Writing index to: {}'.format(index_file))
+        logging.info('Writing index with {} keys to: {}'.format(len(self.geneid2name), index_file))
         with open(index_file, 'wb') as f:
             pickle.dump(self.geneid2name, f)
 
@@ -85,7 +107,17 @@ class GeneResolver:
         logging.info('Gene index ({} keys) load in {}s'.format(len(self.geneid2name), datetime.now() - start_time))
 
     def gene_id_to_name(self, gene_id):
-        return self.geneid2name[gene_id]
+        try:
+            gene_id_int = int(gene_id)
+            locus, description = self.geneid2name[gene_id_int]
+            if locus and description:
+                return '{}//{}'.format(description, locus)
+            elif not locus:
+                return '{}'.format(description)
+            else:
+                return '{}'.format(locus)
+        except ValueError:
+            raise KeyError('Gene ids should be ints. {} is not an int'.format(gene_id))
 
 
 class SpeciesResolver:
@@ -97,6 +129,15 @@ class SpeciesResolver:
 
     def __init__(self):
         self.speciesid2name = defaultdict(dict)
+
+    def get_reverse_index(self):
+        s2n = dict()
+        for sid, n_dict in self.speciesid2name.items():
+            if self.NAME_COMMON_SHORTCUT in n_dict:
+                s2n[n_dict[self.NAME_COMMON_SHORTCUT]] = sid
+            if self.NAME_SCIENTIFIC_SHORTCUT in n_dict:
+                s2n[n_dict[self.NAME_SCIENTIFIC_SHORTCUT]] = sid
+        return s2n
 
     def build_index(self, species_input, index_file):
         logging.info('Reading species input file: {}'.format(species_input))
@@ -129,7 +170,7 @@ class SpeciesResolver:
             name.append(sp2name[self.NAME_COMMON_SHORTCUT])
         if self.NAME_SCIENTIFIC_SHORTCUT in sp2name:
             if name:
-                name.append('/')
+                name.append('//')
             name.append(sp2name[self.NAME_SCIENTIFIC_SHORTCUT])
         return ''.join(name)
 
@@ -161,13 +202,13 @@ class EntityResolver:
         if EntityResolver.__instance is not None:
             raise Exception('This class is a singleton - use EntityResolver.instance()')
         else:
-            self._mesh = MeshResolver()
-            self._mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
-            self._gene = GeneResolver()
-            self._gene.load_index(GENE_INDEX_FILE)
-            self._species = SpeciesResolver()
-            self._species.load_index(TAXONOMY_INDEX_FILE)
-            self._dosageform = DosageFormResolver(self._mesh)
+            self.mesh = MeshResolver()
+            self.mesh.load_index(MESH_ID_TO_HEADING_INDEX_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
+            self.gene = GeneResolver()
+            self.gene.load_index(GENE_INDEX_FILE)
+            self.species = SpeciesResolver()
+            self.species.load_index(TAXONOMY_INDEX_FILE)
+            self.dosageform = DosageFormResolver(self.mesh)
             EntityResolver.__instance = self
 
     @staticmethod
@@ -177,18 +218,14 @@ class EntityResolver:
         return EntityResolver.__instance
 
     def get_name_for_var_ent_id(self, entity_id, entity_type):
-        if entity_id.startswith('MESH:') and entity_type in ['Chemical', 'Disease']:
-            return self._mesh.descriptor_to_heading(entity_id)
+        if entity_id.startswith('MESH:') or entity_type in ['Chemical', 'Disease']:
+            return self.mesh.descriptor_to_heading(entity_id)
         if entity_type == "Gene":
-            return self._gene.gene_id_to_name(entity_id)
+            return self.gene.gene_id_to_name(entity_id)
         if entity_type == 'Species':
-            return self._species.species_id_to_name(entity_id)
+            return self.species.species_id_to_name(entity_id)
         if entity_type == 'DosageForm':
-            return self._dosageform.dosage_form_to_name(entity_id)
-        # if there is no specific resolver - try with mesh
-        if entity_id.startswith('MESH:'):
-            return self._mesh.descriptor_to_heading(entity_id)
-
+            return self.dosageform.dosage_form_to_name(entity_id)
         return entity_id
 
 
