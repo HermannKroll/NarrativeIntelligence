@@ -13,7 +13,7 @@ from narraint.pubtator.document import get_document_id
 
 
 class GNormPlus(BaseTagger):
-    TYPES = (enttypes.GENE,)
+    TYPES = (enttypes.GENE, enttypes.SPECIES)
     __name__ = "GNormPlus"
     __version__ = "unknown"
 
