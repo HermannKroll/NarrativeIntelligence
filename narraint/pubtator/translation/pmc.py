@@ -187,8 +187,9 @@ class PMCConverter:
 
 def main():
     parser = ArgumentParser(description="Collect and convert PMC files from a list of pmc-ids")
-    parser.add_argument("input", help="File containing PMC IDs")
+    parser.add_argument("input", help="File containing PMC IDs OR directory containing PMC files")
     parser.add_argument("output", help="Directory to output the converted Files into")
+    parser.add_argument("-c", "--collect", metavar="DIR", help="Collect PubMedCentral files from DIR")
     group_settings = parser.add_argument_group("Settings")
     group_settings.add_argument("--config", default=PREPROCESS_CONFIG,
                                 help="Configuration file (default: {})".format(PREPROCESS_CONFIG))
@@ -197,6 +198,9 @@ def main():
     args = parser.parse_args()
     conf = Config(args.config)
     logging.basicConfig(level=args.loglevel.upper())
+
+    collect_dir = args.collect if args.collect else conf.pmc_dir
+
 
     # TODO: Logfile
     if args.output:
@@ -212,8 +216,11 @@ def main():
     pmcid2pmid = load_pmcids_to_pmid_index(conf.pmcid2pmid)
 
     error_file = os.path.join(out_dir, "conversion_errors.txt")
-    collector = PMCCollector(conf.pmc_dir)
-    files = collector.collect(args.input)
+    if os.path.isdir(args.input):
+        files = [os.path.join(args.input, fn) for fn in os.listdir(args.input) if fn.endswith(".nxml")]
+    else:
+        collector = PMCCollector(collect_dir)
+        files = collector.collect(args.input)
     translator = PMCConverter()
     translator.convert_bulk(files, out_dir, pmcid2pmid, error_file)
 

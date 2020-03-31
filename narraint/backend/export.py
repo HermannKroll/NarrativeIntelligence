@@ -6,7 +6,7 @@ from narraint.backend.database import Session
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.models import Document, Tag
 from narraint.entity.entityresolver import EntityResolver
-from narraint.pubtator.convert import PatentConverter
+from narraint.pubtator.translation.patent import PatentConverter
 
 
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging):
