@@ -151,11 +151,7 @@ class DosageFormTagger(BaseTagger):
         self.logger.debug('Storing DosageFormTagerIndex cache to: {}'.format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
         pickle.dump(index, open(DOSAGE_FORM_TAGGER_INDEX_CACHE, 'wb'))
 
-    def prepare(self, resume=False):
-        if self._check_for_index():
-            self.logger.info('DosageFormTagger initialized from cache ({} term mappings) - ready to start'
-                             .format(len(self.desc_by_term.keys())))
-            pass
+    def _create_from_mesh(self):
         meshdb = MeSHDB.instance()
         meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
 
@@ -249,6 +245,12 @@ class DosageFormTagger(BaseTagger):
         self.logger.info('DosageFormTagger initialized from data ({} term mappings) - ready to start'
                          .format(len(self.desc_by_term.keys())))
 
+    def prepare(self, resume=False):
+        if self._check_for_index():
+            self.logger.info('DosageFormTagger initialized from cache ({} term mappings) - ready to start'
+                             .format(len(self.desc_by_term.keys())))
+        else:
+            self._create_from_mesh()
         # Create output directory
         if not resume:
             os.mkdir(self.out_dir)
