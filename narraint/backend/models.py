@@ -30,8 +30,8 @@ class Document(Base):
         return Document.create_pubtator(self.title, self.abstract)
 
     @staticmethod
-    def create_pubtator(did, title, abstract):
-        return "{id} t {tit}\n{id} a {abs}\n".format(id=did, tit=title, abs=abstract)
+    def create_pubtator(did, title: str, abstract:str):
+        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title.replace('|',''), abs=abstract.replace('|',''))
 
 
 class Tagger(Base):
