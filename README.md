@@ -18,6 +18,16 @@ Application data includes:
 - UMLS data
 - TIB EPA dump
 
+
+
+| Name | Description | Path on IS69 | 
+| ------ | ------ | ------ | 
+| PMC | PubMedCentral Fulltext XML Dump | /hdd2/datasets/pubmed_central/ |
+| PubMed | Tagged PubMed Abstracts & Titles and Tagged PMC Fulltexts (but does not include the fulltexts) | /hdd2/datasets/pubtator_central/2019_11/ bioconcepts2pubtatorcentral.offset |
+| TIB | Patents | /hdd2/datasets/patents_tib_metadata/2019_06/ tib_epa_ifis.txt |
+| WHO | WHO Database of covid19 Articles | /hdd2/datasets/covid19/who/ |
+| BIORXIV | biorxiv articles related to covid19 | /hdd2/datasets/covid19/who/ |
+
 ### Configuration
 *All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
 
@@ -72,7 +82,7 @@ The package provides APIs for several third-party taggers:
 | Tagger | Entity types |
 |-------------------|-------------------|
 | TaggerOne (0.2.1) | Chemical, Disease |
-| GNormPlus | Gene |
+| GNormPlus | Gene, Species |
 | DNorm | Disease |
 | tmChem | Chemical |
 | DosageFormTagger (own) | DosageForm
@@ -88,6 +98,7 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_03_31](meetings/2020_03_31.md)
 - [2020_03_25](meetings/2020_03_25.md)
 - [2020_03_19](meetings/2020_03_19.md)
 
