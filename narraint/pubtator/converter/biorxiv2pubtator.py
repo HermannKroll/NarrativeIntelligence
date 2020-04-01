@@ -26,6 +26,7 @@ def convert_biorxiv_articles_to_pubtator(input_file, output_file):
     :return:
     """
     logging.info('Converting biorxiv articles to pubtator format...')
+    skipped_documents = set()
     with open(input_file, 'rt', encoding='latin-1') as input_file:
         with open(output_file, 'wt', encoding='utf-8') as output_file:
             reader = csv.reader(input_file, delimiter='\t', quotechar='"', escapechar='\\')
@@ -33,12 +34,16 @@ def convert_biorxiv_articles_to_pubtator(input_file, output_file):
                 doc_id = ARTIFICIL_IDS_START_AT_BIORXIV + int(row[0])
                 title = _clean_text(row[2])
                 abstract = _clean_text(row[3])
+                if not title.strip() and not abstract.strip():
+                    skipped_documents.add(doc_id)
+                    continue
                 if not abstract:
                     abstract = " "
                 if idx > 0:
                     output_file.write('\n')
                 output_file.write(Document.create_pubtator(doc_id, title, abstract))
 
+    logging.info('The following documents have been skipped (no title and no abstract): {}'.format(skipped_documents))
     logging.info('{} documents written in PubTator format'.format(doc_id-ARTIFICIL_IDS_START_AT_BIORXIV))
 
 

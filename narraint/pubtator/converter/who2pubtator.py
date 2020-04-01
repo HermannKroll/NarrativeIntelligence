@@ -18,20 +18,24 @@ def convert_who_covid19_article_database_to_pubtator(input_file, output_file):
     :return:
     """
     logging.info('Converting WHO COVID19 Article database to pubtator format...')
+    skipped_documents = set()
     with open(input_file, 'rt') as input_file:
         with open(output_file, 'wt') as output_file:
             reader = csv.reader(input_file)
-            doc_id = ARTIFICIL_IDS_START_AT
             for idx, row in enumerate(islice(reader, 1, None)):
-                title = row[0]
+                doc_id = ARTIFICIL_IDS_START_AT + idx
+                title = row[0].replace('|', '')
                 abstract = row[2]
+                if not title.strip() and not abstract.strip():
+                    skipped_documents.add(doc_id)
+                    continue
                 if not abstract:
                     abstract = " "
                 if idx > 0:
                     output_file.write('\n')
                 output_file.write(Document.create_pubtator(doc_id, title, abstract))
-                doc_id += 1
 
+    logging.info('The following documents have been skipped (no title and no abstract): {}'.format(skipped_documents))
     logging.info('{} documents written in PubTator format'.format(doc_id-ARTIFICIL_IDS_START_AT))
 
 
