@@ -1,5 +1,6 @@
 import os
 import math
+import logging
 from shutil import copy
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.split import split
@@ -22,6 +23,31 @@ def create_parallel_dirs(root, number, prefix, *subdirs):
             subdir_path = os.path.join(root, f"{prefix}{n}", name)
             if not os.path.exists(subdir_path):
                 os.makedirs(subdir_path)
+
+
+def split_composites(input_dir_or_file, output_dir=None, delete_composites=False, logger=logging):
+    """
+    Splits all composite pubtator files in input_dir into single files in output_dir
+    :param input_dir_or_file: The directory containing the composite files to split or a single composite
+    :param output_dir: The directory to put the single pubtator files. Default is input_dir.
+    :param delete_composites: If set to true, all composite files are deleted after splitting
+    """
+    if os.path.isdir(input_dir_or_file):
+        raw_files = [os.path.join(input_dir_or_file, fn) for fn in os.listdir(input_dir_or_file)]
+        if not output_dir:
+            output_dir = input_dir_or_file
+    else:
+        raw_files = (input_dir_or_file,)
+        if not output_dir:
+            output_dir = os.path.dirname(input_dir_or_file)
+
+    for raw_file in raw_files:
+        if count_documents(raw_file) >1:
+            split(raw_file,output_dir,logger=logger)
+            if delete_composites:
+                os.remove(raw_file)
+        else:
+            copy(raw_file, output_dir)
 
 
 def distribute_workload(input_dir, output_root, workers_number: int, subdirs_name="batch", ):

@@ -22,7 +22,7 @@ def read_pubtator_documents(path):
                 else:
                     yield content
                     content = ""
-            yield content
+            if content: yield content
 
 
 def extract_pubtator_docs(input_file, id_file, output, logger):

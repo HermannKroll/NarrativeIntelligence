@@ -20,7 +20,7 @@ from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.document import get_document_id, DocumentError
-from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs
+from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
@@ -171,6 +171,8 @@ def main():
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
+    parser.add_argument("--composite", action="store_true",
+                        help="Check for composite pubtator files in input. Automatically enabled if input is a file")
 
     group_tag = parser.add_argument_group("Tagging")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
@@ -209,6 +211,16 @@ def main():
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
     logger.info("Project directory: {}".format(root_dir))
     logger.debug("Input directory: {}".format(in_dir))
+
+    if args.composite or os.path.isfile(in_dir):
+        comp_input = in_dir
+        in_dir = os.path.join(root_dir,"split_input")
+        if not os.path.exists(in_dir):
+            os.mkdir(in_dir)
+        logger.debug(f"Composite of single input file: created input directory at {in_dir}")
+        logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
+        split_composites(comp_input, in_dir, logger=logger)
+        logger.info("done")
 
     # Add documents to database
     if args.skip_load:

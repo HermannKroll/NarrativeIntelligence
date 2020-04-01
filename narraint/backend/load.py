@@ -201,6 +201,7 @@ def load(path, collection, tagger_mapping=None, logger=None):
      :param str path: Path to file or directory
     :param str collection: Identifier of the collection (e.g., PMC)
     :param dict tagger_mapping: Mapping from entity type to tuple (tagger name, tagger version)
+    :param logging logger: a logging instance to be used
     :return:
     """
     session = Session.get()
