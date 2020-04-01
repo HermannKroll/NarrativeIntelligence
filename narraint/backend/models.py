@@ -31,7 +31,7 @@ class Document(Base):
 
     @staticmethod
     def create_pubtator(did, title, abstract):
-        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title, abs=abstract)
+        return "{id} t {tit}\n{id} a {abs}\n".format(id=did, tit=title, abs=abstract)
 
 
 class Tagger(Base):

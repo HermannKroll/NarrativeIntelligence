@@ -13,6 +13,7 @@ from narraint.preprocessing.collect import PMCCollector
 from narraint.preprocessing.config import Config
 from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.pubtator import conversion_errors
+from narraint.backend.models import Document
 
 class PMCConverter:
     MAX_CONTENT_LENGTH = 500000
@@ -130,12 +131,12 @@ class PMCConverter:
         elif not pubtator_abstract:
             raise conversion_errors.NoAbstractError
         else:
-            content = "{pmcid}|t| {title}\n{pmcid}|a| {abst}\n".format(abst=pubtator_abstract, title=title, pmcid=pmcid)
+            content = Document.create_pubtator(abstract=pubtator_abstract, title=title, did=pmcid)
             content = content.replace(pmcid, pmid)
             # ensures that no \t are included
             content = content.replace('\t', ' ')
             with open(out_file, "w") as f:
-                f.write("{}\n".format(content))
+                f.write(content)
 
     def convert_bulk(self, filename_list: List[str], output_dir, pmcid2pmid, err_file=None):
         """
