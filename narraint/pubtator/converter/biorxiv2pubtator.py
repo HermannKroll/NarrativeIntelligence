@@ -32,8 +32,8 @@ def convert_biorxiv_articles_to_pubtator(input_file, output_file):
             reader = csv.reader(input_file, delimiter='\t', quotechar='"', escapechar='\\')
             for idx, row in enumerate(islice(reader, 1, None)):
                 doc_id = ARTIFICIL_IDS_START_AT_BIORXIV + int(row[0])
-                title = _clean_text(row[2])
-                abstract = _clean_text(row[3])
+                title = _clean_text(row[2]).replace('|', ' ')
+                abstract = _clean_text(row[3]).replace('|', ' ')
                 if not title.strip() and not abstract.strip():
                     skipped_documents.add(doc_id)
                     continue

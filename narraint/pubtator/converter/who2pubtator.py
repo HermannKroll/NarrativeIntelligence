@@ -24,8 +24,8 @@ def convert_who_covid19_article_database_to_pubtator(input_file, output_file):
             reader = csv.reader(input_file)
             for idx, row in enumerate(islice(reader, 1, None)):
                 doc_id = ARTIFICIL_IDS_START_AT + idx
-                title = row[0].replace('|', '')
-                abstract = row[2]
+                title = row[0].replace('|', ' ')
+                abstract = row[2].replace('|', ' ')
                 if not title.strip() and not abstract.strip():
                     skipped_documents.add(doc_id)
                     continue
