@@ -86,8 +86,8 @@ class PatentConverter:
         logging.info(" done")
 
 def main():
-    parser = ArgumentParser(description="Tool to convert Patent files to Pubtator format")
-    parser.add_argument("input", help="Input file/directory", metavar="INPUT_FILE_OR_DIR")
+    parser = ArgumentParser(description="Tool to convert Patent file to Pubtator format")
+    parser.add_argument("input", help="Input file", metavar="INPUT_FILE_OR_DIR")
     parser.add_argument("output", help="Output file/directory", metavar="OUTPUT_FILE_OR_DIR")
     args=parser.parse_args()
 
