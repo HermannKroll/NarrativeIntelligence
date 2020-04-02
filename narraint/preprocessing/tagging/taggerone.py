@@ -11,6 +11,7 @@ from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import get_document_ids
+from narraint.pubtator.regex import DOCUMENT_ID
 
 
 class NoRemainingDocumentError(Exception):
@@ -27,6 +28,7 @@ class TaggerOne(BaseTagger):
     TYPES = (enttypes.CHEMICAL, enttypes.DISEASE)
     __name__ = "TaggerOne"
     __version__ = "0.2.1"
+    TAGGER_ONE_RETRIES = 2
 
     def get_tags(self):
         return self._get_tags(self.out_dir)
@@ -37,7 +39,8 @@ class TaggerOne(BaseTagger):
         self.out_dir = os.path.join(self.root_dir, "taggerone_out")
         self.batch_dir = os.path.join(self.root_dir, "taggerone_batches")
         self.log_file = os.path.join(self.log_dir, "taggerone.log")
-        self.skipped_files = []
+        self.skipped_files = set()
+        self.current_retry = 0
 
     def prepare(self, resume=False):
         """
@@ -106,7 +109,7 @@ class TaggerOne(BaseTagger):
                         with open(batch_file, "a+") as f_batch:
                             f_batch.write(f_doc.read())
                 else:
-                    self.skipped_files.append(filename)
+                    self.skipped_files.add(filename)
                     num_skipped += 1
             self.logger.debug("Created batch ({}, {} files, {} skipped)".format(batch_id, len(batch), num_skipped))
         return batch_id, batch_file
@@ -145,7 +148,25 @@ class TaggerOne(BaseTagger):
             self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
         return process.poll()
 
-    def handle_error(self):
+    def _ignore_document(self, document_id):
+        """
+        Deletes a document from the TaggerOne input
+        The document will not be tagged - but the process continues Tagging the other documents
+        :param document_id:
+        :return:
+        """
+        self.logger.debug("Last match: {}".format(document_id))
+        last_file = self.mapping_id_file[int(document_id)]
+        self.logger.debug("TaggerOne exception in file {}".format(last_file))
+        self.skipped_files.add(last_file)
+        copyfile(self.log_file, "{}.{}".format(self.log_file, len(self.skipped_files)))
+        if os.path.exists(last_file):
+            os.remove(last_file)
+            self.logger.debug("Successfully deleted {}".format(last_file))
+        else:
+            self.logger.debug("Failed to delete {}. File is already deleted.".format(last_file))
+
+    def handle_error(self, last_batch_file):
         """
         Method performs the error handling if TaggerOne quits with exit code 1.
         :return: Flag whether to continue tagging
@@ -156,19 +177,29 @@ class TaggerOne(BaseTagger):
         matches = re.findall(r"INFO (\d+)-\d+", content)
         self.logger.debug("Searching log file {} ({} matches found)".format(self.log_file, len(matches)))
         if matches:
-            self.logger.debug("Last match: {}".format(matches[-1]))
-            last_file = self.mapping_id_file[int(matches[-1])]
-            self.logger.debug("TaggerOne exception in file {}".format(last_file))
-            self.skipped_files.append(last_file)
-            copyfile(self.log_file, "{}.{}".format(self.log_file, len(self.skipped_files)))
-            if os.path.exists(last_file):
-                os.remove(last_file)
-                self.logger.debug("Successfully deleted {}".format(last_file))
-            else:
-                self.logger.debug("Failed to delete {}. File is already deleted.".format(last_file))
+            # we skip the last document
+            self._ignore_document(matches[-1])
         else:
             # No file processed, assume another error
+            # Try TaggerOne again
             self.logger.error("No files processed")
+            # To prevent a endless repetition -> count the retries
+            # If we have to many retries - skip the first document of the current batch
+            if self.current_retry >= TaggerOne.TAGGER_ONE_RETRIES:
+                self.logger.debug('File crashed 3 times - Skip first file of current batch')
+                # Search the first document id in the last batch
+                with open(last_batch_file, 'r') as f_l_batch:
+                    last_batch_file_content = f_l_batch.read()
+                match = re.findall(DOCUMENT_ID, last_batch_file_content)
+                if match:
+                    self._ignore_document(match)
+                    self.current_retry = 0
+                else:
+                    self.logger.error('Critical error - there is no document id in the last batch - stopping')
+                    keep_tagging = False
+            else:
+                # increase counter - it is a retry
+                self.current_retry += 1
             # Generate batch
             batch_id, batch_file = self.create_batch()
             if not batch_id:
@@ -200,12 +231,13 @@ class TaggerOne(BaseTagger):
 
             # Check process exit code
             if exit_code == 0:
+                self.current_retry = 0
                 # Process finished successfully
                 if self.get_progress() + len(self.skipped_files) == len(self.files):
                     keep_tagging = False
             elif exit_code == 1:
                 # Process quit by exception
-                keep_tagging = self.handle_error()
+                keep_tagging = self.handle_error(batch_file)
             elif exit_code == -9 or exit_code == 137:
                 # Process terminated by user
                 self.logger.info("Received SIGKILL. Stopping TaggerOne ...")
