@@ -10,6 +10,10 @@ Download the latest (currently 2020) MeSH Descriptor file. Then install the requ
 pip install -r requirements.txt
 ```
 
+### Additional Shared Resource Directory
+We have a shared Cloud Space: [OneDrive](https://1drv.ms/u/s!ArDgbq3ak3Zuh5oNxxBPfJSqqpB2cw?e=iMfQKR). Password: youshallnotpass
+
+
 ### Data directory
 The ``data`` directory contains application data for **all** packages.
 Application data should **never** be stored inside the project models.
