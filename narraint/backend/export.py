@@ -3,10 +3,23 @@ import logging
 
 from narraint.entity import enttypes
 from narraint.backend.database import Session
-from narraint.entity.enttypes import TAG_TYPE_MAPPING
+from narraint.entity.enttypes import TAG_TYPE_MAPPING, SPECIES, GENE
 from narraint.backend.models import Document, Tag
 from narraint.entity.entityresolver import EntityResolver
 from narraint.pubtator.translation.patent import PatentConverter
+
+
+def get_entity_source(entity_id, entity_type):
+    entity_id_str = str(entity_id).lower()
+    if entity_id_str.startswith('mesh'):
+        return "MeSH"
+    if entity_id_str.startswith('fid'):
+        return "FID"
+    if entity_type == GENE:
+        return "NCBI Gene"
+    if entity_type == SPECIES:
+        return "NCBI Taxonomy"
+    return ValueError('Don not know the source for entity: {} {}'.format(entity_id, entity_type))
 
 
 def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging):
@@ -117,8 +130,19 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
                     count_translated = 0
                     for e_id, e_type in tags_for_doc:
                         try:
-                            doc_xml_content.append("\t\t<tag>{}</tag>\n"
-                                                   .format(entity_resolver.get_name_for_var_ent_id(e_id, e_type)))
+                            entity_name = entity_resolver.get_name_for_var_ent_id(e_id, e_type)
+                            entity_source = get_entity_source(e_id, e_type)
+                            if entity_source:
+                                if '//' in entity_name:
+                                    for e_n in entity_name.split('//'):
+                                        doc_xml_content.append('\t\t<tag source="{}">{}</tag>\n'
+                                                               .format(entity_source, e_n))
+                                else:
+                                    doc_xml_content.append('\t\t<tag source="{}">{}</tag>\n'
+                                                           .format(entity_source, entity_name))
+                            else:
+                                doc_xml_content.append("\t\t<tag>{}</tag>\n"
+                                                       .format(entity_name))
                             count_translated += 1
                         except KeyError:
                             missing_ent_ids.add((e_id, e_type))
