@@ -8,6 +8,9 @@ from narraint.backend.models import Document, Tag
 from narraint.entity.entityresolver import EntityResolver
 from narraint.pubtator.translation.patent import PatentConverter
 
+CONTENT_BUFFER_SIZE = 10
+TAG_BUFFER_SIZE = 100
+
 
 def get_entity_source(entity_id, entity_type):
     entity_id_str = str(entity_id).lower()
@@ -22,7 +25,8 @@ def get_entity_source(entity_id, entity_type):
     return ValueError('Don not know the source for entity: {} {}'.format(entity_id, entity_type))
 
 
-def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging):
+def export(out_fn, tag_types, document_ids=None, collection=None, content=True, logger=logging,
+           content_buffer=CONTENT_BUFFER_SIZE, tag_buffer=TAG_BUFFER_SIZE):
     logger.info("Beginning export...")
     if document_ids is None:
         document_ids = []
@@ -31,53 +35,106 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
 
     session = Session.get()
 
-    if content and tag_types:
-        query = session.query(Document, Tag)
+    if content:
+        document_query = session.query(Document).yield_per(content_buffer)
         if collection:
-            query = query.filter_by(collection=collection)
+            document_query = document_query.filter_by(collection=collection)
         if document_ids:
-            query = query.filter(Document.id.in_(document_ids))
-        query = query.join(Tag)
-        query = query.order_by(Document.collection, Document.id, Tag.id)
-    elif content:
-        query = session.query(Document)
+            document_query = document_query.filter(Document.id.in_(document_ids))
+        document_query = document_query.order_by(Document.collection, Document.id)
+    if tag_types:
+        tag_query = session.query(Tag).yield_per(tag_buffer)
         if collection:
-            query = query.filter_by(collection=collection)
+            tag_query = tag_query.filter_by(document_collection=collection)
         if document_ids:
-            query = query.filter(Document.id.in_(document_ids))
-        query = query.order_by(Document.collection, Document.id)
-    else:
-        query = session.query(Tag)
-        if collection:
-            query = query.filter_by(document_collection=collection)
-        if document_ids:
-            query = query.filter(Tag.document_id.in_(document_ids))
-        query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+            tag_query = tag_query.filter(Tag.document_id.in_(document_ids))
+        if tag_types and enttypes.ALL != tag_types:
+            tag_query = tag_query.filter(Tag.ent_type.in_(tag_types))
+        tag_query = tag_query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
 
-    if tag_types and enttypes.ALL != tag_types:
-        query = query.filter(Tag.ent_type.in_(tag_types))
+    if content and not tag_types:
+        with open(out_fn, "w") as f:
+            for document in document_query:
+                print(document)
+                f.write(Document.create_pubtator(document.id, document.title, document.abstract) + "\n")
 
-    results = session.execute(query)
-    if content and tag_types:
+    elif not content and tag_types:
         with open(out_fn, "w") as f:
-            doc_id = None
-            for row in results:
-                if doc_id != row[1]:  # row[1] is document ID
-                    if doc_id:
-                        f.write("\n")
-                    f.write(Document.create_pubtator(row[1], row[2], row[3]))
-                    doc_id = row[1]
-                f.write(Tag.create_pubtator(row[1], row[8], row[9], row[11], row[7], row[10]))
-    elif content:
+            for tag in tag_query:
+                f.write(Tag.create_pubtator(tag.document_id, tag.start, tag.end, tag.ent_str, tag.ent_type, tag.ent_id))
+
+    elif content and tag_types:
+        content_iter = iter(document_query)
+        current_document = None
         with open(out_fn, "w") as f:
-            for row in results:
-                f.write(Document.create_pubtator(row[1], row[2], row[3]) + "\n")
-    else:
-        with open(out_fn, "w") as f:
-            for row in results:
-                f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
-    if logger:
-        logger.info("Results written to {}".format(out_fn))
+            for tag in tag_query:
+                # skip to tagged document
+                while not current_document or not (
+                        tag.document_id == current_document.id
+                        and tag.document_collection == current_document.collection):
+                    current_document = next(content_iter)
+                    print(f">>>now at document {current_document.id}")
+                    f.write("\n")
+                    f.write(Document.create_pubtator(current_document.id, current_document.title,
+                                                     current_document.abstract))
+                f.write(Tag.create_pubtator(tag.document_id, tag.start, tag.end, tag.ent_str, tag.ent_type, tag.ent_id))
+                print(f"tag for document {tag.document_id}")
+            # Writing tailing documents with no tags
+            current_document = next(content_iter, None)
+            while current_document:
+                print(f">>>now at document {current_document.id}")
+                f.write("\n")
+                f.write(Document.create_pubtator(current_document.id, current_document.title,
+                                                 current_document.abstract))
+                current_document = next(content_iter, None)
+
+    # if content and tag_types:
+    #     query = session.query(Document, Tag)
+    #     if collection:
+    #         query = query.filter_by(collection=collection)
+    #     if document_ids:
+    #         query = query.filter(Document.id.in_(document_ids))
+    #     query = query.join(Tag)
+    #     query = query.order_by(Document.collection, Document.id, Tag.id)
+    # elif content:
+    #     query = session.query(Document).yield_per(CONTENT_BUFFER_SIZE)
+    #     if collection:
+    #         query = query.filter_by(collection=collection)
+    #     if document_ids:
+    #         query = query.filter(Document.id.in_(document_ids))
+    #     query = query.order_by(Document.collection, Document.id)
+    # else:
+    #     query = session.query(Tag).yield_per(TAG_BUFFER_SIZE)
+    #     if collection:
+    #         query = query.filter_by(document_collection=collection)
+    #     if document_ids:
+    #         query = query.filter(Tag.document_id.in_(document_ids))
+    #     query = query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+    #
+    # if tag_types and enttypes.ALL != tag_types:
+    #     query = query.filter(Tag.ent_type.in_(tag_types))
+    #
+    # #results = session.execute(query)
+    # if content and tag_types:
+    #     with open(out_fn, "w") as f:
+    #         doc_id = None
+    #         for row in query:
+    #             if doc_id != row[1]:  # row[1] is document ID
+    #                 if doc_id:
+    #                     f.write("\n")
+    #                 f.write(Document.create_pubtator(row[1], row[2], row[3]))
+    #                 doc_id = row[1]
+    #             f.write(Tag.create_pubtator(row[1], row[8], row[9], row[11], row[7], row[10]))
+    # elif content:
+    #     with open(out_fn, "w") as f:
+    #         for row in query:
+    #             f.write(Document.create_pubtator(row[1], row[2], row[3]) + "\n")
+    # else:
+    #     with open(out_fn, "w") as f:
+    #         for row in query:
+    #             f.write(Tag.create_pubtator(row[6], row[2], row[3], row[5], row[1], row[4]))
+    # if logger:
+    #     logger.info("Results written to {}".format(out_fn))
 
 
 def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=None, patent_ids=False):
@@ -168,7 +225,8 @@ def main():
     parser.add_argument("--ids", nargs="*", metavar="DOC_ID")
     parser.add_argument("--idfile", help='file containing document ids (one id per line)')
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
-    parser.add_argument("-p", "--patents", action="store_true", help="Will replace the patent prefix ids by country codes")
+    parser.add_argument("-p", "--patents", action="store_true",
+                        help="Will replace the patent prefix ids by country codes")
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
     parser.add_argument("--sqllog", action="store_true", help='logs sql commands')

@@ -62,7 +62,7 @@ class Session:
             self._load_config()
             self.engine = create_engine(self.get_conn_uri())
             add_engine_pidguard(self.engine)
-            session_cls = sessionmaker(bind=self.engine)
+            session_cls = sessionmaker(bind=self.engine) # python black magic: equip self with additional functions
             self.session = scoped_session(session_cls)  # session_cls()
             Base.metadata.create_all(self.engine)
         else:
