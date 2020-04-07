@@ -1,5 +1,6 @@
 import gzip
 import logging
+import os
 import pickle
 from collections import defaultdict
 from datetime import datetime
@@ -9,7 +10,7 @@ from narraint.backend.database import Session
 from narraint.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
-    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE
+    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR
 from narraint.entity.enttypes import GENE
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
@@ -234,6 +235,9 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
+    if not os.path.exists(TMP_DIR):
+        os.mkdir(TMP_DIR)
+        
     mesh = MeshResolver()
     mesh.build_index(MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE,
                      MESH_SUPPLEMENTARY_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
