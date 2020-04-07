@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime
 import logging
+import shutil
 
 from narraint.entity import enttypes
 from narraint.backend.database import Session
@@ -134,6 +135,10 @@ def main():
     logging.info('Process finished in {}s ({}s export, {}s filtering and {}s openie)'
                  .format(time_open_ie-time_start, time_exported-time_start, time_filtered-time_exported,
                          time_open_ie-time_filtered))
+
+    logging.info('Removing temp directory...')
+    shutil.rmtree(working_dir)
+    logging.info('Finished')
 
 
 if __name__ == "__main__":
