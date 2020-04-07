@@ -172,7 +172,7 @@ def main():
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
     parser.add_argument("--composite", action="store_true",
-                        help="Check for composite pubtator files in input. Automatically enabled if input is a file")
+                        help="Check for composite pubtator files in input. Automatically enabled if input is a file.")
 
     group_tag = parser.add_argument_group("Tagging")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
