@@ -104,8 +104,7 @@ class Predication(Base):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        UniqueConstraint('document_id', 'document_collection', 'subject_id', 'predicate', 'object_id', 'sentence')
-    )
+   )
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     document_id = Column(BigInteger, nullable=False)
