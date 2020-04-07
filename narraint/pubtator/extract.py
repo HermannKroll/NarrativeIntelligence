@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import re
 
 from narraint.pubtator.regex import DOCUMENT_ID
 
@@ -37,8 +36,8 @@ def extract_pubtator_docs(input_file, id_file, output, logger):
     with open(output, 'w') as f_out:
         for document_content in read_pubtator_documents(input_file):
             doc_id = DOCUMENT_ID.search(document_content)
-            if doc_id in ids:
-                f_out.write(document_content)
+            if int(doc_id.groups()[0]) in ids:
+                f_out.write(document_content + "\n")
 
     logger.info('extraction finished')
 
