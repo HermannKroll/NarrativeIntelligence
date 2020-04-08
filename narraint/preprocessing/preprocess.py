@@ -1,6 +1,8 @@
 import logging
 import os
 import tempfile
+import sys
+import shutil
 from argparse import ArgumentParser
 from typing import List
 import multiprocessing
@@ -185,6 +187,7 @@ def main():
                                 help="Configuration file (default: {})".format(PREPROCESS_CONFIG))
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
+    group_settings.add_argument("--logdir", default=None)
     group_settings.add_argument("--skip-load", action='store_true',
                                 help="Skip bulk load of documents on start (expert setting)")
     group_settings.add_argument("-w", "--workers", default=1, help="Number of processes for parallelized preprocessing",
@@ -200,17 +203,20 @@ def main():
     # Prepare directories and logging
     root_dir = os.path.abspath(args.workdir) if args.workdir or args.resume else tempfile.mkdtemp()
     in_dir = os.path.abspath(args.input)
-    log_dir = os.path.abspath(os.path.join(root_dir, "log"))
+    log_dir = args.logdir if args.logdir else os.path.abspath(os.path.join(root_dir, "log"))
     if not os.path.exists(root_dir):
-        os.mkdir(root_dir)
-    if not os.path.exists(in_dir):
-        os.mkdir(in_dir)
+        os.makedirs(root_dir)
     if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+        os.makedirs(log_dir)
     logger = init_preprocess_logger(os.path.join(log_dir, "preprocessing.log"), args.loglevel.upper())
+
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
     logger.info("Project directory: {}".format(root_dir))
+    logger.info(f"Logging directory: {log_dir}")
     logger.debug("Input directory: {}".format(in_dir))
+    if not os.path.exists(in_dir):
+        logger.error("Fatal: Input directory or file not found")
+        sys.exit(1)
 
     if args.composite or os.path.isfile(in_dir):
         comp_input = in_dir
@@ -234,13 +240,14 @@ def main():
     if args.workers > 1:
         logger.info('splitting up workload for multiple threads')
         distribute_workload(in_dir, os.path.join(root_dir, "inputDirs"), int(args.workers))
-        create_parallel_dirs(root_dir, int(args.workers), "worker", "log")
+        create_parallel_dirs(root_dir, int(args.workers), "worker")
+        create_parallel_dirs(log_dir, int(args.workers), "worker")
         processes = []
         output_paths = []
         for n in range(int(args.workers)):
             sub_in_dir = os.path.join(root_dir, "inputDirs", f"batch{n}")
             sub_root_dir = os.path.join(root_dir, f"worker{n}")
-            sub_log_dir = os.path.join(sub_root_dir, "log")
+            sub_log_dir = os.path.join(log_dir, f"worker{n}")
             sub_logger = init_preprocess_logger(
                 os.path.join(sub_log_dir, "preprocessing.log"),
                 args.loglevel.upper(),
@@ -270,6 +277,10 @@ def main():
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
                    resume=args.resume, use_tagger_one=args.tagger_one)
+
+    if not args.workdir:
+        logger.info("Done. Deleting tmp project directory.")
+        shutil.rmtree(root_dir)
 
 
 if __name__ == "__main__":
