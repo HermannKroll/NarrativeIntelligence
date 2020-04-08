@@ -220,7 +220,7 @@ def main():
 
     if args.composite or os.path.isfile(in_dir):
         comp_input = in_dir
-        in_dir = os.path.join(root_dir,"split_input")
+        in_dir = os.path.join(root_dir, "split_input")
         if not os.path.exists(in_dir):
             os.mkdir(in_dir)
         logger.debug(f"Composite of single input file: created input directory at {in_dir}")
