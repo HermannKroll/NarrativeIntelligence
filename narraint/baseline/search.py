@@ -91,23 +91,21 @@ def create_index(collection_file, index_dir):
     writer.close()
 
 
-def search(index_dir, query_str, top_n_results):
+def search(index_dir, query_str, top_n_results, out_file=None):
     directory = SimpleFSDirectory(Paths.get(index_dir))
     searcher = IndexSearcher(DirectoryReader.open(directory))
     analyzer = StandardAnalyzer()
+    print("DEBUG: Using IR model", searcher.getSimilarity())
 
     query = QueryParser("contents", analyzer).parse(query_str)
-    print(f"INFO: Searching '{query_str}'")
+    print(f"DEBUG: Searching '{query}' of type '{type(query)}'")
     top_docs = searcher.search(query, top_n_results)
     if top_docs.totalHits.relation == TotalHits.Relation.EQUAL_TO:
         print(f"INFO: Found exact {top_docs.totalHits.value} matches")
     else:
         print(f"INFO: Found at least {top_docs.totalHits.value} matches")
 
-    return top_docs.scoreDocs, searcher
-
-
-def print_results(score_docs, searcher, out_file=None):
+    # Print results
     f_out = None
     if out_file:
         f_out = open(out_file, "w")
@@ -119,10 +117,15 @@ def print_results(score_docs, searcher, out_file=None):
     print(header)
     print("-" * 50)
 
-    for idx, scoreDoc in enumerate(score_docs):
+    for idx, scoreDoc in enumerate(top_docs.scoreDocs):
         doc = searcher.doc(scoreDoc.doc)
-        line = "{no}\t{score:.3f}\t{id}\t{title}".format(no=idx + 1, score=scoreDoc.score, id=doc.get("id"),
-                                                         title=doc.get("title"))
+        line = "{no}\t{score:.3f}\t{id}\t{title}".format(
+            no=idx + 1,
+            score=scoreDoc.score,
+            id=doc.get("id"),
+            title=doc.get("title"),
+            # ex=searcher.explain(query, scoreDoc.doc),
+        )
         if out_file:
             f_out.write(line + "\n")
         print(line)
@@ -165,8 +168,7 @@ def main():
             create_index(args.file, index_dir)
 
     # Search
-    score_docs, searcher = search(index_dir, args.query, args.n)
-    print_results(score_docs, searcher, args.output)
+    search(index_dir, args.query, args.n, args.output)
 
 
 if __name__ == "__main__":
