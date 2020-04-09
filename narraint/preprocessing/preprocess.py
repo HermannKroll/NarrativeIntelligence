@@ -22,7 +22,7 @@ from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.document import get_document_id, DocumentError
-from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
+from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites, sanitize
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
@@ -201,12 +201,15 @@ def main():
 
     # Prepare directories and logging
     root_dir = os.path.abspath(args.workdir) if args.workdir or args.resume else tempfile.mkdtemp()
-    in_dir = os.path.abspath(args.input)
+    ext_in_dir = args.input
+    in_dir = os.path.join(root_dir, "input")
     log_dir = os.path.abspath(os.path.join(root_dir, "log"))
     if not os.path.exists(root_dir):
         os.makedirs(root_dir)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
+    if not os.path.exists(in_dir):
+        os.makedirs(in_dir)
     logger = init_preprocess_logger(os.path.join(log_dir, "preprocessing.log"), args.loglevel.upper())
 
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
@@ -218,13 +221,18 @@ def main():
 
     if args.composite or os.path.isfile(in_dir):
         comp_input = in_dir
-        in_dir = os.path.join(root_dir, "split_input")
         if not os.path.exists(in_dir):
             os.mkdir(in_dir)
         logger.debug(f"Composite of single input file: created input directory at {in_dir}")
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
         split_composites(comp_input, in_dir, logger=logger)
         logger.info("done")
+        ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
+    else:
+        ignored, sanitized = sanitize(ext_in_dir, output_dir=in_dir)
+    logger.info(f"{len(ignored)} files ignored because of wrong format or missing abstract")
+    logger.info(f"{len(sanitized)} files sanitized")
+
 
     # Add documents to database
     if args.skip_load:

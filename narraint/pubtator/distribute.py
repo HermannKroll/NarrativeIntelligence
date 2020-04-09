@@ -1,9 +1,12 @@
 import os
 import math
 import logging
+import re
 from shutil import copy
+from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.split import split
+from narraint.backend.models import Document
 
 
 def create_parallel_dirs(root, number, prefix, *subdirs):
@@ -42,12 +45,54 @@ def split_composites(input_dir_or_file, output_dir=None, delete_composites=False
             output_dir = os.path.dirname(input_dir_or_file)
 
     for raw_file in raw_files:
-        if count_documents(raw_file) >1:
-            split(raw_file,output_dir,logger=logger)
+        if count_documents(raw_file) > 1:
+            split(raw_file, output_dir, logger=logger)
             if delete_composites:
                 os.remove(raw_file)
         else:
             copy(raw_file, output_dir)
+
+
+def sanitize(input_dir_or_file, output_dir=None, delete_mismatched=False, logger=logging):
+    """
+    Removes all "|" characters from pubtator files and cast out files lacking abstracts.
+    :param input_dir_or_file: Input directory containing pubtator files or single pubtator file
+    :param output_dir: Directory to output the sanitized files to. Default: operate on input_dir
+    :param delete_mismatched: If set to true, files without abstract will be deleted from input_dir
+    :return: (list of ignored files, list of sanitized files)
+    """
+    ignored_files = []
+    sanitized_files = []
+    if os.path.isdir(input_dir_or_file):
+        raw_files = [os.path.join(input_dir_or_file, fn) for fn in os.listdir(input_dir_or_file)]
+        if not output_dir:
+            output_dir = input_dir_or_file
+    else:
+        raw_files = (input_dir_or_file,)
+        if not output_dir:
+            output_dir = os.path.dirname(input_dir_or_file)
+
+    for file in raw_files:
+        with open(file) as f:
+            content = f.read()
+            reg_result = CONTENT_ID_TIT_ABS.match(content)
+            if not reg_result:
+                ignored_files.append(file)
+                if delete_mismatched:
+                    os.remove(file)
+            else:
+                pid, title, abstract = reg_result.groups()
+                if abstract.strip() == "":
+                    ignored_files.append(file)
+                    if delete_mismatched:
+                        os.remove(file)
+                elif "|" in title + abstract:
+                    sanitized_files.append(file)
+                    with open(os.path.join(output_dir, os.path.basename(file)), "w+") as nf:
+                        nf.write(Document.create_pubtator(pid, title, abstract))
+                else:
+                    copy(file, output_dir)
+    return (ignored_files,sanitized_files)
 
 
 def distribute_workload(input_dir, output_root, workers_number: int, subdirs_name="batch", ):
