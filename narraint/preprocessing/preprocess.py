@@ -187,7 +187,6 @@ def main():
                                 help="Configuration file (default: {})".format(PREPROCESS_CONFIG))
     group_settings.add_argument("--loglevel", default="INFO")
     group_settings.add_argument("--workdir", default=None)
-    group_settings.add_argument("--logdir", default=None)
     group_settings.add_argument("--skip-load", action='store_true',
                                 help="Skip bulk load of documents on start (expert setting)")
     group_settings.add_argument("-w", "--workers", default=1, help="Number of processes for parallelized preprocessing",
@@ -203,7 +202,7 @@ def main():
     # Prepare directories and logging
     root_dir = os.path.abspath(args.workdir) if args.workdir or args.resume else tempfile.mkdtemp()
     in_dir = os.path.abspath(args.input)
-    log_dir = args.logdir if args.logdir else os.path.abspath(os.path.join(root_dir, "log"))
+    log_dir = os.path.abspath(os.path.join(root_dir, "log"))
     if not os.path.exists(root_dir):
         os.makedirs(root_dir)
     if not os.path.exists(log_dir):
@@ -212,7 +211,6 @@ def main():
 
     init_sqlalchemy_logger(os.path.join(log_dir, "sqlalchemy.log"), args.loglevel.upper())
     logger.info("Project directory: {}".format(root_dir))
-    logger.info(f"Logging directory: {log_dir}")
     logger.debug("Input directory: {}".format(in_dir))
     if not os.path.exists(in_dir):
         logger.error("Fatal: Input directory or file not found")

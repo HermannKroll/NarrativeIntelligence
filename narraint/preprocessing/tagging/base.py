@@ -90,11 +90,12 @@ class BaseTagger(Thread):
             for t1 in doc_tags:
                 if len(t1) != 6:
                     doc_tags_cleaned.remove(t1)
-                    break
-                for t2 in doc_tags_cleaned:
-                    if int(t2[1]) < int(t1[1]) and int(t2[2]) > int(t1[2]):
-                        doc_tags_cleaned.remove(t1)
-                        break
+                    print(f"removed {t1}")
+                else:
+                    for t2 in doc_tags_cleaned:
+                        if int(t2[1]) < int(t1[1]) and int(t2[2]) > int(t1[2]):
+                            doc_tags_cleaned.remove(t1)
+                            break
             tags_cleaned.extend(doc_tags_cleaned)
 
         self.logger.info('Add tagger')

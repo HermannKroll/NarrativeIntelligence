@@ -95,7 +95,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
         logging.info('Using {} ids for a filter condition'.format(len(document_ids)))
 
     session = Session.get()
-    query = session.query(Tag.document_id, Tag.ent_id, Tag.ent_type)
+    query = session.query(Tag.document_id, Tag.ent_id, Tag.ent_type).yield_per(TAG_BUFFER_SIZE)
     if collection:
         query = query.filter_by(document_collection=collection)
     if document_ids:
@@ -105,7 +105,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
     if tag_types and enttypes.ALL != tag_types:
         query = query.filter(Tag.ent_type.in_(tag_types))
 
-    results = session.execute(query)
+    #results = session.execute(query)
     entity_resolver = EntityResolver()
     tags_for_doc = set()
     last_doc_id = -1
@@ -115,8 +115,8 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
     with open(out_fn, 'wt', encoding="utf-8") as f:
         f.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
         f.write("<documents>\n")
-        for row in results:
-            doc_id, ent_id, ent_type = row
+        for tag in query:
+            doc_id, ent_id, ent_type = (tag.document_id, tag.ent_id, tag.ent_type)
             # collect tags for document (as long as tags are for the same document)
             if last_doc_id == -1:
                 last_doc_id = doc_id
@@ -166,7 +166,7 @@ def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=Non
     if logger:
         logger.warning('the following entity ids are missing: {}'.format(missing_ent_ids))
         logger.warning('{} entity tags skips due to missing translations'.format(translation_errors))
-        logger.info("{} documents with their tags written to {}".format(doc_count, out_fn))
+        logger.info("tags of {} documents written to {}".format(doc_count, out_fn))
 
 
 def main():
