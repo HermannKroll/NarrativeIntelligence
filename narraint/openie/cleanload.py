@@ -6,6 +6,8 @@ from typing import List
 
 import nltk
 from nltk.corpus import wordnet
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.models import Tag, Predication
 from narraint.backend.database import Session
@@ -73,6 +75,21 @@ def load_tags_for_doc_ids(doc_ids, collection):
     return doc2tags
 
 
+def _insert_predication_skip_duplicates(session, predication_values):
+    session.rollback()
+    session.commit()
+    for value in predication_values:
+        try:
+            session.bulk_insert_mappings(Predication, [value])
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            session.commit()
+            logging.warning('Skip duplicated fact: ({}, {}, {}, {}, {}, {})'.
+                            format(value["document_id"], value["document_collection"], value["subject_id"],
+                                   value["predicate"], value["object_id"], value["sentence"]))
+
+
 def insert_predications_into_db(tuples_cleaned: List[PRED], collection):
     """
     insert a list of cleaned tuples into the database (bulk insert)
@@ -87,32 +104,39 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection):
     start_time = datetime.now()
     predication_values = []
     for i, p in enumerate(tuples_cleaned):
-        predication_values.append(dict(
-            document_id=p.doc_id,
-            document_collection=collection,
-            subject_openie=p.subj,
-            subject_id=p.s_id,
-            subject_str=p.s_str,
-            subject_type=p.s_type,
-            predicate=p.pred,
-            predicate_cleaned=p.pred_cleaned,
-            object_openie=p.obj,
-            object_id=p.o_id,
-            object_str=p.o_str,
-            object_type=p.o_type,
-            confidence=p.conf,
-            sentence=p.sent,
-            openie_version=OPENIE_VERSION
-        ))
-        if i % BULK_INSERT_AFTER_K == 0:
-            session.bulk_insert_mappings(Predication, predication_values)
-            session.commit()
+        try:
+            predication_values.append(dict(
+                document_id=p.doc_id,
+                document_collection=collection,
+                subject_openie=p.subj,
+                subject_id=p.s_id,
+                subject_str=p.s_str,
+                subject_type=p.s_type,
+                predicate=p.pred,
+                predicate_cleaned=p.pred_cleaned,
+                object_openie=p.obj,
+                object_id=p.o_id,
+                object_str=p.o_str,
+                object_type=p.o_type,
+                confidence=p.conf,
+                sentence=p.sent,
+                openie_version=OPENIE_VERSION
+            ))
+            if i % BULK_INSERT_AFTER_K == 0:
+                session.bulk_insert_mappings(Predication, predication_values)
+                session.commit()
+                predication_values.clear()
+        except IntegrityError:
+            _insert_predication_skip_duplicates(session, predication_values)
             predication_values.clear()
 
         print_progress_with_eta("Inserting", i, len_tuples, start_time)
-
-    session.bulk_insert_mappings(Predication, predication_values)
-    session.commit()
+    try:
+        session.bulk_insert_mappings(Predication, predication_values)
+        session.commit()
+    except IntegrityError:
+        _insert_predication_skip_duplicates(session, predication_values)
+        predication_values.clear()
     logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
 
 
