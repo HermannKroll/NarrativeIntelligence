@@ -1,3 +1,4 @@
+import unicodedata
 from collections import namedtuple
 from datetime import datetime
 
@@ -5,6 +6,7 @@ from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, Foreig
     BigInteger, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from narraint.pubtator.regex import ILLEGAL_CHAR
 
 Base = declarative_base()
 
@@ -30,8 +32,13 @@ class Document(Base):
         return Document.create_pubtator(self.title, self.abstract)
 
     @staticmethod
-    def create_pubtator(did, title: str, abstract:str):
-        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title.replace('|',''), abs=abstract.replace('|',''))
+    def create_pubtator(did, title: str, abstract: str):
+        title = unicodedata.normalize('NFD', title)
+        title = ILLEGAL_CHAR.sub("", title).strip()
+        abstract = unicodedata.normalize('NFD', abstract)
+        abstract = ILLEGAL_CHAR.sub("", abstract).strip()
+        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title,
+                                                       abs=abstract)
 
 
 class Tagger(Base):
@@ -104,7 +111,7 @@ class Predication(Base):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-   )
+    )
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     document_id = Column(BigInteger, nullable=False)

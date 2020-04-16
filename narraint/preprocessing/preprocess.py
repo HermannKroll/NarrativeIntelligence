@@ -22,7 +22,8 @@ from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.pubtator.document import get_document_id, DocumentError
-from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites, sanitize
+from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
+from narraint.pubtator.sanitize import sanitize
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
 
