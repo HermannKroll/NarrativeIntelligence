@@ -46,7 +46,8 @@ def sanitize(input_dir_or_file, output_dir=None, delete_mismatched=False, logger
                     with open(os.path.join(output_dir, os.path.basename(file)), "w+") as nf:
                         nf.write(Document.create_pubtator(pid, title, abstract) + "\n")  # No idea why \n is necessary
                 else:
-                    copy(file, output_dir)
+                    if not input_dir_or_file == output_dir:
+                        copy(file, output_dir)
     return ignored_files, sanitized_files
 
 

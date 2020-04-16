@@ -220,13 +220,10 @@ def main():
         logger.error("Fatal: Input directory or file not found")
         sys.exit(1)
 
-    if args.composite or os.path.isfile(in_dir):
-        comp_input = in_dir
-        if not os.path.exists(in_dir):
-            os.mkdir(in_dir)
+    if args.composite or os.path.isfile(ext_in_dir):
         logger.debug(f"Composite of single input file: created input directory at {in_dir}")
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
-        split_composites(comp_input, in_dir, logger=logger)
+        split_composites(ext_in_dir, in_dir, logger=logger)
         logger.info("done")
         ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
     else:
