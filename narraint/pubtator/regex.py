@@ -8,3 +8,5 @@ CONTENT_RAW = re.compile(r"\d+.*?\n\n", re.DOTALL)
 PUBTATOR_TITLE = re.compile(r"\|t\|(.*?)\n")
 PUBTATOR_ABSTRACT = re.compile(r"\|a\|(.*?)\n")
 ILLEGAL_CHAR = re.compile(r"[^ -{}~]", re.UNICODE)  # Match all non ascii characters, control sequences and |
+PUBMED_ID = re.compile(r"(\d+)")
+PMC_ID = re.compile(r"PMC(\d+)")
