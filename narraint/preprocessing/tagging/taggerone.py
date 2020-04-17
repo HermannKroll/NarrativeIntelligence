@@ -190,10 +190,11 @@ class TaggerOne(BaseTagger):
                 # Search the first document id in the last batch
                 with open(last_batch_file, 'r') as f_l_batch:
                     last_batch_file_content = f_l_batch.read()
-                match = re.findall(DOCUMENT_ID, last_batch_file_content)
-                if match:
-                    self._ignore_document(match)
-                    self.current_retry = 0
+                matches = re.findall(DOCUMENT_ID, last_batch_file_content)
+                if matches:
+                    for match in matches:
+                        self._ignore_document(match)
+                        self.current_retry = 0
                 else:
                     self.logger.error('Critical error - there is no document id in the last batch - stopping')
                     keep_tagging = False
