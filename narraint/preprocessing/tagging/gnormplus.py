@@ -72,7 +72,7 @@ class GNormPlus(BaseTagger):
                 while process.poll() is None:
                     sleep(self.OUTPUT_INTERVAL)
                     print_progress_with_eta("GNormPlus tagging", self.get_progress(), files_total, start_time,
-                                            print_every_k=1, logger=self.logger)
+                                            print_every_k=5, logger=self.logger)
                 self.logger.debug("Exited with code {}".format(process.poll()))
 
             if process.poll() == 1:
