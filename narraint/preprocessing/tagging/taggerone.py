@@ -157,7 +157,7 @@ class TaggerOne(BaseTagger):
         """
         self.logger.debug("Last match: {}".format(document_id))
         last_file = self.mapping_id_file[int(document_id)]
-        self.logger.debug("TaggerOne exception in file {}".format(last_file))
+        self.logger.warning("TaggerOne exception in file {}".format(last_file))
         self.skipped_files.add(last_file)
         copyfile(self.log_file, "{}.{}".format(self.log_file, len(self.skipped_files)))
         if os.path.exists(last_file):
@@ -177,6 +177,7 @@ class TaggerOne(BaseTagger):
         matches = re.findall(r"INFO (\d+)-\d+", content)
         self.logger.debug("Searching log file {} ({} matches found)".format(self.log_file, len(matches)))
         if matches:
+            self.logger.warning("TaggerOne crashed - skipping last file")
             # we skip the last document
             self._ignore_document(matches[-1])
         else:
@@ -186,7 +187,7 @@ class TaggerOne(BaseTagger):
             # To prevent a endless repetition -> count the retries
             # If we have to many retries - skip the first document of the current batch
             if self.current_retry >= TaggerOne.TAGGER_ONE_RETRIES:
-                self.logger.debug('File crashed 3 times - Skip first file of current batch')
+                self.logger.warning('File crashed 3 times - Skip first file of current batch')
                 # Search the first document id in the last batch
                 with open(last_batch_file, 'r') as f_l_batch:
                     last_batch_file_content = f_l_batch.read()
