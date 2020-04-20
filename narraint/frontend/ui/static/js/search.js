@@ -36,7 +36,6 @@ const setButtonSearching = isSearching => {
     }
 };
 
-
 $(document).ready(function () {
     $("#search_form").submit(search);
 
@@ -47,7 +46,6 @@ $(document).ready(function () {
             e.preventDefault();
         }
     });
-
 
     let url_data = "/static/ac_all.txt";
 
@@ -255,11 +253,9 @@ $(document).ready(function () {
                     event.preventDefault();
                     return;
                 }
-
             });
         }
     });
-
 });
 
 function add_collapsable_events() {
@@ -288,6 +284,9 @@ const search = (event) => {
         data_source = "PubMed"
     }
 
+    let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
+    let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
+
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
     setButtonSearching(true);
@@ -296,7 +295,8 @@ const search = (event) => {
         url: search_url,
         data: {
             query: query,
-            data_source: data_source
+            data_source: data_source,
+            ranking: ranking
         }
     });
 
