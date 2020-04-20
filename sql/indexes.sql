@@ -13,3 +13,6 @@ CREATE UNIQUE INDEX unique_doc_s_p_o_sent_idx ON PREDICATION(document_id, docume
 
 CREATE INDEX tag_document_id_idx ON TAG(document_id);
 CREATE INDEX tag_document_collection_idx ON TAG(document_collection);
+
+CREATE INDEX doc_tagged_by_doc_idx ON DOC_TAGGED_BY(document_id);
+CREATE INDEX doc_tagged_by_doc_collection_idx ON DOC_TAGGED_BY(document_collection);
