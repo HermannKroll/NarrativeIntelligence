@@ -131,27 +131,31 @@
                         <label for="radio_pubmed">PubMed Sample (500k Document Titles and Abstracts)</label><br>
 
                         <div style="float: left; width: 50%">
-                        <label><strong>Outer Ranking:</strong></label><br>
-                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking" value="outer_ranking_a" checked="checked">
-                        <label for="radio_outer_ranking_a">Ranking that does a1 and some a2 and also a bit of
-                            a3</label><br>
-                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" value="outer_ranking_b">
-                        <label for="radio_outer_ranking_b">Ranking that does b1 and some b2 and also a bit of
-                            b3</label><br>
-                        <input type="radio" id="radio_outer_ranking_c" name="outer_ranking" value="outer_ranking_c">
-                        <label for="radio_outer_ranking_c">Ranking that does c1 and some c2 and also a bit of c3</label><br>
+                            <label><strong>Outer Ranking:</strong></label><br>
+                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking" value="outer_ranking_a"
+                                   checked="checked">
+                            <label for="radio_outer_ranking_a">Ranking that does a1 and some a2 and also a bit of
+                                a3</label><br>
+                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" value="outer_ranking_b">
+                            <label for="radio_outer_ranking_b">Ranking that does b1 and some b2 and also a bit of
+                                b3</label><br>
+                            <input type="radio" id="radio_outer_ranking_c" name="outer_ranking" value="outer_ranking_c">
+                            <label for="radio_outer_ranking_c">Ranking that does c1 and some c2 and also a bit of
+                                c3</label><br>
                         </div>
 
                         <div style="float: left; width: 50%">
-                        <label><strong>Inner Ranking:</strong></label><br>
-                        <input type="radio" id="radio_inner_ranking_a" name="inner_ranking" value="inner_ranking_a" checked="checked">
-                        <label for="radio_inner_ranking_a">Ranking that does a1 and some a2 and also a bit of
-                            a3</label><br>
-                        <input type="radio" id="radio_inner_ranking_b" name="inner_ranking" value="inner_ranking_b">
-                        <label for="radio_inner_ranking_b">Ranking that does b1 and some b2 and also a bit of
-                            b3</label><br>
-                        <input type="radio" id="radio_inner_ranking_c" name="inner_ranking" value="inner_ranking_c">
-                        <label for="radio_inner_ranking_c">Ranking that does c1 and some c2 and also a bit of c3</label><br>
+                            <label><strong>Inner Ranking:</strong></label><br>
+                            <input type="radio" id="radio_inner_ranking_a" name="inner_ranking" value="inner_ranking_a"
+                                   checked="checked">
+                            <label for="radio_inner_ranking_a">Ranking that does a1 and some a2 and also a bit of
+                                a3</label><br>
+                            <input type="radio" id="radio_inner_ranking_b" name="inner_ranking" value="inner_ranking_b">
+                            <label for="radio_inner_ranking_b">Ranking that does b1 and some b2 and also a bit of
+                                b3</label><br>
+                            <input type="radio" id="radio_inner_ranking_c" name="inner_ranking" value="inner_ranking_c">
+                            <label for="radio_inner_ranking_c">Ranking that does c1 and some c2 and also a bit of
+                                c3</label><br>
                         </div>
 
                     </div>
@@ -190,20 +194,18 @@
                     data-placement="left" title="Center"></button>
             <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary" data-toggle="tooltip"
                     data-placement="left" title="Clear"></button>
-            <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
-            ");">
+            <div id="mynetwork" onchange="createQuery();console.log(query + " onchange");">
 
-
-        </div>
-        <div>
-            <label for="query_translation"><strong>Query Translation</strong></label>
-            <div id="query_translation">No query translation available.</div>
-        </div>
-        <div class="row margin-top" id="div_wrapper_documents">
-            <h2>Documents</h2>
-            <br>
-            <div id="div_documents"></div>
-        </div>
+    </div>
+    <div>
+        <label for="query_translation"><strong>Query Translation</strong></label>
+        <div id="query_translation">No query translation available.</div>
+    </div>
+    <div class="row margin-top" id="div_wrapper_documents">
+        <h2>Documents</h2>
+        <br>
+        <div id="div_documents"></div>
+    </div>
 
     </div>
 {% endblock %}

@@ -296,7 +296,8 @@ const search = (event) => {
         data: {
             query: query,
             data_source: data_source,
-            ranking: ranking
+            outer_ranking: outer_ranking,
+            inner_ranking: inner_ranking
         }
     });
 
