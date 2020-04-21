@@ -10,7 +10,7 @@ def write_content(content, out_dir):
     if doc_ids:
         filename = f"{doc_ids[0]}.txt" if doc_ids[0] == doc_ids[-1] else f"{doc_ids[0]}-{doc_ids[-1]}.txt"
         with open(os.path.join(out_dir, filename), "w") as f:
-            f.write(content)
+            f.write(content + '\n')  # pubtator files must be terminated by an \n
     else:
         raise ValueError("No ID for {}".format(content))
 
