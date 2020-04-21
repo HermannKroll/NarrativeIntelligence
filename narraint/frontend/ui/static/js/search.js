@@ -289,6 +289,8 @@ const search = (event) => {
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
+    console.log("Outer Ranking: " + outer_ranking)
+    console.log("Inner Ranking: " + inner_ranking)
     setButtonSearching(true);
 
     let request = $.ajax({
