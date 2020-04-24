@@ -224,7 +224,7 @@ def main():
         logger.debug(f"Composite of single input file: created input directory at {in_dir}")
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
         split_composites(ext_in_dir, in_dir, logger=logger)
-        logger.info("done")
+        logger.info("done. Sanitizing files...")
         ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
     else:
         ignored, sanitized = sanitize(ext_in_dir, output_dir=in_dir)

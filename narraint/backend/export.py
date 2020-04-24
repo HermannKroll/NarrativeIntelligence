@@ -36,21 +36,9 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
     session = Session.get()
 
     if content:
-        document_query = session.query(Document).yield_per(content_buffer)
-        if collection:
-            document_query = document_query.filter_by(collection=collection)
-        if document_ids:
-            document_query = document_query.filter(Document.id.in_(document_ids))
-        document_query = document_query.order_by(Document.collection, Document.id)
+        document_query = create_document_query(collection, content_buffer, document_ids, session)
     if tag_types:
-        tag_query = session.query(Tag).yield_per(tag_buffer)
-        if collection:
-            tag_query = tag_query.filter_by(document_collection=collection)
-        if document_ids:
-            tag_query = tag_query.filter(Tag.document_id.in_(document_ids))
-        if tag_types and enttypes.ALL != tag_types:
-            tag_query = tag_query.filter(Tag.ent_type.in_(tag_types))
-        tag_query = tag_query.order_by(Tag.document_collection, Tag.document_id, Tag.id)
+        tag_query = create_tag_query(session, collection, document_ids, tag_types, tag_buffer)
 
     if content and not tag_types:
         with open(out_fn, "w") as f:
@@ -85,6 +73,28 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
                 f.write(Document.create_pubtator(current_document.id, current_document.title,
                                                  current_document.abstract))
                 current_document = next(content_iter, None)
+
+
+def create_tag_query(session, collection=None, document_ids=None, tag_types=None, tag_buffer=TAG_BUFFER_SIZE):
+    tag_query = session.query(Tag).yield_per(tag_buffer)
+    if collection:
+        tag_query = tag_query.filter_by(document_collection=collection)
+    if tag_types and enttypes.ALL != tag_types:
+        tag_query = tag_query.filter(Tag.ent_type.in_(tag_types))
+    if document_ids:
+        tag_query = tag_query.filter(Tag.document_id.in_(document_ids))
+    tag_query = tag_query.order_by(Tag.document_collection, Tag.document_id, Tag.ent_type, Tag.start, Tag.id )
+    return tag_query
+
+
+def create_document_query(session, content_buffer=CONTENT_BUFFER_SIZE, collection=None, document_ids=None):
+    document_query = session.query(Document).yield_per(content_buffer)
+    if collection:
+        document_query = document_query.filter_by(collection=collection)
+    if document_ids:
+        document_query = document_query.filter(Document.id.in_(document_ids))
+    document_query = document_query.order_by(Document.collection, Document.id)
+    return document_query
 
 
 def export_xml(out_fn, tag_types, document_ids=None, collection=None, logger=None, patent_ids=False):

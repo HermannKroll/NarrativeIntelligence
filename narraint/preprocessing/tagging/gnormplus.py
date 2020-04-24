@@ -75,7 +75,7 @@ class GNormPlus(BaseTagger):
                                             print_every_k=5, logger=self.logger)
                 self.logger.debug("Exited with code {}".format(process.poll()))
 
-            if process.poll() == 1:
+            if not process.poll() == 0:
                 # Java Exception
                 last_file = self.get_exception_causing_file_from_log()
                 if last_file:
