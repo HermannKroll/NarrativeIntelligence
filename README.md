@@ -52,10 +52,12 @@ The projects core, the `narraint` package, consists of several Python packages a
 
 | Package | Task |
 |-----------------|-----------------------------------------------------------------------------------------------|
+| `analysis` | Python scripts to compute database statistics |
 | `backend` | Connection to database, loading and exporting |
 | `enitity` | Entity stuff like mapping entity ids to vocabulary headings|
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
 | `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
+| `lucence` | Scripts to Wrap Apache Lucene's functions
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
 | `narrative` | Implementation of the Narrative querying |
 | `openie` | OpenIE for PubTator documents using Standford NLP |
@@ -65,7 +67,7 @@ The projects core, the `narraint` package, consists of several Python packages a
 | `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (extracted by openie)  |
 | `semmeddb` | Connection Handling for a SemMedDB. Currently our prototype queries SemMedDB via this package for fact retrieval |
 | `stories` | Some experimental stuff to derive stories from documents |
-
+| `utils` | Several nice helper scripts | 
 
 ## Named Entity Recognition
 
@@ -102,6 +104,8 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_04_16](meetings/2020_04_16.md)
+- [2020_04_07](meetings/2020_04_07.md)
 - [2020_03_31](meetings/2020_03_31.md)
 - [2020_03_25](meetings/2020_03_25.md)
 - [2020_03_19](meetings/2020_03_19.md)
@@ -116,45 +120,4 @@ The script creates a file called `narraint-deploy.tar.gz` inside the `build` dir
 This file contains the compressed Docker image, the README and the docker-compose file.
 
 ## Lucene
-
-### Installation
-
-You need the following packages:
-
-- subversion
-- make
-- g++
-- JRE
-- JDK
-
-First, install [JCC](https://lucene.apache.org/pylucene/jcc/install.html):
-
-    svn co https://svn.apache.org/repos/asf/lucene/pylucene/trunk/jcc jcc
-    cd jcc
-    python setup.py build
-    python setup.py install
-
-Next, download ANT and PyLucene:
-
-    wget http://apache.lauf-forum.at//ant/binaries/apache-ant-1.9.14-bin.tar.gz
-    tar -xvf apache-ant-1.9.14-bin.tar.gz
-    
-    wget http://apache.lauf-forum.at/lucene/pylucene/pylucene-8.1.1-src.tar.gz
-    tar -xvf pylucene-8.1.1-src.tar.gz
-    cd pylucene-8.1.1
-    
-Then, set the environment variable `JAVA_HOME` to the home of your Java installation (see `/usr/libexec/javahome`).
-
-    export JAVA_HOME=...
-
-Now, you need to modify the Makefile to add the correct environment variables:
-    
-- `ANT`: The `apache-ant-1.9.14/bin/ant` binary
-- `PYTHON`: The value from `which python3`
-- `JCC=$(PYTHON) -m jcc --shared`
-- `NUM_FILES=10`
-
-Then, run `make`.
-
-    CC=CC make
-    make install
+To setup lucene see [lucene readme](narraint/lucene/README.md)
