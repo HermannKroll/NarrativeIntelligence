@@ -225,7 +225,6 @@ def main():
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
         split_composites(ext_in_dir, in_dir, logger=logger)
         logger.info("done. Sanitizing files...")
-        logger.info()
         ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
     else:
         ignored, sanitized = sanitize(ext_in_dir, output_dir=in_dir)
