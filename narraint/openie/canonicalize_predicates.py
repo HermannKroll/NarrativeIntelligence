@@ -70,7 +70,7 @@ def canonicalize_predicates(best_matches):
     start_time = datetime.now()
     i = 0
     for pred, (pred_canonicalized, _) in best_matches.items():
-        if pred_canonicalized != PRED_TO_REMOVE:
+        if pred and pred_canonicalized != PRED_TO_REMOVE:
             stmt = update(Predication).where(Predication.predicate_cleaned == pred). \
                 values(predicate_canonicalized=pred_canonicalized)
         else:
