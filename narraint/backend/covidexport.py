@@ -2,6 +2,7 @@ import argparse
 import logging
 import csv
 import os
+from datetime import datetime
 from glob import glob
 
 import json
@@ -11,6 +12,7 @@ from narraint.backend.export import create_tag_query, TAG_BUFFER_SIZE
 from narraint.entity import enttypes
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.pubtator.regex import ILLEGAL_CHAR
+from narraint.progress import print_progress_with_eta
 
 TITLE = "title"
 ABSTRACT = "abstract"
@@ -91,13 +93,19 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
     session = Session.get()
     tag_query = create_tag_query(session, collection, document_ids, tag_types, tag_buffer)
 
+    logger.info('loading file locations...')
     files = glob(f"{json_root}/**/*", recursive=True)
     file_dir = {os.path.basename(f).split(".")[0]: f for f in files}
+    logger.info('loading info csv...')
     with open(info_file) as info:
         info_reader = csv.reader(info, delimiter='\t')
         next(info_reader)
+        logger.info('creating doc_id - file dict...')
         file_dict = {int(art_id): file_dir.get(doc_id, None) for art_id, doc_id in info_reader}
-
+    logger.info(f"Processing {len(file_dict)} documents")
+    document_count = 0
+    start_time = datetime.now()
+    logger.info('Starting to search for tags.')
     art_id = None
     tag_json = {}
     tagtype_offset = 0
@@ -114,7 +122,9 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
             tag_json[doc_id] = []
             reader = FileReader(file)
             tagtype_offset = 0
-            print(f"{doc_id} {file})")
+            logger.debug(f"{doc_id} {file})")
+            print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
+            document_count +=1
         if current_tagtype != tag.ent_type:
             current_tagtype = tag.ent_type
             tagtype_offset = 0
@@ -125,7 +135,7 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
             found += 1
             if abs(tag.start - start) > max(100, 0.002 * tag.start):
                 shaky += 1
-            print(
+            logger.debug(
                 f"{tag.start} - {tag.end} -> {start} - {end}: {tag.ent_str} ({tag.ent_type}) [{shaky / (not_found + found) * 100}% shaky]")
             sec, par, js_start = reader.get_json_location(start)
             js_end = js_start + end - start
@@ -144,9 +154,13 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
             tag_json[doc_id].append(tag_dict)
         else:
             not_found += 1
-            print(
+            logger.debug(
                 f"unable to find {tag.start}, {tag.end}: {tag.ent_str} ({tag.ent_type}) [{found / (not_found + found)}]")
-    print(f"[{found / (not_found + found)}]")
+
+    logger.info(f"Done searching. Tags processed: {not_found + found}, "
+                f"Tags not found: {100*not_found/(not_found + found)}%,"
+                f"Tags shakey: {100*shaky/(not_found + found)}%")
+    logger.info(f"Writing json to {out_fn}")
     with open(out_fn, "w+") as out:
         json.dump(tag_json, out, indent=3)
 
@@ -182,12 +196,8 @@ def main():
     parser.add_argument("--ids", nargs="*", metavar="DOC_ID")
     parser.add_argument("--idfile", help='file containing document ids (one id per line)')
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
-    parser.add_argument("-p", "--patents", action="store_true",
-                        help="Will replace the patent prefix ids by country codes")
-    parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
-    parser.add_argument("--sqllog", action="store_true", help='logs sql commands')
-    parser.add_argument("-f", "--format", help="Export format (Pubtator / XML)", default="Pubtator")
+    parser.add_argument("-l", "--loglevel", default="INFO")
     args = parser.parse_args()
 
     if args.idfile:
@@ -202,7 +212,7 @@ def main():
         tag_types = enttypes.ALL if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
     else:
         tag_types = None
-
+    logging.basicConfig(level=args.loglevel.upper())
     export(args.output, tag_types, args.jsonroot, args.infofile, ids, args.collection)
 
 
