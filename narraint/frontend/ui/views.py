@@ -221,6 +221,8 @@ class SearchView(TemplateView):
                 try:
                     query = str(self.request.GET.get("query", "").strip())
                     data_source = str(self.request.GET.get("data_source", "").strip())
+                    outer_ranking = str(self.request.GET.get("outer_ranking", "").strip())
+                    inner_ranking = str(self.request.GET.get("inner_ranking", "").strip())
                     logging.info("Selected data source is {}".format(data_source))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
