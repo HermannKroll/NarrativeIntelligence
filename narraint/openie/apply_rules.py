@@ -11,7 +11,8 @@ from narraint.backend.models import Predication, PredicationResult
 from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, SPECIES
 
 DOSAGE_FORM_PREDICATE = "dosageform"
-SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE}
+ASSOCIATED_PREDICATE = "associated"
+SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE, ASSOCIATED_PREDICATE}
 
 
 def dosage_form_rule():
@@ -34,9 +35,12 @@ def dosage_form_rule():
 
 
 def mirror_symmetric_predicates():
-    logging.info('Mirroring symmetric predicates...')
     session = Session.get()
-
+    logging.info('Deleting old mirrored predicates...')
+    session.query(Predication).filter(Predication.mirrored == True).delete()
+    session.commit()
+    logging.info('Deleted')
+    logging.info('Mirroring symmetric predicates...')
     for idx_pred, pred_to_mirror in enumerate(SYMMETRIC_PREDICATES):
         start_time = datetime.now()
         logging.info('Mirroring predicate: {}'.format(pred_to_mirror))
