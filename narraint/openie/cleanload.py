@@ -26,6 +26,14 @@ PRED = namedtuple('Predication', ['doc_id', 'subj', 'pred', 'pred_cleaned', 'obj
 OPENIE_TUPLE = namedtuple("OpenIETuple", ['doc_id', 'subj', 'pred', 'pred_lemma', 'obj', 'conf', 'sent'])
 
 
+def clean_sentence(sentence: str):
+    s = sentence.replace('-LRB- ', '(')
+    s = s.replace('-LSB- ', '(')
+    s = s.replace(' -RRB-', ')')
+    s = s.replace(' -RSB-', ')')
+    return s
+
+
 def get_subject_and_object_entities(doc_tags, sub, obj):
     # default not hit
     subs_included = []
@@ -184,6 +192,8 @@ def _clean_tuple_predicate_based(t: PRED):
 
         pred_cleaned += tok + ' '
 
+    # clean the sentence
+    cleaned_sentence = clean_sentence(t.sent).strip()
     # check for active and passive voice
     if ('be' in tokens and participe_past_detected) or ('by' in t.pred and participe_past_detected):
         # passive means we have to change the direction of the tuple
@@ -191,10 +201,10 @@ def _clean_tuple_predicate_based(t: PRED):
         subj, s_txt, s_id, s_type = t.obj, t.o_str, t.o_id, t.o_type
         obj, o_txt, o_id, o_type = t_sub, t_s_txt, t_s_id, t_s_type
 
-        return PRED(t.doc_id, subj.strip(), t.pred.strip(), pred_cleaned.strip(), obj.strip(), t.conf, t.sent.strip(),
+        return PRED(t.doc_id, subj.strip(), t.pred.strip(), pred_cleaned.strip(), obj.strip(), t.conf, cleaned_sentence,
                     s_id, s_txt.strip(), s_type.strip(), o_id, o_txt.strip(), o_type.strip())
 
-    return PRED(t.doc_id, t.subj.strip(), t.pred.strip(), pred_cleaned.strip(), t.obj.strip(), t.conf, t.sent.strip(),
+    return PRED(t.doc_id, t.subj.strip(), t.pred.strip(), pred_cleaned.strip(), t.obj.strip(), t.conf, cleaned_sentence,
                 t.s_id, t.s_str.strip(), t.s_type.strip(), t.o_id, t.o_str.strip(), t.o_type.strip())
 
 
