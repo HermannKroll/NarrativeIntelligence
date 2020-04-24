@@ -13,6 +13,7 @@ from django.views.generic import TemplateView
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.mesh.data import MeSHDB
+from narraint.openie.predicate_vocabulary import create_predicate_vocab
 from narraint.stories.story import MeshTagger
 from narraint.queryengine.engine import QueryEngine
 
@@ -29,17 +30,17 @@ variable_type_mappings = {"chemical": "Chemical",
                           "genes": "Gene",
                           "species": "Species"}
 
-allowed_predicates = ['administered to', 'affects', 'associated with', 'augments', 'causes', 'coexists with',
-                      'complicates', 'converts to', 'diagnoses', 'disrupts', 'inhibits', 'interacts with', 'isa',
-                      'location of', 'manifestation of', 'method of', 'occurs in', 'part of', 'precedes', 'predisposes',
-                      'prevents', 'process of', 'produces', 'stimulates', 'treats', 'uses', 'compared with',
-                      'different from', 'higher than', 'lower than', 'same as', "uses", "dosageform"]
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
+
+allowed_predicates = list(create_predicate_vocab().keys())
+allowed_predicates.append("dosageform")
+logging.info('allowed predicates are: {}'.format(allowed_predicates))
+
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
 
@@ -215,6 +216,7 @@ class SearchView(TemplateView):
         if request.is_ajax():
             results_converted = []
             query_trans_string = ""
+            nt_string = ""
             if "query" in request.GET:
                 try:
                     query = str(self.request.GET.get("query", "").strip())
@@ -241,6 +243,7 @@ class SearchView(TemplateView):
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
+                    nt_string = ""
                     traceback.print_exc(file=sys.stdout)
 
             return JsonResponse(

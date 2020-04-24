@@ -1,0 +1,20 @@
+
+def create_predicate_vocab():
+    return dict(causes=["cause", "result", "lead"],
+                inhibits=["inhibit", "disrupt", "suppress", "inhibitor"],
+                interacts=["interacts with", "interact", "bind", "target"],
+                induces=["induce", "stimulate", "increase", "potentiate", "receive", "enhance", "promote", "improve",
+                         "activate", "higher"],
+                treats=["treat"],
+                associated=["associate", "associated", "associated with", "is a", "same as", "coexits with", "coexists",
+                            "process", "method of", "part of", "correlate", "play role"],
+                augments=["augment"],
+                administered=["administered", "administer", "administered to"],
+                prevents=["prevent"],
+                decreases=["decrease", "reduce", "attenuate", "mediate"],
+                regulates=["regulate"],
+                effects=["effect", "develop", "affect", "contribute", "involve"],
+                produces=["produce"],
+                occurs=["occur"],
+                compares=["compares", "compared with"],
+                PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"])

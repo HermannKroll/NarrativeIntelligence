@@ -1,1 +1,1 @@
-administered to,affects,associated with,augments,causes,coexists with,complicates,converts to,diagnoses,disrupts,inhibits,interacts with,isa,location of,manifestation of,method of,occurs in,part of,precedes,predisposes,prevents,process of,produces,stimulates,treats,uses,compared with,different from,higher than,lower than,same as,dosageform
+causes,inhibts,interacts,induces,treats,dosageform,associated,augments,administered,prevents,decreases,regulates,effects,produces,occurs,compares
