@@ -238,9 +238,9 @@ def main():
     if not os.path.exists(TMP_DIR):
         os.mkdir(TMP_DIR)
         
-    mesh = MeshResolver()
-    mesh.build_index(MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE,
-                     MESH_SUPPLEMENTARY_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
+    # mesh = MeshResolver()
+    # mesh.build_index(MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE,
+    #                  MESH_SUPPLEMENTARY_FILE, MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE)
 
     gene = GeneResolver()
     gene.build_index(GENE_FILE, GENE_INDEX_FILE)
