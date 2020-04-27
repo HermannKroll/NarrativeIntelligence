@@ -351,7 +351,7 @@ const createDocumentList = (results) => {
             let doc_titles = res[3];
             let explanations = res[4];
             let i = 0;
-            let button_string = doc_ids.length + ' Documents'; //point1
+            let button_string = doc_ids.length + ' Documents';
             if (var_names.length > 0) {
                 button_string += ' [';
                 var_names.forEach(name => {
@@ -383,7 +383,7 @@ const createDocumentList = (results) => {
                     //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
                     '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
                     'class="list-group-item list-group-item-action" target="_blank">' +
-                    'PMID' + doc_id + '</a>' + '<br>' + 'Title: ' + title + e_string + '<hr>'
+                    'PMID' + doc_id + '<br> Title: ' + title + e_string + '</a>'
             });
             divList.append('<div class="content">' + document_div_string + '</div>');
         });

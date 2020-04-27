@@ -131,7 +131,7 @@ def main():
 
     time_open_ie = datetime.now()
     # add document as processed to database
-    # mark_document_as_processed_by_openie(ids_to_process, args.collection) # AUSKOMMENTIERT DAMIT ICH NICHT GEFEUERT WERDE
+    mark_document_as_processed_by_openie(ids_to_process, args.collection)
     logging.info('Process finished in {}s ({}s export, {}s filtering and {}s openie)'
                  .format(time_open_ie-time_start, time_exported-time_start, time_filtered-time_exported,
                          time_open_ie-time_filtered))
