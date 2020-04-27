@@ -368,7 +368,7 @@ const createDocumentList = (results) => {
             divList.append('<button class="collapsible">' + button_string + '</button>');
 
             i = 0;
-            let document_div_string = "";
+            let document_div_string = "<br>";
             doc_ids.forEach(doc_id => {
                 let title = doc_titles[i];
                 let explanations_for_doc = explanations[i];
@@ -381,9 +381,8 @@ const createDocumentList = (results) => {
                 });
                 document_div_string +=
                     //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
-                    '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" ' +
-                    'class="list-group-item list-group-item-action" target="_blank">' +
-                    'PMID' + doc_id + '<br> Title: ' + title + e_string + '</a>'
+                    '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" target="_blank">' +
+                    'PMID' + doc_id + '</a>' + '<br> Title: ' + title + e_string + '<hr>'
             });
             divList.append('<div class="content">' + document_div_string + '</div>');
         });
