@@ -355,7 +355,6 @@ const createDocumentList = (results) => {
             if (var_names.length > 0) {
                 button_string += ' [';
                 var_names.forEach(name => {
-                    //vllt. umschreiben, Inhalt der runden Klammern am Anfang schon rausziehen
                     //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
                     if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:'){
                         button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
