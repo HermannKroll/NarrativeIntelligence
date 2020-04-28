@@ -356,21 +356,40 @@ const createDocumentList = (results) => {
                 button_string += ' [';
                 var_names.forEach(name => {
                     //vllt. umschreiben, Inhalt der runden Klammern am Anfang schon rausziehen
-                    //TODO: siehe commit-Nachricht. Außerdem noch die Farbe/Unterstreichung/Dicke ändern!
-                    //TODO: Problem: Klick auf Hyperlink klappt auch Button aus!
+                    //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
                     if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:'){
-                        button_string += name + ': ' + var_subs[i].split('(')[0] + '(' +
-                            '<a href="https://meshb.nlm.nih.gov/record/ui?ui=' +
-                            var_subs[i].split('MESH:').pop().split(' ')[0] + '" target="_blank">' +
-                            var_subs[i].split('MESH:')[1].split(')')[0] + '</a>' + ')'
+                        button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
+                            '<a onclick="event.stopPropagation()" href="https://meshb.nlm.nih.gov/record/ui?ui=' +
+                            var_subs[i].split('MESH:').pop().split(' ')[0] + '" target="_blank"' +
+                            'style="color:#ffffff;font-weight:bold;"' + '>' +
+                            var_subs[i].split('MESH:')[1].split(' ')[0] + '</a> ' +
+                            var_subs[i].split(' ').pop()
+                    } else
+                    {
+                        switch (var_subs[i].split(' ').pop().substring(0, (var_subs[i].split(' ').pop().length - 1))) {
+                            case "Species":
+                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
+                                    '<a onclick="event.stopPropagation()" ' +
+                                    'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' +
+                                    var_subs[i].split('(').pop().split(' ')[0] + '" target="_blank"' +
+                                    'style="color:#ffffff;font-weight:bold;"' + '>' +
+                                    var_subs[i].split('(')[1].split(' ')[0] + '</a> ' +
+                                    var_subs[i].split(' ').pop()
+                                break;
+                            case "Gene":
+                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
+                                    '<a onclick="event.stopPropagation()" ' +
+                                    'href="https://www.ncbi.nlm.nih.gov/gene/?term=' +
+                                    var_subs[i].split('(').pop().split(' ')[0] + '" target="_blank"' +
+                                    'style="color:#ffffff;font-weight:bold;"' + '>' +
+                                    var_subs[i].split('(')[1].split(' ')[0] + '</a> ' +
+                                    var_subs[i].split(' ').pop()
+                                break;
+                            default:
+                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i];
+                                break;
+                        }
                     }
-
-                    //if (i === 0) {
-                    //    button_string += name + ': ' + var_subs[i];
-                    //} else {
-                    //    button_string += ', ' + name + ': ' + var_subs[i];
-                    //}
-
                     i += 1;
                 });
                 button_string += ']';
@@ -402,4 +421,3 @@ const createDocumentList = (results) => {
     }
     return divList;
 };
-
