@@ -355,11 +355,19 @@ const createDocumentList = (results) => {
             if (var_names.length > 0) {
                 button_string += ' [';
                 var_names.forEach(name => {
-                    if (i === 0) {
-                        button_string += name + ': ' + var_subs[i];
-                    } else {
-                        button_string += ', ' + name + ': ' + var_subs[i];
+                    //vllt. umschreiben, Inhalt der runden Klammern am Anfang schon rausziehen
+                    if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:'){
+                        button_string += name + ': ' + var_subs[i].split('(')[0] + '(' +
+                            '<a href="https://meshb.nlm.nih.gov/record/ui?ui=' +
+                            var_subs[i].split('MESH:').pop().split(' ')[0] + '">' +
+                            var_subs[i].split('MESH:')[1].split(')')[0] + '</a>' + ')'
                     }
+
+                    //if (i === 0) {
+                    //    button_string += name + ': ' + var_subs[i];
+                    //} else {
+                    //    button_string += ', ' + name + ': ' + var_subs[i];
+                    //}
 
                     i += 1;
                 });
