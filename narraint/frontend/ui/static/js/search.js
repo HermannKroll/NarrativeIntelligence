@@ -356,10 +356,12 @@ const createDocumentList = (results) => {
                 button_string += ' [';
                 var_names.forEach(name => {
                     //vllt. umschreiben, Inhalt der runden Klammern am Anfang schon rausziehen
+                    //TODO: siehe commit-Nachricht. Außerdem noch die Farbe/Unterstreichung/Dicke ändern!
+                    //TODO: Problem: Klick auf Hyperlink klappt auch Button aus!
                     if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:'){
                         button_string += name + ': ' + var_subs[i].split('(')[0] + '(' +
                             '<a href="https://meshb.nlm.nih.gov/record/ui?ui=' +
-                            var_subs[i].split('MESH:').pop().split(' ')[0] + '">' +
+                            var_subs[i].split('MESH:').pop().split(' ')[0] + '" target="_blank">' +
                             var_subs[i].split('MESH:')[1].split(')')[0] + '</a>' + ')'
                     }
 
