@@ -40,7 +40,9 @@ class TaggerOne(BaseTagger):
         self.batch_dir = os.path.join(self.root_dir, "taggerone_batches")
         self.log_file = os.path.join(self.log_dir, "taggerone.log")
         self.skipped_files = set()
+        self.skipped_file_ids = set()
         self.current_retry = 0
+        self.start_time = datetime.now()
 
     def prepare(self, resume=False):
         """
@@ -90,7 +92,9 @@ class TaggerOne(BaseTagger):
         :return: Tuple of batch ID and batch
         """
         finished_ids = self.get_finished_ids()
-        unfinished_ids = list(self.id_set.difference(finished_ids))
+        unfinished_ids = self.id_set.difference(finished_ids)
+        # ignore skipped file ids
+        unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
         batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
         self.logger.debug(f"Variable finished_ids contains {len(finished_ids)} elements")
@@ -104,14 +108,11 @@ class TaggerOne(BaseTagger):
             # Write batch
             for fn in batch:
                 filename = os.path.join(self.in_dir, fn)
-                if os.path.exists(filename):  # Important if file was deleted
-                    with open(filename) as f_doc:
-                        with open(batch_file, "a+") as f_batch:
-                            f_batch.write(f_doc.read())
-                else:
-                    self.skipped_files.add(filename)
-                    num_skipped += 1
-            self.logger.debug("Created batch ({}, {} files, {} skipped)".format(batch_id, len(batch), num_skipped))
+                with open(filename) as f_doc:
+                    with open(batch_file, "a+") as f_batch:
+                        f_batch.write(f_doc.read())
+
+            self.logger.debug("Created batch ({}, {} files)".format(batch_id, len(batch)))
         return batch_id, batch_file
 
     def get_output_file(self, batch_id):
@@ -128,7 +129,6 @@ class TaggerOne(BaseTagger):
         :param batch_file: Path to batch file
         :return: Exit status of TaggerOne
         """
-        start_time = datetime.now()
         with open(self.log_file, "w") as f_log:
             command = "{} Pubtator {} {input} {out}".format(
                 self.config.tagger_one_script,
@@ -143,7 +143,7 @@ class TaggerOne(BaseTagger):
             # Wait until finished
             while process.poll() is None:
                 sleep(self.OUTPUT_INTERVAL)
-                print_progress_with_eta("TaggerOne tagging", self.get_progress(), len(self.files), start_time,
+                print_progress_with_eta("TaggerOne tagging", self.get_progress(), len(self.files), self.start_time,
                                         print_every_k=1, logger=self.logger)
             self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
         return process.poll()
@@ -156,6 +156,7 @@ class TaggerOne(BaseTagger):
         :return:
         """
         self.logger.debug("Last match: {}".format(document_id))
+        self.skipped_file_ids.add(document_id)
         last_file = self.mapping_id_file[int(document_id)]
         self.logger.warning("TaggerOne exception in file {}".format(last_file))
         self.skipped_files.add(last_file)
@@ -177,19 +178,19 @@ class TaggerOne(BaseTagger):
         matches = re.findall(r"INFO (\d+)-\d+", content)
         self.logger.debug("Searching log file {} ({} matches found)".format(self.log_file, len(matches)))
         if matches:
-            self.logger.warning("TaggerOne crashed - skipping last file")
+            self.logger.warning("TaggerOne crashed - skipping last file: {}".format(matches[-1]))
             # we skip the last document
             self._ignore_document(matches[-1])
         else:
             # No file processed, assume another error
             # Try TaggerOne again
-            self.logger.error("No files processed")
+            self.logger.warning("No files processed")
             # To prevent a endless repetition -> count the retries
             # If we have to many retries - skip the first document of the current batch
             if self.current_retry >= TaggerOne.TAGGER_ONE_RETRIES:
                 self.logger.warning('File crashed 3 times - Skip first file of current batch')
                 # Search the first document id in the last batch
-                with open(last_batch_file, 'r') as f_l_batch:
+                with open(last_batch_file, 'rt') as f_l_batch:
                     last_batch_file_content = f_l_batch.read()
                 matches = re.findall(DOCUMENT_ID, last_batch_file_content)
                 if matches:
@@ -217,12 +218,12 @@ class TaggerOne(BaseTagger):
         Only existing documents are collected (for the case they are deleted by GNormPlus).
 
         Then, TaggerOne is started and the method waits until the process has finished.
-        For the case that the process received a SIGKILL signal, the complete method is exited.
+        For the case that the process received a SIGKILL signal (out of memory), TaggerOne will be restarted.
         For the case that the process terminated with "1" (indicating an error), the last processed document is deleted
         and the process restarts. We create a new batch.
         """
         keep_tagging = True
-        start_time = datetime.now()
+        self.start_time = datetime.now()
 
         # Generate first batch
         batch_id, batch_file = self.create_batch()
@@ -240,16 +241,23 @@ class TaggerOne(BaseTagger):
             elif exit_code == 1:
                 # Process quit by exception
                 keep_tagging = self.handle_error(batch_file)
-            elif exit_code == -9 or exit_code == 137:
+            elif exit_code == 137:
+                # out of memory exit code
+                # let's wait 5 minutes till the process tries to restart
+                self.logger.warning('Received out of memory exit code for process - restart in 5 minutes')
+                sleep(5*60)
+                keep_tagging = self.handle_error(batch_file)
+            elif exit_code == -9:
                 # Process terminated by user
                 self.logger.info("Received SIGKILL. Stopping TaggerOne ...")
                 keep_tagging = False
 
-            # Create new batch
-            batch_id, batch_file = self.create_batch()
+            if keep_tagging:
+                # Create new batch
+                batch_id, batch_file = self.create_batch()
 
         end_time = datetime.now()
         self.logger.info("TaggerOne finished in {} ({} files total, {} errors)".format(
-            end_time - start_time,
+            end_time - self.start_time,
             len(self.files) - len(self.skipped_files),
             len(self.skipped_files)))
