@@ -35,6 +35,7 @@ class TaggerOne(BaseTagger):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.finished_ids = set()
         self.in_dir = os.path.join(self.root_dir, "taggerone_in")
         self.out_dir = os.path.join(self.root_dir, "taggerone_out")
         self.batch_dir = os.path.join(self.root_dir, "taggerone_batches")
@@ -91,13 +92,13 @@ class TaggerOne(BaseTagger):
         Method returns the batch ID and the location of the batch file.
         :return: Tuple of batch ID and batch
         """
-        finished_ids = self.get_finished_ids()
-        unfinished_ids = self.id_set.difference(finished_ids)
+        self.finished_ids = self.finished_ids.union(self.get_finished_ids())
+        unfinished_ids = self.id_set.difference(self.finished_ids)
         # ignore skipped file ids
         unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
         batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
-        self.logger.debug(f"Variable finished_ids contains {len(finished_ids)} elements")
+        self.logger.debug(f"Variable finished_ids contains {len(self.finished_ids)} elements")
         self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
         batch_id = None
         batch_file = None
