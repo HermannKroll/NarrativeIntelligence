@@ -36,7 +36,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
     session = Session.get()
 
     if content:
-        document_query = create_document_query(collection, content_buffer, document_ids, session)
+        document_query = create_document_query(session, collection,  document_ids, content_buffer)
     if tag_types:
         tag_query = create_tag_query(session, collection, document_ids, tag_types, tag_buffer)
 
@@ -87,7 +87,7 @@ def create_tag_query(session, collection=None, document_ids=None, tag_types=None
     return tag_query
 
 
-def create_document_query(session, content_buffer=CONTENT_BUFFER_SIZE, collection=None, document_ids=None):
+def create_document_query(session, collection=None, document_ids=None, content_buffer=CONTENT_BUFFER_SIZE):
     document_query = session.query(Document).yield_per(content_buffer)
     if collection:
         document_query = document_query.filter_by(collection=collection)
