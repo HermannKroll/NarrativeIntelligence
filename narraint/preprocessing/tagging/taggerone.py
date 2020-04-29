@@ -102,7 +102,6 @@ class TaggerOne(BaseTagger):
         batch_id = None
         batch_file = None
         if batch:
-            num_skipped = 0
             batch_id = uuid.uuid1()
             batch_file = self.get_batch_file(batch_id)
             # Write batch
