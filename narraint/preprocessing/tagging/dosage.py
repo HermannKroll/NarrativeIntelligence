@@ -267,11 +267,11 @@ class DosageFormTagger(BaseTagger):
 
         for idx, in_file in enumerate(self.files):
             if in_file.endswith(".txt"):
-                self.logger.debug("Processing {}".format(in_file))
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
                     self.tag(in_file, out_file)
                 except DocumentError as e:
+                    self.logger.debug("Error in document - will be skipped {}".format(in_file))
                     skipped_files.append(in_file)
                     self.logger.info(e)
                 if idx % self.PROGRESS_BATCH == 0:
