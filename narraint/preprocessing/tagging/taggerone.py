@@ -156,7 +156,7 @@ class TaggerOne(BaseTagger):
         :return:
         """
         self.logger.debug("Last match: {}".format(document_id))
-        self.skipped_file_ids.add(document_id)
+        self.skipped_file_ids.add(int(document_id))
         last_file = self.mapping_id_file[int(document_id)]
         self.logger.warning("TaggerOne exception in file {}".format(last_file))
         self.skipped_files.add(last_file)
