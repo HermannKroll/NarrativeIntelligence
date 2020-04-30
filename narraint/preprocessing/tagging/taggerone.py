@@ -36,6 +36,7 @@ class TaggerOne(BaseTagger):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.finished_ids = set()
+        self.batch_ids = set()
         self.in_dir = os.path.join(self.root_dir, "taggerone_in")
         self.out_dir = os.path.join(self.root_dir, "taggerone_out")
         self.batch_dir = os.path.join(self.root_dir, "taggerone_batches")
@@ -97,8 +98,8 @@ class TaggerOne(BaseTagger):
         unfinished_ids = self.id_set.difference(self.finished_ids)
         # ignore skipped file ids
         unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
-        batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
-        batch = [self.mapping_id_file[doc_id] for doc_id in batch_ids]
+        self.batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
+        batch = [self.mapping_id_file[doc_id] for doc_id in self.batch_ids]
         self.logger.debug(f"Variable finished_ids contains {len(self.finished_ids)} elements")
         self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
         batch_id = None
@@ -195,9 +196,9 @@ class TaggerOne(BaseTagger):
                     last_batch_file_content = f_l_batch.read()
                 matches = re.findall(DOCUMENT_ID, last_batch_file_content)
                 if matches:
-                    for match in matches:
-                        self._ignore_document(match)
-                        self.current_retry = 0
+                    # skip first document
+                    self._ignore_document(matches[0])
+                    self.current_retry = 0
                 else:
                     self.logger.error('Critical error - there is no document id in the last batch - stopping')
                     keep_tagging = False
@@ -235,6 +236,8 @@ class TaggerOne(BaseTagger):
 
             # Check process exit code
             if exit_code == 0:
+                # add all batch ids to finished
+                self.finished_ids = self.finished_ids.union(self.batch_ids)
                 self.current_retry = 0
                 # Process finished successfully
                 if self.get_progress() + len(self.skipped_files) == len(self.files):
