@@ -75,7 +75,8 @@ class TaggerOne(BaseTagger):
             with open(self.log_file) as f:
                 content = f.read()
             ids_log = set(int(x) for x in re.findall(r"INFO (\d+)-\d+\n", content))
-        return ids_dir.union(ids_log)
+        self.finished_ids = self.finished_ids.union(ids_dir.union(ids_log))
+        return self.finished_ids
 
     def get_progress(self):
         """
@@ -92,7 +93,7 @@ class TaggerOne(BaseTagger):
         Method returns the batch ID and the location of the batch file.
         :return: Tuple of batch ID and batch
         """
-        self.finished_ids = self.finished_ids.union(self.get_finished_ids())
+        self.finished_ids = self.get_finished_ids()
         unfinished_ids = self.id_set.difference(self.finished_ids)
         # ignore skipped file ids
         unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
