@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import pickle
@@ -5,6 +6,7 @@ import re
 import traceback
 import sys
 from datetime import datetime
+from pprint import pprint
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -14,6 +16,7 @@ from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.mesh.data import MeSHDB
 from narraint.openie.predicate_vocabulary import create_predicate_vocab
+from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.stories.story import MeshTagger
 from narraint.queryengine.engine import QueryEngine
 
@@ -224,11 +227,17 @@ class SearchView(TemplateView):
                     outer_ranking = str(self.request.GET.get("outer_ranking", "").strip())
                     inner_ranking = str(self.request.GET.get("inner_ranking", "").strip())
                     logging.info("Selected data source is {}".format(data_source))
+                    logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+                    logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
                     if data_source not in ["PMC", "PubMed"]:
                         results_converted = []
                         query_trans_string = "Data source is unknown"
+                        nt_string = ""
+                        logger.error('parsing error')
+                    elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+                        query_trans_string = "Outer ranking strategy is unkown"
                         nt_string = ""
                         logger.error('parsing error')
                     elif query_fact_patterns is None:
@@ -238,10 +247,20 @@ class SearchView(TemplateView):
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
                         results_converted = []
-                        aggregated_result = query_engine.query_with_graph_query(query_fact_patterns, query, data_source)
-                        for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
-                                                                                0:30]:
-                            results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
+                        results = query_engine.query_with_graph_query(query_fact_patterns, query, data_source)
+
+                        if outer_ranking == 'outer_ranking_substitution':
+                            substitution_aggregation = ResultAggregationBySubstitution()
+                            results_converted = substitution_aggregation.rank_results(results).to_dict()
+                            pprint(results_converted)
+
+                        elif outer_ranking == 'outer_ranking_ontology':
+                            substitution_aggregation = ResultAggregationBySubstitution()
+                            results_converted = substitution_aggregation.rank_results(results).to_dict()
+
+                  #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
+                   #                                                             0:30]:
+                    #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"

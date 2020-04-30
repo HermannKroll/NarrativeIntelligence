@@ -28,7 +28,7 @@
     margin-top: 62px;
 }
 
-
+/*
 .collapsible {
   background-color: #077731;
   color: white;
@@ -54,15 +54,15 @@
 }
 
 .collapsible:after {
-  content: '\02795'; /* Unicode character for "plus" sign (+) */
+  content: '\02795'; // Unicode character for "plus" sign (+)
   font-size: 13px;
   color: white;
   float: right;
   margin-left: 5px;
 }
-
+*/
 .active:after {
-  content: "\2796"; /* Unicode character for "minus" sign (-) */
+  content: "\2796"; // Unicode character for "minus" sign (-)
 }
 
 /*

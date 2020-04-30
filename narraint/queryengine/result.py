@@ -3,6 +3,29 @@ from collections import defaultdict
 from narraint.entity.entityresolver import EntityResolver
 
 
+class QueryEntitySubstitution:
+
+    def __init__(self, entity_str, entity_id, entity_type):
+        self.entity_str = entity_str
+        self.entity_id = entity_id
+        self.entity_type = entity_type
+        self.entity_name = self._compute_entity_vocabulary_name()
+
+    def _compute_entity_vocabulary_name(self):
+        entity_resolver = EntityResolver.instance()
+        if self.entity_type == 'predicate':
+            return self.entity_id  # id is already the name
+        try:
+            ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type)
+        except KeyError:
+            ent_name = self.entity_str
+        return ent_name
+
+    def to_dict(self):
+        return dict(entity_name=self.entity_name, entity_str=self.entity_str, entity_id=self.entity_id,
+                    entity_type=self.entity_type)
+
+
 class QueryFactExplanation:
 
     def __init__(self, sentence, predicate, predicate_canonicalized):
@@ -13,86 +36,73 @@ class QueryFactExplanation:
     def __str__(self):
         return '{} ("{}" -> "{}")'.format(self.sentence, self.predicate, self.predicate_canonicalized)
 
+    def to_dict(self):
+        return dict(sentence=self.sentence, predicate=self.predicate,
+                    predicate_canonicalized=self.predicate_canonicalized)
 
-class QueryResult:
 
-    def __init__(self, doc_id, title, var2substitution, confidence, explanations: [QueryFactExplanation]):
-        self.doc_id = doc_id
+def serialize_var_substitution(var2substitution):
+    return {k: v.to_dict() for k, v in var2substitution.items()}
+
+
+class QueryResultBase:
+    pass
+
+    def to_dict(self):
+        raise NotImplementedError
+
+
+class QueryResult(QueryResultBase):
+
+    def __init__(self, document_id, title, var2substitution, confidence, explanations: [QueryFactExplanation]):
+        self.document_id = document_id
         self.title = title
         self.var2substitution = var2substitution
         self.confidence = confidence
         self.explanations = explanations
 
+    def to_dict(self):
+        e_dict = [e.to_dict() for e in self.explanations]
+        return dict(type="result", document_id=self.document_id, title=self.title, explanations=e_dict)
 
-class QueryResultAggregate:
 
-    def __init__(self, var_names):
-        self.result_size = 0
-        self.var_names = var_names
-        self.aggregation = {}
-        self.__doc_ids_per_aggregation = defaultdict(set)
+class QueryResultAggregate(QueryResultBase):
+
+    def __init__(self, var2substitution):
+        self.variable_names = sorted(list(var2substitution.keys()))
+        self.var2substitution = var2substitution
         self.results = []
-        self.doc_ids = []
-        self.entity_resolver = EntityResolver.instance()
 
-    def add_query_result(self, result: QueryResult):
-        self.result_size += 1
+    def add_query_result(self, result: QueryResultBase):
         self.results.append(result)
-        self.doc_ids.append(result.doc_id)
-        # build a key consisting of a list of variable substitutions
-        values = []
-        if self.var_names:
-            for name in self.var_names:
-                values.append(result.var2substitution[name].entity_id)
-            key = frozenset(tuple(values))
-        else:
-            key = "DEFAULT"
-        # add this document to the value based aggregation
-        if key in self.aggregation:
-            # skip already included documents
-            if result.doc_id not in self.__doc_ids_per_aggregation[key]:
-                self.aggregation[key][0].append(result)
-                self.__doc_ids_per_aggregation[key].add(result.doc_id)
-        else:
-            self.__doc_ids_per_aggregation[key].add(result.doc_id)
-            self.aggregation[key] = ([result], result.var2substitution)
 
-    def __entity_to_str(self, entity):
-        if entity.entity_type == 'predicate':
-            return entity.entity_id  # id is already the name
-        try:
-            ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
-        except KeyError:
-            ent_name = entity.entity_str
-        return '{} ({} {})'.format(ent_name, entity.entity_id, entity.entity_type)
+    def to_dict(self):
+        result_dict = [r.to_dict() for r in self.results]
+        return dict(type="aggregate", result_size=len(self.results), variable_names=self.variable_names,
+                    substitution=serialize_var_substitution(self.var2substitution), results=result_dict)
 
-    def get_doc_ids_per_substitution(self):
-        for _, (results, var2subs) in self.aggregation.items():
-            doc_ids = []
-            doc_titles = []
-            explanations = []
-            for r in results:
-                doc_ids.append(r.doc_id)
-                doc_titles.append(r.title)
 
-                explanations_for_doc = []
-                for e in r.explanations:
-                    explanations_for_doc.append(str(e))
-                explanations.append(explanations_for_doc)
+class QueryResultAggregateList(QueryResultBase):
 
-            var_substitution_strings = []
-            for v in self.var_names:
-                var_substitution_strings.append(self.__entity_to_str(var2subs[v]))
+    def __init__(self):
+        self.results = []
 
-            yield self.var_names, var_substitution_strings, doc_ids, doc_titles, explanations
+    def add_query_result(self, result: QueryResultAggregate):
+        self.results.append(result)
 
-    def get_and_rank_results(self):
-        ranked_results = []
-        for _, var_subs, doc_ids, doc_titles, explanations in self.get_doc_ids_per_substitution():
-            ranked_results.append((len(doc_ids), var_subs, doc_ids, doc_titles, explanations))
+    def to_dict(self):
+        result_dict = [r.to_dict() for r in self.results]
+        return dict(type="aggregate_list", results=result_dict, result_size=len(self.results))
 
-        ranked_results.sort(key=lambda x: x[0], reverse=True)
-        converted_results = []
-        for _, var_subs, doc_ids, doc_titles, explanations in ranked_results:
-            converted_results.append((self.var_names, var_subs, doc_ids, doc_titles, explanations))
-        return converted_results
+
+class QueryResultList(QueryResultBase):
+
+    def __init__(self):
+        self.results = []
+
+    def add_query_result(self, result: QueryResultBase):
+        self.results.append(result)
+
+    def to_dict(self):
+        result_dict = [r.to_dict() for r in self.results]
+        return dict(type="result_list", results=result_dict, result_size=len(self.results))

@@ -326,9 +326,9 @@ const search = (event) => {
         query_translation.text(query_trans_string);
         let results = response["results"];
         // Create documents DIV
-        let divList = createDocumentList(results);
+        let divList = createResultList(results);
         divDocuments.append(divList);
-        add_collapsable_events();
+        // add_collapsable_events();
 
         // Disable button
         setButtonSearching(false);
@@ -340,8 +340,176 @@ const search = (event) => {
     });
 };
 
+let uniqueAccordionIDCounter = 0;
+const getUniqueAccordionID = () => {
+    uniqueAccordionIDCounter += 1
+    return uniqueAccordionIDCounter;
+};
+
+const createResultDocumentElement = (queryResult, accordionID, headingID, collapseID) => {
+    let document_id = queryResult["document_id"];
+    let title = queryResult["title"];
+    let explanations = queryResult["explanations"];
+    let e_string = "<br><br>Provenance: <br>";
+    let j = 1;
+    explanations.forEach(e => {
+        e_string += j + '. ' + e["sentence"] + " (" + e["predicate"] +  " -> " + e["predicate_canonicalized"] + ')<br>';
+        j += 1;
+    });
+    let divDoc = $('<div><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
+        'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
+    return divDoc;
+};
+
 
 const createDocumentList = (results) => {
+    let accordionID = "accordion" + getUniqueAccordionID();
+    let headingID = accordionID + "heading" + 1;
+    let collapseID = accordionID + "collapse" + 1;
+
+    let divAccordion = $('<div class="accordion" id="'+ accordionID +'"></div>');
+    let divCard = $('<div class="card"></div>');
+    divAccordion.append(divCard);
+    let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
+    divCard.append(divCardHeader);
+    let divH2 = $('<h2 class="mb-0"></h2>');
+    divCardHeader.append(divH2);
+
+    let resultList = results["results"];
+    let resultSize = results["result_size"];
+    let button_string = resultSize + ' Documents';
+    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
+        'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
+    let divCardEntry = $('<div id="'+collapseID+'" class="collapse show" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    let divCardBody = $('<div class="card-body"></div>');
+    divCardEntry.append(divCardBody);
+    divCard.append(divCardEntry);
+
+    let i = 0;
+    resultList.forEach(res => {
+        divCardBody.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
+        i += 1;
+    });
+    console.log(divAccordion);
+    return divAccordion;
+};
+
+
+const createDocumentAggregate = (queryAggregate, accordionID, headingID, collapseID) => {
+    let divCard = $('<div class="card"></div>');
+    let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
+    divCard.append(divCardHeader);
+    let divH2 = $('<h2 class="mb-0"></h2>');
+    divCardHeader.append(divH2);
+
+    let resultList = queryAggregate["results"];
+    let var_names = queryAggregate["variable_names"];
+    let var_subs = queryAggregate["substitution"];
+    let result_size = queryAggregate["result_size"];
+    let button_string = result_size + ' Documents';
+    button_string += ' [';
+    let i = 0;
+    var_names.forEach(name => {
+        //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
+        let entity_substitution = var_subs[name];
+        let ent_str = entity_substitution["entity_str"];
+        let ent_id = entity_substitution["entity_id"];
+        let ent_type = entity_substitution["entity_type"];
+        let ent_name = entity_substitution["entity_name"];
+        let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
+
+        if (var_sub.split('(').pop().substr(0, 5) === 'MESH:') {
+            button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
+                '<a onclick="event.stopPropagation()" href="https://meshb.nlm.nih.gov/record/ui?ui=' +
+                var_sub.split('MESH:').pop().split(' ')[0] + '" target="_blank"' +
+                'style="color:#e80000;font-weight:bold;"' + '>' +
+                var_sub.split('MESH:')[1].split(' ')[0] + '</a> ' +
+                var_sub.split(' ').pop()
+        } else {
+            switch (var_sub.split(' ').pop().substring(0, (var_sub.split(' ').pop().length - 1))) {
+                case "Species":
+                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
+                        '<a onclick="event.stopPropagation()" ' +
+                        'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' +
+                        var_sub.split('(').pop().split(' ')[0] + '" target="_blank"' +
+                        'style="color:#e80000;font-weight:bold;"' + '>' +
+                        var_sub.split('(')[1].split(' ')[0] + '</a> ' +
+                        var_sub.split(' ').pop()
+                    break;
+                case "Gene":
+                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
+                        '<a onclick="event.stopPropagation()" ' +
+                        'href="https://www.ncbi.nlm.nih.gov/gene/?term=' +
+                        var_sub.split('(').pop().split(' ')[0] + '" target="_blank"' +
+                        'style="color:#e80000;font-weight:bold;"' + '>' +
+                        var_sub.split('(')[1].split(' ')[0] + '</a> ' +
+                        var_sub.split(' ').pop()
+                    break;
+                default:
+                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub;
+                    break;
+            }
+        }
+        i += 1;
+    });
+    button_string += ']';
+
+    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
+        'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
+    let divCardEntry = $('<div id="'+collapseID+'" class="collapse" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    let divCardBody = $('<div class="card-body"></div>');
+    divCardEntry.append(divCardBody);
+    divCard.append(divCardEntry);
+    resultList.forEach(res => {
+        divCardBody.append(createDivListForResultElement(res, accordionID, headingID, collapseID));
+    });
+    console.log(divCard);
+    return divCard;
+};
+
+
+const createDocumentAggregateList = (results) => {
+    let accordionID = "accordion" + getUniqueAccordionID();
+    let headingID = accordionID + "heading" + 1;
+    let collapseID = accordionID + "collapse" + 1;
+    let divAccordion = $('<div class="accordion" id="'+ accordionID +'"></div>');
+
+    let resultList = results["results"];
+
+    let i = 0;
+    resultList.forEach(res => {
+        divAccordion.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
+        i += 1;
+    });
+    console.log(divAccordion);
+    return divAccordion;
+};
+
+
+const createDivListForResultElement = (result, accordionID, headingID, collapseID) => {
+    let typeOfRes = result["type"];
+    if (typeOfRes === "result") {
+        return (createResultDocumentElement(result, accordionID, headingID, collapseID));
+    } else if (typeOfRes === "result_list") {
+        return (createDocumentList(result,  accordionID, headingID, collapseID));
+    } else if (typeOfRes === "aggregate") {
+        return (createDocumentAggregate(result,  accordionID, headingID, collapseID));
+    } else if (typeOfRes === "aggregate_list") {
+        return (createDocumentAggregateList(result,  accordionID, headingID, collapseID));
+    }
+    console.log("ERROR - does not recognize result type: " + typeOfRes);
+    return null;
+}
+
+
+const createResultList = (results) => {
+    let divList = $(`<div></div>`);
+    divList.append(createDivListForResultElement(results, null));
+    return divList;
+};
+
+
+const createDocumentList2 = (results) => {
     let divList = $(`<div class="list-group list-group-flush"></div>`);
     if (results.length > 0) {
         results.forEach(res => {
@@ -356,15 +524,14 @@ const createDocumentList = (results) => {
                 button_string += ' [';
                 var_names.forEach(name => {
                     //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
-                    if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:'){
+                    if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:') {
                         button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
                             '<a onclick="event.stopPropagation()" href="https://meshb.nlm.nih.gov/record/ui?ui=' +
                             var_subs[i].split('MESH:').pop().split(' ')[0] + '" target="_blank"' +
                             'style="color:#ffffff;font-weight:bold;"' + '>' +
                             var_subs[i].split('MESH:')[1].split(' ')[0] + '</a> ' +
                             var_subs[i].split(' ').pop()
-                    } else
-                    {
+                    } else {
                         switch (var_subs[i].split(' ').pop().substring(0, (var_subs[i].split(' ').pop().length - 1))) {
                             case "Species":
                                 button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
@@ -408,7 +575,6 @@ const createDocumentList = (results) => {
                     j += 1;
                 });
                 document_div_string +=
-                    //'<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC' + document[0] + '/" ' +
                     '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" target="_blank">' +
                     'PMID' + doc_id + '</a>' + '<br> Title: ' + title + e_string + '<hr>'
             });
