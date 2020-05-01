@@ -1,11 +1,10 @@
-import json
-from collections import defaultdict
-
-from narraint.entity.entityresolver import EntityResolver
-from narraint.queryengine.result import QueryResult, QueryResultBase
+from narraint.queryengine.result import QueryDocumentResult
 
 
 class QueryResultAggregationStrategy:
-
-    def rank_results(self, results: [QueryResultBase]):
+    """
+    Base for all ranking strategies
+    A strategy must rank a list of document results
+    """
+    def rank_results(self, results: [QueryDocumentResult]):
         raise NotImplementedError

@@ -1,12 +1,14 @@
 from collections import defaultdict
 
-from narraint.entity.entityresolver import EntityResolver
 from narraint.queryengine.aggregation.base import QueryResultAggregationStrategy
-from narraint.queryengine.result import QueryResult, QueryResultBase, QueryResultList, QueryResultAggregate, \
+from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList, QueryResultAggregate, \
     QueryResultAggregateList
 
 
 class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
+    """
+    Ranks a list of query results by putting all documents sharing the same variable substitution into a group
+    """
 
     def __init__(self):
         self.var_names = []
@@ -14,7 +16,6 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.__doc_ids_per_aggregation = defaultdict(set)
         self.results = []
         self.doc_ids = []
-        self.entity_resolver = EntityResolver.instance()
 
     def _clear_state(self):
         self.var_names.clear()
@@ -23,7 +24,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
 
-    def rank_results(self, results: [QueryResultBase]):
+    def rank_results(self, results: [QueryDocumentResult]):
         self._clear_state()
         for r in results:
             self._add_query_result(r)
@@ -45,22 +46,13 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             return query_result
         else:
             # no variable is used
-            query_result = QueryResultList()
+            query_result = QueryDocumentResultList()
             for _, (results, var2subs) in self.aggregation.items():
                 for res in results:
                     query_result.add_query_result(res)
             return query_result
-      #  ranked_results = []
-      #  for _, var_subs, doc_ids, doc_titles, explanations in self._get_doc_ids_per_substitution():
-      #      ranked_results.append((len(doc_ids), var_subs, doc_ids, doc_titles, explanations))
 
-      #  ranked_results.sort(key=lambda x: x[0], reverse=True)
-      #  converted_results = []
-      #  for _, var_subs, doc_ids, doc_titles, explanations in ranked_results:
-      #      converted_results.append((self.var_names, var_subs, doc_ids, doc_titles, explanations))
-      #  return converted_results
-
-    def _add_query_result(self, result: QueryResult):
+    def _add_query_result(self, result: QueryDocumentResult):
         if not self.var_names:
             self.var_names = sorted(list(result.var2substitution.keys()))
         self.results.append(result)
@@ -84,31 +76,3 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             self.__doc_ids_per_aggregation[key].add(result.document_id)
             self.aggregation[key] = ([result], result.var2substitution)
 
-    def _entity_to_str(self, entity):
-        if entity.entity_type == 'predicate':
-            return entity.entity_id  # id is already the name
-        try:
-            ent_name = self.entity_resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type)
-        except KeyError:
-            ent_name = entity.entity_str
-        return '{} ({} {})'.format(ent_name, entity.entity_id, entity.entity_type)
-
-    def _get_doc_ids_per_substitution(self):
-        for _, (results, var2subs) in self.aggregation.items():
-            doc_ids = []
-            doc_titles = []
-            explanations = []
-            for r in results:
-                doc_ids.append(r.doc_id)
-                doc_titles.append(r.title)
-
-                explanations_for_doc = []
-                for e in r.explanations:
-                    explanations_for_doc.append(str(e))
-                explanations.append(explanations_for_doc)
-
-            var_substitution_strings = []
-            for v in self.var_names:
-                var_substitution_strings.append(self._entity_to_str(var2subs[v]))
-
-            yield self.var_names, var_substitution_strings, doc_ids, doc_titles, explanations
