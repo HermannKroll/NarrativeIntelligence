@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
     <link href="https://unpkg.com/vis-network@latest/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 {% endblock %}
 
 {% block title %}Narrative Information Access to PubMed{% endblock %}
@@ -109,14 +110,29 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <!--<label for="id_keywords"><strong>Search</strong></label> -->
-                        <textarea class="form-control" id="id_keywords" rows="1"
-                                  name="keywords">Simvastatin causes ?X(Disease)</textarea><br>
-                        <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
+                        <div style="float: left; width: 85%">
+                            <textarea class="form-control" id="id_keywords" rows="1"
+                                  name="keywords">Simvastatin causes ?X(Disease)</textarea>
+                        </div>
+
+                        <div style="float: left; width: 15%">
+                            <button type="submit" class="btn btn-primary" id="btn_search">
+                                Search
+                            </button>
+                            <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                                Please be patient. This process can take up to one minute.
+                            </p>
+                        </div>
+
+                        <div style="float: left; width: 100%">
+                            <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
                         <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
                             'administered', 'associated', 'augments', 'causes', 'compares', 'decreases',
                             'dosageform', 'effects', 'induces', 'inhibits', 'interacts', 'occurs',
                             'prevents', 'produces', 'regulates', 'treats'
                         </small>
+                        </div>
+
                         <label><strong>Data Source:</strong></label><br>
                         <input type="radio" id="radio_pmc" name="data_source" value="PMC" checked="checked">
                         <label for="radio_pmc">PubMedCentral Sample (12k Fulltext Documents including
@@ -126,13 +142,16 @@
 
                         <div style="float: left; width: 50%">
                             <label><strong>Outer Ranking:</strong></label><br>
-                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking" value="outer_ranking_substitution"
+                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                                   value="outer_ranking_substitution"
                                    checked="checked">
-                            <label for="radio_outer_ranking_a">Aggregation by Variable Substitution</label><br>
-                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" value="outer_ranking_ontology">
+                            <label for="radio_outer_ranking_a">Substitution-based Aggregation</label><br>
+                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
+                                   value="outer_ranking_ontology">
                             <label for="radio_outer_ranking_b">Ontology-based Aggregation</label><br>
                         </div>
-                        
+
+                        <!--
                         <div style="float: left; width: 50%">
                             <label><strong>Inner Ranking:</strong></label><br>
                             <input type="radio" id="radio_inner_ranking_a" name="inner_ranking" value="inner_ranking_a"
@@ -146,85 +165,91 @@
                             <label for="radio_inner_ranking_c">Ranking that does c1 and some c2 and also a bit of
                                 c3</label><br>
                         </div>
-
+                        -->
                     </div>
-                    <button type="submit" class="btn btn-primary" id="btn_search">
-                        Search
-                    </button>
-                    <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
-                        Please be patient. This process can take up to one minute.
-                    </p>
+
                 </form>
             </div>
         </div>
 
 
         <div class="accordion" id="accordionNarrativeDesigner">
-          <div class="card">
-            <div class="card-header" id="headingOne">
-              <h2 class="mb-0">
-                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                    Narrative Designer
-                </button>
-              </h2>
-            </div>
-            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionNarrativeDesigner">
-              <div class="card-body">
-                <div id="App">
-                    <div class="help-tip">
-                        <p>- Click on node/edge to select it <br>
-                            - Click the "Center-Button" to center your network <br>
-                            - Click the "Clear-Button" to delete the network <br>
-                            - For multiple select, hold ctrl and click on nodes/edges <br>
-                            - Shortcuts: <br>
-                            - n: create new node <br>
-                            - e: create new edge <br>
-                            - c: cluster <br>
-                            - backspace/delete: to delete nodes or edges <br></p>
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
+                                aria-expanded="false" aria-controls="collapseOne">
+                            Narrative Designer
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
+                     data-parent="#accordionNarrativeDesigner">
+                    <div class="card-body">
+                        <div id="App">
+                            <div class="help-tip">
+                                <p>- Click on node/edge to select it <br>
+                                    - Click the "Center-Button" to center your network <br>
+                                    - Click the "Clear-Button" to delete the network <br>
+                                    - For multiple select, hold ctrl and click on nodes/edges <br>
+                                    - Shortcuts: <br>
+                                    - n: create new node <br>
+                                    - e: create new edge <br>
+                                    - c: cluster <br>
+                                    - backspace/delete: to delete nodes or edges <br></p>
+                            </div>
+
+                            <button class="button" id="load" onClick="document.getElementById('tFile').click();"
+                                    class="btn btn-secondary"
+                                    data-toggle="tooltip" data-placement="left" title="Load"></button>
+                            <button class="button" id="save" onClick=save() class="btn btn-secondary"
+                                    data-toggle="tooltip"
+                                    data-placement="left" title="Save"></button>
+                            <button class="button" id="undo" onClick=undo() class="btn btn-secondary"
+                                    data-toggle="tooltip"
+                                    data-placement="left" title="Undo"></button>
+                            <button class="button" id="redo" onClick=redo() class="btn btn-secondary"
+                                    data-toggle="tooltip"
+                                    data-placement="left" title="Redo"></button>
+                            <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary"
+                                    data-toggle="tooltip"
+                                    data-placement="left" title="Center"></button>
+                            <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary"
+                                    data-toggle="tooltip"
+                                    data-placement="left" title="Clear"></button>
+                            <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
+                            ");">
+
+                        </div>
                     </div>
-
-                    <button class="button" id="load" onClick="document.getElementById('tFile').click();"
-                            class="btn btn-secondary"
-                            data-toggle="tooltip" data-placement="left" title="Load"></button>
-                    <button class="button" id="save" onClick=save() class="btn btn-secondary" data-toggle="tooltip"
-                            data-placement="left" title="Save"></button>
-                    <button class="button" id="undo" onClick=undo() class="btn btn-secondary" data-toggle="tooltip"
-                            data-placement="left" title="Undo"></button>
-                    <button class="button" id="redo" onClick=redo() class="btn btn-secondary" data-toggle="tooltip"
-                            data-placement="left" title="Redo"></button>
-                    <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary" data-toggle="tooltip"
-                            data-placement="left" title="Center"></button>
-                    <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary" data-toggle="tooltip"
-                            data-placement="left" title="Clear"></button>
-                    <div id="mynetwork" onchange="createQuery();console.log(query + " onchange");">
-
-            </div></div>
+                </div>
             </div>
-          </div>
         </div>
 
-    <div>
-        <label for="query_translation"><strong>Query Translation</strong></label>
-        <div id="query_translation">No query translation available.</div>
-    </div>
+        <div>
+            <label for="query_translation"><strong>Query Translation</strong></label>
+            <div id="query_translation">No query translation available.</div>
+        </div>
 
-    <div>
-        <h2>Documents</h2>
-    </div>
-    <div class="row margin-top" id="div_wrapper_documents">
-        <div id="div_documents"></div>
-    </div>
+        <div>
+            <h2>Documents</h2>
+        </div>
+        <div class="row margin-top" id="div_wrapper_documents">
+            <div id="div_documents"></div>
+        </div>
 
     </div>
 {% endblock %}
 
 {% block javascript %}
-     <script type="text/javascript" src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
-     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
 
 
-     <script type="text/javascript">
+    <script type="text/javascript">
         const search_url = "{% url 'search' %}";
 
     </script>
