@@ -376,7 +376,7 @@ const createDocumentList = (results) => {
     divCardHeader.append(divH2);
 
     let resultList = results["results"];
-    let resultSize = results["result_size"];
+    let resultSize = results["size"];
     let button_string = resultSize + ' Documents';
     divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
@@ -405,7 +405,7 @@ const createDocumentAggregate = (queryAggregate, accordionID, headingID, collaps
     let resultList = queryAggregate["results"];
     let var_names = queryAggregate["variable_names"];
     let var_subs = queryAggregate["substitution"];
-    let result_size = queryAggregate["result_size"];
+    let result_size = queryAggregate["size"];
     let button_string = result_size + ' Documents';
     button_string += ' [';
     let i = 0;
@@ -417,6 +417,10 @@ const createDocumentAggregate = (queryAggregate, accordionID, headingID, collaps
         let ent_type = entity_substitution["entity_type"];
         let ent_name = entity_substitution["entity_name"];
         let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
+        if (ent_name === "Miscellaneous") {
+            var_sub = "Miscellaneous";
+        }
+
 
         if (var_sub.split('(').pop().substr(0, 5) === 'MESH:') {
             button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
@@ -488,9 +492,9 @@ const createDocumentAggregateList = (results) => {
 
 const createDivListForResultElement = (result, accordionID, headingID, collapseID) => {
     let typeOfRes = result["type"];
-    if (typeOfRes === "result") {
+    if (typeOfRes === "doc") {
         return (createResultDocumentElement(result, accordionID, headingID, collapseID));
-    } else if (typeOfRes === "result_list") {
+    } else if (typeOfRes === "doc_list") {
         return (createDocumentList(result,  accordionID, headingID, collapseID));
     } else if (typeOfRes === "aggregate") {
         return (createDocumentAggregate(result,  accordionID, headingID, collapseID));
@@ -508,81 +512,3 @@ const createResultList = (results) => {
     return divList;
 };
 
-
-const createDocumentList2 = (results) => {
-    let divList = $(`<div class="list-group list-group-flush"></div>`);
-    if (results.length > 0) {
-        results.forEach(res => {
-            let var_names = res[0];
-            let var_subs = res[1];
-            let doc_ids = res[2];
-            let doc_titles = res[3];
-            let explanations = res[4];
-            let i = 0;
-            let button_string = doc_ids.length + ' Documents';
-            if (var_names.length > 0) {
-                button_string += ' [';
-                var_names.forEach(name => {
-                    //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
-                    if (var_subs[i].split('(').pop().substr(0, 5) === 'MESH:') {
-                        button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
-                            '<a onclick="event.stopPropagation()" href="https://meshb.nlm.nih.gov/record/ui?ui=' +
-                            var_subs[i].split('MESH:').pop().split(' ')[0] + '" target="_blank"' +
-                            'style="color:#ffffff;font-weight:bold;"' + '>' +
-                            var_subs[i].split('MESH:')[1].split(' ')[0] + '</a> ' +
-                            var_subs[i].split(' ').pop()
-                    } else {
-                        switch (var_subs[i].split(' ').pop().substring(0, (var_subs[i].split(' ').pop().length - 1))) {
-                            case "Species":
-                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
-                                    '<a onclick="event.stopPropagation()" ' +
-                                    'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' +
-                                    var_subs[i].split('(').pop().split(' ')[0] + '" target="_blank"' +
-                                    'style="color:#ffffff;font-weight:bold;"' + '>' +
-                                    var_subs[i].split('(')[1].split(' ')[0] + '</a> ' +
-                                    var_subs[i].split(' ').pop()
-                                break;
-                            case "Gene":
-                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i].split('(')[0] + '(' +
-                                    '<a onclick="event.stopPropagation()" ' +
-                                    'href="https://www.ncbi.nlm.nih.gov/gene/?term=' +
-                                    var_subs[i].split('(').pop().split(' ')[0] + '" target="_blank"' +
-                                    'style="color:#ffffff;font-weight:bold;"' + '>' +
-                                    var_subs[i].split('(')[1].split(' ')[0] + '</a> ' +
-                                    var_subs[i].split(' ').pop()
-                                break;
-                            default:
-                                button_string += ', '.repeat(!!i) + name + ': ' + var_subs[i];
-                                break;
-                        }
-                    }
-                    i += 1;
-                });
-                button_string += ']';
-            }
-            divList.append('<button class="collapsible">' + button_string + '</button>');
-
-            i = 0;
-            let document_div_string = "<br>";
-            doc_ids.forEach(doc_id => {
-                let title = doc_titles[i];
-                let explanations_for_doc = explanations[i];
-                i += 1;
-                let e_string = "<br><br>Provenance: <br>";
-                let j = 1;
-                explanations_for_doc.forEach(e => {
-                    e_string += j + '. ' + e + '<br>';
-                    j += 1;
-                });
-                document_div_string +=
-                    '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + doc_id + '/" target="_blank">' +
-                    'PMID' + doc_id + '</a>' + '<br> Title: ' + title + e_string + '<hr>'
-            });
-            divList.append('<div class="content">' + document_div_string + '</div>');
-        });
-    } else {
-        divList.append('<button class="collapsible"> No Documents</button>');
-        divList.append('<div class="content">  No Documents </div>');
-    }
-    return divList;
-};

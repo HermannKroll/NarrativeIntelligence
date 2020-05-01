@@ -16,6 +16,7 @@ from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.mesh.data import MeSHDB
 from narraint.openie.predicate_vocabulary import create_predicate_vocab
+from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.stories.story import MeshTagger
 from narraint.queryengine.engine import QueryEngine
@@ -252,12 +253,11 @@ class SearchView(TemplateView):
                         if outer_ranking == 'outer_ranking_substitution':
                             substitution_aggregation = ResultAggregationBySubstitution()
                             results_converted = substitution_aggregation.rank_results(results).to_dict()
-                            pprint(results_converted)
-
                         elif outer_ranking == 'outer_ranking_ontology':
-                            substitution_aggregation = ResultAggregationBySubstitution()
-                            results_converted = substitution_aggregation.rank_results(results).to_dict()
-
+                            substitution_ontology = ResultAggregationByOntology()
+                            results_converted = substitution_ontology.rank_results(results).to_dict()
+                        with open('last_query.json', 'wt') as f:
+                            pprint(results_converted, f)
                   #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
                    #                                                             0:30]:
                     #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
