@@ -39,14 +39,16 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         if results:
             self.var_names = sorted(list(results[0].var2substitution.keys()))
             if self.var_names:
-                misc_document_results = []
+                misc_document_results = defaultdict(list)
                 var2prefix_substitution_list = {}
                 var2prefix_document_result_list = {}
+                retrieved_ent_types = set()
                 for v in self.var_names:
                     prefix_substitution_list = []
                     prefix_document_result_list = []
                     for res in results:
                         substitution = res.var2substitution[v]
+                        retrieved_ent_types.add(substitution.entity_type)
                         if substitution.entity_type in [CHEMICAL, DISEASE]:
                             id_without_mesh = substitution.entity_id[5:]
                             pref_tree_numbers = self.mesh_ontology.get_tree_numbers_for_descriptor(id_without_mesh)
@@ -54,24 +56,36 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                                 prefix_substitution_list.append((pref_t, res.var2substitution[v]))
                                 prefix_document_result_list.append((pref_t, res))
                         else:
-                            misc_document_results.append(res)
+                            misc_document_results[substitution.entity_type].append(res)
                     prefix_substitution_list.sort(key=lambda x: x[0])
                  #   for p, s in prefix_substitution_list:
                     #    print('{} {}'.format(p, s))
                     var2prefix_substitution_list[v] = prefix_substitution_list
                     var2prefix_document_result_list[v] = prefix_document_result_list
 
-                resulting_tree = self._build_tree_structure(var2prefix_substitution_list)
+                resulting_tree = QueryResultAggregateList()
+                ent_type_aggregation = []
+                if CHEMICAL in retrieved_ent_types:
+                    chemical_tree = self._build_tree_structure(var2prefix_substitution_list, "D")
+                    chemical_aggregation = self._create_query_aggregate("", "", "", CHEMICAL)
+                    chemical_aggregation.add_query_result(chemical_tree)
+                    ent_type_aggregation.append((CHEMICAL, chemical_aggregation))
+                if DISEASE in retrieved_ent_types:
+                    disease_tree = self._build_tree_structure(var2prefix_substitution_list, "C")
+                    disease_aggregation = self._create_query_aggregate("", "", "", DISEASE)
+                    disease_aggregation.add_query_result(disease_tree)
+                    ent_type_aggregation.append((DISEASE, disease_aggregation))
                 self._populate_tree_structure(var2prefix_document_result_list)
-
                 if misc_document_results:
-                    misc_aggregation_list = self.substitution_based_strategy.rank_results(misc_document_results)
-                    misc_var_sub = QueryEntitySubstitution(MISCELLANEOUS_PREFIX, "", "", MISCELLANEOUS_PREFIX)
-                    misc_var2sub = dict()
-                    misc_var2sub[self.var_names[0]] = misc_var_sub
-                    misc_aggregation = QueryResultAggregate(misc_var2sub)
-                    misc_aggregation.add_query_result(misc_aggregation_list)
-                    resulting_tree.results.insert(0, misc_aggregation)
+                    for ent_type, document_results in misc_document_results.items():
+                        document_results = misc_document_results[ent_type]
+                        misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results)
+                        misc_aggregation = self._create_query_aggregate("", "", "", ent_type)
+                        misc_aggregation.add_query_result(misc_aggregation_list)
+                        ent_type_aggregation.append((ent_type, misc_aggregation))
+
+                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[0]):
+                    resulting_tree.add_query_result(aggregation)
                 return resulting_tree
             else:
                 # no variable is used
@@ -81,6 +95,11 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 return query_result
         else:
             return QueryDocumentResultList()
+
+    def _create_query_aggregate(self, ent_str, ent_id, ent_type, ent_name):
+        var2sub = dict()
+        var2sub[self.var_names[0]] = QueryEntitySubstitution(ent_str, ent_id, ent_type, ent_name)
+        return QueryResultAggregate(var2sub)
 
     def _populate_tree_structure(self, var2prefix_document_result_list):
         for v in self.var_names:

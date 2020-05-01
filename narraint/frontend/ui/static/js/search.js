@@ -417,8 +417,9 @@ const createDocumentAggregate = (queryAggregate, accordionID, headingID, collaps
         let ent_type = entity_substitution["entity_type"];
         let ent_name = entity_substitution["entity_name"];
         let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
-        if (ent_name === "Miscellaneous") {
-            var_sub = "Miscellaneous";
+        if (ent_name === "Gene" || ent_name === 'Species' || ent_name === 'Disease' || ent_name === 'Chemical'
+        || ent_name === 'DosageForm' || ent_name === 'CellLine') {
+            var_sub = ent_name;
         }
 
 
