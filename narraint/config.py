@@ -18,6 +18,9 @@ UMLS_MAPPING = os.path.join(DATA_DIR, "umls/mapping.json")
 # SemMed
 SEMMEDDB_CONFIG = os.path.join(CONFIG_DIR, 'semmed.json')
 
+# MeSH Ontology Index File
+MESH_ONTOLOGY_INDEX_FILE = os.path.join(TMP_DIR, "mesh_ontology_index.pkl")
+
 # MESH
 MESH_DESCRIPTORS_FILE = os.path.join(DATA_DIR, "desc2020.xml")
 MESH_SUPPLEMENTARY_FILE = os.path.join(DATA_DIR, "supp2020.xml")
