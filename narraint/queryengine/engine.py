@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 from narraint.entity.enttypes import GENE, SPECIES
 from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.result import QueryFactExplanation, QueryResult, QueryResultAggregate, QueryEntitySubstitution
+from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryResultAggregate, QueryEntitySubstitution
 
 QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -175,7 +175,7 @@ class QueryEngine:
                 conf += float(r[offset+7])
             # create query result
             doc_ids.add(r[0])
-            results.append(QueryResult(r[0], r[1], var2sub, conf, explanations))
+            results.append(QueryDocumentResult(r[0], r[1], var2sub, conf, explanations))
 
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,

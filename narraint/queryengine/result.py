@@ -4,14 +4,26 @@ from narraint.entity.entityresolver import EntityResolver
 
 
 class QueryEntitySubstitution:
+    """
+    Represents an entity substitution for a variable
+    consists of: a string (inside the sentence), an entity id, an entity type and a name stemming from a vocabulary
+    such as MeSH, NCBI Gene Vocabulary and Species Taxonomy
+    """
 
-    def __init__(self, entity_str, entity_id, entity_type):
+    def __init__(self, entity_str, entity_id, entity_type, entity_name=None):
         self.entity_str = entity_str
         self.entity_id = entity_id
         self.entity_type = entity_type
-        self.entity_name = self._compute_entity_vocabulary_name()
+        if not entity_name:
+            self.entity_name = self._compute_entity_vocabulary_name()
+        else:
+            self.entity_name = entity_name
 
     def _compute_entity_vocabulary_name(self):
+        """
+        Uses the EntityResolver to find the vocabulary name/heading for the entity id and type
+        :return:
+        """
         entity_resolver = EntityResolver.instance()
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
@@ -21,12 +33,20 @@ class QueryEntitySubstitution:
             ent_name = self.entity_str
         return ent_name
 
+    def __str__(self):
+        return '{} ("{}" "{}")'.format(self.entity_name, self.entity_id, self.entity_type)
+
     def to_dict(self):
         return dict(entity_name=self.entity_name, entity_str=self.entity_str, entity_id=self.entity_id,
                     entity_type=self.entity_type)
 
 
 class QueryFactExplanation:
+    """
+    Represents a Fact explanation
+    contains the sentence in which the fact is included, the cleaned predicate detected by OpenIE and the canonicalized
+    version of the predicate
+    """
 
     def __init__(self, sentence, predicate, predicate_canonicalized):
         self.sentence = sentence
@@ -41,18 +61,30 @@ class QueryFactExplanation:
                     predicate_canonicalized=self.predicate_canonicalized)
 
 
-def serialize_var_substitution(var2substitution):
-    return {k: v.to_dict() for k, v in var2substitution.items()}
-
-
 class QueryResultBase:
-    pass
+    """
+    Abstract class forming the foundation for the resulting structure
+    """
 
     def to_dict(self):
+        """
+        Converts all internal attributes to a dictionary (needed for the JSON conversion)
+        :return:
+        """
+        raise NotImplementedError
+
+    def get_result_size(self):
+        """
+        Estimates the size of all contained results
+        :return:
+        """
         raise NotImplementedError
 
 
-class QueryResult(QueryResultBase):
+class QueryDocumentResult(QueryResultBase):
+    """
+    Represents document result
+    """
 
     def __init__(self, document_id, title, var2substitution, confidence, explanations: [QueryFactExplanation]):
         self.document_id = document_id
@@ -63,10 +95,36 @@ class QueryResult(QueryResultBase):
 
     def to_dict(self):
         e_dict = [e.to_dict() for e in self.explanations]
-        return dict(type="result", document_id=self.document_id, title=self.title, explanations=e_dict)
+        return dict(type="doc", document_id=self.document_id, title=self.title, explanations=e_dict)
+
+    def get_result_size(self):
+        return 1
+
+
+class QueryDocumentResultList(QueryResultBase):
+    """
+    Represents a list of document results
+    """
+
+    def __init__(self):
+        self.results = []
+
+    def add_query_result(self, result: QueryResultBase):
+        self.results.append(result)
+
+    def to_dict(self):
+        result_dict = [r.to_dict() for r in self.results]
+        return dict(type="doc_list", results=result_dict, size=self.get_result_size())
+
+    def get_result_size(self):
+        return sum([r.get_result_size() for r in self.results])
 
 
 class QueryResultAggregate(QueryResultBase):
+    """
+    Represents an aggregation for some variable substitution
+    It includes a list of all aggregated results
+    """
 
     def __init__(self, var2substitution):
         self.variable_names = sorted(list(var2substitution.keys()))
@@ -76,13 +134,22 @@ class QueryResultAggregate(QueryResultBase):
     def add_query_result(self, result: QueryResultBase):
         self.results.append(result)
 
+    def _serialize_var_substitution(self):
+        return {k: v.to_dict() for k, v in self.var2substitution.items()}
+
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(type="aggregate", result_size=len(self.results), variable_names=self.variable_names,
-                    substitution=serialize_var_substitution(self.var2substitution), results=result_dict)
+        return dict(type="aggregate", size=self.get_result_size(), variable_names=self.variable_names,
+                    substitution=self._serialize_var_substitution(), results=result_dict)
+
+    def get_result_size(self):
+        return sum([r.get_result_size() for r in self.results])
 
 
 class QueryResultAggregateList(QueryResultBase):
+    """
+    Represents a list of aggegrations
+    """
 
     def __init__(self):
         self.results = []
@@ -92,17 +159,8 @@ class QueryResultAggregateList(QueryResultBase):
 
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(type="aggregate_list", results=result_dict, result_size=len(self.results))
+        return dict(type="aggregate_list", results=result_dict, size=self.get_result_size())
 
+    def get_result_size(self):
+        return sum([r.get_result_size() for r in self.results])
 
-class QueryResultList(QueryResultBase):
-
-    def __init__(self):
-        self.results = []
-
-    def add_query_result(self, result: QueryResultBase):
-        self.results.append(result)
-
-    def to_dict(self):
-        result_dict = [r.to_dict() for r in self.results]
-        return dict(type="result_list", results=result_dict, result_size=len(self.results))
