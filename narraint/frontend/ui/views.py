@@ -213,6 +213,16 @@ def convert_graph_patterns_to_nt(query_txt):
     return nt_string[0:-1]  # remove last \n
 
 
+def count_variables_in_query(patterns):
+    var_set = set()
+    for s, s_t, p, o, o_t in patterns:
+        if s_t == 'Variable':
+            var_set.add(VAR_NAME.search(s).group(1))
+        if o_t == 'Variable':
+            var_set.add(VAR_NAME.search(o).group(1))
+    return len(var_set)
+
+
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 
@@ -238,13 +248,18 @@ class SearchView(TemplateView):
                         nt_string = ""
                         logger.error('parsing error')
                     elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
-                        query_trans_string = "Outer ranking strategy is unkown"
+                        query_trans_string = "Outer ranking strategy is unknown"
                         nt_string = ""
                         logger.error('parsing error')
                     elif query_fact_patterns is None:
                         results_converted = []
                         nt_string = ""
                         logger.error('parsing error')
+                    elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(query_fact_patterns) > 1:
+                        results_converted = []
+                        nt_string = ""
+                        query_trans_string = "Do not support multiple variables in an ontology-based ranking"
+                        logger.error("Do not support multiple variables in an ontology-based ranking")
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
                         results_converted = []
