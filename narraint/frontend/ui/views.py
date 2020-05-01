@@ -256,8 +256,8 @@ class SearchView(TemplateView):
                         elif outer_ranking == 'outer_ranking_ontology':
                             substitution_ontology = ResultAggregationByOntology()
                             results_converted = substitution_ontology.rank_results(results).to_dict()
-                        with open('last_query.json', 'wt') as f:
-                            pprint(results_converted, f)
+                       # with open('last_query.json', 'wt') as f:
+                       #     pprint(results_converted, f)
                   #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
                    #                                                             0:30]:
                     #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
