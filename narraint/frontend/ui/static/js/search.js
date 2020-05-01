@@ -269,8 +269,8 @@ const search = (event) => {
     }
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
-
+    //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
+    let inner_ranking = "NOT IMPLEMENTED";
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
@@ -374,7 +374,6 @@ const createDocumentList = (results) => {
         divCardBody.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
         i += 1;
     });
-    console.log(divAccordion);
     return divAccordion;
 };
 
@@ -452,7 +451,6 @@ const createDocumentAggregate = (queryAggregate, accordionID, headingID, collaps
     resultList.forEach(res => {
         divCardBody.append(createDivListForResultElement(res, accordionID, headingID, collapseID));
     });
-    console.log(divCard);
     return divCard;
 };
 
@@ -470,7 +468,6 @@ const createDocumentAggregateList = (results) => {
         divAccordion.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
         i += 1;
     });
-    console.log(divAccordion);
     return divAccordion;
 };
 
