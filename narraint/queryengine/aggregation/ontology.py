@@ -58,8 +58,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         else:
                             misc_document_results[substitution.entity_type].append(res)
                     prefix_substitution_list.sort(key=lambda x: x[0])
-                 #   for p, s in prefix_substitution_list:
-                    #    print('{} {}'.format(p, s))
                     var2prefix_substitution_list[v] = prefix_substitution_list
                     var2prefix_document_result_list[v] = prefix_document_result_list
 
@@ -111,7 +109,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
 
     def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="", depth=0):
         results = QueryResultAggregateList()
-        #print('Begin recursion with prefix: {} and depth: {}'.format(prefix_start, depth))
         for v in self.var_names:
             for pref, substitution in var2prefix_substitution_list[v]:
                 if not pref.startswith(prefix_start):
@@ -149,12 +146,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                             sub_results.add_query_result(next_res)
                             results.add_query_result(sub_results)
                             self.pref2result[pref_current] = sub_results
-                        #for res in self._build_tree_structure(var2prefix_substitution_list, pref_current, depth + 1).results:
-                        #    sub_results.add_query_result(res)
-
-
                     except KeyError as k:
                         print('keyerror: {}'.format(k))
-
-        #print('End recursion with prefix: {} and depth: {}'.format(prefix_start, depth))
         return results
