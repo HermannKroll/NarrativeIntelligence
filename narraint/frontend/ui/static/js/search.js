@@ -299,8 +299,10 @@ const search = (event) => {
 
         // Update graphical network representation
         let nt_string = response["nt_string"];
+        let query_len = 0;
         if (nt_string.length > 0) {
             load_from_string(nt_string);
+            query_len = nt_string.split(".").length-1;
         }
 
 
@@ -310,7 +312,7 @@ const search = (event) => {
         query_translation.text(query_trans_string);
         let results = response["results"];
         // Create documents DIV
-        let divList = createResultList(results);
+        let divList = createResultList(results, query_len);
         divDocuments.append(divList);
         // add_collapsable_events();
 
@@ -330,7 +332,7 @@ const getUniqueAccordionID = () => {
     return uniqueAccordionIDCounter;
 };
 
-const createResultDocumentElement = (queryResult, accordionID, headingID, collapseID) => {
+const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
     let document_id = queryResult["document_id"];
     let title = queryResult["title"];
     let explanations = queryResult["explanations"];
@@ -339,6 +341,10 @@ const createResultDocumentElement = (queryResult, accordionID, headingID, collap
     explanations.forEach(e => {
         e_string += j + '. ' + e["sentence"] + " (" + e["predicate"] +  " -> " + e["predicate_canonicalized"] + ')<br>';
         j += 1;
+        if(j-1 === query_len){
+            e_string += '<br>';
+            j = 1;
+        }
     });
     let divDoc = $('<div><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
@@ -346,7 +352,7 @@ const createResultDocumentElement = (queryResult, accordionID, headingID, collap
 };
 
 
-const createDocumentList = (results) => {
+const createDocumentList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
@@ -371,14 +377,14 @@ const createDocumentList = (results) => {
 
     let i = 0;
     resultList.forEach(res => {
-        divCardBody.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
+        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID+i,collapseID+i));
         i += 1;
     });
     return divAccordion;
 };
 
 
-const createDocumentAggregate = (queryAggregate, accordionID, headingID, collapseID) => {
+const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
     let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
     divCard.append(divCardHeader);
@@ -449,13 +455,13 @@ const createDocumentAggregate = (queryAggregate, accordionID, headingID, collaps
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
     resultList.forEach(res => {
-        divCardBody.append(createDivListForResultElement(res, accordionID, headingID, collapseID));
+        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID, collapseID));
     });
     return divCard;
 };
 
 
-const createDocumentAggregateList = (results) => {
+const createDocumentAggregateList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
@@ -465,32 +471,32 @@ const createDocumentAggregateList = (results) => {
 
     let i = 0;
     resultList.forEach(res => {
-        divAccordion.append(createDivListForResultElement(res, accordionID, headingID+i,collapseID+i));
+        divAccordion.append(createDivListForResultElement(res, query_len, accordionID, headingID+i,collapseID+i));
         i += 1;
     });
     return divAccordion;
 };
 
 
-const createDivListForResultElement = (result, accordionID, headingID, collapseID) => {
+const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID) => {
     let typeOfRes = result["type"];
     if (typeOfRes === "doc") {
-        return (createResultDocumentElement(result, accordionID, headingID, collapseID));
+        return (createResultDocumentElement(result, query_len, accordionID, headingID, collapseID));
     } else if (typeOfRes === "doc_list") {
-        return (createDocumentList(result,  accordionID, headingID, collapseID));
+        return (createDocumentList(result, query_len, accordionID, headingID, collapseID));
     } else if (typeOfRes === "aggregate") {
-        return (createDocumentAggregate(result,  accordionID, headingID, collapseID));
+        return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID));
     } else if (typeOfRes === "aggregate_list") {
-        return (createDocumentAggregateList(result,  accordionID, headingID, collapseID));
+        return (createDocumentAggregateList(result, query_len, accordionID, headingID, collapseID));
     }
     console.log("ERROR - does not recognize result type: " + typeOfRes);
     return null;
 }
 
 
-const createResultList = (results) => {
+const createResultList = (results, query_len) => {
     let divList = $(`<div></div>`);
-    divList.append(createDivListForResultElement(results, null));
+    divList.append(createDivListForResultElement(results, query_len, null, null, null));
     return divList;
 };
 

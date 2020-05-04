@@ -144,8 +144,8 @@ class QueryEngine:
             var_names.append(v)
 
         start = datetime.now()
-        results = list()
         doc_ids = set()
+        doc2result = {}
         for r in session.execute(query):
             # extract var substitutions for pmid
             var2sub = {}
@@ -174,12 +174,21 @@ class QueryEngine:
                 explanations.append(QueryFactExplanation(sentence, predicate, predicate_canonicalized))
                 conf += float(r[offset+7])
             # create query result
-            doc_ids.add(r[0])
-            results.append(QueryDocumentResult(r[0], r[1], var2sub, conf, explanations))
+            doc_id = r[0]
+            doc_ids.add(doc_id)
+
+            if doc_id not in doc2result:
+                doc2result[doc_id] = QueryDocumentResult(doc_id, r[1], var2sub, conf, explanations)
+            else:
+                doc2result[doc_id].explanations.extend(explanations)
+
+        results = list(doc2result.values())
+        #results.append(QueryDocumentResult(r[0], r[1], var2sub, conf, explanations))
 
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
                                     sql_query.replace('\n', ' '), doc_ids)
+        logging.info('{} distinct doc ids retrieved'.format(len(doc_ids)))
         logging.info("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
 
