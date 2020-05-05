@@ -43,7 +43,6 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
     if content and not tag_types:
         with open(out_fn, "w") as f:
             for document in document_query:
-                print(document)
                 f.write(Document.create_pubtator(document.id, document.title, document.abstract) + "\n")
 
     elif not content and tag_types:
@@ -54,6 +53,7 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
     elif content and tag_types:
         content_iter = iter(document_query)
         current_document = None
+        first_doc = True
         with open(out_fn, "w") as f:
             for tag in tag_query:
                 # skip to tagged document
@@ -61,7 +61,9 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
                         tag.document_id == current_document.id
                         and tag.document_collection == current_document.collection):
                     current_document = next(content_iter)
-                    f.write("\n")
+                    if not first_doc:
+                        f.write("\n")
+                    first_doc = False
                     f.write(Document.create_pubtator(current_document.id, current_document.title,
                                                      current_document.abstract))
                 f.write(Tag.create_pubtator(tag.document_id, tag.start, tag.end, tag.ent_str, tag.ent_type, tag.ent_id))
@@ -69,10 +71,14 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
             # Write tailing documents with no tags
             current_document = next(content_iter, None)
             while current_document:
-                f.write("\n")
+                if not first_doc:
+                    f.write("\n")
+                first_doc = False
                 f.write(Document.create_pubtator(current_document.id, current_document.title,
                                                  current_document.abstract))
                 current_document = next(content_iter, None)
+            # end export with a new line
+            f.write("\n")
 
 
 def create_tag_query(session, collection=None, document_ids=None, tag_types=None, tag_buffer=TAG_BUFFER_SIZE):
