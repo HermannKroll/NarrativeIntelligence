@@ -24,6 +24,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self.doc_ids = []
         self.mesh_ontology = MeSHOntology.instance()
         self.pref2result = {}
+        self._pref_trees_visited = set()
+        self._pref_tree_nodes_with_docs = set()
 
     def _clear_state(self):
         self.var_names.clear()
@@ -32,6 +34,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
         self.pref2result.clear()
+        self._pref_trees_visited.clear()
+        self._pref_tree_nodes_with_docs.clear()
 
     def rank_results(self, results: [QueryDocumentResult]):
         self._clear_state()
@@ -55,6 +59,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                             for pref_t in pref_tree_numbers:
                                 prefix_substitution_list.append((pref_t, res.var2substitution[v]))
                                 prefix_document_result_list.append((pref_t, res))
+                                # this tree will have a document node
+                                self._pref_tree_nodes_with_docs.add(pref_t)
                         else:
                             misc_document_results[substitution.entity_type].append(res)
                     prefix_substitution_list.sort(key=lambda x: x[0])
@@ -107,7 +113,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 except KeyError:
                     print('Error: no tree node for prefix {}'.format(tree_prefix))
 
-    def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="", depth=0):
+    def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="", depth=0) -> QueryResultAggregateList():
         results = QueryResultAggregateList()
         for v in self.var_names:
             for pref, substitution in var2prefix_substitution_list[v]:
@@ -120,7 +126,12 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 if len(prefix_start) < len(pref):
                     pref_split = pref.split('.')
                     # split the prefix tree at the current depth (e.g. depth 0 means first element)
-                    pref_current = '.'.join(pref_split[0:depth+1])
+                    pref_current = '.'.join(pref_split[0:depth + 1])
+                    # do not visit pref twice
+                    if pref_current in self._pref_trees_visited:
+                        continue
+                    self._pref_trees_visited.add(pref_current)
+                    print(pref_current)
                     # search the descriptor for this tree
                     try:
                         pref_desc_id, pref_desc_name = self.mesh_ontology.get_descriptor_for_tree_no(pref_current)
@@ -137,10 +148,13 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                                                                          pref_desc_name)
                         var2substitution = dict()
                         var2substitution[v] = pref_desc_substitution
+                        if pref_current == 'C19.246':
+                            print("---")
                         next_res = self._build_tree_structure(var2prefix_substitution_list, pref_current, depth + 1)
-                        # if there is only one sub node - merge them
-                        if len(next_res.results) == 1:
+                        # if the node has no document child and there is only one sub node - merge them
+                        if pref_current not in self._pref_tree_nodes_with_docs and len(next_res.results) == 1:
                             results.add_query_result(next_res)
+                            self.pref2result[pref_current] = next_res
                         else:
                             sub_results = QueryResultAggregate(var2substitution)
                             sub_results.add_query_result(next_res)
