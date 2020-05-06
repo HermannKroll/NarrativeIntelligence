@@ -152,7 +152,7 @@ class BaseTagger(Thread):
         Get a set of doc-ids that are already successfully processed. Should be overwritten by child classes.
         :return: set of ids
         """
-        return set()
+        raise NotImplementedError
 
     @staticmethod
     def _get_tags(directory: str) -> List[Tuple[int, int, int, str, str, str]]:

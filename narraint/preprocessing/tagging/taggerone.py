@@ -35,6 +35,7 @@ class TaggerOne(BaseTagger):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.processed_ids = set()
         self.finished_ids = set()
         self.batch_ids = set()
         self.in_dir = os.path.join(self.root_dir, "taggerone_in")
@@ -66,18 +67,21 @@ class TaggerOne(BaseTagger):
 
     def get_finished_ids(self):
         """
-        Function returns the set of precessed ids. This is the union of the IDs in the output directory and the IDs
-        in the log file (which are currently not written but processed)
+        Function returns the set of successfully processed ids written to outdir
         :return: Set of IDs
         """
         ids_dir = get_document_ids(self.out_dir)
+        self.finished_ids = self.finished_ids.union(ids_dir)
+        return self.finished_ids
+
+    def get_processed_ids(self):
         ids_log = set()
         if os.path.exists(self.log_file):
             with open(self.log_file) as f:
                 content = f.read()
             ids_log = set(int(x) for x in re.findall(r"INFO (\d+)-\d+\n", content))
-        self.finished_ids = self.finished_ids.union(ids_dir.union(ids_log))
-        return self.finished_ids
+        self.processed_ids = self.processed_ids.union(self.get_finished_ids().union(ids_log))
+        return self.processed_ids
 
     def get_progress(self):
         """
@@ -94,13 +98,13 @@ class TaggerOne(BaseTagger):
         Method returns the batch ID and the location of the batch file.
         :return: Tuple of batch ID and batch
         """
-        self.finished_ids = self.get_finished_ids()
-        unfinished_ids = self.id_set.difference(self.finished_ids)
+        self.processed_ids = self.get_finished_ids()
+        unfinished_ids = self.id_set.difference(self.processed_ids)
         # ignore skipped file ids
         unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
         self.batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in self.batch_ids]
-        self.logger.debug(f"Variable finished_ids contains {len(self.finished_ids)} elements")
+        self.logger.debug(f"Variable processed_ids contains {len(self.processed_ids)} elements")
         self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
         batch_id = None
         batch_file = None
@@ -237,7 +241,7 @@ class TaggerOne(BaseTagger):
             # Check process exit code
             if exit_code == 0:
                 # add all batch ids to finished
-                self.finished_ids = self.finished_ids.union(self.batch_ids)
+                self.processed_ids = self.processed_ids.union(self.batch_ids)
                 self.current_retry = 0
                 # Process finished successfully
                 if self.get_progress() + len(self.skipped_files) == len(self.files):
