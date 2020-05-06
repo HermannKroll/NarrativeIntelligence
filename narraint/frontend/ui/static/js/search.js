@@ -411,42 +411,23 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             var_sub = ent_name;
         }
 
-
-        if (var_sub.split('(').pop().substr(0, 5) === 'MESH:') {
-            button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
-                '<a onclick="event.stopPropagation()" href="https://meshb.nlm.nih.gov/record/ui?ui=' +
-                var_sub.split('MESH:').pop().split(' ')[0] + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' +
-                var_sub.split('MESH:')[1].split(' ')[0] + '</a> ' +
-                var_sub.split(' ').pop()
+        if (ent_id.slice(0, 5) === 'MESH:') {
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
+                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+        } else if (ent_type === 'Species') {
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
+                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+        } else if (ent_type === 'Gene'){
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
+                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
         } else {
-            switch (var_sub.split(' ').pop().substring(0, (var_sub.split(' ').pop().length - 1))) {
-                case "Species":
-                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
-                        '<a onclick="event.stopPropagation()" ' +
-                        'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' +
-                        var_sub.split('(').pop().split(' ')[0] + '" target="_blank"' +
-                        'style="color:#e80000;font-weight:bold;"' + '>' +
-                        var_sub.split('(')[1].split(' ')[0] + '</a> ' +
-                        var_sub.split(' ').pop()
-                    break;
-                case "Gene":
-                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub.split('(')[0] + '(' +
-                        '<a onclick="event.stopPropagation()" ' +
-                        'href="https://www.ncbi.nlm.nih.gov/gene/?term=' +
-                        var_sub.split('(').pop().split(' ')[0] + '" target="_blank"' +
-                        'style="color:#e80000;font-weight:bold;"' + '>' +
-                        var_sub.split('(')[1].split(' ')[0] + '</a> ' +
-                        var_sub.split(' ').pop()
-                    break;
-                default:
-                    button_string += ', '.repeat(!!i) + name + ': ' + var_sub;
-                    break;
-            }
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ']'
         }
         i += 1;
     });
-    button_string += ']';
 
     divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
