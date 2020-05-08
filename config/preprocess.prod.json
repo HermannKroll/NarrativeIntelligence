@@ -1,4 +1,5 @@
 {
+  "pmcid2pmid": "/home/kroll/tools/pmcid2pmid.tsv",
   "pmc_dir": "/hdd2/datasets/pubmed_central",
   "taggerOne": {
     "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
