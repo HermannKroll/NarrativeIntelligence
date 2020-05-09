@@ -15,7 +15,7 @@ from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 from narraint.pubtator.extract import read_pubtator_documents
 
 OPENIE_VERSION = "1.0.0"
-
+OPENIE_EXTRACTION = "OpenIE"
 
 def prepare_files(input):
     temp_dir = tempfile.mkdtemp()

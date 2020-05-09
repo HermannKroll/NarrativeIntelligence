@@ -15,6 +15,8 @@ from django.views.generic import TemplateView
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.mesh.data import MeSHDB
+from narraint.opendependencyextraction.main import PATH_EXTRACTION
+from narraint.openie.main import OPENIE_EXTRACTION
 from narraint.openie.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
@@ -242,7 +244,7 @@ class SearchView(TemplateView):
                     logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
-                    if data_source not in ["PMC", "PubMed"]:
+                    if data_source not in ["PMC", "PubMed", "PMC_Path", "PubMed_Path"]:
                         results_converted = []
                         query_trans_string = "Data source is unknown"
                         nt_string = ""
@@ -263,8 +265,13 @@ class SearchView(TemplateView):
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
                         results_converted = []
-                        results = query_engine.query_with_graph_query(query_fact_patterns, query, data_source)
-
+                        if 'Path' in data_source:
+                            data_source = data_source.replace('_Path', '')
+                            results = query_engine.query_with_graph_query(query_fact_patterns, data_source,
+                                                                          PATH_EXTRACTION, query)
+                        else:
+                            results = query_engine.query_with_graph_query(query_fact_patterns, data_source,
+                                                                          OPENIE_EXTRACTION, query)
                         if outer_ranking == 'outer_ranking_substitution':
                             substitution_aggregation = ResultAggregationBySubstitution()
                             results_converted = substitution_aggregation.rank_results(results).to_dict()

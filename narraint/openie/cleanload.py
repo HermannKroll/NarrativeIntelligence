@@ -5,13 +5,14 @@ from datetime import datetime
 from typing import List
 
 import nltk
+import spacy
 from nltk.corpus import wordnet
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.models import Tag, Predication
 from narraint.backend.database import Session
-from narraint.openie.main import OPENIE_VERSION
+from narraint.openie.main import OPENIE_VERSION, OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
@@ -24,6 +25,21 @@ TOKENS_TO_IGNORE = {'with', 'by', 'of', 'from', 'to', 'than', 'as', 'on', 'at', 
 PRED = namedtuple('Predication', ['doc_id', 'subj', 'pred', 'pred_cleaned', 'obj', 'conf', 'sent', 's_id', 's_str',
                                   's_type', 'o_id', 'o_str', 'o_type'])
 OPENIE_TUPLE = namedtuple("OpenIETuple", ['doc_id', 'subj', 'pred', 'pred_lemma', 'obj', 'conf', 'sent'])
+
+
+def read_stanford_openie_input(openie_file):
+    doc_ids = set()
+    tuples_cached = []
+    logging.info('Reading OpenIE input...')
+    # open the input open ie file
+    with open(openie_file, 'r') as f:
+        # read all lines for a single doc
+        for line in f:
+            c = line.strip().split("\t")
+            o_t = OPENIE_TUPLE(int(c[0]), c[1], c[2], c[3], c[4], c[5], c[6])
+            doc_ids.add(o_t.doc_id)
+            tuples_cached.append(o_t)
+    return doc_ids, tuples_cached
 
 
 def clean_sentence(sentence: str):
@@ -39,8 +55,15 @@ def get_subject_and_object_entities(doc_tags, sub, obj):
     subs_included = []
     objs_included = []
     # compute lower case with empty spaces
-    sub_text = ' {} '.format(sub.lower())
-    obj_text = ' {} '.format(obj.lower())
+    if sub[-1].isalpha():
+        sub_text = ' {} '.format(sub.lower())
+    else:
+        sub_text = ' {} '.format(sub.lower()[0:-1])
+
+    if obj[-1].isalpha():
+        obj_text = ' {} '.format(obj.lower())
+    else:
+        obj_text = ' {} '.format(obj.lower()[0:-1])
 
     # check if an entity occurs within the sentence
     for ent_id, ent_str, ent_type in doc_tags:
@@ -77,7 +100,7 @@ def load_tags_for_doc_ids(doc_ids, collection):
     for row in results:
         ent_str = ' {} '.format(row[2]).lower()
         t = (row[1], ent_str, row[3])
-        doc2tags[row[0]].append(t)
+        doc2tags[int(row[0])].append(t)
         counter += 1
     logging.info('{} tags load from db'.format(counter))
     return doc2tags
@@ -98,7 +121,7 @@ def _insert_predication_skip_duplicates(session, predication_values):
                                    value["predicate"], value["object_id"], value["sentence"]))
 
 
-def insert_predications_into_db(tuples_cleaned: List[PRED], collection):
+def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version):
     """
     insert a list of cleaned tuples into the database (bulk insert)
     does not check for collisions
@@ -128,7 +151,8 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection):
                 object_type=p.o_type,
                 confidence=p.conf,
                 sentence=p.sent,
-                openie_version=OPENIE_VERSION
+                extraction_type=extraction_type,
+                extraction_version=version
             ))
             if i % BULK_INSERT_AFTER_K == 0:
                 session.bulk_insert_mappings(Predication, predication_values)
@@ -208,30 +232,19 @@ def _clean_tuple_predicate_based(t: PRED):
                 t.s_id, t.s_str.strip(), t.s_type.strip(), t.o_id, t.o_str.strip(), t.o_type.strip())
 
 
-def clean_open_ie(input, collection):
+def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
     """
     cleans the open ie tuples by:
     1. applying an entity filter (keep only facts about entities)
     2. cleaning predicates (remove be and have & change passive voice to active voice & remove tokens see above)
-    :param input: OpenIE input file
+    :param doc_ids: a set of document ids
+    :param openie_tuples: a list of openie tuples
     :param collection: document collection where the id's stem from (to retrieve entities from the database)
     :return:
     """
     logging.info('Beginning cleaning step...')
-    doc_ids = set()
-    tuples_cached = []
-    logging.info('Reading OpenIE input...')
-    # open the input open ie file
-    with open(input, 'r') as f:
-        # read all lines for a single doc
-        for line in f:
-            c = line.strip().split("\t")
-            o_t = OPENIE_TUPLE(int(c[0]), c[1], c[2], c[3], c[4], c[5], c[6])
-            doc_ids.add(o_t.doc_id)
-            tuples_cached.append(o_t)
-
+    tuples_cached = openie_tuples
     logging.info('{} OpenIE tuples read...'.format(len(tuples_cached)))
-
     if len(doc_ids) == 0:
         logging.info("No documents to check - stopping")
         return
@@ -292,7 +305,7 @@ def clean_open_ie(input, collection):
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    insert_predications_into_db(tuples_cleaned, collection)
+    insert_predications_into_db(tuples_cleaned, collection, extraction_type=OPENIE_EXTRACTION, version=OPENIE_VERSION)
 
 
 def main():
@@ -310,7 +323,8 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    clean_open_ie(args.input, args.collection)
+    doc_ids, openie_tuples = read_stanford_openie_input(args.input)
+    clean_open_ie(doc_ids, openie_tuples, args.collection)
     logging.info('finished')
 
 

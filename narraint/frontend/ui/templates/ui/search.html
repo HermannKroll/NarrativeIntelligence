@@ -134,13 +134,19 @@
                         </div>
 
                         <label><strong>Data Source:</strong></label><br>
-                        <input type="radio" id="radio_pmc" name="data_source" value="PMC" checked="checked">
-                        <label for="radio_pmc">PubMedCentral Sample (12k Fulltext Documents including
-                            Simvastatin)</label><br>
-                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed">
-                        <label for="radio_pubmed">PubMed Sample (1000k Document Titles and Abstracts)</label><br>
+                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed" checked="checked">
+                        <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
+                        <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
+                        <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
 
-                        <div style="float: left; width: 50%">
+                        <input type="radio" id="radio_pmc" name="data_source" value="PMC">
+                        <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents including
+                            Simvastatin)</label><br>
+                        <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                        <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents including
+                            Simvastatin)</label><br>
+
+                             <div style="float: left; width: 50%">
                             <label><strong>Outer Ranking:</strong></label><br>
                             <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
                                    value="outer_ranking_substitution"

@@ -264,8 +264,12 @@ const search = (event) => {
     let data_source = "openie"
     if (document.getElementById('radio_pmc').checked) {
         data_source = "PMC"
-    } else {
+    } else if(document.getElementById('radio_pubmed').checked) {
         data_source = "PubMed"
+    } else if(document.getElementById('radio_pubmed_path').checked) {
+        data_source = "PubMed_Path"
+    } else {
+        data_source = "PMC_Path"
     }
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;

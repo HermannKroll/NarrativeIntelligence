@@ -129,7 +129,8 @@ class Predication(Base):
     object_type = Column(String, nullable=False)
     confidence = Column(Float, nullable=True)
     sentence = Column(String, nullable=False)
-    openie_version = Column(String, nullable=False)
+    extraction_type = Column(String, nullable=False)
+    extraction_version = Column(String, nullable=False)
     mirrored = Column(Boolean, nullable=False, default=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 

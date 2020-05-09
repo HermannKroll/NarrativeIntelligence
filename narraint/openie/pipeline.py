@@ -22,6 +22,7 @@ def retrieve_document_ids_to_process(idfile, document_collection):
     with open(idfile, 'r') as f:
         document_ids = set([int(line.strip()) for line in f])
     logging.info('{} ids retrieved from id file..'.format(len(document_ids)))
+    return document_ids
 
     logging.info('Retrieving already processed document ids from database...')
     session = Session.get()
@@ -47,9 +48,11 @@ def filter_document_sentences_without_tags(document_ids, input_file, output_dir,
         tagged_doc = TaggedDocument(pubtator_content)
         doc_id = tagged_doc.id
         filtered_content = []
-        for sent, ent_ids in tagged_doc.entities_by_sentence.items():
-            if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
-                filtered_content.append(tagged_doc.sentence_by_id[sent].text)
+        for _, sent in tagged_doc.sentence_by_id.items():
+            filtered_content.append(sent.text)
+       # for sent, ent_ids in tagged_doc.entities_by_sentence.items():
+        #    if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
+         #       filtered_content.append(tagged_doc.sentence_by_id[sent].text)
 
         # skip empty documents
         if not filtered_content:

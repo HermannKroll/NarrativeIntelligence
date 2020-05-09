@@ -24,7 +24,7 @@ class QueryEngine:
     def __init__(self):
         self.query_logger = QueryLogger()
 
-    def __construct_query(self, session, graph_query, doc_collection):
+    def __construct_query(self, session, graph_query, doc_collection, extraction_type):
         var_names = []
         var_dict = {}
 
@@ -46,6 +46,7 @@ class QueryEngine:
         for idx, (s, s_t, p, o, o_t) in enumerate(graph_query):
             pred = predication_aliases[idx]
             query = query.filter(pred.document_collection == doc_collection)
+            query = query.filter(pred.extraction_type == extraction_type)
 
             # variable in pattern
             if s.startswith('?') or p.startswith('?') or o.startswith('?'):
@@ -130,12 +131,12 @@ class QueryEngine:
 
         return query, var_names
 
-    def query_with_graph_query(self, graph_query, keyword_query='', doc_collection='PMC'):
+    def query_with_graph_query(self, graph_query, doc_collection, extraction_type, keyword_query=''):
         if len(graph_query) == 0:
             raise ValueError('graph query must contain at least one fact')
 
         session = Session.get()
-        query, var_info = self.__construct_query(session, graph_query, doc_collection)
+        query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.info('executing sql statement: {}'.format(sql_query))
@@ -193,9 +194,15 @@ class QueryEngine:
         return results
 
     @staticmethod
-    def query_predicates_cleaned():
+    def query_predicates_cleaned(collection=None):
         session = Session.get()
-        query = session.query(Predication.predicate_cleaned.distinct()).filter(Predication.predicate_cleaned.isnot(None))
+        if not collection:
+            query = session.query(Predication.predicate_cleaned.distinct()).\
+                filter(Predication.predicate_cleaned.isnot(None))
+        else:
+            query = session.query(Predication.predicate_cleaned.distinct()). \
+                filter(Predication.predicate_cleaned.isnot(None)).\
+                filter(Predication.document_collection == collection)
         predicates = []
         start_time = datetime.now()
         for r in session.execute(query):

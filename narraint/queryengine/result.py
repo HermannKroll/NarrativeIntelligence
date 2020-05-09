@@ -36,6 +36,9 @@ class QueryEntitySubstitution:
     def __str__(self):
         return '{} ("{}" "{}")'.format(self.entity_name, self.entity_id, self.entity_type)
 
+    def __repr__(self):
+        return self.__str__()
+
     def to_dict(self):
         return dict(entity_name=self.entity_name, entity_str=self.entity_str, entity_id=self.entity_id,
                     entity_type=self.entity_type)
