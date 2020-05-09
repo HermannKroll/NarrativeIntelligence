@@ -75,7 +75,7 @@ class PatentConverter:
                 out_fn = os.path.join(out_dir, "{}.txt".format(did))
                 content = Document.create_pubtator(did,title,abstract_by_id[did])
                 with open(out_fn, "w") as f:
-                    f.write(content)
+                    f.write(content + '\n')
             else:
                 logging.info("WARNING: Document {} has no abstract".format(did))
             current_percentage = int((count + 1.0) / total * 100.0)
