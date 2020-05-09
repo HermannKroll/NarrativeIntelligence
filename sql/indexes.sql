@@ -7,8 +7,10 @@ CREATE INDEX pred_predicate_cleaned_idx ON PREDICATION(predicate_cleaned);
 CREATE INDEX pred_predicate_canonicalized ON PREDICATION(predicate_canonicalized);
 CREATE INDEX pred_object_id_idx ON PREDICATION(object_id);
 CREATE INDEX pred_object_type_idx ON PREDICATION(object_type);
+CREATE INDEX pred_extraction_type_idx ON PREDICATION(extraction_type);
 
-CREATE UNIQUE INDEX unique_doc_s_p_o_sent_idx ON PREDICATION(document_id, document_collection, subject_id, predicate, object_id, md5(sentence::text));
+CREATE UNIQUE INDEX unique_doc_s_p_o_sent_idx ON PREDICATION(document_id, document_collection, subject_id, subject_type,
+ predicate, object_id, object_type, md5(sentence::text));
 
 
 CREATE INDEX tag_document_id_idx ON TAG(document_id);
