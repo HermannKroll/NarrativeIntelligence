@@ -131,7 +131,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     if pref_current in self._pref_trees_visited:
                         continue
                     self._pref_trees_visited.add(pref_current)
-                    print(pref_current)
                     # search the descriptor for this tree
                     try:
                         pref_desc_id, pref_desc_name = self.mesh_ontology.get_descriptor_for_tree_no(pref_current)
@@ -148,8 +147,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                                                                          pref_desc_name)
                         var2substitution = dict()
                         var2substitution[v] = pref_desc_substitution
-                        if pref_current == 'C19.246':
-                            print("---")
                         next_res = self._build_tree_structure(var2prefix_substitution_list, pref_current, depth + 1)
                         # if the node has no document child and there is only one sub node - merge them
                         if pref_current not in self._pref_tree_nodes_with_docs and len(next_res.results) == 1:
