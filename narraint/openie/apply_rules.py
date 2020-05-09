@@ -68,7 +68,8 @@ def mirror_symmetric_predicates():
                     confidence=p.confidence,
                     sentence=p.sentence,
                     mirrored=True,
-                    openie_version=p.openie_version
+                    extraction_type=p.extraction_type,
+                    extraction_version=p.extraction_version
                 )
                 session.execute(insert_pred)
                 session.commit()

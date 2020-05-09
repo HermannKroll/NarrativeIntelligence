@@ -103,8 +103,8 @@ PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "docum
                                                      "subject_openie", "subject_id", "subject_str", "subject_type",
                                                      "predicate", "predicate_cleaned", "predicate_canonicalized",
                                                      "object_openie", "object_id", "object_str", "object_type",
-                                                     "confidence", "sentence", "openie_version", "mirrored",
-                                                     "date_inserted"])
+                                                     "confidence", "sentence", "extraction_type", "extraction_version",
+                                                     "mirrored",  "date_inserted"])
 
 
 class Predication(Base):
