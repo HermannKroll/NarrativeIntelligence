@@ -202,7 +202,7 @@ def _clean_tuple_predicate_based(t: PRED):
     start_pred = len(t.subj.split(' '))
     participe_past_detected = False
     for idx, tok in enumerate(tokens):
-        pos_tag = pos_tags[start_pred + idx][1]clean
+        pos_tag = pos_tags[start_pred + idx][1]
         if pos_tag == 'VBN':
             participe_past_detected = True
 
