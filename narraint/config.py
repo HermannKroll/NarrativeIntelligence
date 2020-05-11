@@ -55,3 +55,6 @@ DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "df_index_cache.pkl")
 DOSAGE_ADDITIONAL_DESCS = os.path.join(RESOURCE_DIR, "df_additional_descs.txt")
 DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_terms.txt")
 DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
+
+# MeSH SubHeadings for MEDLINE PubMed
+MEDLINE_BASELINE_INDEX = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
