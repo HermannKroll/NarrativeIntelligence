@@ -13,13 +13,13 @@ from narraint.entity import enttypes
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.pubtator.regex import ILLEGAL_CHAR
 from narraint.progress import print_progress_with_eta
+from narraint.pubtator.translation.cord19m2fulltexts import NEXT_DOCUMENT_ID_OFFSET
 
 TITLE = "title"
 ABSTRACT = "abstract"
 BODY = "body"
 
 MAX_SCAN_WIDTH = 1000
-
 
 class FileReader:
     def __init__(self, file_path):
@@ -28,7 +28,7 @@ class FileReader:
             self.paper_id = content['paper_id']
             self.title = ""
             self.abstract = []
-            self.body_text = []
+            self.body_texts = []
             # Title
             self.title = content['metadata']["title"]
             # Abstract
@@ -37,26 +37,19 @@ class FileReader:
                     self.abstract.append(entry['text'])
             # Body text
             for entry in content['body_text']:
-                self.body_text.append(entry['text'])
-            self.full_str = self.title + " "
-            #self.section_pointers = {ABSTRACT: len(self.full_str)}
-            self.abstract_paragraph_pointers = [0, ]
-            for paragraph in self.abstract:
-                self.full_str += paragraph + "\n"
-                self.abstract_paragraph_pointers.append(len(self.full_str) - self.abstract_start())
-            self.body_paragraph_pointers = [0, ]
-            for paragraph in self.body_text:
-                self.full_str += paragraph + "\n"
-                self.body_paragraph_pointers.append(len(self.full_str) - self.body_start())
+                self.body_texts.append(entry['text'])
+            self.abstract = '\n'.join(self.abstract)
 
     def __repr__(self):
-        return self.full_str
+        return f'{self.paper_id}: {self.abstract[:200]}... {self.body_texts[0]}...'
 
-    def abstract_start(self):
-        return len(self.title)
-
-    def body_start(self):
-        return len(self.title) + len(self.abstract)
+    def get_paragraph(self, art_par_id):
+        """
+        Get the text of the abstract or the full text paraphs
+        :param art_par_id: 0 refers to abstract, >=1 to full text paragraphs
+        :return:
+        """
+        return self.body_texts[art_par_id-1]
 
     def get_json_location(self, full_str_index):
         """
@@ -113,49 +106,53 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
     found = 0
     not_found = 0
     shaky = 0
+    old_art_doc_id = None
+    old_art_par_id = None
+    generate_new_index = False
     for tag in tag_query:
-        if art_id != tag.document_id:
-            art_id = tag.document_id
-            file = file_dict[art_id]
+        cur_art_doc_id = tag.document_id - tag.document_id % NEXT_DOCUMENT_ID_OFFSET
+        cur_art_par_id = tag.document_id % NEXT_DOCUMENT_ID_OFFSET
+        if cur_art_doc_id != old_art_doc_id:
+            old_art_doc_id = cur_art_doc_id
+            file = file_dict[cur_art_doc_id]
             doc_id = os.path.basename(file)
-            doc_id = tag.document_id
             tag_json[doc_id] = []
             reader = FileReader(file)
             tagtype_offset = 0
-            logger.debug(f"{doc_id} {file})")
+            logger.debug(f"{art_id} {file})")
             print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
             document_count +=1
-        if current_tagtype != tag.ent_type:
-            current_tagtype = tag.ent_type
-            tagtype_offset = 0
-        range = search_sanitized(reader.full_str, tag.ent_str, max(tag.start - 5, tagtype_offset))
-        if range:
-            start, end = range
-            tagtype_offset = start + 1
-            found += 1
-            if abs(tag.start - start) > max(100, 0.002 * tag.start):
-                shaky += 1
-            logger.debug(
-                f"{tag.start} - {tag.end} -> {start} - {end}: {tag.ent_str} ({tag.ent_type}) [{shaky / (not_found + found) * 100}% shaky]")
-            sec, par, js_start = reader.get_json_location(start)
-            js_end = js_start + end - start
-            tag_dict = {
-                "location": {
-                    "section": sec,
-                    "paragraph": par,
-                    "start": js_start,
-                    "end": js_end
-                },
-                "tag_str": tag.ent_str,
-                "tag_type:": tag.ent_type,
-                "identifier": tag.ent_id,
-
-            }
-            tag_json[doc_id].append(tag_dict)
+            generate_new_index = True
+        if generate_new_index or cur_art_par_id != old_art_par_id:
+            generate_new_index = False
+            if cur_art_par_id == 0:
+                san_index = create_sanitized_index(reader.abstract)
+            else:
+                san_index = create_sanitized_index(reader.get_paragraph(cur_art_par_id))
+            title_index = create_sanitized_index(reader.title)
+            title_offset = len(f"{tag.document_id}|t| ")
+            text_offset = len(f"{tag.document_id}|t| {reader.title}\n{tag.document_id}|a| ")
+        if tag.start < text_offset:
+            par = 0 #title
+            js_start = tag.start - title_offset
+            js_end = tag.end - title_offset
         else:
-            not_found += 1
-            logger.debug(
-                f"unable to find {tag.start}, {tag.end}: {tag.ent_str} ({tag.ent_type}) [{found / (not_found + found)}]")
+            par = cur_art_par_id + 1
+            js_start = tag.start - text_offset
+            js_end = tag.end - text_offset
+
+        tag_dict = {
+            "location": {
+                "paragraph": par,
+                "start": js_start,
+                "end": js_end
+            },
+            "tag_str": tag.ent_str,
+            "tag_type:": tag.ent_type,
+            "identifier": tag.ent_id,
+
+        }
+        tag_json[doc_id].append(tag_dict)
 
     logger.info(f"Done searching. Tags processed: {not_found + found}, "
                 f"Tags not found: {100*not_found/(not_found + found)}%,"
@@ -163,6 +160,21 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
     logger.info(f"Writing json to {out_fn}")
     with open(out_fn, "w+") as out:
         json.dump(tag_json, out, indent=3)
+
+def create_sanitized_index(content:str):
+    """
+    Takes a string and outputs a list to converts from sanitized index to non-sanitized index.
+    :param content: The string to be indexed
+    :return: List sanitized index -> non sanitized index
+    """
+    san_index = []
+    current_sanitized_i = 0
+    for not_san_i, char in enumerate(content):
+        if not ILLEGAL_CHAR.match(char):
+            san_index[current_sanitized_i]=not_san_i
+            current_sanitized_i += 1
+    return san_index
+
 
 
 def search_sanitized(base_str, search_str, start_index):
