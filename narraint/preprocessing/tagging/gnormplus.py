@@ -102,6 +102,6 @@ class GNormPlus(BaseTagger):
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])
 
-    def get_finished_ids(self):
+    def get_successful_ids(self):
         return get_document_ids(self.out_dir)
 
