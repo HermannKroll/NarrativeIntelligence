@@ -1,4 +1,5 @@
 import os
+import signal
 import re
 import shutil
 import subprocess
@@ -29,6 +30,7 @@ class TaggerOne(BaseTagger):
     __name__ = "TaggerOne"
     __version__ = "0.2.1"
     TAGGER_ONE_RETRIES = 2
+    NO_PROGRESS_SIGNAL = 120
 
     def get_tags(self):
         return self._get_tags(self.out_dir)
@@ -36,6 +38,7 @@ class TaggerOne(BaseTagger):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.finished_ids = set()
+        self.successful_ids = set()
         self.batch_ids = set()
         self.in_dir = os.path.join(self.root_dir, "taggerone_in")
         self.out_dir = os.path.join(self.root_dir, "taggerone_out")
@@ -64,19 +67,22 @@ class TaggerOne(BaseTagger):
         else:
             raise NotImplementedError("Resuming TaggerOne is not implemented.")
 
-    def get_finished_ids(self):
+    def get_successful_ids(self):
         """
-        Function returns the set of precessed ids. This is the union of the IDs in the output directory and the IDs
-        in the log file (which are currently not written but processed)
+        Function returns the set of successfully processed ids written to outdir
         :return: Set of IDs
         """
         ids_dir = get_document_ids(self.out_dir)
+        self.successful_ids = self.successful_ids.union(ids_dir)
+        return self.successful_ids
+
+    def get_finished_ids(self):
         ids_log = set()
         if os.path.exists(self.log_file):
             with open(self.log_file) as f:
                 content = f.read()
             ids_log = set(int(x) for x in re.findall(r"INFO (\d+)-\d+\n", content))
-        self.finished_ids = self.finished_ids.union(ids_dir.union(ids_log))
+        self.finished_ids = self.finished_ids.union(self.get_successful_ids().union(ids_log))
         return self.finished_ids
 
     def get_progress(self):
@@ -100,7 +106,7 @@ class TaggerOne(BaseTagger):
         unfinished_ids = list(unfinished_ids.difference(self.skipped_file_ids))
         self.batch_ids = unfinished_ids[:self.config.tagger_one_batch_size]
         batch = [self.mapping_id_file[doc_id] for doc_id in self.batch_ids]
-        self.logger.debug(f"Variable finished_ids contains {len(self.finished_ids)} elements")
+        self.logger.debug(f"Variable processed_ids contains {len(self.finished_ids)} elements")
         self.logger.debug(f"Variable unfinished_ids contains {len(unfinished_ids)} elements")
         batch_id = None
         batch_file = None
@@ -143,8 +149,17 @@ class TaggerOne(BaseTagger):
             self.logger.debug("Starting TaggerOne {}".format(process.args))
 
             # Wait until finished
+            old_progress = 0
+            last_progress_timestamp = datetime.now()
             while process.poll() is None:
                 sleep(self.OUTPUT_INTERVAL)
+                new_progress = self.get_progress()
+                if new_progress > old_progress:
+                    last_progress_timestamp = datetime.now()
+                    old_progress = new_progress
+                elif (datetime.now() - last_progress_timestamp).total_seconds() > 60*self.config.tagger_one_timeout:
+                    os.kill(process.pid, signal.SIGKILL)
+                    return self.NO_PROGRESS_SIGNAL
                 print_progress_with_eta("TaggerOne tagging", self.get_progress(), len(self.files), self.start_time,
                                         print_every_k=1, logger=self.logger)
             self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
@@ -255,6 +270,11 @@ class TaggerOne(BaseTagger):
                 # Process terminated by user
                 self.logger.info("Received SIGKILL. Stopping TaggerOne ...")
                 keep_tagging = False
+            elif exit_code == TaggerOne.NO_PROGRESS_SIGNAL:
+                # Process killed due to no progress
+                self.logger.info(f"No Progress has been made within the last {self.config.tagger_one_timeout} minutes."
+                                 f" Restarting ...")
+                keep_tagging = self.handle_error(batch_file)
 
             if keep_tagging:
                 # Create new batch

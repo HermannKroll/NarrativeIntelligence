@@ -12,6 +12,7 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.document import DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
+from narraint.pubtator.document import get_document_id
 
 
 class DosageFormTaggerIndex:
@@ -342,3 +343,15 @@ class DosageFormTagger(BaseTagger):
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])
+
+    def get_successful_ids(self):
+        """
+        Dosage form doesn't include content in output files, so no id can be retrieved from them if no tags found.
+        Also, dosage_in dir is deleted if finished. Because of thag, the ids are looked up in the files in input_dir,
+        mapping is done via file name.
+        :return:
+        """
+        finished_filenames = os.listdir(self.out_dir)
+        finished_ids = {get_document_id(os.path.join(self.input_dir, fn)) for fn in finished_filenames}
+
+        return finished_ids

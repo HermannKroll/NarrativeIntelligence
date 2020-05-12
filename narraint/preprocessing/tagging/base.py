@@ -122,8 +122,8 @@ class BaseTagger(Thread):
             session.commit()
 
         self.logger.info("Add doc_tagged_by")
-        processed_ent_types = set((did, ent_type) for ent_type in self.TYPES for did in self.id_set)
-        for did, ent_type in processed_ent_types:
+        successful_ent_types = set((did, ent_type) for ent_type in self.TYPES for did in self.get_successful_ids())
+        for did, ent_type in successful_ent_types:
             insert_doc_tagged_by = insert(DocTaggedBy).values(
                 document_id=did,
                 document_collection=self.collection,
@@ -144,6 +144,13 @@ class BaseTagger(Thread):
         Function returns list of 6-tuples with tags.
         Tuple consists of (document ID, start pos., end pos., matched text, tag type, entity ID)
         :return: List of 6-tuples
+        """
+        raise NotImplementedError
+
+    def get_successful_ids(self):
+        """
+        Get a set of doc-ids that are already successfully processed. Should be overwritten by child classes.
+        :return: set of ids
         """
         raise NotImplementedError
 
