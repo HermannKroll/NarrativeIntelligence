@@ -12,20 +12,65 @@ from narraint.progress import print_progress_with_eta
 
 
 class PubMedMEDLINE:
+    """
+    Query interface for the PubMed sample. Requires pickled dictionary (descriptor -> set of pmids).
+    """
+
     def __init__(self):
         if not os.path.exists(MEDLINE_BASELINE_INDEX):
             raise ValueError("Index file {} can not be found.".format(MEDLINE_BASELINE_INDEX))
         with open(MEDLINE_BASELINE_INDEX, "rb") as f:
             self.desc_to_pmids = pickle.load(f)
 
-    def get_ids(self, desc):
+    def _get_ids(self, desc):
+        """
+        Helper function for a single descriptor.
+        :param str desc: Descriptor
+        :return: set of pmids
+        """
         if desc in self.desc_to_pmids:
             return self.desc_to_pmids[desc]
         else:
             return set()
 
+    def get_ids(self, *descs):
+        """
+        Query a list of descriptors and return a set of pmids all containing these descriptors.
+        Input *descs* may be a single list or a split list.
+
+        :param descs: List of descriptors
+        :return: Set of PMIDs all containing the descriptors
+        """
+        desc_list = []
+        pmids = set()
+        if descs:
+            if isinstance(descs[0], list):
+                desc_list = descs[0]
+            else:
+                desc_list = list(descs)
+        for idx, desc in enumerate(desc_list):
+            if idx == 0:
+                pmids = self._get_ids(desc)
+            else:
+                pmids = pmids.intersection(self._get_ids(desc))
+
+        return pmids
+
 
 def load_file(filename, db_pmids):
+    """
+    Process the XML file *filename* and only process the documents whose PMID is contained in *dm_pmids*.
+    One file contains multiple documents.
+
+    .. note::
+
+       Some descriptors are artificial. Descriptors and Qualifiers are concatenated by an "_", e.g., D001 and Q001
+       become D001_Q001.
+
+    :param filename: Filename of XML file
+    :param db_pmids: Set of PMIDs (int) to process
+    :return: Dictionary PMID -> set(Descriptors)
+    """
     with open(filename) as f:
         tree = etree.parse(f)
 
@@ -69,6 +114,14 @@ def load_file(filename, db_pmids):
 
 
 def load_files(directory, db_pmids):
+    """
+    Process a directory containg XML files. Only process those whose PMID is in *db_pmids*.
+    Return a mapping from Descriptor to PMID
+
+    :param directory:
+    :param db_pmids:
+    :return:
+    """
     desc_to_pmids = {}
 
     files = [os.path.join(directory, fn) for fn in os.listdir(directory) if fn.endswith(".xml")]
@@ -93,6 +146,7 @@ def main():
     parser.add_argument("--build-index", "-i", help="Build index (default: {})".format(MEDLINE_BASELINE_INDEX),
                         const=MEDLINE_BASELINE_INDEX, metavar="INDEX_FILE", nargs="?")
     parser.add_argument("--dir", "-d", help="Directory containing XML files", metavar="DIR", required=True)
+    parser.add_argument("--query", "-q", help="Query PMIDs", metavar="DESC", nargs="+")
     args = parser.parse_args()
 
     # Query database
@@ -100,7 +154,7 @@ def main():
     query = session.query(DocProcessedByOpenIE.document_id).filter(DocProcessedByOpenIE.document_collection == "PubMed")
     results = session.execute(query)
     db_pmids = set(x[0] for x in results)
-    print("{} documents processed by OpenID".format(len(db_pmids)))
+    print("DB: {} documents processed by OpenID".format(len(db_pmids)))
 
     # Build index
     if args.build_index:
@@ -109,6 +163,11 @@ def main():
         print("\nPickling index ...")
         with open(args.build_index, "wb")as f:
             pickle.dump(desc_to_pmids, f)
+    elif args.query:
+        qi = PubMedMEDLINE()
+        pmids = qi.get_ids(args.query)
+        print("PMIDs:")
+        print("\n".join(str(x) for x in pmids))
     else:
         print("Nothing to do")
 
