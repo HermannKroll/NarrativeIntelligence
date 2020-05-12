@@ -52,6 +52,14 @@ class MeSHOntology:
             raise KeyError('tree number is already mapped to: {}'.format(self.treeno2desc[tree_no] ))
         self.treeno2desc[tree_no] = (descriptor_id, descriptor_heading)
 
+    def find_descriptors_start_with_tree_no(self, tree_no: str) -> [(str, str)]:
+        results = []
+        for d_tree_no, (d_id, d_heading) in self.treeno2desc.items():
+            if d_tree_no.startswith(tree_no):
+                results.append((d_id, d_heading))
+        return results
+
+
     def get_descriptor_for_tree_no(self, tree_no: str) -> (str, str):
         """
         Gets a MeSH Descriptor for a tree number
