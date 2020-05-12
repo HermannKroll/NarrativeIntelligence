@@ -36,6 +36,10 @@ class Config:
     def tagger_one_batch_size(self):
         return int(self.config["taggerOne"]["batchSize"])
 
+    @property
+    def tagger_one_timeout(self):
+        return self.config["taggerOne"]["timeout"]
+
     # GNormPlus
     @property
     def gnorm_root(self):

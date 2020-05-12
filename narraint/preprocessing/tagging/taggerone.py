@@ -1,4 +1,5 @@
 import os
+import signal
 import re
 import shutil
 import subprocess
@@ -29,6 +30,7 @@ class TaggerOne(BaseTagger):
     __name__ = "TaggerOne"
     __version__ = "0.2.1"
     TAGGER_ONE_RETRIES = 2
+    NO_PROGRESS_SIGNAL = 120
 
     def get_tags(self):
         return self._get_tags(self.out_dir)
@@ -147,8 +149,17 @@ class TaggerOne(BaseTagger):
             self.logger.debug("Starting TaggerOne {}".format(process.args))
 
             # Wait until finished
+            old_progress = 0
+            last_progress_timestamp = datetime.now()
             while process.poll() is None:
                 sleep(self.OUTPUT_INTERVAL)
+                new_progress = self.get_progress()
+                if new_progress > old_progress:
+                    last_progress_timestamp = datetime.now()
+                    old_progress = new_progress
+                elif (datetime.now() - last_progress_timestamp).total_seconds() > 60*self.config.tagger_one_timeout:
+                    os.kill(process.pid, signal.SIGKILL)
+                    return self.NO_PROGRESS_SIGNAL
                 print_progress_with_eta("TaggerOne tagging", self.get_progress(), len(self.files), self.start_time,
                                         print_every_k=1, logger=self.logger)
             self.logger.debug("TaggerOne thread for {} exited with code {}".format(batch_file, process.poll()))
@@ -259,6 +270,11 @@ class TaggerOne(BaseTagger):
                 # Process terminated by user
                 self.logger.info("Received SIGKILL. Stopping TaggerOne ...")
                 keep_tagging = False
+            elif exit_code == TaggerOne.NO_PROGRESS_SIGNAL:
+                # Process killed due to no progress
+                self.logger.info(f"No Progress has been made within the last {self.config.tagger_one_timeout} minutes."
+                                 f" Restarting ...")
+                keep_tagging = self.handle_error(batch_file)
 
             if keep_tagging:
                 # Create new batch
