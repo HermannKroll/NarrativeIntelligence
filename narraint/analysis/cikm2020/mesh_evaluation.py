@@ -71,19 +71,20 @@ decreases_additional_descriptors = []
 decreases_enhanced_search = (decreases_subject_qualifiers, decreases_object_qualifiers, decreases_additional_descriptors)
 
 terms_for_relation = dict(treats=treats_enhanced_search, causes=causes_enhanced_search,
-                          inhibits=inhibits_enhanced_search, induces=induces_enhanced_search)
+                          inhibits=inhibits_enhanced_search, induces=causes_enhanced_search)
 
 #query_predicates =  [("treats" , [CHEMICAL] , [DISEASE]), ("causes", [CHEMICAL], [DISEASE])]
-#query_predicates =  [("treats" , [CHEMICAL] , [DISEASE])]
-#query_predicates = [("inhibits", [CHEMICAL], [GENE])]
-query_predicates = [("induces", [GENE], [CHEMICAL])]
+#query_predicates =  [("induces" , [CHEMICAL] , [DISEASE])]
+query_predicates = [("inhibits", [CHEMICAL], [GENE])]
+#query_predicates = [("induces", [GENE], [CHEMICAL])]
 
 
 query_engine = QueryEngine()
 session = Session.get()
 pubmed = PubMedMEDLINE()
 
-GENE_NCBI_TO_MESH_MAPPING = {"1576": 'MESH:D051544' }
+GENE_NCBI_TO_MESH_MAPPING = {"1576": 'MESH:D051544', # CYP3A4
+                             "2475" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
 GENE_MESH_TO_NCBI = {v: k for k,v in GENE_NCBI_TO_MESH_MAPPING.items()}
 
 def compute_mesh_queries(sub_id, obj_id, predicate):
