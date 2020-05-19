@@ -20,7 +20,7 @@ from narraint.queryengine.engine import QueryEngine
 
 
 
-# Analyse treats, decreases, causes, inhibits and induces
+# Analyse treats, decreases, induces, inhibits and metabolises
 
 # Treats:
 # Therapy: D004358 https://www.ncbi.nlm.nih.gov/mesh/68004358
@@ -28,26 +28,31 @@ from narraint.queryengine.engine import QueryEngine
 # Q000008: administration and dosage https://meshb.nlm.nih.gov/record/ui?ui=Q000008
 # Q000627: therapeutic usage https://meshb.nlm.nih.gov/record/ui?ui=Q000627
 treats_subject_qualifiers = ['Q000008', 'Q000627']
-# Q000628 therapy: https://www.ncbi.nlm.nih.gov/mesh/81000628
-treats_object_qualifiers = ['Q000628']
+# drug therapy https://meshb.nlm.nih.gov/record/ui?ui=Q000188
+treats_object_qualifiers = ['Q000188']
 treats_additional_descriptors = ['D004358']
 treats_enhanced_search = (treats_subject_qualifiers, treats_object_qualifiers, treats_additional_descriptors)
+# NOT  Q000628 therapy: https://www.ncbi.nlm.nih.gov/mesh/81000628
 
 
-# Causes:
+# Induces:
 # Q000009: adverse effects https://meshb.nlm.nih.gov/record/ui?ui=Q000009
-causes_subject_qualifiers = ['Q000009']
+# Q000506: poisoning https://meshb.nlm.nih.gov/record/ui?ui=Q000506
+# Q000633: toxicity https://meshb.nlm.nih.gov/record/ui?ui=Q000633
+induces_subject_qualifiers = ['Q000009', 'Q000506', 'Q000633']
 # Q000139: chemically induced https://meshb.nlm.nih.gov/record/ui?ui=Q000139
-causes_object_qualifiers = ['Q000139']
+induces_object_qualifiers = ['Q000139']
 # D064420 Drug-Related Side Effects and Adverse Reactions https://meshb.nlm.nih.gov/record/ui?ui=D064420
-causes_additional_descriptors = ['D064420']
-causes_enhanced_search = (causes_subject_qualifiers, causes_object_qualifiers, causes_additional_descriptors)
+induces_additional_descriptors = ['D064420']
+induces_enhanced_search = (induces_subject_qualifiers, induces_object_qualifiers, induces_additional_descriptors)
 
 
 # Inhibits:
 # for drugs
 # Q000037: antagonists & inhibitors https://meshb.nlm.nih.gov/record/ui?ui=Q000037
-inhibits_subject_qualifiers = ['Q000037']
+# Q000494: pharmacology https://meshb.nlm.nih.gov/record/ui?ui=Q000494
+# Q000493: pharmacokinetics https://meshb.nlm.nih.gov/record/ui?ui=Q000493
+inhibits_subject_qualifiers = ['Q000037', 'Q000494', 'Q000493']
 # for genes
 # Q000378: metabolism https://meshb.nlm.nih.gov/record/ui?ui=Q000378
 inhibits_object_qualifiers = ['Q000378']
@@ -55,28 +60,42 @@ inhibits_object_qualifiers = ['Q000378']
 inhibits_additional_descriptors = ['D065692']
 inhibits_enhanced_search = (inhibits_subject_qualifiers, inhibits_object_qualifiers, inhibits_additional_descriptors)
 
-# Induces:
+
+# Metabolism:
+# for genes
 # Q000378: metabolism https://meshb.nlm.nih.gov/record/ui?ui=Q000378
-induces_subject_qualifiers = ['Q000378']
-induces_object_qualifiers = []
-induces_additional_descriptors = []
-induces_enhanced_search = (induces_subject_qualifiers, induces_object_qualifiers, induces_additional_descriptors)
+metabolises_subject_qualifiers = ['Q000378']
+# for chemicals
+metabolises_object_qualifiers = []
+# Cytochrome P-450 Enzyme Inducers https://meshb.nlm.nih.gov/record/ui?ui=D065693
+metabolises_additional_descriptors = ['D065693']
+metabolises_enhanced_search = (metabolises_subject_qualifiers, metabolises_object_qualifiers, metabolises_additional_descriptors)
 
 
 # Decreases:
-#
-decreases_subject_qualifiers = []
-decreases_object_qualifiers = []
+# Chemical -> Disease, Chemical
+# Q000493 pharmacokinetics https://meshb.nlm.nih.gov/record/ui?ui=Q000493
+# Q000494 pharmacology https://meshb.nlm.nih.gov/record/ui?ui=Q000494
+# Q000627 therapeutic use https://meshb.nlm.nih.gov/record/ui?ui=Q000627
+# Q000009 adverse effects https://meshb.nlm.nih.gov/record/ui?ui=Q000009
+# Q000633 toxicity https://meshb.nlm.nih.gov/record/ui?ui=Q000633
+decreases_subject_qualifiers = ['Q000493', 'Q000494', 'Q000627', 'Q000009', 'Q000633']
+# Q000378 metabolism https://meshb.nlm.nih.gov/record/ui?ui=Q000378
+# Q000628 therapy https://meshb.nlm.nih.gov/record/ui?ui=Q000628
+decreases_object_qualifiers = ['Q000378', 'Q000628']
 decreases_additional_descriptors = []
 decreases_enhanced_search = (decreases_subject_qualifiers, decreases_object_qualifiers, decreases_additional_descriptors)
 
-terms_for_relation = dict(treats=treats_enhanced_search, causes=causes_enhanced_search,
-                          inhibits=inhibits_enhanced_search, induces=causes_enhanced_search)
+terms_for_relation = dict(treats=treats_enhanced_search, induces=induces_enhanced_search,
+                          inhibits=inhibits_enhanced_search, metabolises=metabolises_enhanced_search,
+                          decreases=decreases_enhanced_search)
 
-#query_predicates =  [("treats" , [CHEMICAL] , [DISEASE]), ("causes", [CHEMICAL], [DISEASE])]
-#query_predicates =  [("induces" , [CHEMICAL] , [DISEASE])]
-query_predicates = [("inhibits", [CHEMICAL], [GENE])]
-#query_predicates = [("induces", [GENE], [CHEMICAL])]
+query_predicates = []
+query_predicates.append(("treats" , [CHEMICAL], [DISEASE]))
+query_predicates.append(("induces" , [CHEMICAL], [DISEASE]))
+query_predicates.append(("inhibits", [CHEMICAL], [GENE]))
+query_predicates.append(("metabolises", [GENE], [CHEMICAL]))
+query_predicates.append(("decreases", [CHEMICAL], [CHEMICAL, DISEASE]))
 
 
 query_engine = QueryEngine()
@@ -84,7 +103,7 @@ session = Session.get()
 pubmed = PubMedMEDLINE()
 
 GENE_NCBI_TO_MESH_MAPPING = {"1576": 'MESH:D051544', # CYP3A4
-                             "2475" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
+                            "2475" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
 GENE_MESH_TO_NCBI = {v: k for k,v in GENE_NCBI_TO_MESH_MAPPING.items()}
 
 def compute_mesh_queries(sub_id, obj_id, predicate):
@@ -204,7 +223,7 @@ def main():
 
     logging.info('Beginning experiment...')
     logging.info('=' * 60)
-    for DO_QUERY_MESH_EXPANSION in [True, False]:
+    for DO_QUERY_MESH_EXPANSION in [True]:
         logging.info('Query expansion set to: {}'.format(DO_QUERY_MESH_EXPANSION))
         for p, p_s_types, p_o_types in query_predicates:
             logging.info('=' * 60)
