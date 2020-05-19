@@ -3,6 +3,7 @@ import pickle
 from itertools import islice
 from narraint.config import GENE_FILE, GENE_TO_HUMAN_ID_FILE
 
+
 # important note: human taxonomy id is '9606'. Composition of components in GENE_FILE:
 # components[0] = tax_id, components[1] = gene_id, components[2] = gene name
 class GeneMapper:
