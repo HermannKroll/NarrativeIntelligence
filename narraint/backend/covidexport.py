@@ -13,13 +13,13 @@ from narraint.entity import enttypes
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.pubtator.regex import ILLEGAL_CHAR
 from narraint.progress import print_progress_with_eta
+from narraint.pubtator.translation.cord19m2fulltexts import NEXT_DOCUMENT_ID_OFFSET
 
 TITLE = "title"
 ABSTRACT = "abstract"
 BODY = "body"
 
 MAX_SCAN_WIDTH = 1000
-
 
 class FileReader:
     def __init__(self, file_path):
@@ -28,7 +28,7 @@ class FileReader:
             self.paper_id = content['paper_id']
             self.title = ""
             self.abstract = []
-            self.body_text = []
+            self.body_texts = []
             # Title
             self.title = content['metadata']["title"]
             # Abstract
@@ -37,53 +37,22 @@ class FileReader:
                     self.abstract.append(entry['text'])
             # Body text
             for entry in content['body_text']:
-                self.body_text.append(entry['text'])
-            self.full_str = self.title + " "
-            #self.section_pointers = {ABSTRACT: len(self.full_str)}
-            self.abstract_paragraph_pointers = [0, ]
-            for paragraph in self.abstract:
-                self.full_str += paragraph + "\n"
-                self.abstract_paragraph_pointers.append(len(self.full_str) - self.abstract_start())
-            self.body_paragraph_pointers = [0, ]
-            for paragraph in self.body_text:
-                self.full_str += paragraph + "\n"
-                self.body_paragraph_pointers.append(len(self.full_str) - self.body_start())
+                self.body_texts.append(entry['text'])
+            self.abstract = '\n'.join(self.abstract)
 
     def __repr__(self):
-        return self.full_str
+        return f'{self.paper_id}: {self.abstract[:200]}... {self.body_texts[0]}...'
 
-    def abstract_start(self):
-        return len(self.title)
-
-    def body_start(self):
-        return len(self.title) + len(self.abstract)
-
-    def get_json_location(self, full_str_index):
+    def get_paragraph(self, art_par_id):
         """
-        find location of full_str index in json file
-        :param full_str_index: the index of the full_str to be found in the json file
-        :return: (sec, par, ind) - Section (title, abstract or body), paragraph-nr and local index within paragraph. 
-            If section is title, par is always 0
+        Get the text of the abstract or the full text paraphs
+        :param art_par_id: 0 refers to abstract, >=1 to full text paragraphs
+        :return:
         """
-        if full_str_index > self.body_start():
-            section = BODY
-            *_, paragraph_nr = (nr for nr, p in enumerate(self.body_paragraph_pointers) if
-                                p <= full_str_index - self.body_start())  # last nr of generator
-            local_index = full_str_index - self.body_paragraph_pointers[paragraph_nr]
-        elif full_str_index > self.abstract_start():
-            section = ABSTRACT
-            *_, paragraph_nr = (nr for nr, p in enumerate(self.abstract_paragraph_pointers) if
-                                p < full_str_index - self.abstract_start())
-            local_index = full_str_index - self.abstract_paragraph_pointers[paragraph_nr]
-        else:
-            section = TITLE
-            paragraph_nr = 0
-            local_index = full_str_index
-        return section, paragraph_nr, local_index
-
+        return self.body_texts[art_par_id-1] if art_par_id > 0 else self.abstract
 
 def export(out_fn, tag_types, json_root, info_file, document_ids=None, collection=None, logger=logging,
-           tag_buffer=TAG_BUFFER_SIZE):
+           tag_buffer=TAG_BUFFER_SIZE, only_abstract=False):
     logger.info("Beginning export...")
     if document_ids is None:
         document_ids = []
@@ -106,63 +75,90 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
     document_count = 0
     start_time = datetime.now()
     logger.info('Starting to search for tags.')
-    art_id = None
     tag_json = {}
-    tagtype_offset = 0
-    current_tagtype = None
     found = 0
     not_found = 0
     shaky = 0
+    old_art_doc_id = None
+    old_art_par_id = None
+    generate_new_index = False
     for tag in tag_query:
-        if art_id != tag.document_id:
-            art_id = tag.document_id
-            file = file_dict[art_id]
-            doc_id = os.path.basename(file)
-            doc_id = tag.document_id
-            tag_json[doc_id] = []
-            reader = FileReader(file)
-            tagtype_offset = 0
-            logger.debug(f"{doc_id} {file})")
-            print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
-            document_count +=1
-        if current_tagtype != tag.ent_type:
-            current_tagtype = tag.ent_type
-            tagtype_offset = 0
-        range = search_sanitized(reader.full_str, tag.ent_str, max(tag.start - 5, tagtype_offset))
-        if range:
-            start, end = range
-            tagtype_offset = start + 1
-            found += 1
-            if abs(tag.start - start) > max(100, 0.002 * tag.start):
-                shaky += 1
-            logger.debug(
-                f"{tag.start} - {tag.end} -> {start} - {end}: {tag.ent_str} ({tag.ent_type}) [{shaky / (not_found + found) * 100}% shaky]")
-            sec, par, js_start = reader.get_json_location(start)
-            js_end = js_start + end - start
+        try:
+            cur_art_doc_id = tag.document_id - tag.document_id % NEXT_DOCUMENT_ID_OFFSET
+            cur_art_par_id = tag.document_id % NEXT_DOCUMENT_ID_OFFSET
+            if cur_art_doc_id != old_art_doc_id:
+                old_art_doc_id = cur_art_doc_id
+                file = file_dict[cur_art_doc_id]
+                doc_id = os.path.basename(file)
+                tag_json[doc_id] = []
+                reader = FileReader(file)
+                print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
+                document_count +=1
+                print(document_count)
+                generate_new_index = True
+            if generate_new_index or cur_art_par_id != old_art_par_id:
+                if only_abstract and cur_art_par_id > 0:
+                    continue
+                logger.debug(f"{cur_art_doc_id}:{cur_art_par_id} -> {file}, {reader.title})")
+                logger.debug(f"{reader.get_paragraph(cur_art_par_id)}")
+                generate_new_index = False
+                old_art_par_id=cur_art_par_id
+                if cur_art_par_id == 0:
+                    san_index = create_sanitized_index(reader.abstract)
+                else:
+                    san_index = create_sanitized_index(reader.get_paragraph(cur_art_par_id))
+                title_index = create_sanitized_index(reader.title)
+
+                text_offset = len(reader.title) +3 if cur_art_par_id==0 else len(" SECTION") + 2
+            if tag.start < text_offset:
+                par = 0 #title
+                js_start = title_index[tag.start]  #- title_offset
+                js_end = title_index[tag.end] #- title_offset
+            else:
+                par = cur_art_par_id + 1
+                js_start = san_index[tag.start - text_offset]
+                js_end = san_index[tag.end - text_offset]
+            logger.debug(f"{tag.ent_str}: {tag.start}-{tag.end} -> {js_start} - {js_end} "
+                  f"({reader.get_paragraph(cur_art_par_id)[js_start-10:js_start]}|"
+                  f"{reader.get_paragraph(cur_art_par_id)[js_start:js_end]}|"
+                  f"{reader.get_paragraph(cur_art_par_id)[js_end:js_end + 10]})")
             tag_dict = {
                 "location": {
-                    "section": sec,
                     "paragraph": par,
                     "start": js_start,
                     "end": js_end
                 },
-                "tag_str": tag.ent_str,
-                "tag_type:": tag.ent_type,
-                "identifier": tag.ent_id,
+                "entity_str": tag.ent_str,
+                "entity_type": tag.ent_type,
+                "entity_id": tag.ent_id,
 
             }
             tag_json[doc_id].append(tag_dict)
-        else:
-            not_found += 1
-            logger.debug(
-                f"unable to find {tag.start}, {tag.end}: {tag.ent_str} ({tag.ent_type}) [{found / (not_found + found)}]")
+            found+=1
+        except:
+            logger.debug(f"Tag {tag.id} ({tag.ent_str}) not found")
+            not_found+=1
+            continue
+
 
     logger.info(f"Done searching. Tags processed: {not_found + found}, "
-                f"Tags not found: {100*not_found/(not_found + found)}%,"
-                f"Tags shakey: {100*shaky/(not_found + found)}%")
+                f"Tags not found: {100*not_found/(not_found + found)}%,")
     logger.info(f"Writing json to {out_fn}")
     with open(out_fn, "w+") as out:
         json.dump(tag_json, out, indent=3)
+
+def create_sanitized_index(content:str):
+    """
+    Takes a string and outputs a list to converts from sanitized index to non-sanitized index.
+    :param content: The string to be indexed
+    :return: List sanitized index -> non sanitized index
+    """
+    san_index = []
+    for not_san_i, char in enumerate(content):
+        if not ILLEGAL_CHAR.match(char):
+            san_index.append(not_san_i)
+    return san_index
+
 
 
 def search_sanitized(base_str, search_str, start_index):
@@ -193,6 +189,7 @@ def main():
     parser.add_argument("output")
     parser.add_argument("jsonroot")
     parser.add_argument("infofile")
+    parser.add_argument("-a", "--only-abstract", action='store_true')
     parser.add_argument("--ids", nargs="*", metavar="DOC_ID")
     parser.add_argument("--idfile", help='file containing document ids (one id per line)')
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
@@ -213,7 +210,7 @@ def main():
     else:
         tag_types = None
     logging.basicConfig(level=args.loglevel.upper())
-    export(args.output, tag_types, args.jsonroot, args.infofile, ids, args.collection)
+    export(args.output, tag_types, args.jsonroot, args.infofile, ids, args.collection, only_abstract=args.only_abstract)
 
 
 if __name__ == "__main__":

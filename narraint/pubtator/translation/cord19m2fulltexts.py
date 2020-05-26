@@ -56,7 +56,7 @@ def main():
                     f.write(content + '\n')
 
                 for body_text_id, body_text in enumerate(file.body_texts):
-                    if body_text_id > 99999:
+                    if body_text_id >= NEXT_DOCUMENT_ID_OFFSET:
                         raise ValueError('Overflow body id - increase id range for document bodies')
                     artificial_doc_id = doc_id + body_text_id + 1
                     content = Document.create_pubtator(artificial_doc_id, "Section", body_text)
