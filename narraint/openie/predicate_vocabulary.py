@@ -17,4 +17,5 @@ def create_predicate_vocab():
                 produces=["produce"],
                 occurs=["occur"],
                 compares=["compares", "compared with"],
-                PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"])
+                PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"],
+                metabolises=["metabolises"])
