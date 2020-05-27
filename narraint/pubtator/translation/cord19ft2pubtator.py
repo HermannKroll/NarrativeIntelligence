@@ -1,5 +1,6 @@
 import glob
 import json
+import csv
 from argparse import ArgumentParser
 from datetime import datetime
 
@@ -36,15 +37,24 @@ class FileReader:
 def main():
     parser = ArgumentParser(description="Collect and convert PMC files from a list of pmc-ids")
     parser.add_argument("input", help="Root Directory of Cord19m2 data setw")
+    parser.add_argument("metadata", help="Path to metadata.csv file")
     parser.add_argument("output", help="Output of the resulting Pubtator file")
     args = parser.parse_args()
 
-    print('searching all json files in {}'.format(args.input))
-    all_json = glob.glob(f'{args.input}/**/*.json', recursive=True)
-    print('{} json files found'.format(len(all_json)))
+    translate(args.input, args.output)
 
+
+"""
+recursively searches for all .json files in input_dir, sanitizes them and converts them to a pubtator format. 
+:parm input_dir: directory containing the json files
+:param output_dir: an (existing) file path to write the pubtator output to
+"""
+def translate(input_dir, output_file):
+    print('searching all json files in {}'.format(input_dir))
+    all_json = glob.glob(f'{input_dir}/**/*.json', recursive=True)
+    print('{} json files found'.format(len(all_json)))
     start_time = datetime.now()
-    with open(args.output, 'w') as f, open(args.output+'.info.csv', 'w') as f_info:
+    with open(output_file, 'w') as f, open(output_file + '.info.csv', 'w') as f_info:
         f_info.write('document_id\tpaper_id')
         for idx, json_file in enumerate(all_json):
             try:
@@ -67,6 +77,12 @@ def main():
             except KeyError:
                 print('skip: {}'.format(json_file))
 
+
+def read_metadata(metadata_file):
+    with open(metadata_file, 'rb') as f:
+        reader = csv.DictReader(f)
+        dict_list = [d for d in reader]
+        return dict_list
 
 if __name__ == "__main__":
     main()
