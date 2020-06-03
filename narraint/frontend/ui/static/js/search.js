@@ -403,7 +403,6 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     button_string += ' [';
     let i = 0;
     var_names.forEach(name => {
-        //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
         let entity_substitution = var_subs[name];
         let ent_str = entity_substitution["entity_str"];
         let ent_id = entity_substitution["entity_id"];
