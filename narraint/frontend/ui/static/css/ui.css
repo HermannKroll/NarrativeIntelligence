@@ -6,6 +6,24 @@
     white-space: pre-wrap;
 }
 
+.btn.btn-light.btn-light-link {
+    color: #007bff;
+}
+
+.wrapper-div {
+    overflow: auto;
+}
+
+.inner-div-left {
+    width: fit-content;
+    float: left;
+    margin-right: 15px
+}
+
+.inner-div-right {
+    float: left;
+}
+
 .graph-pattern {
     width: 200px;
     height: 200px;

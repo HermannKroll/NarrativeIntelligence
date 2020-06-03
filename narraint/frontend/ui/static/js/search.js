@@ -350,7 +350,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             j = 1;
         }
     });
-    let divDoc = $('<div><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
+    let divDoc = $('<div><a class="btn btn-light btn-light-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
     return divDoc;
 };
@@ -389,7 +389,7 @@ const createDocumentList = (results, query_len) => {
 
 
 const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
-    let divCard = $('<div class="card"></div>');
+    let divCard = $('<div class="card text-white bg-success"></div>');
     let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
     divCard.append(divCardHeader);
     let divH2 = $('<h2 class="mb-0"></h2>');
@@ -417,22 +417,22 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         if (ent_id.slice(0, 5) === 'MESH:') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Species') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Gene'){
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ']'
         }
         i += 1;
     });
 
-    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
+    divH2.append('<button class="btn btn-light" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
     let divCardEntry = $('<div id="'+collapseID+'" class="collapse" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
     let divCardBody = $('<div class="card-body"></div>');

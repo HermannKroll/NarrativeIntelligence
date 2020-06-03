@@ -112,7 +112,7 @@
                         <!--<label for="id_keywords"><strong>Search</strong></label> -->
                         <div style="float: left; width: 85%">
                             <textarea class="form-control" id="id_keywords" rows="1"
-                                  name="keywords">Simvastatin treats ?X(Disease)</textarea>
+                                      name="keywords">Simvastatin treats ?X(Disease)</textarea>
                         </div>
 
                         <div style="float: left; width: 15%">
@@ -126,35 +126,48 @@
 
                         <div style="float: left; width: 100%">
                             <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
-                        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
-                            'administered', 'associated', 'augments', 'compares', 'decreases',
-                            'dosageform', 'effects', 'induces', 'inhibits', 'interacts', 'metabolises', 'occurs',
-                            'prevents', 'produces', 'regulates', 'treats'
-                        </small>
+                            <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
+                                'administered', 'associated', 'augments', 'compares', 'decreases',
+                                'dosageform', 'effects', 'induces', 'inhibits', 'interacts', 'metabolises', 'occurs',
+                                'prevents', 'produces', 'regulates', 'treats'
+                            </small>
                         </div>
 
                         <label><strong>Data Source:</strong></label><br>
-                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed" checked="checked">
-                        <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
-                        <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
-                        <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
 
-                        <input type="radio" id="radio_pmc" name="data_source" value="PMC">
-                        <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents including
-                            Simvastatin)</label><br>
-                        <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
-                        <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents including
-                            Simvastatin)</label><br>
+                        <div class="wrapper-div">
+                            <div class="inner-div-left">
+                                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                                       checked="checked">
+                                <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
+                                    Abstracts)</label><br>
+                                <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
+                                <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and
+                                    Abstracts)</label>
+                            </div>
+                            <div class="inner-div-right">
+                                <input type="radio" id="radio_pmc" name="data_source" value="PMC">
+                                <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                    Simvastatin)</label><br>
+                                <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                                <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                    Simvastatin)</label><br>
+                            </div>
+                        </div>
 
-                             <div style="float: left; width: 50%">
-                            <label><strong>Outer Ranking:</strong></label><br>
-                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                                   value="outer_ranking_substitution"
-                                   checked="checked">
-                            <label for="radio_outer_ranking_a">Substitution-based Aggregation</label><br>
-                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
-                                   value="outer_ranking_ontology">
-                            <label for="radio_outer_ranking_b">Ontology-based Aggregation</label><br>
+                        <label><strong>Outer Ranking:</strong></label><br>
+                        <div class="wrapper-div">
+                            <div class="inner-div-left">
+                                <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                                       value="outer_ranking_substitution"
+                                       checked="checked">
+                                <label for="radio_outer_ranking_a">Substitution-based Aggregation</label><br>
+                            </div>
+                            <div class="inner-div-right">
+                                <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
+                                       value="outer_ranking_ontology">
+                                <label for="radio_outer_ranking_b">Ontology-based Aggregation</label><br>
+                            </div>
                         </div>
 
                         <!--se
@@ -233,7 +246,7 @@
         </div>
 
         <div>
-            <label for="query_translation"><strong>Query Translation</strong></label>
+            <label><strong>Query Translation: </strong></label>
             <div id="query_translation">No query translation available.</div>
         </div>
 
