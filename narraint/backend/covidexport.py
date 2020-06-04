@@ -94,7 +94,7 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
                 reader = FileReader(file)
                 print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
                 document_count +=1
-                print(document_count)
+                #print(document_count)
                 generate_new_index = True
             if generate_new_index or cur_art_par_id != old_art_par_id:
                 if only_abstract and cur_art_par_id > 0:
@@ -139,7 +139,6 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
             logger.debug(f"Tag {tag.id} ({tag.ent_str}) not found")
             not_found+=1
             continue
-
 
     logger.info(f"Done searching. Tags processed: {not_found + found}, "
                 f"Tags not found: {100*not_found/(not_found + found)}%,")
