@@ -1,14 +1,16 @@
 import glob
 import json
 import csv
+import logging
 from argparse import ArgumentParser
 from datetime import datetime
 
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm.query import Query
 
 from narraint.backend import models
 from narraint.backend.database import Session
-from narraint.backend.models import Document
+from narraint.backend.models import Document, Cord19Translation
 from narraint.progress import print_progress_with_eta
 
 UNIQUE_ID_START = 100000
@@ -45,29 +47,49 @@ def main():
     parser.add_argument("input", help="Root Directory of Cord19m2 data set")
     parser.add_argument("metadata", help="Path to metadata.csv file")
     parser.add_argument("output", help="Output of the resulting Pubtator file")
+    parser.add_argument("--crosscollections", "-c", nargs='+', help="Collections to crosscheck")
+    parser.add_argument("--loglevel", "-l", help="Loglevel", default="INFO")
     args = parser.parse_args()
 
+    logging.basicConfig(level=args.loglevel.upper())
     translator = Translator(args.collection, args.input, args.output, args.metadata)
-    dict_list = read_metadata(args.metadata)
-
+    translator.translate()
 
 class Translator:
     def __init__(self, collection, input_dir, output_file, metadata_file):
+        logging.debug("Reading metadata...")
         self.metadata_dict = read_metadata(metadata_file)
+        logging.debug(f"{len(self.metadata_dict)} entries found.")
         self.collection = collection
-        self.session = Session.get()
         self.input_dir = input_dir
         self.output_file = output_file
-        self.insert_translation(100000, 'd1aafb70c066a2068b02786f8929fd9c900897fb')
+        self.collect_excluded_shas()
 
-    def get_metadata_by_sha(self, sha):
+    def collect_excluded_shas(self, exclude_collections = []):
+        exclude_collections = {c for c in exclude_collections}
+        exclude_collections.add(self.collection)
+        session = Session.get()
+        query = session.query(Cord19Translation).filter(
+            Cord19Translation.document_collection.in_(exclude_collections)).with_entities(
+            Cord19Translation.sha
+        )
+        excluded_shas = []
+        for row in query:
+            excluded_shas.extend(row.sha.split(";"))
+        self.excluded_shas=excluded_shas
+
+    def get_metadata_by_sha(self, cord_id):
         """
         Search for sha in metadata_dict and return the first column containing it
-        :param sha:
+        :param cordid:
         :return:
         """
+        if cord_id[0:3] == "PMC":
+            relevant_column = "pmcid"
+        else:
+            relevant_column = "sha"
         for d in self.metadata_dict:
-            if sha in d['sha']:
+            if cord_id in d[relevant_column]:
                 return d
         else:
             return None
@@ -87,6 +109,8 @@ class Translator:
             for idx, json_file in enumerate(all_json):
                 try:
                     file = FileReader(json_file)
+                    if file.paper_id in self.excluded_shas: #Document already translated
+                        continue
                     doc_id = UNIQUE_ID_START + (NEXT_DOCUMENT_ID_OFFSET * idx)
                     # export title + abstract
                     if len(file.abstract) > 0:
@@ -99,6 +123,7 @@ class Translator:
                         artificial_doc_id = doc_id + body_text_id + 1
                         content = Document.create_pubtator(artificial_doc_id, "Section", body_text)
                         f.write(content + '\n')
+                        self.insert_translation(artificial_doc_id, file.paper_id)
 
                     f_info.write('\n{}\t{}'.format(doc_id, file.paper_id))
                     print_progress_with_eta('converting', idx, len(all_json), start_time)
@@ -106,6 +131,7 @@ class Translator:
                     print('skip: {}'.format(json_file))
 
     def insert_translation(self, art_id, sha):
+        session = Session.get()
         metadata = self.get_metadata_by_sha(sha)
 
         insert_query = insert(models.Cord19Translation).values(
@@ -115,8 +141,8 @@ class Translator:
             sha=sha,
             source_x=';'.join(metadata['source_x'])
         )
-        self.session.execute(insert_query)
-        self.session.commit()
+        session.execute(insert_query)
+        session.commit()
 
 
 def read_metadata(metadata_file):
