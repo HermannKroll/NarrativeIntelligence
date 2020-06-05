@@ -5,6 +5,7 @@ import logging
 from argparse import ArgumentParser
 from datetime import datetime
 
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm.query import Query
 
@@ -12,6 +13,7 @@ from narraint.backend import models
 from narraint.backend.database import Session
 from narraint.backend.models import Document, Cord19Translation
 from narraint.progress import print_progress_with_eta
+from narraint.pubtator.translation.metareader import MetaReader
 
 UNIQUE_ID_START = 100000
 NEXT_DOCUMENT_ID_OFFSET = 100000
@@ -52,20 +54,25 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel.upper())
-    translator = Translator(args.collection, args.input, args.output, args.metadata)
+    translator = Translator(args.collection, args.input, args.output, args.metadata, args.crosscollections)
     translator.translate()
 
 class Translator:
-    def __init__(self, collection, input_dir, output_file, metadata_file):
+    def __init__(self, collection, input_dir, output_file, metadata_file, crosscollections):
         logging.debug("Reading metadata...")
-        self.metadata_dict = read_metadata(metadata_file)
-        logging.debug(f"{len(self.metadata_dict)} entries found.")
+        self.meta = MetaReader(metadata_file)
+        logging.debug(f"{len(self.meta)} entries found.")
         self.collection = collection
         self.input_dir = input_dir
         self.output_file = output_file
-        self.collect_excluded_shas()
+        self.excluded_shas = self.collect_excluded_shas(crosscollections)
+        self.id_offset = self.get_offset()
+        self.timestamp = datetime.now()
+        logging.debug(f"starting at id {self.id_offset}")
 
-    def collect_excluded_shas(self, exclude_collections = []):
+    def collect_excluded_shas(self, exclude_collections=None):
+        if exclude_collections is None:
+            exclude_collections = []
         exclude_collections = {c for c in exclude_collections}
         exclude_collections.add(self.collection)
         session = Session.get()
@@ -76,23 +83,7 @@ class Translator:
         excluded_shas = []
         for row in query:
             excluded_shas.extend(row.sha.split(";"))
-        self.excluded_shas=excluded_shas
-
-    def get_metadata_by_sha(self, cord_id):
-        """
-        Search for sha in metadata_dict and return the first column containing it
-        :param cordid:
-        :return:
-        """
-        if cord_id[0:3] == "PMC":
-            relevant_column = "pmcid"
-        else:
-            relevant_column = "sha"
-        for d in self.metadata_dict:
-            if cord_id in d[relevant_column]:
-                return d
-        else:
-            return None
+        return excluded_shas
 
     """
     recursively searches for all .json files in input_dir, sanitizes them and converts them to a pubtator format. 
@@ -104,18 +95,27 @@ class Translator:
         all_json = glob.glob(f'{self.input_dir}/**/*.json', recursive=True)
         print('{} json files found'.format(len(all_json)))
         start_time = datetime.now()
+        current_id = 0
+        logging.info("Translating...")
         with open(self.output_file, 'w') as f, open(self.output_file + '.info.csv', 'w') as f_info:
             f_info.write('document_id\tpaper_id')
-            for idx, json_file in enumerate(all_json):
+            for json_file in all_json:
                 try:
                     file = FileReader(json_file)
+                    metadata = self.meta.get_metadata_by_id(file.paper_id)
                     if file.paper_id in self.excluded_shas: #Document already translated
+                        logging.debug(f"skipping {file.paper_id}: already translated")
                         continue
-                    doc_id = UNIQUE_ID_START + (NEXT_DOCUMENT_ID_OFFSET * idx)
+                    doc_id = self.id_offset + (NEXT_DOCUMENT_ID_OFFSET * current_id)
                     # export title + abstract
                     if len(file.abstract) > 0:
                         content = Document.create_pubtator(doc_id, file.title, file.abstract)
                         f.write(content + '\n')
+                        self.insert_translation(doc_id, file.paper_id, metadata)
+                    elif len(metadata['abstract']) > 0:
+                        content = Document.create_pubtator(doc_id, file.title, " ".join(metadata['abstract']))
+                        f.write(content + '\n')
+                        self.insert_translation(doc_id, file.paper_id, metadata)
 
                     for body_text_id, body_text in enumerate(file.body_texts):
                         if body_text_id >= NEXT_DOCUMENT_ID_OFFSET:
@@ -123,37 +123,36 @@ class Translator:
                         artificial_doc_id = doc_id + body_text_id + 1
                         content = Document.create_pubtator(artificial_doc_id, "Section", body_text)
                         f.write(content + '\n')
-                        self.insert_translation(artificial_doc_id, file.paper_id)
+                        self.insert_translation(artificial_doc_id, file.paper_id, metadata)
 
                     f_info.write('\n{}\t{}'.format(doc_id, file.paper_id))
-                    print_progress_with_eta('converting', idx, len(all_json), start_time)
+                    current_id += 1
+                    print_progress_with_eta('converting', current_id, len(all_json), start_time)
                 except KeyError:
                     print('skip: {}'.format(json_file))
 
-    def insert_translation(self, art_id, sha):
+    def get_offset(self):
         session = Session.get()
-        metadata = self.get_metadata_by_sha(sha)
+        max_id = session.query(func.max(Cord19Translation.document_id)).scalar()
+        max_id = max_id if max_id else 0
+        return max_id - max_id % NEXT_DOCUMENT_ID_OFFSET + NEXT_DOCUMENT_ID_OFFSET
+
+
+    def insert_translation(self, art_id, sha, metadata=None):
+        session = Session.get()
+        metadata = metadata if metadata else self.meta.get_metadata_by_id(sha)
 
         insert_query = insert(models.Cord19Translation).values(
             document_id=art_id,
             document_collection=self.collection,
             cord_uid=metadata['cord_uid'][0],
             sha=sha,
-            source_x=';'.join(metadata['source_x'])
+            source_x=';'.join(metadata['source_x']),
+            date_inserted=self.timestamp
         )
         session.execute(insert_query)
         session.commit()
 
-
-def read_metadata(metadata_file):
-    with open(metadata_file, 'r') as f:
-        reader = csv.DictReader(f)
-        dict_list = []
-        for d in reader:
-            for k in d.keys():
-                d[k] = d[k].split(";") # Iterpret ';'-splitted values as list
-            dict_list.append(d)
-        return dict_list
 
 if __name__ == "__main__":
     main()
