@@ -55,8 +55,18 @@ print('Q6: {} correct of {} documents'.format(len(eval_q6_ids_correct), len(eval
 query_engine = QueryEngine()
 
 
-
 def perform_baseline_evaluation(subject_id, subject_type, predicate, object_id, object_type, ids_sample, ids_correct):
+    """
+    Baseline = PubMed MeSH Term search
+    :param subject_id: ID of the subject
+    :param subject_type: type of the subject
+    :param predicate: predicate
+    :param object_id: ID of the object
+    :param object_type: type of the object
+    :param ids_sample: sample - which document were evaluated by the experts
+    :param ids_correct: which documents are correct hits
+    :return: precision, recall, len_hits_on_pubmed, len_hits_sample, len_hits_correct
+    """
     if subject_type == GENE:
         subject_id = GENE_NCBI_TO_MESH_MAPPING[subject_id]
     if object_type == GENE:
@@ -73,12 +83,11 @@ def perform_baseline_evaluation(subject_id, subject_type, predicate, object_id, 
     return precision, recall, len(pubmed_hits), pubmed_hits_sample, pubmed_correct_hits
 
 
-
 def main():
-    parser = argparse.ArgumentParser()
-    #parser.add_argument("output", help='resulting file')
-    args = parser.parse_args()
-
+    """
+    performs the expert evaluation of CIKM2020
+    :return:
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)

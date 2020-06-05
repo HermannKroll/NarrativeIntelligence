@@ -5,7 +5,13 @@ from itertools import islice
 files_to_analyse = ["performance_query_1.tsv", "performance_query_2.tsv", "performance_query_3.tsv",
                     "performance_query_variable_1.tsv", "performance_query_variable_2.tsv"]
 
-def convert_time_to_milliseconds(time_str):
+
+def convert_time_to_milliseconds(time_str) -> int:
+    """
+    converts a timespan string to milliseconds as an integer
+    :param time_str:
+    :return:
+    """
     ho_mi_sec, milliseconds_str = time_str.split('.')
     milliseconds = int(milliseconds_str[0:3])
     comps = ho_mi_sec.split(':')
@@ -14,7 +20,11 @@ def convert_time_to_milliseconds(time_str):
     milliseconds += int(comps[0]) * 60 * 60 * 1000
     return milliseconds
 
+
 def main():
+    """
+    Iterates over the performance evaluation files and computes average times 
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)

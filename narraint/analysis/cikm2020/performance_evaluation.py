@@ -19,7 +19,13 @@ QUERIES_WITH_THREE_PRED = 100000
 QUERIES_WITH_VAR_1 = 100
 QUERIES_WITH_VAR_2 = 1000
 
+
 class PerformanceQueryEngine:
+    """
+    This class is a small version of the QueryEngine
+    It supports the translation into a SQL statement and measures the performance for translation and execution
+    The times are measured by COUNT(*) queries
+    """
 
     def __construct_query(self, session, graph_query, doc_collection, extraction_type):
         var_names = []
@@ -126,12 +132,9 @@ class PerformanceQueryEngine:
         session = Session.get()
         time_before_translation = datetime.now()
         query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
-        time_after_translation = datetime.now(
-
-        )
-        #sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
-        #logging.info('executing sql statement: {}'.format(sql_query))
+        time_after_translation = datetime.now()
         time_before_query = datetime.now()
+        result_size = 0
         for r in session.execute(query):
             result_size = r[0]
         time_after_query = datetime.now()
@@ -140,6 +143,9 @@ class PerformanceQueryEngine:
 
 
 def main():
+    """
+    Performes the performance evaluation and stores the results as .tsv files
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
@@ -151,7 +157,6 @@ def main():
         .filter(Predication.extraction_type == 'PATH')\
         .filter(Predication.document_collection == 'PubMed')\
         .order_by(func.random()).limit(RANDOM_FACTS)
-    # .limit(RANDOM_FACTS)
 
     logging.info('Querying {} randomly sampled facts'.format(RANDOM_FACTS))
     facts = set()
@@ -235,7 +240,6 @@ def main():
             time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
             fp.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
             print_progress_with_eta('analysing performace variabe II', i, QUERIES_WITH_VAR_2, start_time, print_every_k=1)
-
 
 
 if __name__ == "__main__":

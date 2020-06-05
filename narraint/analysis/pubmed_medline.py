@@ -1,6 +1,7 @@
 import argparse
 import os
 import pickle
+from collections import defaultdict
 from datetime import datetime
 
 from lxml import etree
@@ -21,6 +22,18 @@ class PubMedMEDLINE:
             raise ValueError("Index file {} can not be found.".format(MEDLINE_BASELINE_INDEX))
         with open(MEDLINE_BASELINE_INDEX, "rb") as f:
             self.desc_to_pmids = pickle.load(f)
+
+        self.pmid_to_descs = None
+
+    def create_reverse_index(self):
+        """
+        computes an reverse index which maps a document to it's set of mesh descriptors
+        :return: None
+        """
+        self.pmid_to_descs = defaultdict(list)
+        for k, pmids in self.desc_to_pmids.items():
+            for pmid in pmids:
+                self.pmid_to_descs[pmid].append(k)
 
     def _get_ids(self, desc):
         """
@@ -49,6 +62,8 @@ class PubMedMEDLINE:
             else:
                 desc_list = list(descs)
         for idx, desc in enumerate(desc_list):
+            if ' ' in desc:
+                raise ValueError('does not expect a empty space in : {}'.format(desc))
             if idx == 0:
                 pmids = self._get_ids(desc)
             else:
@@ -57,7 +72,7 @@ class PubMedMEDLINE:
         return pmids
 
 
-def load_file(filename, db_pmids):
+def load_file(filename, db_pmids=None):
     """
     Process the XML file *filename* and only process the documents whose PMID is contained in *dm_pmids*.
     One file contains multiple documents.
@@ -86,8 +101,9 @@ def load_file(filename, db_pmids):
         else:
             pmid = int(pmids[0].text)
 
-        if pmid not in db_pmids:
-            continue  # BAD
+        if db_pmids:
+            if pmid not in db_pmids:
+                continue  # BAD
 
         # Parse Mesh heading
         for mh in article.iterfind("./MedlineCitation/MeshHeadingList/MeshHeading"):
@@ -113,7 +129,7 @@ def load_file(filename, db_pmids):
     return pmid_to_descs
 
 
-def load_files(directory, db_pmids):
+def load_files(directory, db_pmids=None):
     """
     Process a directory containg XML files. Only process those whose PMID is in *db_pmids*.
     Return a mapping from Descriptor to PMID
@@ -151,7 +167,7 @@ def main():
 
     # Query database
     session = Session.get()
-    query = session.query(DocProcessedByOpenIE.document_id).filter(DocProcessedByOpenIE.document_collection == "PubMed")
+    query = session.query(DocProcessedByOpenIE.document_id).filter(DocProcessedByOpenIE.document_collection == "PMC")
     results = session.execute(query)
     db_pmids = set(x[0] for x in results)
     print("DB: {} documents processed by OpenID".format(len(db_pmids)))

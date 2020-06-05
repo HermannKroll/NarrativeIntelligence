@@ -4,6 +4,11 @@ from itertools import islice
 
 
 def main():
+    """
+    The evaluation performed by mesh_evaluation.py is stored within single .tsv files
+    This file iterates over the json files and prints the average precision and recall for each configuration
+    :return:
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)

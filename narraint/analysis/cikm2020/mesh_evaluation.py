@@ -5,11 +5,12 @@ from datetime import datetime
 
 from sqlalchemy import func
 
-from narraint.analysis.cikm2020.helper import retrieve_subdescriptors, perform_evaluation
+from narraint.analysis.cikm2020.helper import perform_evaluation
 from narraint.analysis.pubmed_medline import PubMedMEDLINE
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.enttypes import DISEASE, CHEMICAL, GENE
+from narraint.entity.meshontology import MeSHOntology
 from narraint.opendependencyextraction.main import PATH_EXTRACTION
 from narraint.openie.main import OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
@@ -101,12 +102,22 @@ query_predicates.append(("decreases", [CHEMICAL], [CHEMICAL, DISEASE]))
 query_engine = QueryEngine()
 session = Session.get()
 pubmed = PubMedMEDLINE()
+mesh_ontology = MeSHOntology()
 
 GENE_NCBI_TO_MESH_MAPPING = {"1576": 'MESH:D051544', # CYP3A4
                             "2475" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
 GENE_MESH_TO_NCBI = {v: k for k,v in GENE_NCBI_TO_MESH_MAPPING.items()}
 
-def compute_mesh_queries(sub_id, obj_id, predicate):
+
+def compute_mesh_queries(sub_id: str, obj_id: str, predicate:str):
+    """
+    computes a set of mesh-based queries for the PubMed Medline
+    e.g. a predicate is represented by different subheadings to that we have to check all combinations
+    :param sub_id: MeSH subject id
+    :param obj_id: MeSH object_id
+    :param predicate: predicate to check
+    :return: a list of queries. A query consists of a list of descriptors to query for
+    """
     sub_qualifiers, obj_qualifiers, add_mesh_descs = terms_for_relation[predicate]
     queries = []
 
@@ -131,14 +142,22 @@ def compute_mesh_queries(sub_id, obj_id, predicate):
 
 
 def pubmed_mesh_hits(sub_id, predicate, obj_id, compute_subdescriptors=True):
+    """
+    computes the hits on the PubMed baseline
+    :param sub_id: mesh subject id
+    :param predicate: predicate
+    :param obj_id: mesh object id
+    :param compute_subdescriptors: expands the mesh decriptors for all sub descriptors if true
+    :return: a set of document hits
+    """
     if not sub_id.startswith('MESH:') or not obj_id.startswith('MESH:'):
         raise ValueError('does not support mesh search without suitable Descriptors')
     doc_ids = set()
     sub_without_mesh = sub_id.replace('MESH:', '')
     obj_without_mesh = obj_id.replace('MESH:', '')
     if compute_subdescriptors:
-        subj_sub_descriptors = retrieve_subdescriptors(sub_without_mesh)
-        obj_sub_descriptors = retrieve_subdescriptors(obj_without_mesh)
+        subj_sub_descriptors = mesh_ontology.retrieve_subdescriptors(sub_without_mesh)
+        obj_sub_descriptors = mesh_ontology.retrieve_subdescriptors(obj_without_mesh)
         for subj_desc, _ in subj_sub_descriptors:
             for obj_desc, _ in obj_sub_descriptors:
                 for q_descs in compute_mesh_queries(subj_desc, obj_desc, predicate):
@@ -149,9 +168,16 @@ def pubmed_mesh_hits(sub_id, predicate, obj_id, compute_subdescriptors=True):
     return doc_ids
 
 
-
-
 def get_subject_object_for_predicate(predicate, extraction_type, subject_types=None, object_types=None):
+    """
+    retrieves a set of (subject, object) ids for each predicate
+    e.g. "treats" results in a list of suitable (Chemical, Disease) pairs which are in the database
+    :param predicate: predicate to query
+    :param extraction_type: extraction type to query
+    :param subject_types: allowed subject types to query for
+    :param object_types: allowed object types to query for
+    :return: a set of (subject_id, subject_type, object_id, object_type) tuples
+    """
     query = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
                           Predication.object_id, Predication.object_type)\
         .filter_by(predicate_canonicalized=predicate)\
@@ -161,9 +187,6 @@ def get_subject_object_for_predicate(predicate, extraction_type, subject_types=N
         query = query.filter(Predication.subject_type.in_(subject_types))
     if object_types:
         query = query.filter(Predication.object_type.in_(object_types))
-#    query = query.group_by(Predication.subject_id, Predication.subject_type,
-#                           Predication.object_id, Predication.object_type)
-#    query = query.having(func.count() > 2)
 
     results = defaultdict(set)
     for row in session.execute(query):
@@ -193,6 +216,14 @@ def get_subject_object_for_predicate(predicate, extraction_type, subject_types=N
 
 
 def perform_evaluation_prec_recall_for(query_fact_patterns, document_collection, extraction_type, ids_correct):
+    """
+
+    :param query_fact_patterns:
+    :param document_collection:
+    :param extraction_type:
+    :param ids_correct:
+    :return:
+    """
     query_results = query_engine.query_with_graph_query(query_fact_patterns, document_collection, extraction_type)
     doc_ids = set([q_r.document_id for q_r in query_results])
     doc_ids_correct = doc_ids.intersection(ids_correct)
@@ -210,17 +241,14 @@ def perform_evaluation_prec_recall_for(query_fact_patterns, document_collection,
     return len_retrieved, precision, recall
 
 
-
 def main():
-    parser = argparse.ArgumentParser()
-    #parser.add_argument("output", help='resulting file')
-    args = parser.parse_args()
-
+    """
+    performs the MeSH based evaluation for CIKM2020
+    :return:
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
-
-
     logging.info('Beginning experiment...')
     logging.info('=' * 60)
     for DO_QUERY_MESH_EXPANSION in [True]:
