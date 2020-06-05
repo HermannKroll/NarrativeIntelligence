@@ -128,6 +128,19 @@ class MeSHOntology:
             with open(index_path, 'rb') as f:
                 self.__dict__ = pickle.load(f)
 
+    def retrieve_subdescriptors(self, decriptor_id: str) -> [(str)]:
+        """
+        retrieves a list of all sub-descriptors for a given descriptor
+        :param decriptor_id: a mesh descriptor id
+        :return: a list of sub-descritor ids
+        """
+        tree_nos = self.get_tree_numbers_for_descriptor(descriptor_id=decriptor_id)
+        sub_descriptors = set()
+        for t_n in tree_nos:
+            for res in self.find_descriptors_start_with_tree_no(t_n):
+                sub_descriptors.add(res)
+        return sub_descriptors
+
 
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
