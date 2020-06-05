@@ -6,7 +6,12 @@ from narraint.queryengine.engine import QueryEngine
 
 
 class EntityTagger:
-
+    """
+    EntityTagger converts a string to an entity
+    Performs a simple dictionary-based lookup and returns the corresponding entity
+    Builds upon the EntityResolver and computes reverse indexes,
+    e.g. Gene_ID -> Gene_Name is converted to Gene_Name -> Gene_ID
+    """
     def __init__(self):
         self.resolver = EntityResolver.instance()
         self.term2entity = {}
@@ -25,57 +30,13 @@ class EntityTagger:
         for e_term, e_id in self.resolver.species.get_reverse_index().items():
             self.term2entity[e_term.strip().lower()] = (e_id, SPECIES)
         self._add_to_reverse_index(self.resolver.dosageform.fid2name.items(), 'DosageForm')
-
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def tag_entity(self, term: str):
+        """
+        Tags an entity by given a string
+        :param term: the entity term
+        :return: an entity as (entity_id, entity_type)
+        """
         return self.term2entity[term.lower().strip()]
-
-
-def main():
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
-
-    resolver = EntityResolver()
-    entities = QueryEngine.query_entities()
-    written_entity_ids = set()
-    ignored = []
-    with open('ac_entities.txt', 'wt') as f:
-        counter, notfound = 0, 0
-        for e_id, e_str, e_type in entities:
-            if (e_id, e_type) in written_entity_ids:
-                continue
-            written_entity_ids.add((e_id, e_type))
-            try:
-                heading = resolver.get_name_for_var_ent_id(e_id, e_type)
-
-                if e_type in [GENE, SPECIES]:
-                    if '//' in heading:
-                        names = heading.split('//')
-                        if len(names) != 2:
-                            raise ValueError('Species and Gene should have 2 names at max: {} ({})'.format(heading,
-                                                                                                           names))
-                        parts = []
-                        for n in names:
-                            parts.append('{}\t{}'.format(n, e_id))
-                        result = '\n'.join(parts)
-                else:
-                    result = '{}\t{}'.format(heading, e_id)
-                if counter == 0:
-                    f.write(result)
-                else:
-                    f.write('\n' + result)
-                counter += 1
-            except KeyError:
-                ignored.append((e_id, e_type))
-                notfound += 1
-    logging.info('The following entities are not in index: {}'.format(ignored))
-    logging.info('{} entity ids are not in index'.format(notfound))
-    logging.info('{} entity information written'.format(counter))
-
-
-if __name__ == "__main__":
-    main()
-
 
