@@ -90,7 +90,7 @@ class SemMedDB:
             self.connected = False
             self.logger.info('Error while connecting to the database..')
 
-    def __execute_select_query(self, sql):
+    def execute_select_query(self, sql):
         self.logger.info('executing select statement: {}'.format(sql))
         start = datetime.now()
         cur = self.conn.cursor()
@@ -115,7 +115,7 @@ class SemMedDB:
             self.predicatesCount = {}
 
             self.logger.info('Executing query to retrieve the predicates list...')
-            rows = self.__execute_select_query(QUERY_PREDICATES)
+            rows = self.execute_select_query(QUERY_PREDICATES)
             for r in rows:
                 self.predicatesCount[r[0]] = r[1]
             self.logger.info("{} predicates load from DB".format(len(self.predicatesCount)))
@@ -244,7 +244,7 @@ class SemMedDB:
         fact_patterns_cui = self.__translate_fact_pattern_mesh_ids_to_cuis(fact_patterns)
         sql, var_names = self.__translate_fact_patterns_to_semmeddb_sql(fact_patterns_cui)
 
-        rows, time_needed = self.__execute_select_query(sql)
+        rows, time_needed = self.execute_select_query(sql)
         pmids = []
         titles = []
         var_subs = []
