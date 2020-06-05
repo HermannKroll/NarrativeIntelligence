@@ -350,7 +350,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             j = 1;
         }
     });
-    let divDoc = $('<div><a class="btn btn-light btn-light-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
+    let divDoc = $('<div><a class="btn-sm btn-light btn-light-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
     return divDoc;
 };

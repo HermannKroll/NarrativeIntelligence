@@ -6,7 +6,8 @@
     white-space: pre-wrap;
 }
 
-.btn.btn-light.btn-light-link {
+.btn.btn-light.btn-light-link,
+.btn-sm.btn-light.btn-light-link{
     color: #007bff;
 }
 
@@ -14,13 +15,13 @@
     overflow: auto;
 }
 
-.inner-div-left {
+.inner-div-left-mid {
     width: fit-content;
     float: left;
     margin-right: 15px
 }
 
-.inner-div-right {
+.inner-div-right-most {
     float: left;
 }
 
