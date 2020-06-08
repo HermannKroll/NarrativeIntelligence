@@ -149,13 +149,10 @@ class DocProcessedByOpenIE(Base):
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
 
-class Cord19Translation(Base):
+class DocumentTranslation(Base):
     __tablename__ = "cord19_translation"
     document_id = Column(BigInteger, primary_key=True)
     document_collection = Column(String, primary_key=True)
-    cord_uid = Column(String, nullable=False)
-    sha = Column(String, nullable=False)
-    source_x = Column(String)
+    source_doc_id = Column(String, nullable=False)
+    md5 = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
-
-
