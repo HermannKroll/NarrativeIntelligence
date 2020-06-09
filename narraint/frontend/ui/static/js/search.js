@@ -350,8 +350,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             j = 1;
         }
     });
-    let divDoc = $('<div><a class="btn-sm btn-light btn-light-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
-        'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
+    let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' + '</a>' + ' ' +
+        '- ID: ' + document_id + '<br><b>' + title + '</b>' + e_string + '<br></div>');
+    // 'PMID' + document_id
     return divDoc;
 };
 
@@ -371,10 +373,12 @@ const createDocumentList = (results, query_len) => {
 
     let resultList = results["results"];
     let resultSize = results["size"];
-    let button_string = resultSize + ' Documents';
+    let button_string = resultSize + ' Document';
+    if (resultSize > 1) {button_string += 's'};
     divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
     let divCardEntry = $('<div id="'+collapseID+'" class="collapse show" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    // tbd: grid
     let divCardBody = $('<div class="card-body"></div>');
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
@@ -389,7 +393,7 @@ const createDocumentList = (results, query_len) => {
 
 
 const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
-    let divCard = $('<div class="card text-white bg-success"></div>');
+    let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
     divCard.append(divCardHeader);
     let divH2 = $('<h2 class="mb-0"></h2>');
@@ -399,7 +403,8 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let var_names = queryAggregate["variable_names"];
     let var_subs = queryAggregate["substitution"];
     let result_size = queryAggregate["size"];
-    let button_string = result_size + ' Documents';
+    let button_string = result_size + ' Document';
+    if(result_size > 1) {button_string += 's'}
     button_string += ' [';
     let i = 0;
     var_names.forEach(name => {
@@ -427,7 +432,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ']'
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ')]'
         }
         i += 1;
     });

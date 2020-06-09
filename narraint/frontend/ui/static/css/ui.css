@@ -6,11 +6,6 @@
     white-space: pre-wrap;
 }
 
-.btn.btn-light.btn-light-link,
-.btn-sm.btn-light.btn-light-link{
-    color: #007bff;
-}
-
 .wrapper-div {
     overflow: auto;
 }
