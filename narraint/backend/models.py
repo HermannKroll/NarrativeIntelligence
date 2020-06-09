@@ -150,9 +150,10 @@ class DocProcessedByOpenIE(Base):
 
 
 class DocumentTranslation(Base):
-    __tablename__ = "cord19_translation"
+    __tablename__ = "document_translation"
     document_id = Column(BigInteger, primary_key=True)
     document_collection = Column(String, primary_key=True)
     source_doc_id = Column(String, nullable=False)
     md5 = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
+    source = Column(String)
