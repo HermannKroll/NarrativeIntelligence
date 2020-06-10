@@ -275,6 +275,7 @@ const search = (event) => {
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
+
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
@@ -351,8 +352,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         }
     });
     let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
-        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' + '</a>' + ' ' +
-        '- ID: ' + document_id + '<br><b>' + title + '</b>' + e_string + '<br></div>');
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' + '</a>' +
+        ' - ID: ' + document_id + '<br><b>' + title + '</b>' + e_string + '<br></div>');
     // 'PMID' + document_id
     return divDoc;
 };
