@@ -139,7 +139,7 @@ class Translator:
         title = ";".join(metadata['title'])
         abstract = ";".join(metadata['abstract'])
         content = Document.create_pubtator(doc_id, title, abstract)
-        md5_hash = get_md5_hash_str(content)
+        md5_hash = get_md5_hash_str(title + abstract)
         if md5_hash not in self.excluded_hashs:
             f.write(content + "\n")
             self.insert_translation(doc_id, md5_hash, metadata, self.meta_file)
