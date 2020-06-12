@@ -81,6 +81,15 @@ def export(out_fn, tag_types, document_ids=None, collection=None, content=True, 
 
 
 def create_tag_query(session, collection=None, document_ids=None, tag_types=None, tag_buffer=TAG_BUFFER_SIZE):
+    """
+    returns a query for tags with specified parameters
+    :param session: session to execute query on
+    :param collection: filter by collection
+    :param document_ids: filter by ids
+    :param tag_types: filter by tag types
+    :param tag_buffer: yield per tag_buffer
+    :return:
+    """
     tag_query = session.query(Tag).yield_per(tag_buffer)
     if collection:
         tag_query = tag_query.filter_by(document_collection=collection)

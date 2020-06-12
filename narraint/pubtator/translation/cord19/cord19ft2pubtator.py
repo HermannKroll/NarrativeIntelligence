@@ -17,6 +17,7 @@ from narraint.pubtator.translation.md5_hasher import get_md5_hash, get_md5_hash_
 
 UNIQUE_ID_START = 100000
 NEXT_DOCUMENT_ID_OFFSET = 100000
+PARAGRAPH_TITLE_DUMMY = "Section"
 
 
 def main():
@@ -109,7 +110,7 @@ class Translator:
                         if body_text_id >= NEXT_DOCUMENT_ID_OFFSET:
                             raise ValueError('Overflow body id - increase id range for document bodies')
                         artificial_doc_id = doc_id + body_text_id + 1
-                        content = Document.create_pubtator(artificial_doc_id, "Section", body_text)
+                        content = Document.create_pubtator(artificial_doc_id, PARAGRAPH_TITLE_DUMMY, body_text)
                         f.write(content + '\n')
 
                     current_id += 1
@@ -128,21 +129,18 @@ class Translator:
                 print_progress_with_eta('converting', current_id + len(already_translated), len(self.meta),
                                         start_time)
 
-        logging.info(f"Done. {len(tanslated_jsons) + len(abstracts_from_meta)} docs inserted,"
+        logging.info(f"Done. {len(tanslated_jsons) + len(abstracts_from_meta)} docs inserted,"  
                      f" {len(already_translated)} docs already in database.")
         logging.info(f"{len(abstracts_from_meta)} docs constructed from abstracts in metadata file.")
 
-
     def translate_from_meta(self, cord_uid, current_id, f):
         metadata = self.meta.get_metadata_by_cord_uid(cord_uid)
+        title, abstract, md5_hash = self.meta.get_doc_content(cord_uid, generate_md5=True)
         doc_id = self.id_offset + (current_id * NEXT_DOCUMENT_ID_OFFSET)
-        title = ";".join(metadata['title'])
-        abstract = ";".join(metadata['abstract'])
         content = Document.create_pubtator(doc_id, title, abstract)
-        md5_hash = get_md5_hash_str(title + abstract)
         if md5_hash not in self.excluded_hashs:
             f.write(content + "\n")
-            self.insert_translation(doc_id, md5_hash, metadata, self.meta_file)
+            self.insert_translation(doc_id, md5_hash, metadata, os.path.basename(self.meta_file))
             return True, md5_hash
         else:
             return False, md5_hash
