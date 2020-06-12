@@ -90,7 +90,7 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
                 old_art_doc_id = cur_art_doc_id
                 file = file_dict[cur_art_doc_id]
                 doc_id = os.path.basename(file)
-                tag_json[doc_id] = []
+
                 reader = FileReader(file)
                 print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
                 document_count +=1
@@ -133,7 +133,10 @@ def export(out_fn, tag_types, json_root, info_file, document_ids=None, collectio
                 "entity_id": tag.ent_id,
 
             }
-            tag_json[doc_id].append(tag_dict)
+            if tag_dict:
+                if not doc_id in tag_json:
+                    tag_json[doc_id] = []
+                tag_json[doc_id].append(tag_dict)
             found+=1
         except:
             logger.debug(f"Tag {tag.id} ({tag.ent_str}) not found")
