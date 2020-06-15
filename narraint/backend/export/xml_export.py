@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from collections import defaultdict
 from datetime import datetime
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import xml.etree.ElementTree as ET
@@ -35,6 +36,9 @@ def get_entity_source(entity_id, entity_type):
     if entity_type == SPECIES:
         return "NCBI Taxonomy"
     return ValueError('Don not know the source for entity: {} {}'.format(entity_id, entity_type))
+
+
+
 
 
 def export_xml(output_dir, tag_types, document_ids=None, collection=None, logger=None, patent_ids=False):
@@ -80,56 +84,52 @@ def export_xml(output_dir, tag_types, document_ids=None, collection=None, logger
         query = query.filter(Tag.ent_type.in_(tag_types))
 
     entity_resolver = EntityResolver()
-    tags_for_doc = set()
-    last_doc_id = -1
-    docs_exported = 0
+    tags_for_doc = defaultdict(set)
     translation_errors = 0
     missing_ent_ids = set()
-    logging.info('Extracting documents...')
+    logging.info('Retrieving document tags...')
     start_time = datetime.now()
     for tag in query:
         doc_id, ent_id, ent_type = (tag.document_id, tag.ent_id, tag.ent_type)
         # collect tags for document (as long as tags are for the same document)
-        if last_doc_id == -1:
-            last_doc_id = doc_id
-        if doc_id == last_doc_id:
-            tags_for_doc.add((ent_id, ent_type))
+        tags_for_doc[doc_id].add((ent_id, ent_type))
+
+    logging.info('Beginning export...')
+    docs_exported = 0
+    # export the tags for each document
+    for doc_id, tags in tags_for_doc.items():
+        docs_exported += 1
+        print_progress_with_eta("exporting tags...", docs_exported, document_count, start_time, print_every_k=500)
+        if not tags:
             continue
+        if patent_ids:
+            doc_id = str(PatentConverter.decode_patent_country_code(doc_id))
         else:
-            last_doc_id = doc_id
-            print_progress_with_eta("exporting", docs_exported, document_count, start_time, print_every_k=500)
-            docs_exported += 1
-            if tags_for_doc:
-                if patent_ids:
-                    doc_id = str(PatentConverter.decode_patent_country_code(doc_id))
-                else:
-                    doc_id = str(doc_id)
-                filename = os.path.join(output_dir, "{}.xml".format(doc_id))
-                with open(filename, 'w', encoding='utf-8') as f:
-                    top = Element('document')
-                    for e_id, e_type in tags_for_doc:
-                        try:
-                            entity_name = entity_resolver.get_name_for_var_ent_id(e_id, e_type)
-                            entity_source = get_entity_source(e_id, e_type)
-                            if entity_source:
-                                if '//' in entity_name:
-                                    for e_n in entity_name.split('//'):
-                                        tag = SubElement(top, "tag", dict(source=entity_source))
-                                        tag.text = e_n
-                                else:
-                                    tag = SubElement(top, "tag", dict(source=entity_source))
-                                    tag.text = entity_name
-                            else:
-                                tag = SubElement(top, "tag")
-                                tag.text = entity_name
-                        except KeyError:
-                            missing_ent_ids.add((e_id, e_type))
-                            translation_errors += 1
-                            continue
-                    # write the document
-                    xml_data = minidom.parseString(ET.tostring(top, encoding='utf-8')).toprettyxml(indent="   ")
-                    f.write(xml_data)
-                tags_for_doc = set()
+            doc_id = str(doc_id)
+        filename = os.path.join(output_dir, "{}.xml".format(doc_id))
+        with open(filename, 'w', encoding='utf-8') as f:
+            top = Element('document')
+            for e_id, e_type in tags:
+                try:
+                    entity_name = entity_resolver.get_name_for_var_ent_id(e_id, e_type)
+                    entity_source = get_entity_source(e_id, e_type)
+                    if entity_source:
+                        if '//' in entity_name:
+                            for e_n in entity_name.split('//'):
+                                tag = SubElement(top, "tag", dict(source=entity_source))
+                                tag.text = e_n
+                        else:
+                            tag = SubElement(top, "tag", dict(source=entity_source))
+                            tag.text = entity_name
+                    else:
+                        tag = SubElement(top, "tag")
+                        tag.text = entity_name
+                except KeyError:
+                    missing_ent_ids.add((e_id, e_type))
+                    continue
+            # write the document
+            xml_data = minidom.parseString(ET.tostring(top, encoding='utf-8')).toprettyxml(indent="   ")
+            f.write(xml_data)
 
     if logger:
         logger.warning('the following entity ids are missing: {}'.format(missing_ent_ids))
