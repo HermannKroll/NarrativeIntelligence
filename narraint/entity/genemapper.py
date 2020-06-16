@@ -13,8 +13,8 @@ class GeneMapper:
     """
     HUMAN_SPECIES_ID = '9606'
 
-
     __instance = None
+
     def __init__(self):
         if GeneMapper.__instance is not None:
             raise Exception('This class is a singleton - use EntityResolver.instance()')
@@ -48,15 +48,18 @@ class GeneMapper:
         :param index_file:
         :return:
         """
+        logging.info('Computing index...')
         self.gene_to_human_id_dict.clear()
         self._build_human_gene_name_dict()
         with gzip.open(gene_file, 'rt') as f:
             for line in islice(f, 1, None):
                 components = line.strip().split('\t')
-                if components[0] != self.HUMAN_SPECIES_ID and components[1] not in self.human_gene_dict:
-                    self.gene_to_human_id_dict[components[1]] = self.human_gene_dict[self.human_gene_dict[components[2]]]
+                species_id, gene_id, gene_name = components[0:3]
+                if species_id != self.HUMAN_SPECIES_ID and gene_name in self.human_gene_dict:
+                    self.gene_to_human_id_dict[gene_id] = self.human_gene_dict[gene_name]
         with open(index_file, 'wb') as f:
             pickle.dump(self.__dict__, f)
+        logging.info('Index stored in {}'.format(index_file))
 
     def load_index(self, index_file=GENE_TO_HUMAN_ID_FILE):
         """
@@ -66,20 +69,16 @@ class GeneMapper:
         """
         with open(index_file, 'rb') as f:
             self.__dict__ = pickle.load(f)
+        logging.info('Index for gene mapper load from {}'.format(index_file))
 
-    def map_to_human_gene(self, gene_ids):
+    def map_to_human_gene(self, gene_id):
         """
-        Expects gene ids which are to be mapped to human gene ids AS A LIST and returns a list of mapped ids.
-        No error is returned if gene id cannot be mapped to human one
-        :param gene_ids:
-        :return:
+        Expects a gene id which is mapped to the corresponding humen gene
+        Keyerror is thrown if no mapping exists
+        :param gene_id: gene id which should be mapped to the human gene id
+        :return: human gene id
         """
-        mapped_gene_ids = gene_ids
-        with open(GENE_TO_HUMAN_ID_FILE, 'rb') as f:
-            gene_to_human_id_dict = pickle.load(f)
-            for gene_id, n in gene_ids:
-                mapped_gene_ids[n] = gene_to_human_id_dict.get(gene_id, gene_id)
-        return mapped_gene_ids
+        return self.gene_to_human_id_dict[gene_id]
 
 
 def main():
@@ -92,6 +91,7 @@ def main():
 
     gene_mapper = GeneMapper()
     gene_mapper.build_gene_mapper_index()
+
 
 if __name__ == "__main__":
     main()
