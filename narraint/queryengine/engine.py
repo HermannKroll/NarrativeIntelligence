@@ -184,8 +184,7 @@ class QueryEngine:
                 doc2result[doc_id].explanations.extend(explanations)
 
         results = list(doc2result.values())
-        #results.append(QueryDocumentResult(r[0], r[1], var2sub, conf, explanations))
-
+       
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
                                     sql_query.replace('\n', ' '), doc_ids)
