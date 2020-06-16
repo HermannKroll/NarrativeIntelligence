@@ -139,7 +139,7 @@ class QueryEngine:
         query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
-        logging.info('executing sql statement: {}'.format(sql_query))
+        logging.debug('executing sql statement: {}'.format(sql_query))
         var_names = []
         for v, _, _ in var_info:
             var_names.append(v)
@@ -189,8 +189,8 @@ class QueryEngine:
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
                                     sql_query.replace('\n', ' '), doc_ids)
-        logging.info('{} distinct doc ids retrieved'.format(len(doc_ids)))
-        logging.info("{} results with doc ids: {}".format(len(results), doc_ids))
+        logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
+        logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
 
     @staticmethod

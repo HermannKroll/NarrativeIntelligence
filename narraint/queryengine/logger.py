@@ -23,12 +23,12 @@ class QueryLogger:
                                                           keywords, fact_patterns, sql_statement, pmids_results)
 
         if not os.path.isfile(log_file_name):
-            logging.info('creating new log file: {}'.format(log_file_name))
+            logging.debug('creating new log file: {}'.format(log_file_name))
             with open(log_file_name, 'w') as f:
                 f.write(self.log_header)
                 f.write(log_entry)
         else:
-            logging.info('appending to log file: {}'.format(log_file_name))
+            logging.debug('appending to log file: {}'.format(log_file_name))
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
