@@ -104,6 +104,7 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_06_17](meetings/2020_06_17.md)
 - [2020_06_04](meetings/2020_06_04.md)
 - [2020_04_29](meetings/2020_04_29.md)
 - [2020_04_24](meetings/2020_04_24.md)
