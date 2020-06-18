@@ -1,14 +1,13 @@
-import argparse
 import logging
 from datetime import datetime
 
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import update, and_
+from sqlalchemy import update, and_, or_
 from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication, PredicationResult
-from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, SPECIES
+from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, SPECIES, DISEASE
 
 DOSAGE_FORM_PREDICATE = "dosageform"
 ASSOCIATED_PREDICATE = "associated"
@@ -16,6 +15,10 @@ SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE, ASSOCIATED_PREDICATE}
 
 
 def dosage_form_rule():
+    """
+    Any predicate_canonicalized between a Chemical and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
+    :return: None
+    """
     logging.info('Applying DosageForm rule...')
     session = Session.get()
 
@@ -35,6 +38,10 @@ def dosage_form_rule():
 
 
 def mirror_symmetric_predicates():
+    """
+    Some predicates are symmetric - these predicates will be mirrored in the database
+    :return: None
+    """
     session = Session.get()
     logging.info('Deleting old mirrored predicates...')
     session.query(Predication).filter(Predication.mirrored == True).delete()
@@ -87,6 +94,46 @@ def mirror_symmetric_predicates():
     logging.info('Mirroring predicates finished')
 
 
+def clean_extractions_in_database():
+    """
+    Some predicates are typed, e.g. treatments are between Chemical and Diseases - all other combinations are removed
+    :return:
+    """
+    session = Session.get()
+
+    # Delete all treatments which are not (Chemical -> Disease)
+    logging.info('Cleaning treats (Chemical -> Disease)...')
+    q_treatment = update(Predication).where(and_(Predication.predicate_canonicalized == 'treats',
+                                                    or_(Predication.subject_type != CHEMICAL,
+                                                        Predication.object_type != DISEASE)))\
+        .values(predicate_canonicalized=None)
+    session.execute(q_treatment)
+    session.commit()
+
+    logging.info('Cleaning decreases (Chemical -> ...)')
+    q_decrease = update(Predication).where(and_(Predication.predicate_canonicalized == 'decreases',
+                                                        Predication.subject_type != CHEMICAL))\
+        .values(predicate_canonicalized=None)
+    session.execute(q_decrease)
+    session.commit()
+
+    logging.info('Cleaning induces (Chemical -> Chemical / Disease)')
+    q_cause = update(Predication).where(and_(Predication.predicate_canonicalized == 'induces',
+        or_(Predication.object_type != DISEASE, and_(Predication.subject_type != CHEMICAL,
+                                                     Predication.subject_type != DISEASE))))\
+        .values(predicate_canonicalized=None)
+    session.execute(q_cause)
+    session.commit()
+
+    logging.info('Cleaning inhibits (Chemical -> Gene)')
+    q_inhibits = update(Predication).where(and_(Predication.predicate_canonicalized == 'inhibits',
+                                                        or_(Predication.subject_type != CHEMICAL,
+                                                             Predication.object_type != GENE)))\
+        .values(predicate_canonicalized=None)
+    session.execute(q_inhibits)
+    session.commit()
+
+
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
@@ -94,7 +141,7 @@ def main():
 
     dosage_form_rule()
     mirror_symmetric_predicates()
-
+    clean_extractions_in_database()
 
 if __name__ == "__main__":
     main()

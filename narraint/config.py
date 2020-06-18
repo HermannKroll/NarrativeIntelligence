@@ -48,6 +48,9 @@ GRAPH_GV = os.path.join(DATA_DIR, "graph/graph.gv")
 # OpenIE
 OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
 
+# PathIE
+PATHIE_CONFIG = os.path.join(CONFIG_DIR, "pathie.json")
+
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 

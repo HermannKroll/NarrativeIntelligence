@@ -1,12 +1,8 @@
-import argparse
 import logging
 
-from narraint.analysis.cikm2020.helper import retrieve_subdescriptors
 from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits, perform_evaluation, GENE_NCBI_TO_MESH_MAPPING
-from narraint.entity.enttypes import DISEASE, CHEMICAL, GENE
-from narraint.entity.meshontology import MeSHOntology
-from narraint.opendependencyextraction.main import PATH_EXTRACTION
-from narraint.openie.main import OPENIE_EXTRACTION
+from narraint.entity.enttypes import GENE
+from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.queryengine.engine import QueryEngine
 from ui.views import convert_query_text_to_fact_patterns
 
@@ -143,7 +139,7 @@ def main():
         precision, recall, len_doc_ids, len_ids_in_sample, len_correct = perform_evaluation(query_engine,
                                                                                             query_fact_patterns,
                                                                                             document_collection,
-                                                                                            PATH_EXTRACTION,
+                                                                                            PATHIE_EXTRACTION,
                                                                                             ids_correct,
                                                                                             id_sample=id_sample,
                                                                                             do_expansion=True)

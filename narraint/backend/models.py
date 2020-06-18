@@ -141,11 +141,12 @@ class Predication(Base):
         return "<Predication {}>".format(self.id)
 
 
-class DocProcessedByOpenIE(Base):
-    __tablename__ = "doc_processed_by_openie"
+class DocProcessedByIE(Base):
+    __tablename__ = "doc_processed_by_ie"
 
     document_id = Column(BigInteger, primary_key=True)
     document_collection = Column(String, primary_key=True)
+    extraction_type = Column(String, primary_key=True)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
 

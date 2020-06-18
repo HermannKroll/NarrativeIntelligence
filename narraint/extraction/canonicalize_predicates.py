@@ -2,19 +2,27 @@ import argparse
 import logging
 import fasttext
 from datetime import datetime
-from sqlalchemy import update, and_
+from sqlalchemy import update
 from scipy.spatial.distance import cosine
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
-from narraint.openie.predicate_vocabulary import create_predicate_vocab
+from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.engine import QueryEngine
 from narraint.progress import print_progress_with_eta
 
 PRED_TO_REMOVE = "REMOVE"
 
 
-def match_predicates(model, predicates, vocab_predicates):
+def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}):
+    """
+    The distance between each predicate and all predicates of the vocabulary are computed. The predicate is assigned
+    to the closed predicate in the room. Cosine Similarity is used.
+    :param model: fasttext Word Embedding
+    :param predicates: a list of predicates
+    :param vocab_predicates: the vocabulary as a dict mapping predicates to their synonyms
+    :return: a dict mapping each predicate to a predicate of the vocabulary and a distance
+    """
     vocab_vectors = []
     for k, v_preds in vocab_predicates.items():
         for v_p in v_preds:
@@ -40,13 +48,16 @@ def match_predicates(model, predicates, vocab_predicates):
         if p in best_matches:
             raise ValueError('p should not be twice in predicates (duplicate found)')
         best_matches[p] = (best_match[0], best_match[1])
-
     return best_matches
 
 
-def canonicalize_predicates(best_matches):
+def canonicalize_predicates(best_matches: {str: (str, float)}):
+    """
+    Canonicalizes Predicates by resolving synonymous predicates. This procedure updates the database
+    :param best_matches: dictionary which maps a predicate to a canonicalized predicate and a distance score
+    :return: None
+    """
     session = Session.get()
-
     start_time = datetime.now()
     i = 0
     for pred, (pred_canonicalized, _) in best_matches.items():

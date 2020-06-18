@@ -5,28 +5,33 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections import defaultdict
 from datetime import datetime
 from time import sleep
 import logging
 import networkx as nx
 
-from narraint.graph.labeled import LabeledGraph
+from narraint.config import PATHIE_CONFIG
 from narraint.progress import print_progress_with_eta
-from narraint.config import OPENIE_CONFIG
+from narraint.pubtator.count import count_documents
 from narraint.pubtator.document import TaggedDocument
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 from narraint.pubtator.extract import read_pubtator_documents
-
-PATH_EXTRACTION = "PATH"
-CORENLP_VERSION = "4.0.0"
 
 NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
 IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy"]
 
 
-def filter_document_sentences_without_tags_enhanced(doc_size, input_file, corenlp_dir, openie_filelist):
-    logging.info('Filtering {} documents (keep only document sentences with tags)'.format(doc_size))
+def filter_document_sentences_without_tags_enhanced(doc_len: int, input_file: str, output_dir: str,
+                                                    out_filelist_file: str):
+    """
+    Filtering a PubTator file as a preperation for the extraction
+    Keeps only sentences with at least two entities
+    :param doc_len: the len of included documents in the input file
+    :param input_file: a PubTator input file / directory of PubTator file
+    :param output_dir: output directory where the documents are extracted
+    :param out_filelist_file: output file where a filelist of all extracted files is stored
+    :return: len of extracted documents, a dict mapping document ids to tags (ent_id, ' ' + lower(ent_str), ent_type)
+    """
+    logging.info('Filtering {} documents (keep only document sentences with tags)'.format(doc_len))
     amount_skipped_files = 0
     openie_files = []
     doc2tags = dict()
@@ -53,64 +58,32 @@ def filter_document_sentences_without_tags_enhanced(doc_size, input_file, corenl
             if hits >= 2:
                 filtered_content.add(sent.text)
 
-        #filtered_test = []
         for sent, ent_ids in tagged_doc.entities_by_sentence.items():
             if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
                 filtered_content.add(tagged_doc.sentence_by_id[sent].text)
 
-
-
-        #if len(filtered_test) > len(filtered_content):
-         #   print('Filtered too many sentences {} (self) vs {} (real tagged)'.format(len(filtered_content),
-             #                                                                                   len(filtered_test)))
         # skip empty documents
         if not filtered_content:
             continue
         # write filtered document
-        o_file = os.path.join(corenlp_dir, '{}.txt'.format(doc_id))
+        o_file = os.path.join(output_dir, '{}.txt'.format(doc_id))
         openie_files.append(o_file)
         with open(o_file, 'w') as f_out:
             f_out.write('. '.join(filtered_content))
-
-        print_progress_with_eta('filtering documents...', idx, doc_size, start_time, print_every_k=10)
+        print_progress_with_eta('filtering documents...', idx, doc_len, start_time, print_every_k=10)
 
     logging.info('{} files need to be processed. {} files skipped.'.format(len(openie_files), amount_skipped_files))
-    with open(openie_filelist, "w") as f:
+    with open(out_filelist_file, "w") as f:
         f.write("\n".join(openie_files))
     return len(openie_files), doc2tags
 
 
-def prepare_files_old(input, temp_dir):
-    temp_in_dir = os.path.join(temp_dir, "input")
-    filelist_fn = os.path.join(temp_dir, "filelist.txt")
-    os.mkdir(temp_in_dir)
-
-    input_files = []
-
-    amount_skipped_files = 0
-    amount_files = 0
-    logging.info('counting files to process....')
-    for document_content in read_pubtator_documents(input):
-        match = CONTENT_ID_TIT_ABS.match(document_content)
-        if not match:
-            amount_skipped_files += 1
-        else:
-            amount_files += 1
-            doc_id, title, abstract = match.group(1, 2, 3)
-            content = f"{title}. {abstract}"
-            input_file = os.path.join(temp_in_dir, "{}.txt".format(doc_id))
-            input_files.append(input_file)
-            with open(input_file, "w") as f:
-                f.write(content)
-
-    logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
-    with open(filelist_fn, "w") as f:
-        f.write("\n".join(input_files))
-
-    return filelist_fn, amount_files
-
-
-def get_progress(out_corenlp_dir):
+def get_progress(out_corenlp_dir: str) -> int:
+    """
+    Get the current progress of the NLP tool
+    :param out_corenlp_dir: reads the output dir and checks how many .json files have been created already
+    :return: length of processed documents
+    """
     hits = 0
     for fn in os.listdir(out_corenlp_dir):
         if fn.endswith('.json'):
@@ -118,7 +91,14 @@ def get_progress(out_corenlp_dir):
     return hits
 
 
-def run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn):
+def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str):
+    """
+    Invokes the Stanford CoreNLP tool to process files
+    :param core_nlp_dir: CoreNLP tool directory
+    :param out_corenlp_dir: the output directory
+    :param filelist_fn: the path of the filelist which files should be processed
+    :return: None
+    """
     start = datetime.now()
     with open(filelist_fn) as f:
         num_files = len(f.read().split("\n"))
@@ -129,7 +109,7 @@ def run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn):
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        print_progress_with_eta('OpenIE running...', get_progress(out_corenlp_dir), num_files, start_time, print_every_k=1)
+        print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time, print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_corenlp_dir), num_files, datetime.now() - start,
     ))
@@ -137,6 +117,17 @@ def run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn):
 
 
 def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
+    """
+    PathIE extraction procedure
+    1. Reads CoreNLP JSON output
+    2. Converts EnhancedDependenciesPlusPlus into a graph
+    3. Performs a Path search on this graph between the entities
+    4. if a predicate / keyword is included on the path, a fact is extracted
+    :param doc_id: the document id
+    :param sentence_json: json sentence parse
+    :param doc_tags: dict mapping doc ids to tags
+    :return:
+    """
     enhan_deps = sentence_json["enhancedPlusPlusDependencies"]
     tokens = sentence_json["tokens"]
     sentence_parts = []
@@ -180,12 +171,12 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
                 ent_token_ids = []
                 for t_part in tag_stripped.split(' '):
                     for tok, idx in tok2idx.items():
-                        if t_part in tok:
+                        if tok.startswith(t_part):
                             ent_token_ids.append(idx)
                 entities_in_sentence.append((tag_id, tag_stripped, tag_type, ent_token_ids))
             else:
                 for tok, idx in tok2idx.items():
-                    if tag_stripped in tok:
+                    if tok.startswith(tag_stripped):
                         entities_in_sentence.append((tag_id, tag_stripped, tag_type, [idx]))
 
     dep_graph = nx.Graph()
@@ -228,29 +219,40 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
                     except nx.NetworkXNoPath:
                         pass
 
- #   for t in extracted_tuples:
-  #      print('({}, {}, {}) <- {}'.format(t[1], t[2], t[4], t[5]))
     return extracted_tuples
 
 
-def process_file(doc_id, input_file, doc2tags):
+def process_json_file(doc_id, input_file, doc2tags):
+    """
+    Extracts facts out of a JSON file
+    :param doc_id: document id
+    :param input_file: JSON input file as a filename
+    :param doc2tags: dict mapping doc ids to tags
+    :return: a list of extracted tuples
+    """
     extracted_tuples = []
     with open(input_file, 'r') as f:
-        print('Processing input file: {}'.format(input_file))
         json_fixed_lines = []
         for line in f:
             if NUMBER_FIX_REGEX.findall(line):
                 json_fixed_lines.append(line.replace(',', '.', 1))
             else:
                 json_fixed_lines.append(line)
-
         json_data = json.loads(''.join(json_fixed_lines))
         for sent in json_data["sentences"]:
             extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc2tags))
     return extracted_tuples
 
 
-def process_output(out_corenlp_dir, amount_files, outfile, doc2tags):
+def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags):
+    """
+    Processes the CoreNLP output directory: iterates over all files and calls the process_json_file function
+    :param out_corenlp_dir: CoreNLP output directory (dir of .json files)
+    :param amount_files: amount of files
+    :param outfile: filename where all extractions will be stored
+    :param doc2tags: dict mapping doc ids to tags
+    :return: None
+    """
     tuples = 0
     start_time = datetime.now()
     with open(outfile, 'wt') as f_out:
@@ -258,7 +260,7 @@ def process_output(out_corenlp_dir, amount_files, outfile, doc2tags):
         for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
             if filename.endswith('.json'):
                 doc_id = int(filename.split('.')[0])
-                extracted_tuples = process_file(doc_id, os.path.join(out_corenlp_dir, filename), doc2tags[doc_id])
+                extracted_tuples = process_json_file(doc_id, os.path.join(out_corenlp_dir, filename), doc2tags[doc_id])
                 for e_tuple in extracted_tuples:
                     line = '\t'.join([str(t) for t in e_tuple])
                     if first_line:
@@ -266,31 +268,30 @@ def process_output(out_corenlp_dir, amount_files, outfile, doc2tags):
                         f_out.write(line)
                     else:
                         f_out.write('\n' + line)
-
             print_progress_with_eta("extracting triples", idx, amount_files, start_time, print_every_k=1)
-
     logging.info('{} lines written'.format(tuples))
 
 
 def main():
-    """
-
-    Input: Directory with Pubtator files
-    :return:
-    """
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
-                                      "pubtator files")
-    parser.add_argument("output", help="File with OpenIE results")
-    parser.add_argument("workdir", help="File with OpenIE results")
+    parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
+    parser.add_argument("output", help="PathIE output file")
+    parser.add_argument("--workdir", help="working directory")
+    parser.add_argument("--conf", default=PATHIE_CONFIG)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
+    # Read config
+    with open(args.conf) as f:
+        conf = json.load(f)
+        core_nlp_dir = conf["corenlp"]
 
-    core_nlp_dir = "/home/kroll/tools/stanford-corenlp-4.0.0/stanford-corenlp-4.0.0/"
-    temp_dir = args.workdir # '/home/kroll/workingdir/corenlp/temp_simvastatin_cholesterol/' # tempfile.mkdtemp()
+    if args.workdir:
+        temp_dir = args.workdir
+    else:
+        temp_dir = tempfile.mkdtemp()
     out_corenlp_dir = os.path.join(temp_dir, "output")
     temp_in_dir = os.path.join(temp_dir, "input")
     filelist_fn = os.path.join(temp_dir, "filelist.txt")
@@ -300,15 +301,17 @@ def main():
         os.mkdir(out_corenlp_dir)
     logging.info('Working in: {}'.format(temp_dir))
     # Prepare files
-    amount_files, doc2tags = filter_document_sentences_without_tags_enhanced(12000, args.input, temp_in_dir, filelist_fn)
+    doc_count = count_documents(args.input)
+    logging.info('{} documents counted'.format(doc_count))
+    amount_files, doc2tags = filter_document_sentences_without_tags_enhanced(doc_count, args.input, temp_in_dir, filelist_fn)
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn)
+        pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn)
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-      #  process_output(out_corenlp_dir, amount_files, args.output, doc2tags)
+        pathie_process_corenlp_output(out_corenlp_dir, amount_files, args.output, doc2tags)
         print(" done in {}".format(datetime.now() - start))
 
 

@@ -13,6 +13,10 @@ SPLIT_THRESHOLD_FOR_TEST_AND_VALID = 0.8
 
 
 def load_tuples_from_db():
+    """
+    Loads the facts from the database
+    :return: a set o tuples
+    """
     session = Session.get()
     query = session.query(Predication.document_id, Predication.subject_openie, Predication.predicate,
                           Predication.object_openie, Predication.sentence,
@@ -28,6 +32,11 @@ def load_tuples_from_db():
 
 
 def aggregate_triples(tuples):
+    """
+    Aggregates the tuple for CESI
+    :param tuples: database tuples
+    :return: the aggregation
+    """
     logging.info('aggregating of {} tuples by subject, predicate and object...'.format(len(tuples)))
     # go trough all cached triples
     aggregation = {}
@@ -38,11 +47,15 @@ def aggregate_triples(tuples):
             aggregation[key] = (t, [sent])
         else:
             aggregation[key][1].append(sent)
-
     return aggregation
 
 
 def export_to_cesi(output):
+    """
+    Exports the database tuples in the CESI input format
+    :param output: output filename
+    :return: None
+    """
     tuples_cached = load_tuples_from_db()
     aggregation = aggregate_triples(tuples_cached)
 
@@ -55,7 +68,6 @@ def export_to_cesi(output):
     with open(output, 'w') as f:
         f_test = open(filename_test, 'w')
         f_valid = open(filename_valid, 'w')
-
         id_counter = 0
         for _, value in aggregation.items():
             t, sentences = value
@@ -74,23 +86,23 @@ def export_to_cesi(output):
                 f_valid.write(json_str)
             else:
                 f_test.write(json_str)
-
             id_counter += 1
-
             print_progress_with_eta("exporting", id_counter, size, start_time)
-
         f_test.close()
         f_valid.close()
-
     logging.info('export finished')
 
 
 def export_to_tsv(output):
+    """
+    Exports the database tuples as a CSV
+    :param output: output filename
+    :return: None
+    """
     tuples = load_tuples_from_db()
     tuples_len = len(tuples)
     logging.info('exporting {} entries in TSV format to {}'.format(tuples_len, output))
     start_time = datetime.now()
-
     with open(output, 'w') as f:
         f.write('doc_id\tsubject_openie\tpredicate\tobject_openie\tsub_id\tsub_str\tsub_type\tobj_id\tobj_str'
                 '\tobject_type\tsentence')
@@ -100,16 +112,10 @@ def export_to_tsv(output):
                                                                           sub_type, obj_id, obj_ent, obj_type, sent))
 
             print_progress_with_eta("exporting", i, tuples_len, start_time)
-
     logging.info('export finished')
 
 
 def main():
-    """
-
-    Input: Directory with Pubtator files
-    :return:
-    """
     parser = argparse.ArgumentParser()
     parser.add_argument("output", help='export file (if CESI _test and _valid will also be created)')
     parser.add_argument("-f", "--format",  action='store', choices=["CESI", "TSV"],

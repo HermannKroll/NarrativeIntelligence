@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -14,10 +13,15 @@ from narraint.config import OPENIE_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 from narraint.pubtator.extract import read_pubtator_documents
 
-OPENIE_VERSION = "1.0.0"
-OPENIE_EXTRACTION = "OpenIE"
 
 def prepare_files(input):
+    """
+    Converts a PubTator file into plain texts files which can be processed by OpenIE
+    Easily speaking, writes title and abstract of a PubTator file to a plain text file
+    Creates a new temporary directory as a workign dir
+    :param input: a PubTator file / a directory of PubTator files
+    :return: a filelist for OpenIE, the location where the OpenIE output should be stored, the amount of files
+    """
     temp_dir = tempfile.mkdtemp()
     temp_in_dir = os.path.join(temp_dir, "input")
     filelist_fn = os.path.join(temp_dir, "filelist.txt")
@@ -44,11 +48,15 @@ def prepare_files(input):
     logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
     with open(filelist_fn, "w") as f:
         f.write("\n".join(input_files))
-
     return filelist_fn, out_fn, amount_files
 
 
 def get_progress(out_fn):
+    """
+    Get the progress of how many files have already been processed by OpenIE
+    :param out_fn: The output file of OpenIE
+    :return: the amount of processed files
+    """
     if not os.path.exists(out_fn):
         return 0
     else:
@@ -61,6 +69,13 @@ def get_progress(out_fn):
 
 
 def run_openie(core_nlp_dir, out_fn, filelist_fn):
+    """
+    Invokes the startup of OpenIE
+    :param core_nlp_dir: Directory of Stanford OpenIE toolkit (CoreNLP(
+    :param out_fn: OpenIE output file
+    :param filelist_fn: the filelist which files should be processed
+    :return: None
+    """
     start = datetime.now()
     with open(filelist_fn) as f:
         num_files = len(f.read().split("\n"))
@@ -137,11 +152,6 @@ def process_output(openie_out, outfile):
 
 
 def main():
-    """
-
-    Input: Directory with Pubtator files
-    :return:
-    """
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
                                       "pubtator files")

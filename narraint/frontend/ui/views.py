@@ -1,26 +1,17 @@
-import json
 import logging
-import os
-import pickle
 import re
 import traceback
 import sys
-from datetime import datetime
-from pprint import pprint
 
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
-from narraint.mesh.data import MeSHDB
-from narraint.opendependencyextraction.main import PATH_EXTRACTION
-from narraint.openie.main import OPENIE_EXTRACTION
-from narraint.openie.predicate_vocabulary import create_predicate_vocab
+from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
+from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
-from narraint.stories.story import MeshTagger
 from narraint.queryengine.engine import QueryEngine
 
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -268,7 +259,7 @@ class SearchView(TemplateView):
                         if 'Path' in data_source:
                             data_source = data_source.replace('_Path', '')
                             results = query_engine.query_with_graph_query(query_fact_patterns, data_source,
-                                                                          PATH_EXTRACTION, query)
+                                                                          PATHIE_EXTRACTION, query)
                         else:
                             results = query_engine.query_with_graph_query(query_fact_patterns, data_source,
                                                                           OPENIE_EXTRACTION, query)

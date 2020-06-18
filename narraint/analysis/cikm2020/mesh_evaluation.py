@@ -1,9 +1,6 @@
-import argparse
 import logging
 from collections import defaultdict
 from datetime import datetime
-
-from sqlalchemy import func
 
 from narraint.analysis.cikm2020.helper import perform_evaluation
 from narraint.analysis.pubmed_medline import PubMedMEDLINE
@@ -11,8 +8,7 @@ from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.enttypes import DISEASE, CHEMICAL, GENE
 from narraint.entity.meshontology import MeSHOntology
-from narraint.opendependencyextraction.main import PATH_EXTRACTION
-from narraint.openie.main import OPENIE_EXTRACTION
+from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 
@@ -255,7 +251,7 @@ def main():
         logging.info('Query expansion set to: {}'.format(DO_QUERY_MESH_EXPANSION))
         for p, p_s_types, p_o_types in query_predicates:
             logging.info('=' * 60)
-            for extraction_type in [OPENIE_EXTRACTION, PATH_EXTRACTION]:
+            for extraction_type in [OPENIE_EXTRACTION, PATHIE_EXTRACTION]:
                 if DO_QUERY_MESH_EXPANSION:
                     filename = 'eval_mesh_{}_{}_expansion.tsv'.format(extraction_type, p)
                 else:

@@ -5,19 +5,18 @@ from datetime import datetime
 from typing import List
 
 import nltk
-import spacy
 from nltk.corpus import wordnet
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.models import Tag, Predication
 from narraint.backend.database import Session
-from narraint.openie.main import OPENIE_VERSION, OPENIE_EXTRACTION
+from narraint.extraction.versions import OPENIE_VERSION, OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
 MAX_SENTENCE_LENGTH = 3000
 
+# A list of words to ignore in OpenIE extractions
 TOKENS_TO_IGNORE = {'with', 'by', 'of', 'from', 'to', 'than', 'as', 'on', 'at', 'may', 'in', 'can', 'more', 'less',
                     'into', 'be', 'have', 'well', 'for'}
 
@@ -27,7 +26,13 @@ PRED = namedtuple('Predication', ['doc_id', 'subj', 'pred', 'pred_cleaned', 'obj
 OPENIE_TUPLE = namedtuple("OpenIETuple", ['doc_id', 'subj', 'pred', 'pred_lemma', 'obj', 'conf', 'sent'])
 
 
-def read_stanford_openie_input(openie_file):
+def read_stanford_openie_input(openie_file: str):
+    """
+    reads a OpenIE output file created by main.py and transforms the data into a list of
+    OpenIE tuples
+    :param openie_file: OpenIE output file created by main.py
+    :return: a set of document ids, a list of OpenIE tuples
+    """
     doc_ids = set()
     tuples_cached = []
     logging.info('Reading OpenIE input...')
@@ -43,6 +48,11 @@ def read_stanford_openie_input(openie_file):
 
 
 def clean_sentence(sentence: str):
+    """
+    Clean OpenIE sentences by replacing the bracket shortcuts back to valid brackets
+    :param sentence: a sentence
+    :return: cleaned sentence
+    """
     s = sentence.replace('-LRB- ', '(')
     s = s.replace('-LSB- ', '(')
     s = s.replace(' -RRB-', ')')
@@ -50,7 +60,15 @@ def clean_sentence(sentence: str):
     return s
 
 
-def get_subject_and_object_entities(doc_tags, sub, obj):
+def get_subject_and_object_entities(doc_tags, sub: str, obj: str):
+    """
+    Computes a list of entities which are included in the subject as well as a list of entities
+    included in the object
+    :param doc_tags: a dictionary mapping a doc_id to tags
+    :param sub: the subject
+    :param obj: the object
+    :return: a list of entities (ent_str, ent_id, ent_type) included in subj, list of entities in obj
+    """
     # default not hit
     subs_included = []
     objs_included = []
@@ -309,13 +327,9 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
 
 
 def main():
-    """
-    Input: Directory with Pubtator files
-    :return:
-    """
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help='OpenIE export file')
-    parser.add_argument("-c", "--collection", required=True, help='collection to which the ids belong')
+    parser.add_argument("input", help='OpenIE export file (exported by main.py / pipeline.py')
+    parser.add_argument("-c", "--collection", required=True, help='document collection to which the ids belong')
 
     args = parser.parse_args()
 

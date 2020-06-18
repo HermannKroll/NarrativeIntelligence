@@ -8,7 +8,6 @@ from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
 
-
 def load_tags_for_doc_ids_complete(doc_ids, collection):
     """
     loads the database entity tags for a list of doc_ids
@@ -32,7 +31,6 @@ def load_tags_for_doc_ids_complete(doc_ids, collection):
         counter += 1
     logging.info('{} tags load from db'.format(counter))
     return doc2tags
-
 
 
 def main():
