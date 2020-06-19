@@ -124,9 +124,8 @@ class MeSHOntology:
         :param index_path: Path for pickle dump (default in project's config)
         :return: None
         """
-        if os.path.isfile(index_path):
-            with open(index_path, 'rb') as f:
-                self.__dict__ = pickle.load(f)
+        with open(index_path, 'rb') as f:
+            self.__dict__ = pickle.load(f)
 
     def retrieve_subdescriptors(self, decriptor_id: str) -> [(str)]:
         """
