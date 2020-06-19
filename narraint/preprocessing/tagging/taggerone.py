@@ -29,7 +29,6 @@ class TaggerOne(BaseTagger):
     TYPES = (enttypes.CHEMICAL, enttypes.DISEASE)
     __name__ = "TaggerOne"
     __version__ = "0.2.1"
-    TAGGER_ONE_RETRIES = 2
     NO_PROGRESS_SIGNAL = 120
 
     def get_tags(self):
@@ -204,8 +203,9 @@ class TaggerOne(BaseTagger):
             self.logger.warning("No files processed")
             # To prevent a endless repetition -> count the retries
             # If we have to many retries - skip the first document of the current batch
-            if self.current_retry >= TaggerOne.TAGGER_ONE_RETRIES:
-                self.logger.warning('File crashed 3 times - Skip first file of current batch')
+            if self.current_retry >= self.config.tagger_one_max_retries:
+                self.logger.warning('File crashed {} times - Skip first file of current batch'
+                                    .format(self.config.tagger_one_max_retries))
                 # Search the first document id in the last batch
                 with open(last_batch_file, 'rt') as f_l_batch:
                     last_batch_file_content = f_l_batch.read()

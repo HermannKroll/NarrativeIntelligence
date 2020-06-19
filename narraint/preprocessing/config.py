@@ -40,6 +40,10 @@ class Config:
     def tagger_one_timeout(self):
         return self.config["taggerOne"]["timeout"]
 
+    @property
+    def tagger_one_max_retries(self):
+        return self.config["taggerOne"]["max_retries"]
+
     # GNormPlus
     @property
     def gnorm_root(self):
