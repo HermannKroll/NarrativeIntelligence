@@ -30,7 +30,7 @@ Application data includes:
 | PubMed | Tagged PubMed Abstracts & Titles and Tagged PMC Fulltexts (but does not include the fulltexts) | /hdd2/datasets/pubtator_central/2019_11/ bioconcepts2pubtatorcentral.offset |
 | TIB | Patents | /hdd2/datasets/patents_tib_metadata/2019_06/ tib_epa_ifis.txt |
 | WHO | WHO Database of covid19 Articles | /hdd2/datasets/covid19/who/ |
-| BIORXIV | biorxiv articles related to covid19 | /hdd2/datasets/covid19/who/ |
+| BIORXIV | biorxiv articles related to covid19 | /hdd2/datasets/covid19/biorxiv/ |
 
 ### Configuration
 *All* configuration lives inside the `config` directory. The `*.example.json` files show the structure of the corresponding configuration file. Copy the example file and remove the `.example` from the filename. Note, the configuration files are referenced by the module `narraint.config`, so you shouldn't rename them.
@@ -54,13 +54,13 @@ The projects core, the `narraint` package, consists of several Python packages a
 |-----------------|-----------------------------------------------------------------------------------------------|
 | `analysis` | Python scripts to compute database statistics |
 | `backend` | Connection to database, loading and exporting |
-| `enitity` | Entity stuff like mapping entity ids to vocabulary headings|
+| `enitity` | Entity stuff like mapping entity ids to vocabulary headings |
+| `extraction` | Information Extraction methods to harvest facts out of text (OpenIE and PathIE)
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
 | `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
 | `lucence` | Scripts to Wrap Apache Lucene's functions
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
 | `narrative` | Implementation of the Narrative querying |
-| `openie` | OpenIE for PubTator documents using Standford NLP |
 | `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
 | `pubmedutils` | Tools to query PMIDs from PubMed and PubTator files from Pubtator  |
 | `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
