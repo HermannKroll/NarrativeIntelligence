@@ -53,6 +53,9 @@ class CovExport:
     def get_translation_by_docid(self, docid):
         return self.translation_query[self._docid_index[docid]]
 
+    def get_meta_by_artid(self, artid):
+        return self.meta.get_metadata_by_cord_uid(self.get_translation_by_docid(artid).source_doc_id)
+
     def get_get_sourcefile_by_docid(self, docid):
         translation = self.get_translation_by_docid(docid)
         return self.file_dict[translation.source]
@@ -66,7 +69,7 @@ class CovExport:
 
     def create_document_json(self, document_id):
         translation = self.get_translation_by_docid(document_id)
-        metadata = self.meta.get_metadata_by_id(document_id)
+        metadata = self.get_meta_by_artid(document_id)
         output_document_id = os.path.basename(translation.source).split('.')[0]
         cord_uid = metadata['cord_uid']
         source_collection = metadata['source_x']
@@ -78,8 +81,8 @@ class CovExport:
         san_index = create_sanitized_index(" " + title + " " + abstract)
         output_json = []
         for tag in tag_list:
-            san_start = san_index[tag.start]
-            length = san_index[tag.end]-san_start
+            san_start = san_index[tag.start-1]+1
+            length = san_index[tag.end-1]-san_start+1
             json_par_id = par_id
             if san_start < len(title) + 1: # tag in title
                 san_start -= 1
@@ -127,7 +130,6 @@ class CovExport:
             doc_id = tag.document_id - par_id
 
             if tag.document_id != last_art_id:  # new paragraph has begun
-
                 if tasklist:  # execute tasklist
                     last_par_id = last_doc_id % NEXT_DOCUMENT_ID_OFFSET
                     tags = self.find_tags_in_tit_abs(tasklist, last_abstract, last_par_id,
@@ -142,14 +144,18 @@ class CovExport:
                         last_title = current_filereader.title
                     out_doc_id, doc_dict = self.create_document_json(doc_id)
                     last_out_doc_id = out_doc_id
-                    tag_json.update(out_doc_id=doc_dict)
+                    tag_json[out_doc_id] = doc_dict
                     last_doc_id = doc_id
                 if '.csv' in last_translation.source:  # New paragraph + source is csv
-                    title, abstract, md5 = self.meta.get_doc_content(last_translation.source_document_id, True)
+                    title, abstract, md5 = self.meta.get_doc_content(last_translation.source_doc_id, True)
                     last_title, last_abstract = title, abstract
                     source_hash = md5
                 elif '.json' in last_translation.source:
-                    last_abstract = current_filereader.get_paragraph(par_id)
+                    abstract = current_filereader.get_paragraph(par_id)
+                    if par_id == 0 and not abstract:
+                       _, abstract, _ = self.meta.get_doc_content(last_translation.source_doc_id)
+                    last_abstract = abstract
+
 
             tasklist.append(tag)
         return tag_json
@@ -157,7 +163,7 @@ class CovExport:
     def export(self, tag_types, only_abstract=False):
         self.logger.info("Starting export...")
         tag_json = self.create_tag_json(tag_types)
-        with open(self.out_file) as f:
+        with open(self.out_file, "w+") as f:
             json.dump(tag_json, f, indent=3)
 
         if only_abstract:
@@ -167,8 +173,8 @@ class CovExport:
                 tag_json[key].update(tags=[tag for tag in tag_json[key]['tags'] if tag['location']['par']==0])
                 if not tag_json[key]['tags']:
                     tag_json.pop(key)
-        with open(self.out_file + ".abstract") as f:
-            json.dump(tag_json, f, indent=3)
+            with open(self.out_file + ".abstract", "w+") as f:
+                json.dump(tag_json, f, indent=3)
 
 
 
@@ -332,6 +338,7 @@ def main():
         tag_types = None
     logging.basicConfig(level=args.loglevel.upper())
     exporter = CovExport(args.output, tag_types, args.jsonroot, args.metafile, args.collection, ids)
+    exporter.export(tag_types, args.only_abstract)
 
 
 if __name__ == "__main__":
