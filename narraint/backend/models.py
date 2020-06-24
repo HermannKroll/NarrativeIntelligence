@@ -40,6 +40,13 @@ class Document(Base):
         return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title,
                                                        abs=abstract)
 
+    @staticmethod
+    def sanitize(to_sanitize):
+        to_sanitize= unicodedata.normalize('NFD', to_sanitize)
+        to_sanitize = ILLEGAL_CHAR.sub("", to_sanitize)
+        return to_sanitize
+
+
 
 class Tagger(Base):
     __tablename__ = "tagger"

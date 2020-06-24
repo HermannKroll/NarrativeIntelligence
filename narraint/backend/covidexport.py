@@ -2,6 +2,7 @@ import argparse
 import logging
 import csv
 import os
+import unicodedata
 from datetime import datetime
 from glob import glob
 
@@ -25,23 +26,24 @@ BODY = "body"
 
 MAX_SCAN_WIDTH = 1000
 
+
 class CovExport:
     def __init__(self, out_fn, tag_types, json_root, meta_file, collection=None, document_ids=None, logger=logging):
         self.logger = logger
         self.out_file = out_fn
         logger.info("Setting up...")
-        logger.debug("Collecting JSONs...")
+        logger.info("Collecting JSONs...")
         self.file_dict = _build_file_dict(json_root)
         logger.debug(f"Found {len(self.file_dict)} jsons")
         self.tag_types = tag_types
-        logger.debug("Reading Metadata file...")
+        logger.info("Reading Metadata file...")
         self.meta = MetaReader(meta_file)
         logger.debug(f"{len(self.meta)} entries in Metadata file")
-        logger.debug("Sending Query to document_translation...")
+        logger.info("Sending Query to document_translation...")
         self.collection = collection
         self.document_ids = document_ids
         self.translation_query = query_document_translation(collection, document_ids)
-        logger.debug("Building index...")
+        logger.info("Building translation indices...")
         self._docid_index = self._build_docid_index()
         logger.debug(f"{len(self._docid_index)} rows for collection {collection if collection else 'any'} and "
                      f"{len(document_ids) if document_ids else 'any'}ids")
@@ -70,49 +72,77 @@ class CovExport:
     def create_document_json(self, document_id):
         translation = self.get_translation_by_docid(document_id)
         metadata = self.get_meta_by_artid(document_id)
-        output_document_id = os.path.basename(translation.source).split('.')[0]
-        cord_uid = metadata['cord_uid']
+
+        output_document_id = os.path.basename(translation.source)
+        if translation.source == os.path.basename(self.meta.path):
+            output_document_id += "/" + translation.source_doc_id
+        cord_uid = metadata['cord_uid'][0]
         source_collection = metadata['source_x']
         output_dict = {"cord_uid": cord_uid, "source_collection": source_collection}
         return output_document_id, output_dict
 
     @staticmethod
     def find_tags_in_tit_abs(tag_list, abstract, par_id, title=PARAGRAPH_TITLE_DUMMY):
-        san_index = create_sanitized_index(" " + title + " " + abstract)
+        tags_found = 0
+        text = "_" + title + "__" + abstract
+        logging.debug(f"{par_id}: >{text}<")
+        san_index = create_sanitized_index(text)
         output_json = []
         for tag in tag_list:
-            san_start = san_index[tag.start-1]+1
-            length = san_index[tag.end-1]-san_start+1
-            json_par_id = par_id
-            if san_start < len(title) + 1: # tag in title
-                san_start -= 1
-                json_par_id = 0
-            else:
-                san_start -= len(" " + title + " ")
-                json_par_id = par_id + 1
-            san_end = san_start + length
-            output_json.append({
-                "location": {
-                    "paragraph": json_par_id,
-                    "start": san_start,
-                    "end": san_end
-                },
-                "entity_str": tag.ent_str,
-                "entity_type": tag.ent_type,
-                "entity_id": tag.ent_id,
-            })
+            found = False
+            try:
+                san_start = san_index[tag.start]
+                length = san_index[tag.end] - san_start
+                json_par_id = par_id
+                if par_id == 0:
+                    if san_start < len(title) + 1:  # tag in title
+                        san_start -= 1
+                        json_par_id = 0
+                    else:
+                        san_start -= 3
+                        json_par_id = 1
+                else:
+                    san_start -= len("_" + title + "__")
+                    json_par_id = par_id + 1
+                san_end = san_start + length
+                if json_par_id == 0:
+                    logging.debug(f"TIT: {text[0:san_start + 1]}"
+                                  f"|{text[san_start + 1:san_end + 1]}|"
+                                  f"{text[san_end + 1: len(title)]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+                elif json_par_id == 1:
+                    logging.debug(f"ABS: {text[san_start-50:san_start + 3]}"
+                                  f"|{text[san_start + 3:san_end + 3]}|"
+                                  f"{text[san_end + 3: san_end + 51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+                else:
+                    logging.debug(f"FUL: {text[san_start-50:san_start+3+len(title)]}"
+                          f"|{text[san_start+3+len(title):san_end+3+len(title)]}|"
+                          f"{text[san_end+3+len(title):san_end+51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+
+                output_json.append({
+                    "location": {
+                        "paragraph": json_par_id,
+                        "start": san_start,
+                        "end": san_end
+                    },
+                    "entity_str": tag.ent_str,
+                    "entity_type": tag.ent_type,
+                    "entity_id": tag.ent_id,
+                })
+            except:
+                logging.debug(f"{tag}not found")
+
         return output_json
 
     def create_tag_json(self, tag_types):
         """
-        This abomination hopefully creates a json containing all the tags in the database
+        This abomination hopefully creates a json containing all the tags in the database.
         :param tag_types:
-        :return:
+        :return: (tag_json, translation_json)
         """
         session = Session.get()
         tag_query = create_tag_query(session, self.collection, self.document_ids, tag_types, self.tag_buffer)
-        start_time = datetime.now()
         tag_json = {}
+        translation_json = {}
 
         last_translation = None
         last_art_id = None
@@ -125,16 +155,22 @@ class CovExport:
         database_hash = None
 
         tasklist = []
+        task_total = 0
+        found_total = 0
         for tag in tag_query:
             par_id = tag.document_id % NEXT_DOCUMENT_ID_OFFSET
             doc_id = tag.document_id - par_id
 
             if tag.document_id != last_art_id:  # new paragraph has begun
                 if tasklist:  # execute tasklist
-                    last_par_id = last_doc_id % NEXT_DOCUMENT_ID_OFFSET
+                    last_par_id = last_art_id % NEXT_DOCUMENT_ID_OFFSET
                     tags = self.find_tags_in_tit_abs(tasklist, last_abstract, last_par_id,
                                                      last_title if last_par_id == 0 else PARAGRAPH_TITLE_DUMMY)
-                    tag_json[last_out_doc_id].update(tags=tags)
+                    if last_out_doc_id in tag_json:
+                        tag_json[last_out_doc_id].extend(tags)
+                    else:
+                        tag_json[last_out_doc_id] = tags
+                    found_total += len(tags)
                     tasklist.clear()
                 last_art_id = tag.document_id
                 if doc_id != last_doc_id:  # New document: set FileReader if source is file
@@ -144,7 +180,7 @@ class CovExport:
                         last_title = current_filereader.title
                     out_doc_id, doc_dict = self.create_document_json(doc_id)
                     last_out_doc_id = out_doc_id
-                    tag_json[out_doc_id] = doc_dict
+                    translation_json[out_doc_id] = doc_dict
                     last_doc_id = doc_id
                 if '.csv' in last_translation.source:  # New paragraph + source is csv
                     title, abstract, md5 = self.meta.get_doc_content(last_translation.source_doc_id, True)
@@ -152,39 +188,56 @@ class CovExport:
                     source_hash = md5
                 elif '.json' in last_translation.source:
                     abstract = current_filereader.get_paragraph(par_id)
-                    if par_id == 0 and not abstract:
-                       _, abstract, _ = self.meta.get_doc_content(last_translation.source_doc_id)
+                    if par_id == 0 and not abstract:  # abstract not included in JSON parse
+                        _, abstract, _ = self.meta.get_doc_content(last_translation.source_doc_id)
                     last_abstract = abstract
 
-
             tasklist.append(tag)
-        return tag_json
+            task_total += 1
+        last_par_id = last_art_id % NEXT_DOCUMENT_ID_OFFSET
+        tags = self.find_tags_in_tit_abs(tasklist, last_abstract, last_par_id,
+                                         last_title if last_par_id == 0 else PARAGRAPH_TITLE_DUMMY)
+        if last_out_doc_id in tag_json:
+            tag_json[last_out_doc_id].extend(tags)
+        else:
+            tag_json[last_out_doc_id] = tags
+        found_total += len(tags)
+        tasklist.clear()
+        logging.debug(f"total of tags added to tasklist:{task_total}")
+        logging.debug(f"total of found tags: {found_total}")
+        return tag_json, translation_json
 
     def export(self, tag_types, only_abstract=False):
         self.logger.info("Starting export...")
-        tag_json = self.create_tag_json(tag_types)
+        tag_json, translation_json = self.create_tag_json(tag_types)
+
+        logging.info(f"Writing fulltext tag json to {self.out_file}...")
         with open(self.out_file, "w+") as f:
             json.dump(tag_json, f, indent=3)
+        logging.info(f"Writing fulltext translation json to {self.out_file}.translation...")
+        with open(self.out_file + ".translation", "w+") as f:
+            json.dump(translation_json, f, indent=3)
 
         if only_abstract:
-            abstract_json = {}
-            for key in tag_json.keys():
-                document_json = {}
-                tag_json[key].update(tags=[tag for tag in tag_json[key]['tags'] if tag['location']['par']==0])
-                if not tag_json[key]['tags']:
-                    tag_json.pop(key)
+            # Gotta love your dict comprehensions :D
+            abs_tag_json = {
+                    key: [tag for tag in tag_json[key] if tag['location']['paragraph'] == 0]
+                    for key in tag_json.keys()
+                    if [tag for tag in tag_json[key] if tag['location']['paragraph'] == 0]
+                }
+            abs_translation_json = {key: translation_json[key] for key in abs_tag_json.keys()}
+            logging.info(f"Writing abstract tag json to {self.out_file}.abstract ...")
             with open(self.out_file + ".abstract", "w+") as f:
-                json.dump(tag_json, f, indent=3)
-
-
-
-
-
+                json.dump(abs_tag_json, f, indent=3)
+            logging.info(f"Writing abstract translation json to {self.out_file}.abstract.translation ...")
+            with open(self.out_file + ".abstract.translation", "w+") as f:
+                json.dump(abs_translation_json, f, indent=3)
 
 
 def _build_file_dict(json_root):
     files = glob(f"{json_root}/**/*", recursive=True)
     return {os.path.basename(f): f for f in files}
+
 
 def query_document_translation(self, collection=None, document_ids=None):
     session = Session.get()
@@ -196,108 +249,7 @@ def query_document_translation(self, collection=None, document_ids=None):
     return [row for row in translation_query]
 
 
-def export(out_fn, tag_types, json_root, info_file, document_ids=None, collection=None, logger=logging,
-           tag_buffer=TAG_BUFFER_SIZE, only_abstract=False):
-    logger.info("Beginning export...")
-    if document_ids is None:
-        document_ids = []
-    else:
-        logger.info('Using {} ids for a filter condition'.format(len(document_ids)))
-
-    session = Session.get()
-    tag_query = create_tag_query(session, collection, document_ids, tag_types, tag_buffer)
-
-
-
-
-    logger.info('loading file locations...')
-    files = glob(f"{json_root}/**/*", recursive=True)
-    file_dir = {os.path.basename(f).split(".")[0]: f for f in files}
-    logger.info('loading info csv...')
-    with open(info_file) as info:
-        info_reader = csv.reader(info, delimiter='\t')
-        next(info_reader)
-        logger.info('creating doc_id - file dict...')
-        file_dict = {int(art_id): file_dir.get(doc_id, None) for art_id, doc_id in info_reader}
-    logger.info(f"Processing {len(file_dict)} documents")
-    document_count = 0
-    start_time = datetime.now()
-    logger.info('Starting to search for tags.')
-    tag_json = {}
-    found = 0
-    not_found = 0
-    shaky = 0
-    old_art_doc_id = None
-    old_art_par_id = None
-    generate_new_index = False
-    for tag in tag_query:
-        try:
-            cur_art_doc_id = tag.document_id - tag.document_id % NEXT_DOCUMENT_ID_OFFSET
-            cur_art_par_id = tag.document_id % NEXT_DOCUMENT_ID_OFFSET
-            if cur_art_doc_id != old_art_doc_id:
-                old_art_doc_id = cur_art_doc_id
-                file = file_dict[cur_art_doc_id]
-                doc_id = os.path.basename(file)
-                tag_json[doc_id] = []
-                reader = FileReader(file)
-                print_progress_with_eta('searching', document_count, len(file_dict), start_time, logger=logger, print_every_k=100)
-                document_count +=1
-                #print(document_count)
-                generate_new_index = True
-            if generate_new_index or cur_art_par_id != old_art_par_id:
-                if only_abstract and cur_art_par_id > 0:
-                    continue
-                logger.debug(f"{cur_art_doc_id}:{cur_art_par_id} -> {file}, {reader.title})")
-                logger.debug(f"{reader.get_paragraph(cur_art_par_id)}")
-                generate_new_index = False
-                old_art_par_id=cur_art_par_id
-                if cur_art_par_id == 0:
-                    san_index = create_sanitized_index(reader.abstract)
-                else:
-                    san_index = create_sanitized_index(reader.get_paragraph(cur_art_par_id))
-                title_index = create_sanitized_index(reader.title)
-
-                text_offset = len(reader.title) +3 if cur_art_par_id==0 else len(" SECTION") + 2
-            if tag.start < text_offset:
-                par = 0 #title
-                js_start = title_index[tag.start]  #- title_offset
-                js_end = title_index[tag.end] #- title_offset
-            else:
-                par = cur_art_par_id + 1
-                js_start = san_index[tag.start - text_offset]
-                js_end = san_index[tag.end - text_offset]
-            logger.debug(f"{tag.ent_str}: {tag.start}-{tag.end} -> {js_start} - {js_end} "
-                  f"({reader.get_paragraph(cur_art_par_id)[js_start-10:js_start]}|"
-                  f"{reader.get_paragraph(cur_art_par_id)[js_start:js_end]}|"
-                  f"{reader.get_paragraph(cur_art_par_id)[js_end:js_end + 10]})")
-            tag_dict = {
-                "location": {
-                    "paragraph": par,
-                    "start": js_start,
-                    "end": js_end
-                },
-                "entity_str": tag.ent_str,
-                "entity_type": tag.ent_type,
-                "entity_id": tag.ent_id,
-
-            }
-            if tag_dict:
-                if not doc_id in tag_json:
-                    tag_json[doc_id] = []
-                tag_json[doc_id].append(tag_dict)
-            found+=1
-        except:
-            logger.debug(f"Tag {tag.id} ({tag.ent_str}) not found")
-            not_found += 1
-            continue
-
-    logger.info(f"Done searching. Tags processed: {not_found + found}, "
-                f"Tags not found: {100*not_found/(not_found + found)}%,")
-    logger.info(f"Writing json to {out_fn}")
-    with open(out_fn, "w+") as out:
-        json.dump(tag_json, out, indent=3)
-
-def create_sanitized_index(content:str):
+def create_sanitized_index(content: str):
     """
     Takes a string and outputs a list to converts from sanitized index to non-sanitized index.
     :param content: The string to be indexed
@@ -305,7 +257,9 @@ def create_sanitized_index(content:str):
     """
     san_index = []
     for not_san_i, char in enumerate(content):
-        if not ILLEGAL_CHAR.match(char):
+        unistr = unicodedata.normalize('NFD', char)
+        unistr = ILLEGAL_CHAR.sub("", unistr)
+        if unistr:
             san_index.append(not_san_i)
     return san_index
 
@@ -315,7 +269,8 @@ def main():
     parser.add_argument("output")
     parser.add_argument("jsonroot")
     parser.add_argument("metafile")
-    parser.add_argument("-a", "--only-abstract", action='store_true')
+    parser.add_argument("-a", "--only-abstract", action='store_true', help="additionally store json containing only"
+                                                                           "tags in abstracts and titles")
     parser.add_argument("--ids", nargs="*", metavar="DOC_ID")
     parser.add_argument("--idfile", help='file containing document ids (one id per line)')
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
@@ -341,5 +296,23 @@ def main():
     exporter.export(tag_types, args.only_abstract)
 
 
+def test_create_sanitzized_index():
+    text = "Das ist ein schön€r Tag!"
+    tag_start = 8
+    tag_end = 18
+    index = create_sanitized_index(text)
+    san_start = index[tag_start]
+    san_end = index[tag_end]
+    print(f"{tag_start}:{tag_end} -> {san_start}:{san_end}")
+    print(text)
+    print(" "*tag_start + text[san_start:san_end])
+
+#def test_abs_tag()
+#    title
+
+
+
 if __name__ == "__main__":
     main()
+    #test_create_sanitzized_index()
+
