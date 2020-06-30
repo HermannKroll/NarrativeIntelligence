@@ -283,3 +283,6 @@ class SearchView(TemplateView):
             return JsonResponse(
                 dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)
+
+class DataView(TemplateView):
+    template_name = "ui/data.html"

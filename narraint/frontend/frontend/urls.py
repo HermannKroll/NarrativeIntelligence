@@ -15,8 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.cache import never_cache
+
+from ui.views import DataView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'', include('ui.urls')),
+    path("data/", never_cache(DataView.as_view()), name="data")
 ]
