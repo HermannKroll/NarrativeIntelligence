@@ -5,9 +5,10 @@ import sys
 
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from sqlalchemy import func
 
 from narraint.backend.database import Session
-from narraint.backend.models import Document
+from narraint.backend.models import Predication
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
@@ -294,7 +295,7 @@ class StatsView(TemplateView):
             if "query" in request.GET:
                 session = Session.get()
                 try:
-                    test_query_results = session.query(Document).first();
+                    test_query_results = session.query(Predication.column, func.count(Predication.column)).group_by(Predication.column).all()
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
 
