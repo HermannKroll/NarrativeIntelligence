@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 
 from narraint.backend.database import Session
+from narraint.backend.models import Document
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
@@ -285,14 +286,18 @@ class SearchView(TemplateView):
                 dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)
 
-class DataView(TemplateView):
-    template_name = "ui/data.html"
+class StatsView(TemplateView):
+    template_name = "ui/stats.html"
 
-    def query_document_translation(self, collection=None, document_ids=None):
-        session = Session.get()
-        translation_query = session.query(DocumentTranslation)
-        if collection:
-            translation_query = translation_query.filter(DocumentTranslation.document_collection == collection)
-        if document_ids:
-            translation_query = translation_query.filter(DocumentTranslation.document_id.in_(document_ids))
-        return [row for row in translation_query]
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            session = Session.get()
+            test_query_result = session.query(Document).first()
+            return test_query_result
+        return super().get(request, *args, **kwargs)
+        #translation_query = session.query(DocumentTranslation)
+        #if collection:
+        #    translation_query = translation_query.filter(DocumentTranslation.document_collection == collection)
+        #if document_ids:
+        #    translation_query = translation_query.filter(DocumentTranslation.document_id.in_(document_ids))
+        #return [row for row in translation_query]

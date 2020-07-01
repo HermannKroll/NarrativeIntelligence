@@ -17,10 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
 
-from ui.views import DataView
+from ui.views import StatsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'', include('ui.urls')),
-    path("data/", never_cache(DataView.as_view()), name="data")
+    path("stats/", never_cache(StatsView.as_view()), name="stats")
 ]

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block title %}Admin Interface for Query Statistics{% endblock %}
+
+{% block content %}
+    <div class="container margin-top">
+        <div class="row">
+            <div class="col">
+                <form action="{% url 'stats' %}" id="stats_form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <div style="float: left; width: 15%">
+                            <button type="submit" class="btn btn-primary" id="btn_stats">
+                                Stats
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div id="stats_div">
+                    Put stats here!
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+        const stats_url = "{% url 'stats' %}";
+    </script>
+    <script src="{% static 'js/../../static/js/../../static/js/stats.js' %}" type="text/javascript"></script>
+{% endblock %}
