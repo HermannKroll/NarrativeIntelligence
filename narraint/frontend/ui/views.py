@@ -291,10 +291,18 @@ class StatsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
-            session = Session.get()
-            test_query_result = session.query(Document).first()
-            return test_query_result
+            if "query" in request.GET:
+                session = Session.get()
+                try:
+                    test_query_results = session.query(Document).first();
+                except Exception:
+                    traceback.print_exc(file=sys.stdout)
+
+                return JsonResponse(
+                    dict(results=test_query_results)
+                )
         return super().get(request, *args, **kwargs)
+
         #translation_query = session.query(DocumentTranslation)
         #if collection:
         #    translation_query = translation_query.filter(DocumentTranslation.document_collection == collection)
