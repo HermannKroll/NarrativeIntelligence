@@ -1,20 +1,14 @@
 $(document).ready(function () {
-    $("#stats_form").submit(stats);
-});
+    //$("#stats_form").submit(stats);
 
-const stats = (event) => {
-    console.log("CP1");
-    event.preventDefault();
-    let request = $.ajax({
+    $.ajax({
         url: stats_url,
+        dataType: 'json',
         data: {
-
+            query: "stats"
+        },
+        success: function (response) {
+            console.log("Response: " + response);
         }
-    });
-    request.done(function (response) {
-        console.log("Success: " + response + " End of Response");
-    });
-    request.fail(function (result) {
-        console.log("Fail: " + result);
-    });
-};
+    })
+});

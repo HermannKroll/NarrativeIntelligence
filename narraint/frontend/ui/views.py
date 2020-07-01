@@ -290,12 +290,14 @@ class SearchView(TemplateView):
 class StatsView(TemplateView):
     template_name = "ui/stats.html"
 
+    print("Made it here.")
+
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             if "query" in request.GET:
                 session = Session.get()
                 try:
-                    test_query_results = session.query(Predication.column, func.count(Predication.column)).group_by(Predication.column).all()
+                    test_query_results = session.query(Predication.predicate_canonicalized, func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).all()
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
 
