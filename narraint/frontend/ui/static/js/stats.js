@@ -25,7 +25,7 @@ $(document).ready(function () {
                         let stats_pathie_extr = document.createElement("td");
 
                         //fill cells of single row
-                        stats_position.textContent = Math.ceil((i+1)/2).toLocaleString();
+                        stats_position.textContent = (i/2+1).toLocaleString();
                         //rename "null" to "other" so it looks gut
                         if (results[i][0] == null) {
                             stats_predicate.textContent = "other";

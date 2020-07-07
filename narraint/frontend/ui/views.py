@@ -307,10 +307,3 @@ class StatsView(TemplateView):
                     dict(results=test_query_results)
                 )
         return super().get(request, *args, **kwargs)
-
-        #translation_query = session.query(DocumentTranslation)
-        #if collection:
-        #    translation_query = translation_query.filter(DocumentTranslation.document_collection == collection)
-        #if document_ids:
-        #    translation_query = translation_query.filter(DocumentTranslation.document_id.in_(document_ids))
-        #return [row for row in translation_query]
