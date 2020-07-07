@@ -297,10 +297,12 @@ class StatsView(TemplateView):
             if "query" in request.GET:
                 session = Session.get()
                 try:
-                    test_query_results = session.query(Predication.predicate_canonicalized, func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).all()
+                    test_query_results = session.query(Predication.predicate_canonicalized, Predication.extraction_type,
+                                                       func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
                 except Exception:
                     traceback.print_exc(file=sys.stdout)
 
+                session.close();
                 return JsonResponse(
                     dict(results=test_query_results)
                 )

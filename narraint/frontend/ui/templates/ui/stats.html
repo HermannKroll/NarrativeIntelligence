@@ -11,19 +11,18 @@
     <div class="container margin-top">
         <div class="row">
             <div class="col">
-                <form action="{% url 'stats' %}" id="stats_form">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <div style="float: left; width: 15%">
-                            <button type="submit" class="btn btn-primary" id="btn_stats">
-                                Stats
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                <div id="stats_div">
-                    Put stats here!
-                </div>
+                <table id="stats_table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Predicate</th>
+                        <th scope="col">OpenIE Extr.</th>
+                        <th scope="col">PathIE Extr.</th>
+                    </tr>
+                    </thead>
+                    <tbody id="stats_table_body">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -31,6 +30,7 @@
 {% endblock %}
 
 {% block javascript %}
+    <script type="text/javascript" src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript">
         const stats_url = "{% url 'stats' %}";
