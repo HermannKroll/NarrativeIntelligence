@@ -28,22 +28,26 @@ MAX_SCAN_WIDTH = 1000
 
 
 class CovExport:
+    """
+    This class encapsulates the proce
+    """
+
     def __init__(self, out_fn, tag_types, json_root, meta_file, collection=None, document_ids=None, logger=logging):
         self.logger = logger
         self.out_file = out_fn
         logger.info("Setting up...")
-        logger.info("Collecting JSONs...")
+        logger.debug("Collecting JSONs...")
         self.file_dict = _build_file_dict(json_root)
         logger.debug(f"Found {len(self.file_dict)} jsons")
         self.tag_types = tag_types
-        logger.info("Reading Metadata file...")
+        logger.debug("Reading Metadata file...")
         self.meta = MetaReader(meta_file)
         logger.debug(f"{len(self.meta)} entries in Metadata file")
-        logger.info("Sending Query to document_translation...")
+        logger.debug("Sending Query to document_translation...")
         self.collection = collection
         self.document_ids = document_ids
         self.translation_query = query_document_translation(collection, document_ids)
-        logger.info("Building translation indices...")
+        logger.debug("Building index...")
         self._docid_index = self._build_docid_index()
         logger.debug(f"{len(self._docid_index)} rows for collection {collection if collection else 'any'} and "
                      f"{len(document_ids) if document_ids else 'any'}ids")
@@ -211,10 +215,8 @@ class CovExport:
         self.logger.info("Starting export...")
         tag_json, translation_json = self.create_tag_json(tag_types)
 
-        logging.info(f"Writing fulltext tag json to {self.out_file}...")
         with open(self.out_file, "w+") as f:
             json.dump(tag_json, f, indent=3)
-        logging.info(f"Writing fulltext translation json to {self.out_file}.translation...")
         with open(self.out_file + ".translation", "w+") as f:
             json.dump(translation_json, f, indent=3)
 
@@ -226,10 +228,8 @@ class CovExport:
                     if [tag for tag in tag_json[key] if tag['location']['paragraph'] == 0]
                 }
             abs_translation_json = {key: translation_json[key] for key in abs_tag_json.keys()}
-            logging.info(f"Writing abstract tag json to {self.out_file}.abstract ...")
             with open(self.out_file + ".abstract", "w+") as f:
                 json.dump(abs_tag_json, f, indent=3)
-            logging.info(f"Writing abstract translation json to {self.out_file}.abstract.translation ...")
             with open(self.out_file + ".abstract.translation", "w+") as f:
                 json.dump(abs_translation_json, f, indent=3)
 
