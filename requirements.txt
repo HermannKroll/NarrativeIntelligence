@@ -10,3 +10,4 @@ sqlalchemy
 nltk
 networkx
 lxml
+psycopg2
