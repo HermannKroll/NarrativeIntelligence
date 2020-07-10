@@ -123,6 +123,10 @@ python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubta
 ```
 The temporary created files as well as all logs won't be removed then. 
 
+## Database scheme
+
+![DB Scheme](./docs/dbdiagram.png)
+created with app.quickdatabasediagrams.com
 ### Export XML UB
 If you want to export in our specified XML format, use the following script. You need to create some indexes before you can use the xml export.
 ```
