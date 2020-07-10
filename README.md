@@ -2,6 +2,11 @@
 
 This project can be used to process documents using Narratives.
 
+
+## Preprocessing
+See [Preprocessing Readme](preprocessing.md).
+
+
 ## Getting Started
 Download the latest (currently 2020) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
 
@@ -114,9 +119,6 @@ created with app.quickdatabasediagrams.com
 - [2020_03_31](meetings/2020_03_31.md)
 - [2020_03_25](meetings/2020_03_25.md)
 - [2020_03_19](meetings/2020_03_19.md)
-
-## Preprocessing
-See [Preprocessing Readme](preprocessing.md).
 
 ## Docker
 The preprocessing-pipeline can be used as Docker container.
