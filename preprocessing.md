@@ -16,8 +16,8 @@ mkdir ~/tools
 Download [GNormPlus](https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/) and [TaggerOne](https://www.ncbi.nlm.nih.gov/research/bionlp/tools/taggerone/). Unzip both and move the directories into tools. 
 ```
 tools/
-	  GNormPlusJava/
-	  TaggerOne-0.2.1/
+  GNormPlusJava/
+  TaggerOne-0.2.1/
 ```
 ### Tagger Configuration
 Configure the tagger locations for the project
@@ -85,7 +85,7 @@ export PYTHONPATH=/home/kroll/NarrativeIntelligence/
 ```
 
 ### Tagging Documents
-We assume each document to have a document id, a document collection, a title and an abstract. Document ids must be unique with a document collection. Our pipeline expects documents to be in the PubTator format. 
+We assume each document to have a document id, a document collection, a title and an abstract. Document ids must be unique with a document collection. Our pipeline expects documents to be in the [PubTator format](https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/index.html). 
 ```
 document_id|t| title text here
 document_id|a| abstract text here
@@ -107,7 +107,7 @@ document_id_3|t| title text here
 document_id_3|a| abstract text here
 
 ```
-The files are separated by two new line characters *\n*. ATTENTION: the PubTator file must end with two *\n* characters. 
+The files are separated by two new line characters *\\n*. ATTENTION: the PubTator file must end with two *\\n* characters. 
 
 Finally we can start tagging our documents. Assume we have a test document test.pubtator.
 ```
@@ -124,7 +124,11 @@ python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubta
 The temporary created files as well as all logs won't be removed then. 
 
 ### Export XML UB
-If you want to export in our specified XML format, use the following script. 
+If you want to export in our specified XML format, use the following script. You need to create some indexes before you can use the xml export.
+```
+python3 narraint/entity/entitiyresolver.py
+```
+This might take a while and will build all required indexes. Then, you can export the documents
 ```
 python3 narraint/backend/export/xml_export.py
 ```
