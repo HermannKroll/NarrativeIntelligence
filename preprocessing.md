@@ -19,6 +19,8 @@ tools/
   GNormPlusJava/
   TaggerOne-0.2.1/
 ```
+Both tools require an Java installation. 
+
 ### Tagger Configuration
 Configure the tagger locations for the project
 ```
