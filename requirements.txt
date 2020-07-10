@@ -9,3 +9,4 @@ mlxtend
 sqlalchemy
 nltk
 networkx
+lxml
