@@ -3,8 +3,11 @@
 $(document).ready(function () {
     //$("#stats_form").submit(stats);
 
-    let table = $('#stats_table').DataTable( {
-        "pageLength": 10
+    let table = $('#stats_table').DataTable({
+        "pageLength": 25,
+        "language": {
+            "emptyTable": '<div class="spinner-border"></div>'
+        },
     });
 
     $.ajax({
