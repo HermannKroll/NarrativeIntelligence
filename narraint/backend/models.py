@@ -129,14 +129,14 @@ class Predication(Base):
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False)
     predicate_cleaned = Column(String, nullable=True)
-    predicate_canonicalized = Column(String, nullable=True) #TODO: GROUP BY
+    predicate_canonicalized = Column(String, nullable=True)
     object_openie = Column(String, nullable=False)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
     object_type = Column(String, nullable=False)
     confidence = Column(Float, nullable=True)
     sentence = Column(String, nullable=False)
-    extraction_type = Column(String, nullable=False) #TODO: GROUP BY
+    extraction_type = Column(String, nullable=False)
     extraction_version = Column(String, nullable=False)
     mirrored = Column(Boolean, nullable=False, default=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
