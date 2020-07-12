@@ -7,9 +7,16 @@
 
 {% endblock %}
 
-{% block title %}Admin Interface for Query Statistics{% endblock %}
+{% block title %}Statistics per Predicate and Extraction Type{% endblock %}
 
 {% block content %}
+
+    <div style="width: auto" align="center">
+        <a href="{% url 'search' %}" class="btn btn-primary" id="btn_search">Home</a>
+    </div>
+
+    <br><br>
+
     <div class="container margin-top">
         <div class="row">
             <div class="col">

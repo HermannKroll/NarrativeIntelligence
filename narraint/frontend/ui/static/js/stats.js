@@ -1,4 +1,4 @@
-//TODO: 1. Buttons search <-> stats, "searching" symbol oder so
+//TODO: "searching" symbol oder so
 
 $(document).ready(function () {
     //$("#stats_form").submit(stats);

@@ -29,8 +29,6 @@
        style="display: none">Open Modal</a>
     <input type='file' onChange=load() id="tFile" style="display: none"/>
 
-
-    <!--TODO: das hier nochmal anders machen, so kaum erweiterbar-->
     <form action="" class="login_form long" id="nodemod" style="display: none;">
         <div class="divheaders" id="mydivheader">New Node</div>
         <br>
@@ -88,12 +86,11 @@
 
     <!-- own development starts here:  -->
 
+    <div style="width: auto" align="center">
+        <a href="{% url 'stats' %}" class="btn btn-primary" id="btn_search">Stats</a>
+    </div>
 
     <div class="container margin-top">
-
-        <div id="data_test_div">
-            <p id="data_test_p">Test</p>
-        </div>
 
         <div class="row">
             <div class="col">
