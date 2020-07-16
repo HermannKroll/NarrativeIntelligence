@@ -18,7 +18,12 @@ class MetaReader:
         return self.metadata_list[self._docid_dict[doc_id]]
 
     def get_metadata_by_cord_uid(self, cord_uid):
-        return self.metadata_list[self.cord_uid_index[cord_uid]]
+        """
+
+        :param cord_uid:
+        :return: metadata csv row. None if not in metadata file
+        """
+        return self.metadata_list[self.cord_uid_index[cord_uid]] if cord_uid in self.cord_uid_index else None
 
     def __len__(self):
         return len(self.metadata_list)
@@ -50,9 +55,11 @@ class MetaReader:
         Get title, abstract and optional md5 of document from metadata
         :param cord_uid: corduid of docuemnt to get
         :param generate_md5: Set to true if md5 should be generated
-        :return: (title, abstract,md5) if generate_md5 else (title, abstract)
+        :return: (title, abstract,md5) if generate_md5 else (title, abstract). None if not in metadata file
         """
         metadata = self.get_metadata_by_cord_uid(cord_uid)
+        if not metadata:
+            return None
         title = ";".join(metadata['title'])
         abstract = ";".join(metadata['abstract'])
         return title, abstract, get_md5_hash_str(title+abstract) if generate_md5 else None

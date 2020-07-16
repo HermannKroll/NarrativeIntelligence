@@ -20,11 +20,14 @@ def print_progress_with_eta(text, current_idx, size, start_time, print_every_k=1
             percentage = 0
             eta = "--"
         else:
-            percentage = (current_idx + 1.0) / size * 100.0
-            elapsed_seconds = (datetime.now() - start_time).seconds + 1
-            seconds_per_doc = elapsed_seconds / (current_idx + 1.0)
-            remaining_seconds = (size - current_idx) * seconds_per_doc
-            eta = (datetime.now() + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
+            try:
+                percentage = (current_idx + 1.0) / size * 100.0
+                elapsed_seconds = (datetime.now() - start_time).seconds + 1
+                seconds_per_doc = elapsed_seconds / (current_idx + 1.0)
+                remaining_seconds = (size - current_idx) * seconds_per_doc
+                eta = (datetime.now() + timedelta(seconds=remaining_seconds)).strftime("%Y-%m-%d %H:%M")
+            except:
+                eta = "--"
         if not logger:
             sys.stdout.write("\r{} ... {:0.1f} % (ETA {})".format(text, percentage, eta))
             sys.stdout.flush()

@@ -8,8 +8,10 @@ from glob import glob
 
 import json
 
+from sqlalchemy import func
+
 from narraint.backend.database import Session
-from narraint.backend.models import DocumentTranslation
+from narraint.backend.models import DocumentTranslation, Tag
 from narraint.backend.export import create_tag_query, TAG_BUFFER_SIZE
 from narraint.entity import enttypes
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
@@ -64,7 +66,7 @@ class CovExport:
 
     def get_get_sourcefile_by_docid(self, docid):
         translation = self.get_translation_by_docid(docid)
-        return self.file_dict[translation.source]
+        return self.file_dict[translation.source] if translation.source in self.file_dict else None
 
     def get_content_from_meta(self, document_id, check_md5=True):
         translation = self.get_translation_by_docid(document_id)
@@ -74,16 +76,22 @@ class CovExport:
             file = self.file_dict[translation.source]
 
     def create_document_json(self, document_id):
+        """
+        :param document_id:
+        :return: output document id, meta dict if found, else {}
+        """
         translation = self.get_translation_by_docid(document_id)
         metadata = self.get_meta_by_artid(document_id)
-
         output_document_id = os.path.basename(translation.source)
-        if translation.source == os.path.basename(self.meta.path):
-            output_document_id += "/" + translation.source_doc_id
-        cord_uid = metadata['cord_uid'][0]
-        source_collection = metadata['source_x']
-        output_dict = {"cord_uid": cord_uid, "source_collection": source_collection}
-        return output_document_id, output_dict
+        if metadata:
+            if translation.source == os.path.basename(self.meta.path):
+                output_document_id += "/" + translation.source_doc_id
+            cord_uid = metadata['cord_uid'][0]
+            source_collection = metadata['source_x']
+            output_dict = {"cord_uid": cord_uid, "source_collection": source_collection}
+            return output_document_id, output_dict
+        else:
+            return output_document_id, {}
 
     @staticmethod
     def find_tags_in_tit_abs(tag_list, abstract, par_id, title=PARAGRAPH_TITLE_DUMMY):
@@ -109,18 +117,18 @@ class CovExport:
                     san_start -= len("_" + title + "__")
                     json_par_id = par_id + 1
                 san_end = san_start + length
-                if json_par_id == 0:
-                    logging.debug(f"TIT: {text[0:san_start + 1]}"
-                                  f"|{text[san_start + 1:san_end + 1]}|"
-                                  f"{text[san_end + 1: len(title)]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
-                elif json_par_id == 1:
-                    logging.debug(f"ABS: {text[san_start-50:san_start + 3]}"
-                                  f"|{text[san_start + 3:san_end + 3]}|"
-                                  f"{text[san_end + 3: san_end + 51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
-                else:
-                    logging.debug(f"FUL: {text[san_start-50:san_start+3+len(title)]}"
-                          f"|{text[san_start+3+len(title):san_end+3+len(title)]}|"
-                          f"{text[san_end+3+len(title):san_end+51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+                # if json_par_id == 0:
+                #     logging.debug(f"TIT: {text[0:san_start + 1]}"
+                #                   f"|{text[san_start + 1:san_end + 1]}|"
+                #                   f"{text[san_end + 1: len(title)]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+                # elif json_par_id == 1:
+                #     logging.debug(f"ABS: {text[san_start-50:san_start + 3]}"
+                #                   f"|{text[san_start + 3:san_end + 3]}|"
+                #                   f"{text[san_end + 3: san_end + 51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
+                # else:
+                #     logging.debug(f"FUL: {text[san_start-50:san_start+3+len(title)]}"
+                #           f"|{text[san_start+3+len(title):san_end+3+len(title)]}|"
+                #           f"{text[san_end+3+len(title):san_end+51]} @@@ {tag.ent_str}, {tag.start} -> {san_start}")
 
                 output_json.append({
                     "location": {
@@ -145,9 +153,12 @@ class CovExport:
         """
         session = Session.get()
         tag_query = create_tag_query(session, self.collection, self.document_ids, tag_types, self.tag_buffer)
+        tag_amount = session.query(func.count(Tag.document_id)).filter_by(document_collection=self.collection).scalar()
+        logging.info(f"Retrieved {tag_amount} tags")
         tag_json = {}
         translation_json = {}
 
+        start_time = datetime.now()
         last_translation = None
         last_art_id = None
         last_doc_id = None
@@ -157,44 +168,61 @@ class CovExport:
         last_out_doc_id = None
         source_hash = None
         database_hash = None
+        document_valid = True
 
         tasklist = []
         task_total = 0
         found_total = 0
-        for tag in tag_query:
+        for tag_no, tag in enumerate(tag_query):
+            print_progress_with_eta("Reconstructing tag locations...", tag_no, tag_amount, start_time, 100000)
             par_id = tag.document_id % NEXT_DOCUMENT_ID_OFFSET
             doc_id = tag.document_id - par_id
+            #if doc_id%100000000==0:
+                #logging.info(f"At docid {doc_id}")
 
             if tag.document_id != last_art_id:  # new paragraph has begun
-                if tasklist:  # execute tasklist
-                    last_par_id = last_art_id % NEXT_DOCUMENT_ID_OFFSET
-                    tags = self.find_tags_in_tit_abs(tasklist, last_abstract, last_par_id,
-                                                     last_title if last_par_id == 0 else PARAGRAPH_TITLE_DUMMY)
-                    if last_out_doc_id in tag_json:
-                        tag_json[last_out_doc_id].extend(tags)
-                    else:
-                        tag_json[last_out_doc_id] = tags
-                    found_total += len(tags)
-                    tasklist.clear()
-                last_art_id = tag.document_id
-                if doc_id != last_doc_id:  # New document: set FileReader if source is file
-                    last_translation = self.get_translation_by_docid(doc_id)
-                    if '.json' in last_translation.source:
-                        current_filereader = FileReader(self.get_get_sourcefile_by_docid(doc_id))
-                        last_title = current_filereader.title
-                    out_doc_id, doc_dict = self.create_document_json(doc_id)
-                    last_out_doc_id = out_doc_id
-                    translation_json[out_doc_id] = doc_dict
-                    last_doc_id = doc_id
-                if '.csv' in last_translation.source:  # New paragraph + source is csv
-                    title, abstract, md5 = self.meta.get_doc_content(last_translation.source_doc_id, True)
-                    last_title, last_abstract = title, abstract
-                    source_hash = md5
-                elif '.json' in last_translation.source:
-                    abstract = current_filereader.get_paragraph(par_id)
-                    if par_id == 0 and not abstract:  # abstract not included in JSON parse
-                        _, abstract, _ = self.meta.get_doc_content(last_translation.source_doc_id)
-                    last_abstract = abstract
+                try:
+                    if tasklist:  # execute tasklist
+                        last_par_id = last_art_id % NEXT_DOCUMENT_ID_OFFSET
+                        tags = self.find_tags_in_tit_abs(tasklist, last_abstract, last_par_id,
+                                                         last_title if last_par_id == 0 else PARAGRAPH_TITLE_DUMMY)
+                        if last_out_doc_id in tag_json:
+                            tag_json[last_out_doc_id].extend(tags)
+                        else:
+                            tag_json[last_out_doc_id] = tags
+                        found_total += len(tags)
+                        tasklist.clear()
+                    last_art_id = tag.document_id
+                    if doc_id != last_doc_id:  # New document: set FileReader if source is file
+                        last_translation = self.get_translation_by_docid(doc_id)
+                        if '.json' in last_translation.source:
+                            sourcefile = self.get_get_sourcefile_by_docid(doc_id)
+                            if not sourcefile:
+                                logging.warning(f"Couldn't find sourcefile for doc_id {doc_id}")
+                                current_filereader=None
+                                continue
+                            current_filereader = FileReader(sourcefile)
+                            last_title = current_filereader.title
+                        out_doc_id, doc_dict = self.create_document_json(doc_id)
+                        last_out_doc_id = out_doc_id
+                        translation_json[out_doc_id] = doc_dict
+                        last_doc_id = doc_id
+                    if '.csv' in last_translation.source:  # New paragraph + source is csv
+                        title, abstract, md5 = self.meta.get_doc_content(last_translation.source_doc_id, True)
+                        last_title, last_abstract = title, abstract
+                        source_hash = md5
+                    elif '.json' in last_translation.source:
+                        abstract = current_filereader.get_paragraph(par_id)
+                        if par_id == 0 and not abstract:  # abstract not included in JSON parse
+                            _, abstract, _ = self.meta.get_doc_content(last_translation.source_doc_id)
+                        last_abstract = abstract
+                    document_valid=True
+                except:
+                    logging.warning(f"document {tag.document_id} is invalid, skipping")
+                    document_valid=False
+                    continue
+            elif not document_valid:
+                continue
 
             tasklist.append(tag)
             task_total += 1
