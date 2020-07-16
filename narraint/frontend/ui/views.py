@@ -5,7 +5,10 @@ import sys
 
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from sqlalchemy import func
 
+from narraint.backend.database import Session
+from narraint.backend.models import Predication
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
@@ -40,7 +43,6 @@ logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
-
 
 def check_and_convert_variable(text):
     var_name = VAR_NAME.search(text).group(1)
@@ -282,4 +284,25 @@ class SearchView(TemplateView):
 
             return JsonResponse(
                 dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
+        return super().get(request, *args, **kwargs)
+
+class StatsView(TemplateView):
+    template_name = "ui/stats.html"
+    stats_query_results = None #TODO: außerhalb speichern
+
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            if "query" in request.GET:
+                if not self.stats_query_results:
+                    session = Session.get()
+                    try:
+                        self.stats_query_results = session.query(Predication.predicate_canonicalized, Predication.extraction_type,
+                                                           func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
+                    except Exception:
+                        traceback.print_exc(file=sys.stdout)
+
+                    session.close()
+                return JsonResponse(
+                    dict(results=self.stats_query_results)
+                )
         return super().get(request, *args, **kwargs)

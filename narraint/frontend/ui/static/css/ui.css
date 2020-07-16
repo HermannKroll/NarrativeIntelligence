@@ -6,6 +6,20 @@
     white-space: pre-wrap;
 }
 
+.wrapper-div {
+    overflow: auto;
+}
+
+.inner-div-left-mid {
+    width: fit-content;
+    float: left;
+    margin-right: 15px
+}
+
+.inner-div-right-most {
+    float: left;
+}
+
 .graph-pattern {
     width: 200px;
     height: 200px;
