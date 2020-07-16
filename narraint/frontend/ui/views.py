@@ -44,7 +44,6 @@ logging.info('allowed predicates are: {}'.format(allowed_predicates))
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
 
-
 def check_and_convert_variable(text):
     var_name = VAR_NAME.search(text).group(1)
     m = VAR_TYPE.search(text)
@@ -289,21 +288,21 @@ class SearchView(TemplateView):
 
 class StatsView(TemplateView):
     template_name = "ui/stats.html"
-
-    print("Made it here.")
+    stats_query_results = None #TODO: außerhalb speichern
 
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             if "query" in request.GET:
-                session = Session.get()
-                try:
-                    test_query_results = session.query(Predication.predicate_canonicalized, Predication.extraction_type,
-                                                       func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
-                except Exception:
-                    traceback.print_exc(file=sys.stdout)
+                if not self.stats_query_results:
+                    session = Session.get()
+                    try:
+                        self.stats_query_results = session.query(Predication.predicate_canonicalized, Predication.extraction_type,
+                                                           func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
+                    except Exception:
+                        traceback.print_exc(file=sys.stdout)
 
-                session.close();
+                    session.close()
                 return JsonResponse(
-                    dict(results=test_query_results)
+                    dict(results=self.stats_query_results)
                 )
         return super().get(request, *args, **kwargs)
