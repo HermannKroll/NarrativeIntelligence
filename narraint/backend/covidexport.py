@@ -251,9 +251,9 @@ class CovExport:
         if only_abstract:
             # Gotta love your dict comprehensions :D
             abs_tag_json = {
-                    key: [tag for tag in tag_json[key] if tag['location']['paragraph'] == 0]
+                    key: [tag for tag in tag_json[key] if tag['location']['paragraph'] <= 1]
                     for key in tag_json.keys()
-                    if [tag for tag in tag_json[key] if tag['location']['paragraph'] == 0]
+                    if [tag for tag in tag_json[key] if tag['location']['paragraph'] <= 1]
                 }
             abs_translation_json = {key: translation_json[key] for key in abs_tag_json.keys()}
             with open(self.out_file + ".abstract", "w+") as f:
