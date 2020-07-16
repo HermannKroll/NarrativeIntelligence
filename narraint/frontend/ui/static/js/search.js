@@ -275,6 +275,7 @@ const search = (event) => {
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
+
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
@@ -350,8 +351,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             j = 1;
         }
     });
-    let divDoc = $('<div><a href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
-        'PMID' + document_id + '</a>' + '<br> Title: ' + title + e_string + '<br></div>');
+    let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' + '</a>' +
+        ' - ID: ' + document_id + '<br><b>' + title + '</b>' + e_string + '<br></div>');
+    // 'PMID' + document_id
     return divDoc;
 };
 
@@ -371,10 +374,12 @@ const createDocumentList = (results, query_len) => {
 
     let resultList = results["results"];
     let resultSize = results["size"];
-    let button_string = resultSize + ' Documents';
+    let button_string = resultSize + ' Document';
+    if (resultSize > 1) {button_string += 's'};
     divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
     let divCardEntry = $('<div id="'+collapseID+'" class="collapse show" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    // tbd: grid
     let divCardBody = $('<div class="card-body"></div>');
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
@@ -399,11 +404,11 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let var_names = queryAggregate["variable_names"];
     let var_subs = queryAggregate["substitution"];
     let result_size = queryAggregate["size"];
-    let button_string = result_size + ' Documents';
+    let button_string = result_size + ' Document';
+    if(result_size > 1) {button_string += 's'}
     button_string += ' [';
     let i = 0;
     var_names.forEach(name => {
-        //TODO: externes href-stylesheet? String vorher zerlegen, so ist hässlich. stopPropagation() auslagern.
         let entity_substitution = var_subs[name];
         let ent_str = entity_substitution["entity_str"];
         let ent_id = entity_substitution["entity_id"];
@@ -418,22 +423,22 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         if (ent_id.slice(0, 5) === 'MESH:') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Species') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Gene'){
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
-                'style="color:#e80000;font-weight:bold;"' + '>' + ent_id + '</a> ' + ']'
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ']'
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ')]'
         }
         i += 1;
     });
 
-    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
+    divH2.append('<button class="btn btn-light" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
         'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
     let divCardEntry = $('<div id="'+collapseID+'" class="collapse" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
     let divCardBody = $('<div class="card-body"></div>');

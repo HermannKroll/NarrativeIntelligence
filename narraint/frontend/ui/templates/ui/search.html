@@ -29,8 +29,6 @@
        style="display: none">Open Modal</a>
     <input type='file' onChange=load() id="tFile" style="display: none"/>
 
-
-
     <form action="" class="login_form long" id="nodemod" style="display: none;">
         <div class="divheaders" id="mydivheader">New Node</div>
         <br>
@@ -86,10 +84,14 @@
     </form>
 
 
-    <!-- own development starts here: -->
+    <!-- own development starts here:  -->
 
+    <div style="width: auto" align="center">
+        <a href="{% url 'stats' %}" class="btn btn-primary" id="btn_search">Stats</a>
+    </div>
 
     <div class="container margin-top">
+
         <div class="row">
             <div class="col">
                 <div class="help-tip">
@@ -112,7 +114,7 @@
                         <!--<label for="id_keywords"><strong>Search</strong></label> -->
                         <div style="float: left; width: 85%">
                             <textarea class="form-control" id="id_keywords" rows="1"
-                                  name="keywords">Simvastatin treats ?X(Disease)</textarea>
+                                      name="keywords">Simvastatin treats ?X(Disease)</textarea>
                         </div>
 
                         <div style="float: left; width: 15%">
@@ -124,40 +126,86 @@
                             </p>
                         </div>
 
+                        <!--TODO: umschreiben, so nicht erweiterbar. Au0erdem, pubmed Logo in static folder(?)-->
                         <div style="float: left; width: 100%">
-                            <label for="id_keywords"><strong> Allowed Predicates:</strong></label>
-                        <small id="id_help_2" class="form-text text-muted" aria-describedby="id_help">
-                            'administered', 'associated', 'augments', 'compares', 'decreases',
-                            'dosageform', 'effects', 'induces', 'inhibits', 'interacts', 'metabolises', 'occurs',
-                            'prevents', 'produces', 'regulates', 'treats'
-                        </small>
+                            <label><strong> Allowed Predicates:</strong></label>
+                            <div class="wrapper-div text-muted">
+                                <div class="inner-div-left-mid">
+                                    'administered' <br>
+                                    'associated'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'augments' <br>
+                                    'compares'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'decreases' <br>
+                                    'dosageform'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'effects' <br>
+                                    'induces'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'inhibits' <br>
+                                    'interacts'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'metabolises' <br>
+                                    'occurs'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'prevents' <br>
+                                    'produces'
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'regulates' <br>
+                                    'treats'
+                                </div>
+                                <div class="inner-div-left-mid">
+
+                                </div>
+                            </div>
                         </div>
 
                         <label><strong>Data Source:</strong></label><br>
-                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed" checked="checked">
-                        <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
-                        <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
-                        <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and Abstracts)</label><br>
 
-                        <input type="radio" id="radio_pmc" name="data_source" value="PMC">
-                        <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents including
-                            Simvastatin)</label><br>
-                        <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
-                        <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents including
-                            Simvastatin)</label><br>
-
-                             <div style="float: left; width: 50%">
-                            <label><strong>Outer Ranking:</strong></label><br>
-                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                                   value="outer_ranking_substitution"
-                                   checked="checked">
-                            <label for="radio_outer_ranking_a">Substitution-based Aggregation</label><br>
-                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
-                                   value="outer_ranking_ontology">
-                            <label for="radio_outer_ranking_b">Ontology-based Aggregation</label><br>
+                        <div class="wrapper-div">
+                            <div class="inner-div-left-mid">
+                                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                                       checked="checked">
+                                <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
+                                    Abstracts)</label><br>
+                                <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
+                                <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and
+                                    Abstracts)</label>
+                            </div>
+                            <div class="inner-div-right-most">
+                                <input type="radio" id="radio_pmc" name="data_source" value="PMC">
+                                <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                    Simvastatin)</label><br>
+                                <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                                <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                    Simvastatin)</label><br>
+                            </div>
                         </div>
 
-                        <!--
+                        <label><strong>Outer Ranking:</strong></label><br>
+                        <div class="wrapper-div">
+                            <div class="inner-div-left-mid">
+                                <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                                       value="outer_ranking_substitution"
+                                       checked="checked">
+                                <label for="radio_outer_ranking_a">Substitution-based Aggregation</label><br>
+                            </div>
+                            <div class="inner-div-right-most">
+                                <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
+                                       value="outer_ranking_ontology">
+                                <label for="radio_outer_ranking_b">Ontology-based Aggregation</label><br>
+                            </div>
+                        </div>
+
+                        <!--se
                         <div style="float: left; width: 50%">
                             <label><strong>Inner Ranking:</strong></label><br>
                             <input type="radio" id="radio_inner_ranking_a" name="inner_ranking" value="inner_ranking_a"
@@ -180,10 +228,10 @@
 
 
         <div class="accordion" id="accordionNarrativeDesigner">
-            <div class="card">
-                <div class="card-header" id="headingOne">
+            <div class="card mb-3">
+                <div class="card-header text-center" id="headingOne">
                     <h2 class="mb-0">
-                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
+                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOne"
                                 aria-expanded="false" aria-controls="collapseOne">
                             Narrative Designer
                         </button>
@@ -233,11 +281,12 @@
         </div>
 
         <div>
-            <label for="query_translation"><strong>Query Translation</strong></label>
+            <label><strong>Query Translation: </strong></label>
             <div id="query_translation">No query translation available.</div>
         </div>
 
         <div>
+            <br>
             <h2>Documents</h2>
         </div>
         <div class="row margin-top" id="div_wrapper_documents">
