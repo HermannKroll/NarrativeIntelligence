@@ -11,3 +11,4 @@ nltk
 networkx
 lxml
 psycopg2
+psycopg2-binary
