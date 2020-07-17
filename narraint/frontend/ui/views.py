@@ -30,7 +30,6 @@ variable_type_mappings = {"chemical": "Chemical",
                           "genes": "Gene",
                           "species": "Species"}
 
-
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
@@ -43,6 +42,7 @@ logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
+
 
 def check_and_convert_variable(text):
     var_name = VAR_NAME.search(text).group(1)
@@ -96,8 +96,8 @@ def align_triple(text: str):
         raise ValueError('Cannot find a predicate in: {}'.format(text))
 
     subj = text_without_quotes[0:pred_start].strip()
-    pred = text_without_quotes[pred_start:pred_start+pred_len+1].strip()
-    obj = text_without_quotes[pred_start+pred_len+1:].strip()
+    pred = text_without_quotes[pred_start:pred_start + pred_len + 1].strip()
+    obj = text_without_quotes[pred_start + pred_len + 1:].strip()
     return subj, pred, obj
 
 
@@ -145,11 +145,11 @@ def convert_query_text_to_fact_patterns(query_txt):
         fact_patterns.append((s, s_type, p, o, o_type))
 
     # check for at least 1 entity
- #   entity_check = False
-  #  for s, p, o in fact_patterns:
-   #     if not s.startswith('?') or not o.startswith('?'):
+    #   entity_check = False
+    #  for s, p, o in fact_patterns:
+    #     if not s.startswith('?') or not o.startswith('?'):
     #        entity_check = True
-     #       break
+    #       break
     # if not entity_check:
     #    explanation_str += "no entity included in query - error\n"
     #   return None, explanation_str
@@ -250,7 +250,8 @@ class SearchView(TemplateView):
                         results_converted = []
                         nt_string = ""
                         logger.error('parsing error')
-                    elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(query_fact_patterns) > 1:
+                    elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(
+                            query_fact_patterns) > 1:
                         results_converted = []
                         nt_string = ""
                         query_trans_string = "Do not support multiple variables in an ontology-based ranking"
@@ -271,11 +272,11 @@ class SearchView(TemplateView):
                         elif outer_ranking == 'outer_ranking_ontology':
                             substitution_ontology = ResultAggregationByOntology()
                             results_converted = substitution_ontology.rank_results(results).to_dict()
-                       # with open('last_query.json', 'wt') as f:
-                       #     pprint(results_converted, f)
-                  #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
-                   #                                                             0:30]:
-                    #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
+                    # with open('last_query.json', 'wt') as f:
+                    #     pprint(results_converted, f)
+                #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
+                #                                                             0:30]:
+                #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
@@ -286,23 +287,26 @@ class SearchView(TemplateView):
                 dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)
 
+
 class StatsView(TemplateView):
     template_name = "ui/stats.html"
-    stats_query_results = None #TODO: außerhalb speichern
+    stats_query_results = None
 
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             if "query" in request.GET:
-                if not self.stats_query_results:
+                if not StatsView.stats_query_results:
                     session = Session.get()
                     try:
-                        self.stats_query_results = session.query(Predication.predicate_canonicalized, Predication.extraction_type,
-                                                           func.count(Predication.predicate_canonicalized)).group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
-                    except Exception:
+                        logging.info('Processing database statistics...')
+                        StatsView.stats_query_results = session.query(Predication.predicate_canonicalized,
+                                                                      Predication.extraction_type,
+                                                                      func.count(Predication.predicate_canonicalized)).\
+                            group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
+                    except:
                         traceback.print_exc(file=sys.stdout)
-
                     session.close()
                 return JsonResponse(
-                    dict(results=self.stats_query_results)
+                    dict(results=StatsView.stats_query_results)
                 )
         return super().get(request, *args, **kwargs)

@@ -352,8 +352,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         }
     });
     let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
-        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' + '</a>' +
-        ' - ID: ' + document_id + '<br><b>' + title + '</b>' + e_string + '<br></div>');
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' +
+        'PMID: ' + document_id + '</a>' + '<br><b>' + title  + '</b>' + e_string + '<br></div>');
     // 'PMID' + document_id
     return divDoc;
 };
@@ -433,7 +433,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ent_id + ')]'
+            button_string += ', '.repeat(!!i) + var_sub + ']'
         }
         i += 1;
     });
