@@ -310,23 +310,31 @@ const search = (event) => {
             query_len = nt_string.split(".").length-1;
         }
 
-
         // Print query translation
         let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
         query_translation.text(query_trans_string);
         let results = response["results"];
+        let result_size = results["size"];
         // Create documents DIV
         let divList = createResultList(results, query_len);
         divDocuments.append(divList);
         // add_collapsable_events();
 
+        let documents_header = $("#header_documents");
+        if (result_size >= 0){
+            documents_header.html(result_size + " Documents")
+        } else {
+            documents_header.html("Documents")
+        }
         // Disable button
         setButtonSearching(false);
     });
 
     request.fail(function (result) {
         setButtonSearching(false);
+        let documents_header = $("#header_documents");
+        documents_header.html("Documents")
         console.log(result);
     });
 };
