@@ -21,6 +21,10 @@ class GeneMapper:
         else:
             self.human_gene_dict = {}
             self.gene_to_human_id_dict = {}
+            try:
+                self.load_index()
+            except FileExistsError and FileNotFoundError:
+                logging.warning('No GeneMapper Index file was found')
             GeneMapper.__instance = self
 
     @staticmethod
@@ -38,8 +42,11 @@ class GeneMapper:
         with gzip.open(gene_file, 'rt') as f:
             for line in islice(f, 1, None):
                 components = line.strip().split('\t')
-                if components[0] == self.HUMAN_SPECIES_ID and components[2] not in self.human_gene_dict:
-                    self.human_gene_dict[components[2]] = components[1]
+                gene_id = int(components[1])
+                gene_name = components[2]
+                if components[0] == self.HUMAN_SPECIES_ID and gene_name not in self.human_gene_dict:
+                    self.human_gene_dict[gene_name] = gene_id
+
 
     def build_gene_mapper_index(self, gene_file=GENE_FILE, index_file=GENE_TO_HUMAN_ID_FILE):
         """
@@ -55,6 +62,7 @@ class GeneMapper:
             for line in islice(f, 1, None):
                 components = line.strip().split('\t')
                 species_id, gene_id, gene_name = components[0:3]
+                gene_id = int(gene_id)
                 if species_id != self.HUMAN_SPECIES_ID and gene_name in self.human_gene_dict:
                     self.gene_to_human_id_dict[gene_id] = self.human_gene_dict[gene_name]
         with open(index_file, 'wb') as f:
@@ -69,7 +77,7 @@ class GeneMapper:
         """
         with open(index_file, 'rb') as f:
             self.__dict__ = pickle.load(f)
-        logging.info('Index for gene mapper load from {}'.format(index_file))
+        logging.info('Index for gene mapper load from {} ({} keys)'.format(index_file, len(self.gene_to_human_id_dict)))
 
     def map_to_human_gene(self, gene_id):
         """
@@ -78,7 +86,7 @@ class GeneMapper:
         :param gene_id: gene id which should be mapped to the human gene id
         :return: human gene id
         """
-        return self.gene_to_human_id_dict[gene_id]
+        return self.gene_to_human_id_dict[int(gene_id)]
 
 
 def main():

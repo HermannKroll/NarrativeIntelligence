@@ -8,6 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from narraint.backend.database import Session
 from narraint.backend.models import Predication, PredicationResult
 from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, SPECIES, DISEASE
+from narraint.entity.genemapper import GeneMapper
+from narraint.progress import print_progress_with_eta
 
 DOSAGE_FORM_PREDICATE = "dosageform"
 ASSOCIATED_PREDICATE = "associated"
@@ -134,14 +136,50 @@ def clean_extractions_in_database():
     session.commit()
 
 
+def remap_genes_to_human_ids():
+    logging.info('Loading gene mapper...')
+    gene_mapper = GeneMapper()
+
+    logging.info('Remapping gene ids...')
+    session = Session.get()
+    db_gene_ids = set()
+    logging.info('Querying subject gene ids...')
+    q_s = session.query(Predication.subject_id).filter(Predication.subject_type == GENE)
+    for r in session.execute(q_s):
+        db_gene_ids.add(r[0])
+    logging.info('Querying object gene ids...')
+    q_o = session.query(Predication.object_id).filter(Predication.object_type == GENE)
+    for r in session.execute(q_o):
+        db_gene_ids.add(r[0])
+
+
+
+    logging.info('Processing gene ids...')
+    gene_ids_len = len(db_gene_ids)
+    start_time = datetime.now()
+    for idx, gene_id in enumerate(db_gene_ids):
+        try:
+            gene_id_int = int(gene_id)
+            map_to = gene_mapper.map_to_human_gene(gene_id)
+            #print('map {} to {}'.format(gene_id_int, map_to))
+        except ValueError:
+            print('skipping gene id: {}'.format(gene_id))
+            continue
+        except KeyError:
+            print('GeneMapper cannot map {}'.format(gene_id))
+            continue
+        print_progress_with_eta("updating genes", idx, gene_ids_len, start_time, print_every_k=10)
+
+
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    dosage_form_rule()
-    mirror_symmetric_predicates()
-    clean_extractions_in_database()
+    #dosage_form_rule()
+    #mirror_symmetric_predicates()
+    #clean_extractions_in_database()
+    remap_genes_to_human_ids()
 
 if __name__ == "__main__":
     main()
