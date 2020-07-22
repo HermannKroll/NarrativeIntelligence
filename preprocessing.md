@@ -114,14 +114,14 @@ The files are separated by two new line characters *\\n*. ATTENTION: the PubTato
 Finally we can start tagging our documents. Assume we have a test document test.pubtator.
 ```
 cd ~/NarrativeIntelligence/
-python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --collection test -t A --tagger-one 
+python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A --tagger-one 
 ```
-The pipeline will invoke the taggers to tag the documents. The document collection is *test*. -t A means to tag Chemicals, Diseases, DosageForms, Genes and Species. 
+The pipeline will invoke the taggers to tag the documents. The document corpus is *test*. -t A means to tag Chemicals, Diseases, DosageForms, Genes and Species. 
 
 The pipeline will work in a temporary directory and remove it if finished. If you want to work in a specified directory, use
 ```
 cd ~/NarrativeIntelligence/
-python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --collection test -t A --tagger-one --workdir temp/
+python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A --tagger-one --workdir temp/
 ```
 The temporary created files as well as all logs won't be removed then. 
 
