@@ -8,6 +8,8 @@ import nltk
 from nltk.corpus import wordnet
 from sqlalchemy.exc import IntegrityError
 
+from narraint.entity.entityresolver import GeneResolver
+from narraint.entity.enttypes import GENE
 from narraint.backend.models import Tag, Predication
 from narraint.backend.database import Session
 from narraint.extraction.versions import OPENIE_VERSION, OPENIE_EXTRACTION
@@ -139,20 +141,68 @@ def _insert_predication_skip_duplicates(session, predication_values):
                                    value["predicate"], value["object_id"], value["sentence"]))
 
 
-def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version):
+def clean_and_translate_gene_ids(predications: List[PRED]):
+    """
+     Some extractions may contain several gene ids (these gene ids are encoded as "id1;id2;id3" as tags)
+     This method splits these extraction in single facts with only a single gene id for each
+     Gene IDs are unique for each species - We are only interested in the names of genes
+     Thus, we map each gene id to its gene symbol, so that, e.g. CYP3A4 is the unique description for all species
+     :param predications: a list of predications
+     :return: None
+     """
+    logging.info('Cleaning and translating gene ids...')
+    predications_cleaned = []
+    generesolver = GeneResolver()
+    generesolver.load_index()
+    start_time = datetime.now()
+    predications_len = len(predications)
+    for idx, p in enumerate(predications):
+        if p.s_type == GENE and ';' in p.s_id:
+            subj_ids = set()
+            for g_id in p.s_id.split(';'):
+                subj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+        else:
+            subj_ids = [p.s_id]
+        if p.o_type == GENE and ';' in p.o_id:
+            obj_ids = set()
+            for g_id in p.o_id.split(';'):
+                obj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+        else:
+            obj_ids = [p.o_id]
+        for s_id in subj_ids:
+            for o_id in obj_ids:
+                p_cleaned = PRED(p.doc_id, p.subj, p.pred, p.pred_cleaned, p.obj, p.conf, p.sent, s_id, p.s_str,
+                                 p.s_type, o_id, p.o_str, p.o_type)
+                predications_cleaned.append(p_cleaned)
+        print_progress_with_eta('cleaning gene ids...', idx, predications_len, start_time)
+    logging.info('{} predications obtained'.format(len(predications_cleaned)))
+    return predications_cleaned
+
+
+def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version, clean_genes=True):
     """
     insert a list of cleaned tuples into the database (bulk insert)
     does not check for collisions
     :param tuples_cleaned: a list of PRED tuples
     :param collection: the document collection
+    :param extraction_type: extraction type like OpenIE or PathIE
+    :param version: version of extraction method
+    :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
     :return: Nothing
     """
+    if clean_genes:
+        tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
     session = Session.get()
     len_tuples = len(tuples_cleaned)
     logging.info('Inserting {} tuples to database...'.format(len_tuples))
     start_time = datetime.now()
     predication_values = []
+    duplicate_check = set()
     for i, p in enumerate(tuples_cleaned):
+        key = (p.doc_id, p.s_id, p.s_type, p.pred, p.o_id, p.o_type, p.sent)
+        if key in duplicate_check:
+            continue
+        duplicate_check.add(key)
         try:
             predication_values.append(dict(
                 document_id=p.doc_id,

@@ -105,9 +105,9 @@ class GeneResolver:
                 components = line.strip().split('\t')
                 gene_id = int(components[1])
                 if gene_id in gene_ids_in_db:
-                    gene_locus = components[2]
+                    gene_symbol = components[2]
                     description = components[8]
-                    self.geneid2name[gene_id] = (gene_locus, description)
+                    self.geneid2name[gene_id] = (gene_symbol, description)
 
         logging.info('Writing index with {} keys to: {}'.format(len(self.geneid2name), index_file))
         with open(index_file, 'wb') as f:
@@ -125,19 +125,29 @@ class GeneResolver:
         If description and locus are available, Description//Focus is returned
         else either the gene descriptor or locus
         :param gene_id: NCBI Gene ID
-        :return: Description//Locus if available, else description / focus
+        :return: Description//Symbol if available, else description / symbol
         """
         try:
             gene_id_int = int(gene_id)
-            locus, description = self.geneid2name[gene_id_int]
-            if locus and description:
-                return '{}//{}'.format(description, locus)
-            elif not locus:
+            symbol, description = self.geneid2name[gene_id_int]
+            if symbol and description:
+                return '{}//{}'.format(description, symbol)
+            elif not symbol:
                 return '{}'.format(description)
             else:
-                return '{}'.format(locus)
+                return '{}'.format(symbol)
         except ValueError:
             raise KeyError('Gene ids should be ints. {} is not an int'.format(gene_id))
+
+    def gene_id_to_symbol(self, gene_id):
+        """
+        Translates a NCBI Gene ID to a gene symbol like CYP3A4
+        :param gene_id:
+        :return:
+        """
+        gene_id_int = int(gene_id)
+        symbol, _ = self.geneid2name[gene_id_int]
+        return symbol
 
 
 class SpeciesResolver:
