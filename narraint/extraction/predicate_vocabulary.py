@@ -1,10 +1,10 @@
 
 def create_predicate_vocab():
-    return dict(causes=["cause", "result", "lead"],
-                inhibits=["inhibit", "disrupt", "suppress", "inhibitor", "disturb"],
+    return dict(inhibits=["inhibit", "disrupt", "suppress", "inhibitor", "disturb"],
                 interacts=["interacts with", "interact", "bind", "target"],
                 induces=["induce", "stimulate", "increase", "potentiate", "receive", "enhance", "promote", "improve",
-                         "activate", "higher", "metabolite", "metabolize", "metabolise", "metabol"],
+                         "activate", "higher", "metabolite", "metabolize", "metabolise", "metabol",
+                         "cause", "result", "lead", "causes"],
                 treats=["treat"],
                 associated=["associate", "associated", "associated with", "is a", "same as", "coexits with", "coexists",
                             "process", "method of", "part of", "correlate", "play role"],
