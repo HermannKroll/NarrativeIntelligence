@@ -160,13 +160,19 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
         if p.s_type == GENE and ';' in p.s_id:
             subj_ids = set()
             for g_id in p.s_id.split(';'):
-                subj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+                try:
+                    subj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+                except KeyError:
+                    continue
         else:
             subj_ids = [p.s_id]
         if p.o_type == GENE and ';' in p.o_id:
             obj_ids = set()
             for g_id in p.o_id.split(';'):
-                obj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+                try:
+                    obj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
+                except KeyError:
+                    continue
         else:
             obj_ids = [p.o_id]
         for s_id in subj_ids:
