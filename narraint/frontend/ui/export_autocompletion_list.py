@@ -21,13 +21,16 @@ def main():
                 continue
             written_entity_ids.add((e_id, e_type))
             try:
-                heading = resolver.get_name_for_var_ent_id(e_id, e_type)
-
-                if e_type in [GENE, SPECIES]:
+                # if entity is a gene - the entity is already the gene symbol
+                if e_type == GENE:
+                    heading = e_id
+                else:
+                    heading = resolver.get_name_for_var_ent_id(e_id, e_type)
+                if e_type in SPECIES:
                     if '//' in heading:
                         names = heading.split('//')
                         if len(names) != 2:
-                            raise ValueError('Species and Gene should have 2 names at max: {} ({})'.format(heading,
+                            raise ValueError('Species should have 2 names at max: {} ({})'.format(heading,
                                                                                                            names))
                         parts = []
                         for n in names:
