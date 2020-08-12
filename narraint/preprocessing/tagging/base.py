@@ -115,9 +115,11 @@ class BaseTagger(Thread):
                 document_collection=self.collection,
                 tagger_name=tagger_name,
                 tagger_version=tagger_version,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
             )
+            if not Session.is_sqlite:
+                insert_tag = insert_tag.on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+                )
             session.execute(insert_tag)
             session.commit()
 
@@ -130,10 +132,12 @@ class BaseTagger(Thread):
                 tagger_name=tagger_name,
                 tagger_version=tagger_version,
                 ent_type=ent_type,
-            ).on_conflict_do_nothing(
-                index_elements=('document_id', 'document_collection',
-                                'tagger_name', 'tagger_version', 'ent_type'),
             )
+            if not Session.is_sqlite:
+                insert_doc_tagged_by = insert_doc_tagged_by.on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection',
+                                    'tagger_name', 'tagger_version', 'ent_type'),
+                )
             session.execute(insert_doc_tagged_by)
             session.commit()
 

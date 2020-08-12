@@ -14,7 +14,7 @@ Base = declarative_base()
 class Document(Base):
     __tablename__ = "document"
     __table_args__ = (
-        PrimaryKeyConstraint('collection', id, sqlite_on_conflict='IGNORE')
+        PrimaryKeyConstraint('collection', 'id', sqlite_on_conflict='IGNORE'),
     )
     collection = Column(String)
     id = Column(BigInteger)
@@ -53,7 +53,7 @@ class Document(Base):
 class Tagger(Base):
     __tablename__ = "tagger"
     __table_args__ = (
-        PrimaryKeyConstraint('name', 'version', sqlite_on_conflict='IGNORE')
+        PrimaryKeyConstraint('name', 'version', sqlite_on_conflict='IGNORE'),
     )
     name = Column(String, primary_key=True)
     version = Column(String, primary_key=True)
@@ -84,10 +84,12 @@ class Tag(Base):
                              sqlite_on_conflict='IGNORE'),
         ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version'),
                              sqlite_on_conflict='IGNORE'),
-        UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+        UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id',
+                         sqlite_on_conflict='IGNORE'),
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
     )
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer)
     ent_type = Column(String, nullable=False)
     start = Column(Integer, nullable=False)
     end = Column(Integer, nullable=False)
@@ -174,7 +176,7 @@ class DocProcessedByIE(Base):
 class DocumentTranslation(Base):
     __tablename__ = "document_translation"
     __table_args__ = (
-        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
+        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE'),
     )
     document_id = Column(BigInteger)
     document_collection = Column(String)

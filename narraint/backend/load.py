@@ -55,9 +55,11 @@ def insert_taggers(*tagger_list):
         insert_stmt = insert(Tagger).values(
             name=tagger[0],
             version=tagger[1],
-        ).on_conflict_do_nothing(
-            index_elements=('name', 'version'),
         )
+        if not Session.is_sqlite:
+            insert_stmt = insert_stmt.on_conflict_do_nothing(
+                index_elements=('name', 'version'),
+            )
         session.execute(insert_stmt)
     session.commit()
 
@@ -230,9 +232,11 @@ def load(path, collection, tagger_mapping=None, logger=None):
                 id=d_content[0],
                 title=d_content[1],
                 abstract=d_content[2],
-            ).on_conflict_do_nothing(
-                index_elements=('collection', 'id'),
             )
+            if not Session.is_sqlite:
+                insert_document = insert_document.on_conflict_do_nothing(
+                    index_elements=('collection', 'id')
+                )
             session.execute(insert_document)
 
         # only if tagger mapping is set, tags will be inserted
@@ -258,9 +262,11 @@ def load(path, collection, tagger_mapping=None, logger=None):
                         document_collection=collection,
                         tagger_name=tagger_name,
                         tagger_version=tagger_version,
-                    ).on_conflict_do_nothing(
-                        index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
                     )
+                    if not Session.is_sqlite:
+                        insert_tag = insert_tag.on_conflict_do_nothing(
+                            index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+                        )
                     session.execute(insert_tag)
 
                 # Add DocTaggedBy
@@ -272,10 +278,12 @@ def load(path, collection, tagger_mapping=None, logger=None):
                         tagger_name=tagger_name,
                         tagger_version=tagger_version,
                         ent_type=ent_type,
-                    ).on_conflict_do_nothing(
-                        index_elements=('document_id', 'document_collection',
-                                        'tagger_name', 'tagger_version', 'ent_type'),
                     )
+                    if not Session.is_sqlite:
+                        insert_doc_tagged_by= insert_doc_tagged_by.on_conflict_do_nothing(
+                            index_elements=('document_id', 'document_collection',
+                                            'tagger_name', 'tagger_version', 'ent_type'),
+                        )
                     session.execute(insert_doc_tagged_by)
             else:
                 if logger: logger.warning("Document {} {} not in DB".format(collection, doc_id))
