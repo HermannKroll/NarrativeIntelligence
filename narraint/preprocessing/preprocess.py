@@ -180,7 +180,7 @@ def main():
     group_tag = parser.add_argument_group("Tagging")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
     parser.add_argument("-c", "--corpus", required=True)
-    group_tag.add_argument("--tagger-one", action="store_true",
+    group_tag.add_argument("--no-tagger-one", action="store_true",
                            help="Tag diseases and chemicals with TaggerOne instead of DNorm and tmChem.")
 
     group_settings = parser.add_argument_group("Settings")
@@ -264,7 +264,7 @@ def main():
                 args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger,
                 sub_output, conf, *tag_types
             )
-            kwargs = dict(resume=args.resume, use_tagger_one=args.tagger_one)
+            kwargs = dict(resume=args.resume, use_tagger_one= not args.no_tagger_one)
             process = multiprocessing.Process(target=preprocess, args=process_args, kwargs=kwargs)
             processes.append(process)
             process.start()
@@ -280,7 +280,7 @@ def main():
                 os.remove(sub_out_path)
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
-                   resume=args.resume, use_tagger_one=args.tagger_one)
+                   resume=args.resume, use_tagger_one= not args.no_tagger_one)
 
     if not args.workdir:
         logger.info("Done. Deleting tmp project directory.")
