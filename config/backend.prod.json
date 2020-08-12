@@ -1,4 +1,6 @@
 {
+  "use_SQLite": false,
+  "SQLite_path": "/home/jan/narintFork/test/sqlitebase.db",
   "POSTGRES_DB": "taggingdb",
   "POSTGRES_HOST": "134.169.32.169",
   "POSTGRES_PORT": "5432",
