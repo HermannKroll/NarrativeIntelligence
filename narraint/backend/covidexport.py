@@ -84,7 +84,7 @@ class CovExport:
         metadata = self.get_meta_by_artid(document_id)
         output_document_id = os.path.basename(translation.source)
         if metadata:
-            if translation.source == os.path.basename(self.meta.path):
+            if "metadata.csv" in translation.source:
                 output_document_id += "/" + translation.source_doc_id
             cord_uid = metadata['cord_uid'][0]
             source_collection = metadata['source_x']
@@ -243,9 +243,11 @@ class CovExport:
         self.logger.info("Starting export...")
         tag_json, translation_json = self.create_tag_json(tag_types)
 
-        with open(self.out_file, "w+") as f:
+        logging.info(f"Writing fulltext tag json to {self.out_file}...")
+        with open(self.out_file + "_entity_mentions_fulltexts.json", "w+") as f:
             json.dump(tag_json, f, indent=3)
-        with open(self.out_file + ".translation", "w+") as f:
+        logging.info(f"Writing fulltext translation json to {self.out_file}.translation...")
+        with open(self.out_file + "_translation.json", "w+") as f:
             json.dump(translation_json, f, indent=3)
 
         if only_abstract:
@@ -256,10 +258,12 @@ class CovExport:
                     if [tag for tag in tag_json[key] if tag['location']['paragraph'] <= 1]
                 }
             abs_translation_json = {key: translation_json[key] for key in abs_tag_json.keys()}
-            with open(self.out_file + ".abstract", "w+") as f:
+            logging.info(f"Writing abstract tag json to {self.out_file}.abstract ...")
+            with open(self.out_file + "cord19v30_entity_mentions_title_and_abstract.json", "w+") as f:
                 json.dump(abs_tag_json, f, indent=3)
-            with open(self.out_file + ".abstract.translation", "w+") as f:
-                json.dump(abs_translation_json, f, indent=3)
+            #logging.info(f"Writing abstract translation json to {self.out_file}.abstract.translation ...")
+            #with open(self.out_file + ".abstract.translation", "w+") as f:
+            #    json.dump(abs_translation_json, f, indent=3)
 
 
 def _build_file_dict(json_root):
