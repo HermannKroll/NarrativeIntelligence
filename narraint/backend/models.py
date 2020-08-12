@@ -13,9 +13,11 @@ Base = declarative_base()
 
 class Document(Base):
     __tablename__ = "document"
-
-    collection = Column(String, primary_key=True)
-    id = Column(BigInteger, primary_key=True)
+    __table_args__ = (
+        PrimaryKeyConstraint('collection', id, sqlite_on_conflict='IGNORE')
+    )
+    collection = Column(String)
+    id = Column(BigInteger)
     title = Column(String, nullable=False)
     abstract = Column(String, nullable=False)
     fulltext = Column(String)
@@ -50,6 +52,9 @@ class Document(Base):
 
 class Tagger(Base):
     __tablename__ = "tagger"
+    __table_args__ = (
+        PrimaryKeyConstraint('name', 'version', sqlite_on_conflict='IGNORE')
+    )
     name = Column(String, primary_key=True)
     version = Column(String, primary_key=True)
 
@@ -57,9 +62,12 @@ class Tagger(Base):
 class DocTaggedBy(Base):
     __tablename__ = "doc_tagged_by"
     __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')),
-        PrimaryKeyConstraint('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'),
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')
+                             , sqlite_on_conflict='IGNORE'),
+        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')
+                             , sqlite_on_conflict='IGNORE'),
+        PrimaryKeyConstraint('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'
+                             , sqlite_on_conflict='IGNORE'),
     )
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
@@ -72,8 +80,10 @@ class DocTaggedBy(Base):
 class Tag(Base):
     __tablename__ = "tag"
     __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version')),
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection'),
+                             sqlite_on_conflict='IGNORE'),
+        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version'),
+                             sqlite_on_conflict='IGNORE'),
         UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
     )
 
@@ -118,9 +128,10 @@ class Predication(Base):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
     )
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(BigInteger, autoincrement=True)
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
     subject_openie = Column(String, nullable=False)
@@ -150,17 +161,23 @@ class Predication(Base):
 
 class DocProcessedByIE(Base):
     __tablename__ = "doc_processed_by_ie"
-
-    document_id = Column(BigInteger, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    extraction_type = Column(String, primary_key=True)
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('document_id', 'document_collection', 'extraction_type', sqlite_on_conflict='IGNORE')
+    )
+    document_id = Column(BigInteger)
+    document_collection = Column(String)
+    extraction_type = Column(String)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
 
 class DocumentTranslation(Base):
     __tablename__ = "document_translation"
-    document_id = Column(BigInteger, primary_key=True)
-    document_collection = Column(String, primary_key=True)
+    __table_args__ = (
+        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
+    )
+    document_id = Column(BigInteger)
+    document_collection = Column(String)
     source_doc_id = Column(String, nullable=False)
     md5 = Column(String, nullable=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)

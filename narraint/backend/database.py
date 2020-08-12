@@ -45,10 +45,17 @@ def add_engine_pidguard(engine):
 
 class Session:
     _instance = None
+    is_sqlite = False
 
     def _load_config(self):
         with open(BACKEND_CONFIG) as f:
             config = json.load(f)
+        Session.is_sqlite = False or config["use_SQLite"]
+        if Session.is_sqlite:
+            self.sqlite_path = config["SQLite_path"]
+            print(self.sqlite_path)
+            if not self.sqlite_path:
+                raise ValueError("use_SQLite is true, but SQLite_path is not set!")
         self.config = dict(
             POSTGRES_USER=environ.get("NI_POSTGRES_USER", config["POSTGRES_USER"]),
             POSTGRES_PW=environ.get("NI_POSTGRES_PW", config["POSTGRES_PW"]),
@@ -59,22 +66,26 @@ class Session:
 
     def __init__(self):
         if not self._instance:
+            self.sqlite_path = None
             self._load_config()
             self.engine = create_engine(self.get_conn_uri())
             add_engine_pidguard(self.engine)
-            session_cls = sessionmaker(bind=self.engine) # python black magic: equip self with additional functions
+            session_cls = sessionmaker(bind=self.engine)  # python black magic: equip self with additional functions
             self.session = scoped_session(session_cls)  # session_cls()
             Base.metadata.create_all(self.engine)
         else:
             raise ValueError("Instance already exists: Use get()")
 
     def get_conn_uri(self):
-        return "postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}".format(
-            user=self.config["POSTGRES_USER"],
-            password=self.config["POSTGRES_PW"],
-            host=self.config["POSTGRES_HOST"],
-            port=self.config["POSTGRES_PORT"],
-            db=self.config["POSTGRES_DB"],
+        if self.sqlite_path:
+            return f"sqlite:///{self.sqlite_path}"
+        else:
+            return "postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}".format(
+                user=self.config["POSTGRES_USER"],
+                password=self.config["POSTGRES_PW"],
+                host=self.config["POSTGRES_HOST"],
+                port=self.config["POSTGRES_PORT"],
+                db=self.config["POSTGRES_DB"],
         )
 
     @classmethod
