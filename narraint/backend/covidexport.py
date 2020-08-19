@@ -5,6 +5,7 @@ import os
 import unicodedata
 from datetime import datetime
 from glob import glob
+from pathlib import  Path
 
 import json
 
@@ -243,6 +244,7 @@ class CovExport:
         self.logger.info("Starting export...")
         tag_json, translation_json = self.create_tag_json(tag_types)
 
+        Path(os.path.dirname(self.out_file)).mkdir(parents=True, exist_ok=True)
         logging.info(f"Writing fulltext tag json to {self.out_file}...")
         with open(self.out_file + "_entity_mentions_fulltexts.json", "w+") as f:
             json.dump(tag_json, f, indent=3)
