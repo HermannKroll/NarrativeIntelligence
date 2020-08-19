@@ -50,7 +50,7 @@ class Session:
     def _load_config(self):
         with open(BACKEND_CONFIG) as f:
             config = json.load(f)
-        Session.is_sqlite = False or config["use_SQLite"]
+        Session.is_sqlite = False or ("use_SQLite" in config and config["use_SQLite"])
         if Session.is_sqlite:
             self.sqlite_path = config["SQLite_path"]
             print(self.sqlite_path)
