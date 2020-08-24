@@ -57,14 +57,13 @@ def init_preprocess_logger(log_filename, log_level, log_format=LOGGING_FORMAT, w
 
 def get_tagger_by_ent_type(tag_types, use_tagger_one):
     tagger_by_ent_type = {}
-    if enttypes.GENE in tag_types:
+
+    if enttypes.GENE in tag_types and enttypes.SPECIES in tag_types:
         tagger_by_ent_type[enttypes.GENE] = GNormPlus
-        if enttypes.SPECIES not in tag_types:
-            raise ValueError("GNormPlus does not support tagging of Species and Genes separately")
-    if enttypes.SPECIES in tag_types:
         tagger_by_ent_type[enttypes.SPECIES] = GNormPlus
-        if enttypes.GENE not in tag_types:
-            raise ValueError("GNormPlus does not support tagging of Species and Genes separately")
+
+    if (enttypes.GENE in tag_types) != (enttypes.SPECIES in tag_types):
+        raise ValueError("GNormPlus does not support tagging of Species and Genes separately")
 
     if enttypes.DISEASE in tag_types and not use_tagger_one:
         tagger_by_ent_type[enttypes.DISEASE] = DNorm
@@ -73,7 +72,7 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     if enttypes.CHEMICAL in tag_types and enttypes.DISEASE in tag_types and use_tagger_one:
         tagger_by_ent_type[enttypes.CHEMICAL] = TaggerOne
         tagger_by_ent_type[enttypes.DISEASE] = TaggerOne
-    if (enttypes.CHEMICAL not in tag_types or enttypes.DISEASE not in tag_types) and use_tagger_one:
+    if (enttypes.CHEMICAL in tag_types) != (enttypes.DISEASE in tag_types) and use_tagger_one:
         raise ValueError("TaggerOne does not support Tagging of Chemicals or Diseases separately!")
     if enttypes.DOSAGE_FORM in tag_types:
         tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
