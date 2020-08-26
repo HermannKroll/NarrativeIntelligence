@@ -157,24 +157,30 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
     start_time = datetime.now()
     predications_len = len(predications)
     for idx, p in enumerate(predications):
+        subj_ids = set()
         if p.s_type == GENE and ';' in p.s_id:
-            subj_ids = set()
             for g_id in p.s_id.split(';'):
                 try:
                     subj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
                 except KeyError:
                     continue
         else:
-            subj_ids = [p.s_id]
+            try:
+                subj_ids.add(generesolver.gene_id_to_symbol(p.s_id).lower())
+            except KeyError:
+                continue
+        obj_ids = set()
         if p.o_type == GENE and ';' in p.o_id:
-            obj_ids = set()
             for g_id in p.o_id.split(';'):
                 try:
                     obj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
                 except KeyError:
                     continue
         else:
-            obj_ids = [p.o_id]
+            try:
+                obj_ids.add(generesolver.gene_id_to_symbol(p.o_id).lower())
+            except KeyError:
+                continue
         for s_id in subj_ids:
             for o_id in obj_ids:
                 p_cleaned = PRED(p.doc_id, p.subj, p.pred, p.pred_cleaned, p.obj, p.conf, p.sent, s_id, p.s_str,
