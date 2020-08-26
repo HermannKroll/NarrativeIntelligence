@@ -362,6 +362,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' +
         'PMID: ' + document_id + '</a>' + '<br><b>' + title  + '</b>' + e_string + '<br></div>');
+    let divProv = $('<button data-toggle="collapse" data-target="#prov_'+document_id+'">Provenance</button>' +
+        '<div id="prov_'+document_id+'" class="collapse">\n' +
+         e_string  + '</div>')
+    divDoc.append(divProv);
     return divDoc;
 };
 
