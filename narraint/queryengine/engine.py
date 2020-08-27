@@ -56,7 +56,7 @@ class QueryEngine:
                 # check if x already occurred -> yes join both aliased predication together
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
-                    query = query.filter(pred.subject_id == s)
+                    query = query.filter(pred.subject_id.like('{}%'.format(s)))
                     if s_t in [GENE, SPECIES]:
                         query = query.filter(pred.subject_type == s_t)
                 else:
@@ -79,7 +79,7 @@ class QueryEngine:
                         else:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
-                    query = query.filter(pred.object_id == o)
+                    query = query.filter(pred.object_id.like('{}'.format(o)))
                     if o_t in [GENE, SPECIES]:
                         query = query.filter(pred.object_type == o_t)
                 else:
@@ -120,7 +120,8 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_canonicalized == p)
+                query = query.filter(pred.subject_id.like('{}'.format(s), pred.object_id.like('{}'.format(o)),
+                                                          pred.predicate_canonicalized == p))
                 if s_t in [GENE, SPECIES]:
                     query = query.filter(pred.subject_type == s_t)
                 if o_t in [GENE, SPECIES]:
@@ -172,16 +173,22 @@ class QueryEngine:
                 predicate_canonicalized = r[offset + 3]
                 predicate = r[offset + 8]
                 sentence = r[offset + 9]
-                explanations.append(QueryFactExplanation(sentence, predicate, predicate_canonicalized))
+                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized))
                 conf += float(r[offset+7])
             # create query result
             doc_id = r[0]
             doc_ids.add(doc_id)
 
-            if doc_id not in doc2result:
-                doc2result[doc_id] = QueryDocumentResult(doc_id, r[1], var2sub, conf, explanations)
+            # each document id + the variable substitution forms a unique document result
+            var2sub_set = set()
+            for k, v in var2sub:
+                var2sub_set.add('{}:{}'.format(k, v))
+            key = (doc_id, frozenset(var2sub_set))
+            if key not in doc2result:
+                doc2result[key] = QueryDocumentResult(doc_id, r[1], var2sub, conf, explanations)
             else:
-                doc2result[doc_id].explanations.extend(explanations)
+                for e in explanations:
+                    doc2result[key].integrate_explanation(e)
 
         results = list(doc2result.values())
        
