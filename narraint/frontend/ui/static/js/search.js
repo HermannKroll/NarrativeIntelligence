@@ -349,7 +349,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let document_id = queryResult["document_id"];
     let title = queryResult["title"];
     let explanations = queryResult["explanations"];
-    let e_string = "<br><br>Provenance: <br>";
+    let e_string = "";
     let j = 1;
     explanations.forEach(e => {
         e_string += j + '. ' + e["sentence"] + " (" + e["predicate"] +  " -> " + e["predicate_canonicalized"] + ')<br>';
@@ -361,7 +361,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     });
     let divDoc = $('<div><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' +
-        'PMID: ' + document_id + '</a>' + '<br><b>' + title  + '</b>' + e_string + '<br></div>');
+        'PMID: ' + document_id + '</a>' + '<br><b>' + title  + '</b><br></div><br>');
     let divProv = $('<button data-toggle="collapse" data-target="#prov_'+document_id+'">Provenance</button>' +
         '<div id="prov_'+document_id+'" class="collapse">\n' +
          e_string  + '</div>')
