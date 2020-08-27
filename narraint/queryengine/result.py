@@ -51,7 +51,8 @@ class QueryFactExplanation:
     version of the predicate
     """
 
-    def __init__(self, sentence, predicate, predicate_canonicalized):
+    def __init__(self, position, sentence, predicate, predicate_canonicalized):
+        self.position = position
         self.sentence = sentence
         self.predicate = predicate
         self.predicate_canonicalized = predicate_canonicalized
@@ -95,6 +96,24 @@ class QueryDocumentResult(QueryResultBase):
         self.var2substitution = var2substitution
         self.confidence = confidence
         self.explanations = explanations
+
+    def integrate_explanation(self, explanation: QueryFactExplanation):
+        """
+        Integrates a explanation into the current list of explanations for this document and var substitution
+        If the predicate and the sentence are already included as a explanation - the new explanation won't be added
+        If the predicate is new but within the sentence, the predicate will be joined by a '/' into the existing list
+        Else the new explanation will be added to the list
+        :param explanation: a QueryFactExplanation for this document
+        :return: None
+        """
+        for e in self.explanations:
+            if e.position == explanation.position and e.sentence == explanation.sentence:
+                if explanation.predicate in e.predicate:
+                    return
+                else:
+                    e.predicate = e.predicate + '/' + explanation.predicate
+                    return
+        self.explanations.append(explanation)
 
     def to_dict(self):
         e_dict = [e.to_dict() for e in self.explanations]
