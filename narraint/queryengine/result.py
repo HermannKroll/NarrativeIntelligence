@@ -60,18 +60,22 @@ class QueryFactExplanation:
     version of the predicate
     """
 
-    def __init__(self, position, sentence, predicate, predicate_canonicalized):
+    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str):
         self.position = position
         self.sentence = sentence
         self.predicate = predicate
         self.predicate_canonicalized = predicate_canonicalized
+        self.subject_str = subject_str
+        self.object_str = object_str
 
     def __str__(self):
-        return '{} ("{}" -> "{}")'.format(self.sentence, self.predicate, self.predicate_canonicalized)
+        return '{} [{}, "{}" -> "{}", {}]'.format(self.sentence, self.subject_str, self.predicate,
+                                                  self.predicate_canonicalized, self.object_str)
 
     def to_dict(self):
         return dict(sentence=self.sentence, predicate=self.predicate,
-                    predicate_canonicalized=self.predicate_canonicalized)
+                    predicate_canonicalized=self.predicate_canonicalized,
+                    subject_str=self.subject_str, object_str=self.object_str)
 
 
 class QueryResultBase:
@@ -117,11 +121,12 @@ class QueryDocumentResult(QueryResultBase):
         """
         for e in self.explanations:
             if e.position == explanation.position and e.sentence == explanation.sentence:
-                if explanation.predicate in e.predicate:
-                    return
-                else:
+                if explanation.predicate not in e.predicate:
                     e.predicate = e.predicate + '/' + explanation.predicate
-                    return
+                if explanation.subject_str not in e.subject_str:
+                    e.subject_str = e.subject_str + '/' + explanation.subject_str
+                if explanation.object_str not in e.object_str:
+                    e.object_str = e.object_str + '/' + explanation.object_str
         self.explanations.append(explanation)
 
     def to_dict(self):
