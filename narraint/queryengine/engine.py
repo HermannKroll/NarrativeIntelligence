@@ -171,10 +171,12 @@ class QueryEngine:
             conf = 0
             for i in range(0, len(graph_query)):
                 offset = 2 + i * 10
+                subject_str = r[offset + 1]
+                object_str = r[offset + 5]
                 predicate_canonicalized = r[offset + 3]
                 predicate = r[offset + 8]
                 sentence = r[offset + 9]
-                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized))
+                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized, subject_str, object_str))
                 conf += float(r[offset + 7])
             # create query result
             doc_id = r[0]
