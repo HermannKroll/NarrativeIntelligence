@@ -352,7 +352,15 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let e_string = "";
     let j = 1;
     explanations.forEach(e => {
-        e_string += j + '. ' + e["sentence"] + "<br>[" + e["subject_str"]+ ", " + e["predicate"] +  " -> " +
+        let sentence = e["sentence"];
+        let s_reg = new RegExp('('+e["subject_str"]+')', 'gi');
+        let p_reg = new RegExp('('+e["predicate"]+')', 'gi');
+        let o_reg = new RegExp('('+e["object_str"]+')', 'gi');
+        sentence = sentence.replaceAll(s_reg, "<mark>"+e["subject_str"]+"</mark>")
+        sentence = sentence.replaceAll(p_reg, "<mark>"+e["predicate"]+"</mark>")
+        sentence = sentence.replaceAll(o_reg, "<mark>"+e["object_str"]+"</mark>")
+
+        e_string += j + '. ' + sentence + "<br>[" + e["subject_str"]+ ", " + e["predicate"] +  " -> " +
             e["predicate_canonicalized"] + ", " + e["object_str"]  + ']<br>';
         j += 1;
         if(j-1 === query_len){
