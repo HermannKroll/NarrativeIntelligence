@@ -1,6 +1,8 @@
 from collections import defaultdict
 
 from narraint.entity.entityresolver import EntityResolver
+from narraint.entity.enttypes import DISEASE, CHEMICAL
+from narraint.entity.meshontology import MeSHOntology
 
 
 class QueryEntitySubstitution:
@@ -27,6 +29,10 @@ class QueryEntitySubstitution:
         entity_resolver = EntityResolver.instance()
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
+        # Convert MeSH Tree Numbers to MeSH Descriptors
+        if self.entity_type in [CHEMICAL, DISEASE] and not self.entity_id.startswith('MESH:'):
+            mesh_ontology = MeSHOntology.instance()
+            self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
         try:
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type)
         except KeyError:
@@ -121,6 +127,19 @@ class QueryDocumentResult(QueryResultBase):
 
     def get_result_size(self):
         return 1
+
+    def __eq__(self, other):
+        if not isinstance(other, QueryDocumentResult):
+            return False
+        if self.document_id != other.document_id:
+            return False
+        for k, v in self.var2substitution.items():
+            if k not in other.var2substitution:
+                return False
+            v_o = other.var2substitution[k]
+            if v.entity_id != v_o.entity_id or v.entity_type != v_o.entity_type:
+                return False
+        return True
 
 
 class QueryDocumentResultList(QueryResultBase):
