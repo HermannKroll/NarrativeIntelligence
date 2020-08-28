@@ -32,7 +32,10 @@ class QueryEntitySubstitution:
         # Convert MeSH Tree Numbers to MeSH Descriptors
         if self.entity_type in [CHEMICAL, DISEASE] and not self.entity_id.startswith('MESH:'):
             mesh_ontology = MeSHOntology.instance()
-            self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
+            try:
+                self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
+            except KeyError:
+                pass
         try:
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type)
         except KeyError:
