@@ -207,8 +207,7 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     """
     logging.info('Transforming entity ids to prefixes...')
     predications_cleaned = []
-    mesh_ontology = MeSHOntology()
-    mesh_ontology.load_index()
+    mesh_ontology = MeSHOntology.instance()
     start_time = datetime.now()
     predications_len = len(predications)
     for idx, p in enumerate(predications):
