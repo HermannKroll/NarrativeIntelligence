@@ -11,7 +11,8 @@ from sqlalchemy.dialects import postgresql
 
 from narraint.entity.enttypes import GENE, SPECIES
 from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryResultAggregate, QueryEntitySubstitution
+from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryResultAggregate, \
+    QueryEntitySubstitution
 
 QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -79,7 +80,7 @@ class QueryEngine:
                         else:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
-                    query = query.filter(pred.object_id.like('{}'.format(o)))
+                    query = query.filter(pred.object_id.like('{}%'.format(o)))
                     if o_t in [GENE, SPECIES]:
                         query = query.filter(pred.object_type == o_t)
                 else:
@@ -120,8 +121,8 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                query = query.filter(pred.subject_id.like('{}'.format(s), pred.object_id.like('{}'.format(o)),
-                                                          pred.predicate_canonicalized == p))
+                query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)),
+                                     pred.predicate_canonicalized == p)
                 if s_t in [GENE, SPECIES]:
                     query = query.filter(pred.subject_type == s_t)
                 if o_t in [GENE, SPECIES]:
@@ -156,12 +157,12 @@ class QueryEngine:
 
                 if t == 'subject':
                     # it's ent_str, ent_id, ent_type
-                    var2sub[v] = QueryEntitySubstitution(r[offset+1], r[offset], r[offset+2])
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 1], r[offset], r[offset + 2])
                 elif t == 'object':
                     # it's ent_str, ent_id, ent_type
-                    var2sub[v] = QueryEntitySubstitution(r[offset+5], r[offset+4], r[offset+6])
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 5], r[offset + 4], r[offset + 6])
                 elif t == 'predicate':
-                    var2sub[v] = QueryEntitySubstitution(r[offset+3], 'predicate', 'predicate')
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 3], 'predicate', 'predicate')
                 else:
                     raise ValueError('Unknown position in query projection')
 
@@ -174,7 +175,7 @@ class QueryEngine:
                 predicate = r[offset + 8]
                 sentence = r[offset + 9]
                 explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized))
-                conf += float(r[offset+7])
+                conf += float(r[offset + 7])
             # create query result
             doc_id = r[0]
             doc_ids.add(doc_id)
@@ -191,7 +192,7 @@ class QueryEngine:
                     doc2result[key].integrate_explanation(e)
 
         results = list(doc2result.values())
-       
+
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
                                     sql_query.replace('\n', ' '), doc_ids)
@@ -203,11 +204,11 @@ class QueryEngine:
     def query_predicates_cleaned(collection=None):
         session = Session.get()
         if not collection:
-            query = session.query(Predication.predicate_cleaned.distinct()).\
+            query = session.query(Predication.predicate_cleaned.distinct()). \
                 filter(Predication.predicate_cleaned.isnot(None))
         else:
             query = session.query(Predication.predicate_cleaned.distinct()). \
-                filter(Predication.predicate_cleaned.isnot(None)).\
+                filter(Predication.predicate_cleaned.isnot(None)). \
                 filter(Predication.document_collection == collection)
         predicates = []
         start_time = datetime.now()
@@ -220,7 +221,8 @@ class QueryEngine:
     @staticmethod
     def query_entities():
         session = Session.get()
-        query_subjects = session.query(Predication.subject_id, Predication.subject_str, Predication.subject_type).distinct()
+        query_subjects = session.query(Predication.subject_id, Predication.subject_str,
+                                       Predication.subject_type).distinct()
         query_objects = session.query(Predication.object_id, Predication.object_str, Predication.object_type).distinct()
         query = query_subjects.union(query_objects).distinct()
 
@@ -232,4 +234,3 @@ class QueryEngine:
 
         logging.info('{} entities queried in {}s'.format(len(entities), datetime.now() - start_time))
         return entities
-
