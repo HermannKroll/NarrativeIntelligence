@@ -176,7 +176,8 @@ class QueryEngine:
                 predicate_canonicalized = r[offset + 3]
                 predicate = r[offset + 8]
                 sentence = r[offset + 9]
-                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized, subject_str, object_str))
+                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized, subject_str,
+                                                         object_str))
                 conf += float(r[offset + 7])
             # create query result
             doc_id = r[0]
