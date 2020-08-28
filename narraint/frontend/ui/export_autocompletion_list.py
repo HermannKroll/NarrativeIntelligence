@@ -1,7 +1,9 @@
 import logging
 
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES
+from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL, DISEASE
+from narraint.entity.meshontology import MeSHOntology
+from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.engine import QueryEngine
 
 
@@ -12,15 +14,27 @@ def main():
 
     resolver = EntityResolver()
     entities = QueryEngine.query_entities()
+    mesh_ontology = MeSHOntology().instance()
     written_entity_ids = set()
     ignored = []
-    with open('ac_entities.txt', 'wt') as f:
+    with open('static/ac_all.txt', 'wt') as f:
+        predicates = create_predicate_vocab()
+        for pred in predicates.keys():
+            f.write('{}\tpredicate\n'.format(pred))
+        f.write('dosageform\tpredicate\n')
         counter, notfound = 0, 0
         for e_id, e_str, e_type in entities:
-            if (e_id, e_type) in written_entity_ids:
-                continue
-            written_entity_ids.add((e_id, e_type))
             try:
+                # Convert MeSH Tree Numbers to MeSH Descriptors
+                if e_type in [CHEMICAL, DISEASE] and not e_id.startswith('MESH:'):
+                    mesh_ontology = MeSHOntology.instance()
+                    e_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(e_id)[0])
+
+                # Skip duplicated entries
+                if (e_id, e_type) in written_entity_ids:
+                    continue
+                written_entity_ids.add((e_id, e_type))
+
                 # if entity is a gene - the entity is already the gene symbol
                 if e_type == GENE:
                     heading = e_id
