@@ -123,11 +123,12 @@ class QueryDocumentResult(QueryResultBase):
         for e in self.explanations:
             if e.position == explanation.position and e.sentence == explanation.sentence:
                 if explanation.predicate not in e.predicate:
-                    e.predicate = e.predicate + '/' + explanation.predicate
+                    e.predicate = e.predicate + '//' + explanation.predicate
                 if explanation.subject_str not in e.subject_str:
-                    e.subject_str = e.subject_str + '/' + explanation.subject_str
+                    e.subject_str = e.subject_str + '//' + explanation.subject_str
                 if explanation.object_str not in e.object_str:
-                    e.object_str = e.object_str + '/' + explanation.object_str
+                    e.object_str = e.object_str + '//' + explanation.object_str
+                return
         self.explanations.append(explanation)
 
     def to_dict(self):
