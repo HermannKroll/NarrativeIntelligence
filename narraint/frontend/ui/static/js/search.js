@@ -353,12 +353,19 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let j = 1;
     explanations.forEach(e => {
         let sentence = e["sentence"];
-        let s_reg = new RegExp('('+e["subject_str"]+')', 'gi');
-        let p_reg = new RegExp('('+e["predicate"]+')', 'gi');
-        let o_reg = new RegExp('('+e["object_str"]+')', 'gi');
-        sentence = sentence.replaceAll(s_reg, "<mark>"+e["subject_str"]+"</mark>")
-        sentence = sentence.replaceAll(p_reg, "<mark>"+e["predicate"]+"</mark>")
-        sentence = sentence.replaceAll(o_reg, "<mark>"+e["object_str"]+"</mark>")
+        // an explanation might have multiple subjects / predicates / objects sperated by //
+        e["subject_str"].split('//').forEach(s => {
+            let s_reg = new RegExp('('+s+')', 'gi');
+            sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">'+s+"</code>")
+        });
+        e["predicate"].split('//').forEach(p => {
+            let p_reg = new RegExp('('+p+')', 'gi');
+            sentence = sentence.replaceAll(p_reg, '<mark>'+p+"</mark>")
+        });
+         e["object_str"].split('//').forEach(o => {
+            let o_reg = new RegExp('('+o+')', 'gi');
+            sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">'+o+"</code>")
+        });
 
         e_string += j + '. ' + sentence + "<br>[" + e["subject_str"]+ ", " + e["predicate"] +  " -> " +
             e["predicate_canonicalized"] + ", " + e["object_str"]  + ']<br>';
