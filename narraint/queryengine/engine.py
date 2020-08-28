@@ -15,6 +15,7 @@ QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
+DO_NOT_CARE_PREDICATE = 'associated'
 
 
 class QueryEngine:
@@ -95,8 +96,9 @@ class QueryEngine:
                             query = query.filter(pred.object_id == last_pred.subject_id)
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
-
-                if not p.startswith('?'):
+                if p == DO_NOT_CARE_PREDICATE:
+                    query = query.filter(pred.predicate_canonicalized.isnot(None))
+                elif not p.startswith('?'):
                     query = query.filter(pred.predicate_canonicalized == p)
                 else:
                     query = query.filter(pred.predicate_canonicalized.isnot(None))
@@ -114,10 +116,14 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)),
-                                     pred.predicate_canonicalized == p)
+                if p == DO_NOT_CARE_PREDICATE:
+                    query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)))
+                    query = query.filter(pred.predicate_canonicalized.isnot(None))
+                else:
+                    query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)),
+                                         pred.predicate_canonicalized == p)
 
-                    # order by document id descending and limit results to 100
+        # order by document id descending and limit results to 100
         query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
 
         return query, var_names
