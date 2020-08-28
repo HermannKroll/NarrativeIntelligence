@@ -79,6 +79,7 @@ class GeneResolver:
 
     def __init__(self):
         self.geneid2name = {}
+        self._genelocus2name = {}
 
     def get_reverse_index(self):
         term2entity = {}
@@ -138,6 +139,24 @@ class GeneResolver:
                 return '{}'.format(symbol)
         except ValueError:
             raise KeyError('Gene ids should be ints. {} is not an int'.format(gene_id))
+
+    def gene_locus_to_description(self, locus):
+        """
+        Get the description for a gene locus
+        If description is available description//locus will be returned else only the locus
+        If called first, a index will be computed
+        :param locus: the gene locus
+        :return: if translation is available description//locus will be returned - else locus
+        """
+        if not self._genelocus2name:
+            logging.info('Computing genelocus2name index on the fly...')
+            self._genelocus2name = {}
+            for (locus, description) in self.geneid2name.values():
+                self._genelocus2name[locus] = description
+        if locus in self._genelocus2name:
+            return '{}//{}'.format(self._genelocus2name[locus], locus)
+        else:
+            return '{}'.format(locus)
 
     def gene_id_to_symbol(self, gene_id):
         """
@@ -268,17 +287,21 @@ class EntityResolver:
             EntityResolver()
         return EntityResolver.__instance
 
-    def get_name_for_var_ent_id(self, entity_id, entity_type):
+    def get_name_for_var_ent_id(self, entity_id, entity_type, resolve_gene_by_id=True):
         """
         Translates an entity id and type to its name
         :param entity_id: the entity id
         :param entity_type: the entity type
+        :param resolve_gene_by_id:
         :return: uses the corresponding resolver for the entity type
         """
         if entity_id.startswith('MESH:') or entity_type in [CHEMICAL, DISEASE]:
             return self.mesh.descriptor_to_heading(entity_id)
         if entity_type == GENE:
-            return self.gene.gene_id_to_name(entity_id)
+            if resolve_gene_by_id:
+                return self.gene.gene_id_to_name(entity_id)
+            else:
+                return self.gene.gene_locus_to_description(entity_id)
         if entity_type == SPECIES:
             return self.species.species_id_to_name(entity_id)
         if entity_type == DOSAGE_FORM:
