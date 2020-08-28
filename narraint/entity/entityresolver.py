@@ -83,8 +83,8 @@ class GeneResolver:
     def get_reverse_index(self):
         term2entity = {}
         for e_id, (gene_focus, gene_name) in self.geneid2name.items():
-            term2entity[gene_focus.strip().lower()] = str(e_id)
-            term2entity[gene_name.strip().lower()] = str(e_id)
+            term2entity[gene_focus.strip().lower()] = gene_focus.strip().lower()
+            term2entity[gene_name.strip().lower()] = gene_focus.strip().lower()
         return term2entity
 
     def build_index(self, gene_input=GENE_FILE, index_file=GENE_INDEX_FILE):
