@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import datetime
-from collections import namedtuple
 
 from sqlalchemy.orm import aliased
 
@@ -9,10 +8,8 @@ from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
-from narraint.entity.enttypes import GENE, SPECIES
 from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryResultAggregate, \
-    QueryEntitySubstitution
+from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
 QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -58,8 +55,6 @@ class QueryEngine:
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
                     query = query.filter(pred.subject_id.like('{}%'.format(s)))
-                    if s_t in [GENE, SPECIES]:
-                        query = query.filter(pred.subject_type == s_t)
                 else:
                     var_name = VAR_NAME.search(s)
                     if not var_name:
@@ -81,8 +76,6 @@ class QueryEngine:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
                     query = query.filter(pred.object_id.like('{}%'.format(o)))
-                    if o_t in [GENE, SPECIES]:
-                        query = query.filter(pred.object_type == o_t)
                 else:
                     var_name = VAR_NAME.search(o)
                     if not var_name:
@@ -123,10 +116,6 @@ class QueryEngine:
             else:
                 query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)),
                                      pred.predicate_canonicalized == p)
-                if s_t in [GENE, SPECIES]:
-                    query = query.filter(pred.subject_type == s_t)
-                if o_t in [GENE, SPECIES]:
-                    query = query.filter(pred.object_type == o_t)
 
                     # order by document id descending and limit results to 100
         query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
