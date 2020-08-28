@@ -37,7 +37,8 @@ class QueryEntitySubstitution:
             except KeyError:
                 pass
         try:
-            ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type)
+            ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type,
+                                                               resolve_gene_by_id=False)
         except KeyError:
             ent_name = self.entity_str
         return ent_name
