@@ -22,7 +22,7 @@ class MeSHOntology:
             raise Exception('This class is a singleton - use EntityOntology.instance()')
         else:
             self.treeno2desc = {}
-            self.descriptor2treeno = defaultdict(list)
+            self.descriptor2treeno = {}
             self.load_index()
             MeSHOntology.__instance = self
 
@@ -37,8 +37,8 @@ class MeSHOntology:
         Clear the index by removing all entries from dictionaries
         :return: Nothing
         """
-        self.treeno2desc.clear()
-        self.descriptor2treeno.clear()
+        self.treeno2desc = {}
+        self.descriptor2treeno = {}
 
     def _add_descriptor_for_tree_no(self, descriptor_id, descriptor_heading, tree_no: str):
         """
@@ -59,7 +59,6 @@ class MeSHOntology:
                 results.append((d_id, d_heading))
         return results
 
-
     def get_descriptor_for_tree_no(self, tree_no: str) -> (str, str):
         """
         Gets a MeSH Descriptor for a tree number
@@ -75,7 +74,10 @@ class MeSHOntology:
         :param tree_no: Tree number for this descriptor
         :return:
         """
-        self.descriptor2treeno[descriptor_id].append(tree_no)
+        if descriptor_id in self.descriptor2treeno:
+            self.descriptor2treeno[descriptor_id].append(tree_no)
+        else:
+            self.descriptor2treeno[descriptor_id] = [tree_no]
 
     def get_tree_numbers_for_descriptor(self, descriptor_id) -> [str]:
         """
