@@ -55,12 +55,16 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         retrieved_ent_types.add(substitution.entity_type)
                         if substitution.entity_type in [CHEMICAL, DISEASE]:
                             id_without_mesh = substitution.entity_id[5:]
-                            pref_tree_numbers = self.mesh_ontology.get_tree_numbers_for_descriptor(id_without_mesh)
-                            for pref_t in pref_tree_numbers:
-                                prefix_substitution_list.append((pref_t, res.var2substitution[v]))
-                                prefix_document_result_list.append((pref_t, res))
-                                # this tree will have a document node
-                                self._pref_tree_nodes_with_docs.add(pref_t)
+                            try:
+                                pref_tree_numbers = self.mesh_ontology.get_tree_numbers_for_descriptor(id_without_mesh)
+                                for pref_t in pref_tree_numbers:
+                                    prefix_substitution_list.append((pref_t, res.var2substitution[v]))
+                                    prefix_document_result_list.append((pref_t, res))
+                                    # this tree will have a document node
+                                    self._pref_tree_nodes_with_docs.add(pref_t)
+                            except KeyError:
+                                # We will ignore that node here
+                                pass
                         else:
                             misc_document_results[substitution.entity_type].append(res)
                     prefix_substitution_list.sort(key=lambda x: x[0])
