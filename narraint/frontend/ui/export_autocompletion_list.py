@@ -36,11 +36,13 @@ def main():
                 written_entity_ids.add((e_id, e_type))
 
                 # if entity is a gene - the entity is already the gene symbol
-                if e_type == GENE:
-                    heading = e_id
-                else:
-                    heading = resolver.get_name_for_var_ent_id(e_id, e_type)
-                if e_type in SPECIES:
+                #if e_type == GENE:
+                 #   heading = e_id
+                #else:
+                if e_id == 'cyp3a4':
+                    print('test')
+                heading = resolver.get_name_for_var_ent_id(e_id, e_type, resolve_gene_by_id=False)
+                if e_type in [GENE, SPECIES]:
                     if '//' in heading:
                         names = heading.split('//')
                         if len(names) != 2:
@@ -50,6 +52,8 @@ def main():
                         for n in names:
                             parts.append('{}\t{}'.format(n, e_id))
                         result = '\n'.join(parts)
+                    else:
+                        result = '{}\t{}'.format(heading, e_id)
                 else:
                     result = '{}\t{}'.format(heading, e_id)
                 if counter == 0:
