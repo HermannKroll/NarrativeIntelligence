@@ -164,12 +164,12 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
                 for g_id in p.s_id.split(';'):
                     try:
                         subj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
-                    except KeyError:
+                    except (KeyError, ValueError):
                         continue
             else:
                 try:
                     subj_ids.add(generesolver.gene_id_to_symbol(p.s_id).lower())
-                except KeyError:
+                except (KeyError, ValueError):
                     continue
         else:
             subj_ids = [p.s_id]
@@ -179,12 +179,12 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
                 for g_id in p.o_id.split(';'):
                     try:
                         obj_ids.add(generesolver.gene_id_to_symbol(g_id).lower())
-                    except KeyError:
+                    except (KeyError, ValueError):
                         continue
             else:
                 try:
                     obj_ids.add(generesolver.gene_id_to_symbol(p.o_id).lower())
-                except KeyError:
+                except (KeyError, ValueError):
                     continue
         else:
             obj_ids = [p.o_id]
@@ -235,6 +235,7 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
         print_progress_with_eta('transforming mesh ids to tree prefixes...', idx, predications_len, start_time)
     logging.info('{} predications obtained'.format(len(predications_cleaned)))
     return predications_cleaned
+
 
 
 def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version, clean_genes=True,
