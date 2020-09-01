@@ -34,6 +34,8 @@ eval_q4_ids_correct = {26760500, 29253574, 20305377, 27803295, 22611195, 3051576
 print('Q4: {} correct of {} documents'.format(len(eval_q4_ids_correct), len(eval_q4_ids_met_mtor)))
 queries_pubmed.append(("PubMed", eval_q4, eval_q4_ids_met_mtor, eval_q4_ids_correct))
 
+
+# PMC
 # Erythromycin: D004917
 eval_q5 = "Gene:1576 metabolises Simvastatin. MESH:D004917 inhibits Gene:1576"
 eval_q5_ids_pmc_sim_cyp_ery = {28442937, 18360537, 30815270, 19436666, 26674520, 28144253, 22327313, 23585384, 20512335, 18225466, 25028555, 24474103, 30345053, 29950882, 27664109, 21577272, 16480505, 26089839, 14612892, 30808332, 24448021, 24888381, 23444277, 30092624, 25505582}
