@@ -4,7 +4,7 @@ from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits, perform
 from narraint.entity.enttypes import GENE
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.queryengine.engine import QueryEngine
-from ui.views import convert_query_text_to_fact_patterns
+from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 
 queries_pubmed = []
 
