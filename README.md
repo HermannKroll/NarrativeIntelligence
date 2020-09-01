@@ -109,6 +109,7 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_09_01](meetings/2020_09_01.md)
 - [2020_08_24](meetings/2020_08_24.md)
 - [2020_07_24](meetings/2020_07_24.md)
 - [2020_07_16](meetings/2020_07_16.md)
