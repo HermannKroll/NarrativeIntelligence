@@ -6,7 +6,7 @@ mesh_ontology = MeSHOntology()
 
 
 def perform_evaluation(query_engine, query_fact_patterns, document_collection, extraction_type,
-                                            ids_correct, id_sample=None, do_expansion=False, print_expansion=False):
+                       ids_correct, id_sample=None, do_expansion=False, print_expansion=False):
     """
     performs the evaluation of our graph query system
     :param query_engine: a reference to the query engine
