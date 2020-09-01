@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.enttypes import GENE, SPECIES
+from narraint.extraction.versions import PATHIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import VAR_NAME, VAR_TYPE, VAR_TYPE_PREDICATE
 
@@ -154,7 +155,7 @@ def main():
     q = session.query(Predication.subject_id, Predication.subject_type, Predication.predicate_canonicalized,
                       Predication.object_id, Predication.object_type)\
         .filter(Predication.predicate_canonicalized != None)\
-        .filter(Predication.extraction_type == 'PATH')\
+        .filter(Predication.extraction_type == PATHIE_EXTRACTION)\
         .filter(Predication.document_collection == 'PubMed')\
         .order_by(func.random()).limit(RANDOM_FACTS)
 

@@ -42,7 +42,7 @@ def main():
             for line in islice(fp, 1, None):
                 time_query, time_translation, result_size, _ = line.split('\t')
                 count += 1
-                time_query_datetime =  convert_time_to_milliseconds(time_query)
+                time_query_datetime = convert_time_to_milliseconds(time_query)
                 time_translation_datetime = convert_time_to_milliseconds(time_translation)
                 avg_time_query += float(time_query_datetime)
                 avg_time_translation += float(time_translation_datetime)

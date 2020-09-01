@@ -100,8 +100,8 @@ session = Session.get()
 pubmed = PubMedMEDLINE()
 mesh_ontology = MeSHOntology()
 
-GENE_NCBI_TO_MESH_MAPPING = {"1576": 'MESH:D051544', # CYP3A4
-                            "2475" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
+GENE_NCBI_TO_MESH_MAPPING = {"cyp3a4": 'MESH:D051544', # CYP3A4
+                            "mtor" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
 GENE_MESH_TO_NCBI = {v: k for k,v in GENE_NCBI_TO_MESH_MAPPING.items()}
 
 
