@@ -5,12 +5,10 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import update, and_, or_
 from sqlalchemy.exc import IntegrityError
 
-from narraint.entity.entityresolver import GeneResolver
 from narraint.backend.database import Session
 from narraint.backend.models import Predication, PredicationResult
-from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, SPECIES, DISEASE
-from narraint.entity.genemapper import GeneMapper
-from narraint.progress import print_progress_with_eta
+from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE
+
 
 DOSAGE_FORM_PREDICATE = "dosageform"
 ASSOCIATED_PREDICATE = "associated"
