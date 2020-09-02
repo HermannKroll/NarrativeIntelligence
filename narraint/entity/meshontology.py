@@ -103,9 +103,6 @@ class MeSHOntology:
         descriptor_count = len(descs)
         for idx, desc in enumerate(descs):
             for tn in desc.tree_numbers:
-                # only care about diseases (D) and chemicals (C)
-                if not tn.startswith('D') and not tn.startswith('C'):
-                    continue
                 self._add_descriptor_for_tree_no(desc.unique_id, desc.heading, tn)
                 self._add_tree_number_for_descriptor(desc.unique_id, tn)
             print_progress_with_eta("building mesh ontology", idx, descriptor_count, start_time, print_every_k=1)
