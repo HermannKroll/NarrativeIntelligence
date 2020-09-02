@@ -31,8 +31,6 @@ nano preprocess.json
 Enter your GNormPlus and TaggerOne root paths
 ```
 {
-  "pmcid2pmid": "/home/kroll/tools/pmcid2pmid.tsv",
-  "pmc_dir": "/hdd2/datasets/pubmed_central",
   "taggerOne": {
     "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
     "model": "models/model_BC5CDRJ_011.bin",
@@ -43,9 +41,7 @@ Enter your GNormPlus and TaggerOne root paths
   "gnormPlus": {
     "root": "/home/kroll/tools/tagger/GNormPlusJava",
     "javaArgs": "-Xmx100G -Xms30G"
-  },
-  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
-  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
+  }
 }
 ```
 You can ignore the pmcid2pmid, dnorm and tmchem settings. 
