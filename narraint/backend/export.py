@@ -150,6 +150,8 @@ def main():
         document_ids = None
 
     export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
+    logging.info('Finished')
 
+    
 if __name__ == "__main__":
     main()
