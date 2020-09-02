@@ -61,4 +61,5 @@ DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_
 DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
 
 # MeSH SubHeadings for MEDLINE PubMed
-MEDLINE_BASELINE_INDEX = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
+MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
+MESH2Doc_INDEX_PMC = os.path.join(TMP_DIR, "pmc_index.pkl")
