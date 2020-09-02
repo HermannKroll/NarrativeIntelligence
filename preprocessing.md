@@ -136,6 +136,6 @@ python3 narraint/entity/entitiyresolver.py
 ```
 This might take a while and will build all required indexes. Then, you can export the documents
 ```
-python3 narraint/backend/export/xml_export.py
+python3 narraint/backend/exports/xml_export.py
 ```
 See help for parameter description. 
