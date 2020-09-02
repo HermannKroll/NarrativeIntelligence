@@ -10,24 +10,19 @@ def delete_document_collection_from_database(document_collection: str):
     session = Session.get()
 
     logging.info('Deleting doc_processed_by_ie entries...')
-    q = session.query(DocProcessedByIE).filter(Tag.document_collection == document_collection).delete()
-    session.execute(q)
+    session.query(DocProcessedByIE).filter(DocProcessedByIE.document_collection == document_collection).delete()
 
     logging.info('Deleting predication entries...')
-    q = session.query(Predication).filter(Tag.document_collection == document_collection).delete()
-    session.execute(q)
+    session.query(Predication).filter(Predication.document_collection == document_collection).delete()
 
     logging.info('Deleting doc_tagged_by entries...')
-    q = session.query(DocTaggedBy).filter(DocTaggedBy.document_collection == document_collection).delete()
-    session.execute(q)
+    session.query(DocTaggedBy).filter(DocTaggedBy.document_collection == document_collection).delete()
 
     logging.info('Deleting tag entries...')
-    q = session.query(Tag).filter(Tag.document_collection == document_collection).delete()
-    session.execute(q)
+    session.query(Tag).filter(Tag.document_collection == document_collection).delete()
 
     logging.info('Deleting document entries...')
-    q = session.query(Document).filter(Document.collection == document_collection).delete()
-    session.execute(q)
+    session.query(Document).filter(Document.collection == document_collection).delete()
 
     logging.info('Begin commit...')
     session.commit()
