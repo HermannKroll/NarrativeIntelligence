@@ -16,7 +16,7 @@ from narraint.pubtator import conversion_errors
 from narraint.backend.models import Document
 
 class PMCConverter:
-    MAX_CONTENT_LENGTH = 500000
+    MAX_CONTENT_LENGTH = 1000000
     PATTERNS_TO_DELETE = (
         re.compile(r"<table-wrap\s.*?</table-wrap>"),  # <table-wrap>
         re.compile(r"<inline-formula\s.*?</inline-formula>"),  # <inline-formula>
@@ -152,11 +152,12 @@ class PMCConverter:
 
         for current, fn in enumerate(filename_list):
             pmcid = ".".join(fn.split("/")[-1].split(".")[:-1]).replace('PMC', '')
-            if pmcid in pmcid2pmid:
-                pmid = pmcid2pmid[pmcid]
+            pmcid_int = int(pmcid)
+            if pmcid_int in pmcid2pmid:
+                pmid = pmcid2pmid[int(pmcid_int)]
                 try:
                     out_file = os.path.join(output_dir, f"{pmid}.txt")
-                    self.convert(fn, out_file, pmcid, pmid)
+                    self.convert(fn, out_file, pmcid, str(pmid))
                 except conversion_errors.NoTitleError:
                     ignored_files.append(f"{fn}\nNo title was found!")
                 except conversion_errors.NoAbstractError:
