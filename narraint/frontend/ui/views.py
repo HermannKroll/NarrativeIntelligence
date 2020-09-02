@@ -220,94 +220,6 @@ def count_variables_in_query(patterns):
     return len(var_set)
 
 
-def _compute_entity_list(entity, entity_type):
-    """
-    Transforms an entity and entity type into a list
-    If the entity is a list of tree numbers nothing happens
-    else the entity will be packed into a list
-    :param entity: an entity id
-    :param entity_type: the entity type
-    :return: returns the entity id packed in a list
-    """
-    if entity_type == 'MESH_ONTOLOGY':
-        # it is already a list of tree numbers
-        return entity
-    else:
-        return [entity]
-
-
-def _merge_results(results: [QueryDocumentResult]) -> [QueryDocumentResult]:
-    """
-    Merges a list of document results and eliminates duplicated documents
-    :param results: a list of QueryDocumentResult
-    :return: a list of unique QueryDocumentResult
-    """
-    result_index = {}
-    unique_results = []
-    for r in results:
-        if r.document_id in result_index:
-            is_new_document = True
-            for existing in result_index[r.document_id]:
-                if existing == r:
-                    is_new_document = False
-                    break
-            if is_new_document:
-                result_index[r.document_id].append(r)
-                unique_results.append(r)
-        else:
-            result_index[r.document_id] = [r]
-            unique_results.append(r)
-    return unique_results
-
-
-def process_query(query_fact_patterns, data_source, query):
-    """
-    Executes the query fact patterns as a SQL query and collects all results
-    Expands the query automatically, if e.g. a MeSH descriptor has several tree numbers
-    :param query_fact_patterns: a list of query fact patterns
-    :param data_source: the data source PubMed / PMC
-    :param query: the query as the input string for logging
-    :return: a list of QueryDocumentResults
-    """
-    query_fact_patterns_expanded = []
-    expand_query = False
-    for idx, qp in enumerate(query_fact_patterns):
-        exp_cond1 = qp[1] == 'MESH_ONTOLOGY' and len(qp[0]) > 1
-        exp_cond2 = qp[4] == 'MESH_ONTOLOGY' and len(qp[3]) > 1
-
-        if exp_cond1 or exp_cond2:
-            expand_query = True
-            subj_entities = _compute_entity_list(qp[0], qp[1])
-            subj_type = qp[1]
-            predicates = [qp[2]]
-            obj_entities = _compute_entity_list(qp[3], qp[4])
-            obj_type = qp[4]
-            cross_product = list(itertools.product(subj_entities, [subj_type], predicates, obj_entities, [obj_type]))
-            query_fact_patterns_expanded.append(cross_product)
-        else:
-            query_fact_patterns_expanded.append(qp)
-
-    if 'Path' in data_source:
-        data_source = data_source.replace('_Path', '')
-        extraction_type = PATHIE_EXTRACTION
-    else:
-        extraction_type = OPENIE_EXTRACTION
-
-    if expand_query:
-        query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
-        logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
-        part_result = []
-        for query_fact_patterns in query_fact_patterns_expanded:
-            part_result.extend(query_engine.query_with_graph_query(list(query_fact_patterns), data_source,
-                                                                   extraction_type, query))
-        results = _merge_results(part_result)
-
-    else:
-        results = query_engine.query_with_graph_query(query_fact_patterns_expanded, data_source,
-                                                      extraction_type, query)
-    return results
-
-
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 
@@ -348,7 +260,15 @@ class SearchView(TemplateView):
                         logger.error("Do not support multiple variables in an ontology-based ranking")
                     else:
                         nt_string = convert_graph_patterns_to_nt(query)
-                        results = process_query(query_fact_patterns, data_source, query)
+                        if 'Path' in data_source:
+                            document_collection = data_source.replace('_Path', '')
+                            extraction_type = PATHIE_EXTRACTION
+                        else:
+                            document_collection = data_source
+                            extraction_type = OPENIE_EXTRACTION
+
+                        results = query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
+                                                                            extraction_type, query)
                         results_converted = []
                         if outer_ranking == 'outer_ranking_substitution':
                             substitution_aggregation = ResultAggregationBySubstitution()
