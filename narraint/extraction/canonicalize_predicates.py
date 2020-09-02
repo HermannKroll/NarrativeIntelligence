@@ -60,6 +60,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     session = Session.get()
     start_time = datetime.now()
     i = 0
+    pred_len = len(best_matches)
     for pred, (pred_canonicalized, _) in best_matches.items():
         if pred and pred_canonicalized != PRED_TO_REMOVE:
             stmt = update(Predication).where(Predication.predicate_cleaned == pred).\
@@ -70,7 +71,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
 
         session.execute(stmt)
         session.commit()
-        print_progress_with_eta('updating...', i, len(best_matches), start_time, print_every_k=5)
+        print_progress_with_eta('updating...', i, pred_len, start_time, print_every_k=5)
         i += 1
 
 
@@ -95,6 +96,7 @@ def main():
     best_matches = match_predicates(model, predicates, pred_vocab)
     logging.info('Canonicalizing predicates...')
     canonicalize_predicates(best_matches)
+    logging.info('Finished')
 
 
 if __name__ == "__main__":
