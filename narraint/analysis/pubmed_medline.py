@@ -7,8 +7,8 @@ from datetime import datetime
 from lxml import etree
 
 from narraint.backend.database import Session
-from narraint.backend.models import DocProcessedByOpenIE
-from narraint.config import MEDLINE_BASELINE_INDEX
+from narraint.backend.models import DocProcessedByIE
+from narraint.config import MESH2DOC_INDEX_Pubmed, MESH2Doc_INDEX_PMC
 from narraint.progress import print_progress_with_eta
 
 
@@ -17,10 +17,10 @@ class PubMedMEDLINE:
     Query interface for the PubMed sample. Requires pickled dictionary (descriptor -> set of pmids).
     """
 
-    def __init__(self):
-        if not os.path.exists(MEDLINE_BASELINE_INDEX):
-            raise ValueError("Index file {} can not be found.".format(MEDLINE_BASELINE_INDEX))
-        with open(MEDLINE_BASELINE_INDEX, "rb") as f:
+    def __init__(self, index=MESH2DOC_INDEX_Pubmed):
+        if not os.path.exists(index):
+            raise ValueError("Index file {} can not be found.".format(index))
+        with open(index, "rb") as f:
             self.desc_to_pmids = pickle.load(f)
 
         self.pmid_to_descs = None
@@ -70,6 +70,12 @@ class PubMedMEDLINE:
                 pmids = pmids.intersection(self._get_ids(desc))
 
         return pmids
+
+
+class PMCIndex(PubMedMEDLINE):
+
+    def __init__(self, index=MESH2Doc_INDEX_PMC):
+        super(PMCIndex, self).__init__(index=index)
 
 
 def load_file(filename, db_pmids=None):
@@ -159,15 +165,15 @@ def load_files(directory, db_pmids=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--build-index", "-i", help="Build index (default: {})".format(MEDLINE_BASELINE_INDEX),
-                        const=MEDLINE_BASELINE_INDEX, metavar="INDEX_FILE", nargs="?")
+    parser.add_argument("--build-index", "-i", help="Build index (default: {})".format(MESH2DOC_INDEX_Pubmed),
+                        const=MESH2DOC_INDEX_Pubmed, metavar="INDEX_FILE", nargs="?")
     parser.add_argument("--dir", "-d", help="Directory containing XML files", metavar="DIR", required=True)
     parser.add_argument("--query", "-q", help="Query PMIDs", metavar="DESC", nargs="+")
     args = parser.parse_args()
 
     # Query database
     session = Session.get()
-    query = session.query(DocProcessedByOpenIE.document_id).filter(DocProcessedByOpenIE.document_collection == "PMC")
+    query = session.query(DocProcessedByIE.document_id).filter(DocProcessedByIE.document_collection == "PubMed")
     results = session.execute(query)
     db_pmids = set(x[0] for x in results)
     print("DB: {} documents processed by OpenID".format(len(db_pmids)))

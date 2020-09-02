@@ -97,8 +97,7 @@ query_predicates.append(("decreases", [CHEMICAL], [CHEMICAL, DISEASE]))
 
 query_engine = QueryEngine()
 session = Session.get()
-pubmed = PubMedMEDLINE()
-mesh_ontology = MeSHOntology()
+mesh_ontology = MeSHOntology.instance()
 
 GENE_NCBI_TO_MESH_MAPPING = {"cyp3a4": 'MESH:D051544', # CYP3A4
                             "mtor" : "MESH:D058570"}  # MTOR https://www.ncbi.nlm.nih.gov/mesh/?term=TOR+Serine-Threonine+Kinases
@@ -137,9 +136,10 @@ def compute_mesh_queries(sub_id: str, obj_id: str, predicate:str):
     return queries
 
 
-def pubmed_mesh_hits(sub_id, predicate, obj_id, compute_subdescriptors=True):
+def pubmed_mesh_hits(mesh_index, sub_id, predicate, obj_id, compute_subdescriptors=True):
     """
     computes the hits on the PubMed baseline
+    :param mesh_index: mesh index
     :param sub_id: mesh subject id
     :param predicate: predicate
     :param obj_id: mesh object id
@@ -157,10 +157,10 @@ def pubmed_mesh_hits(sub_id, predicate, obj_id, compute_subdescriptors=True):
         for subj_desc, _ in subj_sub_descriptors:
             for obj_desc, _ in obj_sub_descriptors:
                 for q_descs in compute_mesh_queries(subj_desc, obj_desc, predicate):
-                    doc_ids.update(pubmed.get_ids(q_descs))
+                    doc_ids.update(mesh_index.get_ids(q_descs))
     else:
         for q_descs in compute_mesh_queries(sub_without_mesh, obj_without_mesh, predicate):
-            doc_ids.update(pubmed.get_ids(q_descs))
+            doc_ids.update(mesh_index.get_ids(q_descs))
     return doc_ids
 
 
@@ -272,7 +272,7 @@ def main():
                     l_recall = []
                     status_outout = 'checking {} ({})'.format(p, extraction_type)
                     for idx, (sub_id, sub_type, obj_id, obj_type) in enumerate(pred_subjects_and_objects):
-                        ids_correct = pubmed_mesh_hits(sub_id, p, obj_id, compute_subdescriptors=DO_QUERY_MESH_EXPANSION)
+                        ids_correct = pubmed_mesh_hits(None, sub_id, p, obj_id, compute_subdescriptors=DO_QUERY_MESH_EXPANSION)
                         if obj_type == GENE:
                             obj_id = GENE_MESH_TO_NCBI[obj_id]
                         if sub_type == GENE:
