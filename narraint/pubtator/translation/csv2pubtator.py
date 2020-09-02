@@ -39,7 +39,7 @@ class CsvConverter:
                         if row[self.id_index]:
                             doc_id = row[self.id_index]
                         elif self.pmcids2pmids and self.pmc_index and row[self.pmc_index]:
-                            doc_id = self.pmcids2pmids.get(PMC_ID.match(row[self.pmc_index]).group(1))
+                            doc_id = self.pmcids2pmids.get(int(PMC_ID.match(row[self.pmc_index]).group(1)))
                         else:
                             create_artificial = True
                     else:

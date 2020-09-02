@@ -5,6 +5,7 @@ import os
 import re
 
 from datetime import datetime, timedelta
+from itertools import islice
 
 from narraint.preprocessing.config import Config
 from narraint.pubtator.count import count_documents
@@ -20,16 +21,16 @@ def load_pmcids_to_pmid_index(index_file):
     :return: a dict as mapping
     """
     pmcid2pmid = {}
-    first = True
     with open(index_file, 'r') as f:
-        for l in f:
-            if first:
-                first = False
-                continue
-            split = l.split('\t')
-            pmcid = split[0]
-            pmid = split[1][:-1] # skip \n
-            pmcid2pmid[pmcid] = pmid
+        for line in islice(f, 1, None):
+            split = line.split('\t')
+            try:
+                pmcid = int(split[0])
+                pmid = int(split[1][:-1]) # skip \n
+                pmcid2pmid[pmcid] = pmid
+            except ValueError:
+                pass
+                # print('Support only integers as ids: {}'.format(split))
     return pmcid2pmid
 
 
