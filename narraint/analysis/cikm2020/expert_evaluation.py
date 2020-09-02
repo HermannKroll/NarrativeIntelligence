@@ -54,21 +54,24 @@ queries_pubmed.append(("PubMed", eval_q4, eval_q4_trans, eval_q4_ids_met_mtor, e
 # PMC
 # Erythromycin: D004917
 eval_q5 = "Gene:1576 metabolises Simvastatin. MESH:D004917 inhibits Gene:1576"
+# MESH:D051544 = CYP3A4
+eval_q5_trans = (('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D004917', 'inhibits', 'MESH:D051544'))
 eval_q5_ids_pmc_sim_cyp_ery = {28442937, 18360537, 30815270, 19436666, 26674520, 28144253, 22327313, 23585384, 20512335,
                                18225466, 25028555, 24474103, 30345053, 29950882, 27664109, 21577272, 16480505, 26089839,
                                14612892, 30808332, 24448021, 24888381, 23444277, 30092624, 25505582}
 eval_q5_ids_correct = {28442937, 18360537, 30815270, 19436666, 26674520, 28144253}
 print('Q5: {} correct of {} documents'.format(len(eval_q5_ids_correct), len(eval_q5_ids_pmc_sim_cyp_ery)))
-queries_pubmed.append(("PMC", eval_q5, eval_q5_ids_pmc_sim_cyp_ery, eval_q5_ids_correct))
+queries_pubmed.append(("PMC", eval_q5, eval_q5_trans, eval_q5_ids_pmc_sim_cyp_ery, eval_q5_ids_correct))
 
 # Amiodarone: D000638
 eval_q6 = "Gene:1576 metabolises Simvastatin. MESH:D000638 inhibits Gene:1576"
+eval_q6_trans = (('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D000638', 'inhibits', 'MESH:D051544'))
 eval_q6_ids_pmc_sim_cyp_ami = {30345053, 25883814, 27716084, 25861286, 24434254, 22084608, 24308359, 25505590, 20972517,
                                22096377, 30302080, 29067253, 28321163, 27538727, 25135287, 30526249, 29780235, 29361723,
                                29997136, 23700039, 28097103, 28442915, 26819251, 19436657, 23974980}
 eval_q6_ids_correct = {30345053, 25883814, 27716084, 25861286, 24434254}
 print('Q6: {} correct of {} documents'.format(len(eval_q6_ids_correct), len(eval_q6_ids_pmc_sim_cyp_ami)))
-queries_pubmed.append(("PMC", eval_q6, eval_q6_ids_pmc_sim_cyp_ami, eval_q6_ids_correct))
+queries_pubmed.append(("PMC", eval_q6, eval_q6_trans, eval_q6_ids_pmc_sim_cyp_ami, eval_q6_ids_correct))
 
 query_engine = QueryEngine()
 
@@ -116,18 +119,11 @@ def main():
     for document_collection, query, query_trans, id_sample, ids_correct in queries_pubmed:
         logging.info('=' * 60)
         logging.info('Query: {}'.format(query))
-        query_fact_patterns, query_trans = convert_query_text_to_fact_patterns(query)
         logging.info('-' * 60)
         logging.info('Baseline')
-        subject_id = query_trans[0]
-        object_id = query_trans[1]
         precision, recall, len_doc_ids, len_ids_in_sample, len_correct = perform_baseline_evaluation(
             doc_collection2mesh_index[document_collection],
-            subject_id,
-            subject_type,
-            predicate,
-            object_id,
-            object_type,
+            query_trans,
             id_sample,
             ids_correct)
         logging.info(
