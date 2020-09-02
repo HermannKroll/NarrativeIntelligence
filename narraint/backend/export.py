@@ -119,6 +119,7 @@ def main():
     parser.add_argument("-c", "--collection", help="Collection(s)", default=None)
     parser.add_argument("-d", "--document", action="store_true", help="Export content of document")
     parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+")
+
     parser.add_argument("--sqllog", action="store_true", help='logs sql commands')
     args = parser.parse_args()
 
@@ -152,6 +153,6 @@ def main():
     export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
     logging.info('Finished')
 
-    
+
 if __name__ == "__main__":
     main()

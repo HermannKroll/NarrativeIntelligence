@@ -165,6 +165,7 @@ def main():
 
     export_xml(abs_path, tag_types, document_ids=None, collection=args.collection, logger=logger,
                    patent_ids=args.patents)
+    logging.info('Finished')
 
 
 if __name__ == "__main__":
