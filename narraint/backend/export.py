@@ -149,9 +149,6 @@ def main():
     else:
         document_ids = None
 
-    if args.patents:
-        parser.error('Does not support patent ids replacement in pubtator mode')
-
     export(args.output, tag_types, document_ids, collection=args.collection, content=args.document, logger=logger)
 
 if __name__ == "__main__":
