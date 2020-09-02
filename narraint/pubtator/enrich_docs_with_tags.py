@@ -24,9 +24,8 @@ def load_all_tags_for_doc_ids(doc_ids, collection, tag_types):
     query = create_tag_query(session, collection, doc_ids, tag_types=tag_types)
 
     doc2tags = defaultdict(list)
-    results = session.execute(query)
     counter = 0
-    for tag in results:
+    for tag in query:
         t = (tag.ent_id, tag.ent_str, tag.ent_type, tag.start, tag.end)
         doc2tags[int(tag.document_id)].append(t)
         counter += 1
@@ -55,7 +54,7 @@ def enrich_pubtator_documents_with_database_tags(input_dir, output_file, documen
 
     logging.info('Producing new output in {}'.format(output_file))
     with open(output_file, 'wt') as f:
-        for idx, pubtator_content in enumerate(read_pubtator_documents(output_file)):
+        for idx, pubtator_content in enumerate(read_pubtator_documents(input_dir)):
             match = CONTENT_ID_TIT_ABS.match(pubtator_content)
             if match:
                 doc_id, doc_title, doc_content = match.group(1, 2, 3)
