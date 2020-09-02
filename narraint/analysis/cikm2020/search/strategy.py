@@ -1,5 +1,6 @@
 import os
 
+from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
 from narraint.analysis.cikm2020.helper import perform_evaluation
 from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
 from narraint.pubtator.document import TaggedDocument
@@ -21,7 +22,7 @@ class SearchStrategy:
 
 class TextSearchStrategy(SearchStrategy):
 
-    def __init__(self, document_dir: str):
+    def __init__(self, document_dir=EXP_TEXTS_DIRECTORY):
         self.document_dir = document_dir
 
     def get_document_content(self, document_id: int, document_collection: str):
