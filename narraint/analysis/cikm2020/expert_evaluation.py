@@ -1,13 +1,15 @@
 import logging
+import os
 
-from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits, perform_evaluation, GENE_NCBI_TO_MESH_MAPPING
-from narraint.analysis.cikm2020.search.strategy import PathIESearchStrategy, OpenIESearchStrategy
+from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
+from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits
 from narraint.analysis.pubmed_medline import PubMedMEDLINE, PMCIndex
-from narraint.entity.enttypes import GENE
-from narraint.entity.meshontology import MeSHOntology
-from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
+from narraint.backend.export import export
+from narraint.backend.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
+
+from narraint.entity import enttypes
+from narraint.pubtator.split import split
 from narraint.queryengine.engine import QueryEngine
-from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 
 queries_pubmed = []
 
@@ -41,8 +43,8 @@ eval_q3_ids_correct = {12131698, 23444397, 16098846, 11550401, 24283488, 2918931
 print('Q3: {} correct of {} documents'.format(len(eval_q3_ids_correct), len(eval_q3_ids_sim_rab)))
 queries_pubmed.append(("PubMed", eval_q3, eval_q3_trans, eval_q3_ids_sim_rab, eval_q3_ids_correct))
 
-eval_q4 = "Metformin inhibits Gene:2475"
-eval_q4_trans = ("MESH:D008687", 'inhibits', 'Gene:2475')
+eval_q4 = "Metformin inhibits mtor"
+eval_q4_trans = [("MESH:D008687", 'inhibits', 'MESH:D058570')]
 eval_q4_ids_met_mtor = {26760500, 29253574, 22427958, 31186373, 30259865, 20305377, 27803295, 22611195, 30515768,
                         26756023, 24505341, 28242651, 30886744, 21540236, 27264609, 26967226, 29694764, 27796611,
                         23526220, 21631893, 24437490, 26304716, 30989649, 28168653, 23701880}
@@ -55,7 +57,7 @@ queries_pubmed.append(("PubMed", eval_q4, eval_q4_trans, eval_q4_ids_met_mtor, e
 # Erythromycin: D004917
 eval_q5 = "Gene:1576 metabolises Simvastatin. MESH:D004917 inhibits Gene:1576"
 # MESH:D051544 = CYP3A4
-eval_q5_trans = (('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D004917', 'inhibits', 'MESH:D051544'))
+eval_q5_trans = [('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D004917', 'inhibits', 'MESH:D051544')]
 eval_q5_ids_pmc_sim_cyp_ery = {28442937, 18360537, 30815270, 19436666, 26674520, 28144253, 22327313, 23585384, 20512335,
                                18225466, 25028555, 24474103, 30345053, 29950882, 27664109, 21577272, 16480505, 26089839,
                                14612892, 30808332, 24448021, 24888381, 23444277, 30092624, 25505582}
@@ -65,7 +67,7 @@ queries_pubmed.append(("PMC", eval_q5, eval_q5_trans, eval_q5_ids_pmc_sim_cyp_er
 
 # Amiodarone: D000638
 eval_q6 = "Gene:1576 metabolises Simvastatin. MESH:D000638 inhibits Gene:1576"
-eval_q6_trans = (('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D000638', 'inhibits', 'MESH:D051544'))
+eval_q6_trans = [('MESH:D051544', 'metabolises', 'MESH:D019821'), ('MESH:D000638', 'inhibits', 'MESH:D051544')]
 eval_q6_ids_pmc_sim_cyp_ami = {30345053, 25883814, 27716084, 25861286, 24434254, 22084608, 24308359, 25505590, 20972517,
                                22096377, 30302080, 29067253, 28321163, 27538727, 25135287, 30526249, 29780235, 29361723,
                                29997136, 23700039, 28097103, 28442915, 26819251, 19436657, 23974980}
@@ -100,6 +102,26 @@ def perform_baseline_evaluation(mesh_index, facts: [(str, str, str)], ids_sample
     return precision, recall, len(pubmed_hits), pubmed_hits_sample, pubmed_correct_hits
 
 
+def export_document_texts(doc_ids, document_collection):
+    if not os.path.isdir(EXP_TEXTS_DIRECTORY):
+        os.mkdir(EXP_TEXTS_DIRECTORY)
+    export_needed = False
+    for doc_id in doc_ids:
+        fn = os.path.join(EXP_TEXTS_DIRECTORY, '{}_{}.txt'.format(document_collection, doc_id))
+        if not os.path.isfile(fn):
+            export_needed = True
+    if export_needed:
+        temp_file = os.path.join(EXP_TEXTS_DIRECTORY, 'temp.pubtator')
+        if document_collection == 'PubMed':
+            export(temp_file, enttypes.ALL, doc_ids, document_collection, content=True)
+        elif document_collection == 'PMC':
+            export_pmc_fulltexts_with_tags(temp_file, enttypes.ALL, doc_ids)
+        else:
+            raise ValueError('Document collection is not supported: {}'.format(document_collection))
+        split(temp_file, EXP_TEXTS_DIRECTORY, document_prefix='{}_'.format(document_collection))
+        os.remove(temp_file)
+
+
 def main():
     """
     performs the expert evaluation of CIKM2020
@@ -112,11 +134,13 @@ def main():
     logging.info('loading indexes...')
     mesh_index_pubmed = PubMedMEDLINE()
     mesh_index_pmc = PMCIndex()
-    mesh_ontology = MeSHOntology.instance()
     doc_collection2mesh_index = {'PubMed': mesh_index_pubmed, 'PMC': mesh_index_pmc}
     logging.info('Beginning experiment...')
     logging.info('=' * 60)
-    for document_collection, query, query_trans, id_sample, ids_correct in queries_pubmed:
+    for document_collection, query, query_trans, ids_sample, ids_correct in queries_pubmed:
+        logging.info('exporting document texts if missing...')
+        export_document_texts(ids_sample, document_collection)
+        logging.info('export finished')
         logging.info('=' * 60)
         logging.info('Query: {}'.format(query))
         logging.info('-' * 60)
@@ -124,7 +148,7 @@ def main():
         precision, recall, len_doc_ids, len_ids_in_sample, len_correct = perform_baseline_evaluation(
             doc_collection2mesh_index[document_collection],
             query_trans,
-            id_sample,
+            ids_sample,
             ids_correct)
         logging.info(
             '{} retrieved, {} ids found in sample, {} ids are correct'.format(len_doc_ids, len_ids_in_sample,
@@ -135,12 +159,12 @@ def main():
             f_score = 2 * (precision * recall) / (precision + recall)
             logging.info('F1-Score: {}'.format(f_score))
 
-        evaluation_strategies = [OpenIESearchStrategy(query_engine), PathIESearchStrategy(query_engine)]
+        evaluation_strategies = []#[OpenIESearchStrategy(query_engine), PathIESearchStrategy(query_engine)]
         for strat in evaluation_strategies:
             logging.info('-' * 60)
             logging.info('-' * 60)
             logging.info('Performing strategy: {}'.format(strat.name))
-            prec, rec, f1 = strat.perform_search(query, document_collection, id_sample, ids_correct)
+            prec, rec, f1 = strat.perform_search(query, document_collection, ids_sample, ids_correct)
             logging.info('Precision: {}'.format(prec))
             logging.info('Recall: {}'.format(rec))
             logging.info('F1-Score: {}'.format(f1))
