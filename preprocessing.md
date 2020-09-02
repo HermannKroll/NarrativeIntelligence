@@ -120,7 +120,7 @@ The pipeline will invoke the taggers to tag the documents. The document corpus i
 
 -t A means to tag Chemicals, Diseases, DosageForms, Genes and Species. 
 
--t DF means to use our own tagger and to tag Genes and Species only. 
+-t DF means to use our own tagger and to tag DosageForms only. 
 
 -t C D means to user TaggerOne and to tag Chemicals and Diseases only. 
 
