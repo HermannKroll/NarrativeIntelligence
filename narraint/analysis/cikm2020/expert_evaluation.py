@@ -104,7 +104,7 @@ def perform_baseline_evaluation(mesh_index, facts: [(str, str, str)], ids_sample
 
 def export_document_texts(doc_ids, document_collection):
     if not os.path.isdir(EXP_TEXTS_DIRECTORY):
-        os.mkdir(EXP_TEXTS_DIRECTORY)
+        os.makedirs(EXP_TEXTS_DIRECTORY)
     export_needed = False
     for doc_id in doc_ids:
         fn = os.path.join(EXP_TEXTS_DIRECTORY, '{}_{}.txt'.format(document_collection, doc_id))
