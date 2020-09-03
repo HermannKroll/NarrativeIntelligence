@@ -134,9 +134,9 @@ def clean_extractions_in_database():
 
     logging.info('Cleaning induces (Chemical -> Chemical / Disease)')
     q_cause = update(Predication).where(and_(Predication.predicate_canonicalized == 'induces',
-                                             or_(Predication.object_type != DISEASE,
-                                                 and_(Predication.subject_type != CHEMICAL,
-                                                      Predication.subject_type != DISEASE)))) \
+                                             or_(Predication.subject_type != CHEMICAL,
+                                                 and_(Predication.object_type != CHEMICAL,
+                                                      Predication.object_type != DISEASE)))) \
         .values(predicate_canonicalized=None)
     session.execute(q_cause)
     session.commit()
