@@ -8,9 +8,22 @@ from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 
 
 def compute_f_measure(precision, recall):
-    if precision > 0.0 and recall > 0.0:
+    if precision + recall > 0.0:
         return 2 * (precision * recall) / (precision + recall)
     return 0.0
+
+
+def calculate_prec_rec_f(doc_hits, ids_correct):
+    doc_ids_correct = doc_hits.intersection(ids_correct)
+    len_hits = len(doc_hits)
+    len_correct = len(doc_ids_correct)
+    if doc_ids_correct:
+        precision = len_correct / len_hits
+        recall = len_correct / len(ids_correct)
+    else:
+        precision = 0.0
+        recall = 0.0
+    return precision, recall, compute_f_measure(precision, recall)
 
 
 class SearchStrategy:
@@ -46,16 +59,7 @@ class DBSearchStrategy(SearchStrategy):
             doc_hits = doc_ids.intersection(ids_sample)
         else:
             doc_hits = doc_ids
-        doc_ids_correct = doc_hits.intersection(ids_correct)
-        len_hits = len(doc_hits)
-        len_correct = len(doc_ids_correct)
-        if doc_ids_correct:
-            precision = len_correct / len_hits
-            recall = len_correct / len(ids_correct)
-        else:
-            precision = 0.0
-            recall = 0.0
-        return precision, recall, compute_f_measure(precision, recall)
+        return calculate_prec_rec_f(doc_hits, ids_correct)
 
 
 class OpenIESearchStrategy(DBSearchStrategy):
@@ -66,7 +70,6 @@ class OpenIESearchStrategy(DBSearchStrategy):
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) \
             -> (float, float, float):
-
         return self.query_ie_database(query, document_collection, OPENIE_EXTRACTION, ids_sample, ids_correct)
 
 
@@ -80,3 +83,19 @@ class PathIESearchStrategy(DBSearchStrategy):
             -> (float, float, float):
         return self.query_ie_database(query, document_collection, PATHIE_EXTRACTION, ids_sample, ids_correct)
 
+
+class KeywordStrategy(TextSearchStrategy):
+    def __init__(self, document_dir, mesh_ontology=None):
+        super().__init__(document_dir)
+        self.mesh_ontology = mesh_ontology
+
+    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
+    float, float, float):
+        query_fact_patterns = convert_query_text_to_fact_patterns(query)
+        subjects = []
+        objects = []
+        for fact_pattern in query_fact_patterns:
+            for i, lst in {(0, subjects), (3, objects)}:
+                if isinstance(fact_pattern[i], list):
+                    pass
+        return None
