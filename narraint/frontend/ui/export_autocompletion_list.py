@@ -13,12 +13,17 @@ def main():
                         level=logging.DEBUG)
 
     resolver = EntityResolver()
+    logging.info('Query entities in Predication...')
     entities = QueryEngine.query_entities()
-    mesh_ontology = MeSHOntology().instance()
     written_entity_ids = set()
     ignored = []
-    with open('static/ac_all.txt', 'wt') as f:
-        predicates = create_predicate_vocab()
+    predicates = create_predicate_vocab()
+    with open('static/ac_predicates') as f_pred:
+        for pred in predicates.keys():
+            f_pred.write('{},'.format(pred))
+        f_pred.write('dosageform')
+
+    with open('static/ac_all.txt', 'wt') as f, open('static/ac_entities.txt') as f_ent:
         for pred in predicates.keys():
             f.write('{}\tpredicate\n'.format(pred))
         f.write('dosageform\tpredicate\n')
@@ -35,12 +40,6 @@ def main():
                     continue
                 written_entity_ids.add((e_id, e_type))
 
-                # if entity is a gene - the entity is already the gene symbol
-                #if e_type == GENE:
-                 #   heading = e_id
-                #else:
-                if e_id == 'cyp3a4':
-                    print('test')
                 heading = resolver.get_name_for_var_ent_id(e_id, e_type, resolve_gene_by_id=False)
                 if e_type in [GENE, SPECIES]:
                     if '//' in heading:
@@ -58,8 +57,10 @@ def main():
                     result = '{}\t{}'.format(heading, e_id)
                 if counter == 0:
                     f.write(result)
+                    f_ent.write(result)
                 else:
                     f.write('\n' + result)
+                    f_ent.write('\n' + result)
                 counter += 1
             except KeyError:
                 ignored.append((e_id, e_type))
