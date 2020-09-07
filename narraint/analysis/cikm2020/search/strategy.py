@@ -50,8 +50,8 @@ class DBSearchStrategy(SearchStrategy):
         self.query_engine = query_engine
 
     def query_ie_database(self, query, document_collection, extraction_type, ids_sample, ids_correct):
-        query_fact_patterns, _ = convert_query_text_to_fact_patterns(query)
-        query_results = self.query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
+        graph_query, _ = convert_query_text_to_fact_patterns(query)
+        query_results = self.query_engine.process_query_with_expansion(graph_query, document_collection,
                                                                        extraction_type, query)
         doc_ids = set([q_r.document_id for q_r in query_results])
 

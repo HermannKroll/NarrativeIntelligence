@@ -9,7 +9,9 @@ from narraint.backend.models import Document, Predication
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
+from narraint.entity.entity import Entity
 from narraint.queryengine.logger import QueryLogger
+from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
 QUERY_LIMIT = 10000
@@ -24,13 +26,13 @@ class QueryEngine:
     def __init__(self):
         self.query_logger = QueryLogger()
 
-    def __construct_query(self, session, graph_query, doc_collection, extraction_type):
+    def __construct_query(self, session, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type):
         var_names = []
         var_dict = {}
 
         document = aliased(Document, name='D')
         predication_aliases = []
-        for idx, _ in enumerate(graph_query):
+        for idx, _ in enumerate(query_patterns):
             predication_aliases.append(aliased(Predication, name='P{}'.format(idx)))
 
         projection_list = [document.id, document.title]
@@ -43,7 +45,9 @@ class QueryEngine:
         for pred in predication_aliases:
             query = query.filter(document.id == pred.document_id)
 
-        for idx, (s, s_t, p, o, o_t) in enumerate(graph_query):
+        for idx, (subj, p, obj) in enumerate(query_patterns):
+            s, s_t = subj.entity_id, subj.entity_type
+            o, o_t = obj.entity_id, obj.entity_type
             pred = predication_aliases[idx]
             query = query.filter(pred.document_collection == doc_collection)
             query = query.filter(pred.extraction_type == extraction_type)
@@ -129,12 +133,12 @@ class QueryEngine:
 
         return query, var_names
 
-    def query_with_graph_query(self, graph_query, doc_collection, extraction_type, keyword_query=''):
-        if len(graph_query) == 0:
+    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type, keyword_query=''):
+        if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
         session = Session.get()
-        query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
+        query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type)
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.debug('executing sql statement: {}'.format(sql_query))
@@ -165,7 +169,7 @@ class QueryEngine:
             # extract confidence & explanation for facts
             explanations = []
             conf = 0
-            for i in range(0, len(graph_query)):
+            for i in range(0, len(query_patterns)):
                 offset = 2 + i * 10
                 subject_str = r[offset + 1]
                 object_str = r[offset + 5]
@@ -193,26 +197,11 @@ class QueryEngine:
         results = list(doc2result.values())
 
         time_needed = datetime.now() - start
-        self.query_logger.write_log(time_needed, 'openie', keyword_query, graph_query,
+        self.query_logger.write_log(time_needed, 'openie', keyword_query, query_patterns,
                                     sql_query.replace('\n', ' '), doc_ids)
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
-
-    def _compute_entity_list(self, entity, entity_type):
-        """
-        Transforms an entity and entity type into a list
-        If the entity is a list of tree numbers nothing happens
-        else the entity will be packed into a list
-        :param entity: an entity id
-        :param entity_type: the entity type
-        :return: returns the entity id packed in a list
-        """
-        if entity_type == 'MESH_ONTOLOGY':
-            # it is already a list of tree numbers
-            return entity
-        else:
-            return [entity]
 
     def _merge_results(self, results: [QueryDocumentResult]) -> [QueryDocumentResult]:
         """
@@ -237,11 +226,11 @@ class QueryEngine:
                 unique_results.append(r)
         return unique_results
 
-    def process_query_with_expansion(self, query_fact_patterns, document_collection, extraction_type, query):
+    def process_query_with_expansion(self, graph_query: GraphQuery, document_collection, extraction_type, query):
         """
         Executes the query fact patterns as a SQL query and collects all results
         Expands the query automatically, if e.g. a MeSH descriptor has several tree numbers
-        :param query_fact_patterns: a list of query fact patterns
+        :param graph_query: a graph query object
         :param document_collection: the document collection to query
         :param extraction_type: the extraction type to query
         :param query: the query as the input string for logging
@@ -249,34 +238,35 @@ class QueryEngine:
         """
         query_fact_patterns_expanded = []
         expand_query = False
-        for idx, qp in enumerate(query_fact_patterns):
-            exp_cond1 = len(qp[0]) > 1
-            exp_cond2 = len(qp[3]) > 1
+        for idx, fp in enumerate(graph_query.fact_patterns):
+            exp_cond1 = len(fp.subjects) > 1
+            exp_cond2 = len(fp.objects) > 1
 
             if exp_cond1 or exp_cond2:
                 expand_query = True
-                subj_entities = self._compute_entity_list(qp[0], qp[1])
-                subj_type = qp[1]
-                predicates = [qp[2]]
-                obj_entities = self._compute_entity_list(qp[3], qp[4])
-                obj_type = qp[4]
                 cross_product = list(
-                    itertools.product(subj_entities, [subj_type], predicates, obj_entities, [obj_type]))
+                    itertools.product(fp.subjects, [fp.predicate], fp.objects))
                 query_fact_patterns_expanded.append(cross_product)
             else:
-                query_fact_patterns_expanded.append(qp)
+                query_fact_patterns_expanded.append([(fp.subjects[0], fp.predicate, fp.objects[0])])
 
         if expand_query:
             query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
             logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
             part_result = []
             for query_fact_patterns in query_fact_patterns_expanded:
-                part_result.extend(self.query_with_graph_query(list(query_fact_patterns), document_collection,
+                part_result.extend(self.query_with_graph_query(query_fact_patterns, document_collection,
                                                                extraction_type, query))
             results = self._merge_results(part_result)
 
         else:
-            results = self.query_with_graph_query(query_fact_patterns_expanded, document_collection,
+            graph_patterns = []
+            for fp in graph_query:
+                if len(fp.subjects) > 1 or len(fp.objects) > 1:
+                    raise ValueError('Graph Patterns should only have a single entity as subject or object: {}'
+                                     .format(fp))
+                graph_patterns.append((fp.subjects[0], fp.predicate, fp.objects[0]))
+            results = self.query_with_graph_query(graph_patterns, document_collection,
                                                   extraction_type, query)
         return results
 

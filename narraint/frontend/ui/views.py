@@ -10,6 +10,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
+from narraint.entity.entity import Entity
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
@@ -17,6 +18,7 @@ from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
+from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.result import QueryDocumentResult
 
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -62,21 +64,21 @@ def check_and_convert_variable(text):
 def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
-        s, s_type = check_and_convert_variable(text), 'Variable'
+        e = [Entity(check_and_convert_variable(text), 'Variable')]
     elif text_low.startswith('mesh:'):
-        s, s_type = text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH'
+        e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
     elif text_low.startswith('gene:'):
-        s, s_type = text.split(":", 1)[1], GENE
+        e = [Entity(text.split(":", 1)[1], GENE)]
     elif text_low.startswith('species:'):
-        s, s_type = text.split(":", 1)[1], SPECIES
+        e = [Entity(text.split(":", 1)[1], SPECIES)]
     elif text_low.startswith('fidx'):
-        s, s_type = text.upper(), DOSAGE_FORM
+        e = [Entity(text.upper(), DOSAGE_FORM)]
     else:
         try:
-            s, s_type = entity_tagger.tag_entity(text)
+            e = entity_tagger.tag_entity(text)
         except KeyError:
             raise ValueError("Don't know how to understand: {}".format(text))
-    return s, s_type
+    return e
 
 
 def align_triple(text: str):
@@ -108,7 +110,7 @@ def convert_query_text_to_fact_patterns(query_txt):
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
     # split query into facts by '.'
     facts_txt = fact_txt.strip().replace(';', '.').split('.')
-    fact_patterns = []
+    graph_query = GraphQuery()
     explanation_str = ""
     for fact_txt in facts_txt:
         # skip empty facts
@@ -124,14 +126,14 @@ def convert_query_text_to_fact_patterns(query_txt):
             return None, explanation_str
 
         try:
-            s, s_type = convert_text_to_entity(s_t)
+            s = convert_text_to_entity(s_t)
         except ValueError as e:
             explanation_str += 'error unknown subject: {}\n'.format(e)
             logger.error('error unknown subject: {}'.format(e))
             return None, explanation_str
 
         try:
-            o, o_type = convert_text_to_entity(o_t)
+            o = convert_text_to_entity(o_t)
         except ValueError as e:
             explanation_str += 'error unknown object: {}\n'.format(e)
             logger.error('error unknown object: {}'.format(e))
@@ -144,29 +146,9 @@ def convert_query_text_to_fact_patterns(query_txt):
             return None, explanation_str
 
         explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt.strip(), s, p, o)
-        fact_patterns.append((s, s_type, p, o, o_type))
+        graph_query.add_fact_pattern(FactPattern(s, p, o))
 
-    # check for at least 1 entity
-    #   entity_check = False
-    #  for s, p, o in fact_patterns:
-    #     if not s.startswith('?') or not o.startswith('?'):
-    #        entity_check = True
-    #       break
-    # if not entity_check:
-    #    explanation_str += "no entity included in query - error\n"
-    #   return None, explanation_str
-
-    # check if the query is one connected graph
-    #  g = LabeledGraph()
-    #  for s, p, o in fact_patterns:
-    #      g.add_edge(p, s, o)
-    # there are multiple connected components - stop
-    #  con_comp = g.compute_connectivity_components()
-    #  if len(con_comp) != 1:
-    #      explanation_str += "query consists of multiple graphs (query must be one connectivity component)\n"
-    #     return None, explanation_str
-
-    return fact_patterns, explanation_str
+    return graph_query, explanation_str
 
 
 def convert_graph_patterns_to_nt(query_txt):
@@ -210,9 +192,13 @@ def convert_graph_patterns_to_nt(query_txt):
     return nt_string[0:-1]  # remove last \n
 
 
-def count_variables_in_query(patterns):
+def count_variables_in_query(graph_query: GraphQuery):
     var_set = set()
-    for s, s_t, p, o, o_t in patterns:
+    for fp in graph_query.fact_patterns:
+        s = fp.subject.entity_id
+        s_t = fp.subject.entity_type
+        o = fp.object.entity_id
+        o_t = fp.object.entity.type
         if s_t == 'Variable':
             var_set.add(VAR_NAME.search(s).group(1))
         if o_t == 'Variable':
