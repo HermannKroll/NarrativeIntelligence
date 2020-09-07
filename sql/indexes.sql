@@ -1,3 +1,6 @@
+CREATE UNIQUE INDEX unique_doc_s_p_o_sent_idx ON PREDICATION(document_id, document_collection, subject_id, subject_type,
+ predicate, object_id, object_type, extraction_type, md5(sentence::text));
+
 CREATE INDEX pred_document_id_idx ON PREDICATION(document_id);
 CREATE INDEX pred_document_col_idx ON PREDICATION(document_collection);
 CREATE INDEX pred_subject_id_idx ON PREDICATION(subject_id);
@@ -9,8 +12,9 @@ CREATE INDEX pred_object_id_idx ON PREDICATION(object_id);
 CREATE INDEX pred_object_type_idx ON PREDICATION(object_type);
 CREATE INDEX pred_extraction_type_idx ON PREDICATION(extraction_type);
 
-CREATE UNIQUE INDEX unique_doc_s_p_o_sent_idx ON PREDICATION(document_id, document_collection, subject_id, subject_type,
- predicate, object_id, object_type, extraction_type, md5(sentence::text));
+-- support fast like search
+CREATE INDEX trgm_idx_predication_subject_id ON Predication USING gin (subject_id gin_trgm_ops);
+CREATE INDEX trgm_idx_predication_object_id ON Predication USING gin (object_id gin_trgm_ops);
 
 
 CREATE INDEX tag_document_id_idx ON TAG(document_id);
