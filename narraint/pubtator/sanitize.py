@@ -41,13 +41,18 @@ def sanitize(input_dir_or_file, output_dir=None, delete_mismatched=False, logger
                     ignored_files.append(file)
                     if delete_mismatched:
                         os.remove(file)
-                elif ILLEGAL_CHAR.search(title + abstract):
-                    sanitized_files.append(file)
-                    with open(os.path.join(output_dir, os.path.basename(file)), "w+") as nf:
-                        nf.write(Document.create_pubtator(pid, title, abstract) + "\n")  # No idea why \n is necessary
                 else:
-                    if not input_dir_or_file == output_dir:
-                        copy(file, output_dir)
+                    new_filename = os.path.join(output_dir, os.path.basename(file))
+                    if not ".txt" == new_filename[-4:]:
+                        new_filename += ".txt"
+                        sanitized_files.append(file)
+                    if ILLEGAL_CHAR.search(title + abstract):
+                        sanitized_files.append(file)
+                        with open(new_filename, "w+") as nf:
+                            nf.write(Document.create_pubtator(pid, title, abstract) + "\n")
+                    else:
+                        if not input_dir_or_file == output_dir:
+                            copy(file, new_filename)
     return ignored_files, sanitized_files
 
 
