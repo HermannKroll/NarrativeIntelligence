@@ -18,12 +18,12 @@ def main():
     written_entity_ids = set()
     ignored = []
     predicates = create_predicate_vocab()
-    with open('static/ac_predicates') as f_pred:
+    with open('static/ac_predicates', 'wt') as f_pred:
         for pred in predicates.keys():
             f_pred.write('{},'.format(pred))
         f_pred.write('dosageform')
-
-    with open('static/ac_all.txt', 'wt') as f, open('static/ac_entities.txt') as f_ent:
+    mesh_ontology = MeSHOntology.instance()
+    with open('static/ac_all.txt', 'wt') as f, open('static/ac_entities.txt', 'wt') as f_ent:
         for pred in predicates.keys():
             f.write('{}\tpredicate\n'.format(pred))
         f.write('dosageform\tpredicate\n')
@@ -32,7 +32,6 @@ def main():
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
                 if e_type in [CHEMICAL, DISEASE] and not e_id.startswith('MESH:'):
-                    mesh_ontology = MeSHOntology.instance()
                     e_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(e_id)[0])
 
                 # Skip duplicated entries
