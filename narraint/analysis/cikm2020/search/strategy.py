@@ -1,5 +1,7 @@
 import os
 
+from nltk.stem.porter import *
+
 from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
 from narraint.analysis.cikm2020.helper import perform_evaluation
 from narraint.entity.entity import Entity
@@ -126,6 +128,7 @@ class SentenceFactCooccurrence(TextSearchStrategy):
     def __init__(self, document_dir=EXP_TEXTS_DIRECTORY):
         super().__init__(document_dir)
         self.name = "SentenceFactCooccurrence"
+        self.stemmer = PorterStemmer()
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
@@ -145,7 +148,8 @@ class SentenceFactCooccurrence(TextSearchStrategy):
                 pred_sentences = set()
                 for sent_idx in intersection:
                     sentence_txt = document.sentence_by_id[sent_idx].text.lower().strip()
-                    if fp.predicate in sentence_txt:
+                    predicate_stemmed = self.stemmer.stem(fp.predicate)
+                    if predicate_stemmed in sentence_txt:
                         pred_sentences.add(sent_idx)
                 if len(pred_sentences) == 0:
                     add_document_id = False
