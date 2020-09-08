@@ -4,7 +4,7 @@ import os
 from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
 from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits
 from narraint.analysis.cikm2020.search.strategy import OpenIESearchStrategy, PathIESearchStrategy, \
-    SentenceEntityCooccurrence, SentenceFactCooccurrence
+    SentenceEntityCooccurrence, SentenceFactCooccurrence, OpenIECorefSearchStrategy
 from narraint.analysis.pubmed_medline import PubMedMEDLINE, PMCIndex
 from narraint.backend.export import export
 from narraint.backend.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
@@ -65,7 +65,7 @@ eval_q5_ids_pmc_sim_cyp_ery = {28442937, 18360537, 30815270, 19436666, 26674520,
                                14612892, 30808332, 24448021, 24888381, 23444277, 30092624, 25505582}
 eval_q5_ids_correct = {28442937, 18360537, 30815270, 19436666, 26674520, 28144253}
 print('Q5: {} correct of {} documents'.format(len(eval_q5_ids_correct), len(eval_q5_ids_pmc_sim_cyp_ery)))
-#queries_pubmed.append(("PMC", eval_q5, eval_q5_trans, eval_q5_ids_pmc_sim_cyp_ery, eval_q5_ids_correct))
+queries_pubmed.append(("PMC", eval_q5, eval_q5_trans, eval_q5_ids_pmc_sim_cyp_ery, eval_q5_ids_correct))
 
 # Amiodarone: D000638
 eval_q6 = "Gene:1576 metabolises Simvastatin. MESH:D000638 inhibits Gene:1576"
@@ -75,7 +75,7 @@ eval_q6_ids_pmc_sim_cyp_ami = {30345053, 25883814, 27716084, 25861286, 24434254,
                                29997136, 23700039, 28097103, 28442915, 26819251, 19436657, 23974980}
 eval_q6_ids_correct = {30345053, 25883814, 27716084, 25861286, 24434254}
 print('Q6: {} correct of {} documents'.format(len(eval_q6_ids_correct), len(eval_q6_ids_pmc_sim_cyp_ami)))
-#queries_pubmed.append(("PMC", eval_q6, eval_q6_trans, eval_q6_ids_pmc_sim_cyp_ami, eval_q6_ids_correct))
+queries_pubmed.append(("PMC", eval_q6, eval_q6_trans, eval_q6_ids_pmc_sim_cyp_ami, eval_q6_ids_correct))
 
 query_engine = QueryEngine()
 
@@ -161,7 +161,9 @@ def main():
             f_score = 2 * (precision * recall) / (precision + recall)
             logging.info('F1-Score: {}'.format(f_score))
 
-        evaluation_strategies = [SentenceEntityCooccurrence(), SentenceFactCooccurrence()]#[OpenIESearchStrategy(query_engine), PathIESearchStrategy(query_engine)]
+        evaluation_strategies = [OpenIESearchStrategy(query_engine), OpenIECorefSearchStrategy(query_engine)]
+                                 #PathIESearchStrategy(query_engine),
+                                 #SentenceEntityCooccurrence(), SentenceFactCooccurrence()]
         for strat in evaluation_strategies:
             logging.info('-' * 60)
             logging.info('-' * 60)
