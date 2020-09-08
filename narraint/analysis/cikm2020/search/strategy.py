@@ -188,6 +188,17 @@ class OpenIESearchStrategy(DBSearchStrategy):
         return self.query_ie_database(query, document_collection, OPENIE_EXTRACTION, ids_sample, ids_correct)
 
 
+class OpenIECorefSearchStrategy(DBSearchStrategy):
+
+    def __init__(self, query_engine):
+        super().__init__(query_engine)
+        self.name = 'OpenIECoref'
+
+    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) \
+            -> (float, float, float):
+        return self.query_ie_database(query, document_collection, OPENIE_EXTRACTION, ids_sample, ids_correct)
+
+
 class PathIESearchStrategy(DBSearchStrategy):
 
     def __init__(self, query_engine):
