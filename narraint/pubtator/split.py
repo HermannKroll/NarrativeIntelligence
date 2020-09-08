@@ -25,11 +25,13 @@ def split(filename, out_dir, batch_size=1, logger=None, document_prefix=""):
     for doc_content in read_pubtator_documents(filename):
         docs_in_batch += 1
         doc_group_content.append(doc_content)
-        # FIXME: Ensure that last batch possibly being smaller than the batch size is written anyway
         if docs_in_batch >= batch_size:
             write_content('\n'.join(doc_group_content), out_dir, document_prefix)
             doc_group_content = []
             docs_in_batch = 0
+    # write the last batch of documents
+    if doc_group_content:
+        write_content('\n'.join(doc_group_content), out_dir, document_prefix)
     if logger: logger.debug('finished')
 
 
