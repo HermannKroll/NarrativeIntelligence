@@ -195,10 +195,10 @@ def convert_graph_patterns_to_nt(query_txt):
 def count_variables_in_query(graph_query: GraphQuery):
     var_set = set()
     for fp in graph_query.fact_patterns:
-        s = fp.subject.entity_id
-        s_t = fp.subject.entity_type
-        o = fp.object.entity_id
-        o_t = fp.object.entity.type
+        s = fp.subjects[0].entity_id
+        s_t = fp.subjects[0].entity_type
+        o = fp.objects[0].entity_id
+        o_t = fp.objects[0].entity.type
         if s_t == 'Variable':
             var_set.add(VAR_NAME.search(s).group(1))
         if o_t == 'Variable':
