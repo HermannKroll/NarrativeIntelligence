@@ -198,7 +198,7 @@ def count_variables_in_query(graph_query: GraphQuery):
         s = fp.subjects[0].entity_id
         s_t = fp.subjects[0].entity_type
         o = fp.objects[0].entity_id
-        o_t = fp.objects[0].entity.type
+        o_t = fp.objects[0].entity_type
         if s_t == 'Variable':
             var_set.add(VAR_NAME.search(s).group(1))
         if o_t == 'Variable':
