@@ -109,10 +109,10 @@ class SentenceEntityCooccurrence(TextSearchStrategy):
                 subj_sentences, obj_sentences = set(), set()
                 for subj in fp.subjects:
                     subj_sentences.update(self.find_sentences_by_entity_id(subj, document))
-                    subj_sentences.update(self.find_sentences_by_entity_name(subj, document))
+                  #  subj_sentences.update(self.find_sentences_by_entity_name(subj, document))
                 for obj in fp.objects:
                     obj_sentences.update(self.find_sentences_by_entity_id(obj, document))
-                    obj_sentences.update(self.find_sentences_by_entity_name(obj, document))
+                   # obj_sentences.update(self.find_sentences_by_entity_name(obj, document))
                 intersection = subj_sentences.intersection(obj_sentences)
 
                 if len(intersection) == 0:
