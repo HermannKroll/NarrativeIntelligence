@@ -161,7 +161,7 @@ def main():
             f_score = 2 * (precision * recall) / (precision + recall)
             logging.info('F1-Score: {}'.format(f_score))
 
-        evaluation_strategies = [OpenIESearchStrategy(query_engine), OpenIECorefSearchStrategy(query_engine)]
+        evaluation_strategies = [SentenceEntityCooccurrence()]# [OpenIESearchStrategy(query_engine), OpenIECorefSearchStrategy(query_engine)]
                                  #PathIESearchStrategy(query_engine),
                                  #SentenceEntityCooccurrence(), SentenceFactCooccurrence()]
         for strat in evaluation_strategies:
