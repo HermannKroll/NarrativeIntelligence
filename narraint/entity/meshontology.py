@@ -53,6 +53,11 @@ class MeSHOntology:
         self.treeno2desc[tree_no] = (descriptor_id, descriptor_heading)
 
     def find_descriptors_start_with_tree_no(self, tree_no: str) -> [(str, str)]:
+        """
+        Finds all descriptors which are in a tree starting with the tree number
+        :param tree_no: tree number which should be the start of the descriptors
+        :return: a list of descriptors (id, heading)
+        """
         results = []
         for d_tree_no, (d_id, d_heading) in self.treeno2desc.items():
             if d_tree_no.startswith(tree_no):
