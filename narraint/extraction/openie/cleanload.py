@@ -3,15 +3,16 @@ import logging
 from collections import namedtuple, defaultdict
 from datetime import datetime
 from typing import List
-
+import hashlib
 import nltk
+
 from nltk.corpus import wordnet
 from sqlalchemy.exc import IntegrityError
 
 from narraint.entity.meshontology import MeSHOntology
 from narraint.entity.entityresolver import GeneResolver
-from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL
-from narraint.backend.models import Tag, Predication
+from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM
+from narraint.backend.models import Tag, Predication, Sentence
 from narraint.backend.database import Session
 from narraint.extraction.versions import OPENIE_VERSION, OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
@@ -139,7 +140,7 @@ def _insert_predication_skip_duplicates(session, predication_values):
             session.commit()
             logging.warning('Skip duplicated fact: ({}, {}, {}, {}, {}, {})'.
                             format(value["document_id"], value["document_collection"], value["subject_id"],
-                                   value["predicate"], value["object_id"], value["sentence"]))
+                                   value["predicate"], value["object_id"], value["sentence_id"]))
 
 
 def clean_and_translate_gene_ids(predications: List[PRED]):
@@ -212,7 +213,7 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     predications_len = len(predications)
     for idx, p in enumerate(predications):
         subj_ids = set()
-        if p.s_type in [CHEMICAL, DISEASE] and p.s_id.startswith('MESH:'):
+        if p.s_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.s_id.startswith('MESH:'):
             try:
                 subj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.s_id[5:]))
             except KeyError:
@@ -220,7 +221,7 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
         else:
             subj_ids = [p.s_id]
         obj_ids = set()
-        if p.o_type in [CHEMICAL, DISEASE] and p.o_id.startswith('MESH:'):
+        if p.o_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.o_id.startswith('MESH:'):
             try:
                 obj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.o_id[5:]))
             except KeyError:
@@ -236,6 +237,57 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     logging.info('{} predications obtained'.format(len(predications_cleaned)))
     return predications_cleaned
 
+
+def text_to_md5hash(text: str) -> str:
+    """
+    Converts a arbitrary string to a md5 hash
+    :param text: some string
+    :return: a string consisting of md5 hexdigest
+    """
+    return hashlib.md5(text.encode()).hexdigest()
+
+
+def load_sentences_with_hashes(document_collection: str):
+    """
+    Loads all sentences with the corresponding hashes from the database
+    :param document_collection: the document collection
+    :return: a default dict mapping md5hashes to (sentence_id, sentence_text) tuples
+    """
+    logging.info('Retrieving known sentences for collection...')
+    session = Session.get()
+    sentence_q = session.query(Sentence).filter(Sentence.document_collection == document_collection)
+    hash2sentence = defaultdict(list)
+    count = 0
+    for sent in sentence_q:
+        hash2sentence[sent.md5hash].append((sent.id, sent.text))
+        count += 1
+    logging.info('{} sentences retrieved'.format(count))
+    return hash2sentence
+
+
+def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentence, document_id, document_collection):
+    """
+    Checks whether the sentence is already contained in the database -> return the known sentence id
+    :param session: current db session
+    :param sentence_txt: the sentence text to insert
+    :param hash2sentence: the defaultdict mapping md5hashes to (sentence_id, sentence_text) tuples
+    :param document_id: the document id for the sentence
+    :param document_collection: the document collection for the sentence
+    :return:
+    """
+    sentence_hash = text_to_md5hash(sentence_txt)
+    if sentence_hash in hash2sentence:
+        for s_id, s_txt in hash2sentence[sentence_hash]:
+            if sentence_txt == s_txt:
+                return s_id
+    # we have to insert a new sentence
+    sentence = Sentence(document_id=document_id, document_collection=document_collection, text=sentence_txt,
+                        md5hash=sentence_hash)
+    session.add(sentence)
+    session.flush()
+    session.refresh(sentence)
+    hash2sentence[sentence_hash].append((sentence.id, sentence.text))
+    return sentence.id
 
 
 def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version, clean_genes=True,
@@ -255,6 +307,7 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
     if do_transform_mesh_ids_to_prefixes:
         tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
+    hash2sentence = load_sentences_with_hashes(collection)
     session = Session.get()
     len_tuples = len(tuples_cleaned)
     logging.info('Inserting {} tuples to database...'.format(len_tuples))
@@ -266,25 +319,21 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
         if key in duplicate_check:
             continue
         duplicate_check.add(key)
+        predication_values.append(dict(
+            document_id=p.doc_id,
+            document_collection=collection,
+            subject_id=p.s_id,
+            subject_str=p.s_str,
+            subject_type=p.s_type,
+            predicate=p.pred_cleaned,
+            object_id=p.o_id,
+            object_str=p.o_str,
+            object_type=p.o_type,
+            confidence=p.conf,
+            sentence_id=insert_sentence_and_get_sentence_id(session, p.sent, hash2sentence, p.doc_id, collection),
+            extraction_type=extraction_type
+        ))
         try:
-            predication_values.append(dict(
-                document_id=p.doc_id,
-                document_collection=collection,
-                subject_openie=p.subj,
-                subject_id=p.s_id,
-                subject_str=p.s_str,
-                subject_type=p.s_type,
-                predicate=p.pred,
-                predicate_cleaned=p.pred_cleaned,
-                object_openie=p.obj,
-                object_id=p.o_id,
-                object_str=p.o_str,
-                object_type=p.o_type,
-                confidence=p.conf,
-                sentence=p.sent,
-                extraction_type=extraction_type,
-                extraction_version=version
-            ))
             if i % BULK_INSERT_AFTER_K == 0:
                 session.bulk_insert_mappings(Predication, predication_values)
                 session.commit()

@@ -8,7 +8,9 @@ from sqlalchemy.exc import IntegrityError
 from narraint.backend.database import Session
 from narraint.backend.models import Predication, PredicationResult
 from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE
-
+from narraint.entity.meshontology import MeSHOntology
+from narraint.extraction.openie.cleanload import BULK_INSERT_AFTER_K, _insert_predication_skip_duplicates
+from narraint.progress import print_progress_with_eta
 
 DOSAGE_FORM_PREDICATE = "dosageform"
 ASSOCIATED_PREDICATE = "associated"
@@ -58,16 +60,12 @@ def mirror_symmetric_predicates():
     :return: None
     """
     session = Session.get()
-    logging.info('Deleting old mirrored predicates...')
-    session.query(Predication).filter(Predication.mirrored == True).delete()
-    session.commit()
-    logging.info('Deleted')
     logging.info('Mirroring symmetric predicates...')
     for idx_pred, pred_to_mirror in enumerate(SYMMETRIC_PREDICATES):
         start_time = datetime.now()
         logging.info('Mirroring predicate: {}'.format(pred_to_mirror))
         q = session.query(Predication)
-        q = q.filter(Predication.mirrored == False).filter(Predication.predicate_canonicalized == pred_to_mirror)
+        q = q.filter(Predication.predicate_canonicalized == pred_to_mirror)
         count_mirrored = 0
         for r in session.execute(q):
             p = PredicationResult(*r)
@@ -76,29 +74,24 @@ def mirror_symmetric_predicates():
                 insert_pred = insert(Predication).values(
                     document_id=p.document_id,
                     document_collection=p.document_collection,
-                    subject_openie=p.object_openie,
                     subject_id=p.object_id,
                     subject_str=p.object_str,
                     subject_type=p.object_type,
                     predicate=p.predicate,
-                    predicate_cleaned=p.predicate_cleaned,
                     predicate_canonicalized=p.predicate_canonicalized,
-                    object_openie=p.subject_openie,
                     object_id=p.subject_id,
                     object_str=p.subject_str,
                     object_type=p.subject_type,
                     confidence=p.confidence,
-                    sentence=p.sentence,
-                    mirrored=True,
-                    extraction_type=p.extraction_type,
-                    extraction_version=p.extraction_version
+                    sentence_id=p.sentence_id,
+                    extraction_type=p.extraction_type
                 )
                 session.execute(insert_pred)
                 session.commit()
             except IntegrityError:
                 logging.warning('Skip duplicated fact: ({}, {}, {}, {}, {}, {})'.
                                 format(p.document_id, p.document_collection, p.subject_id, p.predicate, p.object_id,
-                                       p.sentence))
+                                       p.sentence_id))
 
                 session.rollback()
                 session.commit()
