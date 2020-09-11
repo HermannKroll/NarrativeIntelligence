@@ -1,4 +1,7 @@
 import os
+import re
+import math
+from itertools import product
 
 from nltk.stem.porter import *
 
@@ -45,8 +48,10 @@ class TextSearchStrategy(SearchStrategy):
         self.document_dir = document_dir
         self.mesh_ontology = MeSHOntology.instance()
         self.entity_resolver = EntityResolver.instance()
+        self.stemmer = PorterStemmer()
 
-    def get_document_content(self, document_id: int, document_collection: str):
+
+    def get_document_content(self, document_id: int, document_collection: str) -> TaggedDocument:
         doc_path = os.path.join(self.document_dir, '{}_{}.txt'.format(document_collection, document_id))
         with open(doc_path, 'r') as f:
             return TaggedDocument(f.read())
@@ -71,6 +76,12 @@ class TextSearchStrategy(SearchStrategy):
                 sentences.update(document.sentences_by_mesh[entity.entity_id])
         return sentences
 
+    def find_entity_positions(self, entity: Entity, document:TaggedDocument):
+        meshs = entity.get_meshs()
+        return {e.start for m in meshs if m in document.entities_by_mesh for e in document.entities_by_mesh.get(m)}
+
+
+
     def find_sentences_by_entity_name(self, entity: Entity, document: TaggedDocument):
         """
         Find all sentence ids which contain the entity name
@@ -90,8 +101,7 @@ class TextSearchStrategy(SearchStrategy):
                 s_lower = sent.text.lower().strip()
                 if entity_name in s_lower:
                     sentences.add(s_id)
-        return sentences
-
+        return
 
 class SentenceEntityCooccurrence(TextSearchStrategy):
 
@@ -128,7 +138,6 @@ class SentenceFactCooccurrence(TextSearchStrategy):
     def __init__(self, document_dir=EXP_TEXTS_DIRECTORY):
         super().__init__(document_dir)
         self.name = "SentenceFactCooccurrence"
-        self.stemmer = PorterStemmer()
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
@@ -214,14 +223,43 @@ class KeywordStrategy(TextSearchStrategy):
     def __init__(self, document_dir, mesh_ontology=None):
         super().__init__(document_dir)
         self.mesh_ontology = mesh_ontology
+        self.max_distance = math.inf
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
     float, float, float):
-        query_fact_patterns = convert_query_text_to_fact_patterns(query)
-        subjects = []
-        objects = []
-        for fact_pattern in query_fact_patterns:
-            for i, lst in {(0, subjects), (3, objects)}:
-                if isinstance(fact_pattern[i], list):
-                    pass
-        return None
+        graph_query, _ = convert_query_text_to_fact_patterns(query)
+
+        fps = {fp: (
+            {m for s in fp.subjects for m in s.get_meshs()},
+            self.stemmer.stem(fp.predicate),
+            {m for o in fp.objects for m in o.get_meshs()}
+        ) for fp in graph_query}
+
+        hits = set()
+
+        for doc_id in ids_sample:
+            doc_content = self.get_document_content(doc_id, document_collection)
+            is_hit = True
+            for fp in graph_query:
+                subs, pred, objs = fp.subjects, fp.predicate, fp.objects
+                sub_positions = [pos for s in subs for pos in self.find_entity_positions(s, doc_content)]
+                pred_positions = [i.start() for i in re.finditer(self.stemmer.stem(pred), doc_content.content.lower())]
+                obj_positions = [pos for o in objs for pos in self.find_entity_positions(o, doc_content)]
+
+                is_hit &= not(not sub_positions or not pred_positions or not obj_positions)
+
+                min_dist = math.inf
+                for s_pos, p_pos, o_pos in product(sub_positions, pred_positions, obj_positions):
+                    min_dist = min(min_dist, max(abs(s_pos-p_pos), abs(s_pos-o_pos), abs(p_pos-o_pos)))
+                
+                is_hit &= min_dist <= self.max_distance
+                
+            if is_hit:
+                hits.add(doc_id)
+        return calculate_prec_rec_f(hits, ids_correct)
+
+
+class KeywordDistanceStrategy(KeywordStrategy):
+    def __init__(self, document_dir, max_distance, mesh_ontology=None):
+        super().__init__(document_dir, mesh_ontology)
+        self.max_distance = max_distance
