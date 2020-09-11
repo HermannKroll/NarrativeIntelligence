@@ -63,10 +63,10 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     pred_len = len(best_matches)
     for pred, (pred_canonicalized, _) in best_matches.items():
         if pred and pred_canonicalized != PRED_TO_REMOVE:
-            stmt = update(Predication).where(Predication.predicate_cleaned == pred).\
+            stmt = update(Predication).where(Predication.predicate == pred).\
                 values(predicate_canonicalized=pred_canonicalized)
         else:
-            stmt = update(Predication).where(Predication.predicate_cleaned == pred). \
+            stmt = update(Predication).where(Predication.predicate == pred). \
                 values(predicate_canonicalized=None)
 
         session.execute(stmt)

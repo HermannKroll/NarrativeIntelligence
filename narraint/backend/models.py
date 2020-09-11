@@ -130,28 +130,26 @@ class Predication(Base):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
+        UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
+                         'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
+                         sqlite_on_conflict='IGNORE'),
     )
 
     id = Column(BigInteger, autoincrement=True)
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
-    subject_openie = Column(String, nullable=False)
     subject_id = Column(String, nullable=False)
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False)
-    predicate_cleaned = Column(String, nullable=True)
     predicate_canonicalized = Column(String, nullable=True)
-    object_openie = Column(String, nullable=False)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
     object_type = Column(String, nullable=False)
     confidence = Column(Float, nullable=True)
-    sentence = Column(String, nullable=False)
+    sentence_id = Column(BigInteger, nullable=False)
     extraction_type = Column(String, nullable=False)
-    extraction_version = Column(String, nullable=False)
-    mirrored = Column(Boolean, nullable=False, default=False)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     def __str__(self):
@@ -159,6 +157,20 @@ class Predication(Base):
 
     def __repr__(self):
         return "<Predication {}>".format(self.id)
+
+
+class Sentence(Base):
+    __tablename__ = "sentence"
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
+    )
+
+    id = Column(BigInteger, autoincrement=True)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
+    text = Column(String, nullable=False)
+    md5hash = Column(String, nullable=False)
 
 
 class DocProcessedByIE(Base):
