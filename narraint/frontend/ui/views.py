@@ -105,7 +105,7 @@ def align_triple(text: str):
     return subj, pred, obj
 
 
-def convert_query_text_to_fact_patterns(query_txt):
+def convert_query_text_to_fact_patterns(query_txt) -> (GraphQuery, str):
     # remove too many spaces
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
     # split query into facts by '.'
