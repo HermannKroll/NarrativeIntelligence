@@ -12,6 +12,7 @@ from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, M
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
     MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR
 from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM
+from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
 
@@ -279,6 +280,7 @@ class EntityResolver:
             self.species = SpeciesResolver()
             self.species.load_index()
             self.dosageform = DosageFormResolver(self.mesh)
+            self.mesh_ontology = None
             EntityResolver.__instance = self
 
     @staticmethod
@@ -295,6 +297,11 @@ class EntityResolver:
         :param resolve_gene_by_id:
         :return: uses the corresponding resolver for the entity type
         """
+        if not entity_id.startswith('MESH:') and entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
+            if not self.mesh_ontology:
+                self.mesh_ontology = MeSHOntology.instance()
+            entity_mesh_id = 'MESH:{}'.format(self.mesh_ontology.get_descriptor_for_tree_no(entity_id)[0])
+            return self.mesh.descriptor_to_heading(entity_mesh_id)
         if entity_id.startswith('MESH:') or entity_type in [CHEMICAL, DISEASE]:
             return self.mesh.descriptor_to_heading(entity_id)
         if entity_type == GENE:
