@@ -151,7 +151,6 @@ class Predication(Base):
     confidence = Column(Float, nullable=True)
     sentence_id = Column(BigInteger, nullable=False)
     extraction_type = Column(String, nullable=False)
-    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     def __str__(self):
         return "<{}>\t<{}>\t<{}>".format(self.subject_id, self.predicate, self.object_id)
