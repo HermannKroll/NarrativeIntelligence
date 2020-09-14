@@ -130,6 +130,7 @@ class Predication(Base):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        ForeignKeyConstraint(('sentence_id',), ('sentence.id',)),
         PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
         UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
                          'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
