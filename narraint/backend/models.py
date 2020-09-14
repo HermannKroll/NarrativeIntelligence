@@ -99,8 +99,7 @@ class Tag(Base):
     document_collection = Column(String, nullable=False)
     tagger_name = Column(String, nullable=False)
     tagger_version = Column(String, nullable=False)
-    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
-
+    
     def __eq__(self, other):
         return self.ent_type == other.type and self.start == other.start and self.end == other.end and \
                self.ent_id == other.ent_id and self.ent_str == other.ent_str and \
