@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import aliased
 
-from narraint.backend.models import Document, Predication
+from narraint.backend.models import Document, Predication, Sentence
 from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
@@ -29,28 +29,37 @@ class QueryEngine:
     def __construct_query(self, session, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type):
         var_names = []
         var_dict = {}
+        if len(query_patterns) == 0:
+            raise ValueError('Query needs to contain at least a single fact pattern')
 
-        document = aliased(Document, name='D')
         predication_aliases = []
         for idx, _ in enumerate(query_patterns):
             predication_aliases.append(aliased(Predication, name='P{}'.format(idx)))
 
-        projection_list = [document.id, document.title]
-        for p in predication_aliases:
-            projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized, p.object_id,
-                                    p.object_str, p.object_type, p.confidence, p.predicate_cleaned, p.sentence])
+        projection_list = []
+        for idx, p in enumerate(predication_aliases):
+            # the first entry needs to project the document id
+            if idx == 0:
+                projection_list.extend([p.document_id, p.subject_id, p.subject_str, p.subject_type,
+                                        p.predicate_canonicalized, p.object_id, p.object_str, p.object_type,
+                                        p.confidence, p.predicate, p.sentence_id])
+            else:
+                projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized,
+                                        p.object_id, p.object_str, p.object_type, p.confidence, p.predicate,
+                                        p.sentence_id])
 
-        query = session.query(*projection_list).distinct()
-        query = query.filter(document.collection == doc_collection)
+        pred0 = predication_aliases[0]
+        query = session.query(*projection_list)
+        query = query.filter(pred0.document_collection == doc_collection)
         for pred in predication_aliases:
-            query = query.filter(document.id == pred.document_id)
+            query = query.filter(pred.document_id == pred0.document_id)
+            query = query.filter(pred.document_collection == doc_collection)
+            query = query.filter(pred.extraction_type == extraction_type)
 
         for idx, (subj, p, obj) in enumerate(query_patterns):
             s, s_t = subj.entity_id, subj.entity_type
             o, o_t = obj.entity_id, obj.entity_type
             pred = predication_aliases[idx]
-            query = query.filter(pred.document_collection == doc_collection)
-            query = query.filter(pred.extraction_type == extraction_type)
 
             # variable in pattern
             if s.startswith('?') or p.startswith('?') or o.startswith('?'):
@@ -129,11 +138,13 @@ class QueryEngine:
                                          pred.predicate_canonicalized == p)
 
         # order by document id descending and limit results to 100
-        query = query.order_by(document.id.desc()).limit(QUERY_LIMIT)
+        query = query.order_by().limit(QUERY_LIMIT)
+            #query.order_by(pred0.document_id.desc()).limit(QUERY_LIMIT)
 
         return query, var_names
 
-    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type, keyword_query=''):
+    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type, keyword_query='',
+                               query_titles_and_sentences=True):
         if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
@@ -148,12 +159,13 @@ class QueryEngine:
 
         start = datetime.now()
         doc_ids = set()
+        sentence_ids = set()
         doc2result = {}
         for r in session.execute(query):
             # extract var substitutions for pmid
             var2sub = {}
             for v, t, pred_pos in var_info:
-                offset = 2 + pred_pos * 10
+                offset = 1 + pred_pos * 10
 
                 if t == 'subject':
                     # it's ent_str, ent_id, ent_type
@@ -170,17 +182,18 @@ class QueryEngine:
             explanations = []
             conf = 0
             for i in range(0, len(query_patterns)):
-                offset = 2 + i * 10
+                offset = 1 + i * 10
                 subject_str = r[offset + 1]
                 object_str = r[offset + 5]
                 predicate_canonicalized = r[offset + 3]
                 predicate = r[offset + 8]
-                sentence = r[offset + 9]
-                explanations.append(QueryFactExplanation(i, sentence, predicate, predicate_canonicalized, subject_str,
+                sentence_id = int(r[offset + 9])
+                sentence_ids.add(sentence_id)
+                explanations.append(QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
                                                          object_str))
                 conf += float(r[offset + 7])
             # create query result
-            doc_id = r[0]
+            doc_id = int(r[0])
             doc_ids.add(doc_id)
 
             # each document id + the variable substitution forms a unique document result
@@ -194,6 +207,14 @@ class QueryEngine:
                 for e in explanations:
                     doc2result[key].integrate_explanation(e)
 
+        if query_titles_and_sentences:
+            doc2titles, id2sentences = self.query_titles_and_sentences_for_doc_ids(doc_ids, sentence_ids, doc_collection)
+            # Replace all previously assigned empty titles and sentence ids by document titles and sentence ids
+            for (doc_id, var2sub_set), result in doc2result.items():
+                result.title = doc2titles[doc_id]
+                for e in result.explanations:
+                    e.sentence = id2sentences[e.sentence]
+
         results = list(doc2result.values())
 
         time_needed = datetime.now() - start
@@ -202,6 +223,25 @@ class QueryEngine:
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
+
+
+    def query_titles_and_sentences_for_doc_ids(self, doc_ids, sentence_ids, document_collection):
+        session = Session.get()
+        # Query the document titles
+        q_titles = session.query(Document.id, Document.title).filter(Document.collection == document_collection)
+        q_titles = q_titles.filter(Document.id.in_(doc_ids))
+        doc2titles = {}
+        for r in q_titles:
+            doc2titles[int(r[0])] = r[1]
+
+        # Query the sentences
+        q_sentences = session.query(Sentence.id, Sentence.text).filter(Sentence.id.in_(sentence_ids))
+        id2sentences = {}
+        for r in q_sentences:
+            id2sentences[int(r[0])] = r[1]
+
+        return doc2titles, id2sentences
+
 
     def _merge_results(self, results: [QueryDocumentResult]) -> [QueryDocumentResult]:
         """
@@ -256,7 +296,7 @@ class QueryEngine:
             part_result = []
             for query_fact_patterns in query_fact_patterns_expanded:
                 part_result.extend(self.query_with_graph_query(query_fact_patterns, document_collection,
-                                                               extraction_type, query))
+                                                               extraction_type, query, query_titles_and_sentences=False))
             results = self._merge_results(part_result)
 
         else:
@@ -267,18 +307,35 @@ class QueryEngine:
                                      .format(fp))
                 graph_patterns.append((fp.subjects[0], fp.predicate, fp.objects[0]))
             results = self.query_with_graph_query(graph_patterns, document_collection,
-                                                  extraction_type, query)
+                                                  extraction_type, query, query_titles_and_sentences=False)
+
+        # Replace all empty titles and sentence ids by the corresponding titles and explanations
+        doc_ids = set()
+        sentence_ids = set()
+        for r in results:
+            doc_ids.add(r.document_id)
+            for e in r.explanations:
+                sentence_ids.add(e.sentence)
+
+        doc2titles, id2sentences = self.query_titles_and_sentences_for_doc_ids(doc_ids, sentence_ids,
+                                                                               document_collection)
+        # Replace all previously assigned empty titles and sentence ids by document titles and sentence ids
+        for result in results:
+            result.title = doc2titles[result.document_id]
+            for e in result.explanations:
+                e.sentence = id2sentences[e.sentence]
+
         return results
 
     @staticmethod
-    def query_predicates_cleaned(collection=None):
+    def query_predicates(collection=None):
         session = Session.get()
         if not collection:
-            query = session.query(Predication.predicate_cleaned.distinct()). \
-                filter(Predication.predicate_cleaned.isnot(None))
+            query = session.query(Predication.predicate.distinct()). \
+                filter(Predication.predicate.isnot(None))
         else:
-            query = session.query(Predication.predicate_cleaned.distinct()). \
-                filter(Predication.predicate_cleaned.isnot(None)). \
+            query = session.query(Predication.predicate.distinct()). \
+                filter(Predication.predicate.isnot(None)). \
                 filter(Predication.document_collection == collection)
         predicates = []
         start_time = datetime.now()
