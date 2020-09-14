@@ -335,6 +335,8 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
         ))
         try:
             if i % BULK_INSERT_AFTER_K == 0:
+                # first commit all sentences
+                session.commit()
                 session.bulk_insert_mappings(Predication, predication_values)
                 session.commit()
                 predication_values.clear()
@@ -344,6 +346,8 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
 
         print_progress_with_eta("Inserting", i, len_tuples, start_time)
     try:
+        # first commit all sentences
+        session.commit()
         session.bulk_insert_mappings(Predication, predication_values)
         session.commit()
     except IntegrityError:
