@@ -149,7 +149,7 @@ def main():
                         level=logging.DEBUG)
 
     dosage_form_rule()
-    mirror_symmetric_predicates()
+    #mirror_symmetric_predicates()
     clean_extractions_in_database()
 
 
