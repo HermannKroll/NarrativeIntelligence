@@ -1,4 +1,6 @@
 from narraint.entity.entityresolver import EntityResolver
+from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
+from narraint.entity.meshontology import MeSHOntology
 
 
 class QueryEntitySubstitution:
@@ -26,6 +28,14 @@ class QueryEntitySubstitution:
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
         try:
+            # Convert MeSH Tree Numbers to MeSH Descriptors
+            if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not self.entity_id.startswith('MESH:'):
+                mesh_ontology = MeSHOntology.instance()
+                try:
+                    self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
+                except KeyError:
+                    pass
+
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type,
                                                                resolve_gene_by_id=False)
         except KeyError:
