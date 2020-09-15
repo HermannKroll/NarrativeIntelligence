@@ -139,8 +139,6 @@ class QueryEngine:
 
         # order by document id descending and limit results to 100
         query = query.order_by().limit(QUERY_LIMIT)
-            #query.order_by(pred0.document_id.desc()).limit(QUERY_LIMIT)
-
         return query, var_names
 
     def query_with_graph_query(self, query_patterns, doc_collection, extraction_type, keyword_query='',
@@ -189,8 +187,9 @@ class QueryEngine:
                 predicate = r[offset + 8]
                 sentence_id = int(r[offset + 9])
                 sentence_ids.add(sentence_id)
-                explanations.append(QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
-                                                         object_str))
+                explanations.append(
+                    QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
+                                         object_str))
                 conf += float(r[offset + 7])
             # create query result
             doc_id = int(r[0])
@@ -208,7 +207,8 @@ class QueryEngine:
                     doc2result[key].integrate_explanation(e)
 
         if query_titles_and_sentences:
-            doc2titles, id2sentences = self.query_titles_and_sentences_for_doc_ids(doc_ids, sentence_ids, doc_collection)
+            doc2titles, id2sentences = self.query_titles_and_sentences_for_doc_ids(doc_ids, sentence_ids,
+                                                                                   doc_collection)
             # Replace all previously assigned empty titles and sentence ids by document titles and sentence ids
             for (doc_id, var2sub_set), result in doc2result.items():
                 result.title = doc2titles[doc_id]
@@ -218,14 +218,20 @@ class QueryEngine:
         results = list(doc2result.values())
 
         time_needed = datetime.now() - start
-        self.query_logger.write_log(time_needed, 'openie', keyword_query, query_patterns,
+        self.query_logger.write_log(time_needed, extraction_type, keyword_query, query_patterns,
                                     sql_query.replace('\n', ' '), doc_ids)
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
 
-
     def query_titles_and_sentences_for_doc_ids(self, doc_ids, sentence_ids, document_collection):
+        """
+        Query the titles and sentences for a set of doc ids and sentence ids
+        :param doc_ids: a set of doc ids
+        :param sentence_ids: a set of sentence ids
+        :param document_collection: the corresponding document collection
+        :return: dict mapping docids to titles, dict mapping sentence ids to sentence texts
+        """
         session = Session.get()
         # Query the document titles
         q_titles = session.query(Document.id, Document.title).filter(Document.collection == document_collection)
@@ -241,7 +247,6 @@ class QueryEngine:
             id2sentences[int(r[0])] = r[1]
 
         return doc2titles, id2sentences
-
 
     def _merge_results(self, results: [QueryDocumentResult]) -> [QueryDocumentResult]:
         """
@@ -296,7 +301,8 @@ class QueryEngine:
             part_result = []
             for query_fact_patterns in query_fact_patterns_expanded:
                 part_result.extend(self.query_with_graph_query(query_fact_patterns, document_collection,
-                                                               extraction_type, query, query_titles_and_sentences=False))
+                                                               extraction_type, query,
+                                                               query_titles_and_sentences=False))
             results = self._merge_results(part_result)
 
         else:
@@ -325,7 +331,7 @@ class QueryEngine:
             for e in result.explanations:
                 e.sentence = id2sentences[e.sentence]
 
-        return results
+        return sorted(results, key=lambda d: d.document_id, reverse=True)
 
     @staticmethod
     def query_predicates(collection=None):
