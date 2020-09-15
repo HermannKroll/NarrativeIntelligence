@@ -18,7 +18,7 @@ def main():
     written_entity_ids = set()
     ignored = []
     predicates = create_predicate_vocab()
-    with open('static/ac_predicates', 'wt') as f_pred:
+    with open('static/ac_predicates.txt', 'wt') as f_pred:
         for pred in predicates.keys():
             f_pred.write('{},'.format(pred))
         f_pred.write('dosageform')
