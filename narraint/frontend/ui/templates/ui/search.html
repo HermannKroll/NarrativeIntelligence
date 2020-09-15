@@ -41,7 +41,7 @@
             <option value="Gene">Gene</option>
             <option value="Species">Species</option>
         </select>
-        <br></br>
+        <br>
         <a class="okbtn" id="btnsub" onclick="dialogNameNode()" href="#close-modal" rel="modal:close">OK</a>
         <a class="cancelbtn" id="canBtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
@@ -78,7 +78,7 @@
             <option value="Gene">Gene</option>
             <option value="Species">Species</option>
         </select>
-        <br></br>
+        <br>
         <a class="okbtn" id="btnsubrename" onclick="dialogReName()" href="#close-modal" rel="modal:close">OK</a>
         <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
@@ -167,7 +167,16 @@
 
                         <div class="wrapper-div">
                             <div class="inner-div-left-mid">
-                                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                                <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed"
+                                       checked="checked">
+                                <label for="radio_pubmed_path">PubMed Sample (2M Document Titles and
+                                    Abstracts)</label><br>
+                                <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                                <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
+                                    Simvastatin)</label><br>
+                            </div>
+                             <!--<div class="inner-div-left-mid">
+                               <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
                                        checked="checked">
                                 <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
                                     Abstracts)</label><br>
@@ -182,7 +191,7 @@
                                 <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
                                 <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
                                     Simvastatin)</label><br>
-                            </div>
+                            </div> -->
                         </div>
 
                         <label><strong>Outer Ranking:</strong></label><br>
