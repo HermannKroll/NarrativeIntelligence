@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/network.css' %}" type="text/css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="/resources/demos/style.css">
+  <!--  <link rel="stylesheet" href="/resources/demos/style.css"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
-    <link href="https://unpkg.com/vis-network@latest/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://unpkg.com/vis-network@latest/dist/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 {% endblock %}
@@ -91,15 +91,14 @@
             <div class="col">
                 <div class="help-tip">
                     <p> - Please type in the keywords you want to query <br>
-                        - EntityTagger includes MeSH, Genes and Species <br>
-                        - You can specify an entity by its heading such as Simvastatin or its ID MESH:DD019821 <br>
+                        - You can specify an entity by its heading such as Simvastatin or its ID MESH:D019821 <br>
                         - Entities including empty spaces must be escaped by quotes, e.g. "Diabetes Mellitus" <br>
                         - Predicates must stem from a predefined set of predicates (see below) <br>
-                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin causes ?X
+                        - You can also use variables in your query by adding a question mark, e.g. Simvastatin treats ?X
                         <br>
-                        - You can type variables by state the variable type in brackets, e.g.
+                        - You can type variables by putting the variable type in brackets, e.g.
                         ?X(Disease), ?X(Species) (Choose from Chemical, Disease, DosageForm, Gene and Species) <br>
-                        - Multiple facts are queried as follows (separated by a '.'): Simvastatin causes ?X. ?X affects
+                        - Multiple facts are queried as follows (separated by a '.'): Simvastatin treats ?X. ?X affects
                         ?Y<br>
                 </div>
 
