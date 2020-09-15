@@ -1,0 +1,1 @@
+inhibits,interacts,induces,treats,associated,augments,administered,prevents,decreases,regulates,effects,produces,occurs,compares,PRED_TO_REMOVE,metabolises,dosageform
