@@ -261,12 +261,14 @@ $(document).ready(function () {
 const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
-    let data_source = "openie"
-    if (document.getElementById('radio_pmc').checked) {
+    let data_source = ""
+   /* if (document.getElementById('radio_pmc').checked) {
         data_source = "PMC"
     } else if(document.getElementById('radio_pubmed').checked) {
         data_source = "PubMed"
-    } else if(document.getElementById('radio_pubmed_path').checked) {
+    } else
+    */
+    if(document.getElementById('radio_pubmed_path').checked) {
         data_source = "PubMed_Path"
     } else {
         data_source = "PMC_Path"
