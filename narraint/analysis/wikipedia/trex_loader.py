@@ -82,7 +82,10 @@ def load_trex_dataset(input_dir):
                     subject_ent = fact['subject']
                     subject_id = _convert_wikidata_uri_to_id(subject_ent['uri'])
                     subject_str = subject_ent['surfaceform']
-                    predicate = _convert_wikidata_uri_to_id(fact['predicate']['uri'])
+                    predicate = fact['predicate']['surfaceform']
+                    if not predicate:
+                        predicate = "" # db does enforce not null here
+                    predicate_canonicalized = _convert_wikidata_uri_to_id(fact['predicate']['uri'])
                     object_ent = fact['object']
                     object_id = _convert_wikidata_uri_to_id(object_ent['uri'])
                     object_str = object_ent['surfaceform']
@@ -90,7 +93,7 @@ def load_trex_dataset(input_dir):
                     extraction_type = fact['annotator']
                     sentence_id = sentidx2id[int(fact['sentence_id'])]
 
-                    key = (document_id, subject_id, predicate, object_id, sentence_id, extraction_type)
+                    key = (document_id, subject_id, predicate_canonicalized, object_id, sentence_id, extraction_type)
                     if key not in existing_facts:
                         existing_facts.add(key)
                         predication_values.append(dict(
@@ -100,7 +103,7 @@ def load_trex_dataset(input_dir):
                             subject_str=subject_str,
                             subject_type="Entity",
                             predicate=predicate,
-                            predicate_canonicalized=predicate,
+                            predicate_canonicalized=predicate_canonicalized,
                             object_id=object_id,
                             object_str=object_str,
                             object_type="Entity",
