@@ -40,6 +40,8 @@ class QueryEntitySubstitution:
                                                                resolve_gene_by_id=False)
         except KeyError:
             ent_name = self.entity_str
+        if ent_name == self.entity_id:
+            ent_name = self.entity_str
         return ent_name
 
     def __str__(self):

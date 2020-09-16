@@ -40,9 +40,13 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 
 logger = logging.getLogger(__name__)
 
-allowed_predicates = list(create_predicate_vocab().keys())
-allowed_predicates.append("dosageform")
-logging.info('allowed predicates are: {}'.format(allowed_predicates))
+allowed_predicates = set(create_predicate_vocab().keys())
+for i in range(0, 10000):
+    allowed_predicates.add('P{}'.format(i))
+    allowed_predicates.add('p{}'.format(i))
+
+allowed_predicates.add("dosageform")
+# logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
@@ -73,6 +77,8 @@ def convert_text_to_entity(text):
         e = [Entity(text.split(":", 1)[1], SPECIES)]
     elif text_low.startswith('fidx'):
         e = [Entity(text.upper(), DOSAGE_FORM)]
+    elif text_low.startswith('q'):
+        e = [Entity(text.upper(), "Entity")]
     else:
         try:
             e = entity_tagger.tag_entity(text)
@@ -275,6 +281,37 @@ class SearchView(TemplateView):
 
             return JsonResponse(
                 dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
+        return super().get(request, *args, **kwargs)
+
+
+class SearchViewWiki(TemplateView):
+    template_name = "ui/searchwiki.html"
+
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            results_converted = []
+            query_trans_string = ""
+            nt_string = ""
+            if "query" in request.GET:
+                try:
+                    query = str(self.request.GET.get("query", "").strip())
+                    data_source = str(self.request.GET.get("data_source", "").strip())
+                    logging.info("Selected data source is {}".format(data_source))
+
+                    graph_query, query_trans_string = convert_query_text_to_fact_patterns(query)
+                    for fp in graph_query:
+                        fp.predicate = fp.predicate.upper()
+                    results = query_engine.process_query_with_expansion(graph_query, "trex", query=query, likesearch=False)
+                    substitution_aggregation = ResultAggregationBySubstitution()
+                    results_converted = substitution_aggregation.rank_results(results).to_dict()
+                except Exception:
+                    results_converted = []
+                    query_trans_string = "keyword query cannot be converted (syntax error)"
+                    nt_string = ""
+                    traceback.print_exc(file=sys.stdout)
+
+            return JsonResponse(
+                dict(results=results_converted, query_translation=query_trans_string, nt_string=""))
         return super().get(request, *args, **kwargs)
 
 

@@ -26,7 +26,8 @@ class QueryEngine:
     def __init__(self):
         self.query_logger = QueryLogger()
 
-    def __construct_query(self, session, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type):
+    def __construct_query(self, session, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type=None,
+                          likesearch=True):
         var_names = []
         var_dict = {}
         if len(query_patterns) == 0:
@@ -54,7 +55,8 @@ class QueryEngine:
         for pred in predication_aliases:
             query = query.filter(pred.document_id == pred0.document_id)
             query = query.filter(pred.document_collection == doc_collection)
-            query = query.filter(pred.extraction_type == extraction_type)
+            if extraction_type:
+                query = query.filter(pred.extraction_type == extraction_type)
 
         for idx, (subj, p, obj) in enumerate(query_patterns):
             s, s_t = subj.entity_id, subj.entity_type
@@ -69,7 +71,10 @@ class QueryEngine:
                 # check if x already occurred -> yes join both aliased predication together
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
-                    query = query.filter(pred.subject_id.like('{}%'.format(s)))
+                    if likesearch:
+                        query = query.filter(pred.subject_id.like('{}%'.format(s)))
+                    else:
+                        query = query.filter(pred.subject_id == s)
                 else:
                     var_name = VAR_NAME.search(s)
                     if not var_name:
@@ -90,7 +95,10 @@ class QueryEngine:
                         else:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
-                    query = query.filter(pred.object_id.like('{}%'.format(o)))
+                    if likesearch:
+                        query = query.filter(pred.object_id.like('{}%'.format(o)))
+                    else:
+                        query = query.filter(pred.object_id == o)
                 else:
                     var_name = VAR_NAME.search(o)
                     if not var_name:
@@ -130,24 +138,26 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                if p == DO_NOT_CARE_PREDICATE:
+                if likesearch:
                     query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)))
+                else:
+                    query = query.filter(pred.subject_id == s, pred.object_id == o)
+                if p == DO_NOT_CARE_PREDICATE:
                     query = query.filter(pred.predicate_canonicalized.isnot(None))
                 else:
-                    query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)),
-                                         pred.predicate_canonicalized == p)
+                    query = query.filter(pred.predicate_canonicalized == p)
 
         # order by document id descending and limit results to 100
         query = query.order_by().limit(QUERY_LIMIT)
         return query, var_names
 
-    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type, keyword_query='',
-                               query_titles_and_sentences=True):
+    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type=None, keyword_query='',
+                               query_titles_and_sentences=True, likesearch=True):
         if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
         session = Session.get()
-        query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type)
+        query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch)
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.debug('executing sql statement: {}'.format(sql_query))
@@ -190,7 +200,10 @@ class QueryEngine:
                 explanations.append(
                     QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
                                          object_str))
-                conf += float(r[offset + 7])
+                if r[offset+7]:
+                    conf += float(r[offset + 7])
+                else:
+                    conf += 0.0
             # create query result
             doc_id = int(r[0])
             doc_ids.add(doc_id)
@@ -221,7 +234,7 @@ class QueryEngine:
         self.query_logger.write_log(time_needed, extraction_type, keyword_query, query_patterns,
                                     sql_query.replace('\n', ' '), doc_ids)
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
-        logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
+        #logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
 
     def query_titles_and_sentences_for_doc_ids(self, doc_ids, sentence_ids, document_collection):
@@ -271,7 +284,8 @@ class QueryEngine:
                 unique_results.append(r)
         return unique_results
 
-    def process_query_with_expansion(self, graph_query: GraphQuery, document_collection, extraction_type, query):
+    def process_query_with_expansion(self, graph_query: GraphQuery, document_collection, extraction_type=None,
+                                     query="", likesearch=True):
         """
         Executes the query fact patterns as a SQL query and collects all results
         Expands the query automatically, if e.g. a MeSH descriptor has several tree numbers
@@ -279,6 +293,7 @@ class QueryEngine:
         :param document_collection: the document collection to query
         :param extraction_type: the extraction type to query
         :param query: the query as the input string for logging
+        :param likesearch: performs like searches for subjects and objects
         :return: a list of QueryDocumentResults
         """
         query_fact_patterns_expanded = []
@@ -302,7 +317,8 @@ class QueryEngine:
             for query_fact_patterns in query_fact_patterns_expanded:
                 part_result.extend(self.query_with_graph_query(query_fact_patterns, document_collection,
                                                                extraction_type, query,
-                                                               query_titles_and_sentences=False))
+                                                               query_titles_and_sentences=False,
+                                                               likesearch=likesearch))
             results = self._merge_results(part_result)
 
         else:
@@ -313,7 +329,8 @@ class QueryEngine:
                                      .format(fp))
                 graph_patterns.append((fp.subjects[0], fp.predicate, fp.objects[0]))
             results = self.query_with_graph_query(graph_patterns, document_collection,
-                                                  extraction_type, query, query_titles_and_sentences=False)
+                                                  extraction_type, query, query_titles_and_sentences=False,
+                                                  likesearch=likesearch)
 
         # Replace all empty titles and sentence ids by the corresponding titles and explanations
         doc_ids = set()
