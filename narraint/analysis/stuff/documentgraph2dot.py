@@ -44,6 +44,7 @@ def export_document_graph_as_dot(output_dot, document_id, document_collection):
         graph.save_to_dot(output_dot)
 
 
+
 def main():
    # parser = argparse.ArgumentParser()
  #   parser.add_argument("output")
@@ -54,7 +55,9 @@ def main():
                         level=logging.DEBUG)
 
     logging.info('Beginning export document graph as dot file...')
-    for doc_id in [115285]:
+    with open('ids.tsv', 'rt') as f:
+        ids = set([int(li[:-1]) for li in f])
+    for doc_id in ids:
         logging.info('Exporting document graph: {}'.format(doc_id))
         export_document_graph_as_dot('../../../data/document_graphs/{}.dot'.format(doc_id), doc_id, "trex")
     logging.info('Finished')
