@@ -52,7 +52,9 @@ class QueryEngine:
         pred0 = predication_aliases[0]
         query = session.query(*projection_list)
         query = query.filter(pred0.document_collection == doc_collection)
-        for pred in predication_aliases:
+        if extraction_type:
+            query = query.filter(pred0.extraction_type == extraction_type)
+        for pred in predication_aliases[1:]:
             query = query.filter(pred.document_id == pred0.document_id)
             query = query.filter(pred.document_collection == doc_collection)
             if extraction_type:
