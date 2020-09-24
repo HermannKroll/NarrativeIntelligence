@@ -115,7 +115,9 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 try:
                     self.pref2result[tree_prefix].add_query_result(doc_result)
                 except KeyError:
-                    print('Error: no tree node for prefix {}'.format(tree_prefix))
+                    # we do not want to other trees than C or D
+                    pass
+                    #print('Error: no tree node for prefix {}'.format(tree_prefix))
 
     def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="", depth=0) -> QueryResultAggregateList():
         results = QueryResultAggregateList()
@@ -140,12 +142,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         pref_desc_id, pref_desc_name = self.mesh_ontology.get_descriptor_for_tree_no(pref_current)
                         pref_desc_id = 'MESH:' + pref_desc_id
                         pref_desc_name = pref_current + '.' + pref_desc_name
-                        if pref.startswith('C'):
-                            pref_desc_type = DISEASE
-                        elif pref.startswith('D'):
-                            pref_desc_type = CHEMICAL
-                        else:
-                            pref_desc_type = "UNKNOWN"
+                        pref_desc_type = self.mesh_ontology.get_name_for_tree(pref[0])
 
                         pref_desc_substitution = QueryEntitySubstitution(pref_desc_name, pref_desc_id, pref_desc_type,
                                                                          pref_desc_name)
