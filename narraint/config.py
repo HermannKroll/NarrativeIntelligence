@@ -10,6 +10,7 @@ RESOURCE_DIR = os.path.join(GIT_ROOT_DIR, "resources")
 CONFIG_DIR = os.path.join(GIT_ROOT_DIR, "config")
 LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
+CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 
 # UMLS
 UMLS_DATA = os.path.join(DATA_DIR, "umls/MRCONSO.RRF.gz")
