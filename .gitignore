@@ -120,7 +120,7 @@ narrative/*.log
 venvlinux/
 tmp/
 logs/
-
+cache/
 config/*
 !config/*.prod.json
 !config/*.example.json
