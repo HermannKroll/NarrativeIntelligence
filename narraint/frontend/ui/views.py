@@ -20,6 +20,7 @@ from narraint.queryengine.aggregation.substitution import ResultAggregationBySub
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.result import QueryDocumentResult
+from narraint.frontend.ui.search_cache import SearchCache
 
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
@@ -50,7 +51,7 @@ allowed_predicates.add("dosageform")
 
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
-
+cache = SearchCache()
 
 def check_and_convert_variable(text):
     var_name = VAR_NAME.search(text).group(1)
@@ -77,8 +78,6 @@ def convert_text_to_entity(text):
         e = [Entity(text.split(":", 1)[1], SPECIES)]
     elif text_low.startswith('fidx'):
         e = [Entity(text.upper(), DOSAGE_FORM)]
-    elif text_low.startswith('q'):
-        e = [Entity(text.upper(), "Entity")]
     else:
         try:
             e = entity_tagger.tag_entity(text)
@@ -258,9 +257,22 @@ class SearchView(TemplateView):
                         else:
                             document_collection = data_source
                             extraction_type = OPENIE_EXTRACTION
-
-                        results = query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
-                                                                            extraction_type, query)
+                        try:
+                            cached_results = cache.load_result_from_cache(document_collection, query_fact_patterns)
+                        except Exception:
+                            logging.error('Cannot load query result from cache...')
+                            cached_results = None
+                        if cached_results:
+                            logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
+                            results = cached_results
+                        else:
+                            results = query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
+                                                                                extraction_type, query)
+                            logging.info('Write results to cache...')
+                            try:
+                                cache.add_result_to_cache(document_collection, query_fact_patterns, results)
+                            except Exception:
+                                logging.error('Cannot store query result to cache...')
                         results_converted = []
                         if outer_ranking == 'outer_ranking_substitution':
                             substitution_aggregation = ResultAggregationBySubstitution()
@@ -268,11 +280,6 @@ class SearchView(TemplateView):
                         elif outer_ranking == 'outer_ranking_ontology':
                             substitution_ontology = ResultAggregationByOntology()
                             results_converted = substitution_ontology.rank_results(results).to_dict()
-                    # with open('last_query.json', 'wt') as f:
-                    #     pprint(results_converted, f)
-                #      for var_names, var_subs, d_ids, titles, explanations in aggregated_result.get_and_rank_results()[
-                #                                                             0:30]:
-                #        results_converted.append(list((var_names, var_subs, d_ids, titles, explanations)))
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
