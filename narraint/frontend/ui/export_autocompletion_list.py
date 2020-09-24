@@ -20,7 +20,8 @@ def main():
     predicates = create_predicate_vocab()
     with open('static/ac_predicates.txt', 'wt') as f_pred:
         for pred in predicates.keys():
-            f_pred.write('{},'.format(pred))
+            if pred != 'PRED_TO_REMOVE':
+                f_pred.write('{},'.format(pred))
         f_pred.write('dosageform')
     mesh_ontology = MeSHOntology.instance()
     with open('static/ac_all.txt', 'wt') as f, open('static/ac_entities.txt', 'wt') as f_ent:
