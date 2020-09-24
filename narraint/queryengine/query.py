@@ -30,3 +30,11 @@ class GraphQuery:
     def __next__(self):
         for fp in self.fact_patterns:
             yield fp
+
+    def get_unique_key(self):
+        parts = []
+        for fp in self.fact_patterns:
+            parts.extend([s.entity_id for s in fp.subjects])
+            parts.append(fp.predicate)
+            parts.extend([o.entity_id for o in fp.objects])
+        return '_'.join(parts)
