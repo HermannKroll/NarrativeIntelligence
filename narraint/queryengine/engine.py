@@ -171,7 +171,9 @@ class QueryEngine:
         doc_ids = set()
         sentence_ids = set()
         doc2result = {}
+        result_count = 0
         for r in session.execute(query):
+            result_count += 1
             # extract var substitutions for pmid
             var2sub = {}
             for v, t, pred_pos in var_info:
@@ -212,8 +214,8 @@ class QueryEngine:
 
             # each document id + the variable substitution forms a unique document result
             var2sub_set = set()
-            for k, v in var2sub:
-                var2sub_set.add('{}:{}'.format(k, v))
+            for k, v in var2sub.items():
+                var2sub_set.add('{}:{}'.format(k, v.entity_id))
             key = (doc_id, frozenset(var2sub_set))
             if key not in doc2result:
                 doc2result[key] = QueryDocumentResult(doc_id, r[1], var2sub, conf, explanations)
@@ -235,6 +237,7 @@ class QueryEngine:
         time_needed = datetime.now() - start
         self.query_logger.write_log(time_needed, extraction_type, keyword_query, query_patterns,
                                     sql_query.replace('\n', ' '), doc_ids)
+        logging.debug('{} database tuples retrieved'.format(result_count))
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         #logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
