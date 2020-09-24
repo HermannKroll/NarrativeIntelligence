@@ -267,7 +267,7 @@ class SearchView(TemplateView):
                             results = cached_results
                         else:
                             results = query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
-                                                                                extraction_type, query)
+                                                                                extraction_type="", query=query)
                             logging.info('Write results to cache...')
                             try:
                                 cache.add_result_to_cache(document_collection, query_fact_patterns, results)
