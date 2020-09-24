@@ -28,6 +28,22 @@ def main():
             f.write('{}\tpredicate\n'.format(pred))
         f.write('dosageform\tpredicate\n')
         counter, notfound = 0, 0
+
+        # write the mesh tree C and D
+        for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("D"):
+            e_id = 'MESH:{}'.format(d_id)
+            written_entity_ids.add((e_id, "Chemical"))
+            result = '{}\t{}'.format(d_heading, e_id)
+            f.write('\n' + result)
+            f_ent.write('\n' + result)
+
+        for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("C"):
+            e_id = 'MESH:{}'.format(d_id)
+            written_entity_ids.add((e_id, "Disease"))
+            result = '{}\t{}'.format(d_heading, e_id)
+            f.write('\n' + result)
+            f_ent.write('\n' + result)
+
         for e_id, e_str, e_type in entities:
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
