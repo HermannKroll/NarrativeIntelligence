@@ -262,13 +262,13 @@ const search = (event) => {
     event.preventDefault();
     let query = $('#id_keywords').val();
     let data_source = ""
-   /* if (document.getElementById('radio_pmc').checked) {
-        data_source = "PMC"
-    } else if(document.getElementById('radio_pubmed').checked) {
-        data_source = "PubMed"
-    } else
-    */
-    if(document.getElementById('radio_pubmed_path').checked) {
+    /* if (document.getElementById('radio_pmc').checked) {
+         data_source = "PMC"
+     } else if(document.getElementById('radio_pubmed').checked) {
+         data_source = "PubMed"
+     } else
+     */
+    if (document.getElementById('radio_pubmed_path').checked) {
         data_source = "PubMed_Path"
     } else {
         data_source = "PMC_Path"
@@ -309,7 +309,7 @@ const search = (event) => {
         let query_len = 0;
         if (nt_string.length > 0) {
             load_from_string(nt_string);
-            query_len = nt_string.split(".").length-1;
+            query_len = nt_string.split(".").length - 1;
         }
 
         // Print query translation
@@ -324,7 +324,7 @@ const search = (event) => {
         // add_collapsable_events();
 
         let documents_header = $("#header_documents");
-        if (result_size >= 0){
+        if (result_size >= 0) {
             documents_header.html(result_size + " Documents")
         } else {
             documents_header.html("Documents")
@@ -353,36 +353,41 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let explanations = queryResult["explanations"];
     let e_string = "";
     let j = 1;
-    explanations.forEach(e => {
-        let sentence = e["sentence"];
-        // an explanation might have multiple subjects / predicates / objects sperated by //
-        e["subject_str"].split('//').forEach(s => {
-            let s_reg = new RegExp('('+s+')', 'gi');
-            sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">'+s+"</code>")
-        });
-        e["predicate"].split('//').forEach(p => {
-            let p_reg = new RegExp('('+p+')', 'gi');
-            sentence = sentence.replaceAll(p_reg, '<mark>'+p+"</mark>")
-        });
-         e["object_str"].split('//').forEach(o => {
-            let o_reg = new RegExp('('+o+')', 'gi');
-            sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">'+o+"</code>")
-        });
+    try {
+        explanations.forEach(e => {
+            let sentence = e["s"];
+            // an explanation might have multiple subjects / predicates / objects sperated by //
+            e["s_str"].split('//').forEach(s => {
+                let s_reg = new RegExp('(' + s + ')', 'gi');
+                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">' + s + "</code>")
+            });
+            e["p"].split('//').forEach(p => {
+                let p_reg = new RegExp('(' + p + ')', 'gi');
+                sentence = sentence.replaceAll(p_reg, '<mark>' + p + "</mark>")
+            });
+            e["o_str"].split('//').forEach(o => {
+                let o_reg = new RegExp('(' + o + ')', 'gi');
+                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">' + o + "</code>")
+            });
 
-        e_string += j + '. ' + sentence + "<br>[" + e["subject_str"]+ ", " + e["predicate"] +  " -> " +
-            e["predicate_canonicalized"] + ", " + e["object_str"]  + ']<br>';
-        j += 1;
-        if(j-1 === query_len){
-            e_string += '<br>';
-            j = 1;
-        }
-    });
+            e_string += j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                e["p_c"] + ", " + e["o_str"] + ']<br>';
+            j += 1;
+            if (j - 1 === query_len) {
+                e_string += '<br>';
+                j = 1;
+            }
+        });
+    } catch (SyntaxError) {
+
+    }
+
     let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
         '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' +
-        document_id + '</a>' + '<br><b>' + title  + '</b><br></div></div><br>');
-    let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_'+document_id+'">Provenance</button>' +
-        '<div id="prov_'+document_id+'" class="collapse">\n' +
-         e_string  + '</div>')
+        document_id + '</a>' + '<br><b>' + title + '</b><br></div></div><br>');
+    let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>' +
+        '<div id="prov_' + document_id + '" class="collapse">\n' +
+        e_string + '</div>')
     divDoc.append(divProv);
     return divDoc;
 };
@@ -393,10 +398,10 @@ const createDocumentList = (results, query_len) => {
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
 
-    let divAccordion = $('<div class="accordion" id="'+ accordionID +'"></div>');
+    let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
     let divCard = $('<div class="card"></div>');
     divAccordion.append(divCard);
-    let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
+    let divCardHeader = $('<div class="card-header" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
     let divH2 = $('<h2 class="mb-0"></h2>');
     divCardHeader.append(divH2);
@@ -404,10 +409,13 @@ const createDocumentList = (results, query_len) => {
     let resultList = results["results"];
     let resultSize = results["size"];
     let button_string = resultSize + ' Document';
-    if (resultSize > 1) {button_string += 's'};
-    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
-        'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
-    let divCardEntry = $('<div id="'+collapseID+'" class="collapse show" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    if (resultSize > 1) {
+        button_string += 's'
+    }
+    ;
+    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#' + collapseID + '" ' +
+        'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
+    let divCardEntry = $('<div id="' + collapseID + '" class="collapse show" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     // tbd: grid
     let divCardBody = $('<div class="card-body"></div>');
     divCardEntry.append(divCardBody);
@@ -415,7 +423,7 @@ const createDocumentList = (results, query_len) => {
 
     let i = 0;
     resultList.forEach(res => {
-        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID+i,collapseID+i));
+        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
         i += 1;
     });
     return divAccordion;
@@ -424,7 +432,7 @@ const createDocumentList = (results, query_len) => {
 
 const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
     let divCard = $('<div class="card"></div>');
-    let divCardHeader = $('<div class="card-header" id="'+headingID+'"></div>');
+    let divCardHeader = $('<div class="card-header" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
     let divH2 = $('<h2 class="mb-0"></h2>');
     divCardHeader.append(divH2);
@@ -434,18 +442,20 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let var_subs = queryAggregate["substitution"];
     let result_size = queryAggregate["size"];
     let button_string = result_size + ' Document';
-    if(result_size > 1) {button_string += 's'}
+    if (result_size > 1) {
+        button_string += 's'
+    }
     button_string += ' [';
     let i = 0;
     var_names.forEach(name => {
         let entity_substitution = var_subs[name];
-        let ent_str = entity_substitution["entity_str"];
-        let ent_id = entity_substitution["entity_id"];
-        let ent_type = entity_substitution["entity_type"];
-        let ent_name = entity_substitution["entity_name"];
+        let ent_str = entity_substitution["str"];
+        let ent_id = entity_substitution["id"];
+        let ent_type = entity_substitution["type"];
+        let ent_name = entity_substitution["name"];
         let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
         if (ent_name === "Gene" || ent_name === 'Species' || ent_name === 'Disease' || ent_name === 'Chemical'
-        || ent_name === 'DosageForm' || ent_name === 'CellLine') {
+            || ent_name === 'DosageForm' || ent_name === 'CellLine') {
             var_sub = ent_name;
         }
 
@@ -457,7 +467,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
-        } else if (ent_type === 'Gene'){
+        } else if (ent_type === 'Gene') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
@@ -467,9 +477,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         i += 1;
     });
 
-    divH2.append('<button class="btn btn-light" type="button" data-toggle="collapse" data-target="#'+collapseID+'" ' +
-        'aria-expanded="true" aria-controls="'+collapseID+'">' + button_string + '</button>');
-    let divCardEntry = $('<div id="'+collapseID+'" class="collapse" aria-labelledby="'+headingID+'" data-parent="#'+accordionID+'"></div>');
+    divH2.append('<button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + collapseID + '" ' +
+        'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
+    let divCardEntry = $('<div id="' + collapseID + '" class="collapse" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     let divCardBody = $('<div class="card-body"></div>');
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
@@ -484,13 +494,13 @@ const createDocumentAggregateList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
-    let divAccordion = $('<div class="accordion" id="'+ accordionID +'"></div>');
+    let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
 
     let resultList = results["results"];
 
     let i = 0;
     resultList.forEach(res => {
-        divAccordion.append(createDivListForResultElement(res, query_len, accordionID, headingID+i,collapseID+i));
+        divAccordion.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
         i += 1;
     });
     return divAccordion;

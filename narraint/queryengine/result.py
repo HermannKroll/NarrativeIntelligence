@@ -51,8 +51,8 @@ class QueryEntitySubstitution:
         return self.__str__()
 
     def to_dict(self):
-        return dict(entity_name=self.entity_name, entity_str=self.entity_str, entity_id=self.entity_id,
-                    entity_type=self.entity_type)
+        return dict(name=self.entity_name, str=self.entity_str, id=self.entity_id,
+                    type=self.entity_type)
 
 
 class QueryFactExplanation:
@@ -75,9 +75,9 @@ class QueryFactExplanation:
                                                   self.predicate_canonicalized, self.object_str)
 
     def to_dict(self):
-        return dict(sentence=self.sentence, predicate=self.predicate,
-                    predicate_canonicalized=self.predicate_canonicalized,
-                    subject_str=self.subject_str, object_str=self.object_str)
+        return dict(s=self.sentence, p=self.predicate,
+                    p_c=self.predicate_canonicalized,
+                    s_str=self.subject_str, o_str=self.object_str)
 
 
 class QueryResultBase:
