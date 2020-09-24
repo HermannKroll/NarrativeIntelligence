@@ -120,29 +120,29 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let j = 1;
     try {
         explanations.forEach(e => {
-        let sentence = e["sentence"];
-        // an explanation might have multiple subjects / predicates / objects sperated by //
-        e["subject_str"].split('//').forEach(s => {
-            let s_reg = new RegExp('('+s+')', 'gi');
-            sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">'+s+"</code>")
-        });
-        e["predicate"].split('//').forEach(p => {
-            let p_reg = new RegExp('('+p+')', 'gi');
-            sentence = sentence.replaceAll(p_reg, '<mark>'+p+"</mark>")
-        });
-         e["object_str"].split('//').forEach(o => {
-            let o_reg = new RegExp('('+o+')', 'gi');
-            sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">'+o+"</code>")
-        });
+            let sentence = e["s"];
+            // an explanation might have multiple subjects / predicates / objects sperated by //
+            e["s_str"].split('//').forEach(s => {
+                let s_reg = new RegExp('(' + s + ')', 'gi');
+                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">' + s + "</code>")
+            });
+            e["p"].split('//').forEach(p => {
+                let p_reg = new RegExp('(' + p + ')', 'gi');
+                sentence = sentence.replaceAll(p_reg, '<mark>' + p + "</mark>")
+            });
+            e["o_str"].split('//').forEach(o => {
+                let o_reg = new RegExp('(' + o + ')', 'gi');
+                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">' + o + "</code>")
+            });
 
-        e_string += j + '. ' + sentence + "<br>[" + e["subject_str"]+ ", " + e["predicate"] +  " -> " +
-            e["predicate_canonicalized"] + ", " + e["object_str"]  + ']<br>';
-        j += 1;
-        if(j-1 === query_len){
-            e_string += '<br>';
-            j = 1;
-        }
-    });
+            e_string += j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                e["p_c"] + ", " + e["o_str"] + ']<br>';
+            j += 1;
+            if (j - 1 === query_len) {
+                e_string += '<br>';
+                j = 1;
+            }
+        });
     } catch (SyntaxError) {
 
     }
@@ -209,10 +209,10 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let i = 0;
     var_names.forEach(name => {
         let entity_substitution = var_subs[name];
-        let ent_str = entity_substitution["entity_str"];
-        let ent_id = entity_substitution["entity_id"];
-        let ent_type = entity_substitution["entity_type"];
-        let ent_name = entity_substitution["entity_name"];
+        let ent_str = entity_substitution["str"];
+        let ent_id = entity_substitution["id"];
+        let ent_type = entity_substitution["type"];
+        let ent_name = entity_substitution["name"];
         let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
         button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.wikidata.org/wiki/' + ent_id + '" target="_blank"' +
