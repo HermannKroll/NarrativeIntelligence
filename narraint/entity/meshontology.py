@@ -8,6 +8,25 @@ from narraint.config import MESH_DESCRIPTORS_FILE, MESH_ONTOLOGY_INDEX_FILE
 from narraint.mesh.data import MeSHDB, Descriptor
 from narraint.progress import print_progress_with_eta
 
+MESH_TREE_NAMES = dict(
+    A="Anatomy",
+    B="Organisms",
+    C="Diseases",
+    D="Chemicals and Drugs",
+    E="Analytical, Diagnostic and Therapeutic Techniques, and Equipment",
+    F="Psychiatry and Psychology",
+    G="Phenomena and Processes",
+    H="Disciplines and Occupations",
+    I="Anthropology, Education, Sociology, and Social Phenomena",
+    J="Technology, Industry, and Agriculture",
+    K="Humanities",
+    L="Information Science",
+    M="Named Groups",
+    N="Health Care",
+    V="Publication Characteristics",
+    Z="Geographicals"
+)
+
 
 class MeSHOntology:
     """
@@ -143,6 +162,15 @@ class MeSHOntology:
             for res in self.find_descriptors_start_with_tree_no(t_n):
                 sub_descriptors.add(res)
         return sub_descriptors
+
+
+    def get_name_for_tree(self, tree_start_character):
+        """
+        Returns the official name for the mesh tree name
+        :param tree_start_character: the starting character
+        :return: the official mesh tree name
+        """
+        return MESH_TREE_NAMES[tree_start_character]
 
 
 def main():
