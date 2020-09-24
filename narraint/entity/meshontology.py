@@ -78,9 +78,12 @@ class MeSHOntology:
         :return: a list of descriptors (id, heading)
         """
         results = []
+        visited = set()
         for d_tree_no, (d_id, d_heading) in self.treeno2desc.items():
-            if d_tree_no.startswith(tree_no):
-                results.append((d_id, d_heading))
+            if d_id not in visited:
+                if d_tree_no.startswith(tree_no):
+                    results.append((d_id, d_heading))
+                    visited.add(d_id)
         return results
 
     def get_descriptor_for_tree_no(self, tree_no: str) -> (str, str):
