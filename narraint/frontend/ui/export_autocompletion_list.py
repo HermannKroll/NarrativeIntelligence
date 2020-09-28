@@ -1,7 +1,7 @@
 import logging
 
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL, DISEASE
+from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.engine import QueryEngine
@@ -33,24 +33,31 @@ def main():
         # write the mesh tree C and D
         for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("D"):
             e_id = 'MESH:{}'.format(d_id)
-            written_entity_ids.add((e_id, "Chemical"))
-            result = '{}\t{}'.format(d_heading, e_id)
-            f.write('\n' + result)
-            f_ent.write('\n' + result)
+            k = (e_id, "MESH")
+            if k not in written_entity_ids:
+                written_entity_ids.add(k)
+                result = '{}\t{}'.format(d_heading, e_id)
+                f.write('\n' + result)
+                f_ent.write('\n' + result)
 
         for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("C"):
             e_id = 'MESH:{}'.format(d_id)
-            written_entity_ids.add((e_id, "Disease"))
-            result = '{}\t{}'.format(d_heading, e_id)
-            f.write('\n' + result)
-            f_ent.write('\n' + result)
+            k = (e_id, "MESH")
+            if k not in written_entity_ids:
+                written_entity_ids.add(k)
+                result = '{}\t{}'.format(d_heading, e_id)
+                f.write('\n' + result)
+                f_ent.write('\n' + result)
 
         for e_id, e_str, e_type in entities:
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
-                if e_type in [CHEMICAL, DISEASE] and not e_id.startswith('MESH:'):
+                if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:'):
                     e_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(e_id)[0])
-
+                    if e_id.startswith('FID'):
+                        e_type = 'FID'
+                    else:
+                        e_type = 'MESH'
                 # Skip duplicated entries
                 if (e_id, e_type) in written_entity_ids:
                     continue
