@@ -7,12 +7,12 @@ from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication, PredicationResult
-from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE
+from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.openie.cleanload import BULK_INSERT_AFTER_K, _insert_predication_skip_duplicates
 from narraint.progress import print_progress_with_eta
 
-DOSAGE_FORM_PREDICATE = "dosageform"
+DOSAGE_FORM_PREDICATE = "administered"
 ASSOCIATED_PREDICATE = "associated"
 SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE, ASSOCIATED_PREDICATE}
 
@@ -109,29 +109,44 @@ def clean_extractions_in_database():
     """
     session = Session.get()
 
-    # Delete all treatments which are not (Chemical -> Disease)
-    logging.info('Cleaning treats (Chemical -> Disease)...')
-    q_treatment = update(Predication).where(and_(Predication.predicate_canonicalized == 'treats',
-                                                 or_(Predication.subject_type != CHEMICAL,
-                                                     Predication.object_type != DISEASE))) \
+    logging.info('Cleaning administered (DosageForm -> Chemical, Disease Species)...')
+    q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',
+                                                    or_(Predication.subject_type != DOSAGE_FORM,
+                                                        Predication.object_type.notin_([SPECIES, DISEASE, CHEMICAL]))))\
         .values(predicate_canonicalized=None)
-    session.execute(q_treatment)
+    session.execute(q_administered)
+    session.commit()
+
+    logging.info('Cleaning induces (Chemical -> Chemical / Disease)')
+    q_induces = update(Predication).where(and_(Predication.predicate_canonicalized == 'induces',
+                                               or_(Predication.subject_type.notin_([CHEMICAL, DISEASE]),
+                                                   Predication.object_type.notin_([CHEMICAL, DISEASE])))) \
+        .values(predicate_canonicalized=None)
+    session.execute(q_induces)
     session.commit()
 
     logging.info('Cleaning decreases (Chemical -> ...)')
     q_decrease = update(Predication).where(and_(Predication.predicate_canonicalized == 'decreases',
-                                                Predication.subject_type != CHEMICAL)) \
+                                                or_(Predication.subject_type.notin_([CHEMICAL, DISEASE]),
+                                                    Predication.object_type.notin_([CHEMICAL, DISEASE])))) \
         .values(predicate_canonicalized=None)
     session.execute(q_decrease)
     session.commit()
 
-    logging.info('Cleaning induces (Chemical -> Chemical / Disease)')
-    q_cause = update(Predication).where(and_(Predication.predicate_canonicalized == 'induces',
-                                             or_(Predication.subject_type != CHEMICAL,
-                                                 and_(Predication.object_type != CHEMICAL,
-                                                      Predication.object_type != DISEASE)))) \
+    logging.info('Cleaning interacts (Chemical -> ...)')
+    q_interacts = update(Predication).where(and_(Predication.predicate_canonicalized == 'interacts',
+                                                 or_(Predication.subject_type.notin_([CHEMICAL, GENE]),
+                                                     Predication.object_type.notin_([CHEMICAL, GENE])))) \
         .values(predicate_canonicalized=None)
-    session.execute(q_cause)
+    session.execute(q_interacts)
+    session.commit()
+
+    logging.info('Cleaning metabolises (Chemical -> ...)')
+    q_metabolises = update(Predication).where(and_(Predication.predicate_canonicalized == 'metabolises',
+                                                   or_(Predication.subject_type != GENE,
+                                                       Predication.object_type != CHEMICAL))) \
+        .values(predicate_canonicalized=None)
+    session.execute(q_metabolises)
     session.commit()
 
     logging.info('Cleaning inhibits (Chemical -> Gene)')
@@ -142,6 +157,15 @@ def clean_extractions_in_database():
     session.execute(q_inhibits)
     session.commit()
 
+    # Delete all treatments which are not (Chemical -> Disease, Species)
+    logging.info('Cleaning treats (Chemical -> Disease)...')
+    q_treatment = update(Predication).where(and_(Predication.predicate_canonicalized == 'treats',
+                                                 or_(Predication.subject_type != CHEMICAL,
+                                                     Predication.object_type.notin_([DISEASE, SPECIES]) != DISEASE))) \
+        .values(predicate_canonicalized=None)
+    session.execute(q_treatment)
+    session.commit()
+
 
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -149,7 +173,7 @@ def main():
                         level=logging.DEBUG)
 
     dosage_form_rule()
-    #mirror_symmetric_predicates()
+    # mirror_symmetric_predicates()
     clean_extractions_in_database()
 
 
