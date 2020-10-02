@@ -25,6 +25,7 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}):
     """
     vocab_vectors = []
     for k, v_preds in vocab_predicates.items():
+        vocab_vectors.append((k, model.get_word_vector(k)))
         for v_p in v_preds:
             vocab_vectors.append((k, model.get_word_vector(v_p)))
 
@@ -37,7 +38,7 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}):
         best_match = None
         min_distance = 1.0
         for p_v_idx, (p_can_v, p_v) in enumerate(vocab_vectors):
-            current_distance = cosine(vec, p_v)
+            current_distance = abs(cosine(vec, p_v))
             if not best_match or current_distance < min_distance:
                 min_distance = current_distance
                 best_match = (p_can_v, min_distance)
