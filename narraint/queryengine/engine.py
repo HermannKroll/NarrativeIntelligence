@@ -1,8 +1,10 @@
 import itertools
 import logging
 import re
+from collections import defaultdict
 from datetime import datetime
 
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
 from narraint.backend.models import Document, Predication, Sentence
@@ -10,6 +12,7 @@ from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
 from narraint.entity.entity import Entity
+from narraint.extraction.predicate_vocabulary import PREDICATE_EXPANSION
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
@@ -150,7 +153,7 @@ class QueryEngine:
                     query = query.filter(pred.predicate_canonicalized == p)
 
         # order by document id descending and limit results to 100
-        query = query.order_by().limit(QUERY_LIMIT)
+        query = query.order_by(func.random()).limit(QUERY_LIMIT)
         return query, var_names
 
     def query_with_graph_query(self, query_patterns, doc_collection, extraction_type=None, keyword_query='',
@@ -307,25 +310,56 @@ class QueryEngine:
             exp_cond1 = len(fp.subjects) > 1
             exp_cond2 = len(fp.objects) > 1
 
-            if exp_cond1 or exp_cond2:
+            if exp_cond1 or exp_cond2 or fp.predicate in PREDICATE_EXPANSION:
                 expand_query = True
+                if fp.predicate in PREDICATE_EXPANSION:
+                    predicates = PREDICATE_EXPANSION[fp.predicate]
+                else:
+                    predicates = [fp.predicate]
+
                 cross_product = list(
-                    itertools.product(fp.subjects, [fp.predicate], fp.objects))
+                    itertools.product(fp.subjects, predicates, fp.objects))
                 query_fact_patterns_expanded.append(cross_product)
             else:
                 query_fact_patterns_expanded.append([(fp.subjects[0], fp.predicate, fp.objects[0])])
 
-        if expand_query:
-            query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
-            logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
-            part_result = []
-            for query_fact_patterns in query_fact_patterns_expanded:
-                part_result.extend(self.query_with_graph_query(query_fact_patterns, document_collection,
-                                                               extraction_type, query,
-                                                               query_titles_and_sentences=False,
-                                                               likesearch=likesearch))
-            results = self._merge_results(part_result)
+        if expand_query or len(graph_query.fact_patterns) > 1:
+            # database join for fact patterns seems to be very slow
+            # Idea: execute after each other and join results in memory
+            temp_results = defaultdict(list)
+            valid_doc_ids = set()
+            for idx, fact_patterns_expanded in enumerate(query_fact_patterns_expanded):
+            #query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
+                logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
+                part_result = []
+                for query_fact_patterns in fact_patterns_expanded:
+                    part_result.extend(self.query_with_graph_query([query_fact_patterns], document_collection,
+                                                                   extraction_type, query,
+                                                                   query_titles_and_sentences=False,
+                                                                   likesearch=likesearch))
+                results = self._merge_results(part_result)
+                new_doc_ids = set()
+                for r in results:
+                    temp_results[r.document_id].append(r)
+                    new_doc_ids.add(r.document_id)
+                if idx == 0:
+                    valid_doc_ids = new_doc_ids
+                else:
+                    # compute intersection to ensure that both required facts are mentioned in both documents
+                    valid_doc_ids = valid_doc_ids.intersection(new_doc_ids)
 
+            joined_results = []
+            for doc_id, result_list in temp_results.items():
+                if doc_id in valid_doc_ids:
+                    doc = None
+                    for idx, r in enumerate(result_list):
+                        if idx == 0:
+                            doc = r
+                        else:
+                            for e in r.explanations:
+                                doc.integrate_explanation(e)
+                    joined_results.append(doc)
+            results = joined_results
         else:
             graph_patterns = []
             for fp in graph_query:
