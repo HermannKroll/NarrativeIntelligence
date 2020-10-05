@@ -19,15 +19,18 @@ def main():
     ignored = []
     predicates = create_predicate_vocab()
     with open('static/ac_predicates.txt', 'wt') as f_pred:
-        for pred in predicates.keys():
+        for idx, pred in enumerate(predicates.keys()):
             if pred != 'PRED_TO_REMOVE':
-                f_pred.write('{},'.format(pred))
-        f_pred.write('dosageform')
+                if idx == 0:
+                    f_pred.write('{}'.format(pred))
+                else:
+                    f_pred.write(',{}'.format(pred))
+
     mesh_ontology = MeSHOntology.instance()
     with open('static/ac_all.txt', 'wt') as f, open('static/ac_entities.txt', 'wt') as f_ent:
         for pred in predicates.keys():
-            f.write('{}\tpredicate\n'.format(pred))
-        f.write('dosageform\tpredicate\n')
+            if pred != 'PRED_TO_REMOVE':
+                f.write('{}\tpredicate\n'.format(pred))
         counter, notfound = 0, 0
 
         # write the mesh tree C and D
