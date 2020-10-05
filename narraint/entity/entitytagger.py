@@ -1,9 +1,10 @@
 import logging
 from collections import defaultdict
 
+from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 from narraint.queryengine.engine import QueryEngine
 
@@ -44,8 +45,35 @@ class EntityTagger:
 
         self._add_to_reverse_index(self.resolver.mesh.supplement_desc2heading.items(), 'MESH', id_prefix='MESH:')
         self._create_mesh_ontology_index(self.resolver.mesh.desc2heading.items())
-        self._add_to_reverse_index(self.resolver.dosageform.fid2name.items(), 'DosageForm')
+        self._add_fid_dosageform_terms()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
+
+    def _add_fid_dosageform_terms(self):
+        """
+        Add the additional dosage form terms to the internal translation dict
+        :return: None
+        """
+        with open(DOSAGE_FID_DESCS, 'rt') as f:
+            for line in f:
+                df_id, df_head, *rest = line.strip().split('\t')
+                self.term2entity[df_head.lower()].append(Entity(df_id, DOSAGE_FORM))
+                if rest:
+                    rest = rest[0]
+                    if ';' in rest:
+                        terms = rest.split(';')
+                        for t in terms:
+                            self.term2entity[t.lower()].append(Entity(df_id, DOSAGE_FORM))
+                    else:
+                        self.term2entity[rest.lower()].append(Entity(df_id, DOSAGE_FORM))
+        with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'rt') as f:
+            for line in f:
+                df_id, synonyms = line.strip().split('\t')
+                if ';' in synonyms:
+                    terms = synonyms.split(';')
+                    for t in terms:
+                        self.term2entity[t.lower()].append((Entity('MESH:{}'.format(df_id), DOSAGE_FORM)))
+                else:
+                    self.term2entity[synonyms.lower()].append((Entity('MESH:{}'.format(df_id), DOSAGE_FORM)))
 
     def tag_entity(self, term: str):
         """
