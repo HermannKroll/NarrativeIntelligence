@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/network.css' %}" type="text/css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <!--  <link rel="stylesheet" href="/resources/demos/style.css"> -->
+    <!--  <link rel="stylesheet" href="/resources/demos/style.css"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
     <link href="https://unpkg.com/vis-network@latest/dist/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -130,19 +130,24 @@
                                 </div>
                                 <div class="inner-div-left-mid">
                                     'compares' <br>
-                                    'decreases'
+
+                                </div>
+                                <div class="inner-div-left-mid">
+                                    'decreases' <br>
+                                    'induces'
                                 </div>
                                 <div class="inner-div-left-mid">
                                     'interacts' <br>
-                                    'induces'
+
                                 </div>
                                 <div class="inner-div-left-mid">
                                     'inhibits' <br>
                                     'metabolises'
                                 </div>
                                 <div class="inner-div-left-mid">
-                                    'treats'
+                                    'treats' <br>
                                 </div>
+
                             </div>
                         </div>
 
@@ -158,23 +163,23 @@
                                 <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
                                     Simvastatin)</label><br>
                             </div>
-                             <!--<div class="inner-div-left-mid">
-                               <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
-                                       checked="checked">
-                                <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
-                                    Abstracts)</label><br>
-                                <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
-                                <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and
-                                    Abstracts)</label>
-                            </div>
-                            <div class="inner-div-right-most">
-                                <input type="radio" id="radio_pmc" name="data_source" value="PMC">
-                                <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents incl.
-                                    Simvastatin)</label><br>
-                                <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
-                                <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
-                                    Simvastatin)</label><br>
-                            </div> -->
+                            <!--<div class="inner-div-left-mid">
+                              <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                                      checked="checked">
+                               <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
+                                   Abstracts)</label><br>
+                               <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
+                               <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and
+                                   Abstracts)</label>
+                           </div>
+                           <div class="inner-div-right-most">
+                               <input type="radio" id="radio_pmc" name="data_source" value="PMC">
+                               <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                   Simvastatin)</label><br>
+                               <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                               <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
+                                   Simvastatin)</label><br>
+                           </div> -->
                         </div>
 
                         <label><strong>Outer Ranking:</strong></label><br>
@@ -213,13 +218,123 @@
             </div>
         </div>
 
+        <div class="accordion" id="accordionExample">
+            <div class="card mb-3">
+                <div class="card-header text-center" id="headingOne">
+                    <h2 class="mb-0">
+                        <button class="btn btn-primary" type="button" data-toggle="collapse"
+                                data-target="#collapseExamples"
+                                aria-expanded="false" aria-controls="collapseExamples">
+                            Example Queries
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    <div class="card-body">
+                        <div class="alert alert-info" role="alert">
+                            Treatment
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats Diabetes Mellitus')">Metformin treats
+                            "Diabetes Mellitus"
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin treats Hypercholesterolemia')">Metformin treats
+                            Hypercholesterolemia
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats ?X(Disease)')">Metformin treats ?X(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Administered
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin administered ?X(DosageForm)')">Metformin administered
+                            ?X(DosageForm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin administered Injections')">Metformin administered
+                            Injections
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Gene Interactions
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin inhibits mtor')">Metformin inhibits mtor
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin inhibits ?X(Gene)')">Metformin inhibits ?X(Gene)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Chemical) inhibits cyp3a4')">?X(Chemical) inhibits cyp3a4
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
+                            Simvastatin
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Adverse Effects
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
+                            Rhabdomyolysis
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces Muscular Diseases')">Simvastatin induces
+                            Muscular Diseases
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Complex Queries
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin associated human')">Metformin treats Diabetes Mellitus. Metformin associated human
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin associated ?X(Chemical)')">Metformin treats Diabetes Mellitus. Metformin associated ?X(Chemical)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin administered ?X(DosageForm)')">Metformin treats Diabetes Mellitus. Metformin administered ?X(DosageForm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces Muscular Diseases. ?X(Chemical) inhibits cyp3a4')">Simvastatin induces "Muscular Diseases". ?X(Chemical) inhibits cyp3a4
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Large Queries
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?Chem(Chemical) treats ?Dis(Disease)')">?Chem(Chemical) treats ?Dis(Disease)
+                        </button>
+                         <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?Chem(Chemical) administered ?Form(DosageForm)')">?Chem(Chemical) administered ?Form(DosageForm)
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div class="accordion" id="accordionNarrativeDesigner">
             <div class="card mb-3">
                 <div class="card-header text-center" id="headingOne">
                     <h2 class="mb-0">
                         <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOne"
-                                aria-expanded="false" aria-controls="collapseOne">
+                                aria-expanded="false" aria-controls="collapseOne" onclick="centerNetworkDelayed()">
                             Narrative Designer
                         </button>
                     </h2>
@@ -228,7 +343,7 @@
                      data-parent="#accordionNarrativeDesigner">
                     <div class="card-body">
 
-         <div id="App">
+                        <div id="App">
                             <div class="help-tip">
                                 <p>- Click on node/edge to select it <br>
                                     - Click the "Center-Button" to center your network <br>

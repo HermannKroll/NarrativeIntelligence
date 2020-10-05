@@ -366,6 +366,10 @@ function dialogNameNode() { // this function is used to name a new node
     createQuery();
 }
 
+function centerNetworkDelayed() {
+    setTimeout(centerNetwork, 1000);
+}
+
 // places the network in the middle of the working space
 function centerNetwork() {
     network.fit({

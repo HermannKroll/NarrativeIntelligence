@@ -341,6 +341,15 @@ const search = (event) => {
     });
 };
 
+function example_search(search_str) {
+    console.log(search_str);
+    document.getElementById('id_keywords').value = search_str;
+    document.getElementById("btn_search").click();
+    $('html,body').scrollTop(0);
+}
+
+
+
 let uniqueAccordionIDCounter = 0;
 const getUniqueAccordionID = () => {
     uniqueAccordionIDCounter += 1
