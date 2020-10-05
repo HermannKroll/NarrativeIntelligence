@@ -118,11 +118,10 @@ class Tag(Base):
 
 
 PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "document_collection",
-                                                     "subject_openie", "subject_id", "subject_str", "subject_type",
-                                                     "predicate", "predicate_cleaned", "predicate_canonicalized",
-                                                     "object_openie", "object_id", "object_str", "object_type",
-                                                     "confidence", "sentence", "extraction_type", "extraction_version",
-                                                     "mirrored",  "date_inserted"])
+                                                     "subject_id", "subject_str", "subject_type",
+                                                     "predicate", "predicate_canonicalized",
+                                                     "object_id", "object_str", "object_type",
+                                                     "confidence", "sentence_id", "extraction_type"])
 
 
 class Predication(Base):
