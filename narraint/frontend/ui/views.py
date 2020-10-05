@@ -54,17 +54,20 @@ entity_tagger = EntityTagger()
 cache = SearchCache()
 
 def check_and_convert_variable(text):
-    var_name = VAR_NAME.search(text).group(1)
-    m = VAR_TYPE.search(text)
-    if m:
-        t = m.group(1).lower()
-        if t not in variable_type_mappings:
-            raise ValueError('"{}" as Variable Type unknown (supported: {})'
-                             .format(t, list(variable_type_mappings.values())))
-        return '{}({})'.format(var_name, variable_type_mappings[t])
-    else:
-        return var_name
-
+    try:
+        var_name = VAR_NAME.search(text).group(1)
+        m = VAR_TYPE.search(text)
+        if m:
+            t = m.group(1).lower()
+            if t not in variable_type_mappings:
+                raise ValueError('"{}" as Variable Type unknown (supported: {})'
+                                 .format(t, list(variable_type_mappings.values())))
+            return '{}({})'.format(var_name, variable_type_mappings[t])
+        else:
+            return var_name
+    except AttributeError:
+        if not VAR_NAME.search(text):
+            raise ValueError('variable "{}" has no name (e.g. ?X(Chemical))'.format(text))
 
 def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
