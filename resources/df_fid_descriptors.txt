@@ -15,7 +15,7 @@ FIDX14	sticks	nasal sticks;sticks
 FIDX15	Pharmaceutical tampons	ear tampons;tampons;rectal tampons
 FIDX16	Spray	ear sprays
 FIDX17	ophthalmic inserts
-FIDX19	shampoos and soaps  shampoos;soaps
+FIDX19	shampoos and soaps	shampoos;soaps
 FIDX20	pellets
 FIDX21	elixirs
 FIDX22	tinctures
