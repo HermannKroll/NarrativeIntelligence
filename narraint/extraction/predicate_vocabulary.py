@@ -14,3 +14,8 @@ def create_predicate_vocab():
                 inhibits=["disrupt", "suppress", "inhibitor", "disturb"],
                 treats=["prevents", "use"],
                 PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"])
+
+
+PREDICATE_EXPANSION = dict(
+    interacts=['interacts', 'metabolises', 'inhibits']
+)
