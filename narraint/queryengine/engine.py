@@ -30,7 +30,7 @@ class QueryEngine:
         self.query_logger = QueryLogger()
 
     def __construct_query(self, session, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type=None,
-                          likesearch=True):
+                          likesearch=True, document_ids=None):
         var_names = []
         var_dict = {}
         if len(query_patterns) == 0:
@@ -55,6 +55,10 @@ class QueryEngine:
         pred0 = predication_aliases[0]
         query = session.query(*projection_list)
         query = query.filter(pred0.document_collection == doc_collection)
+
+        # just get documents which are contained here
+        if document_ids:
+            query = query.filter(pred0.document_id.in_(document_ids))
         if extraction_type:
             query = query.filter(pred0.extraction_type == extraction_type)
         for pred in predication_aliases[1:]:
@@ -157,12 +161,13 @@ class QueryEngine:
         return query, var_names
 
     def query_with_graph_query(self, query_patterns, doc_collection, extraction_type=None, keyword_query='',
-                               query_titles_and_sentences=True, likesearch=True):
+                               query_titles_and_sentences=True, likesearch=True, document_ids=None):
         if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
         session = Session.get()
-        query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch)
+        query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch,
+                                                 document_ids)
 
         sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.debug('executing sql statement: {}'.format(sql_query))
@@ -328,38 +333,63 @@ class QueryEngine:
             # Idea: execute after each other and join results in memory
             temp_results = defaultdict(list)
             valid_doc_ids = set()
+            valid_var_subs = set()
             for idx, fact_patterns_expanded in enumerate(query_fact_patterns_expanded):
             #query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
                 logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
                 part_result = []
+
+                if idx == 0:
+                    document_id_filter = None
+                else:
+                    document_id_filter = valid_doc_ids
                 for query_fact_patterns in fact_patterns_expanded:
                     part_result.extend(self.query_with_graph_query([query_fact_patterns], document_collection,
                                                                    extraction_type, query,
                                                                    query_titles_and_sentences=False,
-                                                                   likesearch=likesearch))
+                                                                   likesearch=likesearch,
+                                                                   document_ids=document_id_filter))
                 results = self._merge_results(part_result)
                 new_doc_ids = set()
+                new_var_subs = set()
                 for r in results:
+                    # update the explanation position
+                    for e in r.explanations:
+                        e.position = idx
+                    for var, var_sub in r.var2substitution.items():
+                        new_var_subs.add((r.document_id, var, var_sub.entity_id, var_sub.entity_type))
                     temp_results[r.document_id].append(r)
+
                     new_doc_ids.add(r.document_id)
                 if idx == 0:
+                    valid_var_subs = new_var_subs
                     valid_doc_ids = new_doc_ids
                 else:
                     # compute intersection to ensure that both required facts are mentioned in both documents
+                    valid_var_subs = valid_var_subs.intersection(new_var_subs)
                     valid_doc_ids = valid_doc_ids.intersection(new_doc_ids)
 
-            joined_results = []
+            doc2result = {}
             for doc_id, result_list in temp_results.items():
                 if doc_id in valid_doc_ids:
-                    doc = None
-                    for idx, r in enumerate(result_list):
-                        if idx == 0:
-                            doc = r
-                        else:
-                            for e in r.explanations:
-                                doc.integrate_explanation(e)
-                    joined_results.append(doc)
-            results = joined_results
+                    for r in result_list:
+                        var_sub_compatible = True
+                        for var, var_sub in r.var2substitution.items():
+                            if (r.document_id, var, var_sub.entity_id, var_sub.entity_type) not in valid_var_subs:
+                                var_sub_compatible = False
+                                break
+                        if var_sub_compatible:
+                            # each document id + the variable substitution forms a unique document result
+                            var2sub_set = set()
+                            for var, var_sub in r.var2substitution.items():
+                                var2sub_set.add((var, var_sub.entity_id, var_sub.entity_type))
+                            key = (doc_id, frozenset(var2sub_set))
+                            if key not in doc2result:
+                                doc2result[key] = r
+                            else:
+                                for e in r.explanations:
+                                    doc2result[key].integrate_explanation(e)
+            results = doc2result.values()
         else:
             graph_patterns = []
             for fp in graph_query:
