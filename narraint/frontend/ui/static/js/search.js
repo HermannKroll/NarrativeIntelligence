@@ -361,7 +361,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let title = queryResult["title"];
     let explanations = queryResult["explanations"];
     let e_string = "";
-    let j = 1;
+    let j = -1;
     try {
         explanations.forEach(e => {
             let sentence = e["s"];
@@ -379,13 +379,15 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">' + o + "</code>")
             });
 
+            if (j === -1){
+                j = parseInt(e["pos"]) + 1;
+            }
+            if (j !== parseInt(e["pos"]) + 1){
+                e_string += '<br>';
+                j = parseInt(e["pos"]) + 1;
+            }
             e_string += j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
                 e["p_c"] + ", " + e["o_str"] + ']<br>';
-            j += 1;
-            if (j - 1 === query_len) {
-                e_string += '<br>';
-                j = 1;
-            }
         });
     } catch (SyntaxError) {
 
