@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
@@ -77,7 +79,7 @@ class QueryFactExplanation:
     def to_dict(self):
         return dict(s=self.sentence, p=self.predicate,
                     p_c=self.predicate_canonicalized,
-                    s_str=self.subject_str, o_str=self.object_str)
+                    s_str=self.subject_str, o_str=self.object_str, pos=self.position)
 
 
 class QueryResultBase:
@@ -131,8 +133,10 @@ class QueryDocumentResult(QueryResultBase):
                     e.object_str = e.object_str + '//' + explanation.object_str
                 return
         self.explanations.append(explanation)
+        self.explanations.sort(key=lambda x: x.position)
 
     def to_dict(self):
+        self.explanations.sort(key=lambda x: x.position)
         e_dict = [e.to_dict() for e in self.explanations]
         return dict(type="doc", document_id=self.document_id, title=self.title, explanations=e_dict)
 
