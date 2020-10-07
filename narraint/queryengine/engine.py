@@ -212,7 +212,7 @@ class QueryEngine:
                 explanations.append(
                     QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
                                          object_str))
-                if r[offset+7]:
+                if r[offset + 7]:
                     conf += float(r[offset + 7])
                 else:
                     conf += 0.0
@@ -247,7 +247,7 @@ class QueryEngine:
                                     sql_query.replace('\n', ' '), doc_ids)
         logging.debug('{} database tuples retrieved'.format(result_count))
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
-        #logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
+        # logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
         return results
 
     def query_titles_and_sentences_for_doc_ids(self, doc_ids, sentence_ids, document_collection):
@@ -333,9 +333,9 @@ class QueryEngine:
             # Idea: execute after each other and join results in memory
             temp_results = defaultdict(list)
             valid_doc_ids = set()
-            valid_var_subs = set()
+            valid_var_subs = defaultdict(set)
             for idx, fact_patterns_expanded in enumerate(query_fact_patterns_expanded):
-            #query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
+                # query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
                 logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
                 part_result = []
 
@@ -351,13 +351,13 @@ class QueryEngine:
                                                                    document_ids=document_id_filter))
                 results = self._merge_results(part_result)
                 new_doc_ids = set()
-                new_var_subs = set()
+                new_var_subs = defaultdict(set)
                 for r in results:
                     # update the explanation position
                     for e in r.explanations:
                         e.position = idx
                     for var, var_sub in r.var2substitution.items():
-                        new_var_subs.add((r.document_id, var, var_sub.entity_id, var_sub.entity_type))
+                        new_var_subs[var].add((r.document_id, var_sub.entity_id, var_sub.entity_type))
                     temp_results[r.document_id].append(r)
 
                     new_doc_ids.add(r.document_id)
@@ -366,30 +366,74 @@ class QueryEngine:
                     valid_doc_ids = new_doc_ids
                 else:
                     # compute intersection to ensure that both required facts are mentioned in both documents
-                    valid_var_subs = valid_var_subs.intersection(new_var_subs)
+                    for var in new_var_subs:
+                        if var in valid_var_subs:
+                            # if there are already substitutions for a specific variable -> intersect
+                            valid_var_subs[var] = valid_var_subs[var].intersection(new_var_subs[var])
+                        else:
+                            # its a new variable which is not known now
+                            valid_var_subs[var] = new_var_subs[var]
                     valid_doc_ids = valid_doc_ids.intersection(new_doc_ids)
 
-            doc2result = {}
-            for doc_id, result_list in temp_results.items():
-                if doc_id in valid_doc_ids:
-                    for r in result_list:
-                        var_sub_compatible = True
-                        for var, var_sub in r.var2substitution.items():
-                            if (r.document_id, var, var_sub.entity_id, var_sub.entity_type) not in valid_var_subs:
-                                var_sub_compatible = False
-                                break
-                        if var_sub_compatible:
-                            # each document id + the variable substitution forms a unique document result
-                            var2sub_set = set()
-                            for var, var_sub in r.var2substitution.items():
-                                var2sub_set.add((var, var_sub.entity_id, var_sub.entity_type))
-                            key = (doc_id, frozenset(var2sub_set))
-                            if key not in doc2result:
-                                doc2result[key] = r
+            if len(valid_var_subs) == 0:
+                # do not check any variable
+                doc2result = {}
+                for doc_id, result_list in temp_results.items():
+                    if doc_id in valid_doc_ids:
+                        for r in result_list:
+                            if doc_id not in doc2result:
+                                doc2result[doc_id] = r
                             else:
                                 for e in r.explanations:
-                                    doc2result[key].integrate_explanation(e)
-            results = doc2result.values()
+                                    doc2result[doc_id].integrate_explanation(e)
+                doc_results = doc2result.values()
+            else:
+                # check compatibility between variable substitutions
+                doc2valid_var_sub = defaultdict(lambda: defaultdict(set))
+                doc2doc_results_without_var = defaultdict(list)
+                doc_and_var_sub2results = defaultdict(list)
+                valid_doc_ids_final = set()
+                for doc_id, result_list in temp_results.items():
+                    if doc_id in valid_doc_ids:
+                        for r in result_list:
+                            for var, var_sub in r.var2substitution.items():
+                                if (r.document_id, var_sub.entity_id, var_sub.entity_type) in valid_var_subs[var]:
+                                    v_key = (var_sub.entity_id, var_sub.entity_type)
+                                    doc2valid_var_sub[doc_id][var].add(v_key)
+                                    v_sub_key = (doc_id, var, var_sub.entity_id, var_sub.entity_type)
+                                    doc_and_var_sub2results[v_sub_key].append(r)
+                                    valid_doc_ids_final.add(doc_id)
+                            if len(r.var2substitution) == 0:
+                                doc2doc_results_without_var[doc_id].append(r)
+
+                var_names = sorted(list(valid_var_subs.keys()))
+                doc_results = []
+                for doc_id in valid_doc_ids_final:
+                    subs_for_document = []
+                    for var_name in var_names:
+                        subs_for_document.append(doc2valid_var_sub[doc_id][var_name])
+
+                    sub_combinations_for_document = list(itertools.product(*subs_for_document))
+                    for combination in sub_combinations_for_document:
+                        doc_result_for_combi = None
+                        for idx, (var_name, var_sub) in enumerate(zip(var_names, combination)):
+                            v_sub_key = (doc_id, var_name, var_sub[0], var_sub[1])
+                            for doc_result in doc_and_var_sub2results[v_sub_key]:
+                                if not doc_result_for_combi:
+                                    doc_result_for_combi = doc_result
+                                else:
+                                    doc_result_for_combi.var2substitution.update(doc_result.var2substitution)
+                                    for e in doc_result.explanations:
+                                        doc_result_for_combi.integrate_explanation(e)
+                        for doc_result in doc2doc_results_without_var[doc_id]:
+                            if not doc_result_for_combi:
+                                doc_result_for_combi = doc_result
+                            else:
+                                for e in doc_result.explanations:
+                                    doc_result_for_combi.integrate_explanation(e)
+                        doc_results.append(doc_result_for_combi)
+
+            results = doc_results
         else:
             graph_patterns = []
             for fp in graph_query:
@@ -415,7 +459,10 @@ class QueryEngine:
         for result in results:
             result.title = doc2titles[result.document_id]
             for e in result.explanations:
-                e.sentence = id2sentences[e.sentence]
+                try:
+                    e.sentence = id2sentences[e.sentence]
+                except KeyError:
+                    pass
 
         return sorted(results, key=lambda d: d.document_id, reverse=True)
 
