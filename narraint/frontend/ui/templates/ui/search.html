@@ -383,13 +383,30 @@
             </div>
         </div>
 
-
-        <div>
-            <label><strong>Query Translation: </strong></label>
-            <div id="query_translation">No query translation available.</div>
+  <div class="accordion" id="accordionQueryTranslation">
+            <div class="card mb-3">
+                <div class="card-header text-center" id="headingOne">
+                    <h2 class="mb-0">
+                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseQT"
+                                aria-expanded="false" aria-controls="collapseOne">
+                            Query Translation
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapseQT" class="collapse" aria-labelledby="headingOne"
+                     data-parent="#accordionQueryTranslation">
+                    <div class="card-body">
+                        <div>
+                            <label><strong>Query Translation: </strong></label>
+                            <div id="query_translation">No query translation available.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div>
+
+        <div id="resultdiv">
             <br>
             <h2 id="header_documents">Documents</h2>
         </div>
