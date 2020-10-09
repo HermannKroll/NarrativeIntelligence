@@ -1,4 +1,3 @@
-
 def create_predicate_vocab():
     return dict(administered=["receive"],
                 associated=["contain", "produce", "convert", "yield", "isolate", "generate", "synthesize", "grow",
@@ -16,6 +15,4 @@ def create_predicate_vocab():
                 PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"])
 
 
-PREDICATE_EXPANSION = dict(
-    interacts=['interacts', 'metabolises', 'inhibits']
-)
+PRED_TO_REMOVE = "PRED_TO_REMOVE"
