@@ -33,14 +33,6 @@ def dosage_form_rule():
     session.execute(stmt_1)
     session.commit()
 
-    logging.info(
-        'Updating predicate to "{}" for ([Chemical, Disease, Species], DosageForm) pairs'.format(DOSAGE_FORM_PREDICATE))
-    stmt_2 = update(Predication).where(and_(Predication.object_type == DOSAGE_FORM,
-                                            Predication.subject_type.in_([CHEMICAL, DISEASE, SPECIES]))). \
-        values(predicate_canonicalized=DOSAGE_FORM_PREDICATE)
-    session.execute(stmt_2)
-    session.commit()
-
 
 def clean_extractions_in_database():
     """
@@ -49,27 +41,10 @@ def clean_extractions_in_database():
     """
     session = Session.get()
 
-    logging.info('Cleaning administered (not DosageForm -> not DosageForm)...')
-    q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',
-                                                    and_(Predication.subject_type != DOSAGE_FORM,
-                                                         Predication.object_type != DOSAGE_FORM))) \
-        .values(predicate_canonicalized=None)
-    session.execute(q_administered)
-    session.commit()
-
     logging.info('Cleaning administered (DosageForm -> [Chemical, Disease Species])...')
     q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',
-                                                    and_(Predication.subject_type == DOSAGE_FORM,
-                                                         Predication.object_type.notin_([SPECIES, DISEASE, CHEMICAL]))))\
-        .values(predicate_canonicalized=None)
-    session.execute(q_administered)
-    session.commit()
-
-    logging.info('Cleaning administered ([Chemical, Disease Species] -> DosageForm)...')
-    q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',
-                                                    and_(Predication.object_type == DOSAGE_FORM,
-                                                         Predication.subject_type.notin_(
-                                                             [SPECIES, DISEASE, CHEMICAL])))) \
+                                                    or_(Predication.subject_type != DOSAGE_FORM,
+                                                        Predication.object_type.notin_([SPECIES, DISEASE, CHEMICAL])))) \
         .values(predicate_canonicalized=None)
     session.execute(q_administered)
     session.commit()
@@ -189,7 +164,7 @@ def main():
 
     dosage_form_rule()
     clean_extractions_in_database()
-    #mirror_symmetric_predicates()
+    # mirror_symmetric_predicates()
 
 
 if __name__ == "__main__":
