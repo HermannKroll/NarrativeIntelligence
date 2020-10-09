@@ -12,16 +12,16 @@ from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
 from narraint.entity.entity import Entity
-from narraint.extraction.predicate_vocabulary import PREDICATE_EXPANSION
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.query_hints import LIKE_SEARCH_FOR_ENTITY_TYPES, DO_NOT_CARE_PREDICATE, SYMMETRIC_PREDICATES, \
+    PREDICATE_EXPANSION
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
 QUERY_LIMIT = 50000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
-DO_NOT_CARE_PREDICATE = 'associated'
 
 
 class QueryEngine:
@@ -80,7 +80,7 @@ class QueryEngine:
                 # check if x already occurred -> yes join both aliased predication together
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
-                    if likesearch:
+                    if likesearch and s_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
                         query = query.filter(pred.subject_id.like('{}%'.format(s)))
                     else:
                         query = query.filter(pred.subject_id == s)
@@ -104,7 +104,7 @@ class QueryEngine:
                         else:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
-                    if likesearch:
+                    if likesearch and o_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
                         query = query.filter(pred.object_id.like('{}%'.format(o)))
                     else:
                         query = query.filter(pred.object_id == o)
@@ -147,10 +147,14 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                if likesearch:
-                    query = query.filter(pred.subject_id.like('{}%'.format(s)), pred.object_id.like('{}%'.format(o)))
+                if likesearch and s_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                    query = query.filter(pred.subject_id.like('{}%'.format(s)))
                 else:
-                    query = query.filter(pred.subject_id == s, pred.object_id == o)
+                    query = query.filter(pred.subject_id == s)
+                if likesearch and o_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                    query = query.filter(pred.object_id.like('{}%'.format(o)))
+                else:
+                    query = query.filter(pred.object_id == o)
                 if p == DO_NOT_CARE_PREDICATE:
                     query = query.filter(pred.predicate_canonicalized.isnot(None))
                 else:
@@ -315,16 +319,24 @@ class QueryEngine:
             exp_cond1 = len(fp.subjects) > 1
             exp_cond2 = len(fp.objects) > 1
 
-            if exp_cond1 or exp_cond2 or fp.predicate in PREDICATE_EXPANSION:
+            if exp_cond1 or exp_cond2 or fp.predicate in PREDICATE_EXPANSION or fp.predicate in SYMMETRIC_PREDICATES:
                 expand_query = True
                 if fp.predicate in PREDICATE_EXPANSION:
                     predicates = PREDICATE_EXPANSION[fp.predicate]
                 else:
                     predicates = [fp.predicate]
 
+                expansion = []
                 cross_product = list(
                     itertools.product(fp.subjects, predicates, fp.objects))
-                query_fact_patterns_expanded.append(cross_product)
+                expansion.extend(cross_product)
+
+                if fp.predicate in SYMMETRIC_PREDICATES:
+                    cross_product = list(
+                        itertools.product(fp.objects, predicates, fp.subjects))
+                    expansion.extend(cross_product)
+                query_fact_patterns_expanded.append(expansion)
+
             else:
                 query_fact_patterns_expanded.append([(fp.subjects[0], fp.predicate, fp.objects[0])])
 
