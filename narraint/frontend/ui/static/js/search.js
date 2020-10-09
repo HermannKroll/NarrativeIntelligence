@@ -259,6 +259,7 @@ $(document).ready(function () {
 });
 
 const search = (event) => {
+    $('#collapseExamples').collapse('hide');
     event.preventDefault();
     let query = $('#id_keywords').val();
     let data_source = ""
@@ -331,6 +332,9 @@ const search = (event) => {
         }
         // Disable button
         setButtonSearching(false);
+
+        // scroll to results
+        document.getElementById("resultdiv").scrollIntoView();
     });
 
     request.fail(function (result) {
