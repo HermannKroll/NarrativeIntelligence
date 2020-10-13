@@ -1,7 +1,7 @@
 import logging
 
-from ui.search_cache import SearchCache
-from ui.views import query_engine, convert_query_text_to_fact_patterns
+from narraint.frontend.ui.search_cache import SearchCache
+from narraint.frontend.ui.views import query_engine, convert_query_text_to_fact_patterns
 
 COMMON_QUERIES = [
     'Simvastatin treats ?X(Disease)',
