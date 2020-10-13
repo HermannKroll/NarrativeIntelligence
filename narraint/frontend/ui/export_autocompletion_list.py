@@ -1,6 +1,8 @@
 import logging
 
+from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entityresolver import EntityResolver
+from narraint.entity.entitytagger import DosageFormTagger
 from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
@@ -33,6 +35,13 @@ def main():
                 f.write('{}\tpredicate\n'.format(pred))
         counter, notfound = 0, 0
 
+        # Write dosage form terms + synonyms
+        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms():
+            for t in terms:
+                result = '{}\t{}'.format(t, df_id)
+                f.write('\n' + result)
+                f_ent.write('\n' + result)
+      
         # write the mesh tree C and D
         for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("D"):
             e_id = 'MESH:{}'.format(d_id)
@@ -72,7 +81,7 @@ def main():
                         names = heading.split('//')
                         if len(names) != 2:
                             raise ValueError('Species should have 2 names at max: {} ({})'.format(heading,
-                                                                                                           names))
+                                                                                                  names))
                         parts = []
                         for n in names:
                             parts.append('{}\t{}'.format(n, e_id))
@@ -98,4 +107,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
