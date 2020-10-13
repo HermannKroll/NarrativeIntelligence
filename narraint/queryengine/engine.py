@@ -14,8 +14,8 @@ from sqlalchemy.dialects import postgresql
 from narraint.entity.entity import Entity
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.query import GraphQuery
-from narraint.queryengine.query_hints import LIKE_SEARCH_FOR_ENTITY_TYPES, DO_NOT_CARE_PREDICATE, SYMMETRIC_PREDICATES, \
-    PREDICATE_EXPANSION
+from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, SYMMETRIC_PREDICATES, \
+    PREDICATE_EXPANSION, should_perform_like_search_for_entity
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
 QUERY_LIMIT = 50000
@@ -80,7 +80,7 @@ class QueryEngine:
                 # check if x already occurred -> yes join both aliased predication together
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
-                    if likesearch and s_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                    if likesearch and should_perform_like_search_for_entity(s, s_t):
                         query = query.filter(pred.subject_id.like('{}%'.format(s)))
                     else:
                         query = query.filter(pred.subject_id == s)
@@ -104,7 +104,7 @@ class QueryEngine:
                         else:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
-                    if likesearch and o_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                    if likesearch and should_perform_like_search_for_entity(o, o_t):
                         query = query.filter(pred.object_id.like('{}%'.format(o)))
                     else:
                         query = query.filter(pred.object_id == o)
@@ -147,11 +147,11 @@ class QueryEngine:
                         else:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
-                if likesearch and s_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                if likesearch and should_perform_like_search_for_entity(s, s_t):
                     query = query.filter(pred.subject_id.like('{}%'.format(s)))
                 else:
                     query = query.filter(pred.subject_id == s)
-                if likesearch and o_t in LIKE_SEARCH_FOR_ENTITY_TYPES:
+                if likesearch and should_perform_like_search_for_entity(o, o_t):
                     query = query.filter(pred.object_id.like('{}%'.format(o)))
                 else:
                     query = query.filter(pred.object_id == o)
