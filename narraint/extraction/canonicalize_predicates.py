@@ -11,7 +11,7 @@ from narraint.extraction.predicate_vocabulary import create_predicate_vocab, PRE
 from narraint.queryengine.engine import QueryEngine
 from narraint.progress import print_progress_with_eta
 
-MIN_DISTANCE_THRESHOLD = 0.5
+MIN_DISTANCE_THRESHOLD = 0.4
 
 
 def transform_predicate(predicate: str):
