@@ -6,7 +6,43 @@ from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
-from narraint.queryengine.engine import QueryEngine
+
+
+class DosageFormTagger:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_dosage_form_vocabulary_terms():
+        """
+        Get all self-designed vocabulary terms for DosageForms
+        :return: a dict mapping the dosage form id to a set of terms
+        """
+        dfid2terms = defaultdict(set)
+        with open(DOSAGE_FID_DESCS, 'rt') as f:
+            for line in f:
+                df_id, df_head, *rest = line.strip().split('\t')
+                dfid2terms[df_id].add(df_head)
+                if rest:
+                    rest = rest[0]
+                    if ';' in rest:
+                        terms = rest.split(';')
+                        for t in terms:
+                            dfid2terms[df_id].add(t)
+                    else:
+                        dfid2terms[df_id].add(rest)
+
+        with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'rt') as f:
+            for line in f:
+                df_id, synonyms = line.strip().split('\t')
+                if ';' in synonyms:
+                    terms = synonyms.split(';')
+                    for t in terms:
+                        dfid2terms[df_id].add(t)
+                else:
+                    dfid2terms[df_id].add(synonyms)
+        return dfid2terms
 
 
 class EntityTagger:
@@ -53,27 +89,9 @@ class EntityTagger:
         Add the additional dosage form terms to the internal translation dict
         :return: None
         """
-        with open(DOSAGE_FID_DESCS, 'rt') as f:
-            for line in f:
-                df_id, df_head, *rest = line.strip().split('\t')
-                self.term2entity[df_head.lower()].append(Entity(df_id, DOSAGE_FORM))
-                if rest:
-                    rest = rest[0]
-                    if ';' in rest:
-                        terms = rest.split(';')
-                        for t in terms:
-                            self.term2entity[t.lower()].append(Entity(df_id, DOSAGE_FORM))
-                    else:
-                        self.term2entity[rest.lower()].append(Entity(df_id, DOSAGE_FORM))
-        with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'rt') as f:
-            for line in f:
-                df_id, synonyms = line.strip().split('\t')
-                if ';' in synonyms:
-                    terms = synonyms.split(';')
-                    for t in terms:
-                        self.term2entity[t.lower()].append((Entity('MESH:{}'.format(df_id), DOSAGE_FORM)))
-                else:
-                    self.term2entity[synonyms.lower()].append((Entity('MESH:{}'.format(df_id), DOSAGE_FORM)))
+        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms():
+            for t in terms:
+                self.term2entity[t.lower()].append(Entity(df_id, DOSAGE_FORM))
 
     def tag_entity(self, term: str):
         """
