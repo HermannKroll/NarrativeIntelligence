@@ -17,7 +17,7 @@ def main():
     resolver = EntityResolver()
     logging.info('Query entities in Predication...')
     entities = QueryEngine.query_entities()
-    written_entity_ids = set()
+    writen_entity_terms = set()
     ignored = []
     predicates = create_predicate_vocab()
     with open('static/ac_predicates.txt', 'wt') as f_pred:
@@ -33,34 +33,40 @@ def main():
         for pred in predicates.keys():
             if pred != 'PRED_TO_REMOVE':
                 f.write('{}\tpredicate\n'.format(pred))
-        counter, notfound = 0, 0
+        notfound = 0
 
         # Write dosage form terms + synonyms
-        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms():
+        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms().items():
             for t in terms:
-                result = '{}\t{}'.format(t, df_id)
-                f.write('\n' + result)
-                f_ent.write('\n' + result)
-      
+                if not t.endswith('s'):
+                    t = '{}s'.format(t)
+                t = t.replace('-', ' ')
+                if df_id.startswith('D'):
+                    df_id = 'MESH:{}'.format(df_id)
+                if t not in writen_entity_terms:
+                    writen_entity_terms.add(t)
+                    result = '{}\t{}'.format(t, df_id)
+                    f.write('\n' + result)
+                    f_ent.write('\n' + result)
+
         # write the mesh tree C and D
         for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("D"):
             e_id = 'MESH:{}'.format(d_id)
-            k = (e_id, "MESH")
-            if k not in written_entity_ids:
-                written_entity_ids.add(k)
+            if d_heading not in writen_entity_terms:
+                writen_entity_terms.add(d_heading)
                 result = '{}\t{}'.format(d_heading, e_id)
                 f.write('\n' + result)
                 f_ent.write('\n' + result)
 
         for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("C"):
             e_id = 'MESH:{}'.format(d_id)
-            k = (e_id, "MESH")
-            if k not in written_entity_ids:
-                written_entity_ids.add(k)
+            if d_heading not in writen_entity_terms:
+                writen_entity_terms.add(d_heading)
                 result = '{}\t{}'.format(d_heading, e_id)
                 f.write('\n' + result)
                 f_ent.write('\n' + result)
 
+        written_entity_ids = set()
         for e_id, e_str, e_type in entities:
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
@@ -86,23 +92,26 @@ def main():
                         for n in names:
                             parts.append('{}\t{}'.format(n, e_id))
                         result = '\n'.join(parts)
+                        f.write('\n' + result)
+                        f_ent.write('\n' + result)
                     else:
+                        if heading not in writen_entity_terms:
+                            writen_entity_terms.add(heading)
+                            result = '{}\t{}'.format(heading, e_id)
+                            f.write('\n' + result)
+                            f_ent.write('\n' + result)
+                else:
+                    if heading not in writen_entity_terms:
+                        writen_entity_terms.add(heading)
                         result = '{}\t{}'.format(heading, e_id)
-                else:
-                    result = '{}\t{}'.format(heading, e_id)
-                if counter == 0:
-                    f.write(result)
-                    f_ent.write(result)
-                else:
-                    f.write('\n' + result)
-                    f_ent.write('\n' + result)
-                counter += 1
+                        f.write('\n' + result)
+                        f_ent.write('\n' + result)
+
             except KeyError:
                 ignored.append((e_id, e_type))
                 notfound += 1
     logging.info('The following entities are not in index: {}'.format(ignored))
     logging.info('{} entity ids are not in index'.format(notfound))
-    logging.info('{} entity information written'.format(counter))
 
 
 if __name__ == "__main__":
