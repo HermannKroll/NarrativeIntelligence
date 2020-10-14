@@ -346,6 +346,7 @@ const search = (event) => {
 };
 
 function example_search(search_str) {
+    $('#collapseExamples').collapse('hide');
     console.log(search_str);
     document.getElementById('id_keywords').value = search_str;
     document.getElementById("btn_search").click();
