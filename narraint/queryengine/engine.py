@@ -18,7 +18,7 @@ from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, SYMMETRIC_PR
     PREDICATE_EXPANSION, should_perform_like_search_for_entity
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
-QUERY_LIMIT = 50000
+QUERY_LIMIT = 10000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
@@ -268,13 +268,21 @@ class QueryEngine:
         q_titles = q_titles.filter(Document.id.in_(doc_ids))
         doc2titles = {}
         for r in q_titles:
-            doc2titles[int(r[0])] = r[1]
+            title = r[1]
+            if len(title) > 300:
+                logging.warning('Large title detected: {}'.format(r[0]))
+                title = title[0:300]
+            doc2titles[int(r[0])] = title
 
         # Query the sentences
         q_sentences = session.query(Sentence.id, Sentence.text).filter(Sentence.id.in_(sentence_ids))
         id2sentences = {}
         for r in q_sentences:
-            id2sentences[int(r[0])] = r[1]
+            sent = r[1]
+            if len(sent) > 300:
+                logging.warning('long sentence detected for: {}'.format(r[0]))
+                sent = sent[0:300]
+            id2sentences[int(r[0])] = sent
 
         return doc2titles, id2sentences
 
