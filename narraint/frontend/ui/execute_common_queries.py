@@ -23,6 +23,9 @@ COMMON_QUERIES = [
     'Simvastatin induces "Muscular Diseases". ?X(Chemical) inhibits cyp3a4',
     '?Chem(Chemical) treats ?Dis(Disease)',
     '?Chem(Chemical) administered ?Form(DosageForm)'
+    'Lidocaine administered ?X(DosageForm)',
+    '?X(Chemical) administered liposomes',
+    '?X(Chemical) administered "Nebulizers and Vaporizers"'
 ]
 
 DOCUMENT_COLLECTIONS = ['PubMed', 'PMC']
