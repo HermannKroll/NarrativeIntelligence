@@ -269,9 +269,9 @@ class QueryEngine:
         doc2titles = {}
         for r in q_titles:
             title = r[1]
-            if len(title) > 300:
+            if len(title) > 500:
                 logging.warning('Large title detected: {}'.format(r[0]))
-                title = title[0:300]
+                title = title[0:500]
             doc2titles[int(r[0])] = title
 
         # Query the sentences
@@ -279,9 +279,9 @@ class QueryEngine:
         id2sentences = {}
         for r in q_sentences:
             sent = r[1]
-            if len(sent) > 300:
+            if len(sent) > 1500:
                 logging.warning('long sentence detected for: {}'.format(r[0]))
-                sent = sent[0:300]
+                sent = '{}[...]'.format(sent[0:1500])
             id2sentences[int(r[0])] = sent
 
         return doc2titles, id2sentences
