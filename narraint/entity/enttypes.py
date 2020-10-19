@@ -1,4 +1,5 @@
 DOSAGE_FORM = "DosageForm"
+DRUG = "Drug"
 CHEMICAL = "Chemical"
 MUTATION = "Mutation"
 GENE = "Gene"
@@ -13,6 +14,7 @@ DOMAINMOTIF = "DomainMotif"
 
 ALL = (
     DOSAGE_FORM,
+    DRUG,
     CHEMICAL,
     MUTATION,
     GENE,
@@ -38,6 +40,7 @@ ENT_TYPES_SUPPORTED_BY_TAGGERS = (
 
 TAG_TYPE_MAPPING = dict(
     DF=DOSAGE_FORM,
+    DR=DRUG,
     C=CHEMICAL,
     M=MUTATION,
     G=GENE,
@@ -51,6 +54,7 @@ TAG_TYPE_MAPPING = dict(
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,
     Disease=DISEASE,
+    Drug=DRUG,
     Gene=GENE,
     Species=SPECIES,
     Mutation=MUTATION,
