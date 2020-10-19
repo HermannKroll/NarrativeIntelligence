@@ -18,6 +18,7 @@ from narraint.preprocessing.config import Config
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
+from narraint.preprocessing.tagging.drug import DrugTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
@@ -76,6 +77,8 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         raise ValueError("TaggerOne does not support Tagging of Chemicals or Diseases separately!")
     if enttypes.DOSAGE_FORM in tag_types:
         tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
+    if enttypes.DRUG in tag_types:
+        tagger_by_ent_type[enttypes.DRUG] = DrugTagger
 
     return tagger_by_ent_type
 

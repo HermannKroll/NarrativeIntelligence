@@ -28,6 +28,9 @@ MESH_SUPPLEMENTARY_FILE = os.path.join(DATA_DIR, "supp2020.xml")
 MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2020_id2heading.pkl')
 MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'supp2020_id2heading.pkl')
 
+# Drugbase
+DRUGBASE_XML_DUMP = os.path.join(DATA_DIR, "full_database.xml")
+
 # GENE
 GENE_FILE = os.path.join(DATA_DIR, 'gene_info_2020.gz')
 GENE_INDEX_FILE = os.path.join(TMP_DIR, 'gene_info_2020_id2name.pkl')
@@ -55,11 +58,17 @@ PATHIE_CONFIG = os.path.join(CONFIG_DIR, "pathie.json")
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
+#Dict Tagger
+DICT_TAGGER_BLACKLIST = os.path.join(RESOURCE_DIR, "dict_tagger_blacklist.txt")
+
 # DosageForm Tagger
 DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "df_index_cache.pkl")
 DOSAGE_ADDITIONAL_DESCS = os.path.join(RESOURCE_DIR, "df_additional_descs.txt")
 DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_terms.txt")
 DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
+
+#Drug Tagger
+DRUG_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "dr_index_cache.pkl")
 
 # MeSH SubHeadings for MEDLINE PubMed
 MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")

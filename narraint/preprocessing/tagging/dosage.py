@@ -1,30 +1,17 @@
 import os
 import pickle
 import re
-from datetime import datetime
 
 from narraint import config
 from narraint.entity import enttypes
 from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS, \
     DOSAGE_FORM_TAGGER_INDEX_CACHE, TMP_DIR
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.base import BaseTagger
-from narraint.progress import print_progress_with_eta
-from narraint.pubtator.document import DocumentError
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
-from narraint.pubtator.document import get_document_id
+from narraint.preprocessing.tagging.dictagger import DictTagger
 
 
-class DosageFormTaggerIndex:
 
-    def __init__(self):
-        self.mesh_file = ""
-        self.tagger_version = DosageFormTagger.__version__
-        self.desc_by_term = {}
-
-
-class DosageFormTagger(BaseTagger):
-    PROGRESS_BATCH = 1000
+class DosageFormTagger(DictTagger):
     DOSAGE_FORM_TREE_NUMBERS = (
         "D26.255",  # Dosage Forms
         "E02.319.300",  # Drug Delivery Systems
@@ -37,11 +24,9 @@ class DosageFormTagger(BaseTagger):
     __version__ = "1.0.0"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.in_dir = os.path.join(self.root_dir, "dosage_in")
-        self.out_dir = os.path.join(self.root_dir, "dosage_out")
-        self.log_file = os.path.join(self.log_dir, "dosage.log")
-        self.desc_by_term = {}
+        super().__init__("dosage", "DosageFormTagger", DosageFormTagger.__version__,
+                         enttypes.DOSAGE_FORM, config.DOSAGE_FORM_TAGGER_INDEX_CACHE, config.MESH_DESCRIPTORS_FILE,
+                         *args, **kwargs)
 
         self.regex_micro = re.compile(r'micro[a-z]')
         self.regex_intra = re.compile(r'intra[a-z]')
@@ -119,40 +104,7 @@ class DosageFormTagger(BaseTagger):
 
         return new_terms
 
-    def _check_for_index(self):
-        if os.path.isfile(DOSAGE_FORM_TAGGER_INDEX_CACHE):
-            index = pickle.load(open(DOSAGE_FORM_TAGGER_INDEX_CACHE, 'rb'))
-            if not isinstance(index, DosageFormTaggerIndex):
-                self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
-                                    .format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
-                pass
-
-            if index.tagger_version != DosageFormTagger.__version__:
-                self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
-                                    .format(index.tagger_version, DosageFormTagger.__version__))
-                pass
-
-            if index.mesh_file != config.MESH_DESCRIPTORS_FILE:
-                self.logger.warning('Ignore index: index created with another mesh file ({} index vs. {} tagger)'
-                                    .format(index.mesh_file, config.MESH_DESCRIPTORS_FILE))
-                pass
-
-            self.logger.debug('Use precached index from {}'.format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
-            self.desc_by_term = index.desc_by_term
-            return index
-        pass
-
-    def _create_index(self):
-        index = DosageFormTaggerIndex()
-        index.mesh_file = config.MESH_DESCRIPTORS_FILE
-        index.tagger_version = DosageFormTagger.__version__
-        index.desc_by_term = self.desc_by_term
-        if not os.path.isdir(TMP_DIR):
-            os.mkdir(TMP_DIR)
-        self.logger.debug('Storing DosageFormTagerIndex cache to: {}'.format(DOSAGE_FORM_TAGGER_INDEX_CACHE))
-        pickle.dump(index, open(DOSAGE_FORM_TAGGER_INDEX_CACHE, 'wb'))
-
-    def _create_from_mesh(self):
+    def index_from_source(self):
         meshdb = MeSHDB.instance()
         meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
 
@@ -240,118 +192,5 @@ class DosageFormTagger(BaseTagger):
                     self.desc_by_term[term] = [dosage_form]
                 else:
                     self.desc_by_term[term].append(dosage_form)
-
-        # Store Tagger information in cache
-        self._create_index()
         self.logger.info('DosageFormTagger initialized from data ({} term mappings) - ready to start'
                          .format(len(self.desc_by_term.keys())))
-
-    def prepare(self, resume=False):
-        if self._check_for_index():
-            self.logger.info('DosageFormTagger initialized from cache ({} term mappings) - ready to start'
-                             .format(len(self.desc_by_term.keys())))
-        else:
-            self._create_from_mesh()
-        # Create output directory
-        if not resume:
-            os.mkdir(self.out_dir)
-        else:
-            raise NotImplementedError("Resuming DosageFormTagger is not implemented.")
-
-    def get_tags(self):
-        return self._get_tags(self.out_dir)
-
-    def run(self):
-        skipped_files = []
-        files_total = len(self.files)
-        start_time = datetime.now()
-
-        for idx, in_file in enumerate(self.files):
-            if in_file.endswith(".txt"):
-                out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
-                try:
-                    self.tag(in_file, out_file)
-                except DocumentError as e:
-                    self.logger.debug("Error in document - will be skipped {}".format(in_file))
-                    skipped_files.append(in_file)
-                    self.logger.info(e)
-                if idx % self.PROGRESS_BATCH == 0:
-                    # be sure to count files not every print (thus idx % self.PROGRESS_BATCH)
-                    print_progress_with_eta("DosageFormTagger tagging", self.get_progress(), files_total, start_time,
-                                            print_every_k=1, logger=self.logger)
-            else:
-                self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
-
-        end_time = datetime.now()
-        self.logger.info("Finished in {} ({} files processed, {} files total, {} errors)".format(
-            end_time - start_time,
-            self.get_progress(),
-            files_total,
-            len(skipped_files)),
-        )
-
-    def tag(self, in_file, out_file):
-        with open(in_file) as f:
-            document = f.read()
-        match = CONTENT_ID_TIT_ABS.match(document)
-        if not match:
-            raise DocumentError(f"No match in {in_file}")
-        pmid, title, abstact = match.group(1, 2, 3)
-        content = title.strip() + " " + abstact.strip()
-        content = content.lower()
-
-        # Generate output
-        output = ""
-        for term, descs in self.desc_by_term.items():
-            for desc in descs:
-                for match in re.finditer(term, content):
-                    start = match.start()
-                    end = match.end()
-                    # Find left end of sequence sequence
-                    try:
-                        idx = content.rindex(" ", 0, start)
-                        if idx != start - 1:
-                            start = idx + 1
-                    except ValueError:
-                        start = 0
-                    # Find right end of sequence sequence
-                    try:
-                        idx = content.index(" ", end)
-                        if idx > end:
-                            end = idx
-                    except ValueError:
-                        end = len(content)
-
-                    occurrence = content[start:end]
-                    occurrence = occurrence.rstrip(".,;")
-
-                    # if the descriptor is not from us (then it is a mesh descriptor)
-                    if not desc.startswith('FIDX'):
-                        desc_str = 'MESH:{}'.format(desc)
-                    else:
-                        desc_str = desc
-
-                    line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=enttypes.DOSAGE_FORM,
-                        desc=desc_str
-                    )
-                    output += line
-
-        # Write
-        with open(out_file, "w") as f:
-            f.write(output)
-
-    def get_progress(self):
-        return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])
-
-    def get_successful_ids(self):
-        """
-        Dosage form doesn't include content in output files, so no id can be retrieved from them if no tags found.
-        Also, dosage_in dir is deleted if finished. Because of thag, the ids are looked up in the files in input_dir,
-        mapping is done via file name.
-        :return:
-        """
-        finished_filenames = os.listdir(self.out_dir)
-        finished_ids = {get_document_id(os.path.join(self.input_dir, fn)) for fn in finished_filenames}
-
-        return finished_ids
