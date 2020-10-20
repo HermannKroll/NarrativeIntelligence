@@ -1,3 +1,4 @@
+import itertools
 import logging
 
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
@@ -49,18 +50,31 @@ def main():
                     f.write('\n' + result)
                     f_ent.write('\n' + result)
 
-        # write the mesh tree C and D
-        for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("D"):
-            e_id = 'MESH:{}'.format(d_id)
-            if d_heading not in writen_entity_terms:
-                writen_entity_terms.add(d_heading)
-                result = '{}\t{}'.format(d_heading, e_id)
-                f.write('\n' + result)
-                f_ent.write('\n' + result)
+        # check all known mesh entities
+        known_mesh_prefixes = set()
+        for e_id, e_str, e_type in entities:
+            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:'):
+                # Split MeSH Tree No by .
+                split_tree_number = e_id.split('.')
+                # add all known concepts and superconcepts to our index
+                # D02
+                # D02.255
+                # D02.255.234
+                for x in range(0, len(split_tree_number)):
+                    known_prefix = '.'.join(split_tree_number[0:x+1])
+                    known_mesh_prefixes.add(known_prefix)
 
-        for d_id, d_heading in mesh_ontology.find_descriptors_start_with_tree_no("C"):
+        # write the mesh tree C and D
+        mesh_descs_to_export = itertools.chain(mesh_ontology.find_descriptors_start_with_tree_no("D"),
+                                               mesh_ontology.find_descriptors_start_with_tree_no("C"))
+        for d_id, d_heading in mesh_descs_to_export:
+            export_desc = False
+            for tn in mesh_ontology.get_tree_numbers_for_descriptor(d_id):
+                if tn in known_mesh_prefixes:
+                    export_desc = True
+                    break
             e_id = 'MESH:{}'.format(d_id)
-            if d_heading not in writen_entity_terms:
+            if export_desc and d_heading not in writen_entity_terms:
                 writen_entity_terms.add(d_heading)
                 result = '{}\t{}'.format(d_heading, e_id)
                 f.write('\n' + result)
