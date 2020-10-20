@@ -35,21 +35,13 @@ class DosageFormTagger(DictTagger):
         # as a dict -
         # just key -> just add the descriptor
         # with values -> combine them to one descriptor
-        additional_descs = {}
+        additional_descs = set()
         with open(DOSAGE_ADDITIONAL_DESCS, 'r') as f:
             for l in f:
                 l_s = l.strip()
-                if '/' in l_s:
-                    descs = l_s.split('/')
-                    k = descs[0]
-                    additional_descs[k] = []
-                    for d in descs[1:]:
-                        if d in additional_descs:
-                            additional_descs[k].append(d)
-                else:
-                    if l_s in additional_descs:
-                        raise KeyError('descriptor already included: {}'.format(l_s))
-                    additional_descs[l_s] = []
+                if l_s in additional_descs:
+                    raise KeyError('descriptor already included: {}'.format(l_s))
+                additional_descs.add(l_s)
         self.logger.debug('{} additional descs loaded'.format(len(additional_descs)))
         return additional_descs
 
@@ -122,17 +114,9 @@ class DosageFormTagger(DictTagger):
 
         # load additional descs manual from file
         additional_descs = self.load_additional_descs()
-        for desc, to_combine in additional_descs.items():
+        for desc in additional_descs:
             d_node = meshdb.desc_by_id(desc)
-            d_node_terms = []
-            for t in d_node.terms:
-                d_node_terms.append(t.string.lower())
-            # combine all additional terms
-            if len(to_combine) > 0:
-                for combine_desc in to_combine:
-                    combine_desc_node = meshdb.desc_by_id(combine_desc)
-                    for t in combine_desc_node.terms:
-                        d_node_terms.add(t.string.lower())
+            d_node_terms = list([t.string.lower() for t in d_node.terms])
             dosage_forms_all.append((d_node.unique_id, d_node_terms))
 
         self.logger.debug('loading subtrees...')
