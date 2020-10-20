@@ -29,9 +29,9 @@ class DosageFormTagger:
                     if ';' in rest:
                         terms = rest.split(';')
                         for t in terms:
-                            dfid2terms[df_id].add(t)
+                            dfid2terms[df_id].add(t.strip())
                     else:
-                        dfid2terms[df_id].add(rest)
+                        dfid2terms[df_id].add(rest.strip())
 
         with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'rt') as f:
             for line in f:
@@ -39,9 +39,9 @@ class DosageFormTagger:
                 if ';' in synonyms:
                     terms = synonyms.split(';')
                     for t in terms:
-                        dfid2terms[df_id].add(t)
+                        dfid2terms[df_id].add(t.strip())
                 else:
-                    dfid2terms[df_id].add(synonyms)
+                    dfid2terms[df_id].add(synonyms.strip())
         return dfid2terms
 
 
