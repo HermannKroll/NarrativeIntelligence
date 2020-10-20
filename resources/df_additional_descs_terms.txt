@@ -44,8 +44,8 @@ D000284	oral application;orally;oral;buccal application;buccal;buccally;Sublingu
 D000287	topical application;topically;topical
 D000279	cutaneous application;cutaneously;cutaneous
 D000282	Intra-vaginal Administration;Intra vaginal Administration;vaginal application;vaginal;vaginally;Intra-vaginal application;Intra vaginal application
-D000283	Intra vesical Drug Administration;Intra-vesical Drug Administration;Intravesical Drug application; Intra vesical Drug application; Intra-vesical Drug application;Intravesical;Intra vesical;Intra-vesical;Intravesically;Intra-vesically;Bladder Drug application
-D058956	mucosal; trans-mucosal;trans mucosal;mucosally;trans-mucosally;trans mucosally;transmucosally;mucosal application
+D000283	Intra vesical Drug Administration;Intra-vesical Drug Administration;Intravesical Drug application;Intra vesical Drug application; Intra-vesical Drug application;Intravesical;Intra vesical;Intra-vesical;Intravesically;Intra-vesically;Bladder Drug application
+D058956	mucosal;trans-mucosal;trans mucosal;mucosally;trans-mucosally;trans mucosally;transmucosally;mucosal application
 D000281	nasal;nasally;intranasal;intra nasal;intra-nasal;intranasally;intra nasally;intra-nasally;nasal application
 D000285	rectal;rectally;anal;anal application;rectal application
 D060433	Ophthalmic;Ophthalmic application;eye related;eye-related
