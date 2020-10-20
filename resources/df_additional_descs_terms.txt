@@ -50,7 +50,7 @@ D000281	nasal;nasally;intranasal;intra nasal;intra-nasal;intranasally;intra nasa
 D000285	rectal;rectally;anal;anal application;rectal application
 D060433	Ophthalmic;Ophthalmic application;eye related;eye-related
 D000280	Inhalation;respiratory
-D008863	Micro sphere;Micro-sphere;Micro bead;Micro-bead;
+D008863	Micro sphere;Micro-sphere;Micro bead;Micro-bead
 D063465	Cream;Lotion;Gel-cream;gel cream
 D019999	oil solution;mouth wash solution;gargles;ear drops;Nasal drops;enema;washes;ear washes;nasal washes
 D009883	Nasal drops
