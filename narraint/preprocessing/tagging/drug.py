@@ -27,6 +27,7 @@ class DrugTagger(DictTagger):
 
     def index_from_source(self):
         logging.info("checking total number of drugs...")
+        #TODO real check
         drug_number = 13581  # subprocess.check_output(f"grep -c '^<drug' {self.source_file}")
         logging.info(f"found {drug_number}.")
         start = datetime.now()
