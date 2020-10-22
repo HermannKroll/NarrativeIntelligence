@@ -109,6 +109,7 @@ created with app.quickdatabasediagrams.com
 
 
 ## Meeting Protocols
+- [2020_10_22](meetings/2020_10_22.md)
 - [2020_09_01](meetings/2020_09_01.md)
 - [2020_08_24](meetings/2020_08_24.md)
 - [2020_07_24](meetings/2020_07_24.md)
@@ -123,6 +124,7 @@ created with app.quickdatabasediagrams.com
 - [2020_03_31](meetings/2020_03_31.md)
 - [2020_03_25](meetings/2020_03_25.md)
 - [2020_03_19](meetings/2020_03_19.md)
+
 
 ## Docker
 The preprocessing-pipeline can be used as Docker container.
