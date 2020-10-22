@@ -36,6 +36,14 @@ const setButtonSearching = isSearching => {
     }
 };
 
+$(document).on('keydown',function(e){
+  var $target = $(e.target||e.srcElement);
+  if(e.keyCode === 8 && !$target.is('input,[contenteditable="true"],textarea'))
+  {
+    e.preventDefault();
+  }
+})
+
 $(document).ready(function () {
     $("#search_form").submit(search);
 
