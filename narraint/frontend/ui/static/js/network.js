@@ -718,7 +718,7 @@ document.addEventListener('keydown', function (params) {
         return;
 
     // Keycode for deleting nodes/edges (delete/backspace)
-    if (event.keyCode == 8 || event.keyCode == 46) {
+    if (event.keyCode === 8 || event.keyCode === 46) {
         if (network.getSelectedNodes().length > 1) {
             initializeUndo();
             for (let i = network.getSelectedNodes().length - 1; i >= 0; i--) {
