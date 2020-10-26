@@ -90,3 +90,15 @@ class Config:
     @property
     def tmchem_script(self):
         return os.path.join(self.tmchem_root, "run.sh")
+
+    @property
+    def dict_max_words(self):
+        return self.config["dict"]["max_words"]
+
+    @property
+    def drug_max_per_product(self):
+        return self.config["drug"]["max_per_product"]
+
+    @property
+    def drug_min_name_length(self):
+        return self.config["drug"]["min_name_length"]
