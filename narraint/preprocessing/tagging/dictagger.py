@@ -5,12 +5,13 @@ import codecs
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
-from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST, DICT_TAGGER_MAX_WORDS
+from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
 from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.document import DocumentError, get_document_id
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
+from narraint.preprocessing.config import Config
 
 
 class DictIndex:
@@ -143,7 +144,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         ind_words = self.split_indexed_words(content)
 
         lines = []
-        for spaces in range(DICT_TAGGER_MAX_WORDS):
+        for spaces in range(self.config.dict_max_words):
             for word_tuple in get_n_tuples(ind_words, spaces+1):
                 words, indexes = zip(*word_tuple)
                 term = " ".join(words)

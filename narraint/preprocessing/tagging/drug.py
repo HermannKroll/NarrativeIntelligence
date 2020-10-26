@@ -1,7 +1,5 @@
 import os
-import pickle
 import re
-import subprocess
 import logging
 from datetime import datetime
 
@@ -11,8 +9,6 @@ from narraint import config
 from narraint.entity import enttypes
 from narraint.preprocessing.tagging.dictagger import DictTagger
 from narraint.progress import print_progress_with_eta
-
-MIN_DRUG_NAME_LENGTH=3
 
 
 class DrugTagger(DictTagger):
@@ -59,7 +55,7 @@ class DrugTagger(DictTagger):
                 for exp_prop in exp_props:
                     if exp_prop.find(f'{pref}kind').text == "Molecular Formula":
                         name_elements.append(exp_prop.find(f'{pref}value'))
-            names = {ne.text for ne in name_elements if len(ne.text) >= MIN_DRUG_NAME_LENGTH}
+            names = {ne.text for ne in name_elements if len(ne.text) >= self.config.drug_min_name_length}
             names = {n.lower() for n in names}
             names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
             for n in names:
@@ -67,10 +63,10 @@ class DrugTagger(DictTagger):
                     self.desc_by_term[n].add(desc)
                 else:
                     self.desc_by_term[n] = {desc, }
-        if config.MAX_DRUGS_PER_PRODUCT > 0:
+        if self.config.drug_max_per_product > 0:
             self.desc_by_term = {k: v
                                  for k, v in self.desc_by_term.items()
-                                 if len(v) <= config.MAX_DRUGS_PER_PRODUCT}
+                                 if len(v) <= self.config.drug_max_per_product}
 
     def extract_dosage_forms(self):
         pref = '{http://www.drugbank.ca}'
