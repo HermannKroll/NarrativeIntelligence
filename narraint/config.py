@@ -70,6 +70,7 @@ DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
 
 #Drug Tagger
 DRUG_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "dr_index_cache.pkl")
+MAX_DRUGS_PER_PRODUCT = 3  # 0 means unlimited
 
 # MeSH SubHeadings for MEDLINE PubMed
 MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
