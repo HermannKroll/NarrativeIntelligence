@@ -5,7 +5,7 @@ import codecs
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
-from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
+from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST, DICT_TAGGER_MAX_WORDS
 from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
@@ -19,6 +19,13 @@ class DictIndex:
         self.source_file, self.tagger_version = source_file, tagger_version
         self.desc_by_term = {}
 
+
+def get_n_tuples(in_list, n):
+    for i, element in enumerate(in_list):
+        if i+n <= len(in_list):
+            yield in_list[i:i+n]
+        else:
+            break
 
 class DictTagger(BaseTagger, metaclass=ABCMeta):
     PROGRESS_BATCH = 1
@@ -132,36 +139,56 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         content = title.strip() + " " + abstact.strip()
         content = content.lower()
 
-        # Generate output
-        output = ""
-        for term, descs in self.desc_by_term.items():
-            for desc in descs:
-                escaped = re.escape(term.lower())
-                #if len(escaped) <= 3:
-                escaped = r"\b"+escaped+r"[se]?\b"
-                for match in re.finditer(escaped, content):
-                    start = match.start()
-                    end = match.end()
+        #split into indexed single words
+        ind_words = self.split_indexed_words(content)
 
-                    occurrence = content[start:end]
-                    occurrence = occurrence.rstrip(".,;")
+        lines = []
+        for spaces in range(DICT_TAGGER_MAX_WORDS):
+            for word_tuple in get_n_tuples(ind_words, spaces+1):
+                words, indexes = zip(*word_tuple)
+                term = " ".join(words)
+                start = indexes[0]
+                end = indexes[-1] + len(words[-1])
+                hits = self.get_term(term)
+                #print(f"Found {hits} for '{term}'")
+                if hits:
+                    for desc in hits:
+                        # if the descriptor is not from us (then it is a mesh descriptor)
+                        if not desc.startswith('FIDX') and not desc.startswith('DB'):
+                            desc_str = 'MESH:{}'.format(desc)
+                        else:
+                            desc_str = desc
 
-                    # if the descriptor is not from us (then it is a mesh descriptor)
-                    if not desc.startswith('FIDX') and not desc.startswith('DB'):
-                        desc_str = 'MESH:{}'.format(desc)
-                    else:
-                        desc_str = desc
+                        line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
+                            id=pmid, start=start, end=end, str=term, type=self.tag_type[0],
+                            desc=desc_str
+                        )
+                        lines.append(line)
 
-                    line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                        id=pmid, start=start, end=start + len(occurrence), str=occurrence, type=self.tag_type[0],
-                        desc=desc_str
-                    )
-                    output += line
-                    #print(f"found {term} in {occurrence}")
-
+        output = "".join(lines)
         # Write
         with open(out_file, "w") as f:
             f.write(output)
+
+    def split_indexed_words(self, content):
+        words = content.split()
+        ind_words = [(words[0], 0)]
+        for n, word in enumerate(words):
+            if n == 0:
+                continue
+            ind = ind_words[-1][1] + len(ind_words[-1][0]) + 1
+            if word and re.match(r"[^\w]", word[0]):
+                word = word[1:]
+                ind += 1
+            if word and re.match(r"[^\w]", word[-1]):
+                word = word[:-2]
+            ind_words.append((word, ind))
+        return ind_words
+
+    def get_term(self, term):
+        hits = self.desc_by_term.get(term)
+        return hits if hits else set()
+
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

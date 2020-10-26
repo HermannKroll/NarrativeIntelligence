@@ -60,12 +60,25 @@ class DrugTagger(DictTagger):
                     if exp_prop.find(f'{pref}kind').text == "Molecular Formula":
                         name_elements.append(exp_prop.find(f'{pref}value'))
             names = {ne.text for ne in name_elements if len(ne.text) >= MIN_DRUG_NAME_LENGTH}
+            names = {n.lower() for n in names}
+            names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
             for n in names:
                 if n in self.desc_by_term:
                     self.desc_by_term[n].add(desc)
                 else:
                     self.desc_by_term[n] = {desc, }
-        pass
+
+    def extract_dosage_forms(self):
+        pref = '{http://www.drugbank.ca}'
+        dosage_forms = set()
+        for n, (event, elem) in enumerate(ET.iterparse(self.source_file, tag=f'{pref}dosage-form')):
+            if elem.text:
+                dosage_forms |= {df.lower().strip for df in re.split(r"[,;]",elem.text)}
+            if n%10000==0:
+                print(f"at element no {n}")
+        output = "\n".join(dosage_forms)
+        with open(os.path.join(config.TMP_DIR, "dosage_forms.txt"), "w+") as f:
+            f.write(output)
 
 
 def fast_iter(source_file, tag, *args, **kwargs):
@@ -84,3 +97,8 @@ def fast_iter(source_file, tag, *args, **kwargs):
         for ancestor in elem.xpath('ancestor-or-self::*'):
             while ancestor.getprevious() is not None:
                 del ancestor.getparent()[0]
+
+
+if __name__ == '__main__':
+    drt = DrugTagger(log_dir="/home/jan/testoutput/", root_dir="/home/jan/testroot/")
+    drt.extract_dosage_forms()
