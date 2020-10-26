@@ -67,6 +67,10 @@ class DrugTagger(DictTagger):
                     self.desc_by_term[n].add(desc)
                 else:
                     self.desc_by_term[n] = {desc, }
+        if config.MAX_DRUGS_PER_PRODUCT > 0:
+            self.desc_by_term = {k: v
+                                 for k, v in self.desc_by_term.items()
+                                 if len(v) <= config.MAX_DRUGS_PER_PRODUCT}
 
     def extract_dosage_forms(self):
         pref = '{http://www.drugbank.ca}'
