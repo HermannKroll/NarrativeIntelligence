@@ -60,6 +60,7 @@ BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
 #Dict Tagger
 DICT_TAGGER_BLACKLIST = os.path.join(RESOURCE_DIR, "dict_tagger_blacklist.txt")
+DICT_TAGGER_MAX_WORDS = 5
 
 # DosageForm Tagger
 DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "df_index_cache.pkl")
