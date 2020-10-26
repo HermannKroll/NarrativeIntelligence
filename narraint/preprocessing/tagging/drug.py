@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import tempfile
 from datetime import datetime
 
 import lxml.etree as ET
@@ -73,12 +74,14 @@ class DrugTagger(DictTagger):
         dosage_forms = set()
         for n, (event, elem) in enumerate(ET.iterparse(self.source_file, tag=f'{pref}dosage-form')):
             if elem.text:
-                dosage_forms |= {df.lower().strip for df in re.split(r"[,;]",elem.text)}
+                dosage_forms |= {df.lower().strip() for df in re.split(r"[,;]",elem.text)}
             if n%10000==0:
-                print(f"at element no {n}")
+                logging.info(f"at element no {n}")
         output = "\n".join(dosage_forms)
+        logging.info("writing to file...")
         with open(os.path.join(config.TMP_DIR, "dosage_forms.txt"), "w+") as f:
             f.write(output)
+        logging.info("done!")
 
 
 def fast_iter(source_file, tag, *args, **kwargs):
@@ -100,5 +103,7 @@ def fast_iter(source_file, tag, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    drt = DrugTagger(log_dir="/home/jan/testoutput/", root_dir="/home/jan/testroot/")
+    logging.basicConfig(level="INFO")
+    tmpout, tmproot = tempfile.mkdtemp(), tempfile.mkdtemp()
+    drt = DrugTagger(log_dir=tmpout, root_dir=tmproot)
     drt.extract_dosage_forms()
