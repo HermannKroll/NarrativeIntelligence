@@ -5,7 +5,7 @@
     "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
     "model": "models/model_BC5CDRJ_011.bin",
     "batchSize": 10000,
-    "timeout": 15,
+    "timeout": 10,
     "max_retries": 1
   },
   "gnormPlus": {
@@ -13,5 +13,12 @@
     "javaArgs": "-Xmx100G -Xms30G"
   },
   "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
-  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
+  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2",
+  "dict": {
+    "max_words": 5
+  },
+  "drug": {
+    "max_per_product": 3,
+    "min_name_length": 3
+  }
 }
