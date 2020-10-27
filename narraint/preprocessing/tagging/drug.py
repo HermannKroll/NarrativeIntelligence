@@ -103,6 +103,7 @@ def fast_iter(source_file, tag, *args, **kwargs):
 
 
 if __name__ == '__main__':
+    """Extract dosage forms from xml"""
     logging.basicConfig(level="INFO")
     tmpout, tmproot = tempfile.mkdtemp(), tempfile.mkdtemp()
     drt = DrugTagger(log_dir=tmpout, root_dir=tmproot)
