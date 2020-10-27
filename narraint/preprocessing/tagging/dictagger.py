@@ -29,7 +29,7 @@ def get_n_tuples(in_list, n):
             break
 
 class DictTagger(BaseTagger, metaclass=ABCMeta):
-    PROGRESS_BATCH = 1
+    PROGRESS_BATCH = 10000
 
     def __init__(self, short_name, long_name, version, tag_type, index_cache, source_file,  *args, **kwargs):
         super().__init__(*args, **kwargs)
