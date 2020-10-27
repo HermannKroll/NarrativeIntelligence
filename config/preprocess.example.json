@@ -9,5 +9,12 @@
     "root": "/opt/GNormPlusJava",
     "javaArgs": "-Xmx100G -Xms30G"
   },
+  "dict": {
+    "max_words": 5
+  },
+  "drug": {
+    "max_per_product": 3,
+    "min_name_length": 3
+  },
   "dnorm": "/opt/DNorm-0.0.7"
 }
