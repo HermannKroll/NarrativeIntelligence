@@ -69,8 +69,8 @@ class DocTaggedBy(Base):
         PrimaryKeyConstraint('document_id', 'document_collection', 'tagger_name', 'tagger_version', 'ent_type'
                              , sqlite_on_conflict='IGNORE'),
     )
-    document_id = Column(BigInteger, nullable=False)
-    document_collection = Column(String, nullable=False)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
     tagger_name = Column(String, nullable=False)
     tagger_version = Column(String, nullable=False)
     ent_type = Column(String, nullable=False)
@@ -93,8 +93,8 @@ class Tag(Base):
     end = Column(Integer, nullable=False)
     ent_id = Column(String, nullable=False)
     ent_str = Column(String, nullable=False)
-    document_id = Column(BigInteger, nullable=False)
-    document_collection = Column(String, nullable=False)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
     
     def __eq__(self, other):
         return self.ent_type == other.type and self.start == other.start and self.end == other.end and \
