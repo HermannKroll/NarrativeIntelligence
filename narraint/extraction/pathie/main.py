@@ -17,7 +17,9 @@ from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.extract import read_pubtator_documents
 
 NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
-IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy"]
+IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
+                      "side effect", "adverse", "complications",
+                      "drug toxicity", "drug injury"]
 
 
 def filter_document_sentences_without_tags_enhanced(doc_len: int, input_file: str, output_dir: str,
