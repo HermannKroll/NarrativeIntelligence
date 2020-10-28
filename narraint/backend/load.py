@@ -147,7 +147,6 @@ def bulk_load(path, collection, tagger_mapping=None):
 
             # Add tags
             for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-                tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
                 tagged_ent_types.add(ent_type)
 
                 tag_inserts.append(dict(
@@ -158,8 +157,6 @@ def bulk_load(path, collection, tagger_mapping=None):
                     ent_str=ent_str,
                     document_id=d_id,
                     document_collection=collection,
-                    tagger_name=tagger_name,
-                    tagger_version=tagger_version,
                 ))
 
             # Add DocTaggedBy
@@ -249,7 +246,6 @@ def load(path, collection, tagger_mapping=None, logger=None):
 
                 # Add tags
                 for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-                    tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
                     tagged_ent_types.add(ent_type)
 
                     insert_tag = insert(Tag).values(
@@ -260,8 +256,6 @@ def load(path, collection, tagger_mapping=None, logger=None):
                         ent_str=ent_str,
                         document_id=d_id,
                         document_collection=collection,
-                        tagger_name=tagger_name,
-                        tagger_version=tagger_version,
                     )
                     if not Session.is_sqlite:
                         insert_tag = insert_tag.on_conflict_do_nothing(

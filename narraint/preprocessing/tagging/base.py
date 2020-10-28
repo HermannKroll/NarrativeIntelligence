@@ -113,8 +113,6 @@ class BaseTagger(Thread):
                 ent_str=ent_str,
                 document_id=d_id,
                 document_collection=self.collection,
-                tagger_name=tagger_name,
-                tagger_version=tagger_version,
             )
             if not Session.is_sqlite:
                 insert_tag = insert_tag.on_conflict_do_nothing(
