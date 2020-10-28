@@ -82,8 +82,6 @@ class Tag(Base):
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection'),
                              sqlite_on_conflict='IGNORE'),
-        ForeignKeyConstraint(('tagger_name', 'tagger_version'), ('tagger.name', 'tagger.version'),
-                             sqlite_on_conflict='IGNORE'),
         UniqueConstraint('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id',
                          sqlite_on_conflict='IGNORE'),
         PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
@@ -97,8 +95,6 @@ class Tag(Base):
     ent_str = Column(String, nullable=False)
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
-    tagger_name = Column(String, nullable=False)
-    tagger_version = Column(String, nullable=False)
     
     def __eq__(self, other):
         return self.ent_type == other.type and self.start == other.start and self.end == other.end and \
