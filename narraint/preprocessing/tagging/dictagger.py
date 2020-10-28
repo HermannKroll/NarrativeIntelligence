@@ -77,12 +77,18 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
     def index_from_source(self):
         pass
 
-
     def get_blacklist_set(self):
         with open(DICT_TAGGER_BLACKLIST) as f:
             blacklist = f.read().splitlines()
-        blacklist = {s.lower() for s in blacklist}
-        return set(blacklist)
+        blacklist_set = set()
+        for s in blacklist:
+            s_lower = s.lower()
+            blacklist_set.add(s_lower)
+            blacklist_set.add('{}s'.format(s_lower))
+            blacklist_set.add('{}e'.format(s_lower))
+            if s_lower.endswith('s') or s_lower.endswith('e'):
+                blacklist_set.add(s_lower[0:-1])
+        return blacklist_set
 
     # TODO: synchronization
     def prepare(self, resume=False):
