@@ -21,4 +21,4 @@ FIDX21	elixirs
 FIDX22	tinctures
 FIDX23	lollipop
 FIDX24	poultices
-FIDX25  intrauterine device
+FIDX25	intrauterine device
