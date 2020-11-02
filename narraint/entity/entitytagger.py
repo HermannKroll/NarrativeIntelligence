@@ -8,7 +8,7 @@ from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 
 
-class DosageFormTagger:
+class DosageFormTaggerVocabulary:
 
     def __init__(self):
         pass
@@ -89,7 +89,7 @@ class EntityTagger:
         Add the additional dosage form terms to the internal translation dict
         :return: None
         """
-        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms().items():
+        for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
             for t in terms:
                 self.term2entity[t.lower()].append(Entity(df_id, DOSAGE_FORM))
 
