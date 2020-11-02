@@ -9,9 +9,10 @@ import nltk
 from nltk.corpus import wordnet
 from sqlalchemy.exc import IntegrityError
 
+from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.meshontology import MeSHOntology
 from narraint.entity.entityresolver import GeneResolver
-from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM
+from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM, DRUG
 from narraint.backend.models import Tag, Predication, Sentence
 from narraint.backend.database import Session
 from narraint.extraction.versions import OPENIE_VERSION, OPENIE_EXTRACTION
@@ -19,6 +20,7 @@ from narraint.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
 MAX_SENTENCE_LENGTH = 3000
+MIN_SUBJECT_OR_OBJECT_LEN = 3
 
 # A list of words to ignore in OpenIE extractions
 TOKENS_TO_IGNORE = {'with', 'by', 'of', 'from', 'to', 'than', 'as', 'on', 'at', 'may', 'in', 'can', 'more', 'less',
@@ -199,6 +201,44 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
     return predications_cleaned
 
 
+def transform_drugbank_ids_to_mesh_ids(predications: List[PRED]):
+    """
+    Transforms a list of predications
+    Maps each DrugBank ID to a MeSH ids (if applicable)
+    Converts all DrugTypes to Chemical Types
+    :param predications: a list of predications
+    :return: a list of converted predications
+    """
+    logging.info('Transforming DrugBank ids to prefixes...')
+    predications_cleaned = []
+    drugbank2mesh_mapper = DrugBank2MeSHMapper.instance()
+    start_time = datetime.now()
+    predications_len = len(predications)
+    for idx, p in enumerate(predications):
+        subj_ids = set()
+        if p.s_type == DRUG and p.s_id in drugbank2mesh_mapper.dbid2meshid:
+            subject_type = CHEMICAL
+            subj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.s_id])
+        else:
+            subject_type = p.s_type
+            subj_ids = [p.s_id]
+        obj_ids = set()
+        if p.o_type == DRUG and p.o_id in drugbank2mesh_mapper.dbid2meshid:
+            object_type = CHEMICAL
+            obj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.o_id])
+        else:
+            object_type = p.o_type
+            obj_ids = [p.o_id]
+        for s_id in subj_ids:
+            for o_id in obj_ids:
+                p_cleaned = PRED(p.doc_id, p.subj, p.pred, p.pred_cleaned, p.obj, p.conf, p.sent, s_id, p.s_str,
+                                 subject_type, o_id, p.o_str, object_type)
+                predications_cleaned.append(p_cleaned)
+        print_progress_with_eta('transforming DrugBank ids to MeSH ids...', idx, predications_len, start_time)
+    logging.info('{} predications obtained'.format(len(predications_cleaned)))
+    return predications_cleaned
+
+
 def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     """
     Transforms the MeSH ids of all facts to MeSH tree numbers
@@ -290,35 +330,81 @@ def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentenc
     return sentence.id
 
 
-def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, version, clean_genes=True,
-                                do_transform_mesh_ids_to_prefixes=True):
+def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
+                                do_transform_mesh_ids_to_prefixes=True, do_map_drugbank_ids=True):
     """
-    insert a list of cleaned tuples into the database (bulk insert)
-    does not check for collisions
+    Cleans a list of predications based on a set of filters
     :param tuples_cleaned: a list of PRED tuples
     :param collection: the document collection
     :param extraction_type: extraction type like OpenIE or PathIE
-    :param version: version of extraction method
     :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
     :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
-    :return: Nothing
+    :param do_map_drugbank_ids: if true all known drugbank ids will be mapped to mesh ids
+    :return: a list of sentence objects to insert, a list of predication values to insert
     """
     if clean_genes:
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
+    if do_map_drugbank_ids:
+        tuples_cleaned = transform_drugbank_ids_to_mesh_ids(tuples_cleaned)
     if do_transform_mesh_ids_to_prefixes:
         tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
+    last_highest_sentence_id = 0
     hash2sentence = load_sentences_with_hashes(collection)
+    sentid2hash = {}
+    inserted_sentence_ids = set()
+    for sent_hash, sentences in hash2sentence.items():
+        for sent_id, sent_txt in sentences:
+            if sent_id > last_highest_sentence_id:
+                last_highest_sentence_id = sent_id
+            inserted_sentence_ids.add(sent_id)
+            sentid2hash[int(sent_id)] = sent_hash
+    logging.info(f'Last highest sentence_id was: {last_highest_sentence_id}')
+    logging.info(f'Querying duplicates from database (collection: {collection} and extraction type: {extraction_type})')
     session = Session.get()
+    # loading all ready known predications for collections
+    q_known = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
+                            Predication.predicate, Predication.object_id, Predication.object_type,
+                            Predication.sentence_id).\
+        filter(Predication.document_collection == collection).\
+        filter(Predication.extraction_type == extraction_type)
+
+    duplicate_check = set()
+    for r in session.execute(q_known):
+        duplicate_check.add((r[0], r[1], r[2], r[3], r[4], r[5], sentid2hash[int(r[6])]))
+    logging.info(f'{len(duplicate_check)} entries retrieved from db')
+
+    last_highest_sentence_id += 1
     len_tuples = len(tuples_cleaned)
     logging.info('Inserting {} tuples to database...'.format(len_tuples))
     start_time = datetime.now()
     predication_values = []
-    duplicate_check = set()
+    sentence_values = []
     for i, p in enumerate(tuples_cleaned):
-        key = (p.doc_id, p.s_id, p.s_type, p.pred, p.o_id, p.o_type, p.sent)
+        sentence_txt = p.sent.replace('\n', '')
+        # Todo: Very dirty fix here
+        if len(p.s_str) < MIN_SUBJECT_OR_OBJECT_LEN or len(p.o_str) < MIN_SUBJECT_OR_OBJECT_LEN:
+            continue
+        # Todo: dirty fix here
+        if p.s_id == '-' or p.o_id == '-':
+            continue
+
+        sent_hash = text_to_md5hash(sentence_txt)
+        key = (p.doc_id, p.s_id, p.s_type, p.pred_cleaned, p.o_id, p.o_type, sent_hash)
         if key in duplicate_check:
             continue
         duplicate_check.add(key)
+
+        sentence_id = -1
+        if sent_hash in hash2sentence:
+            for s_id, s_txt in hash2sentence[sent_hash]:
+                if sentence_txt == s_txt:
+                    sentence_id = s_id
+        # no sentence_id found
+        if sentence_id == -1:
+            sentence_id = last_highest_sentence_id
+            hash2sentence[sent_hash].append((sentence_id, sentence_txt))
+            last_highest_sentence_id += 1
+
         predication_values.append(dict(
             document_id=p.doc_id,
             document_collection=collection,
@@ -330,29 +416,73 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
             object_str=p.o_str,
             object_type=p.o_type,
             confidence=p.conf,
-            sentence_id=insert_sentence_and_get_sentence_id(session, p.sent, hash2sentence, p.doc_id, collection),
+            sentence_id=sentence_id,
             extraction_type=extraction_type
         ))
-        try:
-            if i % BULK_INSERT_AFTER_K == 0:
-                # first commit all sentences
-                session.commit()
-                session.bulk_insert_mappings(Predication, predication_values)
-                session.commit()
-                predication_values.clear()
-        except IntegrityError:
-            _insert_predication_skip_duplicates(session, predication_values)
-            predication_values.clear()
 
-        print_progress_with_eta("Inserting", i, len_tuples, start_time)
-    try:
-        # first commit all sentences
-        session.commit()
-        session.bulk_insert_mappings(Predication, predication_values)
-        session.commit()
-    except IntegrityError:
-        _insert_predication_skip_duplicates(session, predication_values)
-        predication_values.clear()
+        # check whether the sentence was inserted before
+        if sentence_id not in inserted_sentence_ids:
+            inserted_sentence_ids.add(sentence_id)
+            sentence_values.append((dict(
+                id=sentence_id,
+                document_id=p.doc_id,
+                document_collection=collection,
+                text=sentence_txt,
+                md5hash=sent_hash)))
+
+        print_progress_with_eta("Preparing data...", i, len_tuples, start_time)
+    return predication_values, sentence_values
+
+
+def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
+                                                   do_transform_mesh_ids_to_prefixes=True, do_map_drugbank_ids=True):
+    """
+     insert a list of cleaned tuples into the database (bulk insert)
+     does not check for collisions
+     :param tuples_cleaned: a list of PRED tuples
+     :param collection: the document collection
+     :param extraction_type: extraction type like OpenIE or PathIE
+     :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
+     :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
+     :param do_map_drugbank_ids: if true all known drugbank ids will be mapped to mesh ids
+     :return: Nothing
+     """
+    predication_values, sentence_values = clean_predications(tuples_cleaned, collection, extraction_type,
+                                                             clean_genes=clean_genes,
+                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes,
+                                                             do_map_drugbank_ids=do_map_drugbank_ids)
+    logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
+    session = Session.get()
+
+    sentence_part = []
+    logging.info('Inserting sentences...')
+    len_tuples = len(sentence_values)
+    start_time = datetime.now()
+    for i, s in enumerate(sentence_values):
+        sentence_part.append(s)
+        if i % BULK_INSERT_AFTER_K == 0:
+            session.bulk_insert_mappings(Sentence, sentence_part)
+            session.commit()
+            sentence_part.clear()
+        print_progress_with_eta("Inserting sentences...", i, len_tuples, start_time)
+    session.bulk_insert_mappings(Sentence, sentence_part)
+    session.commit()
+    sentence_part.clear()
+
+    predication_part = []
+    logging.info('Inserting predications...')
+    len_tuples = len(predication_values)
+    start_time = datetime.now()
+    for i, p in enumerate(predication_values):
+        predication_part.append(p)
+        if i % BULK_INSERT_AFTER_K == 0:
+            session.bulk_insert_mappings(Predication, predication_part)
+            session.commit()
+            sentence_part.clear()
+        print_progress_with_eta("Inserting predications...", i, len_tuples, start_time)
+    session.bulk_insert_mappings(Predication, predication_part)
+    session.commit()
+    sentence_part.clear()
     logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
 
 
@@ -489,7 +619,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    insert_predications_into_db(tuples_cleaned, collection, extraction_type=OPENIE_EXTRACTION, version=OPENIE_VERSION)
+    insert_predications_into_db(tuples_cleaned, collection, extraction_type=OPENIE_EXTRACTION)
 
 
 def main():

@@ -33,7 +33,7 @@ def main():
     predications = read_pathie_extractions_tsv(args.input)
     logging.info('{} extractions read'.format(len(predications)))
     logging.info('Inserting {} predications'.format(len(predications)))
-    insert_predications_into_db(predications, args.collection, extraction_type=PATHIE_EXTRACTION, version=CORENLP_VERSION)
+    insert_predications_into_db(predications, args.collection, extraction_type=PATHIE_EXTRACTION)
     logging.info('finished')
 
 
