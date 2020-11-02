@@ -5,16 +5,18 @@ import pickle
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
+import lxml.etree as ET
 
 from narraint.backend.database import Session
 from narraint.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
-    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR
-from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM
+    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR, DRUGBANK_ID2NAME_INDEX, DRUGBASE_XML_DUMP
+from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
+from narraint.progress import print_progress_with_eta
 
 
 class MeshResolver:
@@ -260,6 +262,57 @@ class DosageFormResolver:
             return self.fid2name[dosage_form_id]
 
 
+class DrugBankResolver:
+
+    def __init__(self):
+        self.dbid2name = {}
+
+    def load_index(self, index_path=DRUGBANK_ID2NAME_INDEX):
+        with open(index_path, 'rb') as f:
+            self.dbid2name = pickle.load(f)
+        logging.info('{} DrugBank mappings load from index'.format(len(self.dbid2name)))
+
+    def store_index(self, index_path=DRUGBANK_ID2NAME_INDEX):
+        logging.info('Store {} DrugBank mappings to index'.format(len(self.dbid2name)))
+        with open(index_path, 'wb') as f:
+            pickle.dump(self.dbid2name, f)
+
+    def build_index(self, drugbank_file=DRUGBASE_XML_DUMP):
+        logging.info("checking total number of drugs...")
+        # TODO real check
+        drug_number = 13581
+        logging.info(f"found {drug_number}.")
+        start = datetime.now()
+        drugs_found = 0
+        logging.info(f"")
+        pref = '{http://www.drugbank.ca}'
+        for event, elem in ET.iterparse(drugbank_file, tag=f'{pref}drug'):
+            desc = ''
+            for dbid in elem.findall(f'{pref}drugbank-id'):
+                if dbid.attrib.get('primary'):
+                    desc = dbid.text
+                    break
+            if desc == '':
+                continue
+            drugs_found += 1
+            print_progress_with_eta("building index...", drugs_found, drug_number, start, print_every_k=100)
+            description_text = elem.find(f'{pref}description').text
+            if description_text and 'allergen' in description_text.lower()[0:20]:
+                continue
+            # take the first name of each drug
+            name_element = list(elem.findall(f'{pref}name'))[0]
+            self.dbid2name[str(desc)] = name_element.text
+        self.store_index()
+
+    def drugbank_id_to_name(self, drugbank_id):
+        """
+        Translates the DrugBank ID (string) to the name
+        :param drugbank_id: DrugBank ID as a string
+        :return: the name
+        """
+        return self.dbid2name[drugbank_id]
+
+
 class EntityResolver:
     """
     EntityResolver translates an entity id and an entity type to it's corresponding name
@@ -281,6 +334,8 @@ class EntityResolver:
             self.species.load_index()
             self.dosageform = DosageFormResolver(self.mesh)
             self.mesh_ontology = None
+            self.drugbank = DrugBankResolver()
+            self.drugbank.load_index()
             EntityResolver.__instance = self
 
     @staticmethod
@@ -313,6 +368,8 @@ class EntityResolver:
             return self.species.species_id_to_name(entity_id)
         if entity_type == DOSAGE_FORM:
             return self.dosageform.dosage_form_to_name(entity_id)
+        if entity_type == DRUG:
+            return self.drugbank.drugbank_id_to_name(entity_id)
         return entity_id
 
 
@@ -328,14 +385,17 @@ def main():
     if not os.path.exists(TMP_DIR):
         os.mkdir(TMP_DIR)
         
-    mesh = MeshResolver()
-    mesh.build_index()
+  #  mesh = MeshResolver()
+  #  mesh.build_index()
 
-    gene = GeneResolver()
-    gene.build_index()
+   # gene = GeneResolver()
+    #gene.build_index()
 
-    species = SpeciesResolver()
-    species.build_index()
+    #species = SpeciesResolver()
+    #species.build_index()
+
+    drugbank = DrugBankResolver()
+    drugbank.build_index()
 
 
 if __name__ == "__main__":
