@@ -4,7 +4,7 @@ from collections import defaultdict
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG
 from narraint.entity.meshontology import MeSHOntology
 
 
@@ -78,6 +78,8 @@ class EntityTagger:
             self.term2entity[e_term.strip().lower()].append(Entity(e_id, GENE))
         for e_term, e_id in self.resolver.species.get_reverse_index().items():
             self.term2entity[e_term.strip().lower()].append(Entity(e_id, SPECIES))
+        for e_id, e_term in self.resolver.drugbank.dbid2name.items():
+            self.term2entity[e_term.strip().lower()].append(Entity(e_id, DRUG))
 
         self._add_to_reverse_index(self.resolver.mesh.supplement_desc2heading.items(), 'MESH', id_prefix='MESH:')
         self._create_mesh_ontology_index(self.resolver.mesh.desc2heading.items())
