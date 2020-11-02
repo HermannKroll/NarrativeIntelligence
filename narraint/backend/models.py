@@ -138,7 +138,7 @@ class Predication(Base):
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False, index=True)
-    predicate_canonicalized = Column(String, nullable=True, index=True)
+    predicate_canonicalized = Column(String, nullable=True)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
     object_type = Column(String, nullable=False)
@@ -160,7 +160,7 @@ class Sentence(Base):
         PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
     )
 
-    id = Column(BigInteger, autoincrement=True)
+    id = Column(BigInteger)
     document_id = Column(BigInteger, nullable=False, index=True)
     document_collection = Column(String, nullable=False, index=True)
     text = Column(String, nullable=False)
