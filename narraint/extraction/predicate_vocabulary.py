@@ -6,12 +6,13 @@ def create_predicate_vocab():
                             "associate", "correlate", "play role", "play", "limit"],
                 compares=["compare with"],
                 induces=["stimulate", "increase", "potentiate", "enhance", "activate", "higher",
-                         "result", "lead", "causes"],
+                         "result", "lead", "causes", "side effect", "complications", "drug toxicity", "drug injury",
+                         "adverse"],
                 decreases=["reduce", "lower", "attenuate", "mediate"],
                 interacts=["bind", "interact", "target", "regulate"],
                 metabolises=["metabolite", "metabolize", "metabolise", "metabolism", "metabol"],
                 inhibits=["disrupt", "suppress", "inhibitor", "disturb"],
-                treats=["prevents", "use", "improve", "promote", "sensitize", "sensitise", "aid"],
+                treats=["prevents", "use", "improve", "promote", "sensitize", "sensitise", "aid", "treatment", "therapy"],
                 PRED_TO_REMOVE=["show", "present", "exhibit", "find", "form"])
 
 
