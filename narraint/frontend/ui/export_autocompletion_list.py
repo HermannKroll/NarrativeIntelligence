@@ -1,9 +1,8 @@
 import itertools
 import logging
 
-from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.entitytagger import DosageFormTagger
+from narraint.entity.entitytagger import DosageFormTaggerVocabulary
 from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
@@ -37,7 +36,7 @@ def main():
         notfound = 0
 
         # Write dosage form terms + synonyms
-        for df_id, terms in DosageFormTagger.get_dosage_form_vocabulary_terms().items():
+        for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
             for t in terms:
                 if not t.endswith('s'):
                     t = '{}s'.format(t)
