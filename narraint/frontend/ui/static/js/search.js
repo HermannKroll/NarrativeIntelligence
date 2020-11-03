@@ -482,8 +482,12 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             || ent_name === 'DosageForm' || ent_name === 'CellLine') {
             var_sub = ent_name;
         }
-
-        if (ent_id.slice(0, 5) === 'MESH:') {
+        if (ent_id.slice(0,2) === "DB") {
+            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+        }
+        else if (ent_id.slice(0, 5) === 'MESH:') {
             button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
