@@ -12,6 +12,7 @@ PROTEINMUTATION = "ProteinMutation"
 DNAMUTATION = "DNAMutation"
 DOMAINMOTIF = "DomainMotif"
 GENUS = "Genus"
+STRAIN = "Strain"
 
 ALL = (
     DOSAGE_FORM,
@@ -66,5 +67,6 @@ ENTITY_TYPES = dict(
     SNP=SNP,
     DosageForm=DOSAGE_FORM,
     DomainMotif=DOMAINMOTIF,
-    Genus=GENUS
+    Genus=GENUS,
+    Strain=STRAIN
 )
