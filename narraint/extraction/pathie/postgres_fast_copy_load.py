@@ -43,9 +43,6 @@ def clean_and_export_predications_to_copy_load_tsv(tuples_cleaned: List[PRED], c
             f_sent.write(f'\n{sent_str}')
     # free memory here
     sentence_values.clear()
-    logging.info(f'Exporting {len(predication_values)} predications to memory file')
-    pred_keys = ['document_id', 'document_collection', 'subject_id', 'subject_str', 'subject_type', 'predicate',
-                 'object_id', 'object_str', 'object_type', 'confidence', 'sentence_id', 'extraction_type']
 
     session = Session.get()
     connection = session.connection().connection
@@ -56,6 +53,10 @@ def clean_and_export_predications_to_copy_load_tsv(tuples_cleaned: List[PRED], c
     logging.info('Committing...')
     connection.commit()
     f_sent.close()
+
+    logging.info(f'Exporting {len(predication_values)} predications to memory file')
+    pred_keys = ['document_id', 'document_collection', 'subject_id', 'subject_str', 'subject_type', 'predicate',
+                 'object_id', 'object_str', 'object_type', 'confidence', 'sentence_id', 'extraction_type']
 
     f_pred = StringIO()
     for idx, pred_val in enumerate(predication_values):
