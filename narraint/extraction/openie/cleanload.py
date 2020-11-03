@@ -216,16 +216,22 @@ def transform_drugbank_ids_to_mesh_ids(predications: List[PRED]):
     predications_len = len(predications)
     for idx, p in enumerate(predications):
         subj_ids = set()
-        if p.s_type == DRUG and p.s_id in drugbank2mesh_mapper.dbid2meshid:
+        if p.s_type == DRUG:
             subject_type = CHEMICAL
-            subj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.s_id])
+            if p.s_id in drugbank2mesh_mapper.dbid2meshid:
+                subj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.s_id])
+            else:
+                subj_ids = [p.s_id]
         else:
             subject_type = p.s_type
             subj_ids = [p.s_id]
         obj_ids = set()
-        if p.o_type == DRUG and p.o_id in drugbank2mesh_mapper.dbid2meshid:
+        if p.o_type == DRUG:
             object_type = CHEMICAL
-            obj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.o_id])
+            if p.o_id in drugbank2mesh_mapper.dbid2meshid:
+                obj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.o_id])
+            else:
+                obj_ids = [p.o_id]
         else:
             object_type = p.o_type
             obj_ids = [p.o_id]
