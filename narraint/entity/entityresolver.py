@@ -352,6 +352,8 @@ class EntityResolver:
         :param resolve_gene_by_id:
         :return: uses the corresponding resolver for the entity type
         """
+        if entity_type == CHEMICAL and entity_id.startswith('DB'): # DrugBank special rule
+            return self.drugbank.drugbank_id_to_name(entity_id)
         if not entity_id.startswith('MESH:') and entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
             if not self.mesh_ontology:
                 self.mesh_ontology = MeSHOntology.instance()
@@ -385,14 +387,14 @@ def main():
     if not os.path.exists(TMP_DIR):
         os.mkdir(TMP_DIR)
         
-  #  mesh = MeshResolver()
-  #  mesh.build_index()
+    mesh = MeshResolver()
+    mesh.build_index()
 
-   # gene = GeneResolver()
-    #gene.build_index()
+    gene = GeneResolver()
+    gene.build_index()
 
-    #species = SpeciesResolver()
-    #species.build_index()
+    species = SpeciesResolver()
+    species.build_index()
 
     drugbank = DrugBankResolver()
     drugbank.build_index()
