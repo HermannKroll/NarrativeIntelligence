@@ -52,7 +52,7 @@ def main():
         # check all known mesh entities
         known_mesh_prefixes = set()
         for e_id, e_str, e_type in entities:
-            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:'):
+            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith('DB'):
                 # Split MeSH Tree No by .
                 split_tree_number = e_id.split('.')
                 # add all known concepts and superconcepts to our index
@@ -83,7 +83,7 @@ def main():
         for e_id, e_str, e_type in entities:
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
-                if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:'):
+                if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith('DB'):
                     e_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(e_id)[0])
                     if e_id.startswith('FID'):
                         e_type = 'FID'
