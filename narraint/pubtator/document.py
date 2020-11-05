@@ -1,9 +1,5 @@
 from narraint.entity.enttypes import ENTITY_TYPES
-from narraint.pubtator.regex import DOCUMENT_ID, TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
-
-
-class DocumentError(Exception):
-    pass
+from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 
 class TaggedEntity:
@@ -17,10 +13,10 @@ class TaggedEntity:
             raise KeyError('entity type not supported yet: {}'.format(tag_tuple))
 
         self.type = ENTITY_TYPES[tag_tuple[4]]
-        self.mesh = tag_tuple[5]
+        self.ent_id = tag_tuple[5]
 
     def __str__(self):
-        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.type, self.mesh)
+        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.type, self.ent_id)
 
 
 class Sentence:
@@ -34,57 +30,52 @@ class Sentence:
 
 class TaggedDocument:
 
-    def __init__(self, pubtator_content, read_from_file=False):
+    def __init__(self, pubtator_content, spacy_nlp=None):
         """
         initialize a pubtator document
         :param pubtator_content: content of a pubtator file or a pubtator filename
-        :param read_from_file: if true, pubtator_content is treated as a filename
         """
-        if read_from_file:
-            with open(pubtator_content, 'r') as f:
-                content = f.read()
-            pubtator_content = content
         self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
         self.id = int(self.id)
-        self.content = self.title + self.abstract
         self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
         self.entity_names = {t.text.lower() for t in self.tags}
-        # Indexes
-        # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
-        self.sentence_by_id = {}  # Use to build mesh->sentence index
-        self.entities_by_mesh = {}  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
-        self.sentences_by_mesh = {}  # Mesh->Sentence index
-        self.entities_by_sentence = {}  # Use for _query processing
-        self._create_index()
+        if spacy_nlp:
+            # Indexes
+            # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
+            self.sentence_by_id = {}  # Use to build mesh->sentence index
+            self.entities_by_ent_id = {}  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
+            self.sentences_by_ent_id = {}  # Mesh->Sentence index
+            self.entities_by_sentence = {}  # Use for _query processing
+            self._create_index(spacy_nlp)
 
-    def _create_index(self):
+    def _create_index(self, spacy_nlp):
         # self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
         #                            t.text.lower() not in self.mesh_by_entity_name}
-        sentences = self.content.split(". ")
-        for idx, sent in enumerate(sentences):
+        content = f'{self.title}. {self.abstract}'
+        doc_nlp = spacy_nlp(content)
+        for idx, sent in enumerate(doc_nlp.sents):
             self.sentence_by_id[idx] = Sentence(
                 idx,
                 sent.lower(),
-                self.content.index(sent),
-                self.content.index(sent) + len(sent),
+                content.index(sent),
+                content.index(sent) + len(sent),
             )
 
         for tag in self.tags:
-            if tag.mesh not in self.entities_by_mesh:
-                self.entities_by_mesh[tag.mesh] = []
-            self.entities_by_mesh[tag.mesh] += [tag]
+            if tag.ent_id not in self.entities_by_ent_id:
+                self.entities_by_ent_id[tag.ent_id] = []
+            self.entities_by_ent_id[tag.ent_id] += [tag]
 
-        for mesh, entities in self.entities_by_mesh.items():
-            if mesh not in self.sentences_by_mesh:
-                self.sentences_by_mesh[mesh] = set()
+        for ent_id, entities in self.entities_by_ent_id.items():
+            if ent_id not in self.sentences_by_ent_id:
+                self.sentences_by_ent_id[ent_id] = set()
             for entity in entities:
                 for sid, sent in self.sentence_by_id.items():
                     if sent.start <= entity.start <= sent.end:
-                        self.sentences_by_mesh[mesh].add(sid)
+                        self.sentences_by_ent_id[ent_id].add(sid)
                         if sid not in self.entities_by_sentence:
                             self.entities_by_sentence[sid] = set()
                         self.entities_by_sentence[sid].add(entity)
-        pass
 
     def __str__(self):
         return "<Document {} {}>".format(self.id, self.title)
@@ -117,12 +108,3 @@ class TaggedDocumentCollection:
             raise Exception('ID already included in collection')
         self.docs_by_id[doc.id] = doc
 
-
-def get_document_id(fn):
-    with open(fn) as f:
-        line = f.readline()
-    try:
-        match = DOCUMENT_ID.match(line)
-        return int(match.group(1))
-    except AttributeError:
-        raise DocumentError(f"No ID found for {fn}")

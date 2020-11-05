@@ -1,19 +1,16 @@
 import os
-import re
 import math
 from itertools import product
 
 from nltk.stem.porter import *
 
 from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
-from narraint.analysis.cikm2020.helper import perform_evaluation
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
 from narraint.pubtator.document import TaggedDocument
 from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
-from narraint.queryengine.query import GraphQuery
 
 
 def compute_f_measure(precision, recall):
@@ -68,17 +65,17 @@ class TextSearchStrategy(SearchStrategy):
             mesh_descs = self.mesh_ontology.find_descriptors_start_with_tree_no(entity.entity_id)
             for d in mesh_descs:
                 desc_id = 'MESH:{}'.format(d[0])
-                if desc_id in document.sentences_by_mesh:
-                    sentences.update(document.sentences_by_mesh[desc_id])
+                if desc_id in document.sentences_by_ent_id:
+                    sentences.update(document.sentences_by_ent_id[desc_id])
         else:
             # TODO: Search by id, does not work with genes currently
-            if entity.entity_id in document.sentences_by_mesh:
-                sentences.update(document.sentences_by_mesh[entity.entity_id])
+            if entity.entity_id in document.sentences_by_ent_id:
+                sentences.update(document.sentences_by_ent_id[entity.entity_id])
         return sentences
 
     def find_entity_positions(self, entity: Entity, document:TaggedDocument):
         meshs = entity.get_meshs()
-        return {e.start for m in meshs if m in document.entities_by_mesh for e in document.entities_by_mesh.get(m)}
+        return {e.start for m in meshs if m in document.entities_by_ent_id for e in document.entities_by_ent_id.get(m)}
 
 
 
