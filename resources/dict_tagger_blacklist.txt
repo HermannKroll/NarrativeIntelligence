@@ -132,3 +132,4 @@ or serum
 serum albumin
 adenylate
 gelatin
+horse
