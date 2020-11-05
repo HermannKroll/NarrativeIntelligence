@@ -31,8 +31,6 @@ nano preprocess.json
 Enter your GNormPlus and TaggerOne root paths
 ```
 {
-  "pmcid2pmid": "/home/kroll/tools/pmcid2pmid.tsv",
-  "pmc_dir": "/hdd2/datasets/pubmed_central",
   "taggerOne": {
     "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
     "model": "models/model_BC5CDRJ_011.bin",
@@ -43,9 +41,7 @@ Enter your GNormPlus and TaggerOne root paths
   "gnormPlus": {
     "root": "/home/kroll/tools/tagger/GNormPlusJava",
     "javaArgs": "-Xmx100G -Xms30G"
-  },
-  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
-  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
+  }
 }
 ```
 You can ignore the pmcid2pmid, dnorm and tmchem settings. 
@@ -114,14 +110,23 @@ The files are separated by two new line characters *\\n*. ATTENTION: the PubTato
 Finally we can start tagging our documents. Assume we have a test document test.pubtator.
 ```
 cd ~/NarrativeIntelligence/
-python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A --tagger-one 
+python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A
 ```
-The pipeline will invoke the taggers to tag the documents. The document corpus is *test*. -t A means to tag Chemicals, Diseases, DosageForms, Genes and Species. 
+The pipeline will invoke the taggers to tag the documents. The document corpus is *test*. 
+
+-t A means to tag Chemicals, Diseases, DosageForms, Genes and Species. 
+
+-t DF means to use our own tagger and to tag DosageForms only. 
+
+-t C D means to user TaggerOne and to tag Chemicals and Diseases only. 
+
+-t G S means to use GNormPlus and to tag Genes and Species only. 
+
 
 The pipeline will work in a temporary directory and remove it if finished. If you want to work in a specified directory, use
 ```
 cd ~/NarrativeIntelligence/
-python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A --tagger-one --workdir temp/
+python3 narraint/preprocessing/preprocess.py ~/test.pubtator ~/test.tagged.pubtator --corpus test -t A --workdir temp/
 ```
 The temporary created files as well as all logs won't be removed then. 
 

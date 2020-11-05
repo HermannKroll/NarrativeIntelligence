@@ -5,7 +5,7 @@ import os
 import unicodedata
 from datetime import datetime
 from glob import glob
-from pathlib import  Path
+from pathlib import Path
 
 import json
 

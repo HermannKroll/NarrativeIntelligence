@@ -58,3 +58,12 @@ confidence float NULLABLE
 sentence string
 openie_version string
 date_inserted datetime
+
+DocumentTranslation
+-
+document_id int PK FK >- Document.id
+document_collection string PK  FK >- Document.collection
+source_doc_id string
+md5 string
+date_inserted DateTime
+source string
