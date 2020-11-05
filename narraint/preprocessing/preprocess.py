@@ -2,7 +2,10 @@ import logging
 import os
 import tempfile
 import sys
+import signal
 import shutil
+import psutil
+import subprocess
 from argparse import ArgumentParser
 from typing import List
 import multiprocessing
@@ -227,7 +230,7 @@ def main():
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
         split_composites(ext_in_dir, in_dir, logger=logger)
         logger.info("done. Sanitizing files...")
-        ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
+        # ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
     else:
         ignored, sanitized = sanitize(ext_in_dir, output_dir=in_dir)
     logger.info(f"{len(ignored)} files ignored because of wrong format or missing abstract")
@@ -266,12 +269,15 @@ def main():
                 args.corpus, sub_root_dir, sub_in_dir, sub_log_dir, sub_logger,
                 sub_output, conf, *tag_types
             )
-            kwargs = dict(resume=args.resume, use_tagger_one= not args.no_tagger_one)
+            kwargs = dict(resume=args.resume, use_tagger_one=not args.no_tagger_one)
             process = multiprocessing.Process(target=preprocess, args=process_args, kwargs=kwargs)
             processes.append(process)
             process.start()
+
+        signal.signal(signal.SIGINT, int_handler)
         for process in processes:
-            process.join()
+            while process.is_alive():
+                process.join(timeout=1)
         # merge output files
         logger.info(f"merging sub output files to {args.output}")
         with open(args.output, "w+") as output_file:
@@ -282,11 +288,19 @@ def main():
                 os.remove(sub_out_path)
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
-                   resume=args.resume, use_tagger_one= not args.no_tagger_one)
+                   resume=args.resume, use_tagger_one=not args.no_tagger_one)
 
     if not args.workdir:
         logger.info("Done. Deleting tmp project directory.")
         shutil.rmtree(root_dir)
+
+
+def int_handler(sig, frame):
+    print("Interrupt: received control-c")
+    process = psutil.Process(os.getpid())
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
 
 
 if __name__ == "__main__":
