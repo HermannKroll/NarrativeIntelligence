@@ -5,7 +5,6 @@ import sys
 import signal
 import shutil
 import psutil
-import subprocess
 from argparse import ArgumentParser
 from typing import List
 import multiprocessing
@@ -22,10 +21,11 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.drug import DrugTagger
+from narraint.preprocessing.tagging.excipient import ExcipientTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.pubtator.document import get_document_id, DocumentError
+from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
 from narraint.pubtator.sanitize import sanitize
 
@@ -82,7 +82,8 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
     if enttypes.DRUG in tag_types:
         tagger_by_ent_type[enttypes.DRUG] = DrugTagger
-
+    if enttypes.EXCIPIENT in tag_types:
+        tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
     return tagger_by_ent_type
 
 
@@ -230,7 +231,7 @@ def main():
         logger.info(f"Composite enabled or single file as input. Splitting up composite files...")
         split_composites(ext_in_dir, in_dir, logger=logger)
         logger.info("done. Sanitizing files...")
-        # ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
+        ignored, sanitized = sanitize(in_dir, delete_mismatched=True)
     else:
         ignored, sanitized = sanitize(ext_in_dir, output_dir=in_dir)
     logger.info(f"{len(ignored)} files ignored because of wrong format or missing abstract")

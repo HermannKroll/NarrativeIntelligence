@@ -10,7 +10,7 @@ from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import get_document_ids
-from narraint.pubtator.document import get_document_id
+from narraint.preprocessing.utils import get_document_id
 
 
 class GNormPlus(BaseTagger):

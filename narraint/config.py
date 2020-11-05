@@ -76,6 +76,11 @@ DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
 #Drug Tagger
 DRUG_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "dr_index_cache.pkl")
 
+
+# Excipient Tagger
+EXCIPIENT_TAGGER_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'excipient_database_2020.csv')
+EXCIPIENT_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "excipient_index_cache.pkl")
+
 # MeSH SubHeadings for MEDLINE PubMed
 MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
 MESH2Doc_INDEX_PMC = os.path.join(TMP_DIR, "pmc_index.pkl")

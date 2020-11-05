@@ -13,6 +13,7 @@ DNAMUTATION = "DNAMutation"
 DOMAINMOTIF = "DomainMotif"
 GENUS = "Genus"
 STRAIN = "Strain"
+EXCIPIENT = "Excipient"
 
 ALL = (
     DOSAGE_FORM,
@@ -33,6 +34,8 @@ ALL = (
 # set of all tags which are supported by our taggers
 ENT_TYPES_SUPPORTED_BY_TAGGERS = (
     DOSAGE_FORM,
+    DRUG,
+    EXCIPIENT,
     CHEMICAL,
     GENE,
     SPECIES,
@@ -43,6 +46,7 @@ ENT_TYPES_SUPPORTED_BY_TAGGERS = (
 TAG_TYPE_MAPPING = dict(
     DF=DOSAGE_FORM,
     DR=DRUG,
+    E=EXCIPIENT,
     C=CHEMICAL,
     M=MUTATION,
     G=GENE,
@@ -68,5 +72,6 @@ ENTITY_TYPES = dict(
     DosageForm=DOSAGE_FORM,
     DomainMotif=DOMAINMOTIF,
     Genus=GENUS,
-    Strain=STRAIN
+    Strain=STRAIN,
+    Excipient=EXCIPIENT
 )

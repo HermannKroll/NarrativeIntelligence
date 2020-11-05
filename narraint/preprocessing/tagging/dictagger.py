@@ -1,17 +1,14 @@
 import os
 import pickle
 import re
-import codecs
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
-from narraint.entity import enttypes
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
-from narraint.pubtator.document import DocumentError, get_document_id
+from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
-from narraint.preprocessing.config import Config
 
 
 class DictIndex:
@@ -23,15 +20,45 @@ class DictIndex:
 
 def get_n_tuples(in_list, n):
     for i, element in enumerate(in_list):
-        if i+n <= len(in_list):
-            yield in_list[i:i+n]
+        if i + n <= len(in_list):
+            yield in_list[i:i + n]
         else:
             break
+
+
+def clean_vocab_word_by_split_rules(word):
+    if word and re.match(r"[^\w]", word[0]):
+        word = word[1:]
+    if word and re.match(r"[^\w]", word[-1]):
+        word = word[:-1]
+    return word
+
+
+def split_indexed_words(content):
+    words = content.split(' ')
+    ind_words = []
+    next_index_word = 0
+    for word in words:
+        ind = next_index_word
+        word_offset = 0
+        if word and re.match(r"[^\w]", word[0]):
+            word = word[1:]
+            ind += 1
+            word_offset += 1
+        if word and re.match(r"[^\w]", word[-1]):
+            word = word[:-1]
+            word_offset += 1
+        ind_words.append((word, ind))
+        # index = last index + length of last word incl. offset
+        next_index_word = next_index_word + len(word) + word_offset + 1
+    return ind_words
+
+
 
 class DictTagger(BaseTagger, metaclass=ABCMeta):
     PROGRESS_BATCH = 10000
 
-    def __init__(self, short_name, long_name, version, tag_type, index_cache, source_file,  *args, **kwargs):
+    def __init__(self, short_name, long_name, version, tag_type, index_cache, source_file, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag_type = (tag_type,)
         self.short_name, self.long_name, self.version = short_name, long_name, version
@@ -124,7 +151,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                     skipped_files.append(in_file)
                     self.logger.info(e)
                 print_progress_with_eta(f"{self.long_name} tagging", self.get_progress(), files_total, start_time,
-                                            print_every_k=self.PROGRESS_BATCH, logger=self.logger)
+                                        print_every_k=self.PROGRESS_BATCH, logger=self.logger)
             else:
                 self.logger.debug("Ignoring {}: Suffix .txt missing".format(in_file))
 
@@ -146,29 +173,26 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         content = title.strip() + " " + abstact.strip()
         content = content.lower()
 
-        #split into indexed single words
-        ind_words = self.split_indexed_words(content)
+        # split into indexed single words
+        ind_words = split_indexed_words(content)
 
         lines = []
         for spaces in range(self.config.dict_max_words):
-            for word_tuple in get_n_tuples(ind_words, spaces+1):
+            for word_tuple in get_n_tuples(ind_words, spaces + 1):
                 words, indexes = zip(*word_tuple)
                 term = " ".join(words)
                 start = indexes[0]
                 end = indexes[-1] + len(words[-1])
                 hits = self.get_term(term)
-                #print(f"Found {hits} for '{term}'")
+                # print(f"Found {hits} for '{term}'")
                 if hits:
                     for desc in hits:
-                        # if the descriptor is not from us (then it is a mesh descriptor)
-                        if not desc.startswith('FIDX') and not desc.startswith('DB'):
-                            desc_str = 'MESH:{}'.format(desc)
-                        else:
-                            desc_str = desc
-
+                        # remove white space between title and abstract
+                        if start > len(title):
+                            start = start - 1
                         line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
                             id=pmid, start=start, end=end, str=term, type=self.tag_type[0],
-                            desc=desc_str
+                            desc=desc
                         )
                         lines.append(line)
 
@@ -177,25 +201,9 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         with open(out_file, "w") as f:
             f.write(output)
 
-    def split_indexed_words(self, content):
-        words = content.split()
-        ind_words = [(words[0], 0)]
-        for n, word in enumerate(words):
-            if n == 0:
-                continue
-            ind = ind_words[-1][1] + len(ind_words[-1][0]) + 1
-            if word and re.match(r"[^\w]", word[0]):
-                word = word[1:]
-                ind += 1
-            if word and re.match(r"[^\w]", word[-1]):
-                word = word[:-2]
-            ind_words.append((word, ind))
-        return ind_words
-
     def get_term(self, term):
         hits = self.desc_by_term.get(term)
         return hits if hits else set()
-
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

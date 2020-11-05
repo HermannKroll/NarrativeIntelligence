@@ -96,9 +96,17 @@ class Config:
         return self.config["dict"]["max_words"]
 
     @property
+    def drug_check_products(self):
+        return self.config["drug"]["check_products"]
+
+    @property
     def drug_max_per_product(self):
         return self.config["drug"]["max_per_product"]
 
     @property
     def drug_min_name_length(self):
         return self.config["drug"]["min_name_length"]
+
+    @property
+    def ignore_excipient_terms(self):
+        return self.config["drug"]["ignore_excipient_terms"]

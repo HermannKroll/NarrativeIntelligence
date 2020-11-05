@@ -18,7 +18,9 @@
     "max_words": 5
   },
   "drug": {
+    "check_products" : 0,
     "max_per_product": 2,
-    "min_name_length": 3
+    "min_name_length": 3,
+    "ignore_excipient_terms": 1
   }
 }

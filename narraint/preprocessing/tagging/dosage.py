@@ -139,6 +139,8 @@ class DosageFormTagger(DictTagger):
 
         # create invers index
         for dosage_form, dosage_form_terms in dosage_forms_all:
+            if not dosage_form.startswith('FIDX'):
+                dosage_form = f'MESH:{dosage_form}'
             # add all terms for desc
             terms = []
             for t in dosage_form_terms:
