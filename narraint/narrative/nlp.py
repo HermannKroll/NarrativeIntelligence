@@ -145,11 +145,11 @@ def write_output(out_dir):
 
             if sent_id in SP_BY_SENT:
                 s_phrase = get_str_from_related_words(SP_BY_SENT[sent_id][0])
-                s_ent = next((t.mesh for t in doc.tags if t.text in s_phrase), None)
+                s_ent = next((t.ent_id for t in doc.tags if t.text in s_phrase), None)
 
             if sent_id in PO_BY_SENT:
                 o_phrase = get_str_from_related_words(PO_BY_SENT[sent_id][1])
-                o_ent = next((t.mesh for t in doc.tags if t.text in o_phrase), None)
+                o_ent = next((t.ent_id for t in doc.tags if t.text in o_phrase), None)
 
             if s_ent and s_ent != -1:
                 output_sp = s_phrase + ", " + SP_BY_SENT[sent_id][1].text

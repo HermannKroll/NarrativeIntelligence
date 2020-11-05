@@ -33,7 +33,7 @@ class QueryProcessor:
         """
         ent_found = []
         for ent_id, ent_type in self._query.bounds:
-            if ent_id in doc.entities_by_mesh and doc.entities_by_mesh[ent_id][0].type == ent_type:
+            if ent_id in doc.entities_by_ent_id and doc.entities_by_ent_id[ent_id][0].type == ent_type:
                 # mesh = doc.mesh_by_entity_name[ent_id.lower()]
                 # if mesh in doc.entities_by_mesh and doc.entities_by_mesh[mesh][0].type == ent_type:
                 ent_found.append(ent_id)
@@ -81,14 +81,14 @@ class QueryProcessor:
                 # No variable
                 # mesh_s = document.mesh_by_entity_name[fact.s.lower()]
                 # mesh_o = document.mesh_by_entity_name[fact.o.lower()]
-                sents_with_ent = document.sentences_by_mesh[fact.s].intersection(document.sentences_by_mesh[fact.o])
+                sents_with_ent = document.sentences_by_ent_id[fact.s].intersection(document.sentences_by_ent_id[fact.o])
                 sents = {s for s in sents_with_ent if
                          re.search(fact.p.lower(), document.sentence_by_id[s].text.lower())}
             elif len(fact.bounds) == 1:
                 # One variable
                 mesh = document.mesh_by_entity_name[fact.bounds[0][0].lower()]
                 v_name, v_type = fact.vars[0]
-                sents_with_ent = document.sentences_by_mesh[mesh]
+                sents_with_ent = document.sentences_by_ent_id[mesh]
                 sents_with_pred = {s for s in sents_with_ent if
                                    re.search(fact.p.lower(), document.sentence_by_id[s].text.lower())}
                 v_candidates = set()
@@ -138,7 +138,7 @@ class QueryProcessor:
             if len(event.vars) == 0:
                 # No variable
                 # mesh = document.mesh_by_entity_name[event.entity.lower()]
-                sents_with_ent = document.sentences_by_mesh[event.entity]
+                sents_with_ent = document.sentences_by_ent_id[event.entity]
                 sents = {s for s in sents_with_ent if
                          re.search(event.label.lower(), document.sentence_by_id[s].text.lower())}
             else:
