@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from narraint.entity.enttypes import ENTITY_TYPES
 from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
@@ -36,6 +38,8 @@ class TaggedDocument:
         :param pubtator_content: content of a pubtator file or a pubtator filename
         """
         self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
+        self.title = self.title.strip()
+        self.abstract = self.abstract.strip()
         self.id = int(self.id)
         self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
         self.entity_names = {t.text.lower() for t in self.tags}
@@ -43,38 +47,44 @@ class TaggedDocument:
             # Indexes
             # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
             self.sentence_by_id = {}  # Use to build mesh->sentence index
-            self.entities_by_ent_id = {}  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
-            self.sentences_by_ent_id = {}  # Mesh->Sentence index
-            self.entities_by_sentence = {}  # Use for _query processing
+            self.entities_by_ent_id = defaultdict(list)  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
+            self.sentences_by_ent_id = defaultdict(set)  # Mesh->Sentence index
+            self.entities_by_sentence = defaultdict(set) # Use for _query processing
             self._create_index(spacy_nlp)
 
     def _create_index(self, spacy_nlp):
         # self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
         #                            t.text.lower() not in self.mesh_by_entity_name}
-        content = f'{self.title}. {self.abstract}'
+        if self.title[-1] == '.':
+            content = f'{self.title} {self.abstract}'
+            offset = 1
+        else:
+            content = f'{self.title}. {self.abstract}'
+            offset = 2
         doc_nlp = spacy_nlp(content)
         for idx, sent in enumerate(doc_nlp.sents):
+            sent_str = str(sent)
+            start_pos = content.index(sent_str)
+            end_pos = content.index(sent_str) + len(sent_str)
+            if start_pos > len(self.title):
+                start_pos -= offset
+                end_pos -= offset
+
             self.sentence_by_id[idx] = Sentence(
                 idx,
-                sent.lower(),
-                content.index(sent),
-                content.index(sent) + len(sent),
+                sent_str,
+                start_pos,
+                end_pos
             )
 
         for tag in self.tags:
-            if tag.ent_id not in self.entities_by_ent_id:
-                self.entities_by_ent_id[tag.ent_id] = []
-            self.entities_by_ent_id[tag.ent_id] += [tag]
+            self.entities_by_ent_id[tag.ent_id].append(tag)
 
         for ent_id, entities in self.entities_by_ent_id.items():
-            if ent_id not in self.sentences_by_ent_id:
-                self.sentences_by_ent_id[ent_id] = set()
             for entity in entities:
                 for sid, sent in self.sentence_by_id.items():
                     if sent.start <= entity.start <= sent.end:
                         self.sentences_by_ent_id[ent_id].add(sid)
-                        if sid not in self.entities_by_sentence:
-                            self.entities_by_sentence[sid] = set()
                         self.entities_by_sentence[sid].add(entity)
 
     def __str__(self):
