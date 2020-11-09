@@ -20,6 +20,8 @@ class TaggedEntity:
     def __str__(self):
         return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.type, self.ent_id)
 
+    def __repr__(self):
+        return str(self)
 
 class Sentence:
     def __init__(self, sid, text, start, end) -> None:
@@ -29,6 +31,11 @@ class Sentence:
         self.sid = sid
         self.end = end
 
+    def __str__(self):
+        return f'<Sentence {self.sid}, {self.start}, {self.end}, {self.text}'
+
+    def __repr__(self):
+        return str(self)
 
 class TaggedDocument:
 
@@ -89,6 +96,9 @@ class TaggedDocument:
 
     def __str__(self):
         return "<Document {} {}>".format(self.id, self.title)
+
+    def __repr__(self):
+        return str(self)
 
 
 class TaggedDocumentCollection:
