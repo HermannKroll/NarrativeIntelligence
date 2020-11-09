@@ -6,18 +6,17 @@ from datetime import datetime
 import logging
 import shutil
 
+from spacy.lang.en import English
+
 from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.models import DocProcessedByIE
+from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.openie.main import run_openie, process_output
-from narraint.extraction.pathie.main import pathie_run_corenlp, filter_document_sentences_without_tags_enhanced, \
-    pathie_process_corenlp_output
+from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
-from narraint.progress import print_progress_with_eta
 from narraint.config import OPENIE_CONFIG, PATHIE_CONFIG
-from narraint.pubtator.document import TaggedDocument
-from narraint.pubtator.extract import read_pubtator_documents
 
 
 def retrieve_document_ids_to_process(idfile, document_collection, extraction_type):
@@ -39,39 +38,6 @@ def retrieve_document_ids_to_process(idfile, document_collection, extraction_typ
     logging.info('{} ids have already been processed and will be skipped'.format(len(document_ids)-len(missing_ids)))
     logging.info('{} remaining document ids to process...'.format(len(missing_ids)))
     return missing_ids
-
-
-def filter_document_sentences_without_tags(document_ids, input_file, output_dir, ie_filelist):
-    doc_size = len(document_ids)
-    logging.info('Filtering {} documents (keep only document sentences with tags)'.format(doc_size))
-    amount_skipped_files = 0
-    openie_files = []
-    start_time = datetime.now()
-    for idx, pubtator_content in enumerate(read_pubtator_documents(input_file)):
-        tagged_doc = TaggedDocument(pubtator_content)
-        doc_id = tagged_doc.id
-        filtered_content = []
-        for _, sent in tagged_doc.sentence_by_id.items():
-            filtered_content.append(sent.text)
-       # for sent, ent_ids in tagged_doc.entities_by_sentence.items():
-        #    if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
-         #       filtered_content.append(tagged_doc.sentence_by_id[sent].text)
-
-        # skip empty documents
-        if not filtered_content:
-            continue
-        # write filtered document
-        o_file = os.path.join(output_dir, '{}.txt'.format(doc_id))
-        openie_files.append(o_file)
-        with open(o_file, 'w') as f_out:
-            f_out.write('. '.join(filtered_content))
-
-        print_progress_with_eta('filtering documents...', idx, doc_size, start_time)
-
-    logging.info('{} files need to be processed. {} files skipped.'.format(len(openie_files), amount_skipped_files))
-    with open(ie_filelist, "w") as f:
-        f.write("\n".join(openie_files))
-    return len(ie_filelist)
 
 
 def mark_document_as_processed_by_ie(document_ids, document_collection, extraction_type):
@@ -133,9 +99,15 @@ def main():
     export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=args.collection, content=True)
     time_exported = datetime.now()
 
+    logging.info('Init spacy nlp...')
+    spacy_nlp = English()  # just the language with no model
+    sentencizer = spacy_nlp.create_pipe("sentencizer")
+    spacy_nlp.add_pipe(sentencizer)
+
+
     if args.extraction_type == PATHIE_EXTRACTION:
-        amount_files, doc2tags = filter_document_sentences_without_tags_enhanced(len(ids_to_process), args.input,
-                                                                                 ie_input_dir, ie_filelist_file)
+        amount_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), args.input,
+                                                                                 ie_input_dir, ie_filelist_file, spacy_nlp)
         time_filtered = datetime.now()
         corenlp_output_dir = os.path.join(working_dir, 'corenlp_output')
         if not os.path.exists(corenlp_output_dir):
@@ -148,8 +120,8 @@ def main():
         logging.info((" done in {}".format(datetime.now() - start)))
     else:
         # now filter these documents
-        amount_ie_docs = filter_document_sentences_without_tags(ids_to_process, document_export_file, ie_input_dir,
-                                                                ie_filelist_file)
+        amount_ie_docs = filter_and_write_documents_to_tempdir(len(ids_to_process), args.input,
+                                                                                 ie_input_dir, ie_filelist_file, spacy_nlp)
         time_filtered = datetime.now()
         if amount_ie_docs == 0:
             logging.info('No files to process for IE - stopping')

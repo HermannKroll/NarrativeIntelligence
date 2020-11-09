@@ -9,8 +9,11 @@ from datetime import datetime
 from time import sleep
 import logging
 import networkx as nx
+from spacy.lang.en import English
 
 from narraint.config import PATHIE_CONFIG
+from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
+
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
 from narraint.pubtator.document import TaggedDocument
@@ -20,64 +23,6 @@ NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
 IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
                       "side effect", "adverse", "complications",
                       "drug toxicity", "drug injury"]
-
-
-def filter_document_sentences_without_tags_enhanced(doc_len: int, input_file: str, output_dir: str,
-                                                    out_filelist_file: str):
-    """
-    Filtering a PubTator file as a preperation for the extraction
-    Keeps only sentences with at least two entities
-    :param doc_len: the len of included documents in the input file
-    :param input_file: a PubTator input file / directory of PubTator file
-    :param output_dir: output directory where the documents are extracted
-    :param out_filelist_file: output file where a filelist of all extracted files is stored
-    :return: len of extracted documents, a dict mapping document ids to tags (ent_id, ' ' + lower(ent_str), ent_type)
-    """
-    logging.info('Filtering {} documents (keep only document sentences with tags)'.format(doc_len))
-    amount_skipped_files = 0
-    openie_files = []
-    doc2tags = dict()
-    start_time = datetime.now()
-    for idx, pubtator_content in enumerate(read_pubtator_documents(input_file)):
-        tagged_doc = TaggedDocument(pubtator_content)
-        doc_id = tagged_doc.id
-        tags = tagged_doc.tags
-        tag_terms = set()
-        tag_terms_lower = set()
-        for t in tags:
-            tag_terms.add((t.mesh, '{}'.format(t.text.lower()), t.type))
-            tag_terms_lower.add(' {}'.format(t.text.lower()))
-        doc2tags[doc_id] = tag_terms
-
-        filtered_content = set()
-        for sent in tagged_doc.sentence_by_id.values():
-            sent_lower = ' {}'.format(sent.text.lower())
-            hits = 0
-            for t_str in tag_terms_lower:
-                hits += sent_lower.count(t_str)
-                if hits >= 2:
-                    break
-            if hits >= 2:
-                filtered_content.add(sent.text)
-
-        for sent, ent_ids in tagged_doc.entities_by_sentence.items():
-            if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
-                filtered_content.add(tagged_doc.sentence_by_id[sent].text)
-
-        # skip empty documents
-        if not filtered_content:
-            continue
-        # write filtered document
-        o_file = os.path.join(output_dir, '{}.txt'.format(doc_id))
-        openie_files.append(o_file)
-        with open(o_file, 'w') as f_out:
-            f_out.write('. '.join(filtered_content))
-        print_progress_with_eta('filtering documents...', idx, doc_len, start_time, print_every_k=10)
-
-    logging.info('{} files need to be processed. {} files skipped.'.format(len(openie_files), amount_skipped_files))
-    with open(out_filelist_file, "w") as f:
-        f.write("\n".join(openie_files))
-    return len(openie_files), doc2tags
 
 
 def get_progress(out_corenlp_dir: str) -> int:
@@ -111,7 +56,8 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time, print_every_k=1)
+        print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
+                                print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_corenlp_dir), num_files, datetime.now() - start,
     ))
@@ -165,20 +111,20 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
     sentence = ' '.join(sentence_parts).strip()
     sentence_lower = sentence.lower()
     entities_in_sentence = []
-    for tag_id, tag_str, tag_type in doc_tags:
-        tag_stripped = tag_str.strip()
-        if tag_str in sentence_lower:
+    for tag_id, tag_str_lower, tag_type in doc_tags:
+        tag_stripped = tag_str_lower.strip()
+        if tag_str_lower in sentence_lower:
             # find the correct indexes
             if ' ' in tag_stripped:
                 ent_token_ids = []
                 for t_part in tag_stripped.split(' '):
                     for tok, idx in tok2idx.items():
-                        if tok.startswith(t_part):
+                        if tok == t_part:
                             ent_token_ids.append(idx)
                 entities_in_sentence.append((tag_id, tag_stripped, tag_type, ent_token_ids))
             else:
                 for tok, idx in tok2idx.items():
-                    if tok.startswith(tag_stripped):
+                    if tok == tag_stripped:
                         entities_in_sentence.append((tag_id, tag_stripped, tag_type, [idx]))
 
     dep_graph = nx.Graph()
@@ -224,12 +170,12 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
     return extracted_tuples
 
 
-def process_json_file(doc_id, input_file, doc2tags):
+def process_json_file(doc_id, input_file, doc_tags):
     """
     Extracts facts out of a JSON file
     :param doc_id: document id
     :param input_file: JSON input file as a filename
-    :param doc2tags: dict mapping doc ids to tags
+    :param doc_tags: set of tags in the corresponding document
     :return: a list of extracted tuples
     """
     extracted_tuples = []
@@ -242,7 +188,7 @@ def process_json_file(doc_id, input_file, doc2tags):
                 json_fixed_lines.append(line)
         json_data = json.loads(''.join(json_fixed_lines))
         for sent in json_data["sentences"]:
-            extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc2tags))
+            extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
     return extracted_tuples
 
 
@@ -302,10 +248,16 @@ def main():
     if not os.path.isdir(out_corenlp_dir):
         os.mkdir(out_corenlp_dir)
     logging.info('Working in: {}'.format(temp_dir))
+
+    logging.info('Init spacy nlp...')
+    spacy_nlp = English()  # just the language with no model
+    sentencizer = spacy_nlp.create_pipe("sentencizer")
+    spacy_nlp.add_pipe(sentencizer)
+
     # Prepare files
     doc_count = count_documents(args.input)
     logging.info('{} documents counted'.format(doc_count))
-    amount_files, doc2tags = filter_document_sentences_without_tags_enhanced(doc_count, args.input, temp_in_dir, filelist_fn)
+    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn, spacy_nlp)
     if amount_files == 0:
         print('no files to process - stopping')
     else:
