@@ -97,7 +97,7 @@ class Tag(Base):
     document_collection = Column(String, nullable=False, index=True)
     
     def __eq__(self, other):
-        return self.ent_type == other.type and self.start == other.start and self.end == other.end and \
+        return self.ent_type == other.ent_type and self.start == other.start and self.end == other.end and \
                self.ent_id == other.ent_id and self.ent_str == other.ent_str and \
                self.document_id == other.document_id and self.document_collection == other.document_collection
 

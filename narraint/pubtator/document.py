@@ -5,6 +5,7 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 
 class TaggedEntity:
+
     def __init__(self, tag_tuple):
         self.document = int(tag_tuple[0])
         self.start = int(tag_tuple[1])
@@ -14,14 +15,15 @@ class TaggedEntity:
         if tag_tuple[4] not in ENTITY_TYPES:
             raise KeyError('entity type not supported yet: {}'.format(tag_tuple))
 
-        self.type = ENTITY_TYPES[tag_tuple[4]]
+        self.ent_type = ENTITY_TYPES[tag_tuple[4]]
         self.ent_id = tag_tuple[5]
 
     def __str__(self):
-        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.type, self.ent_id)
+        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.ent_type, self.ent_id)
 
     def __repr__(self):
         return str(self)
+
 
 class Sentence:
     def __init__(self, sid, text, start, end) -> None:
@@ -36,6 +38,7 @@ class Sentence:
 
     def __repr__(self):
         return str(self)
+
 
 class TaggedDocument:
 
@@ -56,7 +59,7 @@ class TaggedDocument:
             self.sentence_by_id = {}  # Use to build mesh->sentence index
             self.entities_by_ent_id = defaultdict(list)  # Use Mesh->TaggedEntity index to build Mesh->Sentence index
             self.sentences_by_ent_id = defaultdict(set)  # Mesh->Sentence index
-            self.entities_by_sentence = defaultdict(set) # Use for _query processing
+            self.entities_by_sentence = defaultdict(set)  # Use for _query processing
             self._create_index(spacy_nlp)
 
     def _create_index(self, spacy_nlp):
@@ -127,4 +130,3 @@ class TaggedDocumentCollection:
         if doc.id in self.docs_by_id:
             raise Exception('ID already included in collection')
         self.docs_by_id[doc.id] = doc
-
