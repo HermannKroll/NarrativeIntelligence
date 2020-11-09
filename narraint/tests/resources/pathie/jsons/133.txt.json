@@ -1,0 +1,4862 @@
+{
+  "docId": "133.txt",
+  "sentences": [
+    {
+      "index": 0,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "determine"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 2,
+          "dependentGloss": "purpose"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 4,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 5,
+          "dependentGloss": "experimental"
+        },
+        {
+          "dep": "nmod",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 6,
+          "dependentGloss": "study"
+        },
+        {
+          "dep": "aux",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 7,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "mark",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 8,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 10,
+          "dependentGloss": "whether"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "whether",
+          "dependent": 11,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "acl",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 12,
+          "dependentGloss": "acting"
+        },
+        {
+          "dep": "mark",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 13,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 14,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "membrane",
+          "dependent": 15,
+          "dependentGloss": "lysosome"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 16,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 17,
+          "dependentGloss": "stabilizer"
+        },
+        {
+          "dep": "aux",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 18,
+          "dependentGloss": "could"
+        },
+        {
+          "dep": "advcl",
+          "governor": 12,
+          "governorGloss": "acting",
+          "dependent": 19,
+          "dependentGloss": "prevent"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "retard",
+          "dependent": 20,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "conj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 21,
+          "dependentGloss": "retard"
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 22,
+          "dependentGloss": "autolysis"
+        },
+        {
+          "dep": "case",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 24,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod",
+          "governor": 22,
+          "governorGloss": "autolysis",
+          "dependent": 25,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "storage",
+          "dependent": 26,
+          "dependentGloss": "under"
+        },
+        {
+          "dep": "obl",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 27,
+          "dependentGloss": "storage"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 28,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "mark",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 30,
+          "dependentGloss": "if"
+        },
+        {
+          "dep": "conj",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 31,
+          "dependentGloss": "so"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 32,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "dep",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 33,
+          "dependentGloss": "what"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 34,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 35,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "advmod",
+          "governor": 37,
+          "governorGloss": "efficacious",
+          "dependent": 36,
+          "dependentGloss": "most"
+        },
+        {
+          "dep": "amod",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 37,
+          "dependentGloss": "efficacious"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 38,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 39,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "determine"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 2,
+          "dependentGloss": "purpose"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 4,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 5,
+          "dependentGloss": "experimental"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 6,
+          "dependentGloss": "study"
+        },
+        {
+          "dep": "aux",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 7,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "mark",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 8,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 10,
+          "dependentGloss": "whether"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "whether",
+          "dependent": 11,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "acl",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 12,
+          "dependentGloss": "acting"
+        },
+        {
+          "dep": "mark",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 13,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 14,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "membrane",
+          "dependent": 15,
+          "dependentGloss": "lysosome"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 16,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 17,
+          "dependentGloss": "stabilizer"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 21,
+          "governorGloss": "retard",
+          "dependent": 17,
+          "dependentGloss": "stabilizer"
+        },
+        {
+          "dep": "aux",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 18,
+          "dependentGloss": "could"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 12,
+          "governorGloss": "acting",
+          "dependent": 19,
+          "dependentGloss": "prevent"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "retard",
+          "dependent": 20,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 12,
+          "governorGloss": "acting",
+          "dependent": 21,
+          "dependentGloss": "retard"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 21,
+          "dependentGloss": "retard"
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 22,
+          "dependentGloss": "autolysis"
+        },
+        {
+          "dep": "case",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 24,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 22,
+          "governorGloss": "autolysis",
+          "dependent": 25,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "storage",
+          "dependent": 26,
+          "dependentGloss": "under"
+        },
+        {
+          "dep": "obl:under",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 27,
+          "dependentGloss": "storage"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 28,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "mark",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 30,
+          "dependentGloss": "if"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "whether",
+          "dependent": 31,
+          "dependentGloss": "so"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 31,
+          "dependentGloss": "so"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 32,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "dep",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 33,
+          "dependentGloss": "what"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 34,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 35,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "advmod",
+          "governor": 37,
+          "governorGloss": "efficacious",
+          "dependent": 36,
+          "dependentGloss": "most"
+        },
+        {
+          "dep": "amod",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 37,
+          "dependentGloss": "efficacious"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 38,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 39,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "determine"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 2,
+          "dependentGloss": "purpose"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 4,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 6,
+          "governorGloss": "study",
+          "dependent": 5,
+          "dependentGloss": "experimental"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "purpose",
+          "dependent": 6,
+          "dependentGloss": "study"
+        },
+        {
+          "dep": "aux",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 7,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "mark",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 8,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 10,
+          "dependentGloss": "whether"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "whether",
+          "dependent": 11,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "acl",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 12,
+          "dependentGloss": "acting"
+        },
+        {
+          "dep": "mark",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 13,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 14,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "membrane",
+          "dependent": 15,
+          "dependentGloss": "lysosome"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "stabilizer",
+          "dependent": 16,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 17,
+          "dependentGloss": "stabilizer"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 21,
+          "governorGloss": "retard",
+          "dependent": 17,
+          "dependentGloss": "stabilizer"
+        },
+        {
+          "dep": "aux",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 18,
+          "dependentGloss": "could"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 12,
+          "governorGloss": "acting",
+          "dependent": 19,
+          "dependentGloss": "prevent"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "retard",
+          "dependent": 20,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 12,
+          "governorGloss": "acting",
+          "dependent": 21,
+          "dependentGloss": "retard"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 21,
+          "dependentGloss": "retard"
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 22,
+          "dependentGloss": "autolysis"
+        },
+        {
+          "dep": "case",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 25,
+          "governorGloss": "corneas",
+          "dependent": 24,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 22,
+          "governorGloss": "autolysis",
+          "dependent": 25,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "storage",
+          "dependent": 26,
+          "dependentGloss": "under"
+        },
+        {
+          "dep": "obl:under",
+          "governor": 19,
+          "governorGloss": "prevent",
+          "dependent": 27,
+          "dependentGloss": "storage"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 28,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "mark",
+          "governor": 31,
+          "governorGloss": "so",
+          "dependent": 30,
+          "dependentGloss": "if"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "whether",
+          "dependent": 31,
+          "dependentGloss": "so"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 31,
+          "dependentGloss": "so"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 32,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "dep",
+          "governor": 11,
+          "governorGloss": "hydrocortisone",
+          "dependent": 33,
+          "dependentGloss": "what"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 34,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 35,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "advmod",
+          "governor": 37,
+          "governorGloss": "efficacious",
+          "dependent": 36,
+          "dependentGloss": "most"
+        },
+        {
+          "dep": "amod",
+          "governor": 38,
+          "governorGloss": "concentration",
+          "dependent": 37,
+          "dependentGloss": "efficacious"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 33,
+          "governorGloss": "what",
+          "dependent": 38,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "determine",
+          "dependent": 39,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 0,
+          "characterOffsetEnd": 3,
+          "pos": "DT",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "purpose",
+          "originalText": "purpose",
+          "lemma": "purpose",
+          "characterOffsetBegin": 4,
+          "characterOffsetEnd": 11,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 12,
+          "characterOffsetEnd": 14,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "this",
+          "originalText": "this",
+          "lemma": "this",
+          "characterOffsetBegin": 15,
+          "characterOffsetEnd": 19,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "experimental",
+          "originalText": "experimental",
+          "lemma": "experimental",
+          "characterOffsetBegin": 20,
+          "characterOffsetEnd": 32,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "study",
+          "originalText": "study",
+          "lemma": "study",
+          "characterOffsetBegin": 33,
+          "characterOffsetEnd": 38,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 39,
+          "characterOffsetEnd": 42,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 43,
+          "characterOffsetEnd": 45,
+          "pos": "TO",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "determine",
+          "originalText": "determine",
+          "lemma": "determine",
+          "characterOffsetBegin": 46,
+          "characterOffsetEnd": 55,
+          "pos": "VB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "whether",
+          "originalText": "whether",
+          "lemma": "whether",
+          "characterOffsetBegin": 56,
+          "characterOffsetEnd": 63,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "hydrocortisone",
+          "originalText": "hydrocortisone",
+          "lemma": "hydrocortisone",
+          "characterOffsetBegin": 64,
+          "characterOffsetEnd": 78,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "acting",
+          "originalText": "acting",
+          "lemma": "act",
+          "characterOffsetBegin": 79,
+          "characterOffsetEnd": 85,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "as",
+          "originalText": "as",
+          "lemma": "as",
+          "characterOffsetBegin": 86,
+          "characterOffsetEnd": 88,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 89,
+          "characterOffsetEnd": 90,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "lysosome",
+          "originalText": "lysosome",
+          "lemma": "lysosome",
+          "characterOffsetBegin": 91,
+          "characterOffsetEnd": 99,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "membrane",
+          "originalText": "membrane",
+          "lemma": "membrane",
+          "characterOffsetBegin": 100,
+          "characterOffsetEnd": 108,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "stabilizer",
+          "originalText": "stabilizer",
+          "lemma": "stabilizer",
+          "characterOffsetBegin": 109,
+          "characterOffsetEnd": 119,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "could",
+          "originalText": "could",
+          "lemma": "could",
+          "characterOffsetBegin": 120,
+          "characterOffsetEnd": 125,
+          "pos": "MD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "prevent",
+          "originalText": "prevent",
+          "lemma": "prevent",
+          "characterOffsetBegin": 126,
+          "characterOffsetEnd": 133,
+          "pos": "VB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "or",
+          "originalText": "or",
+          "lemma": "or",
+          "characterOffsetBegin": 134,
+          "characterOffsetEnd": 136,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "retard",
+          "originalText": "retard",
+          "lemma": "retard",
+          "characterOffsetBegin": 137,
+          "characterOffsetEnd": 143,
+          "pos": "VB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "autolysis",
+          "originalText": "autolysis",
+          "lemma": "autolysis",
+          "characterOffsetBegin": 144,
+          "characterOffsetEnd": 153,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 154,
+          "characterOffsetEnd": 156,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 157,
+          "characterOffsetEnd": 160,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "corneas",
+          "originalText": "corneas",
+          "lemma": "cornea",
+          "characterOffsetBegin": 161,
+          "characterOffsetEnd": 168,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "under",
+          "originalText": "under",
+          "lemma": "under",
+          "characterOffsetBegin": 169,
+          "characterOffsetEnd": 174,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "storage",
+          "originalText": "storage",
+          "lemma": "storage",
+          "characterOffsetBegin": 175,
+          "characterOffsetEnd": 182,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 28,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 182,
+          "characterOffsetEnd": 183,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 184,
+          "characterOffsetEnd": 187,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "if",
+          "originalText": "if",
+          "lemma": "if",
+          "characterOffsetBegin": 188,
+          "characterOffsetEnd": 190,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "so",
+          "originalText": "so",
+          "lemma": "so",
+          "characterOffsetBegin": 191,
+          "characterOffsetEnd": 193,
+          "pos": "RB",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 32,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 193,
+          "characterOffsetEnd": 194,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "what",
+          "originalText": "what",
+          "lemma": "what",
+          "characterOffsetBegin": 195,
+          "characterOffsetEnd": 199,
+          "pos": "WP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 200,
+          "characterOffsetEnd": 203,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 204,
+          "characterOffsetEnd": 207,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 36,
+          "word": "most",
+          "originalText": "most",
+          "lemma": "most",
+          "characterOffsetBegin": 208,
+          "characterOffsetEnd": 212,
+          "pos": "RBS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 37,
+          "word": "efficacious",
+          "originalText": "efficacious",
+          "lemma": "efficacious",
+          "characterOffsetBegin": 213,
+          "characterOffsetEnd": 224,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 38,
+          "word": "concentration",
+          "originalText": "concentration",
+          "lemma": "concentration",
+          "characterOffsetBegin": 225,
+          "characterOffsetEnd": 238,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 39,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 238,
+          "characterOffsetEnd": 239,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 7,
+          "dependentGloss": "placed"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 1,
+          "dependentGloss": "Different"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 2,
+          "dependentGloss": "groups"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 4,
+          "dependentGloss": "rabbit"
+        },
+        {
+          "dep": "nmod",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 5,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 6,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "saline",
+          "dependent": 8,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 9,
+          "dependentGloss": "saline"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "controls",
+          "dependent": 10,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 11,
+          "dependentGloss": "controls"
+        },
+        {
+          "dep": "cc",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 12,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "amod",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "varying"
+        },
+        {
+          "dep": "conj",
+          "governor": 11,
+          "governorGloss": "controls",
+          "dependent": 15,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "hydrocortisone",
+          "dependent": 16,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 17,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 18,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 19,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 20,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 21,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 22,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 23,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 24,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 26,
+          "governorGloss": "10",
+          "dependent": 25,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nmod",
+          "governor": 24,
+          "governorGloss": "M",
+          "dependent": 26,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 27,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 28,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 29,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 30,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "obj",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 31,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 32,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nmod",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 33,
+          "dependentGloss": "pH"
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 34,
+          "dependentGloss": "7.4"
+        },
+        {
+          "dep": "punct",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 35,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "case",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 36,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 38,
+          "governorGloss": "degrees",
+          "dependent": 37,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 38,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 39,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "cc",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 40,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "nummod",
+          "governor": 42,
+          "governorGloss": "degrees",
+          "dependent": 41,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 42,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 43,
+          "dependentGloss": "C."
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 44,
+          "dependentGloss": "Acid"
+        },
+        {
+          "dep": "conj",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 45,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 46,
+          "dependentGloss": "released"
+        },
+        {
+          "dep": "mark",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 47,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "nummod",
+          "governor": 49,
+          "governorGloss": "hours",
+          "dependent": 48,
+          "dependentGloss": "six"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 49,
+          "dependentGloss": "hours"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 50,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl",
+          "governor": 46,
+          "governorGloss": "released",
+          "dependent": 51,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "advmod",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 52,
+          "dependentGloss": "biochemically"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 53,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 7,
+          "dependentGloss": "placed"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 1,
+          "dependentGloss": "Different"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 2,
+          "dependentGloss": "groups"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 4,
+          "dependentGloss": "rabbit"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 5,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 6,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "saline",
+          "dependent": 8,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 9,
+          "dependentGloss": "saline"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "controls",
+          "dependent": 10,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "obl:as",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 11,
+          "dependentGloss": "controls"
+        },
+        {
+          "dep": "cc",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 12,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "amod",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "varying"
+        },
+        {
+          "dep": "obl:as",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 15,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 11,
+          "governorGloss": "controls",
+          "dependent": 15,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "hydrocortisone",
+          "dependent": 16,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 17,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 18,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 19,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 20,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 21,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 22,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 23,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 24,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 26,
+          "governorGloss": "10",
+          "dependent": 25,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nmod:to",
+          "governor": 24,
+          "governorGloss": "M",
+          "dependent": 26,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 27,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 28,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 29,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 30,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "obj",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 31,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 32,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 33,
+          "dependentGloss": "pH"
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 34,
+          "dependentGloss": "7.4"
+        },
+        {
+          "dep": "punct",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 35,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "case",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 36,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 38,
+          "governorGloss": "degrees",
+          "dependent": 37,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 38,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 39,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "cc",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 40,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "nummod",
+          "governor": 42,
+          "governorGloss": "degrees",
+          "dependent": 41,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 42,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 43,
+          "dependentGloss": "C."
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 44,
+          "dependentGloss": "Acid"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 45,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 45,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 46,
+          "dependentGloss": "released"
+        },
+        {
+          "dep": "mark",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 47,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "nummod",
+          "governor": 49,
+          "governorGloss": "hours",
+          "dependent": 48,
+          "dependentGloss": "six"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 49,
+          "dependentGloss": "hours"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 50,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl:after",
+          "governor": 46,
+          "governorGloss": "released",
+          "dependent": 51,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "advmod",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 52,
+          "dependentGloss": "biochemically"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 53,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 7,
+          "dependentGloss": "placed"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 1,
+          "dependentGloss": "Different"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 2,
+          "dependentGloss": "groups"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 2,
+          "dependentGloss": "groups"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "corneas",
+          "dependent": 4,
+          "dependentGloss": "rabbit"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "groups",
+          "dependent": 5,
+          "dependentGloss": "corneas"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 6,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 7,
+          "dependentGloss": "placed"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "saline",
+          "dependent": 8,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 9,
+          "dependentGloss": "saline"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "controls",
+          "dependent": 10,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "obl:as",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 11,
+          "dependentGloss": "controls"
+        },
+        {
+          "dep": "cc",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 12,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "amod",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "varying"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 15,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "hydrocortisone",
+          "dependent": 16,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 15,
+          "governorGloss": "concentrations",
+          "dependent": 17,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 18,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 19,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 20,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 21,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 22,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 23,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 24,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 26,
+          "governorGloss": "10",
+          "dependent": 25,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nmod:to",
+          "governor": 24,
+          "governorGloss": "M",
+          "dependent": 26,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 27,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 28,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 29,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "punct",
+          "governor": 22,
+          "governorGloss": "10",
+          "dependent": 30,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "obj",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 31,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 32,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 33,
+          "dependentGloss": "pH"
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "pH",
+          "dependent": 34,
+          "dependentGloss": "7.4"
+        },
+        {
+          "dep": "punct",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 35,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "case",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 36,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 38,
+          "governorGloss": "degrees",
+          "dependent": 37,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 38,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 39,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "cc",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 40,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "nummod",
+          "governor": 42,
+          "governorGloss": "degrees",
+          "dependent": 41,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 42,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 43,
+          "dependentGloss": "C."
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "phosphatase",
+          "dependent": 44,
+          "dependentGloss": "Acid"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 45,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 39,
+          "governorGloss": "C",
+          "dependent": 45,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "M",
+          "dependent": 46,
+          "dependentGloss": "released"
+        },
+        {
+          "dep": "mark",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 47,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "nummod",
+          "governor": 49,
+          "governorGloss": "hours",
+          "dependent": 48,
+          "dependentGloss": "six"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 49,
+          "dependentGloss": "hours"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 50,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl:after",
+          "governor": 46,
+          "governorGloss": "released",
+          "dependent": 51,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "advmod",
+          "governor": 51,
+          "governorGloss": "measured",
+          "dependent": 52,
+          "dependentGloss": "biochemically"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "placed",
+          "dependent": 53,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Different",
+          "originalText": "Different",
+          "lemma": "different",
+          "characterOffsetBegin": 240,
+          "characterOffsetEnd": 249,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "groups",
+          "originalText": "groups",
+          "lemma": "group",
+          "characterOffsetBegin": 250,
+          "characterOffsetEnd": 256,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 257,
+          "characterOffsetEnd": 259,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "rabbit",
+          "originalText": "rabbit",
+          "lemma": "rabbit",
+          "characterOffsetBegin": 260,
+          "characterOffsetEnd": 266,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "corneas",
+          "originalText": "corneas",
+          "lemma": "cornea",
+          "characterOffsetBegin": 267,
+          "characterOffsetEnd": 274,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "were",
+          "originalText": "were",
+          "lemma": "be",
+          "characterOffsetBegin": 275,
+          "characterOffsetEnd": 279,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "placed",
+          "originalText": "placed",
+          "lemma": "place",
+          "characterOffsetBegin": 280,
+          "characterOffsetEnd": 286,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 287,
+          "characterOffsetEnd": 289,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "saline",
+          "originalText": "saline",
+          "lemma": "saline",
+          "characterOffsetBegin": 290,
+          "characterOffsetEnd": 296,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "as",
+          "originalText": "as",
+          "lemma": "as",
+          "characterOffsetBegin": 297,
+          "characterOffsetEnd": 299,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "controls",
+          "originalText": "controls",
+          "lemma": "control",
+          "characterOffsetBegin": 300,
+          "characterOffsetEnd": 308,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "or",
+          "originalText": "or",
+          "lemma": "or",
+          "characterOffsetBegin": 309,
+          "characterOffsetEnd": 311,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 312,
+          "characterOffsetEnd": 314,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "varying",
+          "originalText": "varying",
+          "lemma": "vary",
+          "characterOffsetBegin": 315,
+          "characterOffsetEnd": 322,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "concentrations",
+          "originalText": "concentrations",
+          "lemma": "concentration",
+          "characterOffsetBegin": 323,
+          "characterOffsetEnd": 337,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 338,
+          "characterOffsetEnd": 340,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "hydrocortisone",
+          "originalText": "hydrocortisone",
+          "lemma": "hydrocortisone",
+          "characterOffsetBegin": 341,
+          "characterOffsetEnd": 355,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 356,
+          "characterOffsetEnd": 357,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 19,
+          "word": "10",
+          "originalText": "10",
+          "lemma": "10",
+          "characterOffsetBegin": 357,
+          "characterOffsetEnd": 359,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 20,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 359,
+          "characterOffsetEnd": 360,
+          "pos": "-LRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 21,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 360,
+          "characterOffsetEnd": 361,
+          "pos": "SYM",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 22,
+          "word": "10",
+          "originalText": "10",
+          "lemma": "10",
+          "characterOffsetBegin": 361,
+          "characterOffsetEnd": 363,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 23,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 363,
+          "characterOffsetEnd": 364,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "M",
+          "originalText": "M",
+          "lemma": "m",
+          "characterOffsetBegin": 365,
+          "characterOffsetEnd": 366,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 367,
+          "characterOffsetEnd": 369,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "10",
+          "originalText": "10",
+          "lemma": "10",
+          "characterOffsetBegin": 370,
+          "characterOffsetEnd": 372,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 27,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 372,
+          "characterOffsetEnd": 373,
+          "pos": "-LRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 28,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 373,
+          "characterOffsetEnd": 374,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 29,
+          "word": "4",
+          "originalText": "4",
+          "lemma": "4",
+          "characterOffsetBegin": 374,
+          "characterOffsetEnd": 375,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 30,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 375,
+          "characterOffsetEnd": 376,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "M",
+          "originalText": "M",
+          "lemma": "m",
+          "characterOffsetBegin": 377,
+          "characterOffsetEnd": 378,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "at",
+          "originalText": "at",
+          "lemma": "at",
+          "characterOffsetBegin": 379,
+          "characterOffsetEnd": 381,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "pH",
+          "originalText": "pH",
+          "lemma": "ph",
+          "characterOffsetBegin": 382,
+          "characterOffsetEnd": 384,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "7.4",
+          "originalText": "7.4",
+          "lemma": "7.4",
+          "characterOffsetBegin": 385,
+          "characterOffsetEnd": 388,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 35,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 388,
+          "characterOffsetEnd": 389,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 36,
+          "word": "at",
+          "originalText": "at",
+          "lemma": "at",
+          "characterOffsetBegin": 390,
+          "characterOffsetEnd": 392,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 37,
+          "word": "37",
+          "originalText": "37",
+          "lemma": "37",
+          "characterOffsetBegin": 393,
+          "characterOffsetEnd": 395,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 38,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 396,
+          "characterOffsetEnd": 403,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 39,
+          "word": "C",
+          "originalText": "C",
+          "lemma": "c",
+          "characterOffsetBegin": 404,
+          "characterOffsetEnd": 405,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 40,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 406,
+          "characterOffsetEnd": 409,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 41,
+          "word": "4",
+          "originalText": "4",
+          "lemma": "4",
+          "characterOffsetBegin": 410,
+          "characterOffsetEnd": 411,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 42,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 412,
+          "characterOffsetEnd": 419,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 43,
+          "word": "C.",
+          "originalText": "C.",
+          "lemma": "C.",
+          "characterOffsetBegin": 420,
+          "characterOffsetEnd": 422,
+          "pos": "NNP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 44,
+          "word": "Acid",
+          "originalText": "Acid",
+          "lemma": "Acid",
+          "characterOffsetBegin": 423,
+          "characterOffsetEnd": 427,
+          "pos": "NNP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 45,
+          "word": "phosphatase",
+          "originalText": "phosphatase",
+          "lemma": "phosphatase",
+          "characterOffsetBegin": 428,
+          "characterOffsetEnd": 439,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 46,
+          "word": "released",
+          "originalText": "released",
+          "lemma": "release",
+          "characterOffsetBegin": 440,
+          "characterOffsetEnd": 448,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 47,
+          "word": "after",
+          "originalText": "after",
+          "lemma": "after",
+          "characterOffsetBegin": 449,
+          "characterOffsetEnd": 454,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 48,
+          "word": "six",
+          "originalText": "six",
+          "lemma": "six",
+          "characterOffsetBegin": 455,
+          "characterOffsetEnd": 458,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 49,
+          "word": "hours",
+          "originalText": "hours",
+          "lemma": "hour",
+          "characterOffsetBegin": 459,
+          "characterOffsetEnd": 464,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 50,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 465,
+          "characterOffsetEnd": 468,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 51,
+          "word": "measured",
+          "originalText": "measured",
+          "lemma": "measure",
+          "characterOffsetBegin": 469,
+          "characterOffsetEnd": 477,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 52,
+          "word": "biochemically",
+          "originalText": "biochemically",
+          "lemma": "biochemically",
+          "characterOffsetBegin": 478,
+          "characterOffsetEnd": 491,
+          "pos": "RB",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 53,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 491,
+          "characterOffsetEnd": 492,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "showed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 1,
+          "dependentGloss": "Results"
+        },
+        {
+          "dep": "det",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "amod",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 4,
+          "dependentGloss": "significant"
+        },
+        {
+          "dep": "obj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 5,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 8,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 9,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 10,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 12,
+          "governorGloss": "degrees",
+          "dependent": 11,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 12,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 13,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 14,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 15,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 16,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "degrees",
+          "dependent": 17,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 18,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 19,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "showed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 1,
+          "dependentGloss": "Results"
+        },
+        {
+          "dep": "det",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "amod",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 4,
+          "dependentGloss": "significant"
+        },
+        {
+          "dep": "obj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 5,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 8,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 9,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 10,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 12,
+          "governorGloss": "degrees",
+          "dependent": 11,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 12,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl:at",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 13,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 14,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 15,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 16,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "degrees",
+          "dependent": 17,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 18,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl:as",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 19,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "showed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 1,
+          "dependentGloss": "Results"
+        },
+        {
+          "dep": "det",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "amod",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 4,
+          "dependentGloss": "significant"
+        },
+        {
+          "dep": "obj",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 5,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "membrane",
+          "dependent": 8,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 5,
+          "governorGloss": "stabilization",
+          "dependent": 9,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 10,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 12,
+          "governorGloss": "degrees",
+          "dependent": 11,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "C",
+          "dependent": 12,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl:at",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 13,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 14,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 15,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "fixed",
+          "governor": 15,
+          "governorGloss": "compared",
+          "dependent": 16,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "degrees",
+          "dependent": 17,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "C",
+          "dependent": 18,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "obl:compared_to",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 19,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "showed",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Results",
+          "originalText": "Results",
+          "lemma": "result",
+          "characterOffsetBegin": 493,
+          "characterOffsetEnd": 500,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "showed",
+          "originalText": "showed",
+          "lemma": "show",
+          "characterOffsetBegin": 501,
+          "characterOffsetEnd": 507,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 508,
+          "characterOffsetEnd": 509,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "significant",
+          "originalText": "significant",
+          "lemma": "significant",
+          "characterOffsetBegin": 510,
+          "characterOffsetEnd": 521,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "stabilization",
+          "originalText": "stabilization",
+          "lemma": "stabilization",
+          "characterOffsetBegin": 522,
+          "characterOffsetEnd": 535,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 536,
+          "characterOffsetEnd": 538,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 539,
+          "characterOffsetEnd": 542,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "lysosomal",
+          "originalText": "lysosomal",
+          "lemma": "lysosomal",
+          "characterOffsetBegin": 543,
+          "characterOffsetEnd": 552,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "membrane",
+          "originalText": "membrane",
+          "lemma": "membrane",
+          "characterOffsetBegin": 553,
+          "characterOffsetEnd": 561,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "at",
+          "originalText": "at",
+          "lemma": "at",
+          "characterOffsetBegin": 562,
+          "characterOffsetEnd": 564,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "4",
+          "originalText": "4",
+          "lemma": "4",
+          "characterOffsetBegin": 565,
+          "characterOffsetEnd": 566,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 567,
+          "characterOffsetEnd": 574,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "C",
+          "originalText": "C",
+          "lemma": "c",
+          "characterOffsetBegin": 575,
+          "characterOffsetEnd": 576,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "as",
+          "originalText": "as",
+          "lemma": "as",
+          "characterOffsetBegin": 577,
+          "characterOffsetEnd": 579,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "compared",
+          "originalText": "compared",
+          "lemma": "compare",
+          "characterOffsetBegin": 580,
+          "characterOffsetEnd": 588,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 589,
+          "characterOffsetEnd": 591,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "37",
+          "originalText": "37",
+          "lemma": "37",
+          "characterOffsetBegin": 592,
+          "characterOffsetEnd": 594,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 595,
+          "characterOffsetEnd": 602,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "C",
+          "originalText": "C",
+          "lemma": "c",
+          "characterOffsetBegin": 603,
+          "characterOffsetEnd": 604,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 20,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 604,
+          "characterOffsetEnd": 605,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 10,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 2,
+          "dependentGloss": "trend"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "towards"
+        },
+        {
+          "dep": "nmod",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 4,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 8,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 9,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advmod",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 11,
+          "dependentGloss": "when"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 12,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 12,
+          "governorGloss": "10",
+          "dependent": 15,
+          "dependentGloss": "8"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 16,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 17,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 18,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "case",
+          "governor": 20,
+          "governorGloss": "hydrocortisone",
+          "dependent": 19,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 20,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 21,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 23,
+          "governorGloss": "degrees",
+          "dependent": 22,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 23,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 24,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 26,
+          "dependentGloss": "used"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 27,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "expl",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 28,
+          "dependentGloss": "there"
+        },
+        {
+          "dep": "conj",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 29,
+          "dependentGloss": "being"
+        },
+        {
+          "dep": "det",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 30,
+          "dependentGloss": "no"
+        },
+        {
+          "dep": "amod",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 31,
+          "dependentGloss": "demonstrable"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 32,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 33,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 34,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "obl",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 35,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "dep",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 36,
+          "dependentGloss": "C."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 10,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 2,
+          "dependentGloss": "trend"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "towards"
+        },
+        {
+          "dep": "nmod:towards",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 4,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 8,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 9,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advmod",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 11,
+          "dependentGloss": "when"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 12,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 12,
+          "governorGloss": "10",
+          "dependent": 15,
+          "dependentGloss": "8"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 16,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 17,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 18,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "case",
+          "governor": 20,
+          "governorGloss": "hydrocortisone",
+          "dependent": 19,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 20,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 21,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 23,
+          "governorGloss": "degrees",
+          "dependent": 22,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 23,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 24,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 26,
+          "dependentGloss": "used"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 27,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "expl",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 28,
+          "dependentGloss": "there"
+        },
+        {
+          "dep": "conj",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 29,
+          "dependentGloss": "being"
+        },
+        {
+          "dep": "det",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 30,
+          "dependentGloss": "no"
+        },
+        {
+          "dep": "amod",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 31,
+          "dependentGloss": "demonstrable"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 32,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 33,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 34,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "obl:at",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 35,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "dep",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 36,
+          "dependentGloss": "C."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 10,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 2,
+          "dependentGloss": "trend"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 3,
+          "dependentGloss": "towards"
+        },
+        {
+          "dep": "nmod:towards",
+          "governor": 2,
+          "governorGloss": "trend",
+          "dependent": 4,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 6,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "membrane",
+          "dependent": 7,
+          "dependentGloss": "lysosomal"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 4,
+          "governorGloss": "stabilization",
+          "dependent": 8,
+          "dependentGloss": "membrane"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 9,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advmod",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 11,
+          "dependentGloss": "when"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 12,
+          "dependentGloss": "10"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 12,
+          "governorGloss": "10",
+          "dependent": 15,
+          "dependentGloss": "8"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "8",
+          "dependent": 16,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 17,
+          "dependentGloss": "M"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 18,
+          "dependentGloss": "concentration"
+        },
+        {
+          "dep": "case",
+          "governor": 20,
+          "governorGloss": "hydrocortisone",
+          "dependent": 19,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 20,
+          "dependentGloss": "hydrocortisone"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 21,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 23,
+          "governorGloss": "degrees",
+          "dependent": 22,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "compound",
+          "governor": 24,
+          "governorGloss": "C",
+          "dependent": 23,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "nmod:at",
+          "governor": 18,
+          "governorGloss": "concentration",
+          "dependent": 24,
+          "dependentGloss": "C"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "advcl",
+          "governor": 10,
+          "governorGloss": "seen",
+          "dependent": 26,
+          "dependentGloss": "used"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 27,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "expl",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 28,
+          "dependentGloss": "there"
+        },
+        {
+          "dep": "conj",
+          "governor": 26,
+          "governorGloss": "used",
+          "dependent": 29,
+          "dependentGloss": "being"
+        },
+        {
+          "dep": "det",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 30,
+          "dependentGloss": "no"
+        },
+        {
+          "dep": "amod",
+          "governor": 32,
+          "governorGloss": "stabilization",
+          "dependent": 31,
+          "dependentGloss": "demonstrable"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 32,
+          "dependentGloss": "stabilization"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 33,
+          "dependentGloss": "at"
+        },
+        {
+          "dep": "nummod",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 34,
+          "dependentGloss": "4"
+        },
+        {
+          "dep": "obl:at",
+          "governor": 29,
+          "governorGloss": "being",
+          "dependent": 35,
+          "dependentGloss": "degrees"
+        },
+        {
+          "dep": "dep",
+          "governor": 35,
+          "governorGloss": "degrees",
+          "dependent": 36,
+          "dependentGloss": "C."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "A",
+          "originalText": "A",
+          "lemma": "a",
+          "characterOffsetBegin": 606,
+          "characterOffsetEnd": 607,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "trend",
+          "originalText": "trend",
+          "lemma": "trend",
+          "characterOffsetBegin": 608,
+          "characterOffsetEnd": 613,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "towards",
+          "originalText": "towards",
+          "lemma": "towards",
+          "characterOffsetBegin": 614,
+          "characterOffsetEnd": 621,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "stabilization",
+          "originalText": "stabilization",
+          "lemma": "stabilization",
+          "characterOffsetBegin": 622,
+          "characterOffsetEnd": 635,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 636,
+          "characterOffsetEnd": 638,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 639,
+          "characterOffsetEnd": 642,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "lysosomal",
+          "originalText": "lysosomal",
+          "lemma": "lysosomal",
+          "characterOffsetBegin": 643,
+          "characterOffsetEnd": 652,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "membrane",
+          "originalText": "membrane",
+          "lemma": "membrane",
+          "characterOffsetBegin": 653,
+          "characterOffsetEnd": 661,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 662,
+          "characterOffsetEnd": 665,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "seen",
+          "originalText": "seen",
+          "lemma": "see",
+          "characterOffsetBegin": 666,
+          "characterOffsetEnd": 670,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "when",
+          "originalText": "when",
+          "lemma": "when",
+          "characterOffsetBegin": 671,
+          "characterOffsetEnd": 675,
+          "pos": "WRB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "10",
+          "originalText": "10",
+          "lemma": "10",
+          "characterOffsetBegin": 676,
+          "characterOffsetEnd": 678,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 678,
+          "characterOffsetEnd": 679,
+          "pos": "-LRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 679,
+          "characterOffsetEnd": 680,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 15,
+          "word": "8",
+          "originalText": "8",
+          "lemma": "8",
+          "characterOffsetBegin": 680,
+          "characterOffsetEnd": 681,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 16,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 681,
+          "characterOffsetEnd": 682,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "M",
+          "originalText": "M",
+          "lemma": "m",
+          "characterOffsetBegin": 683,
+          "characterOffsetEnd": 684,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "concentration",
+          "originalText": "concentration",
+          "lemma": "concentration",
+          "characterOffsetBegin": 685,
+          "characterOffsetEnd": 698,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 699,
+          "characterOffsetEnd": 701,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "hydrocortisone",
+          "originalText": "hydrocortisone",
+          "lemma": "hydrocortisone",
+          "characterOffsetBegin": 702,
+          "characterOffsetEnd": 716,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "at",
+          "originalText": "at",
+          "lemma": "at",
+          "characterOffsetBegin": 717,
+          "characterOffsetEnd": 719,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "37",
+          "originalText": "37",
+          "lemma": "37",
+          "characterOffsetBegin": 720,
+          "characterOffsetEnd": 722,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 723,
+          "characterOffsetEnd": 730,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "C",
+          "originalText": "C",
+          "lemma": "c",
+          "characterOffsetBegin": 731,
+          "characterOffsetEnd": 732,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 733,
+          "characterOffsetEnd": 736,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "used",
+          "originalText": "used",
+          "lemma": "use",
+          "characterOffsetBegin": 737,
+          "characterOffsetEnd": 741,
+          "pos": "VBN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 27,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 741,
+          "characterOffsetEnd": 742,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "there",
+          "originalText": "there",
+          "lemma": "there",
+          "characterOffsetBegin": 743,
+          "characterOffsetEnd": 748,
+          "pos": "EX",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "being",
+          "originalText": "being",
+          "lemma": "be",
+          "characterOffsetBegin": 749,
+          "characterOffsetEnd": 754,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "no",
+          "originalText": "no",
+          "lemma": "no",
+          "characterOffsetBegin": 755,
+          "characterOffsetEnd": 757,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "demonstrable",
+          "originalText": "demonstrable",
+          "lemma": "demonstrable",
+          "characterOffsetBegin": 758,
+          "characterOffsetEnd": 770,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "stabilization",
+          "originalText": "stabilization",
+          "lemma": "stabilization",
+          "characterOffsetBegin": 771,
+          "characterOffsetEnd": 784,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "at",
+          "originalText": "at",
+          "lemma": "at",
+          "characterOffsetBegin": 785,
+          "characterOffsetEnd": 787,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "4",
+          "originalText": "4",
+          "lemma": "4",
+          "characterOffsetBegin": 788,
+          "characterOffsetEnd": 789,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "degrees",
+          "originalText": "degrees",
+          "lemma": "degree",
+          "characterOffsetBegin": 790,
+          "characterOffsetEnd": 797,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 36,
+          "word": "C.",
+          "originalText": "C.",
+          "lemma": "C.",
+          "characterOffsetBegin": 798,
+          "characterOffsetEnd": 800,
+          "pos": "NNP",
+          "before": " ",
+          "after": " "
+        }
+      ]
+    }
+  ]
+}

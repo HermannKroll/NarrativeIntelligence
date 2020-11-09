@@ -3,8 +3,10 @@ import os
 from datetime import datetime
 
 from narraint.progress import print_progress_with_eta
-from narraint.pubtator.document import TaggedDocument
+from narraint.pubtator.document import TaggedDocument, TaggedEntity
 from narraint.pubtator.extract import read_pubtator_documents
+
+TAG_MIN_TEXT_LENGTH = 3
 
 
 def filter_document_sentences_without_tags(doc_len: int, input_file: str, spacy_nlp):
@@ -32,14 +34,17 @@ def filter_document_sentences_without_tags(doc_len: int, input_file: str, spacy_
         sorted_sentences = sorted(tagged_doc.sentence_by_id.keys())
         for sent in sorted_sentences:
             tags = tagged_doc.entities_by_sentence[sent]
-            ent_ids = {t.ent_id for t in tags}
+            ent_ids = {t.ent_id for t in tags if len(t.text.strip()) >= TAG_MIN_TEXT_LENGTH}
             if len(ent_ids) > 1:  # at minimum two tags must be included in this sentence
                 sentence_str = tagged_doc.sentence_by_id[sent].text + ' '
                 sentence_str_lower = sentence_str.lower()
                 for t in tagged_doc.entities_by_sentence[sent]:
-                    t_start_new = tag_original_character_offset + sentence_str_lower.index(t.text.lower())
-                    t_start_end = t_start_new + len(t.text)
-                    tag_terms.add((t.ent_id, t.text, t_start_new, t_start_end))
+                    try:
+                        t_start_new = tag_original_character_offset + sentence_str_lower.index(t.text.lower())
+                        t_start_end = t_start_new + len(t.text)
+                        tag_terms.add((doc_id, t_start_new, t_start_end, t.text, t.ent_type, t.ent_id))
+                    except ValueError:
+                        logging.warning(f'Cannot find "{t.text.lower()}" in "{sentence_str_lower}"')
 
                 tag_original_character_offset += len(sentence_str)
                 filtered_content.append(sentence_str)
@@ -49,7 +54,7 @@ def filter_document_sentences_without_tags(doc_len: int, input_file: str, spacy_
             continue
 
         doc2sentences[doc_id] = filtered_content
-        doc2tags[doc_id] = tag_terms
+        doc2tags[doc_id] = [TaggedEntity(t) for t in tag_terms]
 
     return doc2sentences, doc2tags
 

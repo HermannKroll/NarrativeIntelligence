@@ -16,13 +16,13 @@ from narraint.extraction.extraction_utils import filter_and_write_documents_to_t
 
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
-from narraint.pubtator.document import TaggedDocument
+from narraint.pubtator.document import TaggedDocument, TaggedEntity
 from narraint.pubtator.extract import read_pubtator_documents
 
 NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
 IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
-                      "side effect", "adverse", "complications",
-                      "drug toxicity", "drug injury"]
+                      "adverse", "complications"]
+IMPORTANT_PHRASES = ["side effect", "drug toxicity", "drug injury"]
 
 
 def get_progress(out_corenlp_dir: str) -> int:
@@ -55,13 +55,94 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
     start_time = datetime.now()
     while process.poll() is None:
-        sleep(30)
+        sleep(10)
         print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
                                 print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         get_progress(out_corenlp_dir), num_files, datetime.now() - start,
     ))
     sys.stdout.flush()
+
+
+def pathie_reconstruct_sentence_sequence_from_nlp_output(tokens):
+    token_sequence = []
+    for t in tokens:
+        t_txt = t["originalText"]
+        t_before = t["before"]
+        t_after = t["after"]
+        token_sequence.extend([t_txt, t_after])
+    # remove the last element - it does not belong to the string (after token AFTER the last word)
+    return ''.join(token_sequence[:-1])
+
+
+def pathie_reconstruct_text_from_token_indexes(tokens, token_indexes):
+    sequence = []
+    for t in tokens:
+        if t["index"] in token_indexes:
+            sequence.extend([t["originalText"], t["after"]])
+    # remove the last element - it does not belong to the string (after token AFTER the last word)
+    return ''.join(sequence[:-1])
+
+
+def pathie_find_tags_in_sentence(tokens, doc_tags: [TaggedEntity]):
+    tag_token_index_sequences = []
+    for tag in doc_tags:
+        toks_for_tag = []
+        start_token = None
+        for tok in tokens:
+            if tok["characterOffsetBegin"] >= tag.start and tok["characterOffsetEnd"] <= tag.end:
+                toks_for_tag.append(tok["index"])
+                if not start_token:
+                    start_token = tok["originalText"].lower()
+        # if we found a sequence and the start token matches
+        if toks_for_tag and tag.text.lower().startswith(start_token):
+            tag_token_index_sequences.append((tag, toks_for_tag))
+    return tag_token_index_sequences
+
+
+def pathie_find_relations_in_sentence(tokens, sentence_text_lower):
+    idx2word = dict()
+    # root is the empty word
+    idx2word[0] = ""
+    verbs = set()
+    vidx2text_and_lemma = dict()
+    for t in tokens:
+        t_id = t["index"]
+        t_txt = t["originalText"]
+        t_pos = t["pos"]
+        t_lemma = t["lemma"]
+        # it's a verb
+        if t_pos.startswith('V') and t_lemma not in ["have", "be"]:
+            vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
+            verbs.add((t_id, t_txt, t_lemma))
+        else:
+        # check if a keyword is mentioned
+            t_lower = t_txt.lower().strip()
+            for keyword in IMPORTANT_KEYWORDS:
+                if keyword in t_lower: # partial included is enough
+                    vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
+                    verbs.add((t_id, t_txt, t_lemma))
+
+    for keyphrase in IMPORTANT_PHRASES:
+        if keyphrase in sentence_text_lower:
+            keyphrase_parts = keyphrase.split(' ')
+            parts_found = []
+            for part in keyphrase_parts:
+                for t in tokens:
+                    t_id = t["index"]
+                    t_txt = t["originalText"]
+                    t_lemma = t["lemma"]
+                    if t['originalText'].lower() in part:
+                        parts_found.append((t_id, t_txt, t_lemma))
+            if len(parts_found) == len(keyphrase_parts):
+                # the whole phrase was matched
+                t_txt = ' '.join([p[1] for p in parts_found])
+                t_lemma = ' '.join([p[2] for p in parts_found])
+                for p in parts_found:
+                    t_id = p[0]
+                    vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
+                    verbs.add((t_id, t_txt, t_lemma))
+    return verbs, vidx2text_and_lemma
 
 
 def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
@@ -78,54 +159,18 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
     """
     enhan_deps = sentence_json["enhancedPlusPlusDependencies"]
     tokens = sentence_json["tokens"]
-    sentence_parts = []
-    idx2word = dict()
-    # root is the empty word
-    idx2word[0] = ""
-    tok2idx = dict()
-    verbs = []
-    vidx2text_and_lemma = dict()
-    for t in tokens:
-        t_id = t["index"]
-        t_txt = t["originalText"]
-        t_pos = t["pos"]
-        t_lemma = t["lemma"]
-        idx2word[t_id] = t_txt
-        sentence_parts.append(t_txt)
-        tok2idx[t_txt.lower()] = t_id
-        # its a verb
-        if t_pos.startswith('V') and t_lemma not in ["have", "be"]:
-            vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
-            verbs.append((t_id, t_txt, t_lemma))
-        else:
-            t_lower = t_txt.lower().strip()
-            for keyword in IMPORTANT_KEYWORDS:
-                if keyword in t_lower:
-                    vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
-                    verbs.append((t_id, t_txt, t_lemma))
+    sentence = pathie_reconstruct_sentence_sequence_from_nlp_output(tokens).strip()
+    sentence_lower = sentence.lower()
+
+    # find all relations in the sentence
+    verbs, vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower)
 
     # no verbs -> no extractions
     if len(verbs) == 0:
         return []
 
-    sentence = ' '.join(sentence_parts).strip()
-    sentence_lower = sentence.lower()
-    entities_in_sentence = []
-    for tag_id, tag_str_lower, tag_type in doc_tags:
-        tag_stripped = tag_str_lower.strip()
-        if tag_str_lower in sentence_lower:
-            # find the correct indexes
-            if ' ' in tag_stripped:
-                ent_token_ids = []
-                for t_part in tag_stripped.split(' '):
-                    for tok, idx in tok2idx.items():
-                        if tok == t_part:
-                            ent_token_ids.append(idx)
-                entities_in_sentence.append((tag_id, tag_stripped, tag_type, ent_token_ids))
-            else:
-                for tok, idx in tok2idx.items():
-                    if tok == tag_stripped:
-                        entities_in_sentence.append((tag_id, tag_stripped, tag_type, [idx]))
+    # find entities in sentence
+    tag_sequences = pathie_find_tags_in_sentence(tokens, doc_tags)
 
     dep_graph = nx.Graph()
     node_idxs = set()
@@ -146,28 +191,47 @@ def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
 
     extracted_tuples = []
     extracted_index = set()
-    for e1_id, e1_str, e1_type, e1_token_ids in entities_in_sentence:
+    for e1_idx, (e1_tag, e1_token_ids) in enumerate(tag_sequences):
         for e1_tok_id in e1_token_ids:
-            for e2_id, e2_str, e2_type, e2_token_ids in entities_in_sentence:
-                if e1_str == e2_str:
+            for e2_idx, (e2_tag, e2_token_ids) in enumerate(tag_sequences):
+                # do not extract relations between the same entity
+                if e1_idx == e2_idx:
                     continue
                 for e2_tok_id in e2_token_ids:
                     try:
                         for path in nx.all_shortest_paths(dep_graph, source=e1_tok_id, target=e2_tok_id):
                             for n_idx in path:
+                                # does this path lead over a relation
                                 if n_idx in vidx2text_and_lemma:
                                     # this is a valid path
                                     v_txt, v_lemma = vidx2text_and_lemma[n_idx]
-                                    key = (e1_id, e1_type, v_lemma, e2_id, e2_type)
+                                    key = (e1_tag.ent_id, e1_tag.ent_type, v_lemma, e2_tag.ent_id, e2_tag.ent_type)
                                     if key in extracted_index:
                                         continue
                                     extracted_index.add(key)
-                                    extracted_tuples.append((doc_id, e1_id, e1_str, e1_type, v_txt, v_lemma,
-                                                             e2_id, e2_str, e2_type, sentence))
+                                    extracted_tuples.append((doc_id, e1_tag.ent_id, e1_tag.text, e1_tag.ent_type, v_txt,
+                                                             v_lemma,
+                                                             e2_tag.ent_id, e2_tag.text, e2_tag.ent_type, sentence))
                     except nx.NetworkXNoPath:
                         pass
 
     return extracted_tuples
+
+
+def load_and_fix_json_nlp_data(json_path):
+    """
+    Loads and fixes a txt CoreNLP text json file
+    :param json_path: path to json file
+    :return: json object
+    """
+    with open(json_path, 'r') as f:
+        json_fixed_lines = []
+        for line in f:
+            if NUMBER_FIX_REGEX.findall(line):
+                json_fixed_lines.append(line.replace(',', '.', 1))
+            else:
+                json_fixed_lines.append(line)
+        return json.loads(''.join(json_fixed_lines))
 
 
 def process_json_file(doc_id, input_file, doc_tags):
@@ -179,16 +243,9 @@ def process_json_file(doc_id, input_file, doc_tags):
     :return: a list of extracted tuples
     """
     extracted_tuples = []
-    with open(input_file, 'r') as f:
-        json_fixed_lines = []
-        for line in f:
-            if NUMBER_FIX_REGEX.findall(line):
-                json_fixed_lines.append(line.replace(',', '.', 1))
-            else:
-                json_fixed_lines.append(line)
-        json_data = json.loads(''.join(json_fixed_lines))
-        for sent in json_data["sentences"]:
-            extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
+    json_data = load_and_fix_json_nlp_data(input_file)
+    for sent in json_data["sentences"]:
+        extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
     return extracted_tuples
 
 
@@ -209,6 +266,7 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
             if filename.endswith('.json'):
                 doc_id = int(filename.split('.')[0])
                 extracted_tuples = process_json_file(doc_id, os.path.join(out_corenlp_dir, filename), doc2tags[doc_id])
+                tuples += len(extracted_tuples)
                 for e_tuple in extracted_tuples:
                     line = '\t'.join([str(t) for t in e_tuple])
                     if first_line:
@@ -257,7 +315,8 @@ def main():
     # Prepare files
     doc_count = count_documents(args.input)
     logging.info('{} documents counted'.format(doc_count))
-    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn, spacy_nlp)
+    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
+                                                                   spacy_nlp)
     if amount_files == 0:
         print('no files to process - stopping')
     else:

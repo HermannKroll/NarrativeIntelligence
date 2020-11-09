@@ -1,0 +1,5403 @@
+{
+  "docId": "59.txt",
+  "sentences": [
+    {
+      "index": 0,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 1,
+          "dependentGloss": "Regulation"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 3,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "nmod",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 4,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 5,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 1,
+          "dependentGloss": "Regulation"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 3,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 4,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 5,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 1,
+          "dependentGloss": "Regulation"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "fixation",
+          "dependent": 3,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 4,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Regulation",
+          "dependent": 5,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Regulation",
+          "originalText": "Regulation",
+          "lemma": "regulation",
+          "characterOffsetBegin": 0,
+          "characterOffsetEnd": 10,
+          "pos": "NN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 11,
+          "characterOffsetEnd": 13,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "nitrogen",
+          "originalText": "nitrogen",
+          "lemma": "nitrogen",
+          "characterOffsetBegin": 14,
+          "characterOffsetEnd": 22,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "fixation",
+          "originalText": "fixation",
+          "lemma": "fixation",
+          "characterOffsetBegin": 23,
+          "characterOffsetEnd": 31,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 5,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 31,
+          "characterOffsetEnd": 32,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 12,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 1,
+          "dependentGloss": "Biochemical"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 2,
+          "dependentGloss": "characterization"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "these"
+        },
+        {
+          "dep": "compound",
+          "governor": 6,
+          "governorGloss": "fixation",
+          "dependent": 5,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 6,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 7,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 8,
+          "dependentGloss": "nif"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 9,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 10,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nmod",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 11,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "mark",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 13,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 14,
+          "dependentGloss": "they"
+        },
+        {
+          "dep": "ccomp",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 15,
+          "dependentGloss": "fall"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 16,
+          "dependentGloss": "into"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 17,
+          "dependentGloss": "three"
+        },
+        {
+          "dep": "obl",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 18,
+          "dependentGloss": "classes"
+        },
+        {
+          "dep": "punct",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 12,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 1,
+          "dependentGloss": "Biochemical"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 2,
+          "dependentGloss": "characterization"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "these"
+        },
+        {
+          "dep": "compound",
+          "governor": 6,
+          "governorGloss": "fixation",
+          "dependent": 5,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 6,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 7,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 8,
+          "dependentGloss": "nif"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 9,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 10,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 11,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "mark",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 13,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 14,
+          "dependentGloss": "they"
+        },
+        {
+          "dep": "ccomp",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 15,
+          "dependentGloss": "fall"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 16,
+          "dependentGloss": "into"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 17,
+          "dependentGloss": "three"
+        },
+        {
+          "dep": "obl:into",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 18,
+          "dependentGloss": "classes"
+        },
+        {
+          "dep": "punct",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 12,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 1,
+          "dependentGloss": "Biochemical"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 2,
+          "dependentGloss": "characterization"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 3,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "these"
+        },
+        {
+          "dep": "compound",
+          "governor": 6,
+          "governorGloss": "fixation",
+          "dependent": 5,
+          "dependentGloss": "nitrogen"
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 6,
+          "dependentGloss": "fixation"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "nif",
+          "dependent": 7,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 8,
+          "dependentGloss": "nif"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 9,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "mutants",
+          "dependent": 10,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 2,
+          "governorGloss": "characterization",
+          "dependent": 11,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "mark",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 13,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 14,
+          "dependentGloss": "they"
+        },
+        {
+          "dep": "ccomp",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 15,
+          "dependentGloss": "fall"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 16,
+          "dependentGloss": "into"
+        },
+        {
+          "dep": "nummod",
+          "governor": 18,
+          "governorGloss": "classes",
+          "dependent": 17,
+          "dependentGloss": "three"
+        },
+        {
+          "dep": "obl:into",
+          "governor": 15,
+          "governorGloss": "fall",
+          "dependent": 18,
+          "dependentGloss": "classes"
+        },
+        {
+          "dep": "punct",
+          "governor": 12,
+          "governorGloss": "reveals",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Biochemical",
+          "originalText": "Biochemical",
+          "lemma": "biochemical",
+          "characterOffsetBegin": 33,
+          "characterOffsetEnd": 44,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "characterization",
+          "originalText": "characterization",
+          "lemma": "characterization",
+          "characterOffsetBegin": 45,
+          "characterOffsetEnd": 61,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 62,
+          "characterOffsetEnd": 64,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "these",
+          "originalText": "these",
+          "lemma": "these",
+          "characterOffsetBegin": 65,
+          "characterOffsetEnd": 70,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "nitrogen",
+          "originalText": "nitrogen",
+          "lemma": "nitrogen",
+          "characterOffsetBegin": 71,
+          "characterOffsetEnd": 79,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "fixation",
+          "originalText": "fixation",
+          "lemma": "fixation",
+          "characterOffsetBegin": 80,
+          "characterOffsetEnd": 88,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 89,
+          "characterOffsetEnd": 90,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 8,
+          "word": "nif",
+          "originalText": "nif",
+          "lemma": "nif",
+          "characterOffsetBegin": 90,
+          "characterOffsetEnd": 93,
+          "pos": "NN",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 9,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 93,
+          "characterOffsetEnd": 94,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "derepressed",
+          "originalText": "derepressed",
+          "lemma": "derepress",
+          "characterOffsetBegin": 95,
+          "characterOffsetEnd": 106,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "mutants",
+          "originalText": "mutants",
+          "lemma": "mutant",
+          "characterOffsetBegin": 107,
+          "characterOffsetEnd": 114,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "reveals",
+          "originalText": "reveals",
+          "lemma": "reveal",
+          "characterOffsetBegin": 115,
+          "characterOffsetEnd": 122,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "that",
+          "originalText": "that",
+          "lemma": "that",
+          "characterOffsetBegin": 123,
+          "characterOffsetEnd": 127,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "they",
+          "originalText": "they",
+          "lemma": "they",
+          "characterOffsetBegin": 128,
+          "characterOffsetEnd": 132,
+          "pos": "PRP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "fall",
+          "originalText": "fall",
+          "lemma": "fall",
+          "characterOffsetBegin": 133,
+          "characterOffsetEnd": 137,
+          "pos": "VBP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "into",
+          "originalText": "into",
+          "lemma": "into",
+          "characterOffsetBegin": 138,
+          "characterOffsetEnd": 142,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "three",
+          "originalText": "three",
+          "lemma": "three",
+          "characterOffsetBegin": 143,
+          "characterOffsetEnd": 148,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "classes",
+          "originalText": "classes",
+          "lemma": "class",
+          "characterOffsetBegin": 149,
+          "characterOffsetEnd": 156,
+          "pos": "NNS",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 19,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 156,
+          "characterOffsetEnd": 157,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 19,
+          "dependentGloss": "synthesize"
+        },
+        {
+          "dep": "nummod",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 1,
+          "dependentGloss": "Three"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 2,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 3,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 4,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 5,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "24"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "28"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "29",
+          "dependent": 10,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 11,
+          "dependentGloss": "29"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "acl",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamate"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod",
+          "governor": 15,
+          "governorGloss": "glutamate",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 20,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "cc",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 21,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 22,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "conj",
+          "governor": 20,
+          "governorGloss": "nitrogenase",
+          "dependent": 23,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "advmod",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 24,
+          "dependentGloss": "constitutively"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 26,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 27,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "dep",
+          "governor": 25,
+          "governorGloss": "(",
+          "dependent": 28,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 29,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 30,
+          "dependentGloss": "NH4"
+        },
+        {
+          "dep": "dep",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 31,
+          "dependentGloss": "+"
+        },
+        {
+          "dep": "punct",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 32,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 32,
+          "governorGloss": ")",
+          "dependent": 33,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 19,
+          "dependentGloss": "synthesize"
+        },
+        {
+          "dep": "nummod",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 1,
+          "dependentGloss": "Three"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 2,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 3,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 4,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 5,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "24"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "28"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "29",
+          "dependent": 10,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 11,
+          "dependentGloss": "29"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 11,
+          "dependentGloss": "29"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "acl",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamate"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 15,
+          "governorGloss": "glutamate",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 20,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "cc",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 21,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 22,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 23,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 20,
+          "governorGloss": "nitrogenase",
+          "dependent": 23,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "advmod",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 24,
+          "dependentGloss": "constitutively"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 26,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 27,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "dep",
+          "governor": 25,
+          "governorGloss": "(",
+          "dependent": 28,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 29,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 30,
+          "dependentGloss": "NH4"
+        },
+        {
+          "dep": "dep",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 31,
+          "dependentGloss": "+"
+        },
+        {
+          "dep": "punct",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 32,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 32,
+          "governorGloss": ")",
+          "dependent": 33,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 19,
+          "dependentGloss": "synthesize"
+        },
+        {
+          "dep": "nummod",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 1,
+          "dependentGloss": "Three"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 2,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 3,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 4,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 5,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "24"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "28"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "29",
+          "dependent": 10,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 11,
+          "dependentGloss": "29"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 11,
+          "dependentGloss": "29"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "acl",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamate"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 15,
+          "governorGloss": "glutamate",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "mutants",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 20,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "cc",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 21,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "synthetase",
+          "dependent": 22,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "obj",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 23,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 20,
+          "governorGloss": "nitrogenase",
+          "dependent": 23,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "advmod",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 24,
+          "dependentGloss": "constitutively"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "synthesize",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 26,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 27,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "dep",
+          "governor": 25,
+          "governorGloss": "(",
+          "dependent": 28,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 29,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 30,
+          "dependentGloss": "NH4"
+        },
+        {
+          "dep": "dep",
+          "governor": 30,
+          "governorGloss": "NH4",
+          "dependent": 31,
+          "dependentGloss": "+"
+        },
+        {
+          "dep": "punct",
+          "governor": 28,
+          "governorGloss": "presence",
+          "dependent": 32,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 32,
+          "governorGloss": ")",
+          "dependent": 33,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Three",
+          "originalText": "Three",
+          "lemma": "three",
+          "characterOffsetBegin": 158,
+          "characterOffsetEnd": 163,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "mutants",
+          "originalText": "mutants",
+          "lemma": "mutant",
+          "characterOffsetBegin": 164,
+          "characterOffsetEnd": 171,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 172,
+          "characterOffsetEnd": 173,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 4,
+          "word": "strains",
+          "originalText": "strains",
+          "lemma": "strain",
+          "characterOffsetBegin": 173,
+          "characterOffsetEnd": 180,
+          "pos": "NNS",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "SK",
+          "originalText": "SK",
+          "lemma": "sk",
+          "characterOffsetBegin": 181,
+          "characterOffsetEnd": 183,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 6,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 183,
+          "characterOffsetEnd": 184,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 7,
+          "word": "24",
+          "originalText": "24",
+          "lemma": "24",
+          "characterOffsetBegin": 184,
+          "characterOffsetEnd": 186,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 8,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 186,
+          "characterOffsetEnd": 187,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "28",
+          "originalText": "28",
+          "lemma": "28",
+          "characterOffsetBegin": 188,
+          "characterOffsetEnd": 190,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 191,
+          "characterOffsetEnd": 194,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "29",
+          "originalText": "29",
+          "lemma": "29",
+          "characterOffsetBegin": 195,
+          "characterOffsetEnd": 197,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 12,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 197,
+          "characterOffsetEnd": 198,
+          "pos": "-RRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 198,
+          "characterOffsetEnd": 199,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "requiring",
+          "originalText": "requiring",
+          "lemma": "require",
+          "characterOffsetBegin": 200,
+          "characterOffsetEnd": 209,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "glutamate",
+          "originalText": "glutamate",
+          "lemma": "glutamate",
+          "characterOffsetBegin": 210,
+          "characterOffsetEnd": 219,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 220,
+          "characterOffsetEnd": 223,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "growth",
+          "originalText": "growth",
+          "lemma": "growth",
+          "characterOffsetBegin": 224,
+          "characterOffsetEnd": 230,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 18,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 230,
+          "characterOffsetEnd": 231,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "synthesize",
+          "originalText": "synthesize",
+          "lemma": "synthesize",
+          "characterOffsetBegin": 232,
+          "characterOffsetEnd": 242,
+          "pos": "VBP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "nitrogenase",
+          "originalText": "nitrogenase",
+          "lemma": "nitrogenase",
+          "characterOffsetBegin": 243,
+          "characterOffsetEnd": 254,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 255,
+          "characterOffsetEnd": 258,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 259,
+          "characterOffsetEnd": 268,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "synthetase",
+          "originalText": "synthetase",
+          "lemma": "synthetase",
+          "characterOffsetBegin": 269,
+          "characterOffsetEnd": 279,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "constitutively",
+          "originalText": "constitutively",
+          "lemma": "constitutively",
+          "characterOffsetBegin": 280,
+          "characterOffsetEnd": 294,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 295,
+          "characterOffsetEnd": 296,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 26,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 296,
+          "characterOffsetEnd": 298,
+          "pos": "IN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 299,
+          "characterOffsetEnd": 302,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "presence",
+          "originalText": "presence",
+          "lemma": "presence",
+          "characterOffsetBegin": 303,
+          "characterOffsetEnd": 311,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 312,
+          "characterOffsetEnd": 314,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "NH4",
+          "originalText": "NH4",
+          "lemma": "nh4",
+          "characterOffsetBegin": 315,
+          "characterOffsetEnd": 318,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 31,
+          "word": "+",
+          "originalText": "+",
+          "lemma": "+",
+          "characterOffsetBegin": 318,
+          "characterOffsetEnd": 319,
+          "pos": "SYM",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 32,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 319,
+          "characterOffsetEnd": 320,
+          "pos": "-RRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 33,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 320,
+          "characterOffsetEnd": 321,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 18,
+          "dependentGloss": "produces"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "second"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 5,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 8,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 10,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "cc",
+          "governor": 12,
+          "governorGloss": "37",
+          "dependent": 11,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "acl",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod",
+          "governor": 15,
+          "governorGloss": "glutamine",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "amod",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 19,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "obj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 20,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 21,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 22,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "nmod",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 23,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "cc",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 24,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 25,
+          "dependentGloss": "synthesized"
+        },
+        {
+          "dep": "advmod",
+          "governor": 27,
+          "governorGloss": "inactive",
+          "dependent": 26,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 27,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 29,
+          "governorGloss": "synthetase",
+          "dependent": 28,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "obj",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 30,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 31,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 32,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "advcl",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 33,
+          "dependentGloss": "determined"
+        },
+        {
+          "dep": "advmod",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 34,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "punct",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 18,
+          "dependentGloss": "produces"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "second"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 5,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 8,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 10,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "cc",
+          "governor": 12,
+          "governorGloss": "37",
+          "dependent": 11,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 12,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "acl",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 15,
+          "governorGloss": "glutamine",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "amod",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 19,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "obj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 20,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 21,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 22,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 23,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "cc",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 24,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 25,
+          "dependentGloss": "synthesized"
+        },
+        {
+          "dep": "advmod",
+          "governor": 27,
+          "governorGloss": "inactive",
+          "dependent": 26,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 27,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 29,
+          "governorGloss": "synthetase",
+          "dependent": 28,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "obj",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 30,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 31,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 32,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 33,
+          "dependentGloss": "determined"
+        },
+        {
+          "dep": "advmod",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 34,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "punct",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 18,
+          "dependentGloss": "produces"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "second"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "case",
+          "governor": 5,
+          "governorGloss": "mutants",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 5,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 6,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 7,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "appos",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 8,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 9,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 10,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "cc",
+          "governor": 12,
+          "governorGloss": "37",
+          "dependent": 11,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 12,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "acl",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 14,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "obj",
+          "governor": 14,
+          "governorGloss": "requiring",
+          "dependent": 15,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "case",
+          "governor": 17,
+          "governorGloss": "growth",
+          "dependent": 16,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 15,
+          "governorGloss": "glutamine",
+          "dependent": 17,
+          "dependentGloss": "growth"
+        },
+        {
+          "dep": "amod",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 19,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "obj",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 20,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 21,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 23,
+          "governorGloss": "activity",
+          "dependent": 22,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 20,
+          "governorGloss": "levels",
+          "dependent": 23,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "cc",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 24,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 25,
+          "dependentGloss": "synthesized"
+        },
+        {
+          "dep": "advmod",
+          "governor": 27,
+          "governorGloss": "inactive",
+          "dependent": 26,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 27,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 29,
+          "governorGloss": "synthetase",
+          "dependent": 28,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 30,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "obj",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 30,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 31,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 32,
+          "dependentGloss": "as"
+        },
+        {
+          "dep": "advcl:as",
+          "governor": 25,
+          "governorGloss": "synthesized",
+          "dependent": 33,
+          "dependentGloss": "determined"
+        },
+        {
+          "dep": "advmod",
+          "governor": 33,
+          "governorGloss": "determined",
+          "dependent": 34,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "punct",
+          "governor": 18,
+          "governorGloss": "produces",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "A",
+          "originalText": "A",
+          "lemma": "a",
+          "characterOffsetBegin": 322,
+          "characterOffsetEnd": 323,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "second",
+          "originalText": "second",
+          "lemma": "second",
+          "characterOffsetBegin": 324,
+          "characterOffsetEnd": 330,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "class",
+          "originalText": "class",
+          "lemma": "class",
+          "characterOffsetBegin": 331,
+          "characterOffsetEnd": 336,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 337,
+          "characterOffsetEnd": 339,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "mutants",
+          "originalText": "mutants",
+          "lemma": "mutant",
+          "characterOffsetBegin": 340,
+          "characterOffsetEnd": 347,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 348,
+          "characterOffsetEnd": 349,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 7,
+          "word": "strains",
+          "originalText": "strains",
+          "lemma": "strain",
+          "characterOffsetBegin": 349,
+          "characterOffsetEnd": 356,
+          "pos": "NNS",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "SK",
+          "originalText": "SK",
+          "lemma": "sk",
+          "characterOffsetBegin": 357,
+          "characterOffsetEnd": 359,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 9,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 359,
+          "characterOffsetEnd": 360,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 10,
+          "word": "27",
+          "originalText": "27",
+          "lemma": "27",
+          "characterOffsetBegin": 360,
+          "characterOffsetEnd": 362,
+          "pos": "CD",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 363,
+          "characterOffsetEnd": 366,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "37",
+          "originalText": "37",
+          "lemma": "37",
+          "characterOffsetBegin": 367,
+          "characterOffsetEnd": 369,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 369,
+          "characterOffsetEnd": 370,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "requiring",
+          "originalText": "requiring",
+          "lemma": "require",
+          "characterOffsetBegin": 371,
+          "characterOffsetEnd": 380,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 381,
+          "characterOffsetEnd": 390,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 391,
+          "characterOffsetEnd": 394,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "growth",
+          "originalText": "growth",
+          "lemma": "growth",
+          "characterOffsetBegin": 395,
+          "characterOffsetEnd": 401,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "produces",
+          "originalText": "produces",
+          "lemma": "produce",
+          "characterOffsetBegin": 402,
+          "characterOffsetEnd": 410,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "derepressed",
+          "originalText": "derepressed",
+          "lemma": "derepress",
+          "characterOffsetBegin": 411,
+          "characterOffsetEnd": 422,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "levels",
+          "originalText": "levels",
+          "lemma": "level",
+          "characterOffsetBegin": 423,
+          "characterOffsetEnd": 429,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 430,
+          "characterOffsetEnd": 432,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "nitrogenase",
+          "originalText": "nitrogenase",
+          "lemma": "nitrogenase",
+          "characterOffsetBegin": 433,
+          "characterOffsetEnd": 444,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "activity",
+          "originalText": "activity",
+          "lemma": "activity",
+          "characterOffsetBegin": 445,
+          "characterOffsetEnd": 453,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 454,
+          "characterOffsetEnd": 457,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "synthesized",
+          "originalText": "synthesized",
+          "lemma": "synthesize",
+          "characterOffsetBegin": 458,
+          "characterOffsetEnd": 469,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "catalytically",
+          "originalText": "catalytically",
+          "lemma": "catalytically",
+          "characterOffsetBegin": 470,
+          "characterOffsetEnd": 483,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "inactive",
+          "originalText": "inactive",
+          "lemma": "inactive",
+          "characterOffsetBegin": 484,
+          "characterOffsetEnd": 492,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 493,
+          "characterOffsetEnd": 502,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "synthetase",
+          "originalText": "synthetase",
+          "lemma": "synthetase",
+          "characterOffsetBegin": 503,
+          "characterOffsetEnd": 513,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "protein",
+          "originalText": "protein",
+          "lemma": "protein",
+          "characterOffsetBegin": 514,
+          "characterOffsetEnd": 521,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 31,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 521,
+          "characterOffsetEnd": 522,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "as",
+          "originalText": "as",
+          "lemma": "as",
+          "characterOffsetBegin": 523,
+          "characterOffsetEnd": 525,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "determined",
+          "originalText": "determined",
+          "lemma": "determined",
+          "characterOffsetBegin": 526,
+          "characterOffsetEnd": 536,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "immunologically",
+          "originalText": "immunologically",
+          "lemma": "immunologically",
+          "characterOffsetBegin": 537,
+          "characterOffsetEnd": 552,
+          "pos": "RB",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 35,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 552,
+          "characterOffsetEnd": 553,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "third"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 5,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 7,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "punct",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obl",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 9,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 10,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 11,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 12,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": "strain"
+        },
+        {
+          "dep": "appos",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 15,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "26",
+          "dependent": 18,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 19,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "nmod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 21,
+          "dependentGloss": "synthesizes"
+        },
+        {
+          "dep": "cc:preconj",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 22,
+          "dependentGloss": "neither"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 23,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "advmod",
+          "governor": 25,
+          "governorGloss": "active",
+          "dependent": 24,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 25,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "synthetase",
+          "dependent": 26,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 27,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 28,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "cc",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "nor"
+        },
+        {
+          "dep": "det",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 30,
+          "dependentGloss": "an"
+        },
+        {
+          "dep": "advmod",
+          "governor": 32,
+          "governorGloss": "cross-reactive",
+          "dependent": 31,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "amod",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 32,
+          "dependentGloss": "cross-reactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 34,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 34,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "conj",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 35,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "third"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 5,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 7,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "punct",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obl",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 9,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 10,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 11,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 12,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": "strain"
+        },
+        {
+          "dep": "appos",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 15,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "26",
+          "dependent": 18,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 19,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 19,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 21,
+          "dependentGloss": "synthesizes"
+        },
+        {
+          "dep": "cc:preconj",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 22,
+          "dependentGloss": "neither"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 23,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "advmod",
+          "governor": 25,
+          "governorGloss": "active",
+          "dependent": 24,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 25,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "synthetase",
+          "dependent": 26,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 27,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 28,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "cc",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "nor"
+        },
+        {
+          "dep": "det",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 30,
+          "dependentGloss": "an"
+        },
+        {
+          "dep": "advmod",
+          "governor": 32,
+          "governorGloss": "cross-reactive",
+          "dependent": 31,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "amod",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 32,
+          "dependentGloss": "cross-reactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 34,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 34,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 35,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "conj:nor",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 35,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "class"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 1,
+          "dependentGloss": "A"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 2,
+          "dependentGloss": "third"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 5,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "punct",
+          "governor": 7,
+          "governorGloss": "requiring",
+          "dependent": 6,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 7,
+          "dependentGloss": "requiring"
+        },
+        {
+          "dep": "punct",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 8,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "obl",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 9,
+          "dependentGloss": "nitrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "derepressed",
+          "dependent": 10,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 11,
+          "dependentGloss": "derepressed"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 21,
+          "governorGloss": "synthesizes",
+          "dependent": 12,
+          "dependentGloss": "mutants"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": "strain"
+        },
+        {
+          "dep": "appos",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 15,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "26",
+          "dependent": 18,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "appos",
+          "governor": 12,
+          "governorGloss": "mutants",
+          "dependent": 19,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 19,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 15,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 21,
+          "dependentGloss": "synthesizes"
+        },
+        {
+          "dep": "cc:preconj",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 22,
+          "dependentGloss": "neither"
+        },
+        {
+          "dep": "det",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 23,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "advmod",
+          "governor": 25,
+          "governorGloss": "active",
+          "dependent": 24,
+          "dependentGloss": "catalytically"
+        },
+        {
+          "dep": "amod",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 25,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "synthetase",
+          "dependent": 26,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 27,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 28,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "cc",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 29,
+          "dependentGloss": "nor"
+        },
+        {
+          "dep": "det",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 30,
+          "dependentGloss": "an"
+        },
+        {
+          "dep": "advmod",
+          "governor": 32,
+          "governorGloss": "cross-reactive",
+          "dependent": 31,
+          "dependentGloss": "immunologically"
+        },
+        {
+          "dep": "amod",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 32,
+          "dependentGloss": "cross-reactive"
+        },
+        {
+          "dep": "compound",
+          "governor": 34,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "protein",
+          "dependent": 34,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 35,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "conj:nor",
+          "governor": 28,
+          "governorGloss": "enzyme",
+          "dependent": 35,
+          "dependentGloss": "protein"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "class",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "A",
+          "originalText": "A",
+          "lemma": "a",
+          "characterOffsetBegin": 554,
+          "characterOffsetEnd": 555,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "third",
+          "originalText": "third",
+          "lemma": "third",
+          "characterOffsetBegin": 556,
+          "characterOffsetEnd": 561,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "class",
+          "originalText": "class",
+          "lemma": "class",
+          "characterOffsetBegin": 562,
+          "characterOffsetEnd": 567,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 568,
+          "characterOffsetEnd": 570,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 571,
+          "characterOffsetEnd": 580,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 6,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 580,
+          "characterOffsetEnd": 581,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 7,
+          "word": "requiring",
+          "originalText": "requiring",
+          "lemma": "require",
+          "characterOffsetBegin": 581,
+          "characterOffsetEnd": 590,
+          "pos": "VBG",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 8,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 590,
+          "characterOffsetEnd": 591,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "nitrogenase",
+          "originalText": "nitrogenase",
+          "lemma": "nitrogenase",
+          "characterOffsetBegin": 592,
+          "characterOffsetEnd": 603,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 10,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 603,
+          "characterOffsetEnd": 604,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 11,
+          "word": "derepressed",
+          "originalText": "derepressed",
+          "lemma": "derepress",
+          "characterOffsetBegin": 604,
+          "characterOffsetEnd": 615,
+          "pos": "VBN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "mutants",
+          "originalText": "mutants",
+          "lemma": "mutant",
+          "characterOffsetBegin": 616,
+          "characterOffsetEnd": 623,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 624,
+          "characterOffsetEnd": 625,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": "strain",
+          "originalText": "strain",
+          "lemma": "strain",
+          "characterOffsetBegin": 625,
+          "characterOffsetEnd": 631,
+          "pos": "NN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "SK",
+          "originalText": "SK",
+          "lemma": "sk",
+          "characterOffsetBegin": 632,
+          "characterOffsetEnd": 634,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 16,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 634,
+          "characterOffsetEnd": 635,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 17,
+          "word": "25",
+          "originalText": "25",
+          "lemma": "25",
+          "characterOffsetBegin": 635,
+          "characterOffsetEnd": 637,
+          "pos": "CD",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 638,
+          "characterOffsetEnd": 641,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "26",
+          "originalText": "26",
+          "lemma": "26",
+          "characterOffsetBegin": 642,
+          "characterOffsetEnd": 644,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 20,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 644,
+          "characterOffsetEnd": 645,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "synthesizes",
+          "originalText": "synthesizes",
+          "lemma": "synthesize",
+          "characterOffsetBegin": 646,
+          "characterOffsetEnd": 657,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "neither",
+          "originalText": "neither",
+          "lemma": "neither",
+          "characterOffsetBegin": 658,
+          "characterOffsetEnd": 665,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 666,
+          "characterOffsetEnd": 667,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "catalytically",
+          "originalText": "catalytically",
+          "lemma": "catalytically",
+          "characterOffsetBegin": 668,
+          "characterOffsetEnd": 681,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "active",
+          "originalText": "active",
+          "lemma": "active",
+          "characterOffsetBegin": 682,
+          "characterOffsetEnd": 688,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 689,
+          "characterOffsetEnd": 698,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "synthetase",
+          "originalText": "synthetase",
+          "lemma": "synthetase",
+          "characterOffsetBegin": 699,
+          "characterOffsetEnd": 709,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "enzyme",
+          "originalText": "enzyme",
+          "lemma": "enzyme",
+          "characterOffsetBegin": 710,
+          "characterOffsetEnd": 716,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "nor",
+          "originalText": "nor",
+          "lemma": "nor",
+          "characterOffsetBegin": 717,
+          "characterOffsetEnd": 720,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "an",
+          "originalText": "an",
+          "lemma": "a",
+          "characterOffsetBegin": 721,
+          "characterOffsetEnd": 723,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "immunologically",
+          "originalText": "immunologically",
+          "lemma": "immunologically",
+          "characterOffsetBegin": 724,
+          "characterOffsetEnd": 739,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "cross-reactive",
+          "originalText": "cross-reactive",
+          "lemma": "cross-reactive",
+          "characterOffsetBegin": 740,
+          "characterOffsetEnd": 754,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 755,
+          "characterOffsetEnd": 764,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "synthetase",
+          "originalText": "synthetase",
+          "lemma": "synthetase",
+          "characterOffsetBegin": 765,
+          "characterOffsetEnd": 775,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "protein",
+          "originalText": "protein",
+          "lemma": "protein",
+          "characterOffsetBegin": 776,
+          "characterOffsetEnd": 783,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 36,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 783,
+          "characterOffsetEnd": 784,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 1,
+          "dependentGloss": "F"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 2,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 3,
+          "dependentGloss": "prime"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 4,
+          "dependentGloss": "complementation"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 5,
+          "dependentGloss": "analysis"
+        },
+        {
+          "dep": "obj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 7,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 9,
+          "dependentGloss": "mutant"
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "that",
+          "dependent": 10,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 11,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 15,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 19,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "appos",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": "map"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 21,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 22,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "nmod",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 23,
+          "dependentGloss": "segment"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 24,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 25,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 26,
+          "dependentGloss": "Klebsiella"
+        },
+        {
+          "dep": "nmod",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 27,
+          "dependentGloss": "chromosome"
+        },
+        {
+          "dep": "acl",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 28,
+          "dependentGloss": "corresponding"
+        },
+        {
+          "dep": "case",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 29,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 30,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl",
+          "governor": 28,
+          "governorGloss": "corresponding",
+          "dependent": 31,
+          "dependentGloss": "region"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 32,
+          "dependentGloss": "coding"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 34,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "obl",
+          "governor": 32,
+          "governorGloss": "coding",
+          "dependent": 35,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 1,
+          "dependentGloss": "F"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 2,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 3,
+          "dependentGloss": "prime"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 4,
+          "dependentGloss": "complementation"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 5,
+          "dependentGloss": "analysis"
+        },
+        {
+          "dep": "obj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 7,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 9,
+          "dependentGloss": "mutant"
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "that",
+          "dependent": 10,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 11,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 15,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 19,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "appos",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": "map"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 21,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 22,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 23,
+          "dependentGloss": "segment"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 24,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 25,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 26,
+          "dependentGloss": "Klebsiella"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 27,
+          "dependentGloss": "chromosome"
+        },
+        {
+          "dep": "acl",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 28,
+          "dependentGloss": "corresponding"
+        },
+        {
+          "dep": "case",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 29,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 30,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl:to",
+          "governor": 28,
+          "governorGloss": "corresponding",
+          "dependent": 31,
+          "dependentGloss": "region"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 32,
+          "dependentGloss": "coding"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 34,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "obl:for",
+          "governor": 32,
+          "governorGloss": "coding",
+          "dependent": 35,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "reveals"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 1,
+          "dependentGloss": "F"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 2,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 1,
+          "governorGloss": "F",
+          "dependent": 3,
+          "dependentGloss": "prime"
+        },
+        {
+          "dep": "compound",
+          "governor": 5,
+          "governorGloss": "analysis",
+          "dependent": 4,
+          "dependentGloss": "complementation"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 5,
+          "dependentGloss": "analysis"
+        },
+        {
+          "dep": "obj",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 7,
+          "dependentGloss": "that"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 9,
+          "dependentGloss": "mutant"
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "that",
+          "dependent": 10,
+          "dependentGloss": "strains"
+        },
+        {
+          "dep": "dep",
+          "governor": 10,
+          "governorGloss": "strains",
+          "dependent": 11,
+          "dependentGloss": "SK"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 12,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 13,
+          "dependentGloss": "25"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 15,
+          "dependentGloss": "26"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 16,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 17,
+          "dependentGloss": "27"
+        },
+        {
+          "dep": "punct",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 19,
+          "dependentGloss": "37"
+        },
+        {
+          "dep": "appos",
+          "governor": 11,
+          "governorGloss": "SK",
+          "dependent": 20,
+          "dependentGloss": "map"
+        },
+        {
+          "dep": "case",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 21,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 22,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 20,
+          "governorGloss": "map",
+          "dependent": 23,
+          "dependentGloss": "segment"
+        },
+        {
+          "dep": "case",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 24,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 25,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 26,
+          "dependentGloss": "Klebsiella"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 23,
+          "governorGloss": "segment",
+          "dependent": 27,
+          "dependentGloss": "chromosome"
+        },
+        {
+          "dep": "acl",
+          "governor": 27,
+          "governorGloss": "chromosome",
+          "dependent": 28,
+          "dependentGloss": "corresponding"
+        },
+        {
+          "dep": "case",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 29,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 30,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl:to",
+          "governor": 28,
+          "governorGloss": "corresponding",
+          "dependent": 31,
+          "dependentGloss": "region"
+        },
+        {
+          "dep": "acl",
+          "governor": 31,
+          "governorGloss": "region",
+          "dependent": 32,
+          "dependentGloss": "coding"
+        },
+        {
+          "dep": "case",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 33,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 35,
+          "governorGloss": "synthetase",
+          "dependent": 34,
+          "dependentGloss": "glutamine"
+        },
+        {
+          "dep": "obl:for",
+          "governor": 32,
+          "governorGloss": "coding",
+          "dependent": 35,
+          "dependentGloss": "synthetase"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "reveals",
+          "dependent": 36,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "F",
+          "originalText": "F",
+          "lemma": "f",
+          "characterOffsetBegin": 785,
+          "characterOffsetEnd": 786,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 2,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 786,
+          "characterOffsetEnd": 787,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 3,
+          "word": "prime",
+          "originalText": "prime",
+          "lemma": "prime",
+          "characterOffsetBegin": 787,
+          "characterOffsetEnd": 792,
+          "pos": "JJ",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "complementation",
+          "originalText": "complementation",
+          "lemma": "complementation",
+          "characterOffsetBegin": 793,
+          "characterOffsetEnd": 808,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "analysis",
+          "originalText": "analysis",
+          "lemma": "analysis",
+          "characterOffsetBegin": 809,
+          "characterOffsetEnd": 817,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "reveals",
+          "originalText": "reveals",
+          "lemma": "reveal",
+          "characterOffsetBegin": 818,
+          "characterOffsetEnd": 825,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "that",
+          "originalText": "that",
+          "lemma": "that",
+          "characterOffsetBegin": 826,
+          "characterOffsetEnd": 830,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 831,
+          "characterOffsetEnd": 834,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "mutant",
+          "originalText": "mutant",
+          "lemma": "mutant",
+          "characterOffsetBegin": 835,
+          "characterOffsetEnd": 841,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "strains",
+          "originalText": "strains",
+          "lemma": "strain",
+          "characterOffsetBegin": 842,
+          "characterOffsetEnd": 849,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "SK",
+          "originalText": "SK",
+          "lemma": "SK",
+          "characterOffsetBegin": 850,
+          "characterOffsetEnd": 852,
+          "pos": "NNP",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 12,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 852,
+          "characterOffsetEnd": 853,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": "25",
+          "originalText": "25",
+          "lemma": "25",
+          "characterOffsetBegin": 853,
+          "characterOffsetEnd": 855,
+          "pos": "CD",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 855,
+          "characterOffsetEnd": 856,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "26",
+          "originalText": "26",
+          "lemma": "26",
+          "characterOffsetBegin": 857,
+          "characterOffsetEnd": 859,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 16,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 859,
+          "characterOffsetEnd": 860,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "27",
+          "originalText": "27",
+          "lemma": "27",
+          "characterOffsetBegin": 861,
+          "characterOffsetEnd": 863,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 18,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 863,
+          "characterOffsetEnd": 864,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "37",
+          "originalText": "37",
+          "lemma": "37",
+          "characterOffsetBegin": 865,
+          "characterOffsetEnd": 867,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "map",
+          "originalText": "map",
+          "lemma": "map",
+          "characterOffsetBegin": 868,
+          "characterOffsetEnd": 871,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 872,
+          "characterOffsetEnd": 874,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 875,
+          "characterOffsetEnd": 876,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "segment",
+          "originalText": "segment",
+          "lemma": "segment",
+          "characterOffsetBegin": 877,
+          "characterOffsetEnd": 884,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 885,
+          "characterOffsetEnd": 887,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 888,
+          "characterOffsetEnd": 891,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "Klebsiella",
+          "originalText": "Klebsiella",
+          "lemma": "klebsiella",
+          "characterOffsetBegin": 892,
+          "characterOffsetEnd": 902,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "chromosome",
+          "originalText": "chromosome",
+          "lemma": "chromosome",
+          "characterOffsetBegin": 903,
+          "characterOffsetEnd": 913,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "corresponding",
+          "originalText": "corresponding",
+          "lemma": "correspond",
+          "characterOffsetBegin": 914,
+          "characterOffsetEnd": 927,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 928,
+          "characterOffsetEnd": 930,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 931,
+          "characterOffsetEnd": 934,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "region",
+          "originalText": "region",
+          "lemma": "region",
+          "characterOffsetBegin": 935,
+          "characterOffsetEnd": 941,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "coding",
+          "originalText": "coding",
+          "lemma": "code",
+          "characterOffsetBegin": 942,
+          "characterOffsetEnd": 948,
+          "pos": "VBG",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 949,
+          "characterOffsetEnd": 952,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "glutamine",
+          "originalText": "glutamine",
+          "lemma": "glutamine",
+          "characterOffsetBegin": 953,
+          "characterOffsetEnd": 962,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "synthetase",
+          "originalText": "synthetase",
+          "lemma": "synthetase",
+          "characterOffsetBegin": 963,
+          "characterOffsetEnd": 973,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 36,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 973,
+          "characterOffsetEnd": 974,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    }
+  ]
+}

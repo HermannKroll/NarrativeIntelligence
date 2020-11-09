@@ -83,7 +83,7 @@ class ExtractionUtilsTestCase(TestCase):
         doc2sentences, doc2tags = filter_document_sentences_without_tags(1, test26, nlp)
         new_text = ''.join(doc2sentences[doc_id])
         for tag in doc2tags[doc_id]:
-            t_id, t_text, t_start, t_end = tag
+            t_id, t_text, t_start, t_end = tag.ent_id, tag.text, tag.start, tag.end
             self.assertEqual(t_text, new_text[t_start:t_end])
 
         test54 = get_test_resource_filepath("PubMed54.txt")
@@ -91,7 +91,7 @@ class ExtractionUtilsTestCase(TestCase):
         doc2sentences, doc2tags = filter_document_sentences_without_tags(1, test54, nlp)
         new_text = ''.join(doc2sentences[doc_id])
         for tag in doc2tags[doc_id]:
-            t_id, t_text, t_start, t_end = tag
+            t_id, t_text, t_start, t_end = tag.ent_id, tag.text, tag.start, tag.end
             self.assertEqual(t_text, new_text[t_start:t_end])
 
         test_collection = get_test_resource_filepath("PubTatorCollection.txt")
@@ -99,19 +99,8 @@ class ExtractionUtilsTestCase(TestCase):
         for doc_id in [1313813, 1313814]:
             new_text = ''.join(doc2sentences[doc_id])
             for tag in doc2tags[doc_id]:
-                t_id, t_text, t_start, t_end = tag
+                t_id, t_text, t_start, t_end = tag.ent_id, tag.text, tag.start, tag.end
                 self.assertEqual(t_text, new_text[t_start:t_end])
 
 
 
-        #      tmp_dir = test_make_tempdir()
-        #       filelist = os.path.join(tmp_dir, "filelist.txt")
-
-        #      tmp_dir = test_make_tempdir()
-        #       filelist = os.path.join(tmp_dir, "filelist.txt")
-
-#        shutil.rmtree(tmp_dir)
-
-
-#      tmp_dir = test_make_tempdir()
-#       filelist = os.path.join(tmp_dir, "filelist.txt")

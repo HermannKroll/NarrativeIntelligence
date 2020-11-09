@@ -1,0 +1,3219 @@
+{
+  "docId": "75.txt",
+  "sentences": [
+    {
+      "index": 0,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 27,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 2,
+          "dependentGloss": "phosphorylated"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 3,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 5,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 6,
+          "dependentGloss": "glycogen"
+        },
+        {
+          "dep": "nmod",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 7,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 8,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 9,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "nummod",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 10,
+          "dependentGloss": "-1,4-glucan"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 11,
+          "dependentGloss": ":"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 12,
+          "dependentGloss": "orthophosphate"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 13,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 15,
+          "dependentGloss": "glucosyl"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 17,
+          "dependentGloss": "transferase"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "appos",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 19,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "EC",
+          "dependent": 20,
+          "dependentGloss": "2.4.1.1"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 21,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 22,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 25,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cop",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 26,
+          "dependentGloss": "is"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 28,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "advmod",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 29,
+          "dependentGloss": "easily"
+        },
+        {
+          "dep": "conj",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 30,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "mark",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 31,
+          "dependentGloss": "while"
+        },
+        {
+          "dep": "det",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 32,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 33,
+          "dependentGloss": "dephosphorylated"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 34,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 35,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "appos",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 37,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 39,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 40,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 41,
+          "dependentGloss": "contrast"
+        },
+        {
+          "dep": "case",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 42,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 43,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 44,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "nmod",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 45,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "punct",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 46,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "aux",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 47,
+          "dependentGloss": "has"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 48,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "advcl",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 49,
+          "dependentGloss": "reported"
+        },
+        {
+          "dep": "mark",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 50,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "cop",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 51,
+          "dependentGloss": "be"
+        },
+        {
+          "dep": "advmod",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 52,
+          "dependentGloss": "essentially"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 53,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "advmod",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 54,
+          "dependentGloss": "even"
+        },
+        {
+          "dep": "case",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 55,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 56,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 57,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 59,
+          "governorGloss": "AMP",
+          "dependent": 58,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 59,
+          "dependentGloss": "AMP"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 60,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 27,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 2,
+          "dependentGloss": "phosphorylated"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 3,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 3,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 5,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 6,
+          "dependentGloss": "glycogen"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 7,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 8,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 9,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "nummod",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 10,
+          "dependentGloss": "-1,4-glucan"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 11,
+          "dependentGloss": ":"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 12,
+          "dependentGloss": "orthophosphate"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 13,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 15,
+          "dependentGloss": "glucosyl"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 17,
+          "dependentGloss": "transferase"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "appos",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 19,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "EC",
+          "dependent": 20,
+          "dependentGloss": "2.4.1.1"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 21,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 22,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 25,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cop",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 26,
+          "dependentGloss": "is"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 28,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "advmod",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 29,
+          "dependentGloss": "easily"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 30,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "mark",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 31,
+          "dependentGloss": "while"
+        },
+        {
+          "dep": "det",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 32,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 33,
+          "dependentGloss": "dephosphorylated"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 34,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "nsubj:xsubj",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 34,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 35,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "appos",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 37,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 39,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 40,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 41,
+          "dependentGloss": "contrast"
+        },
+        {
+          "dep": "case",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 42,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 43,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 44,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "nmod:to",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 45,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "punct",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 46,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "aux",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 47,
+          "dependentGloss": "has"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 48,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "advcl:while",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 49,
+          "dependentGloss": "reported"
+        },
+        {
+          "dep": "mark",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 50,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "cop",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 51,
+          "dependentGloss": "be"
+        },
+        {
+          "dep": "advmod",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 52,
+          "dependentGloss": "essentially"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 53,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "advmod",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 54,
+          "dependentGloss": "even"
+        },
+        {
+          "dep": "case",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 55,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 56,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 57,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 59,
+          "governorGloss": "AMP",
+          "dependent": 58,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 59,
+          "dependentGloss": "AMP"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 60,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 27,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "amod",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 2,
+          "dependentGloss": "phosphorylated"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 3,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 3,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 4,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 5,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 6,
+          "dependentGloss": "glycogen"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 7,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 8,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 7,
+          "governorGloss": "phosphorylase",
+          "dependent": 9,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "nummod",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 10,
+          "dependentGloss": "-1,4-glucan"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 11,
+          "dependentGloss": ":"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 12,
+          "dependentGloss": "orthophosphate"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 13,
+          "dependentGloss": "alpha"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 14,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "compound",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 15,
+          "dependentGloss": "glucosyl"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 16,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "dep",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 17,
+          "dependentGloss": "transferase"
+        },
+        {
+          "dep": "punct",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 18,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "appos",
+          "governor": 17,
+          "governorGloss": "transferase",
+          "dependent": 19,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "EC",
+          "dependent": 20,
+          "dependentGloss": "2.4.1.1"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "alpha",
+          "dependent": 21,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 22,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "form",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "punct",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 25,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cop",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 26,
+          "dependentGloss": "is"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 28,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "advmod",
+          "governor": 30,
+          "governorGloss": "measured",
+          "dependent": 29,
+          "dependentGloss": "easily"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 30,
+          "dependentGloss": "measured"
+        },
+        {
+          "dep": "mark",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 31,
+          "dependentGloss": "while"
+        },
+        {
+          "dep": "det",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 32,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 33,
+          "dependentGloss": "dephosphorylated"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 34,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "nsubj:xsubj",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 34,
+          "dependentGloss": "form"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 35,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "appos",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 37,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "punct",
+          "governor": 37,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 39,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "case",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 40,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 34,
+          "governorGloss": "form",
+          "dependent": 41,
+          "dependentGloss": "contrast"
+        },
+        {
+          "dep": "case",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 42,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "det",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 43,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 45,
+          "governorGloss": "enzyme",
+          "dependent": 44,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "nmod:to",
+          "governor": 41,
+          "governorGloss": "contrast",
+          "dependent": 45,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "punct",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 46,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "aux",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 47,
+          "dependentGloss": "has"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 48,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "advcl:while",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 49,
+          "dependentGloss": "reported"
+        },
+        {
+          "dep": "mark",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 50,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "cop",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 51,
+          "dependentGloss": "be"
+        },
+        {
+          "dep": "advmod",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 52,
+          "dependentGloss": "essentially"
+        },
+        {
+          "dep": "xcomp",
+          "governor": 49,
+          "governorGloss": "reported",
+          "dependent": 53,
+          "dependentGloss": "inactive"
+        },
+        {
+          "dep": "advmod",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 54,
+          "dependentGloss": "even"
+        },
+        {
+          "dep": "case",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 55,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 56,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 53,
+          "governorGloss": "inactive",
+          "dependent": 57,
+          "dependentGloss": "presence"
+        },
+        {
+          "dep": "case",
+          "governor": 59,
+          "governorGloss": "AMP",
+          "dependent": 58,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 57,
+          "governorGloss": "presence",
+          "dependent": 59,
+          "dependentGloss": "AMP"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "active",
+          "dependent": 60,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 0,
+          "characterOffsetEnd": 3,
+          "pos": "DT",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "phosphorylated",
+          "originalText": "phosphorylated",
+          "lemma": "phosphorylate",
+          "characterOffsetBegin": 4,
+          "characterOffsetEnd": 18,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "form",
+          "originalText": "form",
+          "lemma": "form",
+          "characterOffsetBegin": 19,
+          "characterOffsetEnd": 23,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 24,
+          "characterOffsetEnd": 26,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "liver",
+          "originalText": "liver",
+          "lemma": "liver",
+          "characterOffsetBegin": 27,
+          "characterOffsetEnd": 32,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "glycogen",
+          "originalText": "glycogen",
+          "lemma": "glycogen",
+          "characterOffsetBegin": 33,
+          "characterOffsetEnd": 41,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 42,
+          "characterOffsetEnd": 55,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 56,
+          "characterOffsetEnd": 57,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 9,
+          "word": "alpha",
+          "originalText": "alpha",
+          "lemma": "alpha",
+          "characterOffsetBegin": 57,
+          "characterOffsetEnd": 62,
+          "pos": "NN",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 10,
+          "word": "-1,4-glucan",
+          "originalText": "-1,4-glucan",
+          "lemma": "-1,4-glucan",
+          "characterOffsetBegin": 62,
+          "characterOffsetEnd": 73,
+          "pos": "CD",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": ":",
+          "originalText": ":",
+          "lemma": ":",
+          "characterOffsetBegin": 74,
+          "characterOffsetEnd": 75,
+          "pos": ":",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "orthophosphate",
+          "originalText": "orthophosphate",
+          "lemma": "orthophosphate",
+          "characterOffsetBegin": 76,
+          "characterOffsetEnd": 90,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "alpha",
+          "originalText": "alpha",
+          "lemma": "alpha",
+          "characterOffsetBegin": 91,
+          "characterOffsetEnd": 96,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 96,
+          "characterOffsetEnd": 97,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 15,
+          "word": "glucosyl",
+          "originalText": "glucosyl",
+          "lemma": "glucosyl",
+          "characterOffsetBegin": 97,
+          "characterOffsetEnd": 105,
+          "pos": "NN",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 16,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 105,
+          "characterOffsetEnd": 106,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 17,
+          "word": "transferase",
+          "originalText": "transferase",
+          "lemma": "transferase",
+          "characterOffsetBegin": 106,
+          "characterOffsetEnd": 117,
+          "pos": "NN",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 18,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 117,
+          "characterOffsetEnd": 118,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "EC",
+          "originalText": "EC",
+          "lemma": "EC",
+          "characterOffsetBegin": 119,
+          "characterOffsetEnd": 121,
+          "pos": "NNP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "2.4.1.1",
+          "originalText": "2.4.1.1",
+          "lemma": "2.4.1.1",
+          "characterOffsetBegin": 122,
+          "characterOffsetEnd": 129,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 21,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 129,
+          "characterOffsetEnd": 130,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 131,
+          "characterOffsetEnd": 132,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 23,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 132,
+          "characterOffsetEnd": 145,
+          "pos": "NN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 146,
+          "characterOffsetEnd": 147,
+          "pos": "DT",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 25,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 147,
+          "characterOffsetEnd": 148,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "is",
+          "originalText": "is",
+          "lemma": "be",
+          "characterOffsetBegin": 149,
+          "characterOffsetEnd": 151,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "active",
+          "originalText": "active",
+          "lemma": "active",
+          "characterOffsetBegin": 152,
+          "characterOffsetEnd": 158,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 159,
+          "characterOffsetEnd": 162,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "easily",
+          "originalText": "easily",
+          "lemma": "easily",
+          "characterOffsetBegin": 163,
+          "characterOffsetEnd": 169,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "measured",
+          "originalText": "measured",
+          "lemma": "measure",
+          "characterOffsetBegin": 170,
+          "characterOffsetEnd": 178,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "while",
+          "originalText": "while",
+          "lemma": "while",
+          "characterOffsetBegin": 179,
+          "characterOffsetEnd": 184,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 185,
+          "characterOffsetEnd": 188,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "dephosphorylated",
+          "originalText": "dephosphorylated",
+          "lemma": "dephosphorylate",
+          "characterOffsetBegin": 189,
+          "characterOffsetEnd": 205,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "form",
+          "originalText": "form",
+          "lemma": "form",
+          "characterOffsetBegin": 206,
+          "characterOffsetEnd": 210,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 211,
+          "characterOffsetEnd": 212,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 36,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 212,
+          "characterOffsetEnd": 225,
+          "pos": "NN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 37,
+          "word": "b",
+          "originalText": "b",
+          "lemma": "b",
+          "characterOffsetBegin": 226,
+          "characterOffsetEnd": 227,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 38,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 227,
+          "characterOffsetEnd": 228,
+          "pos": "-RRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 39,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 228,
+          "characterOffsetEnd": 229,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 40,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 230,
+          "characterOffsetEnd": 232,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 41,
+          "word": "contrast",
+          "originalText": "contrast",
+          "lemma": "contrast",
+          "characterOffsetBegin": 233,
+          "characterOffsetEnd": 241,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 42,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 242,
+          "characterOffsetEnd": 244,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 43,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 245,
+          "characterOffsetEnd": 248,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 44,
+          "word": "muscle",
+          "originalText": "muscle",
+          "lemma": "muscle",
+          "characterOffsetBegin": 249,
+          "characterOffsetEnd": 255,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 45,
+          "word": "enzyme",
+          "originalText": "enzyme",
+          "lemma": "enzyme",
+          "characterOffsetBegin": 256,
+          "characterOffsetEnd": 262,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 46,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 262,
+          "characterOffsetEnd": 263,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 47,
+          "word": "has",
+          "originalText": "has",
+          "lemma": "have",
+          "characterOffsetBegin": 264,
+          "characterOffsetEnd": 267,
+          "pos": "VBZ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 48,
+          "word": "been",
+          "originalText": "been",
+          "lemma": "be",
+          "characterOffsetBegin": 268,
+          "characterOffsetEnd": 272,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 49,
+          "word": "reported",
+          "originalText": "reported",
+          "lemma": "report",
+          "characterOffsetBegin": 273,
+          "characterOffsetEnd": 281,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 50,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 282,
+          "characterOffsetEnd": 284,
+          "pos": "TO",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 51,
+          "word": "be",
+          "originalText": "be",
+          "lemma": "be",
+          "characterOffsetBegin": 285,
+          "characterOffsetEnd": 287,
+          "pos": "VB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 52,
+          "word": "essentially",
+          "originalText": "essentially",
+          "lemma": "essentially",
+          "characterOffsetBegin": 288,
+          "characterOffsetEnd": 299,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 53,
+          "word": "inactive",
+          "originalText": "inactive",
+          "lemma": "inactive",
+          "characterOffsetBegin": 300,
+          "characterOffsetEnd": 308,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 54,
+          "word": "even",
+          "originalText": "even",
+          "lemma": "even",
+          "characterOffsetBegin": 309,
+          "characterOffsetEnd": 313,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 55,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 314,
+          "characterOffsetEnd": 316,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 56,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 317,
+          "characterOffsetEnd": 320,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 57,
+          "word": "presence",
+          "originalText": "presence",
+          "lemma": "presence",
+          "characterOffsetBegin": 321,
+          "characterOffsetEnd": 329,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 58,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 330,
+          "characterOffsetEnd": 332,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 59,
+          "word": "AMP",
+          "originalText": "AMP",
+          "lemma": "amp",
+          "characterOffsetBegin": 333,
+          "characterOffsetEnd": 336,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 60,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 336,
+          "characterOffsetEnd": 337,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 2,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 4,
+          "dependentGloss": "we"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 5,
+          "dependentGloss": "obtained"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 6,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 7,
+          "dependentGloss": "stimulated"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 8,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "obl",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 10,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "sulfate",
+          "dependent": 11,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 12,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 14,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 15,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 16,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "conj",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 17,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 18,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 19,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 20,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 21,
+          "dependentGloss": "kinase"
+        },
+        {
+          "dep": "dep",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 22,
+          "dependentGloss": "whereas"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "whereas",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 26,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "sulfate",
+          "dependent": 27,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "obl",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 28,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 29,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 30,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 31,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 32,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "conj",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 33,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 34,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 35,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 37,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 2,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 4,
+          "dependentGloss": "we"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 5,
+          "dependentGloss": "obtained"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 6,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 7,
+          "dependentGloss": "stimulated"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 8,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 10,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "sulfate",
+          "dependent": 11,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 12,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 14,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 15,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 16,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 17,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 17,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 18,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 19,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 20,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 21,
+          "dependentGloss": "kinase"
+        },
+        {
+          "dep": "dep",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 22,
+          "dependentGloss": "whereas"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "whereas",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 26,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "sulfate",
+          "dependent": 27,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 28,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 29,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 30,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 31,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 32,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 33,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 33,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 34,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 35,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 37,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "b"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 2,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 4,
+          "dependentGloss": "we"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 5,
+          "dependentGloss": "obtained"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 6,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 7,
+          "dependentGloss": "stimulated"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 8,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 7,
+          "governorGloss": "stimulated",
+          "dependent": 10,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "sulfate",
+          "dependent": 11,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 10,
+          "governorGloss": "concentrations",
+          "dependent": 12,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 14,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 15,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 16,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "dep",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 17,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 5,
+          "governorGloss": "obtained",
+          "dependent": 17,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 18,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 19,
+          "dependentGloss": "muscle"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "kinase",
+          "dependent": 20,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 21,
+          "dependentGloss": "kinase"
+        },
+        {
+          "dep": "dep",
+          "governor": 17,
+          "governorGloss": "substrate",
+          "dependent": 22,
+          "dependentGloss": "whereas"
+        },
+        {
+          "dep": "dep",
+          "governor": 22,
+          "governorGloss": "whereas",
+          "dependent": 23,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 24,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 25,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 26,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "case",
+          "governor": 28,
+          "governorGloss": "sulfate",
+          "dependent": 27,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 28,
+          "dependentGloss": "sulfate"
+        },
+        {
+          "dep": "punct",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 29,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "cc",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 30,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "cop",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 31,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "det",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 32,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "dep",
+          "governor": 23,
+          "governorGloss": "phosphorylase",
+          "dependent": 33,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 26,
+          "governorGloss": "inhibited",
+          "dependent": 33,
+          "dependentGloss": "substrate"
+        },
+        {
+          "dep": "case",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 34,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 35,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "compound",
+          "governor": 37,
+          "governorGloss": "phosphatase",
+          "dependent": 36,
+          "dependentGloss": "phosphorylase"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 33,
+          "governorGloss": "substrate",
+          "dependent": 37,
+          "dependentGloss": "phosphatase"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "b",
+          "dependent": 38,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 338,
+          "characterOffsetEnd": 341,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 342,
+          "characterOffsetEnd": 355,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "b",
+          "originalText": "b",
+          "lemma": "b",
+          "characterOffsetBegin": 356,
+          "characterOffsetEnd": 357,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "we",
+          "originalText": "we",
+          "lemma": "we",
+          "characterOffsetBegin": 358,
+          "characterOffsetEnd": 360,
+          "pos": "PRP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "obtained",
+          "originalText": "obtained",
+          "lemma": "obtain",
+          "characterOffsetBegin": 361,
+          "characterOffsetEnd": 369,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 370,
+          "characterOffsetEnd": 373,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "stimulated",
+          "originalText": "stimulated",
+          "lemma": "stimulate",
+          "characterOffsetBegin": 374,
+          "characterOffsetEnd": 384,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "by",
+          "originalText": "by",
+          "lemma": "by",
+          "characterOffsetBegin": 385,
+          "characterOffsetEnd": 387,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "high",
+          "originalText": "high",
+          "lemma": "high",
+          "characterOffsetBegin": 388,
+          "characterOffsetEnd": 392,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "concentrations",
+          "originalText": "concentrations",
+          "lemma": "concentration",
+          "characterOffsetBegin": 393,
+          "characterOffsetEnd": 407,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 408,
+          "characterOffsetEnd": 410,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "sulfate",
+          "originalText": "sulfate",
+          "lemma": "sulfate",
+          "characterOffsetBegin": 411,
+          "characterOffsetEnd": 418,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 418,
+          "characterOffsetEnd": 419,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 420,
+          "characterOffsetEnd": 423,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 424,
+          "characterOffsetEnd": 427,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 428,
+          "characterOffsetEnd": 429,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "substrate",
+          "originalText": "substrate",
+          "lemma": "substrate",
+          "characterOffsetBegin": 430,
+          "characterOffsetEnd": 439,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 440,
+          "characterOffsetEnd": 443,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "muscle",
+          "originalText": "muscle",
+          "lemma": "muscle",
+          "characterOffsetBegin": 444,
+          "characterOffsetEnd": 450,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 451,
+          "characterOffsetEnd": 464,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "kinase",
+          "originalText": "kinase",
+          "lemma": "kinase",
+          "characterOffsetBegin": 465,
+          "characterOffsetEnd": 471,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "whereas",
+          "originalText": "whereas",
+          "lemma": "whereas",
+          "characterOffsetBegin": 472,
+          "characterOffsetEnd": 479,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 480,
+          "characterOffsetEnd": 493,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 494,
+          "characterOffsetEnd": 495,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 496,
+          "characterOffsetEnd": 499,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 26,
+          "word": "inhibited",
+          "originalText": "inhibited",
+          "lemma": "inhibit",
+          "characterOffsetBegin": 500,
+          "characterOffsetEnd": 509,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "by",
+          "originalText": "by",
+          "lemma": "by",
+          "characterOffsetBegin": 510,
+          "characterOffsetEnd": 512,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 28,
+          "word": "sulfate",
+          "originalText": "sulfate",
+          "lemma": "sulfate",
+          "characterOffsetBegin": 513,
+          "characterOffsetEnd": 520,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 29,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 520,
+          "characterOffsetEnd": 521,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 522,
+          "characterOffsetEnd": 525,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 526,
+          "characterOffsetEnd": 529,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 32,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 530,
+          "characterOffsetEnd": 531,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "substrate",
+          "originalText": "substrate",
+          "lemma": "substrate",
+          "characterOffsetBegin": 532,
+          "characterOffsetEnd": 541,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 34,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 542,
+          "characterOffsetEnd": 545,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 35,
+          "word": "liver",
+          "originalText": "liver",
+          "lemma": "liver",
+          "characterOffsetBegin": 546,
+          "characterOffsetEnd": 551,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 36,
+          "word": "phosphorylase",
+          "originalText": "phosphorylase",
+          "lemma": "phosphorylase",
+          "characterOffsetBegin": 552,
+          "characterOffsetEnd": 565,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 37,
+          "word": "phosphatase",
+          "originalText": "phosphatase",
+          "lemma": "phosphatase",
+          "characterOffsetBegin": 566,
+          "characterOffsetEnd": 577,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 38,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 577,
+          "characterOffsetEnd": 578,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    }
+  ]
+}

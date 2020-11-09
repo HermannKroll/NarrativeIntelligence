@@ -1,0 +1,5634 @@
+{
+  "docId": "66.txt",
+  "sentences": [
+    {
+      "index": 0,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "purification"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 1,
+          "dependentGloss": "Partial"
+        },
+        {
+          "dep": "cc",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 3,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 4,
+          "dependentGloss": "properties"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "obl",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 7,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 9,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "nmod",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 11,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "case",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 12,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 13,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "nmod",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 14,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 15,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "purification"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 1,
+          "dependentGloss": "Partial"
+        },
+        {
+          "dep": "cc",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 3,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 4,
+          "dependentGloss": "properties"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "obl",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 7,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 9,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 11,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "case",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 12,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 13,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 14,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 15,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 2,
+          "dependentGloss": "purification"
+        },
+        {
+          "dep": "amod",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 1,
+          "dependentGloss": "Partial"
+        },
+        {
+          "dep": "cc",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 3,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 4,
+          "dependentGloss": "properties"
+        },
+        {
+          "dep": "case",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 5,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "a"
+        },
+        {
+          "dep": "obl",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 7,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "amod",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 9,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "compound",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 4,
+          "governorGloss": "properties",
+          "dependent": 11,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "case",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 12,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "compound",
+          "governor": 14,
+          "governorGloss": "liver",
+          "dependent": 13,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 11,
+          "governorGloss": "dehydrogenase",
+          "dependent": 14,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 2,
+          "governorGloss": "purification",
+          "dependent": 15,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Partial",
+          "originalText": "Partial",
+          "lemma": "partial",
+          "characterOffsetBegin": 0,
+          "characterOffsetEnd": 7,
+          "pos": "JJ",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "purification",
+          "originalText": "purification",
+          "lemma": "purification",
+          "characterOffsetBegin": 8,
+          "characterOffsetEnd": 20,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 21,
+          "characterOffsetEnd": 24,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "properties",
+          "originalText": "properties",
+          "lemma": "property",
+          "characterOffsetBegin": 25,
+          "characterOffsetEnd": 35,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 36,
+          "characterOffsetEnd": 38,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "a",
+          "originalText": "a",
+          "lemma": "a",
+          "characterOffsetBegin": 39,
+          "characterOffsetEnd": 40,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "phenobarbital",
+          "originalText": "phenobarbital",
+          "lemma": "phenobarbital",
+          "characterOffsetBegin": 41,
+          "characterOffsetEnd": 54,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 8,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 54,
+          "characterOffsetEnd": 55,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 9,
+          "word": "induced",
+          "originalText": "induced",
+          "lemma": "induce",
+          "characterOffsetBegin": 55,
+          "characterOffsetEnd": 62,
+          "pos": "VBN",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "aldehyde",
+          "originalText": "aldehyde",
+          "lemma": "aldehyde",
+          "characterOffsetBegin": 63,
+          "characterOffsetEnd": 71,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "dehydrogenase",
+          "originalText": "dehydrogenase",
+          "lemma": "dehydrogenase",
+          "characterOffsetBegin": 72,
+          "characterOffsetEnd": 85,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 86,
+          "characterOffsetEnd": 88,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "rat",
+          "originalText": "rat",
+          "lemma": "rat",
+          "characterOffsetBegin": 89,
+          "characterOffsetEnd": 92,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "liver",
+          "originalText": "liver",
+          "lemma": "liver",
+          "characterOffsetBegin": 93,
+          "characterOffsetEnd": 98,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 15,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 98,
+          "characterOffsetEnd": 99,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 1,
+          "dependentGloss": "Properties"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 3,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod",
+          "governor": 1,
+          "governorGloss": "Properties",
+          "dependent": 4,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 7,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 9,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "appos",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 11,
+          "dependentGloss": "1.2.1.3"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "aux",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 13,
+          "dependentGloss": "have"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 14,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 15,
+          "dependentGloss": "studied"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 16,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 17,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "obl",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 18,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 1,
+          "dependentGloss": "Properties"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 3,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 1,
+          "governorGloss": "Properties",
+          "dependent": 4,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 7,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 9,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "appos",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 11,
+          "dependentGloss": "1.2.1.3"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "aux",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 13,
+          "dependentGloss": "have"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 14,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 15,
+          "dependentGloss": "studied"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 16,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 17,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 18,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "induced"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 1,
+          "dependentGloss": "Properties"
+        },
+        {
+          "dep": "case",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 2,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "phenobarbital",
+          "dependent": 3,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 1,
+          "governorGloss": "Properties",
+          "dependent": 4,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 6,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 7,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 8,
+          "dependentGloss": "dehydrogenase"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 9,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "appos",
+          "governor": 8,
+          "governorGloss": "dehydrogenase",
+          "dependent": 10,
+          "dependentGloss": "EC"
+        },
+        {
+          "dep": "nummod",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 11,
+          "dependentGloss": "1.2.1.3"
+        },
+        {
+          "dep": "punct",
+          "governor": 10,
+          "governorGloss": "EC",
+          "dependent": 12,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "aux",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 13,
+          "dependentGloss": "have"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 14,
+          "dependentGloss": "been"
+        },
+        {
+          "dep": "dep",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 15,
+          "dependentGloss": "studied"
+        },
+        {
+          "dep": "case",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 16,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "compound",
+          "governor": 18,
+          "governorGloss": "liver",
+          "dependent": 17,
+          "dependentGloss": "rat"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 15,
+          "governorGloss": "studied",
+          "dependent": 18,
+          "dependentGloss": "liver"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "induced",
+          "dependent": 19,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Properties",
+          "originalText": "Properties",
+          "lemma": "Properties",
+          "characterOffsetBegin": 100,
+          "characterOffsetEnd": 110,
+          "pos": "NNP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 111,
+          "characterOffsetEnd": 113,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 114,
+          "characterOffsetEnd": 117,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "phenobarbital",
+          "originalText": "phenobarbital",
+          "lemma": "phenobarbital",
+          "characterOffsetBegin": 118,
+          "characterOffsetEnd": 131,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "induced",
+          "originalText": "induced",
+          "lemma": "induce",
+          "characterOffsetBegin": 132,
+          "characterOffsetEnd": 139,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "cytoplasmic",
+          "originalText": "cytoplasmic",
+          "lemma": "cytoplasmic",
+          "characterOffsetBegin": 140,
+          "characterOffsetEnd": 151,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "aldehyde",
+          "originalText": "aldehyde",
+          "lemma": "aldehyde",
+          "characterOffsetBegin": 152,
+          "characterOffsetEnd": 160,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "dehydrogenase",
+          "originalText": "dehydrogenase",
+          "lemma": "dehydrogenase",
+          "characterOffsetBegin": 161,
+          "characterOffsetEnd": 174,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 175,
+          "characterOffsetEnd": 176,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 10,
+          "word": "EC",
+          "originalText": "EC",
+          "lemma": "EC",
+          "characterOffsetBegin": 176,
+          "characterOffsetEnd": 178,
+          "pos": "NNP",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "1.2.1.3",
+          "originalText": "1.2.1.3",
+          "lemma": "1.2.1.3",
+          "characterOffsetBegin": 179,
+          "characterOffsetEnd": 186,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 12,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 186,
+          "characterOffsetEnd": 187,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "have",
+          "originalText": "have",
+          "lemma": "have",
+          "characterOffsetBegin": 188,
+          "characterOffsetEnd": 192,
+          "pos": "VBP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "been",
+          "originalText": "been",
+          "lemma": "be",
+          "characterOffsetBegin": 193,
+          "characterOffsetEnd": 197,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "studied",
+          "originalText": "studied",
+          "lemma": "study",
+          "characterOffsetBegin": 198,
+          "characterOffsetEnd": 205,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 206,
+          "characterOffsetEnd": 208,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "rat",
+          "originalText": "rat",
+          "lemma": "rat",
+          "characterOffsetBegin": 209,
+          "characterOffsetEnd": 212,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "liver",
+          "originalText": "liver",
+          "lemma": "liver",
+          "characterOffsetBegin": 213,
+          "characterOffsetEnd": 218,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 19,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 218,
+          "characterOffsetEnd": 219,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "nummod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 1,
+          "dependentGloss": "7"
+        },
+        {
+          "dep": "advmod",
+          "governor": 3,
+          "governorGloss": "higher",
+          "dependent": 2,
+          "dependentGloss": "-12-Fold"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 3,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 4,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 5,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 7,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 9,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "obl",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 10,
+          "dependentGloss": "activities"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 11,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 12,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "obl",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 13,
+          "dependentGloss": "treatment"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "reactor",
+          "dependent": 14,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 15,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 16,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 17,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 18,
+          "dependentGloss": "non-reactor"
+        },
+        {
+          "dep": "nmod",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 19,
+          "dependentGloss": "animals"
+        },
+        {
+          "dep": "case",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 20,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 21,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "nmod",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 22,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "acetaldehyde",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 24,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 26,
+          "dependentGloss": "18"
+        },
+        {
+          "dep": "dep",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 27,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 28,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 30,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 31,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 32,
+          "dependentGloss": "9"
+        },
+        {
+          "dep": "appos",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 33,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 34,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "nummod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 1,
+          "dependentGloss": "7"
+        },
+        {
+          "dep": "advmod",
+          "governor": 3,
+          "governorGloss": "higher",
+          "dependent": 2,
+          "dependentGloss": "-12-Fold"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 3,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 4,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 5,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 7,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 9,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 10,
+          "dependentGloss": "activities"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 11,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 12,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "obl:after",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 13,
+          "dependentGloss": "treatment"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "reactor",
+          "dependent": 14,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 15,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 16,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 17,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 18,
+          "dependentGloss": "non-reactor"
+        },
+        {
+          "dep": "nmod:compared",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 19,
+          "dependentGloss": "animals"
+        },
+        {
+          "dep": "case",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 20,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 21,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "nmod:with",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 22,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "acetaldehyde",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 24,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 26,
+          "dependentGloss": "18"
+        },
+        {
+          "dep": "dep",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 27,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 28,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 30,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 31,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 32,
+          "dependentGloss": "9"
+        },
+        {
+          "dep": "appos",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 33,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 34,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "seen"
+        },
+        {
+          "dep": "nummod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 1,
+          "dependentGloss": "7"
+        },
+        {
+          "dep": "advmod",
+          "governor": 3,
+          "governorGloss": "higher",
+          "dependent": 2,
+          "dependentGloss": "-12-Fold"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "levels",
+          "dependent": 3,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 4,
+          "dependentGloss": "levels"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 5,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 7,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 8,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 10,
+          "governorGloss": "activities",
+          "dependent": 9,
+          "dependentGloss": "cytoplasmic"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 10,
+          "dependentGloss": "activities"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 11,
+          "dependentGloss": "after"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 12,
+          "dependentGloss": "phenobarbital"
+        },
+        {
+          "dep": "obl:after",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 13,
+          "dependentGloss": "treatment"
+        },
+        {
+          "dep": "case",
+          "governor": 15,
+          "governorGloss": "reactor",
+          "dependent": 14,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "nmod:in",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 15,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 16,
+          "dependentGloss": "compared"
+        },
+        {
+          "dep": "fixed",
+          "governor": 16,
+          "governorGloss": "compared",
+          "dependent": 17,
+          "dependentGloss": "to"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 18,
+          "dependentGloss": "non-reactor"
+        },
+        {
+          "dep": "nmod:compared_to",
+          "governor": 13,
+          "governorGloss": "treatment",
+          "dependent": 19,
+          "dependentGloss": "animals"
+        },
+        {
+          "dep": "case",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 20,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 21,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "nmod:with",
+          "governor": 19,
+          "governorGloss": "animals",
+          "dependent": 22,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 24,
+          "governorGloss": "acetaldehyde",
+          "dependent": 23,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 22,
+          "governorGloss": "concentrations",
+          "dependent": 24,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 25,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 26,
+          "dependentGloss": "18"
+        },
+        {
+          "dep": "dep",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 27,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 27,
+          "governorGloss": "mM",
+          "dependent": 28,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "cc",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 29,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 30,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 31,
+          "dependentGloss": "("
+        },
+        {
+          "dep": "nummod",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 32,
+          "dependentGloss": "9"
+        },
+        {
+          "dep": "appos",
+          "governor": 30,
+          "governorGloss": "propionaldehyde",
+          "dependent": 33,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "punct",
+          "governor": 33,
+          "governorGloss": "mM",
+          "dependent": 34,
+          "dependentGloss": ")"
+        },
+        {
+          "dep": "punct",
+          "governor": 6,
+          "governorGloss": "seen",
+          "dependent": 35,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "7",
+          "originalText": "7",
+          "lemma": "7",
+          "characterOffsetBegin": 220,
+          "characterOffsetEnd": 221,
+          "pos": "CD",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 2,
+          "word": "-12-Fold",
+          "originalText": "-12-Fold",
+          "lemma": "-12-fold",
+          "characterOffsetBegin": 221,
+          "characterOffsetEnd": 229,
+          "pos": "RB",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "higher",
+          "originalText": "higher",
+          "lemma": "higher",
+          "characterOffsetBegin": 230,
+          "characterOffsetEnd": 236,
+          "pos": "JJR",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "levels",
+          "originalText": "levels",
+          "lemma": "level",
+          "characterOffsetBegin": 237,
+          "characterOffsetEnd": 243,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "were",
+          "originalText": "were",
+          "lemma": "be",
+          "characterOffsetBegin": 244,
+          "characterOffsetEnd": 248,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "seen",
+          "originalText": "seen",
+          "lemma": "see",
+          "characterOffsetBegin": 249,
+          "characterOffsetEnd": 253,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 254,
+          "characterOffsetEnd": 256,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 257,
+          "characterOffsetEnd": 260,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "cytoplasmic",
+          "originalText": "cytoplasmic",
+          "lemma": "cytoplasmic",
+          "characterOffsetBegin": 261,
+          "characterOffsetEnd": 272,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "activities",
+          "originalText": "activities",
+          "lemma": "activity",
+          "characterOffsetBegin": 273,
+          "characterOffsetEnd": 283,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "after",
+          "originalText": "after",
+          "lemma": "after",
+          "characterOffsetBegin": 284,
+          "characterOffsetEnd": 289,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "phenobarbital",
+          "originalText": "phenobarbital",
+          "lemma": "phenobarbital",
+          "characterOffsetBegin": 290,
+          "characterOffsetEnd": 303,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "treatment",
+          "originalText": "treatment",
+          "lemma": "treatment",
+          "characterOffsetBegin": 304,
+          "characterOffsetEnd": 313,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 314,
+          "characterOffsetEnd": 316,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "reactor",
+          "originalText": "reactor",
+          "lemma": "reactor",
+          "characterOffsetBegin": 317,
+          "characterOffsetEnd": 324,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "compared",
+          "originalText": "compared",
+          "lemma": "compare",
+          "characterOffsetBegin": 325,
+          "characterOffsetEnd": 333,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "to",
+          "originalText": "to",
+          "lemma": "to",
+          "characterOffsetBegin": 334,
+          "characterOffsetEnd": 336,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "non-reactor",
+          "originalText": "non-reactor",
+          "lemma": "non-reactor",
+          "characterOffsetBegin": 337,
+          "characterOffsetEnd": 348,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "animals",
+          "originalText": "animals",
+          "lemma": "animal",
+          "characterOffsetBegin": 349,
+          "characterOffsetEnd": 356,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "with",
+          "originalText": "with",
+          "lemma": "with",
+          "characterOffsetBegin": 357,
+          "characterOffsetEnd": 361,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "high",
+          "originalText": "high",
+          "lemma": "high",
+          "characterOffsetBegin": 362,
+          "characterOffsetEnd": 366,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 22,
+          "word": "concentrations",
+          "originalText": "concentrations",
+          "lemma": "concentration",
+          "characterOffsetBegin": 367,
+          "characterOffsetEnd": 381,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 23,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 382,
+          "characterOffsetEnd": 384,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 24,
+          "word": "acetaldehyde",
+          "originalText": "acetaldehyde",
+          "lemma": "acetaldehyde",
+          "characterOffsetBegin": 385,
+          "characterOffsetEnd": 397,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 25,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 398,
+          "characterOffsetEnd": 399,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 26,
+          "word": "18",
+          "originalText": "18",
+          "lemma": "18",
+          "characterOffsetBegin": 399,
+          "characterOffsetEnd": 401,
+          "pos": "CD",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 27,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 402,
+          "characterOffsetEnd": 404,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 28,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 404,
+          "characterOffsetEnd": 405,
+          "pos": "-RRB-",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 29,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 406,
+          "characterOffsetEnd": 409,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 30,
+          "word": "propionaldehyde",
+          "originalText": "propionaldehyde",
+          "lemma": "propionaldehyde",
+          "characterOffsetBegin": 410,
+          "characterOffsetEnd": 425,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 31,
+          "word": "(",
+          "originalText": "(",
+          "lemma": "(",
+          "characterOffsetBegin": 426,
+          "characterOffsetEnd": 427,
+          "pos": "-LRB-",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 32,
+          "word": "9",
+          "originalText": "9",
+          "lemma": "9",
+          "characterOffsetBegin": 427,
+          "characterOffsetEnd": 428,
+          "pos": "CD",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 33,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 429,
+          "characterOffsetEnd": 431,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 34,
+          "word": ")",
+          "originalText": ")",
+          "lemma": ")",
+          "characterOffsetBegin": 431,
+          "characterOffsetEnd": 432,
+          "pos": "-RRB-",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 35,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 432,
+          "characterOffsetEnd": 433,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "found"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "difference",
+          "dependent": 1,
+          "dependentGloss": "No"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 2,
+          "dependentGloss": "difference"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 5,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "nummod",
+          "governor": 7,
+          "governorGloss": "mM",
+          "dependent": 6,
+          "dependentGloss": "0.12"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 9,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "mM",
+          "dependent": 10,
+          "dependentGloss": "2"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "glycolaldehyde",
+          "dependent": 11,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "conj",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 12,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "mM",
+          "dependent": 14,
+          "dependentGloss": "6"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "conj",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 16,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 17,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "mM",
+          "dependent": 18,
+          "dependentGloss": "0.5"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 19,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 20,
+          "dependentGloss": "betaine"
+        },
+        {
+          "dep": "conj",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 21,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 22,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "found"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "difference",
+          "dependent": 1,
+          "dependentGloss": "No"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 2,
+          "dependentGloss": "difference"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 5,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "nummod",
+          "governor": 7,
+          "governorGloss": "mM",
+          "dependent": 6,
+          "dependentGloss": "0.12"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 9,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "mM",
+          "dependent": 10,
+          "dependentGloss": "2"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "glycolaldehyde",
+          "dependent": 11,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 12,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 12,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "mM",
+          "dependent": 14,
+          "dependentGloss": "6"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 16,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 16,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 17,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "mM",
+          "dependent": 18,
+          "dependentGloss": "0.5"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 19,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 20,
+          "dependentGloss": "betaine"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 21,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 21,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 22,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "found"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "difference",
+          "dependent": 1,
+          "dependentGloss": "No"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 2,
+          "dependentGloss": "difference"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 5,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "nummod",
+          "governor": 7,
+          "governorGloss": "mM",
+          "dependent": 6,
+          "dependentGloss": "0.12"
+        },
+        {
+          "dep": "compound",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 9,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 11,
+          "governorGloss": "mM",
+          "dependent": 10,
+          "dependentGloss": "2"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "glycolaldehyde",
+          "dependent": 11,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 12,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 12,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 13,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "nummod",
+          "governor": 15,
+          "governorGloss": "mM",
+          "dependent": 14,
+          "dependentGloss": "6"
+        },
+        {
+          "dep": "compound",
+          "governor": 16,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 16,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 16,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 17,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "nummod",
+          "governor": 19,
+          "governorGloss": "mM",
+          "dependent": 18,
+          "dependentGloss": "0.5"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 19,
+          "dependentGloss": "mM"
+        },
+        {
+          "dep": "compound",
+          "governor": 21,
+          "governorGloss": "aldehyde",
+          "dependent": 20,
+          "dependentGloss": "betaine"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 21,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 21,
+          "dependentGloss": "aldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "found",
+          "dependent": 22,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "No",
+          "originalText": "No",
+          "lemma": "no",
+          "characterOffsetBegin": 434,
+          "characterOffsetEnd": 436,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "difference",
+          "originalText": "difference",
+          "lemma": "difference",
+          "characterOffsetBegin": 437,
+          "characterOffsetEnd": 447,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 448,
+          "characterOffsetEnd": 451,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "found",
+          "originalText": "found",
+          "lemma": "find",
+          "characterOffsetBegin": 452,
+          "characterOffsetEnd": 457,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "with",
+          "originalText": "with",
+          "lemma": "with",
+          "characterOffsetBegin": 458,
+          "characterOffsetEnd": 462,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "0.12",
+          "originalText": "0.12",
+          "lemma": "0.12",
+          "characterOffsetBegin": 463,
+          "characterOffsetEnd": 467,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 468,
+          "characterOffsetEnd": 470,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "acetaldehyde",
+          "originalText": "acetaldehyde",
+          "lemma": "acetaldehyde",
+          "characterOffsetBegin": 471,
+          "characterOffsetEnd": 483,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 9,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 483,
+          "characterOffsetEnd": 484,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "2",
+          "originalText": "2",
+          "lemma": "2",
+          "characterOffsetBegin": 485,
+          "characterOffsetEnd": 486,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 487,
+          "characterOffsetEnd": 489,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "glycolaldehyde",
+          "originalText": "glycolaldehyde",
+          "lemma": "glycolaldehyde",
+          "characterOffsetBegin": 490,
+          "characterOffsetEnd": 504,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 504,
+          "characterOffsetEnd": 505,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "6",
+          "originalText": "6",
+          "lemma": "6",
+          "characterOffsetBegin": 506,
+          "characterOffsetEnd": 507,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 508,
+          "characterOffsetEnd": 510,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "formaldehyde",
+          "originalText": "formaldehyde",
+          "lemma": "formaldehyde",
+          "characterOffsetBegin": 511,
+          "characterOffsetEnd": 523,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "or",
+          "originalText": "or",
+          "lemma": "or",
+          "characterOffsetBegin": 524,
+          "characterOffsetEnd": 526,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "0.5",
+          "originalText": "0.5",
+          "lemma": "0.5",
+          "characterOffsetBegin": 527,
+          "characterOffsetEnd": 530,
+          "pos": "CD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "mM",
+          "originalText": "mM",
+          "lemma": "mm",
+          "characterOffsetBegin": 531,
+          "characterOffsetEnd": 533,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 20,
+          "word": "betaine",
+          "originalText": "betaine",
+          "lemma": "betaine",
+          "characterOffsetBegin": 534,
+          "characterOffsetEnd": 541,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 21,
+          "word": "aldehyde",
+          "originalText": "aldehyde",
+          "lemma": "aldehyde",
+          "characterOffsetBegin": 542,
+          "characterOffsetEnd": 550,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 22,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 550,
+          "characterOffsetEnd": 551,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "had"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 2,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 3,
+          "dependentGloss": "group"
+        },
+        {
+          "dep": "advmod",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 4,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "advmod",
+          "governor": 7,
+          "governorGloss": "higher",
+          "dependent": 6,
+          "dependentGloss": "slightly"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "activity",
+          "dependent": 7,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 8,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 9,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 11,
+          "dependentGloss": "mitochondrial"
+        },
+        {
+          "dep": "obl",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 12,
+          "dependentGloss": "fraction"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "det",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 15,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 16,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 18,
+          "governorGloss": "propionaldehyde",
+          "dependent": 17,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 18,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "obl",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 19,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "had"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 2,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 3,
+          "dependentGloss": "group"
+        },
+        {
+          "dep": "advmod",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 4,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "advmod",
+          "governor": 7,
+          "governorGloss": "higher",
+          "dependent": 6,
+          "dependentGloss": "slightly"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "activity",
+          "dependent": 7,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 8,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 9,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 11,
+          "dependentGloss": "mitochondrial"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 12,
+          "dependentGloss": "fraction"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "det",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 15,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 16,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 18,
+          "governorGloss": "propionaldehyde",
+          "dependent": 17,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 18,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 18,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 19,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 5,
+          "dependentGloss": "had"
+        },
+        {
+          "dep": "det",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 3,
+          "governorGloss": "group",
+          "dependent": 2,
+          "dependentGloss": "reactor"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 3,
+          "dependentGloss": "group"
+        },
+        {
+          "dep": "advmod",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 4,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "advmod",
+          "governor": 7,
+          "governorGloss": "higher",
+          "dependent": 6,
+          "dependentGloss": "slightly"
+        },
+        {
+          "dep": "amod",
+          "governor": 8,
+          "governorGloss": "activity",
+          "dependent": 7,
+          "dependentGloss": "higher"
+        },
+        {
+          "dep": "obj",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 8,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "case",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 9,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 12,
+          "governorGloss": "fraction",
+          "dependent": 11,
+          "dependentGloss": "mitochondrial"
+        },
+        {
+          "dep": "obl:in",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 12,
+          "dependentGloss": "fraction"
+        },
+        {
+          "dep": "case",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 13,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "det",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 14,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 15,
+          "dependentGloss": "high"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 16,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 18,
+          "governorGloss": "propionaldehyde",
+          "dependent": 17,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 16,
+          "governorGloss": "acetaldehyde",
+          "dependent": 18,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "concentrations",
+          "dependent": 18,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 19,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "punct",
+          "governor": 5,
+          "governorGloss": "had",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 552,
+          "characterOffsetEnd": 555,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "reactor",
+          "originalText": "reactor",
+          "lemma": "reactor",
+          "characterOffsetBegin": 556,
+          "characterOffsetEnd": 563,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "group",
+          "originalText": "group",
+          "lemma": "group",
+          "characterOffsetBegin": 564,
+          "characterOffsetEnd": 569,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "also",
+          "originalText": "also",
+          "lemma": "also",
+          "characterOffsetBegin": 570,
+          "characterOffsetEnd": 574,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "had",
+          "originalText": "had",
+          "lemma": "have",
+          "characterOffsetBegin": 575,
+          "characterOffsetEnd": 578,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "slightly",
+          "originalText": "slightly",
+          "lemma": "slightly",
+          "characterOffsetBegin": 579,
+          "characterOffsetEnd": 587,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "higher",
+          "originalText": "higher",
+          "lemma": "higher",
+          "characterOffsetBegin": 588,
+          "characterOffsetEnd": 594,
+          "pos": "JJR",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "activity",
+          "originalText": "activity",
+          "lemma": "activity",
+          "characterOffsetBegin": 595,
+          "characterOffsetEnd": 603,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 604,
+          "characterOffsetEnd": 606,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 607,
+          "characterOffsetEnd": 610,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "mitochondrial",
+          "originalText": "mitochondrial",
+          "lemma": "mitochondrial",
+          "characterOffsetBegin": 611,
+          "characterOffsetEnd": 624,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "fraction",
+          "originalText": "fraction",
+          "lemma": "fraction",
+          "characterOffsetBegin": 625,
+          "characterOffsetEnd": 633,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "with",
+          "originalText": "with",
+          "lemma": "with",
+          "characterOffsetBegin": 634,
+          "characterOffsetEnd": 638,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 14,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 639,
+          "characterOffsetEnd": 642,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "high",
+          "originalText": "high",
+          "lemma": "high",
+          "characterOffsetBegin": 643,
+          "characterOffsetEnd": 647,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "acetaldehyde",
+          "originalText": "acetaldehyde",
+          "lemma": "acetaldehyde",
+          "characterOffsetBegin": 648,
+          "characterOffsetEnd": 660,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 661,
+          "characterOffsetEnd": 664,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 18,
+          "word": "propionaldehyde",
+          "originalText": "propionaldehyde",
+          "lemma": "propionaldehyde",
+          "characterOffsetBegin": 665,
+          "characterOffsetEnd": 680,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 19,
+          "word": "concentrations",
+          "originalText": "concentrations",
+          "lemma": "concentration",
+          "characterOffsetBegin": 681,
+          "characterOffsetEnd": 695,
+          "pos": "NNS",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 20,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 695,
+          "characterOffsetEnd": 696,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 1,
+          "dependentGloss": "It"
+        },
+        {
+          "dep": "cop",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 2,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 4,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 5,
+          "dependentGloss": "several"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 6,
+          "dependentGloss": "aliphatic"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "aromatic",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 6,
+          "governorGloss": "aliphatic",
+          "dependent": 8,
+          "dependentGloss": "aromatic"
+        },
+        {
+          "dep": "obl",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 9,
+          "dependentGloss": "aldehydes"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "not",
+          "dependent": 10,
+          "dependentGloss": "but"
+        },
+        {
+          "dep": "cc",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 11,
+          "dependentGloss": "not"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 12,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "conj",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 13,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 16,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 17,
+          "dependentGloss": "D"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 18,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "conj",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 19,
+          "dependentGloss": "glyceraldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 1,
+          "dependentGloss": "It"
+        },
+        {
+          "dep": "cop",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 2,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 4,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 5,
+          "dependentGloss": "several"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 6,
+          "dependentGloss": "aliphatic"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "aromatic",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "aliphatic",
+          "dependent": 8,
+          "dependentGloss": "aromatic"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 8,
+          "dependentGloss": "aromatic"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 9,
+          "dependentGloss": "aldehydes"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "not",
+          "dependent": 10,
+          "dependentGloss": "but"
+        },
+        {
+          "dep": "cc",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 11,
+          "dependentGloss": "not"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 12,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 13,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 15,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 16,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 17,
+          "dependentGloss": "D"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 18,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 19,
+          "dependentGloss": "glyceraldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 19,
+          "dependentGloss": "glyceraldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 3,
+          "dependentGloss": "active"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 1,
+          "dependentGloss": "It"
+        },
+        {
+          "dep": "cop",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 2,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 4,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 5,
+          "dependentGloss": "several"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 6,
+          "dependentGloss": "aliphatic"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "aromatic",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "aliphatic",
+          "dependent": 8,
+          "dependentGloss": "aromatic"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "aldehydes",
+          "dependent": 8,
+          "dependentGloss": "aromatic"
+        },
+        {
+          "dep": "obl:with",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 9,
+          "dependentGloss": "aldehydes"
+        },
+        {
+          "dep": "cc",
+          "governor": 11,
+          "governorGloss": "not",
+          "dependent": 10,
+          "dependentGloss": "but"
+        },
+        {
+          "dep": "cc",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 11,
+          "dependentGloss": "not"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 12,
+          "dependentGloss": "with"
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 13,
+          "dependentGloss": "formaldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 14,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 15,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 15,
+          "dependentGloss": "glycolaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 16,
+          "dependentGloss": "or"
+        },
+        {
+          "dep": "compound",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 17,
+          "dependentGloss": "D"
+        },
+        {
+          "dep": "punct",
+          "governor": 19,
+          "governorGloss": "glyceraldehyde",
+          "dependent": 18,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "conj:negcc",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 19,
+          "dependentGloss": "glyceraldehyde"
+        },
+        {
+          "dep": "conj:or",
+          "governor": 13,
+          "governorGloss": "formaldehyde",
+          "dependent": 19,
+          "dependentGloss": "glyceraldehyde"
+        },
+        {
+          "dep": "punct",
+          "governor": 3,
+          "governorGloss": "active",
+          "dependent": 20,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "It",
+          "originalText": "It",
+          "lemma": "it",
+          "characterOffsetBegin": 697,
+          "characterOffsetEnd": 699,
+          "pos": "PRP",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 700,
+          "characterOffsetEnd": 703,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "active",
+          "originalText": "active",
+          "lemma": "active",
+          "characterOffsetBegin": 704,
+          "characterOffsetEnd": 710,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "with",
+          "originalText": "with",
+          "lemma": "with",
+          "characterOffsetBegin": 711,
+          "characterOffsetEnd": 715,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "several",
+          "originalText": "several",
+          "lemma": "several",
+          "characterOffsetBegin": 716,
+          "characterOffsetEnd": 723,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "aliphatic",
+          "originalText": "aliphatic",
+          "lemma": "aliphatic",
+          "characterOffsetBegin": 724,
+          "characterOffsetEnd": 733,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 734,
+          "characterOffsetEnd": 737,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "aromatic",
+          "originalText": "aromatic",
+          "lemma": "aromatic",
+          "characterOffsetBegin": 738,
+          "characterOffsetEnd": 746,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "aldehydes",
+          "originalText": "aldehydes",
+          "lemma": "aldehyde",
+          "characterOffsetBegin": 747,
+          "characterOffsetEnd": 756,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "but",
+          "originalText": "but",
+          "lemma": "but",
+          "characterOffsetBegin": 757,
+          "characterOffsetEnd": 760,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "not",
+          "originalText": "not",
+          "lemma": "not",
+          "characterOffsetBegin": 761,
+          "characterOffsetEnd": 764,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "with",
+          "originalText": "with",
+          "lemma": "with",
+          "characterOffsetBegin": 765,
+          "characterOffsetEnd": 769,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "formaldehyde",
+          "originalText": "formaldehyde",
+          "lemma": "formaldehyde",
+          "characterOffsetBegin": 770,
+          "characterOffsetEnd": 782,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 782,
+          "characterOffsetEnd": 783,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 15,
+          "word": "glycolaldehyde",
+          "originalText": "glycolaldehyde",
+          "lemma": "glycolaldehyde",
+          "characterOffsetBegin": 784,
+          "characterOffsetEnd": 798,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 16,
+          "word": "or",
+          "originalText": "or",
+          "lemma": "or",
+          "characterOffsetBegin": 799,
+          "characterOffsetEnd": 801,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 17,
+          "word": "D",
+          "originalText": "D",
+          "lemma": "d",
+          "characterOffsetBegin": 802,
+          "characterOffsetEnd": 803,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 18,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 803,
+          "characterOffsetEnd": 804,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 19,
+          "word": "glyceraldehyde",
+          "originalText": "glyceraldehyde",
+          "lemma": "glyceraldehyde",
+          "characterOffsetBegin": 804,
+          "characterOffsetEnd": 818,
+          "pos": "NN",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 20,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 818,
+          "characterOffsetEnd": 819,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 13,
+          "dependentGloss": "range"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 2,
+          "dependentGloss": "Km"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 3,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 4,
+          "dependentGloss": "values"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 5,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 6,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cop",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 9,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 10,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 11,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 12,
+          "dependentGloss": "millimolar"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 14,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 13,
+          "dependentGloss": "range"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 2,
+          "dependentGloss": "Km"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 3,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 4,
+          "dependentGloss": "values"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 5,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 6,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cop",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 9,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 10,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 11,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 12,
+          "dependentGloss": "millimolar"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 14,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 13,
+          "dependentGloss": "range"
+        },
+        {
+          "dep": "det",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 2,
+          "dependentGloss": "Km"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 3,
+          "dependentGloss": "-"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 4,
+          "dependentGloss": "values"
+        },
+        {
+          "dep": "case",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 5,
+          "dependentGloss": "for"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 6,
+          "dependentGloss": "propionaldehyde"
+        },
+        {
+          "dep": "cc",
+          "governor": 8,
+          "governorGloss": "acetaldehyde",
+          "dependent": 7,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "nmod:for",
+          "governor": 4,
+          "governorGloss": "values",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 6,
+          "governorGloss": "propionaldehyde",
+          "dependent": 8,
+          "dependentGloss": "acetaldehyde"
+        },
+        {
+          "dep": "cop",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 9,
+          "dependentGloss": "were"
+        },
+        {
+          "dep": "case",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 10,
+          "dependentGloss": "in"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 11,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 12,
+          "dependentGloss": "millimolar"
+        },
+        {
+          "dep": "punct",
+          "governor": 13,
+          "governorGloss": "range",
+          "dependent": 14,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 820,
+          "characterOffsetEnd": 823,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "Km",
+          "originalText": "Km",
+          "lemma": "km",
+          "characterOffsetBegin": 824,
+          "characterOffsetEnd": 826,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 3,
+          "word": "-",
+          "originalText": "-",
+          "lemma": "-",
+          "characterOffsetBegin": 826,
+          "characterOffsetEnd": 827,
+          "pos": "HYPH",
+          "before": "",
+          "after": ""
+        },
+        {
+          "index": 4,
+          "word": "values",
+          "originalText": "values",
+          "lemma": "value",
+          "characterOffsetBegin": 827,
+          "characterOffsetEnd": 833,
+          "pos": "NNS",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "for",
+          "originalText": "for",
+          "lemma": "for",
+          "characterOffsetBegin": 834,
+          "characterOffsetEnd": 837,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "propionaldehyde",
+          "originalText": "propionaldehyde",
+          "lemma": "propionaldehyde",
+          "characterOffsetBegin": 838,
+          "characterOffsetEnd": 853,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 854,
+          "characterOffsetEnd": 857,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "acetaldehyde",
+          "originalText": "acetaldehyde",
+          "lemma": "acetaldehyde",
+          "characterOffsetBegin": 858,
+          "characterOffsetEnd": 870,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "were",
+          "originalText": "were",
+          "lemma": "be",
+          "characterOffsetBegin": 871,
+          "characterOffsetEnd": 875,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "in",
+          "originalText": "in",
+          "lemma": "in",
+          "characterOffsetBegin": 876,
+          "characterOffsetEnd": 878,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 879,
+          "characterOffsetEnd": 882,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "millimolar",
+          "originalText": "millimolar",
+          "lemma": "millimolar",
+          "characterOffsetBegin": 883,
+          "characterOffsetEnd": 893,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "range",
+          "originalText": "range",
+          "lemma": "range",
+          "characterOffsetBegin": 894,
+          "characterOffsetEnd": 899,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 14,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 899,
+          "characterOffsetEnd": 900,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "enzyme",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 2,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 5,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 6,
+          "dependentGloss": "submicromolar"
+        },
+        {
+          "dep": "obl",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 7,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "disulfiram",
+          "dependent": 8,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "disulfiram"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 10,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "enzyme",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 2,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 5,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 6,
+          "dependentGloss": "submicromolar"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 7,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "disulfiram",
+          "dependent": 8,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "disulfiram"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 10,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 4,
+          "dependentGloss": "inhibited"
+        },
+        {
+          "dep": "det",
+          "governor": 2,
+          "governorGloss": "enzyme",
+          "dependent": 1,
+          "dependentGloss": "The"
+        },
+        {
+          "dep": "nsubj:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 2,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "aux:pass",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 3,
+          "dependentGloss": "was"
+        },
+        {
+          "dep": "case",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 5,
+          "dependentGloss": "by"
+        },
+        {
+          "dep": "amod",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 6,
+          "dependentGloss": "submicromolar"
+        },
+        {
+          "dep": "obl:agent",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 7,
+          "dependentGloss": "concentrations"
+        },
+        {
+          "dep": "case",
+          "governor": 9,
+          "governorGloss": "disulfiram",
+          "dependent": 8,
+          "dependentGloss": "of"
+        },
+        {
+          "dep": "nmod:of",
+          "governor": 7,
+          "governorGloss": "concentrations",
+          "dependent": 9,
+          "dependentGloss": "disulfiram"
+        },
+        {
+          "dep": "punct",
+          "governor": 4,
+          "governorGloss": "inhibited",
+          "dependent": 10,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "The",
+          "originalText": "The",
+          "lemma": "the",
+          "characterOffsetBegin": 901,
+          "characterOffsetEnd": 904,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "enzyme",
+          "originalText": "enzyme",
+          "lemma": "enzyme",
+          "characterOffsetBegin": 905,
+          "characterOffsetEnd": 911,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "was",
+          "originalText": "was",
+          "lemma": "be",
+          "characterOffsetBegin": 912,
+          "characterOffsetEnd": 915,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "inhibited",
+          "originalText": "inhibited",
+          "lemma": "inhibit",
+          "characterOffsetBegin": 916,
+          "characterOffsetEnd": 925,
+          "pos": "VBN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "by",
+          "originalText": "by",
+          "lemma": "by",
+          "characterOffsetBegin": 926,
+          "characterOffsetEnd": 928,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "submicromolar",
+          "originalText": "submicromolar",
+          "lemma": "submicromolar",
+          "characterOffsetBegin": 929,
+          "characterOffsetEnd": 942,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "concentrations",
+          "originalText": "concentrations",
+          "lemma": "concentration",
+          "characterOffsetBegin": 943,
+          "characterOffsetEnd": 957,
+          "pos": "NNS",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "of",
+          "originalText": "of",
+          "lemma": "of",
+          "characterOffsetBegin": 958,
+          "characterOffsetEnd": 960,
+          "pos": "IN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "disulfiram",
+          "originalText": "disulfiram",
+          "lemma": "disulfiram",
+          "characterOffsetBegin": 961,
+          "characterOffsetEnd": 971,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 10,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 971,
+          "characterOffsetEnd": 972,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "affected"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 1,
+          "dependentGloss": "Estrone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 2,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 3,
+          "dependentGloss": "deoxycorticosterone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 4,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 5,
+          "dependentGloss": "progesterone"
+        },
+        {
+          "dep": "cc",
+          "governor": 7,
+          "governorGloss": "diethylstilbestrol",
+          "dependent": 6,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 7,
+          "dependentGloss": "diethylstilbestrol"
+        },
+        {
+          "dep": "advmod",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 8,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 11,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "obj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 12,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 13,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "affected"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 1,
+          "dependentGloss": "Estrone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 2,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 3,
+          "dependentGloss": "deoxycorticosterone"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 3,
+          "dependentGloss": "deoxycorticosterone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 4,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 5,
+          "dependentGloss": "progesterone"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 5,
+          "dependentGloss": "progesterone"
+        },
+        {
+          "dep": "cc",
+          "governor": 7,
+          "governorGloss": "diethylstilbestrol",
+          "dependent": 6,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 7,
+          "dependentGloss": "diethylstilbestrol"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 7,
+          "dependentGloss": "diethylstilbestrol"
+        },
+        {
+          "dep": "advmod",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 8,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 11,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "obj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 12,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 13,
+          "dependentGloss": "."
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 9,
+          "dependentGloss": "affected"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 1,
+          "dependentGloss": "Estrone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 2,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 3,
+          "dependentGloss": "deoxycorticosterone"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 3,
+          "dependentGloss": "deoxycorticosterone"
+        },
+        {
+          "dep": "punct",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 4,
+          "dependentGloss": ","
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 5,
+          "dependentGloss": "progesterone"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 5,
+          "dependentGloss": "progesterone"
+        },
+        {
+          "dep": "cc",
+          "governor": 7,
+          "governorGloss": "diethylstilbestrol",
+          "dependent": 6,
+          "dependentGloss": "and"
+        },
+        {
+          "dep": "conj:and",
+          "governor": 1,
+          "governorGloss": "Estrone",
+          "dependent": 7,
+          "dependentGloss": "diethylstilbestrol"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 7,
+          "dependentGloss": "diethylstilbestrol"
+        },
+        {
+          "dep": "advmod",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 8,
+          "dependentGloss": "also"
+        },
+        {
+          "dep": "det",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 10,
+          "dependentGloss": "the"
+        },
+        {
+          "dep": "compound",
+          "governor": 12,
+          "governorGloss": "activity",
+          "dependent": 11,
+          "dependentGloss": "enzyme"
+        },
+        {
+          "dep": "obj",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 12,
+          "dependentGloss": "activity"
+        },
+        {
+          "dep": "punct",
+          "governor": 9,
+          "governorGloss": "affected",
+          "dependent": 13,
+          "dependentGloss": "."
+        }
+      ],
+      "tokens": [
+        {
+          "index": 1,
+          "word": "Estrone",
+          "originalText": "Estrone",
+          "lemma": "Estrone",
+          "characterOffsetBegin": 973,
+          "characterOffsetEnd": 980,
+          "pos": "NNP",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 2,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 980,
+          "characterOffsetEnd": 981,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "deoxycorticosterone",
+          "originalText": "deoxycorticosterone",
+          "lemma": "deoxycorticosterone",
+          "characterOffsetBegin": 982,
+          "characterOffsetEnd": 1001,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 4,
+          "word": ",",
+          "originalText": ",",
+          "lemma": ",",
+          "characterOffsetBegin": 1001,
+          "characterOffsetEnd": 1002,
+          "pos": ",",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "progesterone",
+          "originalText": "progesterone",
+          "lemma": "progesterone",
+          "characterOffsetBegin": 1003,
+          "characterOffsetEnd": 1015,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "and",
+          "originalText": "and",
+          "lemma": "and",
+          "characterOffsetBegin": 1016,
+          "characterOffsetEnd": 1019,
+          "pos": "CC",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "diethylstilbestrol",
+          "originalText": "diethylstilbestrol",
+          "lemma": "diethylstilbestrol",
+          "characterOffsetBegin": 1020,
+          "characterOffsetEnd": 1038,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "also",
+          "originalText": "also",
+          "lemma": "also",
+          "characterOffsetBegin": 1039,
+          "characterOffsetEnd": 1043,
+          "pos": "RB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "affected",
+          "originalText": "affected",
+          "lemma": "affect",
+          "characterOffsetBegin": 1044,
+          "characterOffsetEnd": 1052,
+          "pos": "VBD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "the",
+          "originalText": "the",
+          "lemma": "the",
+          "characterOffsetBegin": 1053,
+          "characterOffsetEnd": 1056,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "enzyme",
+          "originalText": "enzyme",
+          "lemma": "enzyme",
+          "characterOffsetBegin": 1057,
+          "characterOffsetEnd": 1063,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "activity",
+          "originalText": "activity",
+          "lemma": "activity",
+          "characterOffsetBegin": 1064,
+          "characterOffsetEnd": 1072,
+          "pos": "NN",
+          "before": " ",
+          "after": ""
+        },
+        {
+          "index": 13,
+          "word": ".",
+          "originalText": ".",
+          "lemma": ".",
+          "characterOffsetBegin": 1072,
+          "characterOffsetEnd": 1073,
+          "pos": ".",
+          "before": "",
+          "after": " "
+        }
+      ]
+    }
+  ]
+}
