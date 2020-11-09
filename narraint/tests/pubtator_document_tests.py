@@ -1,15 +1,16 @@
 from unittest import TestCase
 
-from narraint.pubtator.document import TaggedDocument, TaggedDocumentCollection
-import spacy
 from spacy.lang.en import English
+
+from narraint.pubtator.document import TaggedDocument, TaggedDocumentCollection
+from narraint.tests.test_config import get_test_resource_filepath
 
 
 class PubTatorDocTestCase(TestCase):
 
     def test_load_tagged_pubtator_doc(self):
         content = ""
-        with open('resources/PMC1313813.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PMC1313813.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content)
 
@@ -21,7 +22,7 @@ class PubTatorDocTestCase(TestCase):
 
     def test_load_untagged_pubtator_doc(self):
         content = ""
-        with open('resources/PMC1313813Untagged.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PMC1313813Untagged.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content)
 
@@ -32,7 +33,7 @@ class PubTatorDocTestCase(TestCase):
         self.assertEqual(0, len(doc.tags))
 
     def test_load_pubtator_doc_collection(self):
-        col = TaggedDocumentCollection('resources/PubTatorCollection.txt')
+        col = TaggedDocumentCollection(get_test_resource_filepath('PubTatorCollection.txt'))
 
         self.assertEqual(2, len(col.docs))
 
@@ -58,7 +59,7 @@ class PubTatorDocTestCase(TestCase):
         nlp.add_pipe(sentencizer)
 
         content = ""
-        with open('resources/PubMed26.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed26.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -74,7 +75,7 @@ class PubTatorDocTestCase(TestCase):
                          doc.sentence_by_id[12].text)
 
         content = ""
-        with open('resources/PubMed54.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -94,7 +95,7 @@ class PubTatorDocTestCase(TestCase):
         nlp.add_pipe(sentencizer)
 
         content = ""
-        with open('resources/PubMed26.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed26.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -105,7 +106,7 @@ class PubTatorDocTestCase(TestCase):
         self.assertEqual(1, len(doc.entities_by_ent_id['DB00183']))
 
         content = ""
-        with open('resources/PubMed54.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -121,7 +122,7 @@ class PubTatorDocTestCase(TestCase):
         nlp.add_pipe(sentencizer)
 
         content = ""
-        with open('resources/PubMed26.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed26.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -132,7 +133,7 @@ class PubTatorDocTestCase(TestCase):
         self.assertSetEqual({4}, doc.sentences_by_ent_id['DB00183'])
 
         content = ""
-        with open('resources/PubMed54.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -148,7 +149,7 @@ class PubTatorDocTestCase(TestCase):
         nlp.add_pipe(sentencizer)
 
         content = ""
-        with open('resources/PubMed26.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed26.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
@@ -162,7 +163,7 @@ class PubTatorDocTestCase(TestCase):
         self.assertEqual({'DB00842'}, {t.ent_id for t in doc.entities_by_sentence[11]})
 
         content = ""
-        with open('resources/PubMed54.txt', 'rt') as f:
+        with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
             content = f.read()
         doc = TaggedDocument(content, spacy_nlp=nlp)
 
