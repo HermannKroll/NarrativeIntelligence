@@ -10,23 +10,12 @@ import lxml.etree as ET
 from narraint import config
 from narraint.entity import enttypes
 from narraint.preprocessing.tagging.dictagger import DictTagger, clean_vocab_word_by_split_rules
+from narraint.preprocessing.tagging.excipient import ExcipientVocabulary
 from narraint.progress import print_progress_with_eta
 
 
 class DrugTaggerVocabulary:
 
-    @staticmethod
-    def read_excipients_names(source_file=config.EXCIPIENT_TAGGER_DATABASE_FILE):
-        excipient_terms = set()
-        with open(source_file, 'rt') as f:
-            for line in islice(f, 1, None):
-                comps = line.split('~')
-                excipient = clean_vocab_word_by_split_rules(comps[0].strip().lower())
-                if len(excipient) > 2:
-                    excipient_terms.update([excipient, f'{excipient}s', f'{excipient}e'])
-                    if excipient[-1] in ['e', 's'] and len(excipient) > 3:
-                        excipient_terms.add(excipient[:-1])
-        return excipient_terms
 
     @staticmethod
     def create_drugbank_vocabulary_from_source(source_file=config.DRUGBASE_XML_DUMP, drug_min_name_length=3,
@@ -80,7 +69,7 @@ class DrugTaggerVocabulary:
                             for k, v in desc_by_term.items()
                             if len(v) <= drug_max_per_product}
         if ignore_excipient_terms > 0:
-            excipient_terms = DrugTaggerVocabulary.read_excipients_names()
+            excipient_terms = ExcipientVocabulary.read_excipients_names()
             desc_by_term = {k: v
                             for k, v in desc_by_term.items()
                             if k not in excipient_terms}

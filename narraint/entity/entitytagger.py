@@ -4,7 +4,7 @@ from collections import defaultdict
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT
 from narraint.entity.meshontology import MeSHOntology
 from narraint.preprocessing.tagging.excipient import ExcipientVocabulary
 
@@ -102,10 +102,11 @@ class EntityTagger:
         Add all excipient terms to the internal dict
         :return:
         """
-        for term, ent_ids in ExcipientVocabulary.create_excipient_vocabulary(expand_terms_by_e_and_s=False).items():
-            for ent_id in ent_ids:
-                self.term2entity[term.strip().lower()] = ent_id
+        for e_id, e_term in self.resolver.drugbank.dbid2name.items():
+            self.term2entity[e_term.strip().lower()].append(Entity(e_id, EXCIPIENT))
 
+        for excipient_name in ExcipientVocabulary.read_excipients_names():
+            self.term2entity[excipient_name.lower()].append(Entity(excipient_name.capitalize(), EXCIPIENT))
 
     def tag_entity(self, term: str):
         """
