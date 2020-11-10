@@ -6,7 +6,7 @@ from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT
 from narraint.entity.meshontology import MeSHOntology
-from narraint.preprocessing.tagging.excipient import ExcipientVocabulary
+from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary
 
 
 class DosageFormTaggerVocabulary:
