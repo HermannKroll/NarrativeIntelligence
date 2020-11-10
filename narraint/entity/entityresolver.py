@@ -12,7 +12,7 @@ from narraint.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
     MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR, DRUGBANK_ID2NAME_INDEX, DRUGBASE_XML_DUMP
-from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG
+from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
@@ -304,13 +304,27 @@ class DrugBankResolver:
             self.dbid2name[str(desc)] = name_element.text
         self.store_index()
 
-    def drugbank_id_to_name(self, drugbank_id):
+    def drugbank_id_to_name(self, drugbank_id: str):
         """
         Translates the DrugBank ID (string) to the name
         :param drugbank_id: DrugBank ID as a string
         :return: the name
         """
         return self.dbid2name[drugbank_id]
+
+
+class ExcipientResolver:
+
+    def __init__(self, drugbank_resolver: DrugBankResolver):
+        self.drugbank_resolver = drugbank_resolver
+
+    def excipient_id_to_name(self, excipient_id: str):
+        # if the name starts with 'DB' (it's) an DrugBank identifier
+        if excipient_id.startswith('DB'):
+            return self.drugbank_resolver.drugbank_id_to_name(excipient_id)
+        else:
+            # else the id is already the name
+            return excipient_id
 
 
 class EntityResolver:
@@ -336,6 +350,7 @@ class EntityResolver:
             self.mesh_ontology = None
             self.drugbank = DrugBankResolver()
             self.drugbank.load_index()
+            self.excipient = ExcipientResolver(drugbank_resolver=self.drugbank)
             EntityResolver.__instance = self
 
     @staticmethod
@@ -372,6 +387,8 @@ class EntityResolver:
             return self.dosageform.dosage_form_to_name(entity_id)
         if entity_type == DRUG:
             return self.drugbank.drugbank_id_to_name(entity_id)
+        if entity_type == EXCIPIENT:
+            return self.excipient.excipient_id_to_name(entity_id)
         return entity_id
 
 

@@ -6,6 +6,7 @@ from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG
 from narraint.entity.meshontology import MeSHOntology
+from narraint.preprocessing.tagging.excipient import ExcipientVocabulary
 
 
 class DosageFormTaggerVocabulary:
@@ -84,6 +85,7 @@ class EntityTagger:
         self._add_to_reverse_index(self.resolver.mesh.supplement_desc2heading.items(), 'MESH', id_prefix='MESH:')
         self._create_mesh_ontology_index(self.resolver.mesh.desc2heading.items())
         self._add_fid_dosageform_terms()
+        self._add_excipient_terms()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def _add_fid_dosageform_terms(self):
@@ -94,6 +96,16 @@ class EntityTagger:
         for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
             for t in terms:
                 self.term2entity[t.lower()].append(Entity(df_id, DOSAGE_FORM))
+
+    def _add_excipient_terms(self):
+        """
+        Add all excipient terms to the internal dict
+        :return:
+        """
+        for term, ent_ids in ExcipientVocabulary.create_excipient_vocabulary(expand_terms_by_e_and_s=False).items():
+            for ent_id in ent_ids:
+                self.term2entity[term.strip().lower()] = ent_id
+
 
     def tag_entity(self, term: str):
         """
