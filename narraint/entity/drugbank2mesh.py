@@ -1,21 +1,13 @@
 import logging
 import pickle
 from collections import defaultdict
-from datetime import datetime
 
-import lxml.etree as ET
-
-from narraint import config
 from narraint.config import MESH_DESCRIPTORS_FILE, DRUGBANK_ID_2_MESH_MAPPING_INDEX
 from narraint.mesh.data import MeSHDB
-from narraint.progress import print_progress_with_eta
-
-DRUG_MIN_NAME_LENGTH = 3
-DRUG_MAX_PER_PRODUCT = 2
+from narraint.preprocessing.tagging.drug import DrugTaggerVocabulary
 
 
 class DrugBank2MeSHMapper:
-
     __instance = None
 
     @staticmethod
@@ -32,7 +24,7 @@ class DrugBank2MeSHMapper:
 
     def compute_mappings(self):
         self._load_mesh_ontology()
-        self._load_drugbank_terms()
+        self.drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=1)
         # compute the intersection between both vocabs
         term_intersections = set(self.drug_terms2dbid.keys()).intersection(set(self.mesh_terms2meshid.keys()))
         self.dbid2meshid = defaultdict(set)
@@ -42,7 +34,8 @@ class DrugBank2MeSHMapper:
             for dbid in dbids:
                 if dbid in self.drug_terms2dbid:
                     raise KeyError('DBID {}has alreay a mapping to {} (instead of {})'.format(dbid, mesh_ids,
-                                                                                              self.drug_terms2dbid[dbid]))
+                                                                                              self.drug_terms2dbid[
+                                                                                                  dbid]))
                 self.dbid2meshid[dbid] = {f'MESH:{mesh_id}' for mesh_id in mesh_ids}
 
     def store_index(self, index_path=DRUGBANK_ID_2_MESH_MAPPING_INDEX):
@@ -55,58 +48,6 @@ class DrugBank2MeSHMapper:
         with open(index_path, 'rb') as f:
             self.dbid2meshid = pickle.load(f)
 
-    def _load_drugbank_terms(self):
-        logging.info("checking total number of drugs...")
-        # TODO real check
-        drug_number = 13581
-        logging.info(f"found {drug_number}.")
-        start = datetime.now()
-        drugs_found = 0
-        logging.info(f"")
-        pref = '{http://www.drugbank.ca}'
-        desc_by_term = {}
-        for event, elem in ET.iterparse(config.DRUGBASE_XML_DUMP, tag=f'{pref}drug'):
-            desc = ''
-            for dbid in elem.findall(f'{pref}drugbank-id'):
-                if dbid.attrib.get('primary'):
-                    desc = dbid.text
-                    break
-            if desc == '':
-                continue
-            drugs_found += 1
-            print_progress_with_eta("building index...", drugs_found, drug_number, start, print_every_k=100)
-            description_text = elem.find(f'{pref}description').text
-            if description_text and 'allergen' in description_text.lower()[0:20]:
-                continue
-            name_elements = list(elem.findall(f'{pref}name'))
-            synonyms = elem.find(f'{pref}synonyms')
-            if synonyms is not None:
-                name_elements += list(synonyms.findall(f'{pref}synonym'))
-            products = elem.find(f'{pref}products')
-            if products is not None:
-                for product in products.findall(f'{pref}product'):
-                    name = product.find(f'{pref}name')
-                    if name is not None:
-                        name_elements.append(name)
-            exp_props = elem.find(f'{pref}experimental-properties')
-            if exp_props is not None:
-                for exp_prop in exp_props:
-                    if exp_prop.find(f'{pref}kind').text == "Molecular Formula":
-                        name_elements.append(exp_prop.find(f'{pref}value'))
-            names = {ne.text for ne in name_elements if len(ne.text) >= DRUG_MIN_NAME_LENGTH}
-            names = {n.lower() for n in names}
-            names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
-            for n in names:
-                if n in desc_by_term:
-                    desc_by_term[n].add(desc)
-                else:
-                    desc_by_term[n] = {desc, }
-
-        if DRUG_MAX_PER_PRODUCT > 0:
-            self.drug_terms2dbid = {k: v
-                                 for k, v in desc_by_term.items()
-                                 if len(v) <= DRUG_MAX_PER_PRODUCT}
-
     def _load_mesh_ontology(self, mesh_file=MESH_DESCRIPTORS_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
         meshdb = MeSHDB.instance()
@@ -115,6 +56,8 @@ class DrugBank2MeSHMapper:
         for desc in meshdb.get_all_descs():
             mesh_id, mesh_head = desc.unique_id, desc.heading
             mesh_mappings.append((mesh_id, mesh_head))
+            if mesh_id == 'D000068899':
+                print('stop')
             for term in desc.terms:
                 mesh_mappings.append((mesh_id, term.string))
 
@@ -125,7 +68,8 @@ class DrugBank2MeSHMapper:
             terms = {mesh_term_lower, f'{mesh_term_lower}e', f'{mesh_term_lower}s'}
             for t in terms:
                 if t in self.mesh_terms2meshid and mesh_id not in self.mesh_terms2meshid[t]:
-                    print('MeSH Term {} has no unique mapping: {} -> {} and {}'.format(t, mesh_term, mesh_id, self.mesh_terms2meshid[t]))
+                    print('MeSH Term {} has no unique mapping: {} -> {} and {}'.format(t, mesh_term, mesh_id,
+                                                                                       self.mesh_terms2meshid[t]))
 
                 self.mesh_terms2meshid[t].add(mesh_id)
 
