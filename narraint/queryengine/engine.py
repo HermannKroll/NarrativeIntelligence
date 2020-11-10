@@ -326,8 +326,9 @@ class QueryEngine:
         for idx, fp in enumerate(graph_query.fact_patterns):
             exp_cond1 = len(fp.subjects) > 1
             exp_cond2 = len(fp.objects) > 1
+            exp_cond3 = fp.predicate in PREDICATE_EXPANSION or fp.predicate in SYMMETRIC_PREDICATES
 
-            if exp_cond1 or exp_cond2 or fp.predicate in PREDICATE_EXPANSION or fp.predicate in SYMMETRIC_PREDICATES:
+            if exp_cond1 or exp_cond2 or exp_cond3:
                 expand_query = True
                 if fp.predicate in PREDICATE_EXPANSION:
                     predicates = PREDICATE_EXPANSION[fp.predicate]
