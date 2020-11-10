@@ -12,7 +12,7 @@ from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.entity.entitytagger import EntityTagger
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -33,7 +33,11 @@ variable_type_mappings = {"chemical": "Chemical",
                           "dosageforms": "DosageForm",
                           "gene": "Gene",
                           "genes": "Gene",
-                          "species": "Species"}
+                          "species": "Species",
+                          "drug": "Drug",
+                          "drugs": "Drugs",
+                          "excipient": "Excipient",
+                          "excipients": "Excipient"}
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -61,10 +65,10 @@ def check_and_convert_variable(text):
             t = m.group(1).lower()
             if t not in variable_type_mappings:
                 raise ValueError('"{}" as Variable Type unknown (supported: {})'
-                                 .format(t, list(variable_type_mappings.values())))
-            return '{}({})'.format(var_name, variable_type_mappings[t])
+                                 .format(t, set(variable_type_mappings.values())))
+            return '{}({})'.format(var_name, variable_type_mappings[t]), variable_type_mappings[t]
         else:
-            return var_name
+            return var_name, None
     except AttributeError:
         if not VAR_NAME.search(text):
             raise ValueError('variable "{}" has no name (e.g. ?X(Chemical))'.format(text))
@@ -72,7 +76,12 @@ def check_and_convert_variable(text):
 def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
-        e = [Entity(check_and_convert_variable(text), 'Variable')]
+        var_string, var_type = check_and_convert_variable(text)
+        if var_type == CHEMICAL:
+            e = [Entity(var_string, 'Variable'), Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
+                 Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable')]
+        else:
+            e = [Entity(var_string, 'Variable')]
     elif text_low.startswith('mesh:'):
         e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
     elif text_low.startswith('gene:'):
@@ -174,16 +183,16 @@ def convert_graph_patterns_to_nt(query_txt):
             var_name = VAR_NAME.search(s).group(1)
             var_type = VAR_TYPE.search(s)
             if var_name not in var_dict:
-                var_dict[var_name] = check_and_convert_variable(s)
+                var_dict[var_name], _ = check_and_convert_variable(s)
             if var_type:
-                var_dict[var_name] = check_and_convert_variable(s)
+                var_dict[var_name], _ = check_and_convert_variable(s)
         if o.startswith('?'):
             var_name = VAR_NAME.search(o).group(1)
             var_type = VAR_TYPE.search(o)
             if var_name not in var_dict:
-                var_dict[var_name] = check_and_convert_variable(o)
+                var_dict[var_name], _ = check_and_convert_variable(o)
             if var_type:
-                var_dict[var_name] = check_and_convert_variable(o)
+                var_dict[var_name], _ = check_and_convert_variable(o)
 
     for f in facts_split:
         # skip empty facts
