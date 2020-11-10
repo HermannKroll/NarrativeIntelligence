@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from itertools import islice
+import lxml.etree as ET
 
 from narraint import config
 from narraint.preprocessing.tagging.dictagger import clean_vocab_word_by_split_rules
