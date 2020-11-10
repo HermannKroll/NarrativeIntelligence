@@ -9,13 +9,12 @@ import nltk
 from nltk.corpus import wordnet
 from sqlalchemy.exc import IntegrityError
 
-from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.meshontology import MeSHOntology
 from narraint.entity.entityresolver import GeneResolver
-from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM, DRUG
+from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM
 from narraint.backend.models import Tag, Predication, Sentence
 from narraint.backend.database import Session
-from narraint.extraction.versions import OPENIE_VERSION, OPENIE_EXTRACTION
+from narraint.extraction.versions import OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
@@ -201,50 +200,6 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
     return predications_cleaned
 
 
-def transform_drugbank_ids_to_mesh_ids(predications: List[PRED]):
-    """
-    Transforms a list of predications
-    Maps each DrugBank ID to a MeSH ids (if applicable)
-    Converts all DrugTypes to Chemical Types
-    :param predications: a list of predications
-    :return: a list of converted predications
-    """
-    logging.info('Transforming DrugBank ids to prefixes...')
-    predications_cleaned = []
-    drugbank2mesh_mapper = DrugBank2MeSHMapper.instance()
-    start_time = datetime.now()
-    predications_len = len(predications)
-    for idx, p in enumerate(predications):
-        subj_ids = set()
-        if p.s_type == DRUG:
-            subject_type = CHEMICAL
-            if p.s_id in drugbank2mesh_mapper.dbid2meshid:
-                subj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.s_id])
-            else:
-                subj_ids = [p.s_id]
-        else:
-            subject_type = p.s_type
-            subj_ids = [p.s_id]
-        obj_ids = set()
-        if p.o_type == DRUG:
-            object_type = CHEMICAL
-            if p.o_id in drugbank2mesh_mapper.dbid2meshid:
-                obj_ids.update(drugbank2mesh_mapper.dbid2meshid[p.o_id])
-            else:
-                obj_ids = [p.o_id]
-        else:
-            object_type = p.o_type
-            obj_ids = [p.o_id]
-        for s_id in subj_ids:
-            for o_id in obj_ids:
-                p_cleaned = PRED(p.doc_id, p.subj, p.pred, p.pred_cleaned, p.obj, p.conf, p.sent, s_id, p.s_str,
-                                 subject_type, o_id, p.o_str, object_type)
-                predications_cleaned.append(p_cleaned)
-        print_progress_with_eta('transforming DrugBank ids to MeSH ids...', idx, predications_len, start_time)
-    logging.info('{} predications obtained'.format(len(predications_cleaned)))
-    return predications_cleaned
-
-
 def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     """
     Transforms the MeSH ids of all facts to MeSH tree numbers
@@ -337,7 +292,7 @@ def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentenc
 
 
 def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                do_transform_mesh_ids_to_prefixes=True, do_map_drugbank_ids=True):
+                                do_transform_mesh_ids_to_prefixes=True):
     """
     Cleans a list of predications based on a set of filters
     :param tuples_cleaned: a list of PRED tuples
@@ -345,13 +300,10 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     :param extraction_type: extraction type like OpenIE or PathIE
     :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
     :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
-    :param do_map_drugbank_ids: if true all known drugbank ids will be mapped to mesh ids
     :return: a list of sentence objects to insert, a list of predication values to insert
     """
     if clean_genes:
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
-    if do_map_drugbank_ids:
-        tuples_cleaned = transform_drugbank_ids_to_mesh_ids(tuples_cleaned)
     if do_transform_mesh_ids_to_prefixes:
         tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
     last_highest_sentence_id = 0
