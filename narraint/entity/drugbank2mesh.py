@@ -6,16 +6,19 @@ from narraint.config import MESH_DESCRIPTORS_FILE, DRUGBANK_ID_2_MESH_MAPPING_IN
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.drug import DrugTaggerVocabulary
 
-DRUGBANK_TO_MESH_DISAMBIGUATION = {
-    'DB03568': 'MESH:D020148',
-    'DB00693': 'MESH:D019793',
-    'DB00759': 'MESH:D013752',
-    'DB00091': 'MESH:D016572',
-    'DB04557': 'MESH:D016718',
-    'DB02134': 'MESH:D019820',
-    'DB03994': 'MESH:D019856',
-    'DB00536': 'MESH:D019791'
-}
+DRUGBANK_TO_MESH_DISAMBIGUATION = {}
+
+
+#    'DB03568': 'MESH:D020148',
+#    'DB00693': 'MESH:D019793',
+#    'DB00759': 'MESH:D013752',
+#    'DB00091': 'MESH:D016572',
+#    'DB04557': 'MESH:D016718',
+#    'DB02134': 'MESH:D019820',
+#    'DB03994': 'MESH:D019856',
+#    'DB00536': 'MESH:D019791',
+#    'DB00182': 'MESH:D000661'
+# }
 
 
 class DrugBank2MeSHMapper:
@@ -30,12 +33,13 @@ class DrugBank2MeSHMapper:
 
     def __init__(self):
         self.drug_terms2dbid = {}
-        self.mesh_terms2meshid = defaultdict(set)
+        self.mesh_terms2meshid = {}
         self.dbid2meshid = {}
 
     def compute_mappings(self):
-        self._load_mesh_ontology()
-        self.drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=1)
+        #self._load_mesh_ontology()
+        self.drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=1,
+                                                                                           expand_term_with_e_and_s=False)
         # compute the intersection between both vocabs
         term_intersections = set(self.drug_terms2dbid.keys()).intersection(set(self.mesh_terms2meshid.keys()))
         self.dbid2meshid.clear()
@@ -43,15 +47,22 @@ class DrugBank2MeSHMapper:
             dbids = self.drug_terms2dbid[term]
             mesh_ids = self.mesh_terms2meshid[term]
             for dbid in dbids:
-                if dbid in self.drug_terms2dbid:
-                    raise KeyError('DBID {} has alreay a mapping to {} (instead of {})'.format(dbid, mesh_ids,
-                                                                                               self.drug_terms2dbid[
-                                                                                                   dbid]))
+                if len(mesh_ids) == 0:
+                    continue
                 if len(mesh_ids) > 1:
-                    self.dbid2meshid[dbid] = DRUGBANK_TO_MESH_DISAMBIGUATION[dbid]
+                    if dbid not in DRUGBANK_TO_MESH_DISAMBIGUATION:
+                        logging.warning(f'DBID {dbid} is ambigious: {mesh_ids}  -- mapping missing')
+                    else:
+                        self.dbid2meshid[dbid] = DRUGBANK_TO_MESH_DISAMBIGUATION[dbid]
                 else:
+                    mesh_desc = 'MESH:{}'.format(mesh_ids.pop())
+                    if dbid in self.dbid2meshid and mesh_desc != self.dbid2meshid[dbid]:
+                        logging.warning('DrugBank-ID: "{}" has already a mapping to {} (instead of {})'.format(dbid,
+                                                                                                               mesh_desc,
+                                                                                                               self.dbid2meshid[
+                                                                                                                   dbid]))
                     # this should map only a single element
-                    self.dbid2meshid[dbid] = mesh_ids.pop()
+                    self.dbid2meshid[dbid] = mesh_desc
 
     def store_index(self, index_path=DRUGBANK_ID_2_MESH_MAPPING_INDEX):
         logging.info(f'Writing DrugBank2MeSH Mapping to cache: {index_path}')
@@ -75,15 +86,17 @@ class DrugBank2MeSHMapper:
                 mesh_mappings.append((mesh_id, term.string))
 
         logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
-        self.mesh_terms2meshid = defaultdict(set)
+        self.mesh_terms2meshid.clear()
         for mesh_id, mesh_term in mesh_mappings:
-            mesh_term_lower = mesh_term.lower()
-            terms = {mesh_term_lower, f'{mesh_term_lower}e', f'{mesh_term_lower}s'}
-            for t in terms:
-                if t in self.mesh_terms2meshid and mesh_id not in self.mesh_terms2meshid[t]:
-                    print('MeSH Term {} has no unique mapping: {} -> {} and {}'.format(t, mesh_term, mesh_id,
-                                                                                       self.mesh_terms2meshid[t]))
-
+            t = mesh_term.lower()
+            if t not in self.mesh_terms2meshid:
+                self.mesh_terms2meshid[t] = {mesh_id}
+                continue
+            else:
+                if mesh_id not in self.mesh_terms2meshid[t]:
+                    logging.warning('MeSH Term {} has no unique mapping: {} -> {} and {}'.format(t, mesh_term, mesh_id,
+                                                                                                 self.mesh_terms2meshid[
+                                                                                                     t]))
                 self.mesh_terms2meshid[t].add(mesh_id)
 
 

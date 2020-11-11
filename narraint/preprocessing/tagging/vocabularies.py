@@ -13,7 +13,8 @@ class DrugTaggerVocabulary:
 
     @staticmethod
     def create_drugbank_vocabulary_from_source(source_file=config.DRUGBASE_XML_DUMP, drug_min_name_length=3,
-                                               check_products=0, drug_max_per_product=2, ignore_excipient_terms=0):
+                                               check_products=0, drug_max_per_product=2, ignore_excipient_terms=0,
+                                               expand_term_with_e_and_s=True):
         # TODO real check
         drug_number = 13581  # subprocess.check_output(f"grep -c '^<drug' {self.source_file}")
         start = datetime.now()
@@ -21,6 +22,7 @@ class DrugTaggerVocabulary:
         logging.info(f"")
         pref = '{http://www.drugbank.ca}'
         desc_by_term = {}
+        drugs_without_description_and_indication = 0
         for event, elem in ET.iterparse(source_file, tag=f'{pref}drug'):
             desc = ''
             for dbid in elem.findall(f'{pref}drugbank-id'):
@@ -33,6 +35,10 @@ class DrugTaggerVocabulary:
             print_progress_with_eta("building index...", drugs_found, drug_number, start, print_every_k=100)
             description_text = elem.find(f'{pref}description').text
             if description_text and 'allergen' in description_text.lower()[0:20]:
+                continue
+            indication_text = elem.find(f'{pref}indication').text
+            if not description_text and not indication_text:
+                drugs_without_description_and_indication += 1
                 continue
             name_elements = list(elem.findall(f'{pref}name'))
             synonyms = elem.find(f'{pref}synonyms')
@@ -52,7 +58,8 @@ class DrugTaggerVocabulary:
                         name_elements.append(exp_prop.find(f'{pref}value'))
             names = {ne.text for ne in name_elements if len(ne.text) >= drug_min_name_length}
             names = {clean_vocab_word_by_split_rules(n.lower()) for n in names}
-            names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
+            if expand_term_with_e_and_s:
+                names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
             for n in names:
                 if n in desc_by_term:
                     desc_by_term[n].add(desc)
