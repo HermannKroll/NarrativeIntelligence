@@ -21,8 +21,10 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.drug import DrugTagger
+from narraint.preprocessing.tagging.drugbankchemical import DrugBankChemicalTagger
 from narraint.preprocessing.tagging.excipient import ExcipientTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
+from narraint.preprocessing.tagging.plantfamily import PlantFamilyTagger
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.preprocessing.utils import get_document_id, DocumentError
@@ -84,6 +86,10 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         tagger_by_ent_type[enttypes.DRUG] = DrugTagger
     if enttypes.EXCIPIENT in tag_types:
         tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
+    if enttypes.PLANTFAMILY in tag_types:
+        tagger_by_ent_type[enttypes.PLANTFAMILY] = PlantFamilyTagger
+    if enttypes.DRUGBANKCHEMICAL in tag_types:
+        tagger_by_ent_type[enttypes.DRUGBANKCHEMICAL] = DrugBankChemicalTagger
     return tagger_by_ent_type
 
 

@@ -8,12 +8,60 @@ from narraint.preprocessing.tagging.dictagger import clean_vocab_word_by_split_r
 from narraint.progress import print_progress_with_eta
 
 
-class DrugTaggerVocabulary:
+def expand_vocabulary_term(term: str) -> str:
+    if term.endswith('s') or term.endswith('e'):
+        yield term[:-1]
+    yield from [term, f'{term}e', f'{term}s']
 
+
+class DrugBankChemicalVocabulary:
+
+    @staticmethod
+    def read_drugbank_chemical_names(drugbank_chemical_list=config.DRUGBANK_CHEMICAL_DATABASE_FILE):
+        chemical_mapping = {}
+        with open(drugbank_chemical_list, 'rt') as f:
+            for line in f:
+                chemical = line.strip()
+                chemical_mapping[chemical.lower()] = chemical.capitalize()
+        return chemical_mapping
+
+    @staticmethod
+    def create_drugbank_chemical_vocabulary(drugbank_chemical_list=config.DRUGBANK_CHEMICAL_DATABASE_FILE,
+                                            drugbank_db_file=config.DRUGBASE_XML_DUMP):
+        # we cannot ignore the excipient terms while reading drugbank here (else our mapping would be empty)
+        drugbank_terms = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(source_file=drugbank_db_file,
+                                                                                     ignore_excipient_terms=False,
+                                                                                     ignore_drugbank_chemicals=False)
+        # drugbank chemicals
+        drugbank_chemicals_mapping = DrugBankChemicalVocabulary.read_drugbank_chemical_names(drugbank_chemical_list)
+        drugbank_identifiers_for_chemical = set()
+        desc_by_term = {}
+        # if an chemical term is found in drugbank - use the drugbnak identifier for tagging
+        for chemical_term, chemical_heading in drugbank_chemicals_mapping.items():
+            # do we find a corresponding term in drugbank
+            if chemical_term in drugbank_terms:
+                # yes - we take the DrugBank identifier
+                drugbank_identifiers_for_chemical.update(drugbank_terms[chemical_term])
+            else:
+                desc_by_term[chemical_term] = [chemical_heading]
+
+        # search all drugbank terms which map to a chemical drugbank identifier
+        for drugbank_term, dbids in drugbank_terms.items():
+            for dbid in dbids:
+                if dbid in drugbank_identifiers_for_chemical:
+                    # the drugbank term will be mapped to its corresponding dbid
+                    desc_by_term[drugbank_term] = dbids
+                    # stop iteration here
+                    break
+        return desc_by_term
+
+
+class DrugTaggerVocabulary:
 
     @staticmethod
     def create_drugbank_vocabulary_from_source(source_file=config.DRUGBASE_XML_DUMP, drug_min_name_length=3,
-                                               check_products=0, drug_max_per_product=2, ignore_excipient_terms=0,
+                                               check_products=0, drug_max_per_product=2, ignore_excipient_terms=True,
+                                               ignore_drugbank_chemicals=True,
                                                expand_term_with_e_and_s=True):
         # TODO real check
         drug_number = 13581  # subprocess.check_output(f"grep -c '^<drug' {self.source_file}")
@@ -23,6 +71,13 @@ class DrugTaggerVocabulary:
         pref = '{http://www.drugbank.ca}'
         desc_by_term = {}
         drugs_without_description_and_indication = 0
+
+        # read excipient terms if they should be ignored
+        if ignore_excipient_terms:
+            excipient_terms = ExcipientVocabulary.read_excipients_names()
+        if ignore_drugbank_chemicals:
+            drugbank_chemicals = DrugBankChemicalVocabulary.read_drugbank_chemical_names()
+
         for event, elem in ET.iterparse(source_file, tag=f'{pref}drug'):
             desc = ''
             for dbid in elem.findall(f'{pref}drugbank-id'):
@@ -58,6 +113,14 @@ class DrugTaggerVocabulary:
                         name_elements.append(exp_prop.find(f'{pref}value'))
             names = {ne.text for ne in name_elements if len(ne.text) >= drug_min_name_length}
             names = {clean_vocab_word_by_split_rules(n.lower()) for n in names}
+
+            # ignore dbid if it's already an excipient
+            if ignore_excipient_terms and len([n for n in names if n in excipient_terms]) > 0:
+                continue
+            # ignore dbid if it's already an DrugBankChemical
+            if ignore_drugbank_chemicals and len([n for n in names if n in drugbank_chemicals]) > 0:
+                continue
+
             if expand_term_with_e_and_s:
                 names = names | {f"{n}s" for n in names} | {f"{n}e" for n in names}
             for n in names:
@@ -69,61 +132,92 @@ class DrugTaggerVocabulary:
             desc_by_term = {k: v
                             for k, v in desc_by_term.items()
                             if len(v) <= drug_max_per_product}
-        if ignore_excipient_terms > 0:
-            excipient_terms = ExcipientVocabulary.read_excipients_names()
-            desc_by_term = {k: v
-                            for k, v in desc_by_term.items()
-                            if k not in excipient_terms}
         return desc_by_term
 
 
 class ExcipientVocabulary:
 
     @staticmethod
-    def read_excipients_names(source_file=config.EXCIPIENT_TAGGER_DATABASE_FILE, expand_terms_by_e_and_s=True):
-        excipient_terms = set()
+    def read_excipients_names(source_file=config.EXCIPIENT_TAGGER_DATABASE_FILE,
+                              drugbank_excipient_file=config.EXCIPIENT_TAGGER_DRUGBANK_EXCIPIENT_FILE,
+                              expand_terms_by_e_and_s=True):
+        excipient_dict = {}
         with open(source_file, 'rt') as f:
             for line in islice(f, 1, None):
                 comps = line.split('~')
                 excipient = clean_vocab_word_by_split_rules(comps[0].strip().lower())
-                if len(excipient) > 2:
-                    if expand_terms_by_e_and_s:
-                        excipient_terms.update([excipient, f'{excipient}s', f'{excipient}e'])
-                        if excipient[-1] in ['e', 's'] and len(excipient) > 3:
-                            excipient_terms.add(excipient[:-1])
+                excipient_heading = excipient.capitalize()
+                if expand_terms_by_e_and_s:
+                    excipient_terms = expand_vocabulary_term(excipient)
+                else:
+                    excipient_terms = [excipient]
+                for term in excipient_terms:
+                    if term in excipient_dict:
+                        excipient_dict[term].add(excipient_heading)
                     else:
-                        excipient_terms.add(excipient)
-        return excipient_terms
+                        excipient_dict[term] = {excipient_heading}
+
+        with open(drugbank_excipient_file, 'rt') as f:
+            for line in f:
+                excipient = line.lower().strip()
+                excipient_heading = excipient.capitalize()
+                if expand_terms_by_e_and_s:
+                    excipient_terms = expand_vocabulary_term(excipient)
+                else:
+                    excipient_terms = [excipient]
+                for term in excipient_terms:
+                    if term in excipient_dict:
+                        excipient_dict[term].add(excipient_heading)
+                    else:
+                        excipient_dict[term] = {excipient_heading}
+        return excipient_dict
 
     @staticmethod
     def create_excipient_vocabulary(excipient_database=config.EXCIPIENT_TAGGER_DATABASE_FILE,
                                     drugbank_db_file=config.DRUGBASE_XML_DUMP, ):
         # we cannot ignore the excipient terms while reading drugbank here (else our mapping would be empty)
         drugbank_terms = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(source_file=drugbank_db_file,
-                                                                                     ignore_excipient_terms=0)
+                                                                                     ignore_excipient_terms=False)
         logging.info(f'Reading excipient database: {excipient_database}...')
+        excipient_terms = ExcipientVocabulary.read_excipients_names()
+        drugbank_identifiers_for_excipients = set()
         desc_by_term = {}
-        with open(excipient_database, 'rt') as f:
-            drugbank_mappings_found = 0
-            new_excipients = 0
-            for line in islice(f, 1, None):
-                comps = line.split('~')
-                excipient = clean_vocab_word_by_split_rules(comps[0].strip().lower())
-                excipient_heading = excipient.capitalize()
-                if len(excipient) > 2:
-                    excipient_terms = [excipient, f'{excipient}s', f'{excipient}e']
-                    if excipient[-1] in ['e', 's'] and len(excipient) > 3:
-                        excipient_terms.append(excipient[:-1])
-                    drugbank_mapping = set()
-                    for term in excipient_terms:
-                        if term in drugbank_terms:
-                            drugbank_mapping.update(drugbank_terms[term])
-                    if len(drugbank_mapping) > 0:
-                        drugbank_mappings_found += 1
-                        for term in excipient_terms:
-                            desc_by_term[term] = list(drugbank_mapping)
-                    else:
-                        new_excipients += 1
-                        for term in excipient_terms:
-                            desc_by_term[term] = list([excipient_heading])
+        # extend dict by all excipient terms
+        # if an excipient term is found in drugbank - use the drugbnak identifier for tagging
+        for excipient_term, excipient_headings in excipient_terms.items():
+            # do we find a corresponding term in drugbank
+            if excipient_term in drugbank_terms:
+                # yes - we take the DrugBank identifier
+                drugbank_identifiers_for_excipients.update(drugbank_terms[excipient_term])
+            else:
+                desc_by_term[excipient_term] = excipient_headings
+
+        # search all drugbank terms which map to excipient drugbank identifier
+        for drugbank_term, dbids in drugbank_terms.items():
+            for dbid in dbids:
+                if dbid in drugbank_identifiers_for_excipients:
+                    # the drugbank term will be mapped to its corresponding dbid
+                    desc_by_term[drugbank_term] = dbids
+                    # stop iteration here
+                    break
+
         return desc_by_term
+
+
+class PlantFamilyVocabulary:
+
+    @staticmethod
+    def read_plant_family_vocabulary(plant_family_database=config.PLANT_FAMILTY_DATABASE_FILE,
+                                     expand_terms_by_e=True):
+        term_to_plant_family = {}
+        with open(plant_family_database, 'rt') as f:
+            for line in f:
+                plant_family = line.strip()
+                plant_family_lower = plant_family.lower()
+                if expand_terms_by_e:
+                    plant_family_terms = [plant_family_lower, f'{plant_family_lower}e']
+                else:
+                    plant_family_terms = [plant_family_lower]
+                for term in plant_family_terms:
+                    term_to_plant_family[term] = {plant_family.capitalize()}
+        return term_to_plant_family

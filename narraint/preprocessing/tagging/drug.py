@@ -28,8 +28,7 @@ class DrugTagger(DictTagger):
         self.desc_by_term = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(self.source_file,
                                                                                         self.config.drug_min_name_length,
                                                                                         self.config.drug_check_products,
-                                                                                        self.config.drug_max_per_product,
-                                                                                        self.config.ignore_excipient_terms)
+                                                                                        self.config.drug_max_per_product)
 
     def extract_dosage_forms(self):
         pref = '{http://www.drugbank.ca}'

@@ -26,7 +26,7 @@ def get_n_tuples(in_list, n):
             break
 
 
-def clean_vocab_word_by_split_rules(word):
+def clean_vocab_word_by_split_rules(word: str) -> str:
     if word and re.match(r"[^\w]", word[0]):
         word = word[1:]
     if word and re.match(r"[^\w]", word[-1]):
