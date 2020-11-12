@@ -38,10 +38,6 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 logger = logging.getLogger(__name__)
 
 allowed_predicates = set(create_predicate_vocab().keys())
-for i in range(0, 10000):
-    allowed_predicates.add('P{}'.format(i))
-    allowed_predicates.add('p{}'.format(i))
-
 logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
 query_engine = QueryEngine()
