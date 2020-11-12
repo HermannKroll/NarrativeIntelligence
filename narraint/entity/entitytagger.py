@@ -4,9 +4,9 @@ from collections import defaultdict
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
-from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary
+from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary
 
 
 class DosageFormTaggerVocabulary:
@@ -86,6 +86,8 @@ class EntityTagger:
         self._create_mesh_ontology_index(self.resolver.mesh.desc2heading.items())
         self._add_fid_dosageform_terms()
         self._add_excipient_terms()
+        self._add_drugbank_chemicals()
+        self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def _add_fid_dosageform_terms(self):
@@ -108,6 +110,22 @@ class EntityTagger:
         for excipient_name in ExcipientVocabulary.read_excipients_names():
             self.term2entity[excipient_name.lower()].append(Entity(excipient_name.capitalize(), EXCIPIENT))
 
+    def _add_drugbank_chemicals(self):
+        """
+        Add all drugbank chmeical terms to the internal dict
+        :return:
+        """
+        for e_id, e_term in self.resolver.drugbank.dbid2name.items():
+            self.term2entity[e_term.strip().lower()].append(Entity(e_id, DRUGBANK_CHEMICAL))
+
+    def _add_plant_families(self):
+        """
+        Add all plant family names
+        :return:
+        """
+        for family_name in PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms_by_e=False):
+            self.term2entity[family_name.strip().lower()].append(Entity(family_name.capitalize(), PLANT_FAMILY))
+        
     def tag_entity(self, term: str):
         """
         Tags an entity by given a string

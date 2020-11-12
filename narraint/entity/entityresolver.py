@@ -12,7 +12,8 @@ from narraint.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
     MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR, DRUGBANK_ID2NAME_INDEX, DRUGBASE_XML_DUMP
-from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT
+from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, \
+    DRUGBANK_CHEMICAL
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
@@ -23,12 +24,14 @@ class MeshResolver:
     """
     MeSHResolver translates MeSH descriptor ids into strings / headings
     """
+
     def __init__(self):
         self.desc2heading = {}
         self.supplement_desc2heading = {}
 
     def build_index(self, mesh_file=MESH_DESCRIPTORS_FILE, index_file=MESH_ID_TO_HEADING_INDEX_FILE,
-                    mesh_supp_file=MESH_SUPPLEMENTARY_FILE, mesh_supp_index=MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE):
+                    mesh_supp_file=MESH_SUPPLEMENTARY_FILE,
+                    mesh_supp_index=MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
         meshdb = MeSHDB.instance()
         meshdb.load_xml(mesh_file)
@@ -216,7 +219,8 @@ class SpeciesResolver:
         start_time = datetime.now()
         with open(index_file, 'rb') as f:
             self.speciesid2name = pickle.load(f)
-        logging.info('Species index ({} keys) load in {}s'.format(len(self.speciesid2name), datetime.now() - start_time))
+        logging.info(
+            'Species index ({} keys) load in {}s'.format(len(self.speciesid2name), datetime.now() - start_time))
 
     def species_id_to_name(self, species_id):
         """
@@ -313,6 +317,15 @@ class DrugBankResolver:
         return self.dbid2name[drugbank_id]
 
 
+class DrugBankChemicalResolver:
+
+    def __init__(self, drugbank_resolver: DrugBankResolver):
+        self.drugbank_resolver = drugbank_resolver
+
+    def drugbank_chemical_id_to_name(self, drugbank_id: str):
+        return self.drugbank_resolver.drugbank_id_to_name(drugbank_id)
+
+
 class ExcipientResolver:
 
     def __init__(self, drugbank_resolver: DrugBankResolver):
@@ -325,6 +338,15 @@ class ExcipientResolver:
         else:
             # else the id is already the name
             return excipient_id
+
+
+class PlantFamilyResolver:
+
+    def __init__(self):
+        pass
+
+    def plant_family_id_to_name(self, plant_family_to_name):
+        return plant_family_to_name
 
 
 class EntityResolver:
@@ -350,7 +372,10 @@ class EntityResolver:
             self.mesh_ontology = None
             self.drugbank = DrugBankResolver()
             self.drugbank.load_index()
+            self.drugbank_chemical = DrugBankChemicalResolver(drugbank_resolver=self.drugbank)
             self.excipient = ExcipientResolver(drugbank_resolver=self.drugbank)
+            self.plantfamily = PlantFamilyResolver()
+
             EntityResolver.__instance = self
 
     @staticmethod
@@ -367,8 +392,6 @@ class EntityResolver:
         :param resolve_gene_by_id:
         :return: uses the corresponding resolver for the entity type
         """
-        if entity_type == CHEMICAL and entity_id.startswith('DB'): # DrugBank special rule
-            return self.drugbank.drugbank_id_to_name(entity_id)
         if not entity_id.startswith('MESH:') and entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
             if not self.mesh_ontology:
                 self.mesh_ontology = MeSHOntology.instance()
@@ -389,6 +412,10 @@ class EntityResolver:
             return self.drugbank.drugbank_id_to_name(entity_id)
         if entity_type == EXCIPIENT:
             return self.excipient.excipient_id_to_name(entity_id)
+        if entity_type == PLANT_FAMILY:
+            return self.plantfamily.plant_family_id_to_name(entity_id)
+        if entity_type == DRUGBANK_CHEMICAL:
+            return self.drugbank.drugbank_id_to_name(entity_id)
         return entity_id
 
 
@@ -403,7 +430,7 @@ def main():
 
     if not os.path.exists(TMP_DIR):
         os.mkdir(TMP_DIR)
-        
+
     mesh = MeshResolver()
     mesh.build_index()
 
