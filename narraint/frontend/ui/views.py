@@ -42,8 +42,7 @@ for i in range(0, 10000):
     allowed_predicates.add('P{}'.format(i))
     allowed_predicates.add('p{}'.format(i))
 
-allowed_predicates.add("dosageform")
-# logging.info('allowed predicates are: {}'.format(allowed_predicates))
+logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
 query_engine = QueryEngine()
 entity_tagger = EntityTagger()
