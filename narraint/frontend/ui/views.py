@@ -12,7 +12,8 @@ from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.entity.entitytagger import EntityTagger
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT
+from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
+    DRUGBANK_CHEMICAL, ALL
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -25,19 +26,10 @@ from narraint.frontend.ui.search_cache import SearchCache
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 
-variable_type_mappings = {"chemical": "Chemical",
-                          "chemicals": "Chemical",
-                          "disease": "Disease",
-                          "diseases": "Disease",
-                          "dosageform": "DosageForm",
-                          "dosageforms": "DosageForm",
-                          "gene": "Gene",
-                          "genes": "Gene",
-                          "species": "Species",
-                          "drug": "Drug",
-                          "drugs": "Drugs",
-                          "excipient": "Excipient",
-                          "excipients": "Excipient"}
+variable_type_mappings = {}
+for ent_typ in ALL:
+    variable_type_mappings[ent_typ.lower()] = ent_typ
+    variable_type_mappings[f'{ent_typ.lower()}s'] = ent_typ
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -78,8 +70,10 @@ def convert_text_to_entity(text):
     if text.startswith('?'):
         var_string, var_type = check_and_convert_variable(text)
         if var_type == CHEMICAL:
-            e = [Entity(var_string, 'Variable'), Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
-                 Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable')]
+            e = [Entity(var_string, 'Variable'),
+                 Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
+                 Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable'),
+                 Entity(var_string.replace(f'({CHEMICAL})', f'({DRUGBANK_CHEMICAL})'), 'Variable')]
         else:
             e = [Entity(var_string, 'Variable')]
     elif text_low.startswith('mesh:'):

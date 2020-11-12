@@ -146,7 +146,7 @@ $(document).ready(function () {
             let lines = data.split("\n"); // split data into an array of tags
             let entities = [];
             let predicates = [];
-            let varTypes = ["Chemical", "Disease", "Gene", "Species", "DosageForm"];
+            let varTypes = ["Chemical", "Disease", "Gene", "Species", "DosageForm", "Drug", "Excipient", "PlantFamily"];
             for (let i = 0; i < lines.length; i++) { // create key value pairs from the labels and the mesh id's
                 let comp = lines[i].split("\t");
                 if (comp[1] === "predicate") {
