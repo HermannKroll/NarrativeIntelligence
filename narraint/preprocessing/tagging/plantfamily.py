@@ -11,7 +11,7 @@ class PlantFamilyTagger(DictTagger):
 
     def __init__(self, *args, **kwargs):
         super().__init__("plantfamily", "PlantFamilyTagger", PlantFamilyTagger.__version__,
-                         enttypes.PLANTFAMILY, config.PLANT_FAMILTY_INDEX_CACHE, config.PLANT_FAMILTY_DATABASE_FILE,
+                         enttypes.PLANT_FAMILY, config.PLANT_FAMILTY_INDEX_CACHE, config.PLANT_FAMILTY_DATABASE_FILE,
                          *args, **kwargs)
 
     def index_from_source(self):

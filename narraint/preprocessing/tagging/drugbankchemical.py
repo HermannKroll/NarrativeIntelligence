@@ -5,13 +5,13 @@ from narraint.preprocessing.tagging.vocabularies import DrugBankChemicalVocabula
 
 
 class DrugBankChemicalTagger(DictTagger):
-    TYPES = (enttypes.DRUGBANKCHEMICAL,)
+    TYPES = (enttypes.DRUGBANK_CHEMICAL,)
     __name__ = "DrugBankChemicalTagger"
     __version__ = "1.0.0"
 
     def __init__(self, *args, **kwargs):
         super().__init__("drugbankchemical", "DrugBankChemicalTagger", DrugBankChemicalTagger.__version__,
-                         enttypes.DRUGBANKCHEMICAL, config.DRUGBANK_CHEMICAL_INDEX_CACHE, config.DRUGBANK_CHEMICAL_DATABASE_FILE,
+                         enttypes.DRUGBANK_CHEMICAL, config.DRUGBANK_CHEMICAL_INDEX_CACHE, config.DRUGBANK_CHEMICAL_DATABASE_FILE,
                          *args, **kwargs)
 
     def index_from_source(self):

@@ -86,10 +86,10 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         tagger_by_ent_type[enttypes.DRUG] = DrugTagger
     if enttypes.EXCIPIENT in tag_types:
         tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
-    if enttypes.PLANTFAMILY in tag_types:
-        tagger_by_ent_type[enttypes.PLANTFAMILY] = PlantFamilyTagger
-    if enttypes.DRUGBANKCHEMICAL in tag_types:
-        tagger_by_ent_type[enttypes.DRUGBANKCHEMICAL] = DrugBankChemicalTagger
+    if enttypes.PLANT_FAMILY in tag_types:
+        tagger_by_ent_type[enttypes.PLANT_FAMILY] = PlantFamilyTagger
+    if enttypes.DRUGBANK_CHEMICAL in tag_types:
+        tagger_by_ent_type[enttypes.DRUGBANK_CHEMICAL] = DrugBankChemicalTagger
     return tagger_by_ent_type
 
 

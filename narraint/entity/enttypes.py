@@ -14,8 +14,8 @@ DOMAINMOTIF = "DomainMotif"
 GENUS = "Genus"
 STRAIN = "Strain"
 EXCIPIENT = "Excipient"
-PLANTFAMILY = "PlantFamily"
-DRUGBANKCHEMICAL = "DrugBankChemical"
+PLANT_FAMILY = "PlantFamily"
+DRUGBANK_CHEMICAL = "DrugBankChemical"
 
 ALL = (
     DOSAGE_FORM,
@@ -32,8 +32,8 @@ ALL = (
     DNAMUTATION,
     DOMAINMOTIF,
     EXCIPIENT,
-    PLANTFAMILY,
-    DRUGBANKCHEMICAL
+    PLANT_FAMILY,
+    DRUGBANK_CHEMICAL
 )
 
 # set of all tags which are supported by our taggers
@@ -45,17 +45,17 @@ ENT_TYPES_SUPPORTED_BY_TAGGERS = (
     GENE,
     SPECIES,
     DISEASE,
-    PLANTFAMILY,
-    DRUGBANKCHEMICAL
+    PLANT_FAMILY,
+    DRUGBANK_CHEMICAL
 )
 
 
 TAG_TYPE_MAPPING = dict(
     DF=DOSAGE_FORM,
     DR=DRUG,
-    DC=DRUGBANKCHEMICAL,
+    DC=DRUGBANK_CHEMICAL,
     E=EXCIPIENT,
-    PF=PLANTFAMILY,
+    PF=PLANT_FAMILY,
     C=CHEMICAL,
     M=MUTATION,
     G=GENE,
@@ -83,6 +83,6 @@ ENTITY_TYPES = dict(
     Genus=GENUS,
     Strain=STRAIN,
     Excipient=EXCIPIENT,
-    PlantFamily=PLANTFAMILY,
-    DrugBankChemical=DRUGBANKCHEMICAL
+    PlantFamily=PLANT_FAMILY,
+    DrugBankChemical=DRUGBANK_CHEMICAL
 )
