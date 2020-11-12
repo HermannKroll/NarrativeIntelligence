@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from narraint.entity.enttypes import DISEASE, CHEMICAL
+from narraint.entity.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 from narraint.queryengine.aggregation.base import QueryResultAggregationStrategy
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
@@ -53,7 +53,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for res in results:
                         substitution = res.var2substitution[v]
                         retrieved_ent_types.add(substitution.entity_type)
-                        if substitution.entity_type in [CHEMICAL, DISEASE]:
+                        if substitution.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
                             id_without_mesh = substitution.entity_id[5:]
                             try:
                                 pref_tree_numbers = self.mesh_ontology.get_tree_numbers_for_descriptor(id_without_mesh)
@@ -63,8 +63,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                                     # this tree will have a document node
                                     self._pref_tree_nodes_with_docs.add(pref_t)
                             except KeyError:
-                                # We will ignore that node here
-                                pass
+                                misc_document_results[substitution.entity_type].append(res)
                         else:
                             misc_document_results[substitution.entity_type].append(res)
                     prefix_substitution_list.sort(key=lambda x: x[0])
@@ -73,14 +72,25 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
 
                 resulting_tree = QueryResultAggregateList()
                 ent_type_aggregation = []
+                if DOSAGE_FORM in retrieved_ent_types:
+                    dosage_form_tree_0 = self._build_tree_structure(var2prefix_substitution_list, "FIDX")
+                    dosage_form_tree_1 = self._build_tree_structure(var2prefix_substitution_list, "D26.255")
+                    dosage_form_tree_2 = self._build_tree_structure(var2prefix_substitution_list, "E02.319.300")
+                    dosage_form_tree_3 = self._build_tree_structure(var2prefix_substitution_list, "J01.637.512")
+                    dosage_form_aggregation = self._create_query_aggregate("", "", DOSAGE_FORM, DOSAGE_FORM)
+                    dosage_form_aggregation.add_query_result(dosage_form_tree_0)
+                    dosage_form_aggregation.add_query_result(dosage_form_tree_1)
+                    dosage_form_aggregation.add_query_result(dosage_form_tree_2)
+                    dosage_form_aggregation.add_query_result(dosage_form_tree_3)
+                    ent_type_aggregation.append((DOSAGE_FORM, dosage_form_aggregation))
                 if CHEMICAL in retrieved_ent_types:
                     chemical_tree = self._build_tree_structure(var2prefix_substitution_list, "D")
-                    chemical_aggregation = self._create_query_aggregate("", "", "", CHEMICAL)
+                    chemical_aggregation = self._create_query_aggregate("", "", CHEMICAL, CHEMICAL)
                     chemical_aggregation.add_query_result(chemical_tree)
                     ent_type_aggregation.append((CHEMICAL, chemical_aggregation))
                 if DISEASE in retrieved_ent_types:
                     disease_tree = self._build_tree_structure(var2prefix_substitution_list, "C")
-                    disease_aggregation = self._create_query_aggregate("", "", "", DISEASE)
+                    disease_aggregation = self._create_query_aggregate("", "", DISEASE, DISEASE)
                     disease_aggregation.add_query_result(disease_tree)
                     ent_type_aggregation.append((DISEASE, disease_aggregation))
                 self._populate_tree_structure(var2prefix_document_result_list)
@@ -88,7 +98,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
                         misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results)
-                        misc_aggregation = self._create_query_aggregate("", "", "", ent_type)
+                        misc_aggregation = self._create_query_aggregate("", "", f'No-Tree-{ent_type}', f'No-Tree-{ent_type}')
                         misc_aggregation.add_query_result(misc_aggregation_list)
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 

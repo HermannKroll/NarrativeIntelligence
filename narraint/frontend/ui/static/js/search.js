@@ -477,26 +477,26 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         let ent_id = entity_substitution["id"];
         let ent_type = entity_substitution["type"];
         let ent_name = entity_substitution["name"];
-        let var_sub = ent_name + " (" + ent_id + " " + ent_type + ")";
-        if (ent_name === "Gene" || ent_name === 'Species' || ent_name === 'Disease' || ent_name === 'Chemical'
-            || ent_name === 'DosageForm' || ent_name === 'CellLine') {
+        let var_sub = name + ':= ' + ent_name + " (" + ent_id + " " + ent_type + ")";
+        // support ontological header nodes
+        if (ent_name === ent_type) {
             var_sub = ent_name;
         }
         if (ent_id.slice(0,2) === "DB") {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         }
         else if (ent_id.slice(0, 5) === 'MESH:') {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Species') {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Gene') {
-            button_string += ', '.repeat(!!i) + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
