@@ -325,7 +325,7 @@ const search = (event) => {
         let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
         query_translation.text(query_trans_string);
-        let results = response["r"];
+        let results = response["results"];
         let result_size = results["s"];
         // Create documents DIV
         let divList = createResultList(results, query_len);
