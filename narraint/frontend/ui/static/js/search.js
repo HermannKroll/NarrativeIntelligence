@@ -519,11 +519,31 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     return divCard;
 };
 
-let globalAccordionDict = new Object();
+let globalAccordionDict = {};
 
-const createExpandListElement = () => {
-    let divExpand = $('<div class="card"><div class="card-body">' + "..." + '</div></div><br>');
+const createExpandListElement = (accordionID) => {
+    let btnid = 'exp'+ accordionID
+    let divExpand = $('<div class="card"><div class="card-body">' +
+        '<button class="btn btn-link" id="'+btnid+'">...' + '</button>' +
+        '</div></div><br>');
+    $('#'+btnid).click();
     return divExpand;
+}
+
+const expandAccordion = (accordionID) => {
+    let accdiv = globalAccordionDict[accordionID][0];
+    let resultList = globalAccordionDict[accordionID][1];
+    let i = 0;
+    resultList.every(res =>{
+        if(i > MAX_SHOWN_ELEMENTS) {
+            return false;
+        } else {
+            createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i)
+                .insertBefore("#exp" + accordionID);
+
+        }
+        return true;
+    });
 }
 
 const createDocumentAggregateList = (results, query_len) => {
@@ -546,7 +566,7 @@ const createDocumentAggregateList = (results, query_len) => {
     });
     // add a expand button
     if(i > MAX_SHOWN_ELEMENTS){
-        divAccordion.append(createExpandListElement());
+        divAccordion.append(createExpandListElement(accordionID));
     }
 
     globalAccordionDict[accordionID] = [divAccordion, nextResultList];
