@@ -1,3 +1,5 @@
+let MAX_SHOWN_ELEMENTS = 20;
+
 let CYTOSCAPE_STYLE = [
     {
         selector: 'node',
@@ -517,6 +519,12 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     return divCard;
 };
 
+let globalAccordionDict = new Object();
+
+const createExpandListElement = () => {
+    let divExpand = $('<div class="card"><div class="card-body">' + "..." + '</div></div><br>');
+    return divExpand;
+}
 
 const createDocumentAggregateList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();
@@ -527,10 +535,21 @@ const createDocumentAggregateList = (results, query_len) => {
     let resultList = results["r"];
 
     let i = 0;
+    let nextResultList = [];
     resultList.forEach(res => {
-        divAccordion.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
         i += 1;
+        if (i < MAX_SHOWN_ELEMENTS) {
+            divAccordion.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
+        } else {
+            nextResultList.push(res);
+        }
     });
+    // add a expand button
+    if(i > MAX_SHOWN_ELEMENTS){
+        divAccordion.append(createExpandListElement());
+    }
+
+    globalAccordionDict[accordionID] = [divAccordion, nextResultList];
     return divAccordion;
 };
 
