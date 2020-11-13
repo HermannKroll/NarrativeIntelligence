@@ -70,7 +70,6 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     var2prefix_substitution_list[v] = prefix_substitution_list
                     var2prefix_document_result_list[v] = prefix_document_result_list
 
-                resulting_tree = QueryResultAggregateList()
                 ent_type_aggregation = []
                 if DOSAGE_FORM in retrieved_ent_types:
                     dosage_form_tree_0 = self._build_tree_structure(var2prefix_substitution_list, "FIDX")
@@ -98,11 +97,13 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
                         misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results)
-                        misc_aggregation = self._create_query_aggregate("", "", f'No-Tree-{ent_type}', f'No-Tree-{ent_type}')
+                        misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH hierarchy)', f'{ent_type} (No MeSH hierarchy)')
                         misc_aggregation.add_query_result(misc_aggregation_list)
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 
-                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[0]):
+                resulting_tree = QueryResultAggregateList()
+                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=True):
+                    self._sort_node_result_list(aggregation)
                     resulting_tree.add_query_result(aggregation)
                 return resulting_tree
             else:
@@ -118,6 +119,18 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         var2sub = dict()
         var2sub[self.var_names[0]] = QueryEntitySubstitution(ent_str, ent_id, ent_type, ent_name)
         return QueryResultAggregate(var2sub)
+
+    def _node_has_result_list(self, node):
+        if isinstance(node, QueryResultAggregateList) or isinstance(node, QueryResultAggregate):
+            return True
+        return False
+
+    def _sort_node_result_list(self, node):
+        if self._node_has_result_list(node):
+            for res in node.results:
+                if self._node_has_result_list(res):
+                    self._sort_node_result_list(res)
+            node.results.sort(key=lambda x: x.get_result_size(), reverse=True)
 
     def _populate_tree_structure(self, var2prefix_document_result_list):
         for v in self.var_names:
