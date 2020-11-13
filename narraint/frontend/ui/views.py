@@ -292,37 +292,6 @@ class SearchView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class SearchViewWiki(TemplateView):
-    template_name = "ui/searchwiki.html"
-
-    def get(self, request, *args, **kwargs):
-        if request.is_ajax():
-            results_converted = []
-            query_trans_string = ""
-            nt_string = ""
-            if "query" in request.GET:
-                try:
-                    query = str(self.request.GET.get("query", "").strip())
-                    data_source = str(self.request.GET.get("data_source", "").strip())
-                    logging.info("Selected data source is {}".format(data_source))
-
-                    graph_query, query_trans_string = convert_query_text_to_fact_patterns(query)
-                    for fp in graph_query:
-                        fp.predicate = fp.predicate.upper()
-                    results = query_engine.process_query_with_expansion(graph_query, "trex", query=query, likesearch=False)
-                    substitution_aggregation = ResultAggregationBySubstitution()
-                    results_converted = substitution_aggregation.rank_results(results).to_dict()
-                except Exception:
-                    results_converted = []
-                    query_trans_string = "keyword query cannot be converted (syntax error)"
-                    nt_string = ""
-                    traceback.print_exc(file=sys.stdout)
-
-            return JsonResponse(
-                dict(results=results_converted, query_translation=query_trans_string, nt_string=""))
-        return super().get(request, *args, **kwargs)
-
-
 class StatsView(TemplateView):
     template_name = "ui/stats.html"
     stats_query_results = None
