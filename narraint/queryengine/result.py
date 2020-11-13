@@ -61,8 +61,8 @@ class QueryEntitySubstitution:
         return self.__str__()
 
     def to_dict(self):
-        return dict(name=self.entity_name, str=self.entity_str, id=self.entity_id,
-                    type=self.entity_type)
+        return dict(n=self.entity_name, s=self.entity_str, id=self.entity_id,
+                    t=self.entity_type)
 
 
 class QueryFactExplanation:
@@ -146,7 +146,7 @@ class QueryDocumentResult(QueryResultBase):
     def to_dict(self):
         self.explanations.sort(key=lambda x: x.position)
         e_dict = [e.to_dict() for e in self.explanations]
-        return dict(type="doc", document_id=self.document_id, title=self.title, explanations=e_dict)
+        return dict(t="doc", docid=self.document_id, title=self.title, e=e_dict)
 
     def get_result_size(self):
         return 1
@@ -178,7 +178,7 @@ class QueryDocumentResultList(QueryResultBase):
 
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(type="doc_list", results=result_dict, size=self.get_result_size())
+        return dict(t="doc_l", r=result_dict, s=self.get_result_size())
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
@@ -203,8 +203,8 @@ class QueryResultAggregate(QueryResultBase):
 
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(type="aggregate", size=self.get_result_size(), variable_names=self.variable_names,
-                    substitution=self._serialize_var_substitution(), results=result_dict)
+        return dict(t="agg", s=self.get_result_size(), v_n=self.variable_names,
+                    sub=self._serialize_var_substitution(), r=result_dict)
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
@@ -223,7 +223,7 @@ class QueryResultAggregateList(QueryResultBase):
 
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(type="aggregate_list", results=result_dict, size=self.get_result_size())
+        return dict(t="agg_l", r=result_dict, s=self.get_result_size())
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])

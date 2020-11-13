@@ -325,8 +325,8 @@ const search = (event) => {
         let query_translation = $("#query_translation");
         let query_trans_string = response["query_translation"];
         query_translation.text(query_trans_string);
-        let results = response["results"];
-        let result_size = results["size"];
+        let results = response["r"];
+        let result_size = results["s"];
         // Create documents DIV
         let divList = createResultList(results, query_len);
         divDocuments.append(divList);
@@ -370,9 +370,9 @@ const getUniqueAccordionID = () => {
 };
 
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
-    let document_id = queryResult["document_id"];
+    let document_id = queryResult["docid"];
     let title = queryResult["title"];
-    let explanations = queryResult["explanations"];
+    let explanations = queryResult["e"];
     let e_string = "";
     let j = -1;
     try {
@@ -430,8 +430,8 @@ const createDocumentList = (results, query_len) => {
     let divH2 = $('<h2 class="mb-0"></h2>');
     divCardHeader.append(divH2);
 
-    let resultList = results["results"];
-    let resultSize = results["size"];
+    let resultList = results["r"];
+    let resultSize = results["s"];
     let button_string = resultSize + ' Document';
     if (resultSize > 1) {
         button_string += 's'
@@ -461,10 +461,10 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let divH2 = $('<h2 class="mb-0"></h2>');
     divCardHeader.append(divH2);
 
-    let resultList = queryAggregate["results"];
-    let var_names = queryAggregate["variable_names"];
-    let var_subs = queryAggregate["substitution"];
-    let result_size = queryAggregate["size"];
+    let resultList = queryAggregate["r"];
+    let var_names = queryAggregate["v_n"];
+    let var_subs = queryAggregate["sub"];
+    let result_size = queryAggregate["s"];
     let button_string = result_size + ' Document';
     if (result_size > 1) {
         button_string += 's'
@@ -473,10 +473,10 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let i = 0;
     var_names.forEach(name => {
         let entity_substitution = var_subs[name];
-        let ent_str = entity_substitution["str"];
+        let ent_str = entity_substitution["s"];
         let ent_id = entity_substitution["id"];
-        let ent_type = entity_substitution["type"];
-        let ent_name = entity_substitution["name"];
+        let ent_type = entity_substitution["t"];
+        let ent_name = entity_substitution["n"];
         let var_sub = name + ':= ' + ent_name + " (" + ent_id + " " + ent_type + ")";
         // support ontological header nodes
         if (ent_name === ent_type) {
@@ -524,7 +524,7 @@ const createDocumentAggregateList = (results, query_len) => {
     let collapseID = accordionID + "collapse" + 1;
     let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
 
-    let resultList = results["results"];
+    let resultList = results["r"];
 
     let i = 0;
     resultList.forEach(res => {
@@ -536,14 +536,14 @@ const createDocumentAggregateList = (results, query_len) => {
 
 
 const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID) => {
-    let typeOfRes = result["type"];
+    let typeOfRes = result["t"];
     if (typeOfRes === "doc") {
         return (createResultDocumentElement(result, query_len, accordionID, headingID, collapseID));
-    } else if (typeOfRes === "doc_list") {
+    } else if (typeOfRes === "d_l") {
         return (createDocumentList(result, query_len, accordionID, headingID, collapseID));
-    } else if (typeOfRes === "aggregate") {
+    } else if (typeOfRes === "agg") {
         return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID));
-    } else if (typeOfRes === "aggregate_list") {
+    } else if (typeOfRes === "agg_l") {
         return (createDocumentAggregateList(result, query_len, accordionID, headingID, collapseID));
     }
     console.log("ERROR - does not recognize result type: " + typeOfRes);
