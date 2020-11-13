@@ -11,23 +11,20 @@ from narraint.extraction.versions import PATHIE_EXTRACTION
 
 def clean_and_export_predications_to_copy_load_tsv(tuples_cleaned: List[PRED], collection, extraction_type,
                                                    clean_genes=True,
-                                                   do_transform_mesh_ids_to_prefixes=True, do_map_drugbank_ids=True):
+                                                   do_transform_mesh_ids_to_prefixes=True):
     """
     insert a list of cleaned tuples into the database (bulk insert)
     does not check for collisions
     :param tuples_cleaned: a list of PRED tuples
     :param collection: the document collection
     :param extraction_type: extraction type like OpenIE or PathIE
-    :param version: version of extraction method
     :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
     :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
-    :param do_map_drugbank_ids: if true all known drugbank ids will be mapped to mesh ids
     :return: Nothing
     """
     predication_values, sentence_values = clean_predications(tuples_cleaned, collection, extraction_type,
                                                              clean_genes=clean_genes,
-                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes,
-                                                             do_map_drugbank_ids=do_map_drugbank_ids)
+                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes)
     # free memory here
     tuples_cleaned.clear()
     sentence_values_len = len(sentence_values)
