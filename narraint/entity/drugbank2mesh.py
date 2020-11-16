@@ -6,19 +6,49 @@ from narraint.config import MESH_DESCRIPTORS_FILE, DRUGBANK_ID_2_MESH_MAPPING_IN
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.drug import DrugTaggerVocabulary
 
-DRUGBANK_TO_MESH_DISAMBIGUATION = {}
-
-
-#    'DB03568': 'MESH:D020148',
-#    'DB00693': 'MESH:D019793',
-#    'DB00759': 'MESH:D013752',
-#    'DB00091': 'MESH:D016572',
-#    'DB04557': 'MESH:D016718',
-#    'DB02134': 'MESH:D019820',
-#    'DB03994': 'MESH:D019856',
-#    'DB00536': 'MESH:D019791',
-#    'DB00182': 'MESH:D000661'
-# }
+DRUGBANK_TO_MESH_DISAMBIGUATION = {
+    "DB01221": "MESH:D007649",
+    "DB00062": "MESH:D000075462",
+    "DB11627": "MESH:D017325",
+    "DB00271": "MESH:D003973",
+    "DB01049": "MESH:D004877",
+    "DB11151": "MESH:D012972",
+    "DB00058": "MESH:D000515",
+    "DB00435": "MESH:D009569",
+    "DB00052": "MESH:D013006",
+    "DB00158": "MESH:D005492",
+    "DB11132": "MESH:D058428",
+    "DB09363": "MESH:D011926",
+    "DB00165": "MESH:D011736",
+    "DB01022": "MESH:D010837",
+    "DB03088": "MESH:D011761",
+    "DB11133": "MESH:D015525",
+    "DB00066": "MESH:D015292",
+    "DB00102": "MESH:D000077214",
+    "DB03568": "MESH:D020148",
+    "DB13761": "MESH:D043322",
+    "DB14292": "MESH:D029023",
+    "DB00184": "MESH:D009538",
+    "DB12768": "MESH:D001500",
+    "DB05259": "MESH:D000068717",
+    "DB14009": "MESH:D002188",
+    "DB14291": "MESH:D031171",
+    "DB11842": "MESH:D000804",
+    "DB06779": "MESH:D017985",
+    "DB00128": "MESH:D001224",
+    "DB12257": "MESH:D010984",
+    "DB14307": "MESH:D013662",
+    "DB00048": "MESH:D028241",
+    "DB08798": "MESH:D013423",
+    "DB13518": "MESH:D000077322",
+    "DB00475": "MESH:D002707",
+    "DB00099": "MESH:D000069585",
+    "DB14154": "MESH:D006046",
+    "DB09337": "MESH:D000388",
+    "DB12909": "MESH:D005176",
+    "DB09278": "MESH:D002606",
+    "DB11596": "MESH:D058766"
+ }
 
 
 class DrugBank2MeSHMapper:
@@ -34,11 +64,13 @@ class DrugBank2MeSHMapper:
     def __init__(self):
         self.drug_terms2dbid = {}
         self.mesh_terms2meshid = {}
+        self.mesh_headings = set()
         self.dbid2meshid = {}
 
     def compute_mappings(self):
-        #self._load_mesh_ontology()
-        self.drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=1,
+        self._load_mesh_ontology()
+        self.drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=False,
+                                                                                           ignore_drugbank_chemicals=False,
                                                                                            expand_term_with_e_and_s=False)
         # compute the intersection between both vocabs
         term_intersections = set(self.drug_terms2dbid.keys()).intersection(set(self.mesh_terms2meshid.keys()))
@@ -47,20 +79,24 @@ class DrugBank2MeSHMapper:
             dbids = self.drug_terms2dbid[term]
             mesh_ids = self.mesh_terms2meshid[term]
             for dbid in dbids:
+                if dbid in DRUGBANK_TO_MESH_DISAMBIGUATION:
+                    self.dbid2meshid[dbid] = DRUGBANK_TO_MESH_DISAMBIGUATION[dbid]
+                    continue
                 if len(mesh_ids) == 0:
                     continue
-                if len(mesh_ids) > 1:
-                    if dbid not in DRUGBANK_TO_MESH_DISAMBIGUATION:
-                        logging.warning(f'DBID {dbid} is ambigious: {mesh_ids}  -- mapping missing')
-                    else:
-                        self.dbid2meshid[dbid] = DRUGBANK_TO_MESH_DISAMBIGUATION[dbid]
                 else:
                     mesh_desc = 'MESH:{}'.format(mesh_ids.pop())
                     if dbid in self.dbid2meshid and mesh_desc != self.dbid2meshid[dbid]:
-                        logging.warning('DrugBank-ID: "{}" has already a mapping to {} (instead of {})'.format(dbid,
-                                                                                                               mesh_desc,
-                                                                                                               self.dbid2meshid[
-                                                                                                                   dbid]))
+                        # trying resolve automatically
+                        if term in self.mesh_headings:
+                            # choose the current the term because its a heading
+                            self.dbid2meshid[dbid] = mesh_desc
+                            continue
+                        else:
+                            logging.warning('DrugBank-ID: "{}" has already a mapping to {} (instead of {})'.format(dbid,
+                                                                                                                   mesh_desc,
+                                                                                                                   self.dbid2meshid[
+                                                                                                                       dbid]))
                     # this should map only a single element
                     self.dbid2meshid[dbid] = mesh_desc
 
@@ -81,6 +117,7 @@ class DrugBank2MeSHMapper:
         mesh_mappings = []
         for desc in meshdb.get_all_descs():
             mesh_id, mesh_head = desc.unique_id, desc.heading
+            self.mesh_headings.add(mesh_head.lower())
             mesh_mappings.append((mesh_id, mesh_head))
             for term in desc.terms:
                 mesh_mappings.append((mesh_id, term.string))
