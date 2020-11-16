@@ -83,7 +83,7 @@ def main():
         for e_id, e_str, e_type in entities:
             try:
                 # Convert MeSH Tree Numbers to MeSH Descriptors
-                if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith('DB'):
+                if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:'):
                     e_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(e_id)[0])
                     if e_id.startswith('FID'):
                         e_type = 'FID'
