@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, EXCIPIENT
+from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL
 from narraint.entity.meshontology import MeSHOntology
 
 
@@ -32,11 +32,12 @@ class QueryEntitySubstitution:
             return self.entity_id  # id is already the name
         try:
             # Translate Drugs and Excipients to MeSH if possible
-            if self.entity_type in [DRUG, EXCIPIENT]:
+            if self.entity_type in [DRUG, EXCIPIENT, DRUGBANK_CHEMICAL]:
                 mapper = DrugBank2MeSHMapper.instance()
                 mapping = mapper.dbid2meshid.get(self.entity_id)
                 if mapping:
                     self.entity_id = mapper.dbid2meshid[self.entity_id]
+                    self.entity_type = CHEMICAL
 
             # Convert MeSH Tree Numbers to MeSH Descriptors
             if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not self.entity_id.startswith('MESH:'):
