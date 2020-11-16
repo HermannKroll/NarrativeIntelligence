@@ -15,10 +15,10 @@ from narraint.entity.entity import Entity
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, SYMMETRIC_PREDICATES, \
-    PREDICATE_EXPANSION, should_perform_like_search_for_entity
+    PREDICATE_EXPANSION, should_perform_like_search_for_entity, ENTITY_TYPE_EXPANSION
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
-QUERY_LIMIT = 10000
+QUERY_LIMIT = 50000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
@@ -91,7 +91,11 @@ class QueryEngine:
                     var_name = var_name.group(1)
                     var_type = VAR_TYPE.search(s)
                     if var_type:
-                        query = query.filter(pred.subject_type == var_type.group(1))
+                        var_type = var_type.group(1)
+                        if var_type in ENTITY_TYPE_EXPANSION:
+                            query = query.filter(pred.subject_type.in_(ENTITY_TYPE_EXPANSION[var_type]))
+                        else:
+                            query = query.filter(pred.subject_type == var_type)
                     if var_name not in var_dict:
                         var_names.append((var_name, 'subject', idx))
                         var_dict[var_name] = (pred, 'subject')
@@ -115,7 +119,11 @@ class QueryEngine:
                     var_name = var_name.group(1)
                     var_type = VAR_TYPE.search(o)
                     if var_type:
-                        query = query.filter(pred.object_type == var_type.group(1))
+                        var_type = var_type.group(1)
+                        if var_type in ENTITY_TYPE_EXPANSION:
+                            query = query.filter(pred.object_type.in_(ENTITY_TYPE_EXPANSION[var_type]))
+                        else:
+                            query = query.filter(pred.object_type == var_type)
                     if var_name not in var_dict:
                         var_names.append((var_name, 'object', idx))
                         var_dict[var_name] = (pred, 'object')
@@ -510,7 +518,9 @@ class QueryEngine:
         session = Session.get()
         query_subjects = session.query(Predication.subject_id, Predication.subject_str,
                                        Predication.subject_type).distinct()
+        query_subjects = query_subjects.filter(Predication.predicate_canonicalized.isnot(None))
         query_objects = session.query(Predication.object_id, Predication.object_str, Predication.object_type).distinct()
+        query_objects = query_objects.filter(Predication.predicate_canonicalized.isnot(None))
         query = query_subjects.union(query_objects).distinct()
 
         entities = set()
