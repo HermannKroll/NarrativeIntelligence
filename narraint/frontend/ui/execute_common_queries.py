@@ -25,10 +25,13 @@ COMMON_QUERIES = [
     '?Chem(Chemical) administered ?Form(DosageForm)'
     'Lidocaine administered ?X(DosageForm)',
     '?X(Chemical) administered liposomes',
-    '?X(Chemical) administered "Nebulizers and Vaporizers"'
+    '?X(Chemical) administered "Nebulizers and Vaporizers"',
+    'Vinca associated ?Y(Disease)',
+    'Digitalis associated ?Y(Disease)',
+    '?X(PlantFamily) associated ?Y(Disease)'
 ]
 
-DOCUMENT_COLLECTIONS = ['PubMed', 'PMC']
+DOCUMENT_COLLECTIONS = ['PubMed' ]# , 'PMC']
 
 
 def execute_common_queries():

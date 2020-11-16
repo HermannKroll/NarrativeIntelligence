@@ -193,7 +193,7 @@
                             <div class="inner-div-right-most">
                                 <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
                                        value="outer_ranking_ontology">
-                                <label for="radio_outer_ranking_b">Hierarchy-based Visualisation</label><br>
+                                <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualisation</label><br>
                             </div>
                         </div>
 
@@ -248,6 +248,20 @@
                         </button>
                         <button type="button" class="btn btn-outline-primary"
                                 onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Plant Family Associations
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated ?Y(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily) associated ?Y(Disease)
                         </button>
 
                         <br><br>
