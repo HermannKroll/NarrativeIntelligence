@@ -133,3 +133,12 @@ serum albumin
 adenylate
 gelatin
 horse
+beta
+laser
+escherichia
+lens
+thymus
+saccharomyces
+helix
+lactobacillus
+enterococcus
