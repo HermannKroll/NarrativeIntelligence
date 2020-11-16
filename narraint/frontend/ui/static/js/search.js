@@ -1,4 +1,4 @@
-let MAX_SHOWN_ELEMENTS = 5;
+let MAX_SHOWN_ELEMENTS = 10;
 
 let CYTOSCAPE_STYLE = [
     {
@@ -148,7 +148,7 @@ $(document).ready(function () {
             let lines = data.split("\n"); // split data into an array of tags
             let entities = [];
             let predicates = [];
-            let varTypes = ["Chemical", "Disease", "Gene", "Species", "DosageForm", "Drug", "Excipient", "PlantFamily"];
+            let varTypes = ["Chemical", "Disease", "DosageForm", "Drug", "Excipient", "Gene", "Species", "PlantFamily"];
             for (let i = 0; i < lines.length; i++) { // create key value pairs from the labels and the mesh id's
                 let comp = lines[i].split("\t");
                 if (comp[1] === "predicate") {
@@ -216,6 +216,22 @@ $(document).ready(function () {
                         }
                         // delegate back to autocomplete, but extract the last term
                         response($.ui.autocomplete.filter(hits, last_word));
+
+                        /*
+                        let cursorPosition = $("#id_keywords").prop("selectionStart");
+                        let relevantTerm = request.term.substring(0, cursorPosition)
+                        $.ajax({
+                            type: "GET",
+                            url: search_url,
+                            data: {
+                                search: relevantTerm,
+                                cursor_pos: cursorPosition
+                            },
+                            success: function (data){
+                                // delegate back to autocomplete, but extract the last term
+                                response(data["terms"]);
+                            }
+                        }); */
                     }
                     ,
                     focus: function () {
@@ -398,6 +414,7 @@ const createExpandableAccordion = (first_call, divID) => {
     let headingID = globalAccordionDict[divID][3];
     let collapseID = globalAccordionDict[divID][4];
     let resultList = globalAccordionDict[divID][5];
+    let global_result_size = globalAccordionDict[divID][6];
     let i = 0;
     // remove the last expand button
     if (first_call === false){
@@ -408,7 +425,8 @@ const createExpandableAccordion = (first_call, divID) => {
     resultList.forEach(res =>{
         i += 1;
         if (i < MAX_SHOWN_ELEMENTS) {
-            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
+            let j = i + global_result_size;
+            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + j, collapseID + j));
         } else {
             nextResultList.push(res);
         }
@@ -417,7 +435,7 @@ const createExpandableAccordion = (first_call, divID) => {
     if(i > MAX_SHOWN_ELEMENTS){
         current_div.append(createExpandListElement(divID, nextResultList.length));
     }
-    globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList];
+    globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList, global_result_size + i];
 }
 
 
@@ -498,13 +516,8 @@ const createDocumentList = (results, query_len) => {
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
-    /*
-    let i = 0;
-    resultList.forEach(res => {
-        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID + i, collapseID + i));
-        i += 1;
-    }); */
-    globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID + i, collapseID + i, resultList];
+
+    globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
     createExpandableAccordion(true, divCardBodyID);
     return divAccordion;
 };
@@ -570,12 +583,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCard.append(divCardEntry);
 
 
-    globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList];
+    globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
     createExpandableAccordion(true, divCardBodyID);
 
-  /*  resultList.forEach(res => {
-        divCardBody.append(createDivListForResultElement(res, query_len, accordionID, headingID, collapseID));
-    }); */
     return divCard;
 };
 
@@ -586,7 +596,7 @@ const createDocumentAggregateList = (results, query_len) => {
     let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
     let resultList = results["r"];
 
-    globalAccordionDict[accordionID] = [divAccordion, query_len, accordionID, headingID + i, collapseID + i, resultList];
+    globalAccordionDict[accordionID] = [divAccordion, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
     createExpandableAccordion(true, accordionID);
 
     return divAccordion;

@@ -13,7 +13,7 @@ from narraint.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
-    DRUGBANK_CHEMICAL, ALL
+    DRUGBANK_CHEMICAL, ALL, DISEASE
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -36,6 +36,9 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
+
+
+allowed_entity_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, DRUG, DRUGBANK_CHEMICAL}
 
 allowed_predicates = set(create_predicate_vocab().keys())
 logging.info('allowed predicates are: {}'.format(allowed_predicates))
@@ -64,13 +67,14 @@ def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         var_string, var_type = check_and_convert_variable(text)
-        if var_type == CHEMICAL:
-            e = [Entity(var_string, 'Variable'),
-                 Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
-                 Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable'),
-                 Entity(var_string.replace(f'({CHEMICAL})', f'({DRUGBANK_CHEMICAL})'), 'Variable')]
-        else:
-            e = [Entity(var_string, 'Variable')]
+        #if var_type == CHEMICAL:
+          #  e = [Entity(var_string, 'Variable')],
+
+                # Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
+                # Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable'),
+                # Entity(var_string.replace(f'({CHEMICAL})', f'({DRUGBANK_CHEMICAL})'), 'Variable')]
+        #else:
+        e = [Entity(var_string, 'Variable')]
     elif text_low.startswith('mesh:'):
         e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
     elif text_low.startswith('gene:'):
@@ -212,6 +216,86 @@ def count_variables_in_query(graph_query: GraphQuery):
     return len(var_set)
 
 
+def is_quote_closed(search_str: str) -> bool:
+    return search_str.count('"') % 2 == 0
+
+
+def is_next_word_predicate(search_str: str) -> bool:
+    components = search_str.strip().split(' ')
+    if len(components) == 0:
+        return False
+    if len(components) == 1:
+        return False
+    last_relevant_word = components[-2].strip()
+    if last_relevant_word in allowed_predicates:
+        # last one was a predicate
+        return False
+    return True
+
+
+def prepare_search_str(search_str: str) -> str:
+    # get the relevant search str
+    search_str_lower = search_str.lower().strip()
+    # replace multiple spaces by a single one
+    search_str_lower = ' '.join(search_str_lower.split())
+    search_str_lower = search_str_lower.replace(';', '.')
+
+    # ignore old facts
+    if '.' in search_str_lower:
+        # just take the latest fact in the current search term
+        search_str_lower = search_str_lower.split('.')[-1]
+
+    return search_str_lower
+
+
+# Simvastatin treats Diabetes Mellitus
+def compute_autocompletion_list(search_str, cursor_pos):
+    if cursor_pos > len(search_str):
+        return []
+    search_str_lower = prepare_search_str(search_str[:cursor_pos])
+
+    # find the relevant string
+    # if all quotes are closed - take string till last space
+    quote_closed = is_quote_closed(search_str_lower)
+    if quote_closed:
+        relevant_term = search_str_lower.split(' ')[-1]
+    else:
+        # quote is open - string starts by last quote
+        relevant_term = search_str_lower.split('"')[-1]
+
+    completions = []
+    logging.info('relevant term is: "{}"'.format(relevant_term))
+    if quote_closed and is_next_word_predicate(search_str_lower):
+        for pred in allowed_predicates:
+            if pred.startswith(relevant_term):
+                completions.append(pred)
+    else:
+        # is a variable?
+        if relevant_term.startswith('?'):
+            # ignore leading question mark
+            var_name = relevant_term[1:].split('(')[0]
+            hits = [f'?{var_name.capitalize()}({var_type})' for var_type in allowed_entity_types]
+            for h in hits:
+                if h.lower().startswith(relevant_term):
+                    completions.append(h)
+        # search for entity
+        for term in entity_tagger.term2entity:
+            if term.startswith(relevant_term):
+                completions.append(term.capitalize())
+
+    # shortest completions first
+    sorted_by_length = sorted(completions, key=lambda x: len(x))[0:10]
+    # sort alphabetically
+    return sorted(sorted_by_length)
+
+
+def format_search_str(search: str, cursor_pos: int) -> str:
+    # remove multiple spaces
+    search = ' '.join(search.split())
+
+
+    return search
+
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 
@@ -220,6 +304,19 @@ class SearchView(TemplateView):
             results_converted = []
             query_trans_string = ""
             nt_string = ""
+
+            if "search" in request.GET and "cursor_pos" in request.GET:
+                search_string = str(self.request.GET.get("search", "").strip())
+                cursor_pos = int(self.request.GET.get("cursor_pos", "").strip())
+                completion_terms = compute_autocompletion_list(search_string, cursor_pos)
+                logging.info(f'Sending completion terms: {completion_terms}')
+                return JsonResponse(dict(terms=completion_terms))
+            if "format" in request.GET and "cursor_pos" in request.GET:
+                search_string = str(self.request.GET.get("search", "").strip())
+                cursor_pos = int(self.request.GET.get("cursor_pos", "").strip())
+                formated_search_str = format_search_str(search_string, cursor_pos)
+                return JsonResponse(dict(formated_search=formated_search_str))
+
             if "query" in request.GET:
                 try:
                     query = str(self.request.GET.get("query", "").strip())
@@ -287,8 +384,8 @@ class SearchView(TemplateView):
                     nt_string = ""
                     traceback.print_exc(file=sys.stdout)
 
-            return JsonResponse(
-                dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
+                return JsonResponse(
+                    dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
         return super().get(request, *args, **kwargs)
 
 
