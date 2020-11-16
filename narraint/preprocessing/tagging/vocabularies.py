@@ -89,7 +89,7 @@ class DrugTaggerVocabulary:
             drugs_found += 1
             print_progress_with_eta("building index...", drugs_found, drug_number, start, print_every_k=100)
             description_text = elem.find(f'{pref}description').text
-            if description_text and 'allergen' in description_text.lower()[0:20]:
+            if description_text and 'allergen' in description_text.lower()[0:30]:
                 continue
             indication_text = elem.find(f'{pref}indication').text
             if not description_text and not indication_text:
