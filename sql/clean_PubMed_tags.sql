@@ -1,3 +1,6 @@
+DELETE FROM TAG where ent_id = '-';
+
+
 WITH doc AS (
     SELECT id, (length(title) + length(abstract) + 10) as length
     from document d
