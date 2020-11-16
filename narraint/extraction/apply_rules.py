@@ -28,7 +28,7 @@ def dosage_form_rule():
     logging.info(
         'Updating predicate to "{}" for (DosageForm, [Chemical, Disease, Species]) pairs'.format(DOSAGE_FORM_PREDICATE))
     stmt_1 = update(Predication).where(and_(Predication.subject_type == DOSAGE_FORM,
-                                            Predication.object_type.in_([CHEMICAL, DISEASE, SPECIES]))). \
+                                            Predication.object_type.in_([CHEMICAL, DISEASE, SPECIES, DRUG, EXCIPIENT]))). \
         values(predicate_canonicalized=DOSAGE_FORM_PREDICATE)
     session.execute(stmt_1)
     session.commit()
