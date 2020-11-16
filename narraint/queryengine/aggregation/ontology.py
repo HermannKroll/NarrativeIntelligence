@@ -97,7 +97,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
                         misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results)
-                        misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH hierarchy)', f'{ent_type} (No MeSH hierarchy)')
+                        misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH Taxonomy)', f'{ent_type} (No MeSH Taxonomy)')
                         misc_aggregation.add_query_result(misc_aggregation_list)
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 
