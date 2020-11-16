@@ -142,3 +142,8 @@ saccharomyces
 helix
 lactobacillus
 enterococcus
+daphnia
+iris
+hlycine
+cereus
+hepatica
