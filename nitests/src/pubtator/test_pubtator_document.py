@@ -3,7 +3,7 @@ from unittest import TestCase
 from spacy.lang.en import English
 
 from narraint.pubtator.document import TaggedDocument, TaggedDocumentCollection
-from narraint.tests.test_config import get_test_resource_filepath
+from nitests.config.config import get_test_resource_filepath
 
 
 class PubTatorDocTestCase(TestCase):
