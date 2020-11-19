@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle
 
+from narraint import config
 from narraint.frontend.frontend.settings import base as settings
 from narraint.mesh.data import MeSHDB
 
@@ -21,6 +22,10 @@ def build_index():
     db.load_xml(settings.DESCRIPTOR_FILE, True, True)
     with open(settings.MESHDB_INDEX, "wb") as f:
         pickle.dump(db.get_index(), f)
+
+
+def proj_rel_path(path:str):
+    return os.path.join(config.GIT_ROOT_DIR, path) if not path[0] == "/" else path
 
 
 def mesh_synonyms(tree_number_list, output):
