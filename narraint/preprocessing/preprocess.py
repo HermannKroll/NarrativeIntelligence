@@ -182,7 +182,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     logger.info("=== Finished ===")
 
 
-def main():
+def main(arguments=None):
     parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
@@ -207,7 +207,7 @@ def main():
 
     parser.add_argument("input", help="Directory with PubTator files ", metavar="IN_DIR")
     parser.add_argument("output", help="Output file", metavar="OUT_FILE")
-    args = parser.parse_args()
+    args = parser.parse_args(arguments)
 
     # Create configuration wrapper
     conf = Config(args.config)

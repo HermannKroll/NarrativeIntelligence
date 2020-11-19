@@ -1,0 +1,23 @@
+{
+  "pmcid2pmid": "/home/kroll/tools/pmcid2pmid.tsv",
+  "pmc_dir": "/hdd2/datasets/pubmed_central",
+  "taggerOne": {
+    "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
+    "model": "models/model_BC5CDRJ_011.bin",
+    "batchSize": 10000,
+    "timeout": 15
+  },
+  "gnormPlus": {
+    "root": "/home/kroll/tools/tagger/GNormPlusJava",
+    "javaArgs": "-Xmx100G -Xms30G"
+  },
+  "dict": {
+    "max_words": 5
+  },
+  "drug": {
+    "max_per_product": 3,
+    "min_name_length": 3
+  },
+  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
+  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2"
+}
