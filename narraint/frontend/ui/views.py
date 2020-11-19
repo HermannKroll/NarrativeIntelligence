@@ -43,9 +43,36 @@ allowed_entity_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAM
 allowed_predicates = set(create_predicate_vocab().keys())
 logging.info('allowed predicates are: {}'.format(allowed_predicates))
 
-query_engine = QueryEngine()
-entity_tagger = EntityTagger()
-cache = SearchCache()
+# Former global variables causing problems. Now in View.instance()
+#query_engine = QueryEngine()
+# entity_tagger = EntityTagger()
+#cache = SearchCache()
+
+
+class View:
+    """
+    Singleton encapsulating the former global query_engine, entity_tagger and cache
+    """
+    query_engine = None
+    entity_tagger = None
+    cache = None
+
+    _instance = None
+    initialized = False
+
+    def __init__(self):
+        raise RuntimeError('Singleton, use instance() instead')
+
+    @classmethod
+    def instance(cls):
+        if not cls.initialized:
+            cls._instance = cls.__new__(cls)
+            cls.query_engine = QueryEngine()
+            cls.entity_tagger = EntityTagger()
+            cls.cache = SearchCache()
+            cls.initialized = True
+        return cls._instance
+
 
 def check_and_convert_variable(text):
     try:
@@ -85,7 +112,7 @@ def convert_text_to_entity(text):
         e = [Entity(text.upper(), DOSAGE_FORM)]
     else:
         try:
-            e = entity_tagger.tag_entity(text)
+            e = View.instance().entity_tagger.tag_entity(text)
         except KeyError:
             raise ValueError("Don't know how to understand: {}".format(text))
     return e
@@ -279,7 +306,7 @@ def compute_autocompletion_list(search_str, cursor_pos):
                 if h.lower().startswith(relevant_term):
                     completions.append(h)
         # search for entity
-        for term in entity_tagger.term2entity:
+        for term in View.instance().entity_tagger.term2entity:
             if term.startswith(relevant_term):
                 completions.append(term.capitalize())
 
@@ -356,7 +383,7 @@ class SearchView(TemplateView):
                             document_collection = data_source
                             extraction_type = OPENIE_EXTRACTION
                         try:
-                            cached_results = cache.load_result_from_cache(document_collection, query_fact_patterns)
+                            cached_results = View.instance().cache.load_result_from_cache(document_collection, query_fact_patterns)
                         except Exception:
                             logging.error('Cannot load query result from cache...')
                             cached_results = None
@@ -364,11 +391,11 @@ class SearchView(TemplateView):
                             logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                             results = cached_results
                         else:
-                            results = query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
+                            results = View.instance().query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
                                                                                 extraction_type="", query=query)
                             logging.info('Write results to cache...')
                             try:
-                                cache.add_result_to_cache(document_collection, query_fact_patterns, results)
+                                View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns, results)
                             except Exception:
                                 logging.error('Cannot store query result to cache...')
                         results_converted = []

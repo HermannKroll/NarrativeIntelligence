@@ -1,7 +1,7 @@
 import logging
 
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.frontend.ui.views import query_engine, convert_query_text_to_fact_patterns
+from narraint.frontend.ui.views import View, convert_query_text_to_fact_patterns
 
 COMMON_QUERIES = [
     'Simvastatin treats ?X(Disease)',
@@ -41,7 +41,7 @@ def execute_common_queries():
         query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(q)
         for collection in DOCUMENT_COLLECTIONS:
 
-            results = query_engine.process_query_with_expansion(query_fact_patterns, collection,
+            results = View.instance().query_engine.process_query_with_expansion(query_fact_patterns, collection,
                                                                 extraction_type="", query=q)
             logging.info('Write results to cache...')
             try:
