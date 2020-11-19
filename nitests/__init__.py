@@ -6,6 +6,7 @@ Structure:
     - resources contains all test files for the tests
     - config contains global configuration for all tests as well as config files for single tests
     - util contains test helper code that can be utitlized by all tests
+    - tmp a tempdir for all statically configured paths. cleared before session start
 
 Testing:
     - it is recommended to use pytest, but unittest should work as well

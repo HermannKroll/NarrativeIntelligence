@@ -1,4 +1,4 @@
-import os
+from narraint import tools
 
 from narraint import config
-config.CONFIG_DIR = os.path.join(config.GIT_ROOT_DIR, "nitests/config/jsonfiles")
+config.BACKEND_CONFIG = tools.proj_rel_path("nitests/config/jsonfiles/backend.json")
