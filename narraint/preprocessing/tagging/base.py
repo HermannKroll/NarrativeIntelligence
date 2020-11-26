@@ -51,6 +51,9 @@ class BaseTagger(Thread):
         self.mapping_file_id: Dict[str, int] = mapping_file_id
         self.id_set: Set[int] = set()
 
+    def get_types(self):
+        return self.__class__.TYPES
+
     def add_files(self, *files: str):
         self.files.update(files)
         self.id_set.update(self.mapping_file_id[fn] for fn in files)
