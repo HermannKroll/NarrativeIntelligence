@@ -7,11 +7,11 @@ from narraint.entity import enttypes
 from narraint.config import DOSAGE_ADDITIONAL_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, DOSAGE_FID_DESCS, \
     DOSAGE_FORM_TAGGER_INDEX_CACHE, TMP_DIR
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.dictagger import Vocabulary
+from narraint.preprocessing.tagging.dictagger import DictTagger
 
 
 
-class DosageFormVocab(Vocabulary):
+class DosageFormTagger(DictTagger):
     DOSAGE_FORM_TREE_NUMBERS = (
         "D26.255",  # Dosage Forms
         "E02.319.300",  # Drug Delivery Systems
@@ -24,9 +24,9 @@ class DosageFormVocab(Vocabulary):
     __version__ = "1.0.0"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(short_name="dosage", long_name="DosageFormTagger", version=DosageFormVocab.__version__,
-                         tag_type=enttypes.DOSAGE_FORM, index_cache=config.DOSAGE_FORM_TAGGER_INDEX_CACHE,
-                         source_file=config.MESH_DESCRIPTORS_FILE)
+        super().__init__("dosage", "DosageFormTagger", DosageFormTagger.__version__,
+                         enttypes.DOSAGE_FORM, config.DOSAGE_FORM_TAGGER_INDEX_CACHE, config.MESH_DESCRIPTORS_FILE,
+                         *args, **kwargs)
 
         self.regex_micro = re.compile(r'micro[a-z]')
         self.regex_intra = re.compile(r'intra[a-z]')

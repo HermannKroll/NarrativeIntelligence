@@ -2,6 +2,7 @@ import os
 import pickle
 import re
 from abc import ABCMeta, abstractmethod
+from builtins import function
 from datetime import datetime
 
 from sqlalchemy.testing.plugin.plugin_base import logging
@@ -15,7 +16,7 @@ from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
 class Vocabulary:
     def __init__(self, short_name: str, long_name: str, version, tag_type,
-                 index_cache: str, source_file: str, blacklist=None,
+                 index_cache: str, source_file: str, create_index_from_source: function, blacklist=None,
                  logger=None):
         self.short_name = short_name
         self.long_name = long_name
@@ -23,6 +24,7 @@ class Vocabulary:
         self.tag_type = tag_type
         self.index_cache = index_cache
         self.source_file = source_file
+        self.create_index_from_source = create_index_from_source
         self.blacklist = blacklist if blacklist else DICT_TAGGER_BLACKLIST
 
         self.desc_by_term = {}
@@ -81,9 +83,6 @@ class Vocabulary:
             blacklist_set = self.get_blacklist_set()
             self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
             self.index_to_pickle()
-
-    def create_index_from_source(self):
-        pass
 
 
 class DictIndex:
