@@ -265,6 +265,13 @@ def load_sentences_with_hashes(document_collection: str):
     logging.info('{} sentences retrieved'.format(count))
     return hash2sentence
 
+def load_highest_sentence_id() -> int:
+    session = Session.get()
+    sentence_id = 0
+    for q in session.execute(session.query(Sentence.id).order_by(Sentence.id.desc()).limit(1)):
+        sentence_id = q[0]
+    return sentence_id
+
 
 def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentence, document_id, document_collection):
     """
@@ -306,16 +313,15 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
     if do_transform_mesh_ids_to_prefixes:
         tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
-    last_highest_sentence_id = 0
     hash2sentence = load_sentences_with_hashes(collection)
     sentid2hash = {}
     inserted_sentence_ids = set()
     for sent_hash, sentences in hash2sentence.items():
         for sent_id, sent_txt in sentences:
-            if sent_id > last_highest_sentence_id:
-                last_highest_sentence_id = sent_id
             inserted_sentence_ids.add(sent_id)
             sentid2hash[int(sent_id)] = sent_hash
+
+    last_highest_sentence_id = load_highest_sentence_id()
     logging.info(f'Last highest sentence_id was: {last_highest_sentence_id}')
     logging.info(f'Querying duplicates from database (collection: {collection} and extraction type: {extraction_type})')
     session = Session.get()
@@ -393,7 +399,7 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
 
 
 def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                                   do_transform_mesh_ids_to_prefixes=True, do_map_drugbank_ids=True):
+                                                   do_transform_mesh_ids_to_prefixes=True):
     """
      insert a list of cleaned tuples into the database (bulk insert)
      does not check for collisions
@@ -402,13 +408,11 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
      :param extraction_type: extraction type like OpenIE or PathIE
      :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
      :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
-     :param do_map_drugbank_ids: if true all known drugbank ids will be mapped to mesh ids
      :return: Nothing
      """
     predication_values, sentence_values = clean_predications(tuples_cleaned, collection, extraction_type,
                                                              clean_genes=clean_genes,
-                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes,
-                                                             do_map_drugbank_ids=do_map_drugbank_ids)
+                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes)
     logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
     session = Session.get()
 
