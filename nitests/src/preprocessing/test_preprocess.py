@@ -8,6 +8,7 @@ from narraint.preprocessing import preprocess
 from narraint.tools import proj_rel_path
 
 class TestPreprocess(unittest.TestCase):
+    @pytest.mark.skip(reason="Not implemented yet")
     def test_single_file_DR(self):
         self.outputdir = config.make_test_tempdir()
         self.workdir = config.make_test_tempdir()
