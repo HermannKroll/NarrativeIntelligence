@@ -14,7 +14,7 @@ class PlantFamilyTagger(DictTagger):
                          enttypes.PLANT_FAMILY, config.PLANT_FAMILTY_INDEX_CACHE, config.PLANT_FAMILTY_DATABASE_FILE,
                          *args, **kwargs)
 
-    def index_from_source(self):
+    def _index_from_source(self):
         self.logger.info('Creating dictionary from source...')
         self.desc_by_term = PlantFamilyVocabulary.read_plant_family_vocabulary(self.source_file)
         self.logger.info(f'{len(self.desc_by_term)} Plant Families found in database')

@@ -165,7 +165,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
     for tagger in taggers:
         logger.info("Preparing {}".format(tagger.name))
-        for target_type in tagger.TYPES:
+        for target_type in tagger.get_types():
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
     logger.info("=== STEP 2 - Tagging ===")

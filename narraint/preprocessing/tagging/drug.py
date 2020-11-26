@@ -20,7 +20,7 @@ class DrugTagger(DictTagger):
                          enttypes.DRUG, config.DRUG_TAGGER_INDEX_CACHE, config.DRUGBASE_XML_DUMP,
                          *args, **kwargs)
 
-    def index_from_source(self):
+    def _index_from_source(self):
         self.logger.info("checking total number of drugs...")
         # TODO real check
         drug_number = 13581  # subprocess.check_output(f"grep -c '^<drug' {self.source_file}")

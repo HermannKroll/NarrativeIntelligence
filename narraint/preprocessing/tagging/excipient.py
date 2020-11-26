@@ -14,7 +14,7 @@ class ExcipientTagger(DictTagger):
                          enttypes.EXCIPIENT, config.EXCIPIENT_TAGGER_INDEX_CACHE, config.EXCIPIENT_TAGGER_DATABASE_FILE,
                          *args, **kwargs)
 
-    def index_from_source(self):
+    def _index_from_source(self):
         self.logger.info('Reading drugbank database for DrugBank mapping...')
         self.desc_by_term = ExcipientVocabulary.create_excipient_vocabulary()
 

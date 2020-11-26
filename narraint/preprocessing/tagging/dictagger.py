@@ -2,87 +2,13 @@ import os
 import pickle
 import re
 from abc import ABCMeta, abstractmethod
-from builtins import function
 from datetime import datetime
-
-from sqlalchemy.testing.plugin.plugin_base import logging
 
 from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
-
-
-class Vocabulary:
-    def __init__(self, short_name: str, long_name: str, version, tag_type,
-                 index_cache: str, source_file: str, create_index_from_source: function, blacklist=None,
-                 logger=None):
-        self.short_name = short_name
-        self.long_name = long_name
-        self.version = version
-        self.tag_type = tag_type
-        self.index_cache = index_cache
-        self.source_file = source_file
-        self.create_index_from_source = create_index_from_source
-        self.blacklist = blacklist if blacklist else DICT_TAGGER_BLACKLIST
-
-        self.desc_by_term = {}
-        self.logger = logger if logger else logging
-
-    def index_from_pickle(self):
-        if os.path.isfile(self.index_cache):
-            index = pickle.load(open(self.index_cache, 'rb'))
-            if not isinstance(index, DictIndex):
-                self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
-                                    .format(self.index_cache))
-                pass
-
-            if index.tagger_version != self.version:
-                self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
-                                    .format(index.tagger_version, self.version))
-                pass
-
-            if index.source_file != self.source_file:
-                self.logger.warning('Ignore index: index created with another source file ({} index vs. {} tagger)'
-                                    .format(index.source_file, self.source_file))
-                pass
-
-            self.logger.debug('Use precached index from {}'.format(self.index_cache))
-            self.desc_by_term = index.desc_by_term
-            return index
-        pass
-
-    def get_blacklist_set(self):
-        with open(self.blacklist) as f:
-            blacklist = f.read().splitlines()
-        blacklist_set = set()
-        for s in blacklist:
-            s_lower = s.lower()
-            blacklist_set.add(s_lower)
-            blacklist_set.add('{}s'.format(s_lower))
-            blacklist_set.add('{}e'.format(s_lower))
-            if s_lower.endswith('s') or s_lower.endswith('e'):
-                blacklist_set.add(s_lower[0:-1])
-        return blacklist_set
-
-    def index_to_pickle(self):
-        index = DictIndex(self.source_file, self.version)
-        index.desc_by_term = self.desc_by_term
-        if not os.path.isdir(TMP_DIR):
-            os.mkdir(TMP_DIR)
-        self.logger.debug('Storing DosageFormTagerIndex cache to: {}'.format(self.index_cache))
-        pickle.dump(index, open(self.index_cache, 'wb+'))
-
-    def prepare(self):
-        if self.index_from_pickle():
-            self.logger.info(f'{self.long_name} initialized from cache '
-                             f'({len(self.desc_by_term.keys())} term mappings) - ready to start')
-        else:
-            self.create_index_from_source()
-            blacklist_set = self.get_blacklist_set()
-            self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
-            self.index_to_pickle()
 
 
 class DictIndex:
@@ -128,31 +54,82 @@ def split_indexed_words(content):
     return ind_words
 
 
+
 class DictTagger(BaseTagger, metaclass=ABCMeta):
     PROGRESS_BATCH = 10000
-    NAME = "DictionaryTagger"
 
-    def __init__(self,  *args, **kwargs):
+    def __init__(self, short_name, long_name, version, tag_types, index_cache, source_file, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tag_type = ()
+        self.tag_types = (tag_types,)
+        self.short_name, self.long_name, self.version = short_name, long_name, version
+        self.index_cache = index_cache
+        self.source_file = source_file
         self.desc_by_term = {}
-        self.log_file = os.path.join(self.log_dir, f"{DictTagger.NAME}.log")
-        self.out_dir = os.path.join(self.root_dir, f"{DictTagger.NAME}_out")
-        self.in_dir = os.path.join(self.root_dir, f"{DictTagger.NAME}_in")
-        self.vocabs = {}
+        self.log_file = os.path.join(self.log_dir, f"{short_name}.log")
+        self.out_dir = os.path.join(self.root_dir, f"{short_name}_out")
+        self.in_dir = os.path.join(self.root_dir, f"{short_name}_in")
 
-    def add_vocab(self, vocab: Vocabulary):
-        if vocab.tag_type not in self.vocabs:
-            self.vocabs[vocab.tag_type] = vocab
-            return True
-        else:
-            return False
+    def get_types(self):
+        return self.tag_types
+
+    def _index_from_pickle(self):
+        if os.path.isfile(self.index_cache):
+            index = pickle.load(open(self.index_cache, 'rb'))
+            if not isinstance(index, DictIndex):
+                self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
+                                    .format(self.index_cache))
+                pass
+
+            if index.tagger_version != self.version:
+                self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
+                                    .format(index.tagger_version, self.version))
+                pass
+
+            if index.source_file != self.source_file:
+                self.logger.warning('Ignore index: index created with another source file ({} index vs. {} tagger)'
+                                    .format(index.source_file, self.source_file))
+                pass
+
+            self.logger.debug('Use precached index from {}'.format(self.index_cache))
+            self.desc_by_term = index.desc_by_term
+            return index
+        pass
+
+    def _index_to_pickle(self):
+        index = DictIndex(self.source_file, self.version)
+        index.desc_by_term = self.desc_by_term
+        if not os.path.isdir(TMP_DIR):
+            os.mkdir(TMP_DIR)
+        self.logger.debug('Storing DosageFormTagerIndex cache to: {}'.format(self.index_cache))
+        pickle.dump(index, open(self.index_cache, 'wb+'))
+
+    @abstractmethod
+    def _index_from_source(self):
+        pass
+
+    def _get_blacklist_set(self):
+        with open(DICT_TAGGER_BLACKLIST) as f:
+            blacklist = f.read().splitlines()
+        blacklist_set = set()
+        for s in blacklist:
+            s_lower = s.lower()
+            blacklist_set.add(s_lower)
+            blacklist_set.add('{}s'.format(s_lower))
+            blacklist_set.add('{}e'.format(s_lower))
+            if s_lower.endswith('s') or s_lower.endswith('e'):
+                blacklist_set.add(s_lower[0:-1])
+        return blacklist_set
 
     # TODO: synchronization
     def prepare(self, resume=False):
-        # TODO
-        for _, vocab in self.vocabs.items():
-            vocab.prepare()
+        if self._index_from_pickle():
+            self.logger.info(f'{self.long_name} initialized from cache '
+                             f'({len(self.desc_by_term.keys())} term mappings) - ready to start')
+        else:
+            self._index_from_source()
+            blacklist_set = self._get_blacklist_set()
+            self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
+            self._index_to_pickle()
         # Create output directory
         if not resume:
             os.mkdir(self.out_dir)
@@ -171,7 +148,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             if in_file.endswith(".txt"):
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
-                    self.tag(in_file, out_file)
+                    self._tag(in_file, out_file)
                 except DocumentError as e:
                     self.logger.debug("Error in document - will be skipped {}".format(in_file))
                     skipped_files.append(in_file)
@@ -189,7 +166,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             len(skipped_files)),
         )
 
-    def tag(self, in_file, out_file):
+    def _tag(self, in_file, out_file):
         with open(in_file) as f:
             document = f.read()
         match = CONTENT_ID_TIT_ABS.match(document)
@@ -209,32 +186,29 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 term = " ".join(words)
                 start = indexes[0]
                 end = indexes[-1] + len(words[-1])
-                hits = self.get_term(term)
-                # print(f"Found {hits} for '{term}'")
-                if hits:
-                    for tagtype, descs in hits.items():
-                        for desc in descs:
-                            # remove white space between title and abstract
-                            if start > len(title):
-                                start = start - 1
-                            line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                                id=pmid, start=start, end=end, str=term, type=tagtype,
-                                desc=desc
-                            )
-                            lines.append(line)
+                if start > len(title):
+                    start = start - 1
+                lines += list(self.generate_tag_lines(end, pmid, start, term, title))
 
         output = "".join(lines)
         # Write
         with open(out_file, "w") as f:
             f.write(output)
 
-    def get_term(self, term):
-        hits = {}
-        for tagtype, vocab in self.vocabs.items():
-            hit = vocab.desc_by_term.get(term)
-            if hit:
-                hits[tagtype] = hit
-        return hits
+    def generate_tag_lines(self, end, pmid, start, term, title):
+        hits = self._get_term(term)
+        # print(f"Found {hits} for '{term}'")
+        if hits:
+            for desc in hits:
+                # remove white space between title and abstract
+                yield "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
+                    id=pmid, start=start, end=end, str=term, type=self.tag_types[0],
+                    desc=desc
+                )
+
+    def _get_term(self, term):
+        hits = self.desc_by_term.get(term)
+        return hits if hits else set()
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])
