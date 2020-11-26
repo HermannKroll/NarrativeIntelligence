@@ -1,3 +1,5 @@
+import pytest
+
 from narraint.analysis.cikm2020.search.strategy import KeywordStrategy, KeywordDistanceStrategy
 from narraint.analysis.cikm2020.expert_evaluation import *
 import logging
@@ -5,6 +7,7 @@ import unittest
 from nitests.config import config
 
 
+@pytest.mark.skip(reason="currently not maintained")
 class TestSearchStrategies(unittest.TestCase):
     def test_keyword_perform_search(self):
         strat = KeywordStrategy(config.get_test_resource_filepath("textstrategy_files"))
