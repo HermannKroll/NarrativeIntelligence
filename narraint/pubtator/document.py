@@ -1,5 +1,7 @@
+import os
 from collections import defaultdict
 
+from narraint import tools
 from narraint.entity.enttypes import ENTITY_TYPES
 from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
@@ -40,6 +42,11 @@ class Sentence:
         return str(self)
 
 
+def parse_tag_list(path_or_str):
+    content = tools.read_if_path(path_or_str)
+    reg_result = TAG_LINE_NORMAL.findall(content)
+    return [TaggedEntity(t) for t in reg_result] if reg_result else []
+
 class TaggedDocument:
 
     def __init__(self, pubtator_content, spacy_nlp=None):
@@ -47,6 +54,7 @@ class TaggedDocument:
         initialize a pubtator document
         :param pubtator_content: content of a pubtator file or a pubtator filename
         """
+        pubtator_content = tools.read_if_path(pubtator_content)
         self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
         self.title = self.title.strip()
         self.abstract = self.abstract.strip()
