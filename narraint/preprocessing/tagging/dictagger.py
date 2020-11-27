@@ -60,7 +60,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
 
     def __init__(self, short_name, long_name, version, tag_types, index_cache, source_file, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tag_types = (tag_types,)
+        self.tag_types = [tag_types,]
         self.short_name, self.long_name, self.version = short_name, long_name, version
         self.index_cache = index_cache
         self.source_file = source_file
@@ -132,7 +132,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             self._index_to_pickle()
         # Create output directory
         if not resume:
-            os.mkdir(self.out_dir)
+            os.makedirs(self.out_dir)
         else:
             raise NotImplementedError(f"Resuming {self.long_name} is not implemented.")
 
@@ -192,7 +192,9 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
 
         output = "".join(lines)
         # Write
-        with open(out_file, "w") as f:
+        if not os.path.isdir(os.path.dirname(out_file)):
+            os.makedirs(os.path.dirname(out_file))
+        with open(out_file, "w+") as f:
             f.write(output)
 
     def generate_tag_lines(self, end, pmid, start, term, title):

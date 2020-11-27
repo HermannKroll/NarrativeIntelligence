@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
-from nitests.config.config import get_test_resource_filepath, make_test_tempdir
+from nitests.util import get_test_resource_filepath, make_test_tempdir
 from spacy.lang.en import English
 
 

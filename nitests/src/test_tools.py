@@ -1,6 +1,6 @@
 import unittest
 import narraint.tools as tl
-from nitests.config.config import get_test_resource_filepath
+from nitests.util import get_test_resource_filepath
 
 
 class TestTools(unittest.TestCase):
