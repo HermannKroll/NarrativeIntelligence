@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 
+from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.regex import DOCUMENT_ID
 
 
@@ -42,6 +43,30 @@ def extract_pubtator_docs(input_file, id_file, output, logger):
     logger.info('extraction finished')
 
 
+def collect_ids_from_dir(input_dir, logger=logging):
+    """
+    Non-recursively collect target document ids from input_dir. Also create a mapping filepath -> id
+    and the reverse mapping id -> filepath
+    :param input_dir: the directory containing the pubtator files
+    :param logger: optional custom logger
+    :return: target_ids, mapping_file_id, mapping_id_file
+    """
+    mapping_id_file = dict()
+    mapping_file_id = dict()
+    target_ids = set()
+
+    for fn in os.listdir(input_dir):
+        abs_path = os.path.join(input_dir, fn)
+        try:
+            doc_id = get_document_id(abs_path)
+            target_ids.add(doc_id)
+            mapping_id_file[doc_id] = abs_path
+            mapping_file_id[abs_path] = doc_id
+        except DocumentError as e:
+            logger.warning(e)
+    return target_ids, mapping_file_id, mapping_id_file
+
+
 def main():
     """
 
@@ -65,3 +90,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

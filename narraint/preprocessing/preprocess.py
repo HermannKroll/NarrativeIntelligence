@@ -27,8 +27,8 @@ from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.plantfamily import PlantFamilyTagger
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
+from narraint.pubtator.extract import collect_ids_from_dir
 from narraint.pubtator.sanitize import sanitize
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)s %(threadName)s %(module)s:%(lineno)d %(message)s'
@@ -137,15 +137,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
 
     # Gather target IDs
-    for fn in os.listdir(input_dir):
-        abs_path = os.path.join(input_dir, fn)
-        try:
-            doc_id = get_document_id(abs_path)
-            target_ids.add(doc_id)
-            mapping_id_file[doc_id] = abs_path
-            mapping_file_id[abs_path] = doc_id
-        except DocumentError as e:
-            logger.warning(e)
+    target_ids, mapping_file_id, mapping_id_file = collect_ids_from_dir(input_dir, logger)
     logger.info("Preprocessing {} documents".format(len(target_ids)))
 
     # Get input documents for each tagger
