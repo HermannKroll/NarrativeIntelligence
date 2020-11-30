@@ -10,8 +10,9 @@ from narraint.tools import proj_rel_path
 from narraint.pubtator.extract import read_tagged_documents
 from nitests.src.preprocessing.tagging.test_metadictagger import assert_tags_pmc_4297_5600
 
+
 class TestPreprocess(unittest.TestCase):
-    # @pytest.mark.skip(reason="Not implemented yet")
+    @pytest.mark.skip(reason="Not implemented yet")
     def test_single_file_DR(self):
         self.outputdir = nitests.util.make_test_tempdir()
         self.workdir = nitests.util.make_test_tempdir()
