@@ -27,6 +27,7 @@ from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.plantfamily import PlantFamilyTagger
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
+from narraint.preprocessing.tagging import metadictagger as mt
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
 from narraint.pubtator.extract import collect_ids_from_dir
 from narraint.pubtator.sanitize import sanitize
@@ -80,16 +81,18 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         tagger_by_ent_type[enttypes.DISEASE] = TaggerOne
     if (enttypes.CHEMICAL in tag_types) != (enttypes.DISEASE in tag_types) and use_tagger_one:
         raise ValueError("TaggerOne does not support Tagging of Chemicals or Diseases separately!")
-    if enttypes.DOSAGE_FORM in tag_types:
-        tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
-    if enttypes.DRUG in tag_types:
-        tagger_by_ent_type[enttypes.DRUG] = DrugTagger
-    if enttypes.EXCIPIENT in tag_types:
-        tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
-    if enttypes.PLANT_FAMILY in tag_types:
-        tagger_by_ent_type[enttypes.PLANT_FAMILY] = PlantFamilyTagger
-    if enttypes.DRUGBANK_CHEMICAL in tag_types:
-        tagger_by_ent_type[enttypes.DRUGBANK_CHEMICAL] = DrugBankChemicalTagger
+
+
+    # if enttypes.DOSAGE_FORM in tag_types:
+    #     tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
+    # if enttypes.DRUG in tag_types:
+    #     tagger_by_ent_type[enttypes.DRUG] = DrugTagger
+    # if enttypes.EXCIPIENT in tag_types:
+    #     tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
+    # if enttypes.PLANT_FAMILY in tag_types:
+    #     tagger_by_ent_type[enttypes.PLANT_FAMILY] = PlantFamilyTagger
+    # if enttypes.DRUGBANK_CHEMICAL in tag_types:
+    #     tagger_by_ent_type[enttypes.DRUGBANK_CHEMICAL] = DrugBankChemicalTagger
     return tagger_by_ent_type
 
 
@@ -133,6 +136,10 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     mapping_file_id = dict()
     missing_files_type = dict()
 
+    # Hard coded, really not nice
+    dict_types = mt.MetaDicTaggerFactory.get_supported_tagtypes() & set(tag_types)
+
+
     # Get tagger classes
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
 
@@ -142,7 +149,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
     # Get input documents for each tagger
     for tag_type in tag_types:
-        tagger_cls = tagger_by_ent_type[tag_type]
+        tagger_cls = tagger_by_ent_type[tag_type] if tag_type not in dict_types else mt.MetaDicTagger
         missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls, logger)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
@@ -155,6 +162,11 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir, logger=logger,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
+
+    if dict_types:
+        dictfactory = mt.MetaDicTaggerFactory(dict_types, kwargs)
+        taggers.append(dictfactory.create_MetaDicTagger())
+
     for tagger in taggers:
         logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.get_types():

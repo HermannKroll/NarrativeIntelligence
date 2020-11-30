@@ -4,6 +4,7 @@ import os
 
 from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.regex import DOCUMENT_ID
+from narraint.pubtator.document import TaggedDocument
 
 
 # TODO: This method should be unit-tested because its used a lot
@@ -23,6 +24,11 @@ def read_pubtator_documents(path):
                     yield content
                     content = ""
             if content: yield content
+
+
+def read_tagged_documents(path):
+    for content in read_pubtator_documents(path):
+        yield TaggedDocument(content)
 
 
 def extract_pubtator_docs(input_file, id_file, output, logger):

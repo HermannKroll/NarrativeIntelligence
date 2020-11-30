@@ -34,14 +34,8 @@ class TestMetadictagger(unittest.TestCase):
         tags_1 = [str(tag) for tag in parse_tag_list(out_1)]
         tags_2 = [str(tag) for tag in parse_tag_list(out_2)]
 
-        self.assertIn("<Entity 399,426,intraventricular injection,DosageForm,MESH:D007276>", tags_1)
-        self.assertIn("<Entity 636,646,injection,DosageForm,MESH:D007267>", tags_1)
-        self.assertIn("<Entity 743,751,glycine,Excipient,DB00145>", tags_1)
-        self.assertIn("<Entity 657,665,glycine,PlantFamily,Glycine>", tags_1)
+        assert_tags_pmc_4297_5600(self, tags_1, tags_2)
 
-        self.assertIn("<Entity 209,219,sparteine,Drug,DB06727", tags_2)
-        self.assertIn("<Entity 189,205,4-aminopyridine,Drug,DB06637", tags_2)
-        self.assertIn("<Entity 826,836,potassium,Excipient,DB14500", tags_2)
 
     @staticmethod
     def make_metatag():
@@ -51,6 +45,17 @@ class TestMetadictagger(unittest.TestCase):
         metatag = factory.create_MetaDicTagger()
         metatag.prepare()
         return metatag
+
+
+def assert_tags_pmc_4297_5600(test_suit, tags_4297, tags_5600):
+    test_suit.assertIn("<Entity 399,426,intraventricular injection,DosageForm,MESH:D007276>", tags_4297)
+    test_suit.assertIn("<Entity 636,646,injection,DosageForm,MESH:D007267>", tags_4297)
+    test_suit.assertIn("<Entity 743,751,glycine,Excipient,DB00145>", tags_4297)
+    test_suit.assertIn("<Entity 657,665,glycine,PlantFamily,Glycine>", tags_4297)
+
+    test_suit.assertIn("<Entity 209,219,sparteine,Drug,DB06727>", tags_5600)
+    test_suit.assertIn("<Entity 189,205,4-aminopyridine,Drug,DB06637>", tags_5600)
+    test_suit.assertIn("<Entity 826,836,potassium,Excipient,DB14500>", tags_5600)
 
 
 if __name__ == '__main__':

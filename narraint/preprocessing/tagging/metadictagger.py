@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import narraint.preprocessing.tagging.dictagger as dt
 import narraint.entity.enttypes as et
-from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily
+from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical
 
 """
 Modified version of the dict tagger, that can run on the vocabularies of multiple dicttaggers
@@ -12,6 +12,8 @@ Modified version of the dict tagger, that can run on the vocabularies of multipl
 
 
 class MetaDicTagger(dt.DictTagger):
+    __name__ = "MetaDicTagger"
+    __version__ = "1.0"
 
     def _index_from_source(self):
         """
@@ -26,10 +28,11 @@ class MetaDicTagger(dt.DictTagger):
 
         self._sub_taggers: List[dt.DictTagger] = []
         self._vocabs = {}
+        self.tag_types = set()
 
     def add_tagger(self, tagger: dt.DictTagger):
         self._sub_taggers.append(tagger)
-        self.tag_types.extend(tagger.get_types())
+        self.tag_types |= set(tagger.get_types())
 
     def prepare(self, resume=False):
         for tagger in self._sub_taggers:
@@ -43,18 +46,21 @@ class MetaDicTagger(dt.DictTagger):
                 for desc in hits:
                     yield f"{pmid}\t{start}\t{end}\t{term}\t{entType}\t{desc}\n"
 
+    def get_types(self):
+        return self.tag_types
 
 class MetaDicTaggerFactory:
     tagger_by_type: Dict[str, dt.DictTagger] = {
         et.DRUG: drug.DrugTagger,
         et.DOSAGE_FORM: dosage.DosageFormTagger,
         et.EXCIPIENT: excipient.ExcipientTagger,
-        et.PLANT_FAMILY: plantfamily.PlantFamilyTagger
+        et.PLANT_FAMILY: plantfamily.PlantFamilyTagger,
+        et.DRUGBANK_CHEMICAL: drugbankchemical.DrugBankChemicalTagger
     }
 
     @staticmethod
     def get_supported_tagtypes():
-        return MetaDicTaggerFactory.tagger_by_type.keys()
+        return set(MetaDicTaggerFactory.tagger_by_type.keys())
 
     def __init__(self, tag_types, tagger_kwargs):
         self.tag_types = tag_types
