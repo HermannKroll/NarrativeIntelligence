@@ -51,6 +51,9 @@ class BaseTagger(Thread):
         self.mapping_file_id: Dict[str, int] = mapping_file_id
         self.id_set: Set[int] = set()
 
+    def get_types(self):
+        return self.__class__.TYPES
+
     def add_files(self, *files: str):
         self.files.update(files)
         self.id_set.update(self.mapping_file_id[fn] for fn in files)
@@ -122,7 +125,7 @@ class BaseTagger(Thread):
             session.commit()
 
         self.logger.info("Add doc_tagged_by")
-        successful_ent_types = set((did, ent_type) for ent_type in self.TYPES for did in self.get_successful_ids())
+        successful_ent_types = set((did, ent_type) for ent_type in self.get_types() for did in self.get_successful_ids())
         for did, ent_type in successful_ent_types:
             insert_doc_tagged_by = insert(DocTaggedBy).values(
                 document_id=did,

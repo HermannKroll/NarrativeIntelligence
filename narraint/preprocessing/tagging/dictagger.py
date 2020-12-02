@@ -58,9 +58,9 @@ def split_indexed_words(content):
 class DictTagger(BaseTagger, metaclass=ABCMeta):
     PROGRESS_BATCH = 10000
 
-    def __init__(self, short_name, long_name, version, tag_type, index_cache, source_file, *args, **kwargs):
+    def __init__(self, short_name, long_name, version, tag_types, index_cache, source_file, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tag_type = (tag_type,)
+        self.tag_types = [tag_types,]
         self.short_name, self.long_name, self.version = short_name, long_name, version
         self.index_cache = index_cache
         self.source_file = source_file
@@ -69,7 +69,10 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         self.out_dir = os.path.join(self.root_dir, f"{short_name}_out")
         self.in_dir = os.path.join(self.root_dir, f"{short_name}_in")
 
-    def index_from_pickle(self):
+    def get_types(self):
+        return self.tag_types
+
+    def _index_from_pickle(self):
         if os.path.isfile(self.index_cache):
             index = pickle.load(open(self.index_cache, 'rb'))
             if not isinstance(index, DictIndex):
@@ -92,7 +95,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             return index
         pass
 
-    def index_to_pickle(self):
+    def _index_to_pickle(self):
         index = DictIndex(self.source_file, self.version)
         index.desc_by_term = self.desc_by_term
         if not os.path.isdir(TMP_DIR):
@@ -101,10 +104,10 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         pickle.dump(index, open(self.index_cache, 'wb+'))
 
     @abstractmethod
-    def index_from_source(self):
+    def _index_from_source(self):
         pass
 
-    def get_blacklist_set(self):
+    def _get_blacklist_set(self):
         with open(DICT_TAGGER_BLACKLIST) as f:
             blacklist = f.read().splitlines()
         blacklist_set = set()
@@ -119,17 +122,17 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
 
     # TODO: synchronization
     def prepare(self, resume=False):
-        if self.index_from_pickle():
+        if self._index_from_pickle():
             self.logger.info(f'{self.long_name} initialized from cache '
                              f'({len(self.desc_by_term.keys())} term mappings) - ready to start')
         else:
-            self.index_from_source()
-            blacklist_set = self.get_blacklist_set()
+            self._index_from_source()
+            blacklist_set = self._get_blacklist_set()
             self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
-            self.index_to_pickle()
+            self._index_to_pickle()
         # Create output directory
         if not resume:
-            os.mkdir(self.out_dir)
+            os.makedirs(self.out_dir)
         else:
             raise NotImplementedError(f"Resuming {self.long_name} is not implemented.")
 
@@ -145,7 +148,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             if in_file.endswith(".txt"):
                 out_file = os.path.join(self.out_dir, in_file.split("/")[-1])
                 try:
-                    self.tag(in_file, out_file)
+                    self._tag(in_file, out_file)
                 except DocumentError as e:
                     self.logger.debug("Error in document - will be skipped {}".format(in_file))
                     skipped_files.append(in_file)
@@ -163,7 +166,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             len(skipped_files)),
         )
 
-    def tag(self, in_file, out_file):
+    def _tag(self, in_file, out_file):
         with open(in_file) as f:
             document = f.read()
         match = CONTENT_ID_TIT_ABS.match(document)
@@ -183,25 +186,29 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 term = " ".join(words)
                 start = indexes[0]
                 end = indexes[-1] + len(words[-1])
-                hits = self.get_term(term)
-                # print(f"Found {hits} for '{term}'")
-                if hits:
-                    for desc in hits:
-                        # remove white space between title and abstract
-                        if start > len(title):
-                            start = start - 1
-                        line = "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                            id=pmid, start=start, end=end, str=term, type=self.tag_type[0],
-                            desc=desc
-                        )
-                        lines.append(line)
+                if start > len(title):
+                    start = start - 1
+                lines += list(self.generate_tag_lines(end, pmid, start, term, title))
 
         output = "".join(lines)
         # Write
-        with open(out_file, "w") as f:
+        if not os.path.isdir(os.path.dirname(out_file)):
+            os.makedirs(os.path.dirname(out_file))
+        with open(out_file, "w+") as f:
             f.write(output)
 
-    def get_term(self, term):
+    def generate_tag_lines(self, end, pmid, start, term, title):
+        hits = self._get_term(term)
+        # print(f"Found {hits} for '{term}'")
+        if hits:
+            for desc in hits:
+                # remove white space between title and abstract
+                yield "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
+                    id=pmid, start=start, end=end, str=term, type=self.tag_types[0],
+                    desc=desc
+                )
+
+    def _get_term(self, term):
         hits = self.desc_by_term.get(term)
         return hits if hits else set()
 

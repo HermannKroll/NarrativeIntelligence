@@ -7,7 +7,7 @@ from narraint.extraction.extraction_utils import filter_document_sentences_witho
 from narraint.extraction.pathie.main import load_and_fix_json_nlp_data, \
     pathie_reconstruct_sentence_sequence_from_nlp_output, pathie_find_tags_in_sentence, \
     pathie_reconstruct_text_from_token_indexes, pathie_find_relations_in_sentence
-from nitests.config.config import get_test_resource_filepath
+from nitests.util import get_test_resource_filepath
 
 
 class TestExtractionUtils(TestCase):

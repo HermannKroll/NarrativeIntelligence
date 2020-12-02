@@ -14,7 +14,7 @@ class DrugBankChemicalTagger(DictTagger):
                          enttypes.DRUGBANK_CHEMICAL, config.DRUGBANK_CHEMICAL_INDEX_CACHE, config.DRUGBANK_CHEMICAL_DATABASE_FILE,
                          *args, **kwargs)
 
-    def index_from_source(self):
+    def _index_from_source(self):
         self.logger.info('Creating dictionary from source...')
         self.desc_by_term = DrugBankChemicalVocabulary.create_drugbank_chemical_vocabulary(drugbank_chemical_list=self.source_file)
         self.logger.info(f'{len(self.desc_by_term)} DrugBank chemicals found in database')

@@ -96,7 +96,7 @@ class DosageFormTagger(DictTagger):
 
         return new_terms
 
-    def index_from_source(self):
+    def _index_from_source(self):
         meshdb = MeSHDB.instance()
         meshdb.load_xml(config.MESH_DESCRIPTORS_FILE)
 
