@@ -20,7 +20,7 @@ from narraint.queryengine.aggregation.substitution import ResultAggregationBySub
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.frontend.ui.search_cache import SearchCache
-from ui.autocompletion import AutocompletionUtil
+from narraint.frontend.ui.autocompletion import AutocompletionUtil
 
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
