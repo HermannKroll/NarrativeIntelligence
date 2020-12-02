@@ -1,1 +1,0 @@
-administered,associated,compares,induces,decreases,interacts,metabolises,inhibits,treats
