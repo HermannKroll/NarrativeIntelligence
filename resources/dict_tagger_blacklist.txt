@@ -147,3 +147,8 @@ iris
 hlycine
 cereus
 hepatica
+glycine
+oryza
+zea
+sorghum
+triticum
