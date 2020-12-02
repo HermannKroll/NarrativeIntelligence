@@ -17,6 +17,7 @@
 
 {% block content %}
 
+    <!--
     <a id="nodeMod" onClick="network.unselectAll();" href="#nodemod" rel="modal:open" style="display: none">Open
         Modal</a>
     <a id="edgeMod" onClick="network.unselectAll();" href="#edgemod" rel="modal:open" style="display: none">Open
@@ -82,13 +83,15 @@
         <a class="okbtn" id="btnsubrename" onclick="dialogReName()" href="#close-modal" rel="modal:close">OK</a>
         <a class="cancelbtn" href="#close-modal" rel="modal:close">Cancel</a>
     </form>
-
+-->
 
     <!-- own development starts here:  -->
     <div class="container margin-top">
 
         <div class="row">
             <div class="col">
+
+                <!--
                 <div class="help-tip">
                     <p> - Please type in the keywords you want to query <br>
                         - You can specify an entity by its heading such as Simvastatin or its ID MESH:D019821 <br>
@@ -101,88 +104,59 @@
                         - Multiple facts are queried as follows (separated by a '.'): Simvastatin treats ?X. ?X affects
                         ?Y<br>
                 </div>
+                -->
 
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-group">
-                        <!--<label for="id_keywords"><strong>Search</strong></label> -->
-                        <div style="float: left; width: 85%">
-                            <textarea class="form-control" id="id_keywords" rows="1"
-                                      name="keywords">Simvastatin treats ?X(Disease)</textarea>
+
+
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
+                        <select class="custom-select" id="input_predicate">
+                            <option value="associated">associated</option>
+                            <option value="administered">administered</option>
+                            <option value="compares">compares</option>
+                            <option value="decreases">decreases</option>
+                            <option value="induces">induces</option>
+                            <option value="interacts">interacts</option>
+                            <option value="inhibits">inhibits</option>
+                            <option value="metabolises">metabolises</option>
+                            <option value="treats">treats</option>
+
+                        </select>
+                        <input type="text" class="form-control" placeholder="enter object" id="input_object">
+                        <div class="input-group-append">
+                            <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
+                            <button class="btn btn-primary" type="submit" id="btn_search">Search</button>
                         </div>
+                    </div>
+                   <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                        Please be patient. This process can take up to one minute.
+                    </p>
 
-                        <div style="float: left; width: 15%">
-                            <button type="submit" class="btn btn-primary" id="btn_search">
-                                Search
-                            </button>
-                            <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
-                                Please be patient. This process can take up to one minute.
-                            </p>
-                        </div>
+                    <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
+                        This is a danger alert—check it out!
+                    </div>
+                    <ul class="list-group" id="query_builder_list">
+                    </ul>
 
-                        <!--TODO: umschreiben, so nicht erweiterbar. Au0erdem, pubmed Logo in static folder(?)-->
-                        <div style="float: left; width: 100%">
-                            <label><strong> Allowed Predicates:</strong></label>
-                            <div class="wrapper-div text-muted">
-                                <div class="inner-div-left-mid">
-                                    'administered' <br>
-                                    'associated'
-                                </div>
-                                <div class="inner-div-left-mid">
-                                    'compares' <br>
-
-                                </div>
-                                <div class="inner-div-left-mid">
-                                    'decreases' <br>
-                                    'induces'
-                                </div>
-                                <div class="inner-div-left-mid">
-                                    'interacts' <br>
-
-                                </div>
-                                <div class="inner-div-left-mid">
-                                    'inhibits' <br>
-                                    'metabolises'
-                                </div>
-                                <div class="inner-div-left-mid">
-                                    'treats' <br>
-                                </div>
-
-                            </div>
-                        </div>
 
                         <label><strong>Data Source:</strong></label><br>
 
                         <div class="wrapper-div">
                             <div class="inner-div-left-mid">
-                                <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed"
+                                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
                                        checked="checked">
                                 <label for="radio_pubmed_path">PubMed Sample (2M Document Titles and
                                     Abstracts)</label><br>
-                                <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
+                                <input type="radio" id="radio_pmc" name="data_source" value="PMC_PATH">
                                 <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
                                     Simvastatin)</label><br>
                             </div>
-                            <!--<div class="inner-div-left-mid">
-                              <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
-                                      checked="checked">
-                               <label for="radio_pubmed">OpenIE: PubMed Sample (2000k Document Titles and
-                                   Abstracts)</label><br>
-                               <input type="radio" id="radio_pubmed_path" name="data_source" value="PubMed_Path">
-                               <label for="radio_pubmed_path">PathIE: PubMed Sample (2000k Document Titles and
-                                   Abstracts)</label>
-                           </div>
-                           <div class="inner-div-right-most">
-                               <input type="radio" id="radio_pmc" name="data_source" value="PMC">
-                               <label for="radio_pmc">OpenIE: PubMedCentral Sample (12k Fulltext Documents incl.
-                                   Simvastatin)</label><br>
-                               <input type="radio" id="radio_pmc_path" name="data_source" value="PMC_PATH">
-                               <label for="radio_pmc_path">PathIE: PubMedCentral Sample (12k Fulltext Documents incl.
-                                   Simvastatin)</label><br>
-                           </div> -->
                         </div>
 
-                        <label><strong>Outer Ranking:</strong></label><br>
+                        <label><strong>Visualisation:</strong></label><br>
                         <div class="wrapper-div">
                             <div class="inner-div-left-mid">
                                 <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
@@ -196,22 +170,6 @@
                                 <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualisation</label><br>
                             </div>
                         </div>
-
-                        <!--se
-                        <div style="float: left; width: 50%">
-                            <label><strong>Inner Ranking:</strong></label><br>
-                            <input type="radio" id="radio_inner_ranking_a" name="inner_ranking" value="inner_ranking_a"
-                                   checked="checked">
-                            <label for="radio_inner_ranking_a">Ranking that does a1 and some a2 and also a bit of
-                                a3</label><br>
-                            <input type="radio" id="radio_inner_ranking_b" name="inner_ranking" value="inner_ranking_b">
-                            <label for="radio_inner_ranking_b">Ranking that does b1 and some b2 and also a bit of
-                                b3</label><br>
-                            <input type="radio" id="radio_inner_ranking_c" name="inner_ranking" value="inner_ranking_c">
-                            <label for="radio_inner_ranking_c">Ranking that does c1 and some c2 and also a bit of
-                                c3</label><br>
-                        </div>
-                        -->
                     </div>
 
                 </form>
@@ -236,7 +194,7 @@
                             Treatment
                         </div>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats Diabetes Mellitus')">Metformin treats
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin treats
                             "Diabetes Mellitus"
                         </button>
                         <button type="button" class="btn btn-outline-primary"
@@ -258,10 +216,12 @@
                                 onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated ?Y(Disease)
+                                onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated
+                            ?Y(Disease)
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily) associated ?Y(Disease)
+                                onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
+                            associated ?Y(Disease)
                         </button>
 
                         <br><br>
@@ -285,7 +245,7 @@
                             administered liposomes
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(Chemical) administered Nebulizers and Vaporizers')">
+                                onclick="example_search('?X(Chemical) administered &quot;Nebulizers and Vaporizers&quot;')">
                             ?X(Chemical) administered "Nebulizers and Vaporizers"
                         </button>
 
@@ -316,7 +276,7 @@
                             Rhabdomyolysis
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces Muscular Diseases')">Simvastatin induces
+                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">Simvastatin induces
                             Muscular Diseases
                         </button>
 
@@ -325,19 +285,19 @@
                             Complex Queries
                         </div>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin associated human')">
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;. Metformin associated human')">
                             Metformin treats Diabetes Mellitus. Metformin associated human
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin associated ?X(Chemical)')">
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;. Metformin associated ?X(Chemical)')">
                             Metformin treats Diabetes Mellitus. Metformin associated ?X(Chemical)
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats Diabetes Mellitus. Metformin administered ?X(DosageForm)')">
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;. Metformin administered ?X(DosageForm)')">
                             Metformin treats Diabetes Mellitus. Metformin administered ?X(DosageForm)
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces Muscular Diseases. ?X(Chemical) inhibits cyp3a4')">
+                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;. ?X(Chemical) inhibits cyp3a4')">
                             Simvastatin induces "Muscular Diseases". ?X(Chemical) inhibits cyp3a4
                         </button>
 
@@ -360,89 +320,90 @@
             </div>
         </div>
 
+        <!--
+                <div class="accordion" id="accordionNarrativeDesigner">
+                    <div class="card mb-3">
+                        <div class="card-header text-center" id="headingOne">
+                            <h2 class="mb-0">
+                                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOne"
+                                        aria-expanded="false" aria-controls="collapseOne" onclick="centerNetworkDelayed()">
+                                    Narrative Designer
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
+                             data-parent="#accordionNarrativeDesigner">
+                            <div class="card-body">
 
-        <div class="accordion" id="accordionNarrativeDesigner">
-            <div class="card mb-3">
-                <div class="card-header text-center" id="headingOne">
-                    <h2 class="mb-0">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOne"
-                                aria-expanded="false" aria-controls="collapseOne" onclick="centerNetworkDelayed()">
-                            Narrative Designer
-                        </button>
-                    </h2>
-                </div>
-                <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
-                     data-parent="#accordionNarrativeDesigner">
-                    <div class="card-body">
+                                <div id="App">
+                                    <div class="help-tip">
+                                        <p>- Click on node/edge to select it <br>
+                                            - Click the "Center-Button" to center your network <br>
+                                            - Click the "Clear-Button" to delete the network <br>
+                                            - For multiple select, hold ctrl and click on nodes/edges <br>
+                                            - Shortcuts: <br>
+                                            - n: create new node <br>
+                                            - e: create new edge <br>
+                                            - c: cluster <br>
+                                            - backspace/delete: to delete nodes or edges <br></p>
+                                    </div>
 
-                        <div id="App">
-                            <div class="help-tip">
-                                <p>- Click on node/edge to select it <br>
-                                    - Click the "Center-Button" to center your network <br>
-                                    - Click the "Clear-Button" to delete the network <br>
-                                    - For multiple select, hold ctrl and click on nodes/edges <br>
-                                    - Shortcuts: <br>
-                                    - n: create new node <br>
-                                    - e: create new edge <br>
-                                    - c: cluster <br>
-                                    - backspace/delete: to delete nodes or edges <br></p>
+                                    <button class="button" id="load" onClick="document.getElementById('tFile').click();"
+                                            class="btn btn-secondary"
+                                            data-toggle="tooltip" data-placement="left" title="Load"></button>
+                                    <button class="button" id="save" onClick=save() class="btn btn-secondary"
+                                            data-toggle="tooltip"
+                                            data-placement="left" title="Save"></button>
+                                    <button class="button" id="undo" onClick=undo() class="btn btn-secondary"
+                                            data-toggle="tooltip"
+                                            data-placement="left" title="Undo"></button>
+                                    <button class="button" id="redo" onClick=redo() class="btn btn-secondary"
+                                            data-toggle="tooltip"
+                                            data-placement="left" title="Redo"></button>
+                                    <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary"
+                                            data-toggle="tooltip"
+                                            data-placement="left" title="Center"></button>
+                                    <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary"
+                                            data-toggle="tooltip"
+                                            data-placement="left" title="Clear"></button>
+                                    <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
+                                    ");">
+
+                                </div>
                             </div>
-
-                            <button class="button" id="load" onClick="document.getElementById('tFile').click();"
-                                    class="btn btn-secondary"
-                                    data-toggle="tooltip" data-placement="left" title="Load"></button>
-                            <button class="button" id="save" onClick=save() class="btn btn-secondary"
-                                    data-toggle="tooltip"
-                                    data-placement="left" title="Save"></button>
-                            <button class="button" id="undo" onClick=undo() class="btn btn-secondary"
-                                    data-toggle="tooltip"
-                                    data-placement="left" title="Undo"></button>
-                            <button class="button" id="redo" onClick=redo() class="btn btn-secondary"
-                                    data-toggle="tooltip"
-                                    data-placement="left" title="Redo"></button>
-                            <button class="button" id="center" onClick=centerNetwork() class="btn btn-secondary"
-                                    data-toggle="tooltip"
-                                    data-placement="left" title="Center"></button>
-                            <button class="button" id="clear" onClick=clear_all() class="btn btn-secondary"
-                                    data-toggle="tooltip"
-                                    data-placement="left" title="Clear"></button>
-                            <div id="mynetwork" onchange="createQuery();console.log(query + " onchange
-                            ");">
-
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+
+                <div class="accordion" id="accordionQueryTranslation">
+                    <div class="card mb-3">
+                        <div class="card-header text-center" id="headingOne">
+                            <h2 class="mb-0">
+                                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseQT"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                    Query Translation
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseQT" class="collapse" aria-labelledby="headingOne"
+                             data-parent="#accordionQueryTranslation">
+                            <div class="card-body">
+                                <div>
+                                    <label><strong>Query Translation: </strong></label>
+                                    <div id="query_translation">No query translation available.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        -->
 
         <div class="accordion" id="accordionQueryTranslation">
             <div class="card mb-3">
                 <div class="card-header text-center" id="headingOne">
                     <h2 class="mb-0">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseQT"
-                                aria-expanded="false" aria-controls="collapseOne">
-                            Query Translation
-                        </button>
-                    </h2>
-                </div>
-                <div id="collapseQT" class="collapse" aria-labelledby="headingOne"
-                     data-parent="#accordionQueryTranslation">
-                    <div class="card-body">
-                        <div>
-                            <label><strong>Query Translation: </strong></label>
-                            <div id="query_translation">No query translation available.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-      <div class="accordion" id="accordionQueryTranslation">
-            <div class="card mb-3">
-                <div class="card-header text-center" id="headingOne">
-                    <h2 class="mb-0">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTutorial"
+                        <button class="btn btn-primary" type="button" data-toggle="collapse"
+                                data-target="#collapseTutorial"
                                 aria-expanded="false" aria-controls="collapseOne">
                             Tutorials / Getting Started
                         </button>
@@ -454,7 +415,10 @@
                         <div>
                             In diesem Video finden Sie eine kurze Einführung in den narrativen Prototypen:
 
-                        <iframe width="560" height="315" src="https://www.youtube.com/embed/gxhMx4DC_v0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/gxhMx4DC_v0"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -485,5 +449,6 @@
 
     </script>
     <script src="{% static 'js/../../static/js/../../static/js/search.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/network.js' %}" type="text/javascript"></script>
+    <!--
+    <script src="{% static 'js/../../static/js/../../static/js/network.js' %}" type="text/javascript"></script> -->
 {% endblock %}

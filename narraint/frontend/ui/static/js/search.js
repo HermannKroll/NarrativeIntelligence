@@ -20,6 +20,190 @@ let CYTOSCAPE_STYLE = [
     }
 ];
 
+function escapeString(input_string){
+    if(input_string.includes(' ')){
+        return '"'+input_string+'"';
+    }
+    return input_string;
+}
+
+function getTextOrPlaceholderFromElement(element_id){
+    let text = document.getElementById(element_id).value;
+    if(text.length > 0){
+        return text;
+    } else {
+        return "";
+    }
+
+}
+
+
+let uniqueListID = 0;
+const getUniqueListID = () => {
+    uniqueListID += 1;
+    return 'li_' + uniqueListID;
+}
+
+let queryPatternDict = {};
+function addQueryPattern(id, subject, predicate, object) {
+    queryPatternDict[id] = [subject, predicate, object];
+}
+function removeQueryPattern(id) {
+    delete queryPatternDict[id];
+}
+
+function removeAllQueryPatterns() {
+    let ids = Object.keys(queryPatternDict);
+    ids.forEach(id => {
+       removeQueryPattern(id);
+    });
+}
+
+function getCurrentQuery(){
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    let predicate_input =  document.getElementById('input_predicate');
+    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+
+    let query = "";
+    if(subject.length > 0 && object.length > 0 ){
+        query = (subject + ' ' + predicate + ' ' +object);
+    }
+
+    Object.values(queryPatternDict).forEach(val => {
+        // do not add this pattern twice
+        if(val[0] !== subject || val[1] !== predicate || val[2] !== object){
+            query =  (val[0] + ' ' + val[1] + ' ' +val[2] + '.') + query;
+        }
+    });
+
+    return query;
+}
+
+function createQueryListItem(subject, predicate, object){
+    let uniqueListItemID = getUniqueListID();
+    addQueryPattern(uniqueListItemID, subject, predicate, object);
+    let deleteEvent = '$(\'#'+uniqueListItemID+'\').remove();removeQueryPattern(\''+uniqueListItemID+'\');'
+    let listItem = $('<li id="'+uniqueListItemID+'" class="list-group-item">'
+        +'<div class="container">' +
+        '  <div class="row">' +
+        '    <div class="col-sm"><span class="name">' +subject + '</span></div>' +
+        '    <div class="col-sm"><span class="name">' +predicate + '</span></div>' +
+        '    <div class="col-sm"><span class="name">' +object + '</span></div>' +
+        '    <div class="col-sm"><button class="btn btn-danger btn-xs pull-right remove-item" onclick="'+deleteEvent+'">-</button></div>' +
+        '  </div>' +
+        '</div>'+
+        '</li>');
+    $('#query_builder_list').append(listItem);
+    document.getElementById('input_subject').value = "";
+    document.getElementById('input_predicate').options[0].selected = true;
+    document.getElementById('input_object').value = "";
+}
+
+function addQueryPart(){
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    let predicate_input =  document.getElementById('input_predicate');
+    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    let query_text = subject + ' ' + predicate + ' ' + object;
+
+    if (subject.length === 0){
+        $('#alert_translation').text('subject is empty');
+        $('#alert_translation').fadeIn();
+        return;
+    }
+    if (object.length === 0){
+        $('#alert_translation').text('object is empty');
+        $('#alert_translation').fadeIn();
+    }
+
+    let request = $.ajax({
+        url: search_url,
+        data: {
+            check: query_text
+        }
+    });
+
+    request.done(function (response) {
+        let answer = response['valid']
+        if(answer === "True"){
+            $('#alert_translation').hide();
+            createQueryListItem(subject, predicate, object)
+        } else {
+            console.log('translation error:' + answer)
+            $('#alert_translation').text(answer);
+            $('#alert_translation').fadeIn();
+        }
+    });
+
+    request.fail(function (result) {
+        $('#alert_translation').text('connection issues (please reload website)');
+        $('#alert_translation').fadeIn();
+    });
+}
+
+
+function clearQueryBuilder(){
+    removeAllQueryPatterns();
+    let queryBuilder = document.getElementById('query_builder_list');
+    while(queryBuilder.firstChild){
+        queryBuilder.removeChild(queryBuilder.firstChild);
+    }
+}
+
+function split(val) {
+    // split string by space but do not split spaces within brackets
+    // remove all leading and closing brackets from splits
+    //console.log(val + " converted to " + termsCleaned);
+    return val.match(/\\?.|^$/g).reduce((p, c) => {
+        if (c === '"') {
+            p.quote ^= 1;
+        } else if (!p.quote && c === ' ') {
+            p.a.push('');
+        } else {
+            p.a[p.a.length - 1] += c.replace(/\\(.)/, "$1");
+        }
+        return p;
+    }, {a: ['']}).a;
+}
+
+let optionMapping = {
+    "associated": 0,
+    "administered": 1,
+    "compares": 2,
+    "decreases": 3,
+    "induces": 4,
+    "interacts": 5,
+    "inhibits": 6,
+    "metabolises": 7,
+    "treats" : 8
+}
+
+function example_search(search_str) {
+    $('#collapseExamples').collapse('hide');
+    clearQueryBuilder();
+    console.log(search_str);
+    //document.getElementById('id_keywords').value = search_str;
+    let first = true;
+    search_str.split('.').forEach(comp => {
+        let triple = split(comp.trim());
+        if (first === false){
+            let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+            let predicate_input =  document.getElementById('input_predicate');
+            let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+            let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+            createQueryListItem(subject, predicate, object);
+        }
+        document.getElementById('input_subject').value = triple[0];
+        document.getElementById('input_predicate').options[optionMapping[triple[1]]].selected = true;
+        document.getElementById('input_object').value = triple[2];
+        first = false;
+    });
+
+    document.getElementById("btn_search").click();
+    $('html,body').scrollTop(0);
+}
+
 const setButtonSearching = isSearching => {
     let btn = $('#btn_search');
     let help = $('#help_search');
@@ -49,189 +233,22 @@ $(document).on('keydown',function(e){
 $(document).ready(function () {
     $("#search_form").submit(search);
 
-    $("#id_keywords").keypress(function (e) {
-        // enter pressed
-        if (e.which === 13 && !e.shiftKey) {
-            $(this).closest("form").submit();
-            e.preventDefault();
-        }
-    });
-
-    let url_data = "/static/ac_all.txt";
-
-    function isQuoteOpen(query) {
-        let matches = query.match(/"/g);
-        if (matches === null) {
-            return false;
-        }
-        return matches.length % 2 === 1;
-    }
-
-    function split(val) {
-        // split string by space but do not split spaces within brackets
-        // remove all leading and closing brackets from splits
-        let termsCleaned = val.match(/\\?.|^$/g).reduce((p, c) => {
-            if (c === '"') {
-                p.quote ^= 1;
-            } else if (!p.quote && c === ' ') {
-                p.a.push('');
-            } else {
-                p.a[p.a.length - 1] += c.replace(/\\(.)/, "$1");
-            }
-            return p;
-        }, {a: ['']}).a;
-        //console.log(val + " converted to " + termsCleaned);
-        return termsCleaned;
-    }
-
-    function checkIsEntity(query, cursorPos, predicates) {
-        // split facts by '.'
-        let factPatterns = query.split('.');
-        let processedChars = 0;
-        // check for each fact
-        for (let j = 0; j < factPatterns.length; j++) {
-            let pattern = factPatterns[j];
-            // check only the pattern in which the cursor is
-            processedChars += pattern.length + 1; // each pattern is spit by '.'
-            // if we are in the wrong pattern, go to next pattern
-            if (processedChars < cursorPos) {
-                continue;
-            }
-            let sub_str = pattern.replace("  ", " ").trim().substring(0, cursorPos);
-            // we are at the beginning of a new pattern
-            if (sub_str === "") {
-                return true;
-            }
-            let terms = split(sub_str);
-            // if we currently have started the new word
-            if (query.charAt(cursorPos - 1) !== ' ') {
-                // throw one element away (the current written word)
-                terms.pop();
-            }
-            if (terms.length === 0) {
-                // if there is no other word to check - we are in entity mode
-                return true;
-            }
-            let potentialPredicate = terms.pop().toLowerCase();
-            // match the last word in predicates (single word)
-            for (let i = 0; i < predicates.length; i++) {
-                if (potentialPredicate === predicates[i]) {
-                    // last word was a predicate
-                    return true;
-                }
-            }
-            if (terms.length === 0) {
-                // the last word was not a predicate, and we have no more words to check
-                // the next word should be a predicate
-                return false;
-            }
-            // match he last two words in predicates
-            potentialPredicate = terms.pop().toLowerCase() + " " + potentialPredicate;
-            for (let i = 0; i < predicates.length; i++) {
-                if (potentialPredicate === predicates[i]) {
-                    // last two words were a predicate
-                    return true;
-                }
-            }
-            // no predicate found - then the next word should be a predicate
-            return false;
-        }
-        // we are potentially at the start of the query
-        return true;
-    }
-
-
-    $.ajax({
-        url: url_data,
-        type: "GET",
-        success: function (data) {
-            let lines = data.split("\n"); // split data into an array of tags
-            let entities = [];
-            let predicates = [];
-            let varTypes = ["Chemical", "Disease", "DosageForm", "Drug", "Excipient", "Gene", "Species", "PlantFamily"];
-            for (let i = 0; i < lines.length; i++) { // create key value pairs from the labels and the mesh id's
-                let comp = lines[i].split("\t");
-                if (comp[1] === "predicate") {
-                    predicates.push(comp[0]);
-                } else {
-                    entities.push(comp[0]);
-                }
-            }
-            entities.sort(); // alphabetical order
-            $("#id_keywords")
-                .autocomplete({
+    $('#input_subject').autocomplete({
                     minLength: 0,
                     autoFocus: true,
                     source: function (request, response) {
-                        // Use only the last entry from the textarea (exclude previous matches)
-                        let cursorPosition = $("#id_keywords").prop("selectionStart");
-                        let relevantTerm = request.term.substring(0, cursorPosition);
-                        let last_word = "";
-                        let hits = [];
-                        // if the quote is open everything between the last quote and the end is our current text
-                        if (isQuoteOpen(relevantTerm)) {
-                            last_word = relevantTerm.substring(relevantTerm.lastIndexOf("\"") + 1).toLowerCase();
-                        } else {
-                            last_word = split(relevantTerm).pop();
-                        }
-                        //console.log("last search term is: " + relevantTerm);
-                        let lastWordLower = last_word.toLowerCase().trim();
-
-                        if (isQuoteOpen(relevantTerm) || checkIsEntity(relevantTerm, cursorPosition, predicates)) {
-                            // check variable
-                            if (last_word.startsWith("?") && last_word.length > 1) {
-                                let varName = last_word;
-                                if (last_word.includes("(")) {
-                                    varName = last_word.substring(0, last_word.indexOf("("));
-
-                                }
-                                hits.push(varName);
-                                for (let i = 0; i < varTypes.length; i++) {
-                                    hits.push(varName + "(" + varTypes[i] + ")");
-                                }
-                            }
-                            // check entity name
-                            else if (lastWordLower.length > 1) {
-                                for (let i = 0; i < entities.length; i++) {
-                                    let term = entities[i];
-                                    let t_lower = term.toLowerCase();
-                                    if (t_lower.startsWith(lastWordLower)) {
-                                        hits.push(term);
-                                    }
-                                    if (hits.length > 15) {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        // check predicate
-                        else {
-                            for (let i = 0; i < predicates.length; i++) {
-                                let term = predicates[i];
-                                let t_lower = term.toLowerCase();
-                                if (t_lower.startsWith(lastWordLower)) {
-                                    hits.push(term);
-                                }
-                            }
-                        }
-                        // delegate back to autocomplete, but extract the last term
-                        response($.ui.autocomplete.filter(hits, last_word));
-
-                        /*
-                        let cursorPosition = $("#id_keywords").prop("selectionStart");
-                        let relevantTerm = request.term.substring(0, cursorPosition)
+                        let relevantTerm = request.term;
                         $.ajax({
                             type: "GET",
                             url: search_url,
                             data: {
-                                search: relevantTerm,
-                                cursor_pos: cursorPosition
+                                completion: relevantTerm
                             },
                             success: function (data){
                                 // delegate back to autocomplete, but extract the last term
                                 response(data["terms"]);
                             }
-                        }); */
+                        });
                     }
                     ,
                     focus: function () {
@@ -240,66 +257,64 @@ $(document).ready(function () {
                     }
                     ,
                     select: function (event, ui) {
-                        let cursorPosition = $("#id_keywords").prop("selectionStart");
-                        let textAfterCursor = this.value.substring(cursorPosition);
-                        let textBeforeCursor = this.value.substring(0, cursorPosition);
-                        let termsBeforeCursor = split(textBeforeCursor);
-
-                        // remove last item before autocompletion
-                        let lastWord = termsBeforeCursor.pop();
-                        let newValue = "";
-                        let terms = [];
-                        if (termsBeforeCursor.length > 0) {
-                            termsBeforeCursor.forEach(t => {
-                                // if empty space in string - escape
-                                if (t.trim().includes(" ")) {
-                                    terms.push("\"" + t + "\"");
-                                } else {
-                                    terms.push(t);
-                                }
-                            });
-                            // last character should be a space
-                            newValue = terms.join(" ") + " ";
-
-                            // remove last started word
-                            // newValue = textBeforeCursor.substring(0, textBeforeCursor.length - lastWord.length) + " ";
-                        }
-                        if (ui.item.value.trim().includes(" ")) {
-                            newValue += "\"" + ui.item.value + "\" " + textAfterCursor.trim();
-                        } else {
-                            newValue += ui.item.value + " " + textAfterCursor.trim();
-                        }
-
-                        this.value = newValue;
+                        this.value = ui.item.value.trim();
                         return false;
                     }
                 }).on("keydown", function (event) {
                 // don't navigate away from the field on tab when selecting an item
                 if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
                     event.preventDefault();
-                    return;
                 }
             });
-        }
-    });
+
+
+    $('#input_object').autocomplete({
+                    minLength: 0,
+                    autoFocus: true,
+                    source: function (request, response) {
+                        let relevantTerm = request.term;
+                        $.ajax({
+                            type: "GET",
+                            url: search_url,
+                            data: {
+                                completion: relevantTerm
+                            },
+                            success: function (data){
+                                // delegate back to autocomplete, but extract the last term
+                                response(data["terms"]);
+                            }
+                        });
+                    }
+                    ,
+                    focus: function () {
+                        // prevent value inserted on focus
+                        return false;
+                    }
+                    ,
+                    select: function (event, ui) {
+                        this.value = ui.item.value.trim();
+                        return false;
+                    }
+                }).on("keydown", function (event) {
+                // don't navigate away from the field on tab when selecting an item
+                if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
+                    event.preventDefault();
+                }
+            });
+
 });
 
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
+    $('#alert_translation').hide();
     event.preventDefault();
-    let query = $('#id_keywords').val();
+    let query = getCurrentQuery();
     let data_source = ""
-    /* if (document.getElementById('radio_pmc').checked) {
+     if (document.getElementById('radio_pmc').checked) {
          data_source = "PMC"
      } else if(document.getElementById('radio_pubmed').checked) {
          data_source = "PubMed"
-     } else
-     */
-    if (document.getElementById('radio_pubmed_path').checked) {
-        data_source = "PubMed_Path"
-    } else {
-        data_source = "PMC_Path"
-    }
+     }
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -330,37 +345,40 @@ const search = (event) => {
         let divDocuments = $('#div_documents');
         divDocuments.empty();
 
+        let valid_query = response["valid_query"];
+        if (valid_query === true){
+            let query_len = 0;
 
-        // Update graphical network representation
-        let nt_string = response["nt_string"];
-        let query_len = 0;
-        if (nt_string.length > 0) {
-            load_from_string(nt_string);
-            query_len = nt_string.split(".").length - 1;
-        }
+            // Print query translation
+            let query_translation = $("#query_translation");
+            let query_trans_string = response["query_translation"];
+            query_translation.text(query_trans_string);
+            let results = response["results"];
+            let result_size = results["s"];
+            // Create documents DIV
+            let divList = createResultList(results, query_len);
+            divDocuments.append(divList);
+            // add_collapsable_events();
 
-        // Print query translation
-        let query_translation = $("#query_translation");
-        let query_trans_string = response["query_translation"];
-        query_translation.text(query_trans_string);
-        let results = response["results"];
-        let result_size = results["s"];
-        // Create documents DIV
-        let divList = createResultList(results, query_len);
-        divDocuments.append(divList);
-        // add_collapsable_events();
+            let documents_header = $("#header_documents");
+            if (result_size >= 0) {
+                documents_header.html(result_size + " Documents")
+            } else {
+                documents_header.html("Documents")
+            }
 
-        let documents_header = $("#header_documents");
-        if (result_size >= 0) {
-            documents_header.html(result_size + " Documents")
+            // scroll to results
+            document.getElementById("resultdiv").scrollIntoView();
         } else {
-            documents_header.html("Documents")
+            let query_trans_string = response["query_translation"];
+            console.log('translation error:' + query_trans_string)
+            $('#alert_translation').text(query_trans_string);
+            $('#alert_translation').fadeIn();
         }
+
         // Disable button
         setButtonSearching(false);
 
-        // scroll to results
-        document.getElementById("resultdiv").scrollIntoView();
     });
 
     request.fail(function (result) {
@@ -371,13 +389,6 @@ const search = (event) => {
     });
 };
 
-function example_search(search_str) {
-    $('#collapseExamples').collapse('hide');
-    console.log(search_str);
-    document.getElementById('id_keywords').value = search_str;
-    document.getElementById("btn_search").click();
-    $('html,body').scrollTop(0);
-}
 
 
 

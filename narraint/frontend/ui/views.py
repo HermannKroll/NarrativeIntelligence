@@ -14,14 +14,13 @@ from narraint.entity.entity import Entity
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL, ALL, DISEASE
-from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.extraction.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.result import QueryDocumentResult
 from narraint.frontend.ui.search_cache import SearchCache
+from ui.autocompletion import AutocompletionUtil
 
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE = re.compile(r'\((\w+)\)')
@@ -38,15 +37,10 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 logger = logging.getLogger(__name__)
 
 
-allowed_entity_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, DRUG, DRUGBANK_CHEMICAL}
+allowed_entity_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL}
 
 allowed_predicates = set(create_predicate_vocab().keys())
 logging.info('allowed predicates are: {}'.format(allowed_predicates))
-
-# Former global variables causing problems. Now in View.instance()
-#query_engine = QueryEngine()
-# entity_tagger = EntityTagger()
-#cache = SearchCache()
 
 
 class View:
@@ -66,11 +60,13 @@ class View:
     @classmethod
     def instance(cls):
         if not cls.initialized:
+            cls.initialized = True
             cls._instance = cls.__new__(cls)
             cls.query_engine = QueryEngine()
             cls.entity_tagger = EntityTagger()
             cls.cache = SearchCache()
-            cls.initialized = True
+            cls.autocompletion = AutocompletionUtil()
+            cls.autocompletion.load_autocompletion_index()
         return cls._instance
 
 
@@ -94,13 +90,6 @@ def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         var_string, var_type = check_and_convert_variable(text)
-        #if var_type == CHEMICAL:
-          #  e = [Entity(var_string, 'Variable')],
-
-                # Entity(var_string.replace(f'({CHEMICAL})', f'({DRUG})'), 'Variable'),
-                # Entity(var_string.replace(f'({CHEMICAL})', f'({EXCIPIENT})'), 'Variable'),
-                # Entity(var_string.replace(f'({CHEMICAL})', f'({DRUGBANK_CHEMICAL})'), 'Variable')]
-        #else:
         e = [Entity(var_string, 'Variable')]
     elif text_low.startswith('mesh:'):
         e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
@@ -114,7 +103,7 @@ def convert_text_to_entity(text):
         try:
             e = View.instance().entity_tagger.tag_entity(text)
         except KeyError:
-            raise ValueError("Don't know how to understand: {}".format(text))
+            raise ValueError("Unknown term: {}".format(text))
     return e
 
 
@@ -143,6 +132,8 @@ def align_triple(text: str):
 
 
 def convert_query_text_to_fact_patterns(query_txt) -> (GraphQuery, str):
+    if not query_txt.strip():
+        return None, "subject or object is missing"
     # remove too many spaces
     fact_txt = re.sub('\s+', ' ', query_txt).strip()
     # split query into facts by '.'
@@ -165,20 +156,20 @@ def convert_query_text_to_fact_patterns(query_txt) -> (GraphQuery, str):
         try:
             s = convert_text_to_entity(s_t)
         except ValueError as e:
-            explanation_str += 'error unknown subject: {}\n'.format(e)
+            explanation_str += '{} (subject error)\n'.format(e)
             logger.error('error unknown subject: {}'.format(e))
             return None, explanation_str
 
         try:
             o = convert_text_to_entity(o_t)
         except ValueError as e:
-            explanation_str += 'error unknown object: {}\n'.format(e)
+            explanation_str += '{} {object error)\n'.format(e)
             logger.error('error unknown object: {}'.format(e))
             return None, explanation_str
 
         p = p_t.lower()
         if p not in allowed_predicates:
-            explanation_str += "error unknown predicate: {}\n".format(p_t)
+            explanation_str += "{} (predicate error)\n".format(p_t)
             logger.error("error unknown predicate: {}".format(p_t))
             return None, explanation_str
 
@@ -243,130 +234,54 @@ def count_variables_in_query(graph_query: GraphQuery):
     return len(var_set)
 
 
-def is_quote_closed(search_str: str) -> bool:
-    return search_str.count('"') % 2 == 0
-
-
-def is_next_word_predicate(search_str: str) -> bool:
-    components = search_str.strip().split(' ')
-    if len(components) == 0:
-        return False
-    if len(components) == 1:
-        return False
-    last_relevant_word = components[-2].strip()
-    if last_relevant_word in allowed_predicates:
-        # last one was a predicate
-        return False
-    return True
-
-
-def prepare_search_str(search_str: str) -> str:
-    # get the relevant search str
-    search_str_lower = search_str.lower().strip()
-    # replace multiple spaces by a single one
-    search_str_lower = ' '.join(search_str_lower.split())
-    search_str_lower = search_str_lower.replace(';', '.')
-
-    # ignore old facts
-    if '.' in search_str_lower:
-        # just take the latest fact in the current search term
-        search_str_lower = search_str_lower.split('.')[-1]
-
-    return search_str_lower
-
-
-# Simvastatin treats Diabetes Mellitus
-def compute_autocompletion_list(search_str, cursor_pos):
-    if cursor_pos > len(search_str):
-        return []
-    search_str_lower = prepare_search_str(search_str[:cursor_pos])
-
-    # find the relevant string
-    # if all quotes are closed - take string till last space
-    quote_closed = is_quote_closed(search_str_lower)
-    if quote_closed:
-        relevant_term = search_str_lower.split(' ')[-1]
-    else:
-        # quote is open - string starts by last quote
-        relevant_term = search_str_lower.split('"')[-1]
-
-    completions = []
-    logging.info('relevant term is: "{}"'.format(relevant_term))
-    if quote_closed and is_next_word_predicate(search_str_lower):
-        for pred in allowed_predicates:
-            if pred.startswith(relevant_term):
-                completions.append(pred)
-    else:
-        # is a variable?
-        if relevant_term.startswith('?'):
-            # ignore leading question mark
-            var_name = relevant_term[1:].split('(')[0]
-            hits = [f'?{var_name.capitalize()}({var_type})' for var_type in allowed_entity_types]
-            for h in hits:
-                if h.lower().startswith(relevant_term):
-                    completions.append(h)
-        # search for entity
-        for term in View.instance().entity_tagger.term2entity:
-            if term.startswith(relevant_term):
-                completions.append(term.capitalize())
-
-    # shortest completions first
-    sorted_by_length = sorted(completions, key=lambda x: len(x))[0:10]
-    # sort alphabetically
-    return sorted(sorted_by_length)
-
-
-def format_search_str(search: str, cursor_pos: int) -> str:
-    # remove multiple spaces
-    search = ' '.join(search.split())
-
-
-    return search
-
 class SearchView(TemplateView):
     template_name = "ui/search.html"
+
+    def __init__(self):
+        init_view = View.instance()
+        super(SearchView, self).__init__()
 
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             results_converted = []
-            query_trans_string = ""
-            nt_string = ""
-
-            if "search" in request.GET and "cursor_pos" in request.GET:
-                search_string = str(self.request.GET.get("search", "").strip())
-                cursor_pos = int(self.request.GET.get("cursor_pos", "").strip())
-                completion_terms = compute_autocompletion_list(search_string, cursor_pos)
+            if "completion" in request.GET:
+                search_string = str(self.request.GET.get("completion", "").strip())
+                logging.info('string-to-complete is: "{}"'.format(search_string))
+                completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
                 logging.info(f'Sending completion terms: {completion_terms}')
                 return JsonResponse(dict(terms=completion_terms))
-            if "format" in request.GET and "cursor_pos" in request.GET:
-                search_string = str(self.request.GET.get("search", "").strip())
-                cursor_pos = int(self.request.GET.get("cursor_pos", "").strip())
-                formated_search_str = format_search_str(search_string, cursor_pos)
-                return JsonResponse(dict(formated_search=formated_search_str))
-
+            if "check" in request.GET:
+                search_string = str(self.request.GET.get("check", "").strip())
+                logging.info(f'checking query: {search_string}')
+                query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(search_string)
+                if query_fact_patterns:
+                    logging.info('query is valid')
+                    return JsonResponse(dict(valid="True"))
+                else:
+                    logging.info(f'query is not valid: {query_trans_string}')
+                    return JsonResponse(dict(valid=query_trans_string))
             if "query" in request.GET:
+                valid_query = False
                 try:
                     query = str(self.request.GET.get("query", "").strip())
                     data_source = str(self.request.GET.get("data_source", "").strip())
                     outer_ranking = str(self.request.GET.get("outer_ranking", "").strip())
                     inner_ranking = str(self.request.GET.get("inner_ranking", "").strip())
+                    logging.info(f'Query string is: {query}')
                     logging.info("Selected data source is {}".format(data_source))
                     logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
                     logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
-                    if data_source not in ["PMC", "PubMed", "PMC_Path", "PubMed_Path"]:
+                    if data_source not in ["PMC", "PubMed"]:
                         results_converted = []
                         query_trans_string = "Data source is unknown"
-                        nt_string = ""
                         logger.error('parsing error')
                     elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
                         query_trans_string = "Outer ranking strategy is unknown"
-                        nt_string = ""
                         logger.error('parsing error')
-                    elif query_fact_patterns is None:
+                    elif not query_fact_patterns or len(query_fact_patterns.fact_patterns) == 0:
                         results_converted = []
-                        nt_string = ""
                         logger.error('parsing error')
                     elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(
                             query_fact_patterns) > 1:
@@ -375,13 +290,8 @@ class SearchView(TemplateView):
                         query_trans_string = "Do not support multiple variables in an ontology-based ranking"
                         logger.error("Do not support multiple variables in an ontology-based ranking")
                     else:
-                        nt_string = convert_graph_patterns_to_nt(query)
-                        if 'Path' in data_source:
-                            document_collection = data_source.replace('_Path', '')
-                            extraction_type = PATHIE_EXTRACTION
-                        else:
-                            document_collection = data_source
-                            extraction_type = OPENIE_EXTRACTION
+                        valid_query = True
+                        document_collection = data_source
                         try:
                             cached_results = View.instance().cache.load_result_from_cache(document_collection, query_fact_patterns)
                         except Exception:
@@ -392,7 +302,7 @@ class SearchView(TemplateView):
                             results = cached_results
                         else:
                             results = View.instance().query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
-                                                                                extraction_type="", query=query)
+                                                                                query=query)
                             logging.info('Write results to cache...')
                             try:
                                 View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns, results)
@@ -408,11 +318,10 @@ class SearchView(TemplateView):
                 except Exception:
                     results_converted = []
                     query_trans_string = "keyword query cannot be converted (syntax error)"
-                    nt_string = ""
                     traceback.print_exc(file=sys.stdout)
 
                 return JsonResponse(
-                    dict(results=results_converted, query_translation=query_trans_string, nt_string=nt_string))
+                    dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string))
         return super().get(request, *args, **kwargs)
 
 
