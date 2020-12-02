@@ -392,7 +392,8 @@ class EntityResolver:
         :param resolve_gene_by_id:
         :return: uses the corresponding resolver for the entity type
         """
-        if not entity_id.startswith('MESH:') and entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
+        if entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not entity_id.startswith('MESH:') and \
+                not entity_id.startswith('FIDX'):
             if not self.mesh_ontology:
                 self.mesh_ontology = MeSHOntology.instance()
             entity_mesh_id = 'MESH:{}'.format(self.mesh_ontology.get_descriptor_for_tree_no(entity_id)[0])

@@ -1,5 +1,6 @@
 from narraint.entity.meshontology import MeSHOntology
 
+
 class Entity:
 
     def __init__(self, entity_id, entity_type, entity_name=None):
@@ -23,4 +24,4 @@ class Entity:
             mesh_descs = set(mesh_ontology.find_descriptors_start_with_tree_no(self.entity_id))
             return map(lambda d: 'MESH:{}'.format(d[0]), mesh_descs)
         else:
-           return {self.entity_id}
+            return {self.entity_id}
