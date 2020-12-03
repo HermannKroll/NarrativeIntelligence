@@ -163,7 +163,7 @@ def convert_query_text_to_fact_patterns(query_txt) -> (GraphQuery, str):
         try:
             o = convert_text_to_entity(o_t)
         except ValueError as e:
-            explanation_str += '{} {object error)\n'.format(e)
+            explanation_str += '{} (object error)\n'.format(e)
             logger.error('error unknown object: {}'.format(e))
             return None, explanation_str
 
