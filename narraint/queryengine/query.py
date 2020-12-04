@@ -3,7 +3,7 @@ from narraint.entity.entity import Entity
 
 class FactPattern:
 
-    def __init__(self, subjects: Entity, predicate: str, objects: Entity):
+    def __init__(self, subjects: [Entity], predicate: str, objects: [Entity]):
         self.subjects = subjects
         self.predicate = predicate
         self.objects = objects

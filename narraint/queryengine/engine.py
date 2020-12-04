@@ -13,9 +13,9 @@ from sqlalchemy.dialects import postgresql
 
 from narraint.entity.entity import Entity
 from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, SYMMETRIC_PREDICATES, \
-    PREDICATE_EXPANSION, should_perform_like_search_for_entity, ENTITY_TYPE_EXPANSION
+    PREDICATE_EXPANSION, should_perform_like_search_for_entity, ENTITY_TYPE_EXPANSION, ENTITY_TYPE_VARIABLE
 from narraint.queryengine.result import QueryFactExplanation, QueryDocumentResult, QueryEntitySubstitution
 
 QUERY_LIMIT = 50000
@@ -317,6 +317,40 @@ class QueryEngine:
                 unique_results.append(r)
         return unique_results
 
+    def optimize_query(self, graph_query: GraphQuery) -> GraphQuery:
+        """
+        Performs a simple query optimization
+        1. remove redundant entity ids in subject or object
+        2. order fact patterns by pushing patterns with variables in the end
+        :param graph_query:
+        :return:
+        """
+        fact_patterns_with_var_count = []
+        for fp in graph_query.fact_patterns:
+            new_fp = FactPattern([], fp.predicate, [])
+            variable_count = 0
+            subject_ids = set()
+            for sub in fp.subjects:
+                if sub.entity_id not in subject_ids:
+                    subject_ids.add(sub.entity_id)
+                    new_fp.subjects.append(sub)
+                    if sub.entity_type == ENTITY_TYPE_VARIABLE:
+                        variable_count += 1
+            object_ids = set()
+            for obj in fp.objects:
+                if obj.entity_id not in object_ids:
+                    object_ids.add(obj.entity_id)
+                    new_fp.objects.append(obj)
+                    if obj.entity_type == ENTITY_TYPE_VARIABLE:
+                        variable_count += 1
+            fact_patterns_with_var_count.append((new_fp, variable_count))
+
+        # Sort the fact patterns by the var count ascending
+        optimized = GraphQuery()
+        for fp, var_count in sorted(fact_patterns_with_var_count, key=lambda x: x[1]):
+            optimized.add_fact_pattern(fp)
+        return optimized
+
     def process_query_with_expansion(self, graph_query: GraphQuery, document_collection, extraction_type=None,
                                      query="", likesearch=True):
         """
@@ -329,6 +363,7 @@ class QueryEngine:
         :param likesearch: performs like searches for subjects and objects
         :return: a list of QueryDocumentResults
         """
+        graph_query = self.optimize_query(graph_query)
         query_fact_patterns_expanded = []
         expand_query = False
         for idx, fp in enumerate(graph_query.fact_patterns):

@@ -1,5 +1,7 @@
 from narraint.entity.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL
 
+ENTITY_TYPE_VARIABLE = "Variable"
+
 MESH_ONTOLOGY = 'MESH_ONTOLOGY'
 
 LIKE_SEARCH_FOR_ENTITY_TYPES = {DOSAGE_FORM, CHEMICAL, DISEASE, GENE, MESH_ONTOLOGY}
@@ -15,7 +17,7 @@ PREDICATE_EXPANSION = dict(
     interacts=['interacts', 'metabolises', 'inhibits']
 )
 
-SYMMETRIC_PREDICATES = {"interacts", "administered"}
+SYMMETRIC_PREDICATES = {"interacts", "administered", "associated"}
 
 
 def should_perform_like_search_for_entity(entity_id, entity_type):
