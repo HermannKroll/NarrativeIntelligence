@@ -1,4 +1,5 @@
 import logging
+import os
 
 from typing import List, Dict
 
@@ -29,6 +30,7 @@ class MetaDicTagger(dt.DictTagger):
         self._sub_taggers: List[dt.DictTagger] = []
         self._vocabs = {}
         self.tag_types = set()
+        os.makedirs(self.out_dir)
 
     def add_tagger(self, tagger: dt.DictTagger):
         self._sub_taggers.append(tagger)

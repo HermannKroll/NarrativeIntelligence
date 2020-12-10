@@ -1,5 +1,7 @@
 import os
 import unittest
+
+import logging
 import pytest
 
 import nitests.config.config as config
@@ -26,6 +28,7 @@ class TestPreprocess(unittest.TestCase):
 
     def test_metadictagger(self):
         self.output = os.path.join(nitests.util.make_test_tempdir(), "output.txt")
+        logging.info(self.output)
         self.workdir = nitests.util.make_test_tempdir()
         args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
                 self.output,
@@ -34,6 +37,18 @@ class TestPreprocess(unittest.TestCase):
         preprocess.main(args)
         (doc1, doc2) = tuple(read_tagged_documents(self.output))
         assert_tags_pmc_4297_5600(self, {str(t) for t in  doc1.tags}, {str(t) for t in  doc2.tags})
+
+
+    def test_metadictagger_parallel(self):
+        self.output = os.path.join(nitests.util.make_test_tempdir(), "output.txt")
+        self.workdir = nitests.util.make_test_tempdir()
+        args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
+                self.output,
+                *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {self.workdir} -w 2".split()
+                ]
+        preprocess.main(args)
+        (doc1, doc2) = tuple(read_tagged_documents(self.output))
+        assert_tags_pmc_4297_5600(self, {str(t) for t in doc1.tags}, {str(t) for t in doc2.tags})
     
 
 

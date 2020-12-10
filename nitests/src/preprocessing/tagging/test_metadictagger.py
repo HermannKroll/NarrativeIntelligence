@@ -18,7 +18,7 @@ class TestMetadictagger(unittest.TestCase):
         self.assertSetEqual(set(metatag._vocabs.keys()), TestMetadictagger.ent_type_set)
         self.assertIn("DB00145", metatag._vocabs[et.EXCIPIENT]["glycine"])
         self.assertIn("MESH:D007267", metatag._vocabs[et.DOSAGE_FORM]["injection"])
-        self.assertIn("Glycine", metatag._vocabs[et.PLANT_FAMILY]["glycine"])
+        self.assertIn("Agave", metatag._vocabs[et.PLANT_FAMILY]["agave"])
         self.assertIn("DB06727", metatag._vocabs[et.DRUG]["sparteine"])
 
         # self.assertEqual(True, False)
