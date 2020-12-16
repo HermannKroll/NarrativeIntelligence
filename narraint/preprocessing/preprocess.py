@@ -182,7 +182,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     for tagger in taggers:
         logger.info("Finalizing {}".format(tagger.name))
         tagger.finalize()
-    export(output_filename, tag_types, target_ids, collection=collection, content=True, logger=logger)
+    #export(output_filename, tag_types, target_ids, collection=collection, content=True, logger=logger)
     logger.info("=== Finished ===")
 
 
@@ -290,13 +290,13 @@ def main(arguments=None):
             while process.is_alive():
                 process.join(timeout=1)
         # merge output files
-        logger.info(f"merging sub output files to {args.output}")
-        with open(args.output, "w+") as output_file:
-            for sub_out_path in output_paths:
-                with open(sub_out_path) as sub_out_file:
-                    for line in sub_out_file:
-                        output_file.write(line)
-                os.remove(sub_out_path)
+        # logger.info(f"merging sub output files to {args.output}")
+        # with open(args.output, "w+") as output_file:
+        #     for sub_out_path in output_paths:
+        #         with open(sub_out_path) as sub_out_file:
+        #             for line in sub_out_file:
+        #                 output_file.write(line)
+        #         os.remove(sub_out_path)
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
                    resume=args.resume, use_tagger_one=not args.no_tagger_one)
