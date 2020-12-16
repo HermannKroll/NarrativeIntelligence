@@ -1,0 +1,134 @@
+ssh://jan@134.169.32.169:22/home/jan/.conda/envs/narint/bin/python3.7 -u /home/jan/narint/narraint/preprocessing/preprocess.py /home/jan/pubmed_10k_sample/sample.txt /home/jan/testoutput/totest -t DR --loglevel DEBUG -c TOTEST --composite
+2020-12-16 12:04:23,211 INFO MainThread preprocess:237 Project directory: /tmp/tmp1vyyyaxu
+2020-12-16 12:04:23,212 DEBUG MainThread preprocess:238 Input directory: /tmp/tmp1vyyyaxu/input
+2020-12-16 12:04:23,212 DEBUG MainThread preprocess:244 Composite of single input file: created input directory at /tmp/tmp1vyyyaxu/input
+2020-12-16 12:04:23,212 INFO MainThread preprocess:245 Composite enabled or single file as input. Splitting up composite files...
+2020-12-16 12:04:24,115 DEBUG MainThread split:23 splitting file (batch size is 1)...
+2020-12-16 12:04:25,655 DEBUG MainThread split:35 finished
+2020-12-16 12:04:25,655 INFO MainThread preprocess:247 done. Sanitizing files...
+2020-12-16 12:04:26,754 INFO MainThread preprocess:251 2 files ignored because of wrong format or missing abstract
+2020-12-16 12:04:26,755 INFO MainThread preprocess:252 0 files sanitized
+/home/jan/narint/tmp/sqlitebase.db
+WARNING:root:No tagger mapping provided. Tags are ignored
+2020-12-16 12:04:26,770 INFO MainThread load:212 Load documents into database...
+2020-12-16 12:04:26,770 INFO MainThread load:213 Counting documents ...
+2020-12-16 12:04:28,421 INFO MainThread load:216 Counting documents ... found 9998
+2020-12-16 12:04:28,421 INFO MainThread load:218 Found 9998 documents
+2020-12-16 12:04:28,429 INFO MainThread progress:35 Adding documents ... 0.0 % (ETA 2020-12-16 14:51)
+2020-12-16 12:04:28,562 INFO MainThread progress:35 Adding documents ... 1.0 % (ETA 2020-12-16 12:06)
+2020-12-16 12:04:28,695 INFO MainThread progress:35 Adding documents ... 2.0 % (ETA 2020-12-16 12:05)
+2020-12-16 12:04:28,826 INFO MainThread progress:35 Adding documents ... 3.0 % (ETA 2020-12-16 12:05)
+2020-12-16 12:04:28,957 INFO MainThread progress:35 Adding documents ... 4.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,087 INFO MainThread progress:35 Adding documents ... 5.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,218 INFO MainThread progress:35 Adding documents ... 6.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,349 INFO MainThread progress:35 Adding documents ... 7.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,482 INFO MainThread progress:35 Adding documents ... 8.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,614 INFO MainThread progress:35 Adding documents ... 9.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,746 INFO MainThread progress:35 Adding documents ... 10.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:29,877 INFO MainThread progress:35 Adding documents ... 11.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,009 INFO MainThread progress:35 Adding documents ... 12.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,140 INFO MainThread progress:35 Adding documents ... 13.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,271 INFO MainThread progress:35 Adding documents ... 14.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,403 INFO MainThread progress:35 Adding documents ... 15.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,535 INFO MainThread progress:35 Adding documents ... 16.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,666 INFO MainThread progress:35 Adding documents ... 17.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,797 INFO MainThread progress:35 Adding documents ... 18.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:30,929 INFO MainThread progress:35 Adding documents ... 19.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,060 INFO MainThread progress:35 Adding documents ... 20.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,192 INFO MainThread progress:35 Adding documents ... 21.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,323 INFO MainThread progress:35 Adding documents ... 22.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,454 INFO MainThread progress:35 Adding documents ... 23.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,586 INFO MainThread progress:35 Adding documents ... 24.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,716 INFO MainThread progress:35 Adding documents ... 25.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,848 INFO MainThread progress:35 Adding documents ... 26.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:31,979 INFO MainThread progress:35 Adding documents ... 27.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,110 INFO MainThread progress:35 Adding documents ... 28.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,242 INFO MainThread progress:35 Adding documents ... 29.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,373 INFO MainThread progress:35 Adding documents ... 30.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,505 INFO MainThread progress:35 Adding documents ... 31.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,636 INFO MainThread progress:35 Adding documents ... 32.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,770 INFO MainThread progress:35 Adding documents ... 33.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:32,902 INFO MainThread progress:35 Adding documents ... 34.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,033 INFO MainThread progress:35 Adding documents ... 35.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,165 INFO MainThread progress:35 Adding documents ... 36.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,295 INFO MainThread progress:35 Adding documents ... 37.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,427 INFO MainThread progress:35 Adding documents ... 38.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,558 INFO MainThread progress:35 Adding documents ... 39.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,689 INFO MainThread progress:35 Adding documents ... 40.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,819 INFO MainThread progress:35 Adding documents ... 41.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:33,950 INFO MainThread progress:35 Adding documents ... 42.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,080 INFO MainThread progress:35 Adding documents ... 43.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,210 INFO MainThread progress:35 Adding documents ... 44.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,341 INFO MainThread progress:35 Adding documents ... 45.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,471 INFO MainThread progress:35 Adding documents ... 46.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,601 INFO MainThread progress:35 Adding documents ... 47.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,731 INFO MainThread progress:35 Adding documents ... 48.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,860 INFO MainThread progress:35 Adding documents ... 49.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:34,991 INFO MainThread progress:35 Adding documents ... 50.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,121 INFO MainThread progress:35 Adding documents ... 51.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,251 INFO MainThread progress:35 Adding documents ... 52.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,382 INFO MainThread progress:35 Adding documents ... 53.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,513 INFO MainThread progress:35 Adding documents ... 54.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,644 INFO MainThread progress:35 Adding documents ... 55.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,775 INFO MainThread progress:35 Adding documents ... 56.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:35,906 INFO MainThread progress:35 Adding documents ... 57.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,037 INFO MainThread progress:35 Adding documents ... 58.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,167 INFO MainThread progress:35 Adding documents ... 59.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,299 INFO MainThread progress:35 Adding documents ... 60.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,428 INFO MainThread progress:35 Adding documents ... 61.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,559 INFO MainThread progress:35 Adding documents ... 62.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,690 INFO MainThread progress:35 Adding documents ... 63.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,821 INFO MainThread progress:35 Adding documents ... 64.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:36,952 INFO MainThread progress:35 Adding documents ... 65.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,083 INFO MainThread progress:35 Adding documents ... 66.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,216 INFO MainThread progress:35 Adding documents ... 67.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,348 INFO MainThread progress:35 Adding documents ... 68.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,479 INFO MainThread progress:35 Adding documents ... 69.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,610 INFO MainThread progress:35 Adding documents ... 70.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,741 INFO MainThread progress:35 Adding documents ... 71.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:37,873 INFO MainThread progress:35 Adding documents ... 72.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,003 INFO MainThread progress:35 Adding documents ... 73.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,135 INFO MainThread progress:35 Adding documents ... 74.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,266 INFO MainThread progress:35 Adding documents ... 75.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,398 INFO MainThread progress:35 Adding documents ... 76.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,529 INFO MainThread progress:35 Adding documents ... 77.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,660 INFO MainThread progress:35 Adding documents ... 78.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,791 INFO MainThread progress:35 Adding documents ... 79.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:38,922 INFO MainThread progress:35 Adding documents ... 80.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,053 INFO MainThread progress:35 Adding documents ... 81.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,183 INFO MainThread progress:35 Adding documents ... 82.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,314 INFO MainThread progress:35 Adding documents ... 83.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,445 INFO MainThread progress:35 Adding documents ... 84.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,575 INFO MainThread progress:35 Adding documents ... 85.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,706 INFO MainThread progress:35 Adding documents ... 86.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,836 INFO MainThread progress:35 Adding documents ... 87.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:39,967 INFO MainThread progress:35 Adding documents ... 88.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,098 INFO MainThread progress:35 Adding documents ... 89.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,229 INFO MainThread progress:35 Adding documents ... 90.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,359 INFO MainThread progress:35 Adding documents ... 91.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,491 INFO MainThread progress:35 Adding documents ... 92.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,621 INFO MainThread progress:35 Adding documents ... 93.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,752 INFO MainThread progress:35 Adding documents ... 94.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:40,884 INFO MainThread progress:35 Adding documents ... 95.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:41,015 INFO MainThread progress:35 Adding documents ... 96.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:41,145 INFO MainThread progress:35 Adding documents ... 97.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:41,276 INFO MainThread progress:35 Adding documents ... 98.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:41,407 INFO MainThread progress:35 Adding documents ... 99.0 % (ETA 2020-12-16 12:04)
+2020-12-16 12:04:41,535 INFO MainThread load:290 Added documents in 0:00:13.113248
+2020-12-16 12:04:41,535 INFO MainThread preprocess:134 === STEP 1 - Preparation ===
+2020-12-16 12:04:42,208 INFO MainThread preprocess:149 Preprocessing 9998 documents
+2020-12-16 12:04:42,534 DEBUG MainThread preprocess:112 Retrieved 0 ids (ent_type=Drug,collection=TOTEST,tagger=MetaDicTagger/1.0)
+2020-12-16 12:04:42,538 DEBUG MainThread preprocess:159 Tasklist for Drug written to: /tmp/tmp1vyyyaxu/tasklist_drug.txt
+2020-12-16 12:04:42,538 INFO MainThread preprocess:160 Tasklist for Drug contains 9998 documents
+2020-12-16 12:04:42,538 INFO MainThread preprocess:173 Preparing MetaDicTagger
+2020-12-16 12:04:42,751 DEBUG MainThread dictagger:93 Use precached index from /home/jan/narint/tmp/dr_index_cache.pkl
+2020-12-16 12:04:42,751 INFO MainThread dictagger:126 DrugTagger initialized from cache (74924 term mappings) - ready to start
+2020-12-16 12:04:42,751 INFO MainThread preprocess:178 MetaDicTagger used 0:00:00.212905 for preparation
+2020-12-16 12:04:42,751 INFO MainThread preprocess:179 === STEP 2 - Tagging ===
+2020-12-16 12:04:42,751 INFO MainThread preprocess:181 Starting MetaDicTagger
+2020-12-16 12:05:53,853 INFO MetaDicTagger dictagger:166 Finished in 0:01:11.095102 (9998 files processed, 9998 files total, 0 errors)
+2020-12-16 12:05:53,853 INFO MainThread preprocess:185 === STEP 3 - Post-processing ===
+2020-12-16 12:05:53,854 INFO MainThread preprocess:187 Finalizing MetaDicTagger
+2020-12-16 12:05:54,892 INFO MainThread base:80 Cleaning tags
+2020-12-16 12:05:55,001 INFO MainThread base:104 Add tagger
+2020-12-16 12:05:55,006 INFO MainThread base:109 Add tags
