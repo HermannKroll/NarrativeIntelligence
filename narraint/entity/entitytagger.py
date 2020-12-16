@@ -134,6 +134,13 @@ class EntityTagger:
         """
         t_low = term.lower().strip()
         if t_low not in self.term2entity:
-            raise KeyError('Does not know an entity for term: {}'.format(t_low))
+            if t_low[-1] == 's':
+                t_low_n = t_low[:-2]
+            else:
+                t_low_n = f'{t_low}s'
+            if t_low_n not in self.term2entity:
+                raise KeyError('Does not know an entity for term: {}'.format(t_low))
+            else:
+                t_low = t_low_n
         return self.term2entity[t_low]
 
