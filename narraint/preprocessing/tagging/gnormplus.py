@@ -68,9 +68,15 @@ class GNormPlus(BaseTagger):
                            self.out_dir, self.config.gnorm_setup]
                 process = subprocess.Popen(sp_args, cwd=self.config.gnorm_root, stdout=f_log, stderr=f_log)
                 self.logger.debug("Starting {}".format(process.args))
-
+                while self.get_progress() == 0:
+                    sleep(0.1)
+                self.logger.info(f"GNormPlus: First Progress after {datetime.now() - start_time}")
+                while self.get_progress() <100:
+                    sleep(0.1)
+                self.logger.info(f"first 100 documents in {datetime.now() - start_time}")
                 # Wait until finished
                 while process.poll() is None:
+
                     sleep(self.OUTPUT_INTERVAL)
                     print_progress_with_eta("GNormPlus tagging", self.get_progress(), files_total, start_time,
                                             print_every_k=5, logger=self.logger)
@@ -83,7 +89,10 @@ class GNormPlus(BaseTagger):
                     last_id = get_document_id(last_file)
                     skipped_files.append(last_file)
                     self.logger.debug("Exception in file {}".format(last_file))
-                    copyfile(self.log_file, "gnorm.{}.log".format(self.log_file, last_id))
+                    try:
+                        copyfile(self.log_file, os.path.join(os.path.dirname(self.log_file), f"gnorm.{last_id}.log"))
+                    except:
+                        self.logger.warn("Could not conserve logfile, continuing anyway")
                     os.remove(last_file)
                 else:
                     # No file processed, assume another error

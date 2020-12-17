@@ -8,6 +8,7 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 class TaggedEntity:
 
+    #TODO: Use kwargs or something
     def __init__(self, tag_tuple):
         self.document = int(tag_tuple[0])
         self.start = int(tag_tuple[1])

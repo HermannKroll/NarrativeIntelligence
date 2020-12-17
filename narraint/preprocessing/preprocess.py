@@ -8,6 +8,7 @@ import psutil
 from argparse import ArgumentParser
 from typing import List
 import multiprocessing
+import datetime as dti
 
 from narraint.entity import enttypes
 from narraint.backend.database import Session
@@ -168,10 +169,13 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
         taggers.append(dictfactory.create_MetaDicTagger())
 
     for tagger in taggers:
+        start = dti.datetime.now()
         logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.get_types():
             tagger.add_files(*missing_files_type[target_type])
         tagger.prepare(resume)
+        preptime = dti.datetime.now() - start
+        logger.info(f"{tagger.name} used {preptime} for preparation")
     logger.info("=== STEP 2 - Tagging ===")
     for tagger in taggers:
         logger.info("Starting {}".format(tagger.name))
@@ -182,12 +186,12 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     for tagger in taggers:
         logger.info("Finalizing {}".format(tagger.name))
         tagger.finalize()
-    export(output_filename, tag_types, target_ids, collection=collection, content=True, logger=logger)
+    #export(output_filename, tag_types, target_ids, collection=collection, content=True, logger=logger)
     logger.info("=== Finished ===")
 
-
+#TODO:
 def main(arguments=None):
-    parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
+    parser = ArgumentParser(description="Tag given documents in pubtator format and insert tags into database")
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
     parser.add_argument("--composite", action="store_true",
@@ -210,7 +214,7 @@ def main(arguments=None):
                                 type=int)
 
     parser.add_argument("input", help="Directory with PubTator files ", metavar="IN_DIR")
-    parser.add_argument("output", help="Output file", metavar="OUT_FILE")
+    parser.add_argument("output", help="DEPRECATED!", metavar="OUT_FILE")
     args = parser.parse_args(arguments)
 
     # Create configuration wrapper
@@ -290,13 +294,13 @@ def main(arguments=None):
             while process.is_alive():
                 process.join(timeout=1)
         # merge output files
-        logger.info(f"merging sub output files to {args.output}")
-        with open(args.output, "w+") as output_file:
-            for sub_out_path in output_paths:
-                with open(sub_out_path) as sub_out_file:
-                    for line in sub_out_file:
-                        output_file.write(line)
-                os.remove(sub_out_path)
+        # logger.info(f"merging sub output files to {args.output}")
+        # with open(args.output, "w+") as output_file:
+        #     for sub_out_path in output_paths:
+        #         with open(sub_out_path) as sub_out_file:
+        #             for line in sub_out_file:
+        #                 output_file.write(line)
+        #         os.remove(sub_out_path)
     else:
         preprocess(args.corpus, root_dir, in_dir, log_dir, logger, args.output, conf, *tag_types,
                    resume=args.resume, use_tagger_one=not args.no_tagger_one)

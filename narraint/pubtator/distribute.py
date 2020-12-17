@@ -73,17 +73,18 @@ def distribute_workload(input_dir, output_root, workers_number: int, subdirs_nam
     distribution = [[] for i in range(workers_number)]
 
     for file, size in file_sizes.items():
-        if size < workload_per_worker:
-            min(distribution, key=lambda l: len(l)).append(file)
-        else:
-            not_full_workers = [worker for worker in distribution
-                                if sum(file_sizes[f] for f in worker) < workload_per_worker]
-            docs_per_worker = math.ceil(size / len(not_full_workers))
-            split(file, tmp_path, docs_per_worker)
-            batches = (os.path.join(tmp_path, file) for file in os.listdir(tmp_path) if not file in distributed_batches)
-            distributed_batches.extend(batches)
-            for worker, batch in zip(not_full_workers, batches):
-                worker.append(batch)
+        min(distribution, key=lambda l: len(l)).append(file)
+        # if size < workload_per_worker:
+        #     min(distribution, key=lambda l: len(l)).append(file)
+        # else:
+        #     not_full_workers = [worker for worker in distribution
+        #                         if sum(file_sizes[f] for f in worker) < workload_per_worker]
+        #     docs_per_worker = math.ceil(count_documents(file) / len(not_full_workers))
+        #     split(file, tmp_path, docs_per_worker)
+        #     batches = (os.path.join(tmp_path, file) for file in os.listdir(tmp_path) if not file in distributed_batches)
+        #     distributed_batches.extend(batches)
+        #     for worker, batch in zip(not_full_workers, batches):
+        #         worker.append(batch)
 
     for i, worker in enumerate(distribution):
         worker_dir = os.path.join(output_root, f"{subdirs_name}{i}")
