@@ -191,7 +191,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
 #TODO:
 def main(arguments=None):
-    parser = ArgumentParser(description="Preprocess PubMedCentral files for the use with Snorkel")
+    parser = ArgumentParser(description="Tag given documents in pubtator format and insert tags into database")
 
     parser.add_argument("--resume", action="store_true", help="Resume tagging")
     parser.add_argument("--composite", action="store_true",
