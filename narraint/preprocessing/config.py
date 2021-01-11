@@ -96,6 +96,14 @@ class Config:
         return self.config["dict"]["max_words"]
 
     @property
+    def dict_check_abbreviation(self):
+        return self.config["dict"]["check_abbreviation"]
+
+    @property
+    def dict_min_full_tag_len(self):
+        return self.config["dict"]["min_full_tag_len"]
+
+    @property
     def drug_check_products(self):
         return self.config["drug"]["check_products"]
 

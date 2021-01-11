@@ -49,7 +49,7 @@ class TestMetadictagger(unittest.TestCase):
 def assert_tags_pmc_4297_5600(test_suit, tags_4297, tags_5600):
     test_suit.assertIn("<Entity 399,426,intraventricular injection,DosageForm,MESH:D007276>", tags_4297)
     test_suit.assertIn("<Entity 636,646,injection,DosageForm,MESH:D007267>", tags_4297)
-   
+
     test_suit.assertIn("<Entity 209,219,sparteine,Drug,DB06727>", tags_5600)
     test_suit.assertIn("<Entity 189,205,4-aminopyridine,Drug,DB06637>", tags_5600)
     test_suit.assertIn("<Entity 826,836,potassium,Excipient,DB14500>", tags_5600)

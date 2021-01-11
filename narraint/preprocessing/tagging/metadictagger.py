@@ -41,12 +41,12 @@ class MetaDicTagger(dt.DictTagger):
             tagger.prepare()
             self._vocabs[tagger.tag_types[0]] = tagger.desc_by_term
 
-    def generate_tag_lines(self, end, pmid, start, term, title):
+    def generate_tag_lines(self, end, pmid, start, term):
         for entType, vocab in self._vocabs.items():
             hits = vocab.get(term)
             if hits:
                 for desc in hits:
-                    yield f"{pmid}\t{start}\t{end}\t{term}\t{entType}\t{desc}\n"
+                    yield pmid, start, end, term, entType, desc
 
     def get_types(self):
         return self.tag_types

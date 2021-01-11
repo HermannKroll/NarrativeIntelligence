@@ -2,6 +2,7 @@ import os
 import pickle
 import re
 from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 from datetime import datetime
 
 from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
@@ -108,7 +109,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
     def _index_from_source(self):
         pass
 
-    def _get_blacklist_set(self):
+    @staticmethod
+    def get_blacklist_set():
         with open(DICT_TAGGER_BLACKLIST) as f:
             blacklist = f.read().splitlines()
         blacklist_set = set()
@@ -128,7 +130,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                              f'({len(self.desc_by_term.keys())} term mappings) - ready to start')
         else:
             self._index_from_source()
-            blacklist_set = self._get_blacklist_set()
+            blacklist_set = DictTagger.get_blacklist_set()
             self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
             self._index_to_pickle()
         # Create output directory
@@ -180,7 +182,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         # split into indexed single words
         ind_words = split_indexed_words(content)
 
-        lines = []
+        tags = []
         for spaces in range(self.config.dict_max_words):
             for word_tuple in get_n_tuples(ind_words, spaces + 1):
                 words, indexes = zip(*word_tuple)
@@ -189,29 +191,56 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 end = indexes[-1] + len(words[-1])
                 if start > len(title):
                     start = start - 1
-                lines += list(self.generate_tag_lines(end, pmid, start, term, title))
+                tags += list(self.generate_tag_lines(end, pmid, start, term))
 
-        output = "".join(lines)
+        if self.config.dict_check_abbreviation:
+            tags = DictTagger.clean_abbreviation_tags(tags, self.config.dict_min_full_tag_len)
+
+        output = "\n".join(['\t'.join([str(field) for field in t]) for t in tags]) + '\n'
         # Write
         if not os.path.isdir(os.path.dirname(out_file)):
             os.makedirs(os.path.dirname(out_file))
         with open(out_file, "w+") as f:
             f.write(output)
 
-    def generate_tag_lines(self, end, pmid, start, term, title):
+    def generate_tag_lines(self, end, pmid, start, term):
         hits = self._get_term(term)
         # print(f"Found {hits} for '{term}'")
         if hits:
             for desc in hits:
-                # remove white space between title and abstract
-                yield "{id}\t{start}\t{end}\t{str}\t{type}\t{desc}\n".format(
-                    id=pmid, start=start, end=end, str=term, type=self.tag_types[0],
-                    desc=desc
-                )
+                yield pmid, start, end, term, self.tag_types[0], desc
 
     def _get_term(self, term):
         hits = self.desc_by_term.get(term)
         return hits if hits else set()
+
+    @staticmethod
+    def clean_abbreviation_tags(tags, minimum_tag_len=5):
+        """
+        This method removes all tags which are assumed to be an abbreviation and which do not have a long expression
+        within the document
+        e.g. Aspirin (ASA) -> ASA is allowed in the document because Aspirin is associated with the same descriptor
+        without aspirin ASA will further not be kept as a valid tag
+        :param minimum_tag_len: the minimum tag length to treat a term as a 'full' tag
+        :param tags: a list of tags
+        :return: a list of cleaned tags
+        """
+        tags_cleaned = []
+        desc2tags = defaultdict(list)
+        for t in tags:
+            _, start, end, term, e_type, desc = t
+            desc2tags[desc].append(t)
+
+        # search if a full tag is found for a descriptor
+        for desc, tags in desc2tags.items():
+            keep_desc = False
+            for t in tags:
+                if len(t[3]) >= minimum_tag_len:
+                    keep_desc = True
+                    break
+            if keep_desc:
+                tags_cleaned.extend(tags)
+        return tags_cleaned
 
     def get_progress(self):
         return len([f for f in os.listdir(self.out_dir) if f.endswith(".txt")])

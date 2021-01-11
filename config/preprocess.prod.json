@@ -15,7 +15,9 @@
   "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
   "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2",
   "dict": {
-    "max_words": 5
+    "max_words": 5,
+    "check_abbreviation": "true",
+    "min_full_tag_len": 5
   },
   "drug": {
     "check_products" : 0,
