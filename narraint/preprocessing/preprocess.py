@@ -215,7 +215,7 @@ def main(arguments=None):
                                 type=int)
 
     parser.add_argument("input", help="Directory with PubTator files / PubTator file ", metavar="IN_DIR")
-    parser.add_argument("-o" "--output", help="export file", metavar="OUT_FILE")
+    parser.add_argument("-o", "--output", help="export file")
     args = parser.parse_args(arguments)
 
     # Create configuration wrapper
