@@ -74,25 +74,26 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
 
     def _index_from_pickle(self):
         if os.path.isfile(self.index_cache):
-            index = pickle.load(open(self.index_cache, 'rb'))
-            if not isinstance(index, DictIndex):
-                self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
-                                    .format(self.index_cache))
-                pass
+            with open(self.index_cache, 'rb') as f:
+                index = pickle.load(f)
+                if not isinstance(index, DictIndex):
+                    self.logger.warning('Ignore index: expect index file to contain an DosageFormTaggerIndexObject: {}'
+                                        .format(self.index_cache))
+                    pass
 
-            if index.tagger_version != self.version:
-                self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
-                                    .format(index.tagger_version, self.version))
-                pass
+                if index.tagger_version != self.version:
+                    self.logger.warning('Ignore index: index does not match tagger version ({} index vs. {} tagger)'
+                                        .format(index.tagger_version, self.version))
+                    pass
 
-            if index.source_file != self.source_file:
-                self.logger.warning('Ignore index: index created with another source file ({} index vs. {} tagger)'
-                                    .format(index.source_file, self.source_file))
-                pass
+                if index.source_file != self.source_file:
+                    self.logger.warning('Ignore index: index created with another source file ({} index vs. {} tagger)'
+                                        .format(index.source_file, self.source_file))
+                    pass
 
-            self.logger.debug('Use precached index from {}'.format(self.index_cache))
-            self.desc_by_term = index.desc_by_term
-            return index
+                self.logger.debug('Use precached index from {}'.format(self.index_cache))
+                self.desc_by_term = index.desc_by_term
+                return index
         pass
 
     def _index_to_pickle(self):
