@@ -8,6 +8,8 @@ import tempfile
 from datetime import datetime
 from time import sleep
 import logging
+
+import multiprocessing
 import networkx as nx
 from spacy.lang.en import English
 
@@ -116,10 +118,10 @@ def pathie_find_relations_in_sentence(tokens, sentence_text_lower):
             vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
             verbs.add((t_id, t_txt, t_lemma))
         else:
-        # check if a keyword is mentioned
+            # check if a keyword is mentioned
             t_lower = t_txt.lower().strip()
             for keyword in IMPORTANT_KEYWORDS:
-                if keyword in t_lower: # partial included is enough
+                if keyword in t_lower:  # partial included is enough
                     vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
                     verbs.add((t_id, t_txt, t_lemma))
 
@@ -278,12 +280,83 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
     logging.info('{} lines written'.format(tuples))
 
 
+def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Queue,
+                                                      results: multiprocessing.Queue):
+    """
+    Helper method to process the CoreNLP output in parallel
+    :param tasks: the queue of tasks
+    :param results: the queue the results will be put to
+    :return: None
+    """
+    logging.info('Worker processing the PathIE output started')
+    extracted_tuples = []
+    while not tasks.empty():
+        doc_id, filepath, doc_tags = tasks.get()
+        tuples = process_json_file(doc_id, filepath, doc_tags)
+        if tuples:
+            extracted_tuples.extend(tuples)
+    results.put(extracted_tuples)
+    logging.info('Worker finished')
+
+
+def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, outfile, doc2tags, workers=1):
+    """
+    Parallelized version of the PathIE CoreNLP output processing steps
+    :param out_corenlp_dir: the directory of the CoreNLP output
+    :param amount_files: the number of files to show a progress
+    :param outfile: the outfile where the extracted tuples will be written to
+    :param doc2tags: dict mapping doc_ids to tags
+    :param workers: the number of workers
+    :return: None
+    """
+    if workers == 1:
+        pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags)
+    else:
+        task_queue = multiprocessing.Queue()
+        result_queue = multiprocessing.Queue()
+        # init the task
+        for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
+            if filename.endswith('.json'):
+                filepath = os.path.join(out_corenlp_dir, filename)
+                doc_id = int(filename.split('.')[0])
+                doc_tags = doc2tags[doc_id]
+                task_queue.put((doc_id, filepath, doc_tags))
+        # init the processes
+        processes = []
+        for i in range(0, workers):
+            p = multiprocessing.Process(target=pathie_process_corenlp_output_parallelized_worker,
+                                        args=(task_queue, result_queue))
+            processes.append(p)
+            p.start()
+
+        logging.info('Collecting results...')
+        first_line = True
+        with open(outfile, 'wt') as f_out:
+            for p in processes:
+                extracted_tuples = result_queue.get()
+                for e_tuple in extracted_tuples:
+                    line = '\t'.join([str(t) for t in e_tuple])
+                    if first_line:
+                        first_line = False
+                        f_out.write(line)
+                    else:
+                        f_out.write('\n' + line)
+
+        logging.info('Waiting for workers to terminate...')
+        for p in processes:
+            while p.is_alive():
+                logging.info('join thread')
+                p.join(timeout=1)
+        logging.info('Workers terminated - Results written')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
     parser.add_argument("output", help="PathIE output file")
     parser.add_argument("--workdir", help="working directory")
     parser.add_argument("--conf", default=PATHIE_CONFIG)
+    parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -307,16 +380,21 @@ def main():
         os.mkdir(out_corenlp_dir)
     logging.info('Working in: {}'.format(temp_dir))
 
-    logging.info('Init spacy nlp...')
-    spacy_nlp = English()  # just the language with no model
-    sentencizer = spacy_nlp.create_pipe("sentencizer")
-    spacy_nlp.add_pipe(sentencizer)
+    if args.workers == 1:
+        logging.info('Init spacy nlp...')
+        spacy_nlp = English()  # just the language with no model
+        sentencizer = spacy_nlp.create_pipe("sentencizer")
+        spacy_nlp.add_pipe(sentencizer)
+    else:
+        # will be created for each worker independently
+        spacy_nlp = None
 
+    logging.info('counting documents...')
     # Prepare files
     doc_count = count_documents(args.input)
     logging.info('{} documents counted'.format(doc_count))
     amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
-                                                                   spacy_nlp)
+                                                                   spacy_nlp, worker_count=args.workers)
     if amount_files == 0:
         print('no files to process - stopping')
     else:
@@ -324,7 +402,7 @@ def main():
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        pathie_process_corenlp_output(out_corenlp_dir, amount_files, args.output, doc2tags)
+        pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, args.output, doc2tags, args.workers)
         print(" done in {}".format(datetime.now() - start))
 
 
