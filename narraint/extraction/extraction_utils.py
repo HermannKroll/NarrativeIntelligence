@@ -4,6 +4,7 @@ from datetime import datetime
 
 import multiprocessing
 
+import queue
 from spacy.lang.en import English
 
 from narraint.progress import print_progress_with_eta
@@ -85,17 +86,20 @@ def filter_document_sentences_without_tags_parallelized_worker(tasks: multiproce
     spacy_nlp = English()  # just the language with no model
     sentencizer = spacy_nlp.create_pipe("sentencizer")
     spacy_nlp.add_pipe(sentencizer)
-    while not tasks.empty():
-        pubtator_content = tasks.get(timeout=1)
-        if pubtator_content is None:
-            break
-        doc_id, filtered_content, tag_terms = filter_document_content(pubtator_content, spacy_nlp)
-        # skip empty documents
-        if not filtered_content:
-            continue
+    while tasks.qsize() > 0:
+        try:
+            pubtator_content = tasks.get(timeout=1)
+            if pubtator_content is None:
+                continue
+            doc_id, filtered_content, tag_terms = filter_document_content(pubtator_content, spacy_nlp)
+            # skip empty documents
+            if not filtered_content:
+                continue
 
-        doc2sentences[doc_id] = filtered_content
-        doc2tags[doc_id] = [TaggedEntity(t) for t in tag_terms]
+            doc2sentences[doc_id] = filtered_content
+            doc2tags[doc_id] = [TaggedEntity(t) for t in tag_terms]
+        except queue.Empty:
+            break
     results.put((doc2sentences, doc2tags))
     logging.info('Worker finished')
 

@@ -8,6 +8,7 @@ import tempfile
 from datetime import datetime
 from time import sleep
 import logging
+import queue
 
 import multiprocessing
 import networkx as nx
@@ -290,11 +291,19 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
     """
     logging.info('Worker processing the PathIE output started')
     extracted_tuples = []
-    while not tasks.empty():
-        doc_id, filepath, doc_tags = tasks.get()
-        tuples = process_json_file(doc_id, filepath, doc_tags)
-        if tuples:
-            extracted_tuples.extend(tuples)
+    while tasks.qsize() > 0:
+        try:
+            task = tasks.get(timeout=1)
+            if task is None:
+                logging.info('Nothing to stop - stop here')
+                continue
+            doc_id, filepath, doc_tags = task
+            tuples = process_json_file(doc_id, filepath, doc_tags)
+            if tuples:
+                extracted_tuples.extend(tuples)
+        except queue.Empty:
+            logging.info('Queue empty exception')
+            break
     results.put(extracted_tuples)
     logging.info('Worker finished')
 
@@ -315,12 +324,15 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         task_queue = multiprocessing.Queue()
         result_queue = multiprocessing.Queue()
         # init the task
+        no_tasks = 0
         for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
             if filename.endswith('.json'):
                 filepath = os.path.join(out_corenlp_dir, filename)
                 doc_id = int(filename.split('.')[0])
                 doc_tags = doc2tags[doc_id]
                 task_queue.put((doc_id, filepath, doc_tags))
+                no_tasks += 1
+        logging.info(f'{no_tasks} json documents to process...')
         # init the processes
         processes = []
         for i in range(0, workers):
