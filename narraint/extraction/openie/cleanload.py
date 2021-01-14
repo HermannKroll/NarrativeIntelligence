@@ -298,6 +298,16 @@ def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentenc
     return sentence.id
 
 
+def clean_sentence_str(sentence: str) -> str:
+    """
+    Postgres is not able to handle sentences containing a null-terminating char or characters starting by backslash x
+    This method cleans the sentences
+    :param sentence: the sentence to clean
+    :return: a cleaned version of the sentence
+    """
+    return sentence.encode().decode("utf-8", "ignore").replace('\\00', '').replace('\\x', '\\x ')
+
+
 def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
                                 do_transform_mesh_ids_to_prefixes=True):
     """
@@ -391,7 +401,7 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
                 id=sentence_id,
                 document_id=p.doc_id,
                 document_collection=collection,
-                text=sentence_txt,
+                text=clean_sentence_str(sentence_txt),
                 md5hash=sent_hash)))
 
         print_progress_with_eta("Preparing data...", i, len_tuples, start_time)
@@ -440,11 +450,11 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
         if i % BULK_INSERT_AFTER_K == 0:
             session.bulk_insert_mappings(Predication, predication_part)
             session.commit()
-            sentence_part.clear()
+            predication_part.clear()
         print_progress_with_eta("Inserting predications...", i, len_tuples, start_time)
     session.bulk_insert_mappings(Predication, predication_part)
     session.commit()
-    sentence_part.clear()
+    predication_part.clear()
     logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
 
 
