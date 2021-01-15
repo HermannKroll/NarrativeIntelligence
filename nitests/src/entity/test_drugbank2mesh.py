@@ -3,7 +3,7 @@ from unittest import TestCase
 from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 
 
-class ExtractionUtilsTestCase(TestCase):
+class DrugBank2MeSHTestCase(TestCase):
 
     def test_drug_mappings(self):
         mapper = DrugBank2MeSHMapper.instance()

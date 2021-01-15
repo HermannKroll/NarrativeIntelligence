@@ -92,6 +92,8 @@ MESH2Doc_INDEX_PMC = os.path.join(TMP_DIR, "pmc_index.pkl")
 PLANT_FAMILTY_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'plant_families_2020.txt')
 PLANT_FAMILTY_INDEX_CACHE = os.path.join(TMP_DIR, 'pf_index_cache.pkl')
 
+# Entity Tagging index
+ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 
 # Autocompletion Index
 AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')

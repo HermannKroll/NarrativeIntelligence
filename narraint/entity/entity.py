@@ -8,6 +8,12 @@ class Entity:
         self.entity_type = entity_type
         self.entity_name = entity_name
 
+    def __hash__(self):
+        return f'{self.entity_type}||{self.entity_id}'.__hash__()
+
+    def __eq__(self, other):
+        return other.entity_id == self.entity_id and other.entity_type == self.entity_type
+
     def __str__(self):
         return '{} ({})'.format(self.entity_id, self.entity_type)
 

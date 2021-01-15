@@ -63,7 +63,7 @@ class View:
             cls.initialized = True
             cls._instance = cls.__new__(cls)
             cls.query_engine = QueryEngine()
-            cls.entity_tagger = EntityTagger()
+            cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil()
             cls.autocompletion.load_autocompletion_index()
