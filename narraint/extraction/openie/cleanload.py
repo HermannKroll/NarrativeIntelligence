@@ -301,11 +301,11 @@ def insert_sentence_and_get_sentence_id(session, sentence_txt: str, hash2sentenc
 def clean_sentence_str(sentence: str) -> str:
     """
     Postgres is not able to handle sentences containing a null-terminating char or characters starting by backslash x
-    This method cleans the sentences
+    This method cleans the sentences (replace all \ by \\)
     :param sentence: the sentence to clean
     :return: a cleaned version of the sentence
     """
-    return sentence.encode().decode("utf-8", "ignore").replace('\\00', '').replace('\\x', '\\x ')
+    return sentence.replace('\\', '\\\\')
 
 
 def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
