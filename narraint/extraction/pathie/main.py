@@ -302,8 +302,9 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
             if tuples:
                 extracted_tuples.extend(tuples)
         except queue.Empty:
-            logging.info('Queue empty exception')
-            break
+            logging.debug('Queue empty exception - waiting for new tasks or exit condition')
+            sleep(0.1)
+            continue
     results.put(extracted_tuples)
     logging.info('Worker finished')
 

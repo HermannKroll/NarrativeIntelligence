@@ -5,6 +5,8 @@ from datetime import datetime
 import multiprocessing
 
 import queue
+from time import sleep
+
 from spacy.lang.en import English
 
 from narraint.progress import print_progress_with_eta
@@ -99,7 +101,9 @@ def filter_document_sentences_without_tags_parallelized_worker(tasks: multiproce
             doc2sentences[doc_id] = filtered_content
             doc2tags[doc_id] = [TaggedEntity(t) for t in tag_terms]
         except queue.Empty:
-            break
+            logging.debug('Queue empty exception - waiting for new tasks or exit condition')
+            sleep(0.1)
+            continue
     results.put((doc2sentences, doc2tags))
     logging.info('Worker finished')
 
