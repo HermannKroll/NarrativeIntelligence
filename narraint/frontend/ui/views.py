@@ -62,6 +62,8 @@ class View:
         if not cls.initialized:
             cls.initialized = True
             cls._instance = cls.__new__(cls)
+            # init resolver here
+            cls.resolver = EntityResolver.instance()
             cls.query_engine = QueryEngine()
             cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
