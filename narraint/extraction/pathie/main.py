@@ -12,6 +12,7 @@ import queue
 
 import multiprocessing
 import networkx as nx
+import shutil
 from spacy.lang.en import English
 
 from narraint.config import PATHIE_CONFIG
@@ -379,10 +380,11 @@ def main():
     with open(args.conf) as f:
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
-
+    tmp_dir_created = False
     if args.workdir:
         temp_dir = args.workdir
     else:
+        tmp_dir_created = True
         temp_dir = tempfile.mkdtemp()
     out_corenlp_dir = os.path.join(temp_dir, "output")
     temp_in_dir = os.path.join(temp_dir, "input")
@@ -417,6 +419,10 @@ def main():
         # Process output
         pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, args.output, doc2tags, args.workers)
         print(" done in {}".format(datetime.now() - start))
+    if tmp_dir_created:
+        logging.info(f'Removing {temp_dir}...')
+        shutil.rmtree(temp_dir)
+    logging.info('PathIE finished')
 
 
 if __name__ == "__main__":
