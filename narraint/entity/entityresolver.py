@@ -95,17 +95,7 @@ class GeneResolver:
         return term2entity
 
     def build_index(self, gene_input=GENE_FILE, index_file=GENE_INDEX_FILE):
-        logging.info('Querying entity ids in db...')
-        session = Session.get()
-        gene_ids_in_db = set()
-        q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_type == GENE)
-        for r in session.execute(q):
-            try:
-                gene_ids_in_db.add(int(r[0]))
-            except ValueError:
-                continue
-        logging.info('{} gene ids retrieved'.format(len(gene_ids_in_db)))
-
+        gene_ids_in_db = Tag.get_gene_ids(Session.get())
         logging.info('Reading gene input file: {}'.format(gene_input))
         with gzip.open(gene_input, 'rt') as f:
             for line in islice(f, 1, None):
