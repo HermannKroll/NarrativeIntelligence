@@ -25,7 +25,6 @@ MIN_SUBJECT_OR_OBJECT_LEN = 3
 TOKENS_TO_IGNORE = {'with', 'by', 'of', 'from', 'to', 'than', 'as', 'on', 'at', 'may', 'in', 'can', 'more', 'less',
                     'into', 'be', 'have', 'well', 'for'}
 
-
 PRED = namedtuple('Predication', ['doc_id', 'subj', 'pred', 'pred_cleaned', 'obj', 'conf', 'sent', 's_id', 's_str',
                                   's_type', 'o_id', 'o_str', 'o_type'])
 OPENIE_TUPLE = namedtuple("OpenIETuple", ['doc_id', 'subj', 'pred', 'pred_lemma', 'obj', 'conf', 'sent'])
@@ -265,7 +264,12 @@ def load_sentences_with_hashes(document_collection: str):
     logging.info('{} sentences retrieved'.format(count))
     return hash2sentence
 
+
 def load_highest_sentence_id() -> int:
+    """
+    Finds the highest sentence id in the sentence table
+    :return: highest used sentence id
+    """
     session = Session.get()
     sentence_id = 0
     for q in session.execute(session.query(Sentence.id).order_by(Sentence.id.desc()).limit(1)):
@@ -305,11 +309,11 @@ def clean_sentence_str(sentence: str) -> str:
     :param sentence: the sentence to clean
     :return: a cleaned version of the sentence
     """
-    return sentence.replace('\\', '\\\\')
+    return sentence.replace('\t', ' ').replace('\n', ' ').replace('\\', '\\\\')
 
 
 def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                do_transform_mesh_ids_to_prefixes=True):
+                       do_transform_mesh_ids_to_prefixes=True):
     """
     Cleans a list of predications based on a set of filters
     :param tuples_cleaned: a list of PRED tuples
@@ -338,14 +342,15 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     # loading all ready known predications for collections
     q_known = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
                             Predication.predicate, Predication.object_id, Predication.object_type,
-                            Predication.sentence_id).\
-        filter(Predication.document_collection == collection).\
+                            Predication.sentence_id). \
+        filter(Predication.document_collection == collection). \
         filter(Predication.extraction_type == extraction_type)
 
     duplicate_check = set()
-    for r in session.execute(q_known):
-        duplicate_check.add((r[0], r[1], r[2], r[3], r[4], r[5], sentid2hash[int(r[6])]))
-    logging.info(f'{len(duplicate_check)} entries retrieved from db')
+    logging.info('Check duplicates only within this session...')
+    #for r in session.execute(q_known):
+    #    duplicate_check.add((r[0], r[1], r[2], r[3], r[4], r[5], sentid2hash[int(r[6])]))
+    #logging.info(f'{len(duplicate_check)} entries retrieved from db')
 
     last_highest_sentence_id += 1
     len_tuples = len(tuples_cleaned)
@@ -383,11 +388,11 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
             document_id=p.doc_id,
             document_collection=collection,
             subject_id=p.s_id,
-            subject_str=p.s_str,
+            subject_str=clean_sentence_str(p.s_str),
             subject_type=p.s_type,
             predicate=p.pred_cleaned,
             object_id=p.o_id,
-            object_str=p.o_str,
+            object_str=clean_sentence_str(p.o_str),
             object_type=p.o_type,
             confidence=p.conf,
             sentence_id=sentence_id,
@@ -409,7 +414,7 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
 
 
 def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                                   do_transform_mesh_ids_to_prefixes=True):
+                                do_transform_mesh_ids_to_prefixes=True):
     """
      insert a list of cleaned tuples into the database (bulk insert)
      does not check for collisions
