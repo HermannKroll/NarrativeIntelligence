@@ -1,62 +1,80 @@
 import itertools
 import logging
 import pickle
-import sys
-from collections import defaultdict
+from datetime import datetime
 
-from pytrie import Trie, SortedTrie, SortedStringTrie
+import os
 
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
-from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.entitytagger import DosageFormTaggerVocabulary
+from narraint.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
+from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 
-from typing import Tuple
-
+import datrie
 
 
 class AutocompletionUtil:
+    __instance = None
+
+    @staticmethod
+    def instance():
+        if AutocompletionUtil.__instance is None:
+            AutocompletionUtil()
+        return AutocompletionUtil.__instance
 
     def __init__(self, logger=logging):
-        self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL}
-        self.logger = logger
-        self.known_entities = defaultdict(set)
-        self.entity_type_roots = {}
-        self.trie = SortedTrie()
+        if AutocompletionUtil.__instance is not None:
+            raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
+        else:
+            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG,
+                                   DRUGBANK_CHEMICAL}
+            self.logger = logger
+            self.known_terms = set()
+            self.trie = None
+            self.load_autocompletion_index()
+            AutocompletionUtil.__instance = self
 
-    def build_autocompletion_index(self):
+    def build_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
         self.compute_known_entities_in_db()
-        self.logger.info(f'Storing index structure to: {AUTOCOMPLETION_TMP_INDEX}')
-        with open(AUTOCOMPLETION_TMP_INDEX, 'wb') as f:
-            pickle.dump(self.known_entities, f)
+        self.logger.info(f'Building Trie structure with {len(self.known_terms)} terms...')
+        alphabet = {c for t in self.known_terms for c in t}
+        self.logger.info(f'{len(alphabet)} different characters are in the alphabet')
 
-    def load_autocompletion_index(self):
-        self.logger.info('Loading autocompletion index...')
-        with open(AUTOCOMPLETION_TMP_INDEX, 'rb') as f:
-            self.known_entities = pickle.load(f)
-
-        self.logger.info('Building Trie structure...')
-        self.trie = SortedStringTrie()
-        for e_type, terms in self.known_entities.items():
-            for t in terms:
-                self.trie[t.lower()] = t
-        self.known_entities = None
+        # self.trie = SortedStringTrie(zip(self.known_terms, range(len(self.known_terms))))
+        start_time = datetime.now()
+        self.trie = datrie.Trie(alphabet)
+        for idx, t in enumerate(self.known_terms):
+            self.trie[t.lower()] = t
+            print_progress_with_eta("computing trie", idx, len(self.known_terms), start_time)
         self.logger.info('Finished')
 
+        self.logger.info(f'Storing index structure to: {index_path}')
+        with open(index_path, 'wb') as f:
+            pickle.dump((self.trie, self.known_terms), f)
+
+    def load_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
+        if os.path.isfile(index_path):
+            self.logger.info('Loading autocompletion index...')
+            with open(index_path, 'rb') as f:
+                self.trie, self.known_terms = pickle.load(f)
+        else:
+            self.logger.info(f'Autocompletion index does not exists: {index_path}')
+
+    @staticmethod
+    def capitalize_entity(entity_str: str) -> str:
+        return ' '.join([s.capitalize() for s in entity_str.strip().split(' ')])
 
     def add_entity_to_dict(self, entity_type, entity_str):
-        str_formated = (' '.join([s.capitalize() for s in entity_str.strip().split(' ')]))
-        self.known_entities[entity_type].add(str_formated)
+        str_formated = AutocompletionUtil.capitalize_entity(entity_str)
+        self.known_terms.add(str_formated)
 
     def compute_known_entities_in_db(self):
-        resolver = EntityResolver()
         self.logger.info('Query entities in Predication...')
         entities = QueryEngine.query_entities()
         mesh_ontology = MeSHOntology.instance()
-        ignored = set()
 
         # Write dosage form terms + synonyms
         for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
@@ -104,26 +122,18 @@ class AutocompletionUtil:
             if export_desc:
                 self.add_entity_to_dict(entity_type, d_heading)
 
-        written_entity_ids = set()
-        for e_id, e_str, e_type in entities:
-            #self.add_entity_to_dict(e_type, e_str)
-            try:
-                # Skip duplicated entries
-                if (e_id, e_type) in written_entity_ids:
-                    continue
-                written_entity_ids.add((e_id, e_type))
+        logging.info('Adding entity tagger entries...')
+        tagger = EntityTagger()
+        know_entity_index = [(e_id, e_type) for e_id, _, e_type in entities]
+        start_time = datetime.now()
+        task_size = len(tagger.term2entity.items())
+        for idx, (term, t_entities) in enumerate(tagger.term2entity.items()):
+            for e in t_entities:
+                #   if (e.entity_id, e.entity_type) in know_entity_index:
+                self.add_entity_to_dict(e.entity_type, term)
+            print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
 
-                heading = resolver.get_name_for_var_ent_id(e_id, e_type, resolve_gene_by_id=False)
-                if e_type in [GENE, SPECIES] and '//' in heading:
-                    for n in heading.split('//'):
-                        self.add_entity_to_dict(e_type, n)
-                else:
-                    self.add_entity_to_dict(e_type, heading)
-
-            except KeyError:
-                ignored.add((e_id, e_type))
-
-        logging.info('The following entities are not in index: {}'.format(ignored))
+        logging.info('Index built')
 
     @staticmethod
     def prepare_search_str(search_str: str) -> str:
@@ -140,12 +150,16 @@ class AutocompletionUtil:
 
         return search_str_lower
 
+    def autocomplete(self, start_str: str):
+        return self.trie.keys(start_str.lower())
+
     def find_entities_starting_with(self, start_str: str, retrieve_k=10):
-        hits = self.trie.keys(start_str)[:retrieve_k]
-        formated_hits = []
-        for h in hits:
-            formated_hits.append((' '.join([s.capitalize() for s in h.strip().split(' ')])))
-        return formated_hits
+        hits = self.autocomplete(start_str)
+        hits.sort()
+        formatted_hits = []
+        for h in hits[0:10]:
+            formatted_hits.append(AutocompletionUtil.capitalize_entity(h))
+        return formatted_hits
 
     def compute_autocompletion_list(self, search_str: str):
         if len(search_str) < 2:
@@ -175,13 +189,9 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    ac = AutocompletionUtil()
-   # ac.build_autocompletion_index()
-    ac.load_autocompletion_index()
+    ac = AutocompletionUtil.instance()
+    ac.build_autocompletion_index()
 
-    print('Diabetes: ', ac.trie.keys('Diabetes'))
-    print('Simva: ', ac.trie.keys('Simva'))
-    print('Metfor: ', ac.trie.keys('Metfor'))
 
 if __name__ == "__main__":
     main()

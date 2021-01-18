@@ -65,7 +65,7 @@ class View:
             cls.query_engine = QueryEngine()
             cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
-            cls.autocompletion = AutocompletionUtil()
+            cls.autocompletion = AutocompletionUtil.instance()
             cls.autocompletion.load_autocompletion_index()
         return cls._instance
 
