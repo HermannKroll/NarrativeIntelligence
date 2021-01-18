@@ -76,7 +76,6 @@ class EntityTagger:
             raise Exception('This class is a singleton - use EntityTagger.instance()')
         else:
             logging.info('Initialize EntityTagger...')
-            self.resolver = EntityResolver.instance()
             self.term2entity = defaultdict(set)
             self.mesh_ontology = MeSHOntology.instance()
             self._load_index()
@@ -98,7 +97,8 @@ class EntityTagger:
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
-        for e_term, e_id in self.resolver.species.get_reverse_index().items():
+        resolver = EntityResolver.instance()
+        for e_term, e_id in resolver.species.get_reverse_index().items():
             self.term2entity[e_term.strip().lower()].add(Entity(e_id, SPECIES))
 
         self._add_gene_terms()
