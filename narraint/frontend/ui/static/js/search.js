@@ -309,12 +309,13 @@ const search = (event) => {
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
-    let data_source = ""
+    let data_source = "PubMed"
+     /*
      if (document.getElementById('radio_pmc').checked) {
          data_source = "PMC"
      } else if(document.getElementById('radio_pubmed').checked) {
          data_source = "PubMed"
-     }
+     } */
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
