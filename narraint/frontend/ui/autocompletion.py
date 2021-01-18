@@ -17,15 +17,6 @@ from narraint.queryengine.engine import QueryEngine
 from typing import Tuple
 
 
-PREDICATE_TYPING = {'treats': ([CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT], [DISEASE, SPECIES]),
-                    'administered': ([DOSAGE_FORM], [SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT]),
-                    'induces': ([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE], [CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE]),
-                    'decreases': ([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE], [CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE]),
-                    'interacts': ([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE], [CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE]),
-                    'metabolises': ([GENE], [CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL]),
-                    'inhibits': ([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL], [GENE])
-                    }
-
 
 class AutocompletionUtil:
 

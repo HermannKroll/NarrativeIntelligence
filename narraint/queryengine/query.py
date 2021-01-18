@@ -8,6 +8,19 @@ class FactPattern:
         self.predicate = predicate
         self.objects = objects
 
+    def __eq__(self, other):
+        if self.predicate != other.predicate:
+            return False
+        s1_subs = {s for s in self.subjects}
+        s2_subs = {s for s in other.subjects}
+        if len(s1_subs.intersection(s2_subs)) != len(s1_subs):
+            return False
+        o1_subs = {o for o in self.objects}
+        o2_subs = {o for o in other.objects}
+        if len(o1_subs.intersection(o2_subs)) != len(o1_subs):
+            return False
+        return True
+
     def __str__(self):
         return '({}, {}, {})'.format(self.subjects, self.predicate, self.objects)
 
