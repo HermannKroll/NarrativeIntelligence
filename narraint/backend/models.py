@@ -2,10 +2,13 @@ import unicodedata
 from collections import namedtuple
 from datetime import datetime
 
+import logging
 from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
     BigInteger, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from narraint.entity.enttypes import GENE
 from narraint.pubtator.regex import ILLEGAL_CHAR
 
 Base = declarative_base()
@@ -112,6 +115,19 @@ class Tag(Base):
     def to_pubtator(self):
         return Tag.create_pubtator(self.document_id, self.start, self.end, self.ent_str, self.ent_type, self.ent_id)
 
+    @staticmethod
+    def get_gene_ids(session):
+        logging.info('Querying gene ids in Tag table...')
+        gene_ids_in_db = set()
+        q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_type == GENE)
+        for r in session.execute(q):
+            try:
+                gene_ids_in_db.add(int(r[0]))
+            except ValueError:
+                continue
+        logging.info('{} gene ids retrieved'.format(len(gene_ids_in_db)))
+        return gene_ids_in_db
+
 
 PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "document_collection",
                                                      "subject_id", "subject_str", "subject_type",
@@ -126,6 +142,7 @@ class Predication(Base):
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
         ForeignKeyConstraint(('sentence_id',), ('sentence.id',)),
         PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
+        # TODO: This index will consume much disk space around 1.2 times the table size
         UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
                          'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
                          sqlite_on_conflict='IGNORE'),

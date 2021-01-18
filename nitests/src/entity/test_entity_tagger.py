@@ -17,7 +17,6 @@ class EntityTaggerTestCase(TestCase):
         """
         metformin_tags = self.entity_tagger.tag_entity('metformin')
         valid_metformin_ids = {'D02.078.370.141.450', 'DB00331'}
-        print(metformin_tags)
         self.assertEqual(2, len(metformin_tags))
         for t in metformin_tags:
             self.assertIn(t.entity_id, valid_metformin_ids)
@@ -117,3 +116,26 @@ class EntityTaggerTestCase(TestCase):
         excipient_names = [n for n in ExcipientVocabulary.read_excipients_names(expand_terms_by_e_and_s=False)]
         for en in excipient_names:
             self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
+
+    def test_gene_names(self):
+        valid_cyp3a4_symbol = {'CYP3A4'}
+        cyp3a4_names = ['CYP3A4', 'cytochrome P450 family 3 subfamily A member 4',
+                        'HLP', 'CP33', 'CP34', 'CYP3A', 'NF-25', 'CYP3A3',
+                        'P450C3', 'CYPIIIA3', 'CYPIIIA4', 'P450PCN1']
+        for n in cyp3a4_names:
+            found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
+            self.assertGreaterEqual(len(found_ids.intersection(valid_cyp3a4_symbol)), len(valid_cyp3a4_symbol))
+
+        valid_mtor_symbol = {'MTOR'}
+        mtor_names = ['MTOR', 'mechanistic target of rapamycin kinase', 'SKS', 'FRAP', 'FRAP1', 'FRAP2', 'RAFT1',
+                      'RAPT1']
+        for n in mtor_names:
+            found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
+            self.assertGreaterEqual(len(found_ids.intersection(valid_mtor_symbol)), len(valid_mtor_symbol))
+
+        valid_cyp3a5_symbol = {'CYP3A5'}
+        cyp3a5_names = ['cyp3a5', 'cytochrome P450 family 3 subfamily A member 5',
+                        'CP35', 'CYPIIIA5', 'P450PCN3', 'PCN3']
+        for n in cyp3a5_names:
+            found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
+            self.assertGreaterEqual(len(found_ids.intersection(valid_cyp3a5_symbol)), len(valid_cyp3a5_symbol))

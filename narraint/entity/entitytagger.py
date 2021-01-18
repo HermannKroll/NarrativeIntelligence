@@ -3,8 +3,13 @@ from collections import defaultdict
 
 import pickle
 
+import gzip
+from itertools import islice
+
+from narraint.backend.database import Session
+from narraint.backend.models import Tag
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, \
-    MESH_SUPPLEMENTARY_FILE, ENTITY_TAGGING_INDEX
+    MESH_SUPPLEMENTARY_FILE, ENTITY_TAGGING_INDEX, GENE_FILE
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY
@@ -93,17 +98,33 @@ class EntityTagger:
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
-        for e_term, e_id in self.resolver.gene.get_reverse_index().items():
-            self.term2entity[e_term.strip().lower()].add(Entity(e_id, GENE))
         for e_term, e_id in self.resolver.species.get_reverse_index().items():
             self.term2entity[e_term.strip().lower()].add(Entity(e_id, SPECIES))
 
+        self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
         self._add_drugbank_tags()
         self._add_fid_dosageform_terms()
         self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
+
+    def _add_gene_terms(self, gene_input=GENE_FILE):
+        gene_ids_in_db = Tag.get_gene_ids(Session.get())
+        logging.info('Reading gene input file: {}'.format(gene_input))
+        with gzip.open(gene_input, 'rt') as f:
+            for line in islice(f, 1, None):
+                components = line.strip().split('\t')
+                gene_id = int(components[1])
+                if gene_id in gene_ids_in_db:
+                    gene_symbol = components[2]
+                    synonyms = components[4]
+                    description = components[8]
+                    self.term2entity[gene_symbol.strip().lower()].add(Entity(gene_symbol, GENE))
+                    self.term2entity[description.strip().lower()].add(Entity(gene_symbol, GENE))
+                    for synonym in synonyms.split('|'):
+                        self.term2entity[synonym.strip().lower()].add(Entity(gene_symbol, GENE))
+        logging.info('Gene terms added')
 
     def _add_fid_dosageform_terms(self):
         """
@@ -188,7 +209,6 @@ class EntityTagger:
         return self.term2entity[t_low]
 
 
-
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
@@ -196,11 +216,7 @@ def main():
 
     entity_tagger = EntityTagger.instance()
     entity_tagger.store_index()
-    print(entity_tagger.tag_entity('simvastatin'))
-    print(entity_tagger.tag_entity('metformin'))
-    print(entity_tagger.tag_entity('metformine'))
-    print(entity_tagger.tag_entity('Dimethylbiguanid'))
-    print(entity_tagger.tag_entity('dimethylbiguanid'))
+
 
 if __name__ == "__main__":
     main()
