@@ -33,6 +33,7 @@ def clean_and_export_predications_to_copy_load_tsv(tuples_cleaned: List[PRED], c
     sent_keys = ["id", "document_id", "document_collection", "text", "md5hash"]
     f_sent = StringIO()
     for idx, sent_value in enumerate(sentence_values):
+        sent_str = '{}'.format('\t'.join([str(sent_value[k]) for k in sent_keys]))
         if idx == 0:
             f_sent.write(sent_str)
         else:
