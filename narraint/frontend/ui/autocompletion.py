@@ -29,7 +29,7 @@ class AutocompletionUtil:
         if AutocompletionUtil.__instance is not None:
             raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
         else:
-            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG,
+            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target", SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG,
                                    DRUGBANK_CHEMICAL}
             self.logger = logger
             self.known_terms = set()
@@ -176,7 +176,10 @@ class AutocompletionUtil:
                     completions.append(h)
         # search for entity
         else:
-            completions.extend(self.find_entities_starting_with(relevant_term))
+            try:
+                completions.extend(self.find_entities_starting_with(relevant_term))
+            except AttributeError:
+                pass
 
         # shortest completions first
         sorted_by_length = sorted(completions, key=lambda x: len(x))[0:10]
