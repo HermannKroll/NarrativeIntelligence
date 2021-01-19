@@ -366,6 +366,9 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
         # Todo: dirty fix here
         if p.s_id == '-' or p.o_id == '-':
             continue
+        # Clean dirty predicates (only one character)
+        if len(p.pred_cleaned) < 2:
+            continue
 
         sent_hash = text_to_md5hash(sentence_txt)
         key = (p.doc_id, p.s_id, p.s_type, p.pred_cleaned, p.o_id, p.o_type, sent_hash)
