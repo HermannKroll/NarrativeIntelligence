@@ -4,7 +4,7 @@ from datetime import datetime
 
 import logging
 from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
-    BigInteger, UniqueConstraint
+    BigInteger, UniqueConstraint, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -168,6 +168,23 @@ class Predication(Base):
 
     def __repr__(self):
         return "<Predication {}>".format(self.id)
+
+    @staticmethod
+    def query_predicates_with_count(session, collection=None):
+        if not collection:
+            query = session.query(Predication.predicate, func.count(Predication.predicate))\
+                .group_by(Predication.predicate)
+        else:
+            query = session.query(Predication.predicate, func.count(Predication.predicate))\
+                .filter(Predication.document_collection == collection)\
+                .group_by(Predication.predicate)
+
+        predicates_with_count = []
+        start_time = datetime.now()
+        for r in session.execute(query):
+            predicates_with_count.append((r[0], int(r[1])))
+        logging.info('{} predicates queried in {}s'.format(len(predicates_with_count), datetime.now() - start_time))
+        return sorted(predicates_with_count, key=lambda x: x[1], reverse=True)
 
 
 class Sentence(Base):

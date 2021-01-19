@@ -1,5 +1,7 @@
 import argparse
 import logging
+from collections import defaultdict
+
 import fasttext
 from datetime import datetime
 from sqlalchemy import update
@@ -12,6 +14,7 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.progress import print_progress_with_eta
 
 MIN_DISTANCE_THRESHOLD = 0.4
+MIN_PREDICATE_COUNT = 1000
 
 
 def transform_predicate(predicate: str):
@@ -27,6 +30,19 @@ def transform_predicate(predicate: str):
     if predicate.endswith('ed'):
         return predicate[:-1]
     return predicate
+
+
+def filter_predicate_list(predicates_with_count):
+    """
+    Filters a list with predicates and counts by a minimum count threshold
+    :param predicates_with_count: list of tuples (pred, count_of_pred)
+    :return: a list of filtered predicates (count >= MIN_PREDICATE_COUNT)
+    """
+    predicates = []
+    for pred, count in predicates_with_count:
+        if count >= MIN_PREDICATE_COUNT:
+            predicates.append(pred)
+    return predicates
 
 
 def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, output_file: str):
@@ -85,19 +101,26 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     """
     session = Session.get()
     start_time = datetime.now()
-    i = 0
-    pred_len = len(best_matches)
+
+    logging.info('Finalizing update plan...')
+    pred_can2preds = defaultdict(set)
     for pred, (pred_canonicalized, min_distance) in best_matches.items():
         if min_distance > MIN_DISTANCE_THRESHOLD:
             pred_canonicalized = PRED_TO_REMOVE
+        pred_can2preds[pred_canonicalized].add(pred)
 
-        stmt = update(Predication).where(Predication.predicate == pred).\
+    logging.info(f'Execute {len(pred_can2preds)} update jobs...')
+    task_size = len(pred_can2preds)
+    i = 0
+    for pred_canonicalized, preds in pred_can2preds.items():
+        stmt = update(Predication).where(Predication.predicate.in_(preds)). \
             values(predicate_canonicalized=pred_canonicalized)
-
         session.execute(stmt)
-        session.commit()
-        print_progress_with_eta('updating...', i, pred_len, start_time, print_every_k=5)
+        print_progress_with_eta('updating...', i, task_size, start_time, print_every_k=1)
         i += 1
+
+    logging.info('Committing updates...')
+    session.commit()
 
 
 def main():
@@ -116,8 +139,11 @@ def main():
     pred_vocab = create_predicate_vocab()
     logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
     logging.info('Retrieving predicates from db...')
-    predicates = QueryEngine.query_predicates()
-    logging.info('{} predicates retrieved'.format(len(predicates)))
+    predicates_with_count = Predication.query_predicates_with_count(session=Session.get())
+    logging.info(f'{len(predicates_with_count)} predicates with count retrieved')
+    logging.info('Filtering with minimum count...')
+    predicates = filter_predicate_list(predicates_with_count)
+    logging.info('{} predicates obtained'.format(len(predicates)))
     logging.info('Matching predicates...')
     best_matches = match_predicates(model, predicates, pred_vocab, args.output_distances)
     logging.info('Canonicalizing predicates...')
