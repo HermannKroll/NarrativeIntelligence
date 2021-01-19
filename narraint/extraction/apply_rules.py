@@ -11,10 +11,12 @@ from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECI
     PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.openie.cleanload import BULK_INSERT_AFTER_K, _insert_predication_skip_duplicates
+from narraint.extraction.predicate_vocabulary import PRED_TO_REMOVE
 from narraint.progress import print_progress_with_eta
 
 DOSAGE_FORM_PREDICATE = "administered"
 ASSOCIATED_PREDICATE = "associated"
+ASSOCIATED_PREDICATE_UNSURE = "associated_u"
 SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE}  # , ASSOCIATED_PREDICATE}
 
 
@@ -45,58 +47,59 @@ def clean_extractions_in_database():
     logging.info('Cleaning administered (DosageForm -> [Chemical, Disease Species])...')
     q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',
                                                     or_(Predication.subject_type != DOSAGE_FORM,
-                                                        Predication.object_type.notin_([SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT])))) \
-        .values(predicate_canonicalized=None)
+                                                        Predication.object_type.notin_([SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY])))) \
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_administered)
-    session.commit()
 
     logging.info('Cleaning induces ([Chemical, Disease] -> [Chemical, Disease])')
     q_induces = update(Predication).where(and_(Predication.predicate_canonicalized == 'induces',
-                                               or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE]),
-                                                   Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE])))) \
-        .values(predicate_canonicalized=None)
+                                               or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY]),
+                                                   Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY])))) \
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_induces)
-    session.commit()
 
     logging.info('Cleaning decreases ([Chemical, Disease] -> [Chemical, Disease])')
     q_decrease = update(Predication).where(and_(Predication.predicate_canonicalized == 'decreases',
-                                                or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE]),
-                                                    Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE])))) \
-        .values(predicate_canonicalized=None)
+                                                or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY]),
+                                                    Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY])))) \
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_decrease)
-    session.commit()
 
     logging.info('Cleaning interacts ([Chemical, Gene] -> [Chemical, Gene])')
     q_interacts = update(Predication).where(and_(Predication.predicate_canonicalized == 'interacts',
-                                                 or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE]),
-                                                     Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE])))) \
-        .values(predicate_canonicalized=None)
+                                                 or_(Predication.subject_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY]),
+                                                     Predication.object_type.notin_([CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY])))) \
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_interacts)
-    session.commit()
 
     logging.info('Cleaning metabolises (Gene -> Chemical)')
     q_metabolises = update(Predication).where(and_(Predication.predicate_canonicalized == 'metabolises',
                                                    or_(Predication.subject_type != GENE,
-                                                       Predication.object_type.notin_([CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT])))) \
-        .values(predicate_canonicalized=None)
+                                                       Predication.object_type.notin_([CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY])))) \
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_metabolises)
-    session.commit()
 
     logging.info('Cleaning inhibits (Chemical -> Gene)')
     q_inhibits = update(Predication).where(and_(Predication.predicate_canonicalized == 'inhibits',
-                                                or_(Predication.subject_type.notin_([CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT]),
+                                                or_(Predication.subject_type.notin_([CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY]),
                                                     Predication.object_type != GENE))) \
-        .values(predicate_canonicalized=None)
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_inhibits)
-    session.commit()
 
     # Delete all treatments which are not (Chemical -> Disease, Species)
     logging.info('Cleaning treats (Chemical -> [Disease, Species])...')
     q_treatment = update(Predication).where(and_(Predication.predicate_canonicalized == 'treats',
                                                  or_(Predication.subject_type.notin_([CHEMICAL, DRUG, PLANT_FAMILY, DRUGBANK_CHEMICAL, EXCIPIENT]),
                                                      Predication.object_type.notin_([DISEASE, SPECIES])))) \
-        .values(predicate_canonicalized=None)
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(q_treatment)
+
+    logging.info(f'Update all {PRED_TO_REMOVE} predicates to {ASSOCIATED_PREDICATE_UNSURE}...')
+    q_update = update(Predication).where(Predication.predicate_canonicalized == PRED_TO_REMOVE)\
+        .values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
+    session.execute(q_update)
+
+    logging.info('Committing updates...')
     session.commit()
 
 
@@ -163,8 +166,10 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
+    logging.info('Applying rules...')
     dosage_form_rule()
     clean_extractions_in_database()
+    logging.info('Finished...')
     # mirror_symmetric_predicates()
 
 
