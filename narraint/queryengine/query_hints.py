@@ -1,7 +1,7 @@
 import re
 
-from narraint.entity.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES
-
+from narraint.entity.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES, \
+    PLANT_FAMILY
 
 QUERY_LIMIT = 50000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -27,15 +27,16 @@ PREDICATE_EXPANSION = dict(
 SYMMETRIC_PREDICATES = {"interacts", "administered", "associated"}
 
 PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT}, {DISEASE, SPECIES}),
-                    'administered': ({DOSAGE_FORM}, {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT}),
-                    'induces': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE},
-                                {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE}),
-                    'decreases': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE},
-                                  {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE}),
-                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE},
-                                  {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE}),
-                    'metabolises': ({GENE}, {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL}),
-                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL}, {GENE})
+                    'administered': ({DOSAGE_FORM}, {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
+                                                     PLANT_FAMILY}),
+                    'induces': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY},
+                                {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY}),
+                    'decreases': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY},
+                                  {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY}),
+                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY},
+                                  {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY}),
+                    'metabolises': ({GENE}, {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}),
+                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}, {GENE})
                     }
 
 

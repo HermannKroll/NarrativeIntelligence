@@ -30,8 +30,11 @@ class FactPattern:
 
 class GraphQuery:
 
-    def __init__(self):
-        self.fact_patterns = []
+    def __init__(self, fact_patterns=None):
+        if fact_patterns is None:
+            self.fact_patterns = list()
+        else:
+            self.fact_patterns = fact_patterns
 
     def add_fact_pattern(self, fact_pattern: FactPattern):
         self.fact_patterns.append(fact_pattern)
@@ -44,10 +47,13 @@ class GraphQuery:
         for fp in self.fact_patterns:
             yield fp
 
+    def __str__(self):
+        return '. '.join([str(fp) for fp in self.fact_patterns])
+
     def get_unique_key(self):
         parts = []
         for fp in self.fact_patterns:
-            parts.extend([s.entity_id for s in fp.subjects])
+            parts.extend(sorted([s.entity_id for s in fp.subjects]))
             parts.append(fp.predicate)
-            parts.extend([o.entity_id for o in fp.objects])
+            parts.extend(sorted([o.entity_id for o in fp.objects]))
         return '_'.join(parts)

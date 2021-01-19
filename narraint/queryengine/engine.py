@@ -3,6 +3,7 @@ import logging
 import re
 from collections import defaultdict
 from datetime import datetime
+from typing import List
 
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
@@ -12,6 +13,7 @@ from narraint.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
 from narraint.entity.entity import Entity
+from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
@@ -169,8 +171,8 @@ class QueryEngine:
         query = query.order_by(func.random()).limit(QUERY_LIMIT)
         return query, var_names
 
-    def query_with_graph_query(self, query_patterns, doc_collection, extraction_type=None, keyword_query='',
-                               query_titles_and_sentences=True, likesearch=True, document_ids=None):
+    def query_with_graph_query(self, query_patterns: [(Entity, str, Entity)], doc_collection, extraction_type=None,
+                               keyword_query='', query_titles_and_sentences=True, likesearch=True, document_ids=None):
         if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
@@ -178,13 +180,13 @@ class QueryEngine:
         query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch,
                                                  document_ids)
 
-        sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
-        logging.debug('executing sql statement: {}'.format(sql_query))
+      #  sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
+        logging.debug('executing sql statement for: {}'.format(query_patterns))
+       # logging.debug('sql statement is: {}'.format(sql_query))
         var_names = []
         for v, _, _ in var_info:
             var_names.append(v)
 
-        start = datetime.now()
         doc_ids = set()
         sentence_ids = set()
         doc2result = {}
@@ -251,13 +253,16 @@ class QueryEngine:
 
         results = list(doc2result.values())
 
-        time_needed = datetime.now() - start
-        self.query_logger.write_log(time_needed, extraction_type, keyword_query, query_patterns,
-                                    sql_query.replace('\n', ' '), doc_ids)
-        logging.debug('{} database tuples retrieved'.format(result_count))
+        #logging.debug('{} database tuples retrieved'.format(result_count))
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         # logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
-        return results
+
+        query_hit_limit = False
+        if result_count >= QUERY_LIMIT:
+            logging.info(f'{result_count} hit query limit')
+            query_hit_limit = True
+
+        return results, query_hit_limit
 
     def query_titles_and_sentences_for_doc_ids(self, doc_ids, sentence_ids, document_collection):
         """
@@ -327,55 +332,46 @@ class QueryEngine:
         :return: a list of QueryDocumentResults
         """
         graph_query = QueryOptimizer.optimize_query(graph_query)
-        query_fact_patterns_expanded = []
-        expand_query = False
-        for idx, fp in enumerate(graph_query.fact_patterns):
-            exp_cond1 = len(fp.subjects) > 1
-            exp_cond2 = len(fp.objects) > 1
-            exp_cond3 = fp.predicate in PREDICATE_EXPANSION or fp.predicate in SYMMETRIC_PREDICATES
+        if not graph_query:
+            logging.info('Query wont yield results - returning empty list')
+            return []
+        start_time = datetime.now()
+        # The query expander will generate a list of queries to execute
+        # Each query consists of a set of facts
+        # The results of each fact pattern will be executed as being connected by an OR
+        expanded_queries = QueryExpander.expand_query(graph_query)
+        # optimize each query
+        optimized_expanded_queries = list([QueryOptimizer.optimize_query(q) for q in expanded_queries])
+        queries_to_execute = sum([len(q.fact_patterns) for q in optimized_expanded_queries])
+        logging.info('The query will be expanded into {} queries'.format(queries_to_execute))
 
-            if exp_cond1 or exp_cond2 or exp_cond3:
-                expand_query = True
-                if fp.predicate in PREDICATE_EXPANSION:
-                    predicates = PREDICATE_EXPANSION[fp.predicate]
-                else:
-                    predicates = [fp.predicate]
-
-                expansion = []
-                cross_product = list(
-                    itertools.product(fp.subjects, predicates, fp.objects))
-                expansion.extend(cross_product)
-
-                if fp.predicate in SYMMETRIC_PREDICATES:
-                    cross_product = list(
-                        itertools.product(fp.objects, predicates, fp.subjects))
-                    expansion.extend(cross_product)
-                query_fact_patterns_expanded.append(expansion)
-
-            else:
-                query_fact_patterns_expanded.append([(fp.subjects[0], fp.predicate, fp.objects[0])])
-
-        if expand_query or len(graph_query.fact_patterns) > 1:
+        if len(optimized_expanded_queries) > 1 or len(optimized_expanded_queries[0].fact_patterns) > 1:
             # database join for fact patterns seems to be very slow
             # Idea: execute after each other and join results in memory
             temp_results = defaultdict(list)
             valid_doc_ids = set()
             valid_var_subs = defaultdict(set)
-            for idx, fact_patterns_expanded in enumerate(query_fact_patterns_expanded):
-                # query_fact_patterns_expanded = list(itertools.product(*query_fact_patterns_expanded))
-                logging.info('The query will be expanded into {} queries'.format(len(query_fact_patterns_expanded)))
+            query_limit_hit = False
+            for idx, expanded_query in enumerate(expanded_queries):
                 part_result = []
 
                 if idx == 0:
                     document_id_filter = None
                 else:
                     document_id_filter = valid_doc_ids
-                for query_fact_patterns in fact_patterns_expanded:
-                    part_result.extend(self.query_with_graph_query([query_fact_patterns], document_collection,
-                                                                   extraction_type, query,
-                                                                   query_titles_and_sentences=False,
-                                                                   likesearch=likesearch,
-                                                                   document_ids=document_id_filter))
+                for q_fp in expanded_query.fact_patterns:
+                    if len(q_fp.subjects) > 1 or len(q_fp.objects) > 1:
+                        raise ValueError('Can only execute query fact patterns with a single subject and object')
+                    query_pattern = [(q_fp.subjects[0], q_fp.predicate, q_fp.objects[0])]
+                    query_result, hit_limit = self.query_with_graph_query(query_pattern,
+                                                                          document_collection,
+                                                                          extraction_type, query,
+                                                                          query_titles_and_sentences=False,
+                                                                          likesearch=likesearch,
+                                                                          document_ids=document_id_filter)
+                    part_result.extend(query_result)
+                    if hit_limit:
+                        query_limit_hit = True
                 results = self._merge_results(part_result)
                 new_doc_ids = set()
                 new_var_subs = defaultdict(set)
@@ -462,15 +458,20 @@ class QueryEngine:
 
             results = doc_results
         else:
+            if len(optimized_expanded_queries) > 1 or len(optimized_expanded_queries[0].fact_patterns) > 1:
+                raise ValueError('There are multiple queries to execute... they should be handled elsewhere')
+            graph_query = optimized_expanded_queries[0]
             graph_patterns = []
-            for fp in graph_query:
+            for fp in graph_query.fact_patterns:
                 if len(fp.subjects) > 1 or len(fp.objects) > 1:
                     raise ValueError('Graph Patterns should only have a single entity as subject or object: {}'
                                      .format(fp))
                 graph_patterns.append((fp.subjects[0], fp.predicate, fp.objects[0]))
-            results = self.query_with_graph_query(graph_patterns, document_collection,
+            results, hit_limit = self.query_with_graph_query(graph_patterns, document_collection,
                                                   extraction_type, query, query_titles_and_sentences=False,
                                                   likesearch=likesearch)
+            if hit_limit:
+                query_limit_hit = True
 
         # Replace all empty titles and sentence ids by the corresponding titles and explanations
         doc_ids = set()
@@ -491,7 +492,10 @@ class QueryEngine:
                 except KeyError:
                     pass
 
-        return sorted(results, key=lambda d: d.document_id, reverse=True)
+        time_needed = datetime.now() - start_time
+        self.query_logger.write_log(time_needed, document_collection, graph_query, len(doc_ids))
+
+        return sorted(results, key=lambda d: d.document_id, reverse=True), query_limit_hit
 
     @staticmethod
     def query_predicates(collection=None):

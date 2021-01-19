@@ -1,6 +1,9 @@
+from typing import List, Set
+
 from narraint.entity.entity import Entity
+from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE, MESH_ONTOLOGY
 
 
 class QueryOptimizer:
@@ -20,7 +23,18 @@ class QueryOptimizer:
             # variable has no type, so all types are allowed
             return "VAR_ALL"
         else:
+            if entity.entity_type == MESH_ONTOLOGY:
+                if entity.entity_id.startswith('C'):
+                    return DISEASE
+                elif entity.entity_id.startswith('D'):
+                    return CHEMICAL
+                else:
+                    return DOSAGE_FORM
             return entity.entity_type
+
+    @staticmethod
+    def _keep_only_entities_matching_constraints(entities: List[Entity], allowed_types: Set[str]):
+        return list([e for e in entities if QueryOptimizer._get_variable_type(e) in allowed_types])
 
     @staticmethod
     def optimize_predicate_types_for_fact_pattern(fact_pattern: FactPattern) -> FactPattern:
@@ -28,6 +42,7 @@ class QueryOptimizer:
         Checks whether the fact pattern's predicate hurt the predicate typing constraint
         e.g. if diabetes (disease) treats metformin (drug) then this method flips the fact pattern
         to metformin treats diabetes
+        remove subjects and objects which do not meet the type constraint
         :param fact_pattern: a given fact pattern
         :return: a fact pattern or None
         """
@@ -45,13 +60,21 @@ class QueryOptimizer:
             # then check whether changing them helps
             if len(q_subs.intersection(a_obj_types)) > 0 and len(q_objs.intersection(a_subj_types)) > 0:
                 # yes - flip pattern
-                return FactPattern(fact_pattern.objects, fact_pattern.predicate, fact_pattern.subjects)
+                return FactPattern(QueryOptimizer._keep_only_entities_matching_constraints(fact_pattern.objects,
+                                                                                           a_subj_types),
+                                   fact_pattern.predicate,
+                                   QueryOptimizer._keep_only_entities_matching_constraints(fact_pattern.subjects,
+                                                                                           a_obj_types))
             else:
                 # We can skip this fact pattern because it will hurt the predicate type constraints
                 return None
         else:
-            # everything is fine
-            return fact_pattern
+            # everything is fine, just filter
+            return FactPattern(QueryOptimizer._keep_only_entities_matching_constraints(fact_pattern.subjects,
+                                                                                       a_subj_types),
+                               fact_pattern.predicate,
+                               QueryOptimizer._keep_only_entities_matching_constraints(fact_pattern.objects,
+                                                                                       a_obj_types))
 
     @staticmethod
     def optimize_predicate_types(graph_query: GraphQuery) -> GraphQuery:
@@ -65,7 +88,11 @@ class QueryOptimizer:
         optimized_query = GraphQuery()
         for fp in graph_query.fact_patterns:
             optimized_fp = QueryOptimizer.optimize_predicate_types_for_fact_pattern(fp)
-            if optimized_fp:
+            if not optimized_fp:
+                return None  # query wont yield results - it will be empty
+            elif not optimized_fp.subjects or not optimized_fp.objects:
+                return None # has no subjects or objects
+            else:
                 optimized_query.add_fact_pattern(optimized_fp)
         return optimized_query
 

@@ -353,6 +353,7 @@ const search = (event) => {
             // Print query translation
             let query_translation = $("#query_translation");
             let query_trans_string = response["query_translation"];
+            let query_limit_hit = response["query_limit_hit"];
             query_translation.text(query_trans_string);
             let results = response["results"];
             let result_size = results["s"];
@@ -362,8 +363,12 @@ const search = (event) => {
             // add_collapsable_events();
 
             let documents_header = $("#header_documents");
+            let document_header_appendix = "";
+            if (query_limit_hit === true){
+                document_header_appendix = " (Truncated)"
+            }
             if (result_size >= 0) {
-                documents_header.html(result_size + " Documents")
+                documents_header.html(result_size + " Documents" + document_header_appendix)
             } else {
                 documents_header.html("Documents")
             }

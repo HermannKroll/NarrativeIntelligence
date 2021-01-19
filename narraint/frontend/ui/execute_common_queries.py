@@ -31,7 +31,7 @@ COMMON_QUERIES = [
     '?X(PlantFamily) associated ?Y(Disease)'
 ]
 
-DOCUMENT_COLLECTIONS = ['PubMed' ]# , 'PMC']
+DOCUMENT_COLLECTIONS = ['PubMed']  # , 'PMC']
 
 
 def execute_common_queries():
@@ -41,11 +41,13 @@ def execute_common_queries():
         query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(q)
         for collection in DOCUMENT_COLLECTIONS:
 
-            results = View.instance().query_engine.process_query_with_expansion(query_fact_patterns, collection,
-                                                                extraction_type="", query=q)
+            results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(query_fact_patterns,
+                                                                                                 collection,
+                                                                                                 extraction_type="",
+                                                                                                 query=q)
             logging.info('Write results to cache...')
             try:
-                cache.add_result_to_cache(collection, query_fact_patterns, results)
+                cache.add_result_to_cache(collection, query_fact_patterns, results, query_limit_hit)
             except Exception:
                 logging.error('Cannot store query result to cache...')
 

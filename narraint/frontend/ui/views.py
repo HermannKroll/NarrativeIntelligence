@@ -11,6 +11,7 @@ from sqlalchemy import func
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
 from narraint.entity.entity import Entity
+from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL, ALL, DISEASE
@@ -21,14 +22,15 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.frontend.ui.autocompletion import AutocompletionUtil
-
-VAR_NAME = re.compile(r'(\?\w+)')
-VAR_TYPE = re.compile(r'\((\w+)\)')
+from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE
 
 variable_type_mappings = {}
 for ent_typ in ALL:
     variable_type_mappings[ent_typ.lower()] = ent_typ
     variable_type_mappings[f'{ent_typ.lower()}s'] = ent_typ
+# support entry of targets
+variable_type_mappings["target"] = GENE
+variable_type_mappings["targets"] = GENE
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -68,7 +70,6 @@ class View:
             cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil.instance()
-            cls.autocompletion.load_autocompletion_index()
         return cls._instance
 
 
@@ -225,10 +226,10 @@ def convert_graph_patterns_to_nt(query_txt):
 def count_variables_in_query(graph_query: GraphQuery):
     var_set = set()
     for fp in graph_query.fact_patterns:
-        s = fp.subjects[0].entity_id
-        s_t = fp.subjects[0].entity_type
-        o = fp.objects[0].entity_id
-        o_t = fp.objects[0].entity_type
+        s = next(iter(fp.subjects)).entity_id
+        s_t = next(iter(fp.subjects)).entity_type
+        o = next(iter(fp.objects)).entity_id
+        o_t = next(iter(fp.objects)).entity_type
         if s_t == 'Variable':
             var_set.add(VAR_NAME.search(s).group(1))
         if o_t == 'Variable':
@@ -264,6 +265,7 @@ class SearchView(TemplateView):
                     return JsonResponse(dict(valid=query_trans_string))
             if "query" in request.GET:
                 valid_query = False
+                query_limit_hit = False
                 try:
                     query = str(self.request.GET.get("query", "").strip())
                     data_source = str(self.request.GET.get("data_source", "").strip())
@@ -272,7 +274,7 @@ class SearchView(TemplateView):
                     logging.info(f'Query string is: {query}')
                     logging.info("Selected data source is {}".format(data_source))
                     logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
-                    logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
+                    #logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
                     query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
                     if data_source not in ["PMC", "PubMed"]:
@@ -292,10 +294,11 @@ class SearchView(TemplateView):
                         query_trans_string = "Do not support multiple variables in an ontology-based ranking"
                         logger.error("Do not support multiple variables in an ontology-based ranking")
                     else:
+                        logger.info(f'Translated Query is: {str(query_fact_patterns)}')
                         valid_query = True
                         document_collection = data_source
                         try:
-                            cached_results = View.instance().cache.load_result_from_cache(document_collection, query_fact_patterns)
+                            cached_results, query_limit_hit = View.instance().cache.load_result_from_cache(document_collection, query_fact_patterns)
                         except Exception:
                             logging.error('Cannot load query result from cache...')
                             cached_results = None
@@ -303,11 +306,11 @@ class SearchView(TemplateView):
                             logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                             results = cached_results
                         else:
-                            results = View.instance().query_engine.process_query_with_expansion(query_fact_patterns, document_collection,
-                                                                                query=query)
-                            logging.info('Write results to cache...')
+                            results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(
+                                query_fact_patterns, document_collection, query=query)
                             try:
-                                View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns, results)
+                                View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns,
+                                                                          results, query_limit_hit)
                             except Exception:
                                 logging.error('Cannot store query result to cache...')
                         results_converted = []
@@ -323,7 +326,8 @@ class SearchView(TemplateView):
                     traceback.print_exc(file=sys.stdout)
 
                 return JsonResponse(
-                    dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string))
+                    dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
+                         query_limit_hit=query_limit_hit))
         return super().get(request, *args, **kwargs)
 
 

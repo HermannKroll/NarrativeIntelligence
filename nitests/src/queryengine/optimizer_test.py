@@ -4,7 +4,7 @@ from narraint.entity.entity import Entity
 from narraint.entity.enttypes import DISEASE, DRUG, GENE
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.optimizer import QueryOptimizer
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, MESH_ONTOLOGY
 
 
 class QueryOptimizerTestCase(TestCase):
@@ -126,3 +126,54 @@ class QueryOptimizerTestCase(TestCase):
         self.assertEqual("?X(Drug)", optimized_q.fact_patterns[1].subjects[0].entity_id)
         self.assertEqual("treats", optimized_q.fact_patterns[1].predicate)
         self.assertEqual("Diabetes", optimized_q.fact_patterns[1].objects[0].entity_id)
+
+    def test_empty_query(self):
+        fp = FactPattern([Entity('mtor', GENE)], "inhibits", [Entity("mtor", GENE)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertEqual(None, optimized_q)
+
+        fp = FactPattern([Entity('Simvastatin', DRUG)], "treats", [Entity("Disease", DISEASE)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertNotEqual(None, optimized_q)
+
+    def test_mesh_ontology_queries(self):
+        fp = FactPattern([Entity('D01.01231', MESH_ONTOLOGY)], "treats", [Entity("C012.21312", MESH_ONTOLOGY)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertNotEqual(None, optimized_q)
+
+        fp = FactPattern([Entity('C01.01231', MESH_ONTOLOGY)], "treats", [Entity("C012.21312", MESH_ONTOLOGY)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertEqual(None, optimized_q)
+
+        fp = FactPattern([Entity('D01.01231', MESH_ONTOLOGY)], "administered", [Entity("E012.21312", MESH_ONTOLOGY)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertNotEqual(None, optimized_q)
+
+    def test_partial_wrong_entities(self):
+        fp = FactPattern([Entity('Simvastatin', DRUG)], "treats", [Entity("Hyper", DISEASE), Entity("Hyper", GENE)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertEqual(1, len(optimized_q.fact_patterns[0].subjects))
+        self.assertEqual("Simvastatin", optimized_q.fact_patterns[0].subjects[0].entity_id)
+        self.assertEqual(1, len(optimized_q.fact_patterns[0].subjects))
+        self.assertEqual("Hyper", optimized_q.fact_patterns[0].objects[0].entity_id)
+
+        fp = FactPattern([Entity("Hyper", DISEASE), Entity("Hyper", GENE)], "treats", [Entity('Simvastatin', DRUG)])
+        q = GraphQuery()
+        q.add_fact_pattern(fp)
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertEqual(1, len(optimized_q.fact_patterns[0].subjects))
+        self.assertEqual("Simvastatin", optimized_q.fact_patterns[0].subjects[0].entity_id)
+        self.assertEqual(1, len(optimized_q.fact_patterns[0].subjects))
+        self.assertEqual("Hyper", optimized_q.fact_patterns[0].objects[0].entity_id)
