@@ -220,7 +220,7 @@ def perform_evaluation_prec_recall_for(query_fact_patterns, document_collection,
     :param ids_correct:
     :return:
     """
-    query_results = query_engine.query_with_graph_query(query_fact_patterns, document_collection, extraction_type)
+    query_results, _ = query_engine.query_with_graph_query(query_fact_patterns, document_collection, extraction_type)
     doc_ids = set([q_r.document_id for q_r in query_results])
     doc_ids_correct = doc_ids.intersection(ids_correct)
     len_retrieved = len(doc_ids)
