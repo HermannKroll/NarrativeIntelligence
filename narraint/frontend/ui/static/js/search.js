@@ -118,9 +118,9 @@ function addQueryPart(){
     }
 
     let request = $.ajax({
-        url: search_url,
+        url: query_check_url,
         data: {
-            check: query_text
+            query: query_text
         }
     });
 
@@ -240,9 +240,9 @@ $(document).ready(function () {
                         let relevantTerm = request.term;
                         $.ajax({
                             type: "GET",
-                            url: search_url,
+                            url: autocompletion_url,
                             data: {
-                                completion: relevantTerm
+                                term: relevantTerm
                             },
                             success: function (data){
                                 // delegate back to autocomplete, but extract the last term
@@ -275,9 +275,9 @@ $(document).ready(function () {
                         let relevantTerm = request.term;
                         $.ajax({
                             type: "GET",
-                            url: search_url,
+                            url: autocompletion_url,
                             data: {
-                                completion: relevantTerm
+                                term: relevantTerm
                             },
                             success: function (data){
                                 // delegate back to autocomplete, but extract the last term
@@ -332,8 +332,8 @@ const search = (event) => {
         data: {
             query: query,
             data_source: data_source,
-            outer_ranking: outer_ranking,
-            inner_ranking: inner_ranking
+            outer_ranking: outer_ranking /*,
+            inner_ranking: inner_ranking*/
         }
     });
 

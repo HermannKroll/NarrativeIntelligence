@@ -441,8 +441,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
     <script type="text/javascript">
-        const search_url = "{% url 'search' %}";
-
+        const search_url = "{% url 'query' %}";
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const query_check_url = "{% url 'check' %}";
     </script>
     <script src="{% static 'js/../../static/js/../../static/js/search.js' %}" type="text/javascript"></script>
     <!--
