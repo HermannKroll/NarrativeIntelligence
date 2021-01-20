@@ -15,19 +15,6 @@ from nitests.src.preprocessing.tagging.test_metadictagger import assert_tags_pmc
 
 
 class TestPreprocess(unittest.TestCase):
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_single_file_DR(self):
-        self.outputdir = nitests.util.make_test_tempdir()
-        self.workdir = nitests.util.make_test_tempdir()
-        print(self.outputdir)
-        args = [proj_rel_path('nitests/resources/PMC1313813Untagged.txt'),
-                os.path.join(self.outputdir, "output.txt"),
-                *f"-t C D -c PREPTEST --loglevel DEBUG --workdir {self.workdir}".split()
-                ]
-        preprocess.main(args)
-        self.assertEqual(True, False)
-
-    #TODO: adjust tests to use database
 
     def test_metadictagger(self):
         self.output = os.path.join(nitests.util.make_test_tempdir(), "output.txt")

@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import signal
 import subprocess
 from datetime import datetime
 from shutil import copyfile
@@ -60,6 +61,10 @@ class GNormPlus(BaseTagger):
         keep_tagging = True
         files_total = len(os.listdir(self.in_dir))
         start_time = datetime.now()
+        old_progress = 0
+        no_progress = False
+
+        last_progress_timestamp = datetime.now()
 
         while keep_tagging:
             with open(self.log_file, "w") as f_log:
@@ -68,21 +73,28 @@ class GNormPlus(BaseTagger):
                            self.out_dir, self.config.gnorm_setup]
                 process = subprocess.Popen(sp_args, cwd=self.config.gnorm_root, stdout=f_log, stderr=f_log)
                 self.logger.debug("Starting {}".format(process.args))
-                while self.get_progress() == 0:
-                    sleep(0.1)
-                self.logger.info(f"GNormPlus: First Progress after {datetime.now() - start_time}")
-                while self.get_progress() <100:
-                    sleep(0.1)
-                self.logger.info(f"first 100 documents in {datetime.now() - start_time}")
+
                 # Wait until finished
                 while process.poll() is None:
 
                     sleep(self.OUTPUT_INTERVAL)
                     print_progress_with_eta("GNormPlus tagging", self.get_progress(), files_total, start_time,
-                                            print_every_k=5, logger=self.logger)
+                                            print_every_k=1, logger=self.logger)
+                    new_progress = self.get_progress()
+                    if new_progress > old_progress:
+                        last_progress_timestamp = datetime.now()
+                        old_progress = new_progress
+                    elif (datetime.now() - last_progress_timestamp).total_seconds() \
+                            > 60 * self.config.tagger_one_timeout:
+                        os.kill(process.pid, signal.SIGKILL)
+                        while process.poll() is None:
+                            sleep(1)
+                        self.logger.warn(f"No Progress in last {self.config.tagger_one_timeout} min")
+                        no_progress=True
+                        break
                 self.logger.debug("Exited with code {}".format(process.poll()))
 
-            if not process.poll() == 0:
+            if not process.poll() == 0 or no_progress:
                 # Java Exception
                 last_file = self.get_exception_causing_file_from_log()
                 if last_file:
@@ -94,10 +106,11 @@ class GNormPlus(BaseTagger):
                     except:
                         self.logger.warn("Could not conserve logfile, continuing anyway")
                     os.remove(last_file)
-                else:
+                elif not no_progress:
                     # No file processed, assume another error
                     keep_tagging = False
                     self.logger.error("No files processed. Assuming an unexpected exception")
+                no_progress = False
             else:
                 keep_tagging = False
 
