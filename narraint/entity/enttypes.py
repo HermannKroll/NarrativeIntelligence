@@ -36,6 +36,14 @@ ALL = (
     DRUGBANK_CHEMICAL
 )
 
+DALL = {
+    DOSAGE_FORM,
+    DRUG,
+    EXCIPIENT,
+    PLANT_FAMILY,
+    DRUGBANK_CHEMICAL
+}
+
 # set of all tags which are supported by our taggers
 ENT_TYPES_SUPPORTED_BY_TAGGERS = (
     DOSAGE_FORM,
@@ -64,7 +72,10 @@ TAG_TYPE_MAPPING = dict(
     V=VARIANT,
     CL=CELLLINE,
     A="ALL",
+    DA="DALL"
 )
+
+DICT_TAG_TYPES = {"DF", "DR", "DC", "E", "PF", "DA"}
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,

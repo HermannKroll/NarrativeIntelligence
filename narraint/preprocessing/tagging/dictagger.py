@@ -134,10 +134,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
             self._index_to_pickle()
         # Create output directory
-        if not resume:
-            os.makedirs(self.out_dir)
-        else:
-            raise NotImplementedError(f"Resuming {self.long_name} is not implemented.")
+        os.makedirs(self.out_dir, exist_ok=True)
+
 
     def get_tags(self):
         return self._get_tags(self.out_dir)

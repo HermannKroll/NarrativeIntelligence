@@ -4,7 +4,27 @@ from shutil import copy
 from argparse import ArgumentParser
 
 from narraint.backend.models import Document
+from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, ILLEGAL_CHAR
+from narraint.pubtator.extract import read_pubtator_documents
+
+from collections.abc import Sequence
+
+
+def filter_and_sanitize(in_file:str, out_file:str, filter_ids, logger=logging):
+    os.makedirs(os.path.dirname(out_file), exist_ok=True)
+    with open(out_file, "w+") as f:
+        for n, doc in enumerate(read_pubtator_documents(in_file)):
+            try:
+                tdoc = TaggedDocument(doc)
+            except:
+                logger.debug(f"ignored {n}th document, unable to parse")
+                continue
+            if tdoc.abstract == "":
+                logging.debug(f"ignoring {tdoc.id}, empty abstract")
+                continue
+            if tdoc.id in filter_ids:
+                f.write(Document.create_pubtator(tdoc.id, tdoc.title, tdoc.abstract) + "\n")
 
 
 def sanitize(input_dir_or_file, output_dir=None, delete_mismatched=False, logger=logging):

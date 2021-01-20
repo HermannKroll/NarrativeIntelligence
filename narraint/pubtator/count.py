@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from narraint.pubtator.regex import DOCUMENT_ID, TAG_DOCUMENT_ID
 
 
-def get_document_ids(path):
+def get_document_ids(path: str):
     ids = set()
     if os.path.isdir(path):
         for fn in os.listdir(path):

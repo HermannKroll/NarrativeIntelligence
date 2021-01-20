@@ -84,16 +84,7 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
         raise ValueError("TaggerOne does not support Tagging of Chemicals or Diseases separately!")
 
 
-    # if enttypes.DOSAGE_FORM in tag_types:
-    #     tagger_by_ent_type[enttypes.DOSAGE_FORM] = DosageFormTagger
-    # if enttypes.DRUG in tag_types:
-    #     tagger_by_ent_type[enttypes.DRUG] = DrugTagger
-    # if enttypes.EXCIPIENT in tag_types:
-    #     tagger_by_ent_type[enttypes.EXCIPIENT] = ExcipientTagger
-    # if enttypes.PLANT_FAMILY in tag_types:
-    #     tagger_by_ent_type[enttypes.PLANT_FAMILY] = PlantFamilyTagger
-    # if enttypes.DRUGBANK_CHEMICAL in tag_types:
-    #     tagger_by_ent_type[enttypes.DRUGBANK_CHEMICAL] = DrugBankChemicalTagger
+
     return tagger_by_ent_type
 
 
