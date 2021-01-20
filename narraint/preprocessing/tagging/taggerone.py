@@ -150,6 +150,13 @@ class TaggerOne(BaseTagger):
             # Wait until finished
             old_progress = 0
             last_progress_timestamp = datetime.now()
+            start_time = datetime.now()
+            while self.get_progress() == 0:
+                sleep(0.1)
+            self.logger.info(f"Taggerone: First Progress after {datetime.now() - start_time}")
+            while self.get_progress() < 100:
+                sleep(0.1)
+            self.logger.info(f"first 100 documents in {datetime.now() - start_time}")
             while process.poll() is None:
                 sleep(self.OUTPUT_INTERVAL)
                 new_progress = self.get_progress()
