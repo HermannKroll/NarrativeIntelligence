@@ -3,6 +3,8 @@ from collections import namedtuple
 from datetime import datetime
 
 import logging
+from typing import List, Tuple
+
 from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
     BigInteger, UniqueConstraint, func
 from sqlalchemy.ext.declarative import declarative_base
@@ -170,13 +172,34 @@ class Predication(Base):
         return "<Predication {}>".format(self.id)
 
     @staticmethod
-    def query_predicates_with_count(session, collection=None):
-        if not collection:
+    def query_predication_count(session, predicate_canonicalized = None):
+        """
+        Counts the number of rows in Predicate
+        :param session: session handle
+        :param predicate_canonicalized: if given the predication is filtered by this predicate_canonicalized
+        :return: the number of rows
+        """
+        if predicate_canonicalized:
+            return session.query(Predication).filter(Predication.predicate_canonicalized == predicate_canonicalized)\
+                .count()
+        else:
+            return session.query(Predication).count()
+
+
+    @staticmethod
+    def query_predicates_with_count(session, document_collection=None) -> List[Tuple[str, int]]:
+        """
+        Queries predicates with the corresponding count of tuples
+        :param session: session handle
+        :param document_collection: document collection
+        :return: a list of tuples (predicate, count of entries)
+        """
+        if not document_collection:
             query = session.query(Predication.predicate, func.count(Predication.predicate))\
                 .group_by(Predication.predicate)
         else:
             query = session.query(Predication.predicate, func.count(Predication.predicate))\
-                .filter(Predication.document_collection == collection)\
+                .filter(Predication.document_collection == document_collection)\
                 .group_by(Predication.predicate)
 
         predicates_with_count = []
@@ -185,6 +208,14 @@ class Predication(Base):
             predicates_with_count.append((r[0], int(r[1])))
         logging.info('{} predicates queried in {}s'.format(len(predicates_with_count), datetime.now() - start_time))
         return sorted(predicates_with_count, key=lambda x: x[1], reverse=True)
+
+
+class PredicationToDelete(Base):
+    __tablename__ = "predication_to_delete"
+    __table_args__ = (
+        PrimaryKeyConstraint('predication_id', sqlite_on_conflict='IGNORE'),
+    )
+    predication_id = Column(BigInteger)
 
 
 class Sentence(Base):
