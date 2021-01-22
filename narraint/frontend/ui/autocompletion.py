@@ -8,7 +8,7 @@ import os
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY
+    PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS
 from narraint.entity.meshontology import MeSHOntology
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
@@ -42,6 +42,10 @@ class AutocompletionUtil:
         self.logger.info(f'Building Trie structure with {len(self.known_terms)} terms...')
         alphabet = {c for t in self.known_terms for c in t}
         self.logger.info(f'{len(alphabet)} different characters are in the alphabet')
+
+        # allow entity types as strings
+        self.known_terms.add("target")
+        self.known_terms.update([t for t in ENT_TYPES_SUPPORTED_BY_TAGGERS])
 
         # self.trie = SortedStringTrie(zip(self.known_terms, range(len(self.known_terms))))
         start_time = datetime.now()
