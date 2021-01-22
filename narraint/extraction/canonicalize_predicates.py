@@ -14,7 +14,7 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.progress import print_progress_with_eta
 
 MIN_DISTANCE_THRESHOLD = 0.4
-MIN_PREDICATE_COUNT = 1000
+MIN_PREDICATE_COUNT_THRESHOLD = 0.001
 
 
 def transform_predicate(predicate: str):
@@ -39,8 +39,11 @@ def filter_predicate_list(predicates_with_count):
     :return: a list of filtered predicates (count >= MIN_PREDICATE_COUNT)
     """
     predicates = []
+    pred_sum = sum([x[1] for x in predicates_with_count])
+    min_count = int(MIN_PREDICATE_COUNT_THRESHOLD * pred_sum)
+    logging.info(f'Minimum threshold for predicates is: {min_count}')
     for pred, count in predicates_with_count:
-        if count >= MIN_PREDICATE_COUNT:
+        if count >= min_count:
             predicates.append(pred)
     return predicates
 
