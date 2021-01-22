@@ -117,11 +117,11 @@ class EntityTagger:
                 components = line.strip().split('\t')
                 gene_id = int(components[1])
                 if gene_id in gene_ids_in_db:
-                    gene_symbol = components[2]
+                    gene_symbol = components[2].strip().lower()
                     synonyms = components[4]
-                    description = components[8]
-                    self.term2entity[gene_symbol.strip().lower()].add(Entity(gene_symbol, GENE))
-                    self.term2entity[description.strip().lower()].add(Entity(gene_symbol, GENE))
+                    description = components[8].strip().lower()
+                    self.term2entity[gene_symbol].add(Entity(gene_symbol, GENE))
+                    self.term2entity[description].add(Entity(gene_symbol, GENE))
                     for synonym in synonyms.split('|'):
                         self.term2entity[synonym.strip().lower()].add(Entity(gene_symbol, GENE))
         logging.info('Gene terms added')
