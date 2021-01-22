@@ -177,3 +177,44 @@ class QueryOptimizerTestCase(TestCase):
         self.assertEqual("Simvastatin", optimized_q.fact_patterns[0].subjects[0].entity_id)
         self.assertEqual(1, len(optimized_q.fact_patterns[0].subjects))
         self.assertEqual("Hyper", optimized_q.fact_patterns[0].objects[0].entity_id)
+
+    def test_optimize_fact_pattern_correct_order(self):
+        fp = FactPattern([Entity('A', DRUG)], "induces", [Entity("B", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertEqual("A", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("B", next(iter(optimized_fp.objects)).entity_id)
+
+        fp = FactPattern([Entity('B', DRUG)], "induces", [Entity("A", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertIsNone(optimized_fp)
+
+        fp = FactPattern([Entity('A', DRUG)], "decreases", [Entity("B", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertEqual("A", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("B", next(iter(optimized_fp.objects)).entity_id)
+
+        fp = FactPattern([Entity('B', DRUG)], "decreases", [Entity("A", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertIsNone(optimized_fp)
+
+
+        # should not flip this
+        fp = FactPattern([Entity('B', DRUG)], "associated", [Entity("A", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertEqual("B", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("A", next(iter(optimized_fp.objects)).entity_id)
+
+        fp = FactPattern([Entity('A', DRUG)], "associated", [Entity("B", GENE)])
+        optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+        self.assertEqual("A", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("B", next(iter(optimized_fp.objects)).entity_id)
+
+    def test_optimize_query_correct_order(self):
+        q = GraphQuery([FactPattern([Entity('A', DRUG)], "induces", [Entity("B", GENE)])])
+        optimized_q = QueryOptimizer.optimize_symmetric_predicate(q)
+        self.assertEqual("A", next(iter(q.fact_patterns[0].subjects)).entity_id)
+        self.assertEqual("B", next(iter(q.fact_patterns[0].objects)).entity_id)
+
+        q = GraphQuery([FactPattern([Entity('B', DRUG)], "induces", [Entity("A", GENE)])])
+        optimized_q = QueryOptimizer.optimize_symmetric_predicate(q)
+        self.assertIsNone(optimized_q)

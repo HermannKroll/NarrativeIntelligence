@@ -3,7 +3,8 @@ from typing import List, Set
 from narraint.entity.entity import Entity
 from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE, MESH_ONTOLOGY
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE, MESH_ONTOLOGY, \
+    SYMMETRIC_PREDICATES, PREDICATE_ASSOCIATED, have_entities_correct_order
 
 
 class QueryOptimizer:
@@ -97,6 +98,50 @@ class QueryOptimizer:
         return optimized_query
 
     @staticmethod
+    def optimize_symmetric_predicate_fp(fact_pattern: FactPattern) -> FactPattern:
+        """
+        Optimizes a symmetric predicate (the arguments must be in the correct order)
+        :param fact_pattern: a fact pattern
+        :return: the fact pattern or None if it has the wrong order
+        """
+        if fact_pattern.predicate == PREDICATE_ASSOCIATED:
+            # both directions are important - cannot optimize
+            return fact_pattern
+        if len(fact_pattern.subjects) > 1 or len(fact_pattern.objects) > 1:
+            # multiple subjects or objects cannot be optimize
+            return fact_pattern
+        if fact_pattern.predicate in SYMMETRIC_PREDICATES:
+            e_sub = next(iter(fact_pattern.subjects))
+            e_obj = next(iter(fact_pattern.objects))
+            # correct order - everything is fine
+            if have_entities_correct_order(e_sub, e_obj):
+                return fact_pattern
+            else:
+                # fact pattern has the wrong order - stop here
+                return None
+        return fact_pattern
+
+    @staticmethod
+    def optimize_symmetric_predicate(graph_query: GraphQuery) -> GraphQuery:
+        """
+        Optimize a graph query by checking if the symmetric predicates have the correct order
+        :param graph_query: a graph query
+        :return: a graph query or none if all fact patterns are in the wrong order
+        """
+        if not graph_query:
+            return None
+        query_optimized = GraphQuery()
+        for fp in graph_query.fact_patterns:
+            fp_optimized = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
+            if fp_optimized:
+                query_optimized.add_fact_pattern(fp_optimized)
+
+        if len(query_optimized.fact_patterns) > 0:
+            return query_optimized
+        else:
+            return None
+
+    @staticmethod
     def optimize_query(graph_query: GraphQuery) -> GraphQuery:
         """
         Performs a simple query optimization
@@ -143,4 +188,7 @@ class QueryOptimizer:
 
         # optimize based on predicate-type constraint
         optimized = QueryOptimizer.optimize_predicate_types(optimized)
+        # optimize wrong symmetric predicate argument order
+        # must be the last check!
+        optimized = QueryOptimizer.optimize_symmetric_predicate(optimized)
         return optimized

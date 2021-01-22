@@ -329,13 +329,14 @@ class QueryEngine:
         :param extraction_type: the extraction type to query
         :param query: the query as the input string for logging
         :param likesearch: performs like searches for subjects and objects
-        :return: a list of QueryDocumentResults
+        :return: a list of QueryDocumentResults, if the query limit was hit
         """
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
             logging.info('Query wont yield results - returning empty list')
-            return []
+            return [], False
         start_time = datetime.now()
+        query_limit_hit = False
         # The query expander will generate a list of queries to execute
         # Each query consists of a set of facts
         # The results of each fact pattern will be executed as being connected by an OR
@@ -351,8 +352,7 @@ class QueryEngine:
             temp_results = defaultdict(list)
             valid_doc_ids = set()
             valid_var_subs = defaultdict(set)
-            query_limit_hit = False
-            for idx, expanded_query in enumerate(expanded_queries):
+            for idx, expanded_query in enumerate(optimized_expanded_queries):
                 part_result = []
 
                 if idx == 0:
