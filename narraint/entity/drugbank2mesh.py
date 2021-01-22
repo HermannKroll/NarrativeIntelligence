@@ -66,6 +66,16 @@ class DrugBank2MeSHMapper:
         self.mesh_terms2meshid = {}
         self.mesh_headings = set()
         self.dbid2meshid = {}
+        self.__meshid2dbid = None
+
+    def get_meshid_for_dbid(self, dbid: str) -> str:
+        return self.dbid2meshid[dbid]
+
+    def get_dbid_for_meshid(self, meshid: str) -> str:
+        if not self.__meshid2dbid:
+            logging.info('Computing  MeshID to DBID index on the fly...')
+            self.__meshid2dbid = {v: k for k, v in self.dbid2meshid.items()}
+        return self.__meshid2dbid[meshid]
 
     def compute_mappings(self):
         self._load_mesh_ontology()
