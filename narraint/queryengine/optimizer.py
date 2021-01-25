@@ -110,6 +110,9 @@ class QueryOptimizer:
         if len(fact_pattern.subjects) > 1 or len(fact_pattern.objects) > 1:
             # multiple subjects or objects cannot be optimize
             return fact_pattern
+        # do not optimize fact patterns with variables
+        if fact_pattern.has_variable():
+            return fact_pattern
         if fact_pattern.predicate in SYMMETRIC_PREDICATES:
             e_sub = next(iter(fact_pattern.subjects))
             e_obj = next(iter(fact_pattern.objects))

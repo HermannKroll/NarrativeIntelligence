@@ -1,4 +1,5 @@
 from narraint.entity.entity import Entity
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE
 
 
 class FactPattern:
@@ -7,6 +8,15 @@ class FactPattern:
         self.subjects = subjects
         self.predicate = predicate
         self.objects = objects
+
+    def has_variable(self):
+        for s in self.subjects:
+            if s.entity_type == ENTITY_TYPE_VARIABLE:
+                return True
+        for o in self.objects:
+            if o.entity_type == ENTITY_TYPE_VARIABLE:
+                return True
+        return False
 
     def __eq__(self, other):
         if self.predicate != other.predicate:

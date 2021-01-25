@@ -26,7 +26,7 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.frontend.ui.autocompletion import AutocompletionUtil
-from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE
+from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 
 variable_type_mappings = {}
 for ent_typ in ALL:
@@ -99,7 +99,7 @@ def check_wrong_variable_entry(text_low):
     if text_low in variable_type_mappings:
         var_type = variable_type_mappings[text_low]
         var_string = f'?{var_type}({var_type})'
-        return [Entity(var_string, 'Variable')]
+        return [Entity(var_string, ENTITY_TYPE_VARIABLE)]
     else:
         return None
 
@@ -108,7 +108,7 @@ def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         var_string, var_type = check_and_convert_variable(text)
-        e = [Entity(var_string, 'Variable')]
+        e = [Entity(var_string, ENTITY_TYPE_VARIABLE)]
     elif text_low.startswith('mesh:'):
         e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
     elif text_low.startswith('gene:'):
