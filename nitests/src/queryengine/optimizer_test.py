@@ -212,9 +212,61 @@ class QueryOptimizerTestCase(TestCase):
     def test_optimize_query_correct_order(self):
         q = GraphQuery([FactPattern([Entity('A', DRUG)], "induces", [Entity("B", GENE)])])
         optimized_q = QueryOptimizer.optimize_symmetric_predicate(q)
-        self.assertEqual("A", next(iter(q.fact_patterns[0].subjects)).entity_id)
-        self.assertEqual("B", next(iter(q.fact_patterns[0].objects)).entity_id)
+        self.assertEqual("A", next(iter(optimized_q.fact_patterns[0].subjects)).entity_id)
+        self.assertEqual("B", next(iter(optimized_q.fact_patterns[0].objects)).entity_id)
 
         q = GraphQuery([FactPattern([Entity('B', DRUG)], "induces", [Entity("A", GENE)])])
         optimized_q = QueryOptimizer.optimize_symmetric_predicate(q)
         self.assertIsNone(optimized_q)
+
+    def test_optimize_query_bug_variable(self):
+        q = GraphQuery([FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
+                                    [Entity('cyp3a4', GENE), Entity('D08.811.682.690.708.170.495.500',
+                                                                    MESH_ONTOLOGY)])])
+        optimized_q = QueryOptimizer.optimize_query(q)
+        optimized_fp = optimized_q.fact_patterns[0]
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("cyp3a4", next(iter(optimized_fp.objects)).entity_id)
+
+    def test_optimize_query_bug_variable_OR(self):
+        q = GraphQuery([FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
+                        FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
+                                    [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
+        optimized_q = QueryOptimizer.optimize_query(q, and_mod=False)
+        optimized_fp = optimized_q.fact_patterns[0]
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("cyp3a4", next(iter(optimized_fp.objects)).entity_id)
+
+        optimized_fp = optimized_q.fact_patterns[1]
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("D08.811.682.690.708.170.495.500", next(iter(optimized_fp.objects)).entity_id)
+
+    def test_optimize_query_bug_variable_AND(self):
+        q = GraphQuery([FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
+                        FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
+                                    [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
+        optimized_q = QueryOptimizer.optimize_query(q, and_mod=True)
+        optimized_fp = optimized_q.fact_patterns[0]
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("cyp3a4", next(iter(optimized_fp.objects)).entity_id)
+
+        optimized_fp = optimized_q.fact_patterns[1]
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("D08.811.682.690.708.170.495.500", next(iter(optimized_fp.objects)).entity_id)
+
+    def test_optimize_query_NOT_AND(self):
+        q = GraphQuery([FactPattern([Entity('?drug(Drug)', DRUG)], "metabolises", [Entity('drug2', DRUG)]),
+                        FactPattern([Entity('?drug(Drug)', DRUG)], "metabolises",
+                                    [Entity('D08.811.682.690.708.170.495.500', DRUG)])])
+        optimized_q = QueryOptimizer.optimize_query(q, and_mod=True)
+        self.assertIsNone(optimized_q)
+
+    def test_optimize_query_NOT_NONE_OR(self):
+        q = GraphQuery([FactPattern([Entity('?drug(Drug)', DRUG)], "metabolises", [Entity('cyp3a4', GENE)]),
+                        FactPattern([Entity('?drug(Drug)', DRUG)], "metabolises",
+                                    [Entity('D08.811.682.690.708.170.495.500', DRUG)])])
+        optimized_q = QueryOptimizer.optimize_query(q, and_mod=False)
+        self.assertEqual(1, len(optimized_q.fact_patterns))
+        optimized_fp = optimized_q.fact_patterns[0]
+        self.assertEqual("cyp3a4", next(iter(optimized_fp.subjects)).entity_id)
+        self.assertEqual("?drug(Drug)", next(iter(optimized_fp.objects)).entity_id)

@@ -78,23 +78,22 @@ class QueryOptimizer:
                                                                                        a_obj_types))
 
     @staticmethod
-    def optimize_predicate_types(graph_query: GraphQuery) -> GraphQuery:
+    def optimize_predicate_types(graph_query: GraphQuery, and_mod=True) -> GraphQuery:
         """
         Optimizes a GraphQuery based on the type-constraint for the predicates
         e.g. if diabetes (disease) treats metformin (drug) then this method flips the fact pattern
         to metformin treats diabetes
         :param graph_query: a graph query
+        :param and_mod: should the fact patterns be treated as being connected by AND (yes if true)? else OR
         :return: a new optimized graph query object
         """
         optimized_query = GraphQuery()
         for fp in graph_query.fact_patterns:
             optimized_fp = QueryOptimizer.optimize_predicate_types_for_fact_pattern(fp)
-            if not optimized_fp:
-                return None  # query wont yield results - it will be empty
-            elif not optimized_fp.subjects or not optimized_fp.objects:
-                return None # has no subjects or objects
-            else:
+            if optimized_fp and optimized_fp.subjects and optimized_fp.objects:
                 optimized_query.add_fact_pattern(optimized_fp)
+            elif and_mod:
+                return None  # query wont yield results - it will be empty
         return optimized_query
 
     @staticmethod
@@ -125,10 +124,11 @@ class QueryOptimizer:
         return fact_pattern
 
     @staticmethod
-    def optimize_symmetric_predicate(graph_query: GraphQuery) -> GraphQuery:
+    def optimize_symmetric_predicate(graph_query: GraphQuery, and_mod=True) -> GraphQuery:
         """
         Optimize a graph query by checking if the symmetric predicates have the correct order
         :param graph_query: a graph query
+        :param and_mod: should the fact patterns be treated as being connected by AND (yes if true)? else OR
         :return: a graph query or none if all fact patterns are in the wrong order
         """
         if not graph_query:
@@ -136,16 +136,17 @@ class QueryOptimizer:
         query_optimized = GraphQuery()
         for fp in graph_query.fact_patterns:
             fp_optimized = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
-            if fp_optimized:
+            if fp_optimized and fp_optimized.subjects and fp_optimized.objects:
                 query_optimized.add_fact_pattern(fp_optimized)
-
+            elif and_mod:
+                return None
         if len(query_optimized.fact_patterns) > 0:
             return query_optimized
         else:
             return None
 
     @staticmethod
-    def optimize_query(graph_query: GraphQuery) -> GraphQuery:
+    def optimize_query(graph_query: GraphQuery, and_mod=True) -> GraphQuery:
         """
         Performs a simple query optimization
         1. remove redundant entity ids in subject or object
@@ -153,6 +154,7 @@ class QueryOptimizer:
         3. order fact patterns by pushing patterns with variables in the end
         4. change order of subject or object if predicate typy constraint is hurt
         :param graph_query:
+        :param and_mod: should the fact patterns be treated as being connected by AND (yes if true)? else OR
         :return:
         """
         fact_patterns_with_var_count = []
@@ -190,8 +192,8 @@ class QueryOptimizer:
             optimized.add_fact_pattern(fp)
 
         # optimize based on predicate-type constraint
-        optimized = QueryOptimizer.optimize_predicate_types(optimized)
+        optimized = QueryOptimizer.optimize_predicate_types(optimized, and_mod)
         # optimize wrong symmetric predicate argument order
         # must be the last check!
-        optimized = QueryOptimizer.optimize_symmetric_predicate(optimized)
+        optimized = QueryOptimizer.optimize_symmetric_predicate(optimized, and_mod)
         return optimized

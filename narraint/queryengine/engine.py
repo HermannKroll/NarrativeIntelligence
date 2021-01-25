@@ -342,7 +342,14 @@ class QueryEngine:
         # The results of each fact pattern will be executed as being connected by an OR
         expanded_queries = QueryExpander.expand_query(graph_query)
         # optimize each query
-        optimized_expanded_queries = list([QueryOptimizer.optimize_query(q) for q in expanded_queries])
+        # each query is a set of fact pattern which should be executed as OR (so set and_mod to false here)
+        optimized_expanded_queries = list([QueryOptimizer.optimize_query(q, and_mod=False) for q in expanded_queries])
+        # remove none objects
+        optimized_expanded_queries = [q for q in optimized_expanded_queries if q]
+        if len(optimized_expanded_queries) == 0:
+            logging.info('Query wont yield results - returning empty list')
+            return [], False
+
         queries_to_execute = sum([len(q.fact_patterns) for q in optimized_expanded_queries])
         logging.info('The query will be expanded into {} queries'.format(queries_to_execute))
 
