@@ -21,7 +21,7 @@ class TestPreprocess(unittest.TestCase):
         logging.info(self.output)
         self.workdir = nitests.util.make_test_tempdir()
         args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
-                self.output,
+                #self.output,
                 *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {self.workdir}".split()
                 ]
         preprocess.main(args)
@@ -35,7 +35,7 @@ class TestPreprocess(unittest.TestCase):
         self.output = os.path.join(nitests.util.make_test_tempdir(), "output.txt")
         self.workdir = nitests.util.make_test_tempdir()
         args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
-                self.output,
+                #self.output,
                 *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {self.workdir} -w 2".split()
                 ]
         preprocess.main(args)

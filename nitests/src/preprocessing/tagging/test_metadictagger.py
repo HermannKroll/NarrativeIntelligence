@@ -42,7 +42,7 @@ class TestMetadictagger(unittest.TestCase):
                                        util.create_test_kwargs(
                                            util.get_test_resource_filepath("infiles/test_metadictagger/")))
         metatag = factory.create_MetaDicTagger()
-        metatag.prepare()
+        metatag._prepare()
         return metatag
 
 

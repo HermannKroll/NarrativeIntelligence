@@ -19,6 +19,7 @@ def prepare_input(in_file:str, out_file: str, logger: logging.Logger, ent_types:
     if not os.path.exists(in_file):
         logger.error("Input file not found!")
         return False
+    logger.info("Counting document ids...")
     in_ids = count.get_document_ids(in_file)
     todo_ids = set()
     for ent_type in ent_types:
@@ -43,7 +44,7 @@ def main(arguments=None):
 
     group_settings.add_argument("-w", "--workers", default=1, help="Number of processes for parallelized preprocessing",
                                 type=int)
-    parser.add_argument("-y", "--yes", action="store_true")
+    parser.add_argument("-y", "--yes_force", help="skip prompt for workdir deletion", action="store_true")
 
     parser.add_argument("input", help="composite pubtator file", metavar="IN_DIR")
     args = parser.parse_args(arguments)
@@ -57,7 +58,7 @@ def main(arguments=None):
     in_file = os.path.abspath(os.path.join(root_dir, "in.pubtator"))
 
     if os.path.exists(root_dir):
-        if not args.yes:
+        if not args.yes_force:
             print(f"{root_dir} already exists, continue and delete?")
             resp = input("y/n")
             if resp not in {"y", "Y", "j", "J", "yes", "Yes"}:
@@ -66,7 +67,7 @@ def main(arguments=None):
         else:
             shutil.rmtree(root_dir)
 
-    os.makedirs(root_dir, exist_ok=True)
+    os.makedirs(root_dir)
     os.makedirs(log_dir)
 
     # create loggers
