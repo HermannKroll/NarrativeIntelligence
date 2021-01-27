@@ -1,14 +1,16 @@
 UPDATE Predication SET predicate_canonicalized = 'associated_unsure' WHERE predicate_canonicalized = 'PRED_TO_REMOVE';
+UPDATE PREDICATION SET subject_id = lower(subject_id) WHERE subject_type = 'Gene';
+UPDATE PREDICATION SET object_id = lower(object_id) WHERE object_type = 'Gene';
 
 
 DELETE FROM Predication WHERE predicate_canonicalized IS NULL;
+DELETE FROM Predication WHERE predicate IN
+	(SELECT distinct predicate FROM Predication GROUP BY predicate HAVING COUNT(*) < 50000);
 
--- Chemicals with only a single character are mostly wrong tagged
-DELETE FROM PREDICATION WHERE (subject_str like '_' and subject_type = 'Chemical') or (object_str like '_' and object_type = 'Chemical');
-DELETE FROM PREDICATION WHERE (subject_str like '__' and subject_type = 'Chemical') or (object_str like '__' and object_type = 'Chemical');
 
 -- Rewrites the Predication table and deletes removed tuples
 VACUUM FULL PREDICATION;
+REINDEX TABLE PREDICATION;
 
 
 -- Clean the Sentence table

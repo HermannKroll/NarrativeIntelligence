@@ -31,14 +31,6 @@ class QueryEntitySubstitution:
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
         try:
-            # Translate Drugs and Excipients to MeSH if possible
-            if self.entity_type in [DRUG, EXCIPIENT, DRUGBANK_CHEMICAL]:
-                mapper = DrugBank2MeSHMapper.instance()
-                mapping = mapper.dbid2meshid.get(self.entity_id)
-                if mapping:
-                    self.entity_id = mapper.dbid2meshid[self.entity_id]
-                    self.entity_type = CHEMICAL
-
             # Convert MeSH Tree Numbers to MeSH Descriptors
             if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not self.entity_id.startswith('MESH:'):
                 mesh_ontology = MeSHOntology.instance()
@@ -46,6 +38,15 @@ class QueryEntitySubstitution:
                     self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
                 except KeyError:
                     pass
+
+            # Translate Chemicals to DrugBank ids if possible
+            if self.entity_type in [CHEMICAL]:
+                mapper = DrugBank2MeSHMapper.instance()
+                mapping = mapper.get_dbid_for_meshid(self.entity_id)
+                if mapping:
+                    self.entity_id = mapping
+                    # Todo: not the best solution :/ Think about excipient and drugbank chemicals
+                    self.entity_type = DRUG
 
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type,
                                                                resolve_gene_by_id=False)

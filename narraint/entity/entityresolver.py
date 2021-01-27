@@ -144,11 +144,12 @@ class GeneResolver:
         :param locus: the gene locus
         :return: if translation is available description//locus will be returned - else locus
         """
+        locus = str(locus).lower()
         if not self._genelocus2name:
             logging.info('Computing genelocus2name index on the fly...')
             self._genelocus2name = {}
-            for (locus, description) in self.geneid2name.values():
-                self._genelocus2name[locus] = description
+            for (l, description) in self.geneid2name.values():
+                self._genelocus2name[str(l).lower()] = description
         if locus in self._genelocus2name:
             return '{}//{}'.format(self._genelocus2name[locus], locus)
         else:
@@ -162,7 +163,7 @@ class GeneResolver:
         """
         gene_id_int = int(gene_id)
         symbol, _ = self.geneid2name[gene_id_int]
-        return symbol
+        return str(symbol).lower()
 
 
 class SpeciesResolver:

@@ -5,8 +5,9 @@ import random
 import re
 import traceback
 import sys
+from typing import List
 
-import httpx as httpx
+from asgiref.sync import sync_to_async
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from sqlalchemy import func
@@ -25,13 +26,15 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.frontend.ui.autocompletion import AutocompletionUtil
-from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE
+from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 
 variable_type_mappings = {}
 for ent_typ in ALL:
     variable_type_mappings[ent_typ.lower()] = ent_typ
     variable_type_mappings[f'{ent_typ.lower()}s'] = ent_typ
 # support entry of targets
+variable_type_mappings["dosage form"] = DOSAGE_FORM
+variable_type_mappings["dosage forms"] = DOSAGE_FORM
 variable_type_mappings["target"] = GENE
 variable_type_mappings["targets"] = GENE
 
@@ -40,7 +43,6 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-
 
 allowed_entity_types = {CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL}
 
@@ -92,11 +94,21 @@ def check_and_convert_variable(text):
         if not VAR_NAME.search(text):
             raise ValueError('variable "{}" has no name (e.g. ?X(Chemical))'.format(text))
 
+
+def check_wrong_variable_entry(text_low):
+    if text_low in variable_type_mappings:
+        var_type = variable_type_mappings[text_low]
+        var_string = f'?{var_type}({var_type})'
+        return [Entity(var_string, ENTITY_TYPE_VARIABLE)]
+    else:
+        return None
+
+
 def convert_text_to_entity(text):
     text_low = text.replace('_', ' ').lower()
     if text.startswith('?'):
         var_string, var_type = check_and_convert_variable(text)
-        e = [Entity(var_string, 'Variable')]
+        e = [Entity(var_string, ENTITY_TYPE_VARIABLE)]
     elif text_low.startswith('mesh:'):
         e = [Entity(text_low.replace('mesh:', 'MESH:').replace('c', 'C').replace('d', 'D'), 'MeSH')]
     elif text_low.startswith('gene:'):
@@ -106,6 +118,10 @@ def convert_text_to_entity(text):
     elif text_low.startswith('fidx'):
         e = [Entity(text.upper(), DOSAGE_FORM)]
     else:
+        # check if the user expects a variable here
+        may_variable = check_wrong_variable_entry(text_low)
+        if may_variable:
+            return may_variable
         try:
             e = View.instance().entity_tagger.tag_entity(text)
         except KeyError:
@@ -240,33 +256,30 @@ def count_variables_in_query(graph_query: GraphQuery):
     return len(var_set)
 
 
-async def get_flavor(request):
-    print("Getting flavor...")
-    await asyncio.sleep(2)
-    print("Returning flavor")
-    return JsonResponse(dict(data=random.choice(
-        [
-            "Sweet Baby Ray's",
-            "Stubb's Original",
-            "Famous Dave's",
-        ]
-    )))
+@sync_to_async
+def sync_autocompletion(search_string: str) -> List[str]:
+    return View.instance().autocompletion.compute_autocompletion_list(search_string)
 
 
 async def get_autocompletion(request):
     completion_terms = []
     if "term" in request.GET:
         search_string = str(request.GET.get("term", "").strip())
-        completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
+        completion_terms = await sync_to_async(sync_autocompletion, thread_sensitive=False)(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
     return JsonResponse(dict(terms=completion_terms))
+
+
+@sync_to_async
+def sync_convert_query(search_string: str) -> (GraphQuery, str):
+    return convert_query_text_to_fact_patterns(search_string)
 
 
 async def get_check_query(request):
     if "query" in request.GET:
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
-        query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(search_string)
+        query_fact_patterns, query_trans_string = await sync_to_async(sync_convert_query, thread_sensitive=False)(search_string)
         if query_fact_patterns:
             logging.info('query is valid')
             return JsonResponse(dict(valid="True"))
@@ -275,71 +288,79 @@ async def get_check_query(request):
             return JsonResponse(dict(valid=query_trans_string))
     return JsonResponse(dict(valid="False"))
 
-async def get_query(request):
+@sync_to_async
+def sync_process_query(request):
     results_converted = []
-    if "query" in request.GET:
-        valid_query = False
-        query_limit_hit = False
-        try:
-            query = str(request.GET.get("query", "").strip())
-            data_source = str(request.GET.get("data_source", "").strip())
-            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
-            # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
-            logging.info(f'Query string is: {query}')
-            logging.info("Selected data source is {}".format(data_source))
-            logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
-            # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
+    valid_query = False
+    query_limit_hit = False
+    query_trans_string = ""
+    try:
+        query = str(request.GET.get("query", "").strip())
+        data_source = str(request.GET.get("data_source", "").strip())
+        outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
+        logging.info(f'Query string is: {query}')
+        logging.info("Selected data source is {}".format(data_source))
+        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+        # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
-            query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
-            if data_source not in ["PMC", "PubMed"]:
-                results_converted = []
-                query_trans_string = "Data source is unknown"
-                logger.error('parsing error')
-            elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
-                query_trans_string = "Outer ranking strategy is unknown"
-                logger.error('parsing error')
-            elif not query_fact_patterns or len(query_fact_patterns.fact_patterns) == 0:
-                results_converted = []
-                logger.error('parsing error')
-            elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(
-                    query_fact_patterns) > 1:
-                results_converted = []
-                nt_string = ""
-                query_trans_string = "Do not support multiple variables in an ontology-based ranking"
-                logger.error("Do not support multiple variables in an ontology-based ranking")
-            else:
-                logger.info(f'Translated Query is: {str(query_fact_patterns)}')
-                valid_query = True
-                document_collection = data_source
-                try:
-                    cached_results, query_limit_hit = View.instance().cache.load_result_from_cache(document_collection,
-                                                                                                   query_fact_patterns)
-                except Exception:
-                    logging.error('Cannot load query result from cache...')
-                    cached_results = None
-                if cached_results:
-                    logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
-                    results = cached_results
-                else:
-                    results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(
-                        query_fact_patterns, document_collection, query=query)
-                    try:
-                        View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns,
-                                                                  results, query_limit_hit)
-                    except Exception:
-                        logging.error('Cannot store query result to cache...')
-                results_converted = []
-                if outer_ranking == 'outer_ranking_substitution':
-                    substitution_aggregation = ResultAggregationBySubstitution()
-                    results_converted = substitution_aggregation.rank_results(results).to_dict()
-                elif outer_ranking == 'outer_ranking_ontology':
-                    substitution_ontology = ResultAggregationByOntology()
-                    results_converted = substitution_ontology.rank_results(results).to_dict()
-        except Exception:
+        query_fact_patterns, query_trans_string = convert_query_text_to_fact_patterns(query)
+        if data_source not in ["PMC", "PubMed"]:
             results_converted = []
-            query_trans_string = "keyword query cannot be converted (syntax error)"
-            traceback.print_exc(file=sys.stdout)
+            query_trans_string = "Data source is unknown"
+            logger.error('parsing error')
+        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+            query_trans_string = "Outer ranking strategy is unknown"
+            logger.error('parsing error')
+        elif not query_fact_patterns or len(query_fact_patterns.fact_patterns) == 0:
+            results_converted = []
+            logger.error('parsing error')
+        elif outer_ranking == 'outer_ranking_ontology' and count_variables_in_query(
+                query_fact_patterns) > 1:
+            results_converted = []
+            nt_string = ""
+            query_trans_string = "Do not support multiple variables in an ontology-based ranking"
+            logger.error("Do not support multiple variables in an ontology-based ranking")
+        else:
+            logger.info(f'Translated Query is: {str(query_fact_patterns)}')
+            valid_query = True
+            document_collection = data_source
+            try:
+                cached_results, query_limit_hit = View.instance().cache.load_result_from_cache(document_collection,
+                                                                                               query_fact_patterns)
+            except Exception:
+                logging.error('Cannot load query result from cache...')
+                cached_results = None
+            if cached_results:
+                logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
+                results = cached_results
+            else:
+                results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(
+                    query_fact_patterns, document_collection, query=query)
+                try:
+                    View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns,
+                                                              results, query_limit_hit)
+                except Exception:
+                    logging.error('Cannot store query result to cache...')
+            results_converted = []
+            if outer_ranking == 'outer_ranking_substitution':
+                substitution_aggregation = ResultAggregationBySubstitution()
+                results_converted = substitution_aggregation.rank_results(results).to_dict()
+            elif outer_ranking == 'outer_ranking_ontology':
+                substitution_ontology = ResultAggregationByOntology()
+                results_converted = substitution_ontology.rank_results(results).to_dict()
+            return valid_query, results_converted, query_trans_string, query_limit_hit
+    except Exception:
+        results_converted = []
+        query_trans_string = "keyword query cannot be converted (syntax error)"
+        traceback.print_exc(file=sys.stdout)
+    return valid_query, results_converted, query_trans_string, query_limit_hit
 
+
+async def get_query(request):
+    if "query" in request.GET:
+        valid_query, results_converted, query_trans_string, query_limit_hit = \
+            await sync_to_async(sync_process_query, thread_sensitive=False)(request)
         return JsonResponse(
             dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
                  query_limit_hit=query_limit_hit))
@@ -347,6 +368,7 @@ async def get_query(request):
         return JsonResponse(
             dict(valid_query="", results=[], query_translation="",
                  query_limit_hit="False"))
+
 
 class SearchView(TemplateView):
     template_name = "ui/search.html"

@@ -1,23 +1,122 @@
 import logging
+from io import StringIO
+from collections import defaultdict
 from datetime import datetime
+from itertools import islice
 
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import update, and_, or_
+from sqlalchemy import update, and_, or_, delete
 from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.database import Session
-from narraint.backend.models import Predication, PredicationResult
+from narraint.backend.models import Predication, PredicationResult, PredicationToDelete
 from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
     PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
-from narraint.extraction.openie.cleanload import BULK_INSERT_AFTER_K, _insert_predication_skip_duplicates
 from narraint.extraction.predicate_vocabulary import PRED_TO_REMOVE
 from narraint.progress import print_progress_with_eta
+from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES
 
 DOSAGE_FORM_PREDICATE = "administered"
 ASSOCIATED_PREDICATE = "associated"
-ASSOCIATED_PREDICATE_UNSURE = "associated_u"
-SYMMETRIC_PREDICATES = {DOSAGE_FORM_PREDICATE}  # , ASSOCIATED_PREDICATE}
+ASSOCIATED_PREDICATE_UNSURE = ASSOCIATED_PREDICATE
+BULK_INSERT_PRED_TO_DELETE_AFTER_K = 1000000
+
+def clean_redundant_predicate_tuples(session, symmetric_predicate_canonicalized: str):
+    logging.info('Counting predication...')
+    predication_count = Predication.query_predication_count(session, symmetric_predicate_canonicalized)
+    logging.info('Querying relevant predication entries...')
+    query = session.query(Predication.id, Predication.sentence_id,
+                          Predication.subject_id, Predication.subject_type,
+                          Predication.predicate,
+                          Predication.object_id,  Predication.object_type)\
+        .filter(Predication.predicate_canonicalized == symmetric_predicate_canonicalized)
+
+    sentence2pred = defaultdict(set)
+    preds2delete = set()
+    start_time = datetime.now()
+    logging.info('Computing duplicated values...')
+    for idx, row in enumerate(session.execute(query)):
+        p_id, sent_id, subj_id, subj_type, predicate, obj_id, obj_type = int(row[0]), int(row[1]), row[2], row[3], row[4], row[5], row[6]
+
+        # symmetric relation - delete one direction
+        sorted_arguments = sort_symmetric_arguments(subj_id, subj_type, obj_id, obj_type)
+        if sorted_arguments[0] == subj_id: # are the arguments sorted correctly?
+            key = sorted_arguments[0], sorted_arguments[1], predicate, sorted_arguments[2], sorted_arguments[3]
+            # yes - does the fact exists multiple times?
+            if key not in sentence2pred[sent_id]:
+                # no - everything is fine
+                sentence2pred[sent_id].add(key)
+            else:
+                # predication is duplicated, can be deleted
+                preds2delete.add(p_id)
+        else:
+            # arguments are not in the correct order
+            preds2delete.add(p_id)
+
+        print_progress_with_eta(f"computing duplicated {symmetric_predicate_canonicalized} values...",
+                                idx, predication_count, start_time)
+
+    percentage = len(preds2delete) / predication_count
+    logging.info(f'Delete {len(preds2delete)} of {predication_count} ({percentage})')
+
+   # pred_to_delete_task = []
+    start_time = datetime.now()
+    f_pred_to_delete = StringIO()
+
+    preds2delete_list = sorted(preds2delete)
+    for idx, pred_id in enumerate(preds2delete_list):
+        print_progress_with_eta("writing to temp file...", idx, len(preds2delete), start_time)
+        if idx == 0:
+            f_pred_to_delete.write(str(pred_id))
+        else:
+            f_pred_to_delete.write(f'\n{pred_id}')
+
+    pred_to_delete_keys = ["predication_id"]
+    logging.info('Executing copy from temp file to predication_to_delete ...')
+    connection = session.connection().connection
+    cursor = connection.cursor()
+    f_pred_to_delete.seek(0)
+    cursor.copy_from(f_pred_to_delete, 'predication_to_delete', sep='\t', columns=pred_to_delete_keys)
+    logging.info('Committing...')
+    connection.commit()
+
+    #   pred_to_delete_task.append(dict(predication_id=pred_id))
+      #  if idx > 0 and idx % BULK_INSERT_PRED_TO_DELETE_AFTER_K == 0:
+       #     session.bulk_insert_mappings(PredicationToDelete, pred_to_delete_task)
+        #    session.commit()
+         #   pred_to_delete_task.clear()
+   # session.bulk_insert_mappings(PredicationToDelete, pred_to_delete_task)
+    #session.commit()
+    #pred_to_delete_task.clear()
+    logging.info(f'{len(preds2delete)} ids have been inserted')
+
+
+def clean_predication_to_delete_table(session):
+    logging.info('Cleaning Predication To Delete Table...')
+    stmt = delete(PredicationToDelete)
+    session.execute(stmt)
+    logging.info('Commiting...')
+    session.commit()
+
+
+def clean_redundant_symmetric_predicates():
+    session = Session.get()
+    clean_predication_to_delete_table(session)
+
+    logging.info(f'Cleaning the following predicates: {SYMMETRIC_PREDICATES}')
+    for predicate in SYMMETRIC_PREDICATES:
+        logging.info(f'Cleaning {predicate} entries...')
+        clean_redundant_predicate_tuples(session, predicate)
+
+    logging.info('Deleting all predications which should be deleted...')
+    subquery = session.query(PredicationToDelete.predication_id).subquery()
+    stmt = delete(Predication).where(Predication.id.in_(subquery))
+    session.execute(stmt)
+    logging.info('Commiting...')
+    session.commit()
+
+    #clean_predication_to_delete_table(session)
 
 
 def dosage_form_rule():
@@ -29,9 +128,10 @@ def dosage_form_rule():
     session = Session.get()
 
     logging.info(
-        'Updating predicate to "{}" for (DosageForm, [Chemical, Disease, Species]) pairs'.format(DOSAGE_FORM_PREDICATE))
+        'Updating predicate to "{}" for (DosageForm, [Chemical, Drug, Plant_Familiy, Excipient, Disease, Species]) pairs'.format(DOSAGE_FORM_PREDICATE))
     stmt_1 = update(Predication).where(and_(Predication.subject_type == DOSAGE_FORM,
-                                            Predication.object_type.in_([CHEMICAL, DISEASE, SPECIES, DRUG, EXCIPIENT]))). \
+                                            Predication.object_type.in_([CHEMICAL, DISEASE, SPECIES, DRUG, PLANT_FAMILY,
+                                                                         EXCIPIENT]))). \
         values(predicate_canonicalized=DOSAGE_FORM_PREDICATE)
     session.execute(stmt_1)
     session.commit()
@@ -167,8 +267,10 @@ def main():
                         level=logging.DEBUG)
 
     logging.info('Applying rules...')
-    dosage_form_rule()
-    clean_extractions_in_database()
+
+    # dosage_form_rule()
+   # clean_extractions_in_database()
+    clean_redundant_symmetric_predicates()
     logging.info('Finished...')
     # mirror_symmetric_predicates()
 
