@@ -9,6 +9,7 @@ import narraint.entity.enttypes as et
 import nitests.util as util
 from narraint import tools
 from narraint.pubtator.document import parse_tag_list
+from narraint.pubtator.extract import read_tagged_documents
 
 
 class TestMetadictagger(unittest.TestCase):
@@ -37,6 +38,13 @@ class TestMetadictagger(unittest.TestCase):
         tags_2 = [repr(tag) for tag in parse_tag_list(out_2)]
 
         assert_tags_pmc_4297_5600(self, tags_1, tags_2)
+
+    def test_custom_abbreviation(self):
+        in_file = util.get_test_resource_filepath("infiles/test_metadictagger/abbreviations.txt")
+        metatag = TestMetadictagger.make_metatag()
+        out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
+        print(out_file)
+
 
 
     @staticmethod

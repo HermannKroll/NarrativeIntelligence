@@ -9,24 +9,25 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 class TaggedEntity:
 
-    #TODO: Use kwargs or something
-    def __init__(self, tag_tuple):
-        self.document = int(tag_tuple[0])
-        self.start = int(tag_tuple[1])
-        self.end = int(tag_tuple[2])
-        self.text = tag_tuple[3]
-
-        if tag_tuple[4] not in ENTITY_TYPES:
+    def __init__(self, tag_tuple=None, document=None, start=None, end=None, text=None, ent_type=None, ent_id = None):
+        self.document = int(tag_tuple[0]) if tag_tuple else document
+        self.start = int(tag_tuple[1]) if tag_tuple else start
+        self.end = int(tag_tuple[2]) if tag_tuple else end
+        self.text = tag_tuple[3] if tag_tuple else text
+        self.ent_type = ENTITY_TYPES[tag_tuple[4] if tag_tuple else ent_type]
+        self.ent_id = tag_tuple[5] if tag_tuple else ent_id
+        if self.ent_type not in ENTITY_TYPES:
             raise KeyError('entity type not supported yet: {}'.format(tag_tuple))
-
-        self.ent_type = ENTITY_TYPES[tag_tuple[4]]
-        self.ent_id = tag_tuple[5]
 
     def __str__(self):
         return Tag.create_pubtator(self.document, self.start, self.end, self.text, self.ent_type, self.ent_id)
 
     def __repr__(self):
         return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.ent_type, self.ent_id)
+
+    def __eq__(self, other):
+        return self.document == other.document and self.start == other.start and self.end == other.end \
+            and self.text == other.text and self.ent_type == other.ent_type and self.ent_id == other.ent_id
 
 
 class Sentence:
@@ -79,7 +80,7 @@ class TaggedDocument:
                 clean_tags.remove(tag1)
             else:
                 for tag2 in self.tags:
-                    if tag2.start < tag1.start and tag2.end > tag1.end:
+                    if tag2.start <= tag1.start and tag2.end >= tag1.end and tag1.text.lower() != tag2.text.lower():
                         clean_tags.remove(tag1)
                         break
         self.tags = clean_tags

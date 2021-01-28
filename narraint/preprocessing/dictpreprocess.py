@@ -110,7 +110,6 @@ def main(arguments=None):
             yield TaggedDocument(doc)
 
     def do_task(in_doc: TaggedDocument):
-        #print(f"{os.getpid()}: is tagging{in_doc.id}")
         return metatag.tag_doc(in_doc)
 
     docs_done = multiprocessing.Value('i', 0)
@@ -123,7 +122,6 @@ def main(arguments=None):
         out_doc.clean_tags()
         if out_doc.tags:
             metatag.base_insert_tags(out_doc)
-            #print(f"{os.getpid()}: is consuming{out_doc.id}")
 
     task_queue = multiprocessing.Queue()
     result_queue = multiprocessing.Queue()
