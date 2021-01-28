@@ -8,7 +8,7 @@ from narraint.preprocessing.tagging.metadictagger import MetaDicTaggerFactory, M
 import narraint.entity.enttypes as et
 import nitests.util as util
 from narraint import tools
-from narraint.pubtator.document import parse_tag_list
+from narraint.pubtator.document import parse_tag_list, TaggedEntity
 from narraint.pubtator.extract import read_tagged_documents
 
 
@@ -43,7 +43,9 @@ class TestMetadictagger(unittest.TestCase):
         in_file = util.get_test_resource_filepath("infiles/test_metadictagger/abbreviations.txt")
         metatag = TestMetadictagger.make_metatag()
         out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
-        print(out_file)
+        out_file.clean_tags()
+        self.assertIn(TaggedEntity(None, 32926486, 709, 712, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926486, 1227, 1230, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
 
 
 

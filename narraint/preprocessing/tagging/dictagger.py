@@ -185,6 +185,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         :param in_doc: document containing title+abstract to tag. Is modified by adding tags
         :return: the modified in_doc
         """
+        abb_vocab = dict()
         out_doc = in_doc
         pmid, title, abstact = in_doc.id, in_doc.title, in_doc.abstract
         content = title.strip() + " " + abstact.strip()
@@ -202,7 +203,25 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 end = indexes[-1] + len(words[-1])
                 if start > len(title):
                     start = start - 1
-                tags += list(self.generate_tagged_entities(end, pmid, start, term))
+                hits = list(self.generate_tagged_entities(end, pmid, start, term))
+                tags += hits
+                if hits:
+                    match = re.match(r" \((\w*)\).*", content[indexes[-1]+len(words[-1]):])
+                    if match:
+                        abbreviation = match.groups()[0]
+                        abb_vocab[abbreviation] = [(t.ent_type, t.ent_id) for t in hits]
+
+        if abb_vocab:
+            for spaces in range(self.config.dict_max_words):
+                for word_tuple in get_n_tuples(ind_words, spaces + 1):
+                    words, indexes = zip(*word_tuple)
+                    term = " ".join(words)
+                    start = indexes[0]
+                    end = indexes[-1] + len(words[-1])
+                    if start > len(title):
+                        start = start - 1
+                    hits = list(self.generate_tagged_entities(end, pmid, start, term, abb_vocab))
+                    tags += hits
 
         if self.config.dict_check_abbreviation:
             tags = DictTagger.clean_abbreviation_tags(tags, self.config.dict_min_full_tag_len)
@@ -224,8 +243,15 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             for desc in hits:
                 yield pmid, start, end, term, self.tag_types[0], desc
 
-    def generate_tagged_entities(self, end, pmid, start, term):
-        hits = self._get_term(term)
+    def generate_tagged_entities(self, end, pmid, start, term, tmp_vocab = None):
+        hits = set()
+        if tmp_vocab:
+            tmp_hit = tmp_vocab.get(term)
+            if tmp_hit:
+                hits |= {hit[1] for hit in tmp_hit}
+        else:
+            hits |= set(self._get_term(term))
+
         # print(f"Found {hits} for '{term}'")
         if hits:
             for desc in hits:

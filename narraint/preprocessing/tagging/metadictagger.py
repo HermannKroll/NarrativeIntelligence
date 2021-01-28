@@ -49,12 +49,21 @@ class MetaDicTagger(dt.DictTagger):
                 for desc in hits:
                     yield pmid, start, end, term, entType, desc
 
-    def generate_tagged_entities(self, end, pmid, start, term):
-        for entType, vocab in self._vocabs.items():
-            hits = vocab.get(term)
-            if hits:
-                for desc in hits:
-                    yield TaggedEntity((pmid, start, end, term, entType, desc))
+    def generate_tagged_entities(self, end, pmid, start, term, tmp_vocab=None):
+        if tmp_vocab:
+            tmp_hit = tmp_vocab.get(term)
+            if tmp_hit:
+                for entType, hit in tmp_hit:
+                    yield TaggedEntity(None, pmid, start, end, term, entType, hit)
+        else:
+            for entType, vocab in self._vocabs.items():
+                hits = vocab.get(term)
+                if hits:
+                    for desc in hits:
+                        yield TaggedEntity((pmid, start, end, term, entType, desc))
+
+
+
 
     def get_types(self):
         return self.tag_types
