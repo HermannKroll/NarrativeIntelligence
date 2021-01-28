@@ -1,3 +1,4 @@
+import os
 import unittest
 import filecmp
 
@@ -23,15 +24,17 @@ class TestMetadictagger(unittest.TestCase):
         # self.assertEqual(True, False)
 
     def test_tag(self):
+
         in_1 = util.get_test_resource_filepath("infiles/test_metadictagger/4297.txt")
         out_1 = tools.proj_rel_path("nitests/tmp/out/4297.txt")
+        os.makedirs(os.path.dirname(out_1))
         in_2 = util.get_test_resource_filepath("infiles/test_metadictagger/5600.txt")
         out_2 = tools.proj_rel_path("nitests/tmp/out/5600.txt")
         metatag = TestMetadictagger.make_metatag()
         metatag._tag(in_1, out_1)
         metatag._tag(in_2, out_2)
-        tags_1 = [str(tag) for tag in parse_tag_list(out_1)]
-        tags_2 = [str(tag) for tag in parse_tag_list(out_2)]
+        tags_1 = [repr(tag) for tag in parse_tag_list(out_1)]
+        tags_2 = [repr(tag) for tag in parse_tag_list(out_2)]
 
         assert_tags_pmc_4297_5600(self, tags_1, tags_2)
 
@@ -42,7 +45,7 @@ class TestMetadictagger(unittest.TestCase):
                                        util.create_test_kwargs(
                                            util.get_test_resource_filepath("infiles/test_metadictagger/")))
         metatag = factory.create_MetaDicTagger()
-        metatag._prepare()
+        metatag.prepare()
         return metatag
 
 

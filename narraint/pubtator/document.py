@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 
 from narraint import tools
+from narraint.backend.models import Tag, Document
 from narraint.entity.enttypes import ENTITY_TYPES
 from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
@@ -22,10 +23,10 @@ class TaggedEntity:
         self.ent_id = tag_tuple[5]
 
     def __str__(self):
-        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.ent_type, self.ent_id)
+        return Tag.create_pubtator(self.document, self.start, self.end, self.text, self.ent_type, self.ent_id)
 
     def __repr__(self):
-        return str(self)
+        return "<Entity {},{},{},{},{}>".format(self.start, self.end, self.text, self.ent_type, self.ent_id)
 
 
 class Sentence:
@@ -71,6 +72,18 @@ class TaggedDocument:
             self.entities_by_sentence = defaultdict(set)  # Use for _query processing
             self._create_index(spacy_nlp)
 
+    def clean(self):
+        clean_tags = self.tags.copy()
+        for tag1 in self.tags:
+            if not tag1.document or not tag1.start or not tag1.end or not tag1.text or not tag1.ent_type or not tag1.ent_id:
+                clean_tags.remove(tag1)
+            else:
+                for tag2 in self.tags:
+                    if tag2.start < tag1.start and tag2.end > tag1.end:
+                        clean_tags.remove(tag1)
+                        break
+        self.tags = clean_tags
+
     def _create_index(self, spacy_nlp):
         # self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
         #                            t.text.lower() not in self.mesh_by_entity_name}
@@ -107,10 +120,10 @@ class TaggedDocument:
                         self.entities_by_sentence[sid].add(entity)
 
     def __str__(self):
-        return "<Document {} {}>".format(self.id, self.title)
+        return Document.create_pubtator(self.id, self.title, self.abstract)+"".join([str(t) for t in self.tags])+"\n"
 
     def __repr__(self):
-        return str(self)
+        return "<Document {} {}>".format(self.id, self.title)
 
 
 class TaggedDocumentCollection:

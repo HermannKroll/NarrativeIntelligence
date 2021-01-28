@@ -9,6 +9,7 @@ from narraint.backend.database import Session
 from narraint.backend.load import insert_taggers
 from narraint.backend.models import Tag, DocTaggedBy
 from narraint.preprocessing.config import Config
+from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
 
@@ -143,6 +144,52 @@ class BaseTagger(Thread):
             session.commit()
 
         self.logger.info("Committed successfully")
+
+    def base_insert_tagger(self):
+        #self.logger.info('Add tagger')
+        tagger_name = self.__name__
+        tagger_version = self.__version__
+        insert_taggers((tagger_name, tagger_version))
+
+    def base_insert_tags(self, doc:TaggedDocument):
+        session = Session.get()
+
+        #self.logger.info("Add tags")
+        for tag in doc.tags:
+            insert_tag = insert(Tag).values(
+                ent_type=tag.ent_type,
+                start=tag.start,
+                end=tag.end,
+                ent_id=tag.ent_id,
+                ent_str=tag.text,
+                document_id=tag.document,
+                document_collection=self.collection,
+            )
+            if not Session.is_sqlite:
+                insert_tag = insert_tag.on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
+                )
+            session.execute(insert_tag)
+            session.commit()
+
+        #self.logger.info("Add doc_tagged_by")
+        successful_ent_types = set(t.ent_type for t in doc.tags)
+        for ent_type in successful_ent_types:
+            insert_doc_tagged_by = insert(DocTaggedBy).values(
+                document_id=doc.id,
+                document_collection=self.collection,
+                tagger_name=self.__name__,
+                tagger_version=self.__version__,
+                ent_type=ent_type,
+            )
+            if not Session.is_sqlite:
+                insert_doc_tagged_by = insert_doc_tagged_by.on_conflict_do_nothing(
+                    index_elements=('document_id', 'document_collection',
+                                    'tagger_name', 'tagger_version', 'ent_type'),
+                )
+            session.execute(insert_doc_tagged_by)
+            session.commit()
+
 
     def get_tags(self):
         """

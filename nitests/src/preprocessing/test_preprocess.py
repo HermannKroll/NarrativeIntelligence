@@ -7,7 +7,7 @@ import pytest
 import nitests.config.config as config
 import nitests.util
 
-from narraint.preprocessing import preprocess
+from narraint.preprocessing import preprocess, dictpreprocess
 from narraint.tools import proj_rel_path
 from narraint.pubtator.extract import read_tagged_documents
 from nitests import util
@@ -26,7 +26,7 @@ class TestPreprocess(unittest.TestCase):
                 ]
         preprocess.main(args)
         doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
-        assert_tags_pmc_4297_5600(self, {str(t) for t in doc1}, {str(t) for t in doc2})
+        assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
         util.clear_database()
 
 
@@ -40,9 +40,30 @@ class TestPreprocess(unittest.TestCase):
                 ]
         preprocess.main(args)
         doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
-        assert_tags_pmc_4297_5600(self, {str(t) for t in doc1}, {str(t) for t in doc2})
+        assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
         util.clear_database()
 
+    def test_dictpreprocess_sinlge_worker(self):
+        workdir = nitests.util.make_test_tempdir()
+        args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
+
+                *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 1 -y".split()
+                ]
+        dictpreprocess.main(args)
+        doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
+        assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
+        util.clear_database()
+
+    def test_dictpreprocess_dual_worker(self):
+        workdir = nitests.util.make_test_tempdir()
+        args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
+
+                *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 2 -y".split()
+                ]
+        dictpreprocess.main(args)
+        doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
+        assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
+        util.clear_database()
     
 
 

@@ -6,6 +6,7 @@ from typing import List, Dict
 import narraint.preprocessing.tagging.dictagger as dt
 import narraint.entity.enttypes as et
 from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical
+from narraint.pubtator.document import TaggedEntity
 
 """
 Modified version of the dict tagger, that can run on the vocabularies of multiple dicttaggers
@@ -47,6 +48,13 @@ class MetaDicTagger(dt.DictTagger):
             if hits:
                 for desc in hits:
                     yield pmid, start, end, term, entType, desc
+
+    def generate_tagged_entities(self, end, pmid, start, term):
+        for entType, vocab in self._vocabs.items():
+            hits = vocab.get(term)
+            if hits:
+                for desc in hits:
+                    yield TaggedEntity((pmid, start, end, term, entType, desc))
 
     def get_types(self):
         return self.tag_types

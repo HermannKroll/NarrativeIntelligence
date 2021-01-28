@@ -26,7 +26,7 @@ class TestDictagger(unittest.TestCase):
         self.assertTrue(os.path.isfile(out_file))
         document = doc.parse_tag_list(out_file)
         self.assertTrue(document)
-        strings = [str(tag) for tag in document]
+        strings = [repr(tag) for tag in document]
         self.assertIn("<Entity 0,8,proteins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
@@ -44,8 +44,8 @@ class TestDictagger(unittest.TestCase):
         self.assertTrue(os.path.isfile(out_file))
         document = doc.parse_tag_list(out_file)
         self.assertTrue(document)
-        strings = [str(tag) for tag in document]
-        self.assertIn("<Entity 21,28,aspirin,Drug,Desc1>", strings)
+        strings = [repr(tag) for tag in document]
+        self.assertIn("<Entity 20,28,aspirin,Drug,Desc1>", strings)
         self.assertIn("<Entity 29,33,asa,Drug,Desc1>", strings)
         self.assertIn("<Entity 51,55,asa,Drug,Desc1>", strings)
 
@@ -62,7 +62,7 @@ class TestDictagger(unittest.TestCase):
         self.assertTrue(os.path.isfile(out_file))
         document = doc.parse_tag_list(out_file)
         self.assertTrue(document)
-        strings = [str(tag) for tag in document]
+        strings = [repr(tag) for tag in document]
         self.assertIn("<Entity 51,61,metformin,Drug,Desc2>", strings)
         self.assertNotIn("ASA", strings)
 

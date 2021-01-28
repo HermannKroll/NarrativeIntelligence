@@ -5,22 +5,32 @@ from argparse import ArgumentParser
 
 import tempfile
 
-from narraint.preprocessing.tagging.metadictagger import MetaDicTagger
+import multiprocessing
+from typing import Iterable
+
+from narraint.backend.load import load
+from narraint.preprocessing.tagging.metadictagger import MetaDicTagger, MetaDicTaggerFactory
 from narraint.pubtator import count
 from narraint.config import PREPROCESS_CONFIG
 from narraint.entity.enttypes import TAG_TYPE_MAPPING, DALL
 from narraint.preprocessing.config import Config
+from narraint.pubtator.document import TaggedDocument
+from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.sanitize import filter_and_sanitize
 from narraint.preprocessing.preprocess import init_preprocess_logger, init_sqlalchemy_logger, \
     get_untagged_doc_ids_by_ent_type
+from narraint.util.multiprocessing.ConsumerWorker import ConsumerWorker
+from narraint.util.multiprocessing.ProducerWorker import ProducerWorker
+from narraint.util.multiprocessing.Worker import Worker
 
 
-def prepare_input(in_file:str, out_file: str, logger: logging.Logger, ent_types: set[str], collection: str) -> bool:
+def prepare_input(in_file:str, out_file: str, logger: logging.Logger, ent_types: Iterable[str], collection: str) -> bool:
     if not os.path.exists(in_file):
         logger.error("Input file not found!")
         return False
     logger.info("Counting document ids...")
     in_ids = count.get_document_ids(in_file)
+    logger.info(f"{len(in_ids)} given, checking against database...")
     todo_ids = set()
     for ent_type in ent_types:
         todo_ids |= get_untagged_doc_ids_by_ent_type(collection, in_ids, ent_type, MetaDicTagger, logger)
@@ -78,7 +88,36 @@ def main(arguments=None):
     ent_types = DALL if "DA" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
     prepare_input(ext_in_file, in_file, logger, ent_types, args.collection)
 
+    load(in_file, args.collection, logger=logger)
 
+    kwargs = dict(collection=args.collection, root_dir=root_dir, input_dir=None, logger=logger,
+                  log_dir=log_dir, config=conf, mapping_id_file=None, mapping_file_id=None)
+
+    metafactory = MetaDicTaggerFactory(ent_types, kwargs)
+    metatag = metafactory.create_MetaDicTagger()
+    metatag.prepare()
+
+    def generate_tasks():
+        for doc in read_pubtator_documents(in_file):
+            yield TaggedDocument(doc)
+
+    def do_task(in_doc: TaggedDocument):
+        return metatag.tag_doc(in_doc)
+
+    def consume_task(out_doc: TaggedDocument):
+        metatag.base_insert_tags(out_doc)
+
+    task_queue = multiprocessing.Queue()
+    result_queue = multiprocessing.Queue()
+    producer = ProducerWorker(task_queue, generate_tasks, args.workers)
+    workers = [Worker(task_queue, result_queue, do_task) for n in range(args.workers)]
+    consumer = ConsumerWorker(result_queue, consume_task, args.workers)
+
+    producer.start()
+    for w in workers:
+        w.start()
+    consumer.start()
+    consumer.join()
 
 
 if __name__ == '__main__':

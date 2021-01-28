@@ -1,3 +1,4 @@
+import copy
 import os
 import pickle
 import re
@@ -5,10 +6,13 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from datetime import datetime
 
+from typing import List
+
 from narraint.config import TMP_DIR, DICT_TAGGER_BLACKLIST
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.preprocessing.utils import get_document_id, DocumentError
+from narraint.pubtator.document import TaggedDocument, TaggedEntity
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
 
@@ -167,13 +171,9 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             len(skipped_files)),
         )
 
-    def _tag(self, in_file, out_file):
-        with open(in_file) as f:
-            document = f.read()
-        match = CONTENT_ID_TIT_ABS.match(document)
-        if not match:
-            raise DocumentError(f"No match in {in_file}")
-        pmid, title, abstact = match.group(1, 2, 3)
+    def tag_doc(self, in_doc:TaggedDocument) -> TaggedDocument:
+        out_doc = copy.deepcopy(in_doc)
+        pmid, title, abstact = in_doc.id, in_doc.title, in_doc.abstract
         content = title.strip() + " " + abstact.strip()
         content = content.lower()
 
@@ -189,17 +189,20 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 end = indexes[-1] + len(words[-1])
                 if start > len(title):
                     start = start - 1
-                tags += list(self.generate_tag_lines(end, pmid, start, term))
+                tags += list(self.generate_tagged_entities(end, pmid, start, term))
 
         if self.config.dict_check_abbreviation:
             tags = DictTagger.clean_abbreviation_tags(tags, self.config.dict_min_full_tag_len)
 
-        output = "\n".join(['\t'.join([str(field) for field in t]) for t in tags]) + '\n'
-        # Write
-        if not os.path.isdir(os.path.dirname(out_file)):
-            os.makedirs(os.path.dirname(out_file))
+        out_doc.tags += tags
+        return out_doc
+
+    def _tag(self, in_file, out_file):
+        with open(in_file) as f:
+            document = f.read()
+        result = self.tag_doc(TaggedDocument(document))
         with open(out_file, "w+") as f:
-            f.write(output)
+            f.write(str(result))
 
     def generate_tag_lines(self, end, pmid, start, term):
         hits = self._get_term(term)
@@ -208,12 +211,19 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             for desc in hits:
                 yield pmid, start, end, term, self.tag_types[0], desc
 
+    def generate_tagged_entities(self, end, pmid, start, term):
+        hits = self._get_term(term)
+        # print(f"Found {hits} for '{term}'")
+        if hits:
+            for desc in hits:
+                yield TaggedEntity((pmid, start, end, term, self.tag_types[0], desc))
+
     def _get_term(self, term):
         hits = self.desc_by_term.get(term)
         return hits if hits else set()
 
     @staticmethod
-    def clean_abbreviation_tags(tags, minimum_tag_len=5):
+    def clean_abbreviation_tags(tags: List[TaggedEntity], minimum_tag_len=5):
         """
         This method removes all tags which are assumed to be an abbreviation and which do not have a long expression
         within the document
@@ -226,14 +236,13 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         tags_cleaned = []
         desc2tags = defaultdict(list)
         for t in tags:
-            _, start, end, term, e_type, desc = t
-            desc2tags[desc].append(t)
+            desc2tags[t.ent_id].append(t)
 
         # search if a full tag is found for a descriptor
         for desc, tags in desc2tags.items():
             keep_desc = False
             for t in tags:
-                if len(t[3]) >= minimum_tag_len:
+                if len(t.text) >= minimum_tag_len:
                     keep_desc = True
                     break
             if keep_desc:
