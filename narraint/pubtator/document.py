@@ -72,7 +72,7 @@ class TaggedDocument:
             self.entities_by_sentence = defaultdict(set)  # Use for _query processing
             self._create_index(spacy_nlp)
 
-    def clean(self):
+    def clean_tags(self):
         clean_tags = self.tags.copy()
         for tag1 in self.tags:
             if not tag1.document or not tag1.start or not tag1.end or not tag1.text or not tag1.ent_type or not tag1.ent_id:

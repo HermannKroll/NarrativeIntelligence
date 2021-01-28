@@ -56,6 +56,14 @@ def split_indexed_words(content):
         ind_words.append((word, ind))
         # index = last index + length of last word incl. offset
         next_index_word = next_index_word + len(word) + word_offset + 1
+
+    # For cases like "water-induced" add "water"
+    amendment = []
+    for word, index in ind_words:
+        split = word.split("-")
+        if len(split) == 2 and split[1][-2:] == "ed":
+            amendment.append((split[0], index))
+    ind_words += amendment
     return ind_words
 
 
@@ -172,7 +180,12 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         )
 
     def tag_doc(self, in_doc:TaggedDocument) -> TaggedDocument:
-        out_doc = copy.deepcopy(in_doc)
+        """
+        Generate tags for a TaggedDocument
+        :param in_doc: document containing title+abstract to tag. Is modified by adding tags
+        :return: the modified in_doc
+        """
+        out_doc = in_doc
         pmid, title, abstact = in_doc.id, in_doc.title, in_doc.abstract
         content = title.strip() + " " + abstact.strip()
         content = content.lower()

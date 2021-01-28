@@ -2,7 +2,7 @@ import unittest
 import os
 
 from narraint.config import PREPROCESS_CONFIG
-from narraint.preprocessing.tagging.dictagger import DictTagger
+from narraint.preprocessing.tagging.dictagger import DictTagger, split_indexed_words
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.drug import DrugTagger
 from narraint.tools import proj_rel_path
@@ -65,6 +65,15 @@ class TestDictagger(unittest.TestCase):
         strings = [repr(tag) for tag in document]
         self.assertIn("<Entity 51,61,metformin,Drug,Desc2>", strings)
         self.assertNotIn("ASA", strings)
+
+    def test_split_indexed_words(self):
+        content = "This is a water-induced, foobar carbon-copper:"
+        indexed = split_indexed_words(content)
+        self.assertIn(('water-induced', 10), indexed)
+        self.assertIn(('water', 10), indexed)
+        self.assertIn(('carbon-copper', 32), indexed)
+        self.assertNotIn(('carbon', 32), indexed)
+
 
 
 if __name__ == '__main__':
