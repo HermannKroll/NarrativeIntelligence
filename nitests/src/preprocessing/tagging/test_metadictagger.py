@@ -25,10 +25,9 @@ class TestMetadictagger(unittest.TestCase):
         # self.assertEqual(True, False)
 
     def test_tag(self):
-
         in_1 = util.get_test_resource_filepath("infiles/test_metadictagger/4297.txt")
         out_1 = tools.proj_rel_path("nitests/tmp/out/4297.txt")
-        os.makedirs(os.path.dirname(out_1))
+        os.makedirs(os.path.dirname(out_1), exist_ok=True)
         in_2 = util.get_test_resource_filepath("infiles/test_metadictagger/5600.txt")
         out_2 = tools.proj_rel_path("nitests/tmp/out/5600.txt")
         metatag = TestMetadictagger.make_metatag()
@@ -49,7 +48,21 @@ class TestMetadictagger(unittest.TestCase):
         dftag = TaggedEntity(None, 32926486, 1365, 1369, "i-h", "DosageForm", "MESH:D000280")
         self.assertIn(dftag, out_file.tags)
 
-
+    def test_custom_abbreviation_with_closing_space(self):
+        in_file = util.get_test_resource_filepath("infiles/test_metadictagger/h2o2space_test.txt")
+        metatag = TestMetadictagger.make_metatag()
+        out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
+        out_file.clean_tags()
+        self.assertIn(TaggedEntity(None, 32926513, 61, 78, "hydrogen peroxide", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 90, 108, "hydrogen peroxide", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 109, 117, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 344, 352, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 461, 469, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 487, 495, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 572, 580, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 665, 673, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 948, 956, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 1171, 1179, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
 
     @staticmethod
     def make_metatag():

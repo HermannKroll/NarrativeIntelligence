@@ -206,7 +206,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 if self.config.custom_abbreviations and hits:
                     match = re.match(r" \(([^\(\)]*)\).*", content[indexes[-1] + len(words[-1]):])
                     if match:
-                        abbreviation = match.groups()[0]
+                        # strip the abbreviation
+                        abbreviation = match.groups()[0].strip()
                         abb_vocab[abbreviation] = [(t.ent_type, t.ent_id) for t in hits]
 
         if abb_vocab:
