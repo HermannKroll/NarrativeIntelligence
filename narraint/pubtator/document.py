@@ -83,7 +83,7 @@ class TaggedDocument:
                     if tag2.start <= tag1.start and tag2.end >= tag1.end and tag1.text.lower() != tag2.text.lower():
                         clean_tags.remove(tag1)
                         break
-        self.tags = sorted(clean_tags, key=lambda t: (t.start, t.end, t.ent_type, t.ent_id))
+        self.tags = sorted(clean_tags, key=lambda t: (t.start, t.end, t.ent_id))
 
     def _create_index(self, spacy_nlp):
         # self.mesh_by_entity_name = {t.text.lower(): t.mesh for t in self.tags if
