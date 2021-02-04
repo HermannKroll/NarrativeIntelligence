@@ -71,7 +71,7 @@ def main(arguments=None):
     ext_in_file = args.input
     in_file = os.path.abspath(os.path.join(root_dir, "in.pubtator"))
 
-    if os.path.exists(root_dir):
+    if args.workdir and os.path.exists(root_dir):
         if not args.yes_force:
             print(f"{root_dir} already exists, continue and delete?")
             resp = input("y/n")
@@ -80,8 +80,9 @@ def main(arguments=None):
                 exit(0)
         else:
             shutil.rmtree(root_dir)
-
-    os.makedirs(root_dir)
+        # only create root dir if workdir is set
+        os.makedirs(root_dir)
+    # logdir must be created in both cases
     os.makedirs(log_dir)
 
     # create loggers
@@ -135,6 +136,11 @@ def main(arguments=None):
     consumer.start()
     consumer.join()
     logger.info(f"finished in {(datetime.now()-start).total_seconds()} seconds")
+
+    if not args.workdir:
+        logger.info(f'Remove temp directory: {root_dir}')
+        shutil.rmtree(root_dir)
+
 
 if __name__ == '__main__':
     main()
