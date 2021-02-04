@@ -28,6 +28,8 @@ class TaggedEntity:
     def __eq__(self, other):
         return self.document == other.document and self.start == other.start and self.end == other.end \
             and self.text == other.text and self.ent_type == other.ent_type and self.ent_id == other.ent_id
+    def __hash__(self):
+        return hash((self.start, self.end, self.text, self.ent_id))
 
 
 class Sentence:
@@ -49,6 +51,7 @@ def parse_tag_list(path_or_str):
     content = tools.read_if_path(path_or_str)
     reg_result = TAG_LINE_NORMAL.findall(content)
     return [TaggedEntity(t) for t in reg_result] if reg_result else []
+
 
 class TaggedDocument:
 
