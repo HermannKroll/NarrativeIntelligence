@@ -9,7 +9,7 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 class TaggedEntity:
 
-    def __init__(self, tag_tuple=None, document=None, start=None, end=None, text=None, ent_type=None, ent_id = None):
+    def __init__(self, tag_tuple=None, document=None, start=None, end=None, text=None, ent_type=None, ent_id=None):
         self.document = int(tag_tuple[0]) if tag_tuple else document
         self.start = int(tag_tuple[1]) if tag_tuple else start
         self.end = int(tag_tuple[2]) if tag_tuple else end
@@ -27,7 +27,8 @@ class TaggedEntity:
 
     def __eq__(self, other):
         return self.document == other.document and self.start == other.start and self.end == other.end \
-            and self.text == other.text and self.ent_type == other.ent_type and self.ent_id == other.ent_id
+               and self.text == other.text and self.ent_type == other.ent_type and self.ent_id == other.ent_id
+
     def __hash__(self):
         return hash((self.start, self.end, self.text, self.ent_id))
 
@@ -124,7 +125,8 @@ class TaggedDocument:
                         self.entities_by_sentence[sid].add(entity)
 
     def __str__(self):
-        return Document.create_pubtator(self.id, self.title, self.abstract)+"".join([str(t) for t in self.tags])+"\n"
+        return Document.create_pubtator(self.id, self.title, self.abstract) + "".join(
+            [str(t) for t in self.tags]) + "\n"
 
     def __repr__(self):
         return "<Document {} {}>".format(self.id, self.title)

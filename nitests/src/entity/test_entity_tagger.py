@@ -7,7 +7,7 @@ from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary
 
 
 class EntityTaggerTestCase(TestCase):
-    
+
     def setUp(self) -> None:
         self.entity_tagger = EntityTagger.instance()
 

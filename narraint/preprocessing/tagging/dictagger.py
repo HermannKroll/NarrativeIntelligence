@@ -67,13 +67,12 @@ def split_indexed_words(content):
     return ind_words
 
 
-
 class DictTagger(BaseTagger, metaclass=ABCMeta):
     PROGRESS_BATCH = 10000
 
     def __init__(self, short_name, long_name, version, tag_types, index_cache, source_file, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tag_types = [tag_types,]
+        self.tag_types = [tag_types, ]
         self.short_name, self.long_name, self.version = short_name, long_name, version
         self.index_cache = index_cache
         self.source_file = source_file
@@ -148,7 +147,6 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         # Create output directory
         os.makedirs(self.out_dir, exist_ok=True)
 
-
     def get_tags(self):
         return self._get_tags(self.out_dir)
 
@@ -179,7 +177,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             len(skipped_files)),
         )
 
-    def tag_doc(self, in_doc:TaggedDocument) -> TaggedDocument:
+    def tag_doc(self, in_doc: TaggedDocument) -> TaggedDocument:
         """
         Generate tags for a TaggedDocument
         :param in_doc: document containing title+abstract to tag. Is modified by adding tags
@@ -206,7 +204,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 hits = list(self.generate_tagged_entities(end, pmid, start, term))
                 tags += hits
                 if self.config.custom_abbreviations and hits:
-                    match = re.match(r" \(([^\(\)]*)\).*", content[indexes[-1]+len(words[-1]):])
+                    match = re.match(r" \(([^\(\)]*)\).*", content[indexes[-1] + len(words[-1]):])
                     if match:
                         abbreviation = match.groups()[0]
                         abb_vocab[abbreviation] = [(t.ent_type, t.ent_id) for t in hits]
@@ -243,7 +241,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             for desc in hits:
                 yield pmid, start, end, term, self.tag_types[0], desc
 
-    def generate_tagged_entities(self, end, pmid, start, term, tmp_vocab = None):
+    def generate_tagged_entities(self, end, pmid, start, term, tmp_vocab=None):
         hits = set()
         if tmp_vocab:
             tmp_hit = tmp_vocab.get(term)
