@@ -97,7 +97,7 @@ def create_tag_query(session, collection=None, document_ids=None, tag_types=None
         tag_query = tag_query.filter(Tag.ent_type.in_(tag_types))
     if document_ids:
         tag_query = tag_query.filter(Tag.document_id.in_(document_ids))
-    tag_query = tag_query.order_by(Tag.document_collection, Tag.document_id, Tag.ent_type, Tag.start, Tag.id )
+    tag_query = tag_query.order_by(Tag.document_collection, Tag.document_id, Tag.start, Tag.id)
     return tag_query
 
 
