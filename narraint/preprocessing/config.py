@@ -100,6 +100,10 @@ class Config:
         return self.config["dict"]["check_abbreviation"]
 
     @property
+    def custom_abbreviations(self):
+        return self.config["dict"]["custom_abbreviations"]
+
+    @property
     def dict_min_full_tag_len(self):
         return self.config["dict"]["min_full_tag_len"]
 

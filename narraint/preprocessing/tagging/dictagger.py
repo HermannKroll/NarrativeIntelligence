@@ -205,8 +205,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                     start = start - 1
                 hits = list(self.generate_tagged_entities(end, pmid, start, term))
                 tags += hits
-                if hits:
-                    match = re.match(r" \((.*)\).*", content[indexes[-1]+len(words[-1]):])
+                if self.config.custom_abbreviations and hits:
+                    match = re.match(r" \(([^\(\)]*)\).*", content[indexes[-1]+len(words[-1]):])
                     if match:
                         abbreviation = match.groups()[0]
                         abb_vocab[abbreviation] = [(t.ent_type, t.ent_id) for t in hits]

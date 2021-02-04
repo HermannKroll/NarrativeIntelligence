@@ -44,8 +44,10 @@ class TestMetadictagger(unittest.TestCase):
         metatag = TestMetadictagger.make_metatag()
         out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
         out_file.clean_tags()
-        self.assertIn(TaggedEntity(None, 32926486, 709, 712, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
-        self.assertIn(TaggedEntity(None, 32926486, 1227, 1230, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926486, 715, 718, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926486, 1233, 1236, "eo", "Excipient", "Ethylene oxide"), out_file.tags)
+        dftag = TaggedEntity(None, 32926486, 1365, 1369, "i-h", "DosageForm", "MESH:D000280")
+        self.assertIn(dftag, out_file.tags)
 
 
 
