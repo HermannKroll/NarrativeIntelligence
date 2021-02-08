@@ -118,7 +118,7 @@ class EntityTaggerTestCase(TestCase):
             self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
 
     def test_gene_names(self):
-        valid_cyp3a4_symbol = {'CYP3A4'}
+        valid_cyp3a4_symbol = {'cyp3a4'}
         cyp3a4_names = ['CYP3A4', 'cytochrome P450 family 3 subfamily A member 4',
                         'HLP', 'CP33', 'CP34', 'CYP3A', 'NF-25', 'CYP3A3',
                         'P450C3', 'CYPIIIA3', 'CYPIIIA4', 'P450PCN1']
@@ -126,16 +126,24 @@ class EntityTaggerTestCase(TestCase):
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
             self.assertGreaterEqual(len(found_ids.intersection(valid_cyp3a4_symbol)), len(valid_cyp3a4_symbol))
 
-        valid_mtor_symbol = {'MTOR'}
+        valid_mtor_symbol = {'mtor'}
         mtor_names = ['MTOR', 'mechanistic target of rapamycin kinase', 'SKS', 'FRAP', 'FRAP1', 'FRAP2', 'RAFT1',
                       'RAPT1']
         for n in mtor_names:
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
             self.assertGreaterEqual(len(found_ids.intersection(valid_mtor_symbol)), len(valid_mtor_symbol))
 
-        valid_cyp3a5_symbol = {'CYP3A5'}
+        valid_cyp3a5_symbol = {'cyp3a5'}
         cyp3a5_names = ['cyp3a5', 'cytochrome P450 family 3 subfamily A member 5',
                         'CP35', 'CYPIIIA5', 'P450PCN3', 'PCN3']
         for n in cyp3a5_names:
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
             self.assertGreaterEqual(len(found_ids.intersection(valid_cyp3a5_symbol)), len(valid_cyp3a5_symbol))
+
+    def test_nano_particle(self):
+        valid_nano_particle_id = {'J01.637.512.600'}
+        names = ['nano particle', 'nano-particle', 'nano particles', 'nanoparticle', 'nanoparticles']
+        for n in names:
+            found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
+            self.assertGreaterEqual(len(found_ids.intersection(valid_nano_particle_id)), len(valid_nano_particle_id),
+                                    msg=f'name: {n} failed - ids found: {found_ids}')

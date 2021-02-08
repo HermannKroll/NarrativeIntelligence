@@ -133,7 +133,17 @@ class EntityTagger:
         """
         for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
             for t in terms:
-                self.term2entity[t.lower()].add(Entity(df_id, DOSAGE_FORM))
+                term = t.strip().lower()
+                # its a mesh descriptor
+                if df_id.startswith('D'):
+                    try:
+                        tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(df_id)
+                        for tn in tree_nos:
+                            self.term2entity[term].add(Entity(tn, 'MESH_ONTOLOGY'))
+                    except KeyError:
+                        self.term2entity[term].add(Entity('MESH:{}'.format(df_id), 'MESH'))
+                else:
+                    self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
 
     def _add_excipient_terms(self):
         """
