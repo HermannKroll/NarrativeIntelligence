@@ -8,17 +8,19 @@ from sqlalchemy.orm import aliased
 
 from narraint.backend.database import Session
 from narraint.backend.models import Predication
+from narraint.entity.entity import Entity
 from narraint.entity.enttypes import GENE, SPECIES
 from narraint.extraction.versions import PATHIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
-from narraint.queryengine.engine import VAR_NAME, VAR_TYPE, VAR_TYPE_PREDICATE
+from narraint.queryengine.engine import VAR_NAME, VAR_TYPE, VAR_TYPE_PREDICATE, QueryEngine
+from narraint.queryengine.query import GraphQuery, FactPattern
 
 RANDOM_FACTS = 100000
-QUERIES_WITH_ONE_PRED = 100000
-QUERIES_WITH_TWO_PRED = 100000
-QUERIES_WITH_THREE_PRED = 100000
+QUERIES_WITH_ONE_PRED = 1000
+QUERIES_WITH_TWO_PRED = 1000
+QUERIES_WITH_THREE_PRED = 1000
 QUERIES_WITH_VAR_1 = 100
-QUERIES_WITH_VAR_2 = 1000
+QUERIES_WITH_VAR_2 = 100
 
 
 class PerformanceQueryEngine:
@@ -27,6 +29,9 @@ class PerformanceQueryEngine:
     It supports the translation into a SQL statement and measures the performance for translation and execution
     The times are measured by COUNT(*) queries
     """
+
+    def __init__(self):
+        self.query_engine = QueryEngine()
 
     def __construct_query(self, session, graph_query, doc_collection, extraction_type):
         var_names = []
@@ -126,21 +131,31 @@ class PerformanceQueryEngine:
 
         return query, var_names
 
-    def query_with_graph_query(self, graph_query, doc_collection, extraction_type, keyword_query=''):
-        if len(graph_query) == 0:
+    def query_with_graph_query(self, facts, doc_collection):
+        if len(facts) == 0:
             raise ValueError('graph query must contain at least one fact')
 
-        session = Session.get()
-        time_before_translation = datetime.now()
-        query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
-        time_after_translation = datetime.now()
-        time_before_query = datetime.now()
-        result_size = 0
-        for r in session.execute(query):
-            result_size = r[0]
-        time_after_query = datetime.now()
+        graph_query = GraphQuery()
+        for f in facts:
+            graph_query.add_fact_pattern(FactPattern([Entity(f[0], f[1])],
+                                                     f[2], [Entity(f[3], f[4])]))
 
-        return (time_after_query - time_before_query), (time_after_translation - time_before_translation), result_size
+        time_before_query = datetime.now()
+        results, limit_hit = self.query_engine.process_query_with_expansion(graph_query, doc_collection)
+        time_after_query = datetime.now()
+        result_size = len(set([r.document_id for r in results]))
+
+        #    session = Session.get()
+        #   time_before_translation = datetime.now()
+        #  query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
+        # time_after_translation = datetime.now()
+        # time_before_query = datetime.now()
+        # result_size = 0
+        # for r in session.execute(query):
+        #    result_size = r[0]
+        # time_after_query = datetime.now()
+
+        return (time_after_query - time_before_query), result_size
 
 
 def main():
@@ -153,10 +168,10 @@ def main():
 
     session = Session.get()
     q = session.query(Predication.subject_id, Predication.subject_type, Predication.predicate_canonicalized,
-                      Predication.object_id, Predication.object_type)\
-        .filter(Predication.predicate_canonicalized != None)\
-        .filter(Predication.extraction_type == PATHIE_EXTRACTION)\
-        .filter(Predication.document_collection == 'PubMed')\
+                      Predication.object_id, Predication.object_type) \
+        .filter(Predication.predicate_canonicalized != None) \
+        .filter(Predication.extraction_type == PATHIE_EXTRACTION) \
+        .filter(Predication.document_collection == 'PubMed') \
         .order_by(func.random()).limit(RANDOM_FACTS)
 
     logging.info('Querying {} randomly sampled facts'.format(RANDOM_FACTS))
@@ -170,44 +185,42 @@ def main():
         for s, s_t, p, o, o_t in facts:
             f.write('\n{}\t{}\t{}\t{}\t'.format(s, s_t, p, o, o_t))
 
-    logging.info('init query enginge')
+    logging.info('init query engine...')
     engine = PerformanceQueryEngine()
 
     logging.info('I: analysing performance: queries with 1 predicate...')
     with open('performance_query_1.tsv', 'wt') as f:
-        f.write('time_query\ttime_translation\tresult_size\tquery')
+        f.write('time_query\tresult_size\tquery')
         start_time = datetime.now()
         for i in range(0, QUERIES_WITH_ONE_PRED):
             fact_query = random.sample(facts, k=1)
-            time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
-            f.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
-            print_progress_with_eta('analysing performace I', i, QUERIES_WITH_ONE_PRED, start_time, print_every_k=1)
-
+            time_query, result_size = engine.query_with_graph_query(fact_query, "PubMed")
+            f.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
+            print_progress_with_eta('analysing performance I', i, QUERIES_WITH_ONE_PRED, start_time, print_every_k=1)
 
     logging.info('II: analysing performance: queries with 2 predicates...')
     with open('performance_query_2.tsv', 'wt') as f:
-        f.write('time_query\ttime_translation\tresult_size\tquery')
+        f.write('time_query\tresult_size\tquery')
         start_time = datetime.now()
         for i in range(0, QUERIES_WITH_TWO_PRED):
             fact_query = random.sample(facts, k=2)
-            time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
-            f.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
-            print_progress_with_eta('analysing performace II', i, QUERIES_WITH_TWO_PRED, start_time, print_every_k=1)
+            time_query, result_size = engine.query_with_graph_query(fact_query, "PubMed")
+            f.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
+            print_progress_with_eta('analysing performance II', i, QUERIES_WITH_TWO_PRED, start_time, print_every_k=1)
 
     logging.info('III: analysing performance: queries with 3 predicate...')
     with open('performance_query_3.tsv', 'wt') as f:
-        f.write('time_query\ttime_translation\tresult_size\tquery')
+        f.write('time_query\tresult_size\tquery')
         start_time = datetime.now()
         for i in range(0, QUERIES_WITH_THREE_PRED):
             fact_query = random.sample(facts, k=3)
-            time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
-            f.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
-            print_progress_with_eta('analysing performace III', i, QUERIES_WITH_THREE_PRED, start_time, print_every_k=1)
-
+            time_query, result_size = engine.query_with_graph_query(fact_query, "PubMed")
+            f.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
+            print_progress_with_eta('analysing performance III', i, QUERIES_WITH_THREE_PRED, start_time, print_every_k=1)
 
     logging.info('IV: analysing performance: queries with 1 variable and 1 predicate...')
     with open('performance_query_variable_1.tsv', 'wt') as fp:
-        fp.write('time_query\ttime_translation\tresult_size\tquery')
+        fp.write('time_query\tresult_size\tquery')
         start_time = datetime.now()
         for i in range(0, QUERIES_WITH_VAR_1):
             fact_query = random.sample(facts, k=1)
@@ -217,13 +230,14 @@ def main():
             else:
                 f = fact_query[0]
                 fact_query[0] = (f[0], f[1], f[2], '?X', 'Variable')
-            time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
-            fp.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
-            print_progress_with_eta('analysing performace variable I', i, QUERIES_WITH_VAR_1, start_time, print_every_k=1)
+            time_query, result_size = engine.query_with_graph_query(fact_query, "PubMed")
+            fp.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
+            print_progress_with_eta('analysing performance variable I', i, QUERIES_WITH_VAR_1, start_time,
+                                    print_every_k=1)
 
     logging.info('V: analysing performance: queries with 1 variable and 2 predicate...')
     with open('performance_query_variable_2.tsv', 'wt') as fp:
-        fp.write('time_query\ttime_translation\tresult_size\tquery')
+        fp.write('time_query\tresult_size\tquery')
         start_time = datetime.now()
         for i in range(0, QUERIES_WITH_VAR_2):
             fact_query = random.sample(facts, k=2)
@@ -236,11 +250,12 @@ def main():
                 f = fact_query[0]
                 fact_query[0] = (f[0], f[1], f[2], '?X', 'Variable')
                 f2 = fact_query[1]
-                fact_query[1] = ('?X', 'Variable',  f2[2], f2[3], f2[4])
+                fact_query[1] = ('?X', 'Variable', f2[2], f2[3], f2[4])
 
-            time_query, time_translation, result_size = engine.query_with_graph_query(fact_query, "PubMed", "PATH")
-            fp.write('\n{}\t{}\t{}\t{}'.format(time_query, time_translation, result_size, fact_query))
-            print_progress_with_eta('analysing performace variabe II', i, QUERIES_WITH_VAR_2, start_time, print_every_k=1)
+            time_query, result_size = engine.query_with_graph_query(fact_query, "PubMed")
+            fp.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
+            print_progress_with_eta('analysing performance variable II', i, QUERIES_WITH_VAR_2, start_time,
+                                    print_every_k=1)
 
 
 if __name__ == "__main__":

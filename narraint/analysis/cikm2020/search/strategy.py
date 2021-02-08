@@ -47,7 +47,6 @@ class TextSearchStrategy(SearchStrategy):
         self.entity_resolver = EntityResolver.instance()
         self.stemmer = PorterStemmer()
 
-
     def get_document_content(self, document_id: int, document_collection: str) -> TaggedDocument:
         doc_path = os.path.join(self.document_dir, '{}_{}.txt'.format(document_collection, document_id))
         with open(doc_path, 'r') as f:
@@ -73,11 +72,9 @@ class TextSearchStrategy(SearchStrategy):
                 sentences.update(document.sentences_by_ent_id[entity.entity_id])
         return sentences
 
-    def find_entity_positions(self, entity: Entity, document:TaggedDocument):
+    def find_entity_positions(self, entity: Entity, document: TaggedDocument):
         meshs = entity.get_meshs()
         return {e.start for m in meshs if m in document.entities_by_ent_id for e in document.entities_by_ent_id.get(m)}
-
-
 
     def find_sentences_by_entity_name(self, entity: Entity, document: TaggedDocument):
         """
@@ -100,13 +97,15 @@ class TextSearchStrategy(SearchStrategy):
                     sentences.add(s_id)
         return
 
+
 class SentenceEntityCooccurrence(TextSearchStrategy):
 
     def __init__(self, document_dir=EXP_TEXTS_DIRECTORY):
         super().__init__(document_dir)
         self.name = "SentenceEntityCooccurrence"
 
-    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (float, float, float):
+    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
+    float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
         document_hits = set()
         for doc_id in ids_sample:
@@ -116,10 +115,10 @@ class SentenceEntityCooccurrence(TextSearchStrategy):
                 subj_sentences, obj_sentences = set(), set()
                 for subj in fp.subjects:
                     subj_sentences.update(self.find_sentences_by_entity_id(subj, document))
-                  #  subj_sentences.update(self.find_sentences_by_entity_name(subj, document))
+                #  subj_sentences.update(self.find_sentences_by_entity_name(subj, document))
                 for obj in fp.objects:
                     obj_sentences.update(self.find_sentences_by_entity_id(obj, document))
-                   # obj_sentences.update(self.find_sentences_by_entity_name(obj, document))
+                # obj_sentences.update(self.find_sentences_by_entity_name(obj, document))
                 intersection = subj_sentences.intersection(obj_sentences)
 
                 if len(intersection) == 0:
@@ -136,7 +135,8 @@ class SentenceFactCooccurrence(TextSearchStrategy):
         super().__init__(document_dir)
         self.name = "SentenceFactCooccurrence"
 
-    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (float, float, float):
+    def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
+    float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
         document_hits = set()
         for doc_id in ids_sample:
@@ -172,8 +172,8 @@ class DBSearchStrategy(SearchStrategy):
 
     def query_ie_database(self, query, document_collection, extraction_type, ids_sample, ids_correct):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
-        query_results = self.query_engine.process_query_with_expansion(graph_query, document_collection,
-                                                                       extraction_type, query)
+        query_results, _ = self.query_engine.process_query_with_expansion(graph_query, document_collection,
+                                                                          extraction_type, query)
         doc_ids = set([q_r.document_id for q_r in query_results])
 
         if ids_sample:
@@ -223,7 +223,7 @@ class KeywordStrategy(TextSearchStrategy):
         self.max_distance = math.inf
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
-    float, float, float):
+            float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
 
         fps = {fp: (
@@ -243,14 +243,14 @@ class KeywordStrategy(TextSearchStrategy):
                 pred_positions = [i.start() for i in re.finditer(self.stemmer.stem(pred), doc_content.content.lower())]
                 obj_positions = [pos for o in objs for pos in self.find_entity_positions(o, doc_content)]
 
-                is_hit &= not(not sub_positions or not pred_positions or not obj_positions)
+                is_hit &= not (not sub_positions or not pred_positions or not obj_positions)
 
                 min_dist = math.inf
                 for s_pos, p_pos, o_pos in product(sub_positions, pred_positions, obj_positions):
-                    min_dist = min(min_dist, max(abs(s_pos-p_pos), abs(s_pos-o_pos), abs(p_pos-o_pos)))
-                
+                    min_dist = min(min_dist, max(abs(s_pos - p_pos), abs(s_pos - o_pos), abs(p_pos - o_pos)))
+
                 is_hit &= min_dist <= self.max_distance
-                
+
             if is_hit:
                 hits.add(doc_id)
         return calculate_prec_rec_f(hits, ids_correct)

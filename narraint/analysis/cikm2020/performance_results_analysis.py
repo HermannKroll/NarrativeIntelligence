@@ -37,31 +37,24 @@ def main():
         with open(file, 'rt') as fp:
             count = 0
             avg_time_query = 0
-            avg_time_translation = 0
             avg_result_size = 0
             for line in islice(fp, 1, None):
-                time_query, time_translation, result_size, _ = line.split('\t')
+                time_query, result_size, _ = line.split('\t')
                 count += 1
                 time_query_datetime = convert_time_to_milliseconds(time_query)
-                time_translation_datetime = convert_time_to_milliseconds(time_translation)
                 avg_time_query += float(time_query_datetime)
-                avg_time_translation += float(time_translation_datetime)
                 avg_result_size += int(result_size)
 
             avg_time_query = avg_time_query / count
-            avg_time_translation = avg_time_translation / count
             avg_result_size = avg_result_size / count
             logging.info('Analysed {} queries'.format(count))
             logging.info('Average query time: {} ms'.format(avg_time_query))
-            logging.info('Average query translation time: {} ms'.format(avg_time_translation))
             logging.info('Average result size: {}'.format(avg_result_size))
             system_throughput = 1000 / avg_time_query
-            logging.info('System througput: {} queries / s'.format(system_throughput))
+            logging.info('System throughput: {} queries / s'.format(system_throughput))
 
         logging.info('-' * 60)
-
     logging.info('Finished')
-
 
 
 if __name__ == "__main__":
