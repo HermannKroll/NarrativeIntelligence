@@ -333,7 +333,7 @@ class QueryEngine:
         """
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
-            logging.info('Query wont yield results - returning empty list')
+            logging.debug('Query wont yield results - returning empty list')
             return [], False
         start_time = datetime.now()
         query_limit_hit = False
@@ -347,11 +347,11 @@ class QueryEngine:
         # remove none objects
         optimized_expanded_queries = [q for q in optimized_expanded_queries if q]
         if len(optimized_expanded_queries) == 0:
-            logging.info('Query wont yield results - returning empty list')
+            logging.debug('Query wont yield results - returning empty list')
             return [], False
 
         queries_to_execute = sum([len(q.fact_patterns) for q in optimized_expanded_queries])
-        logging.info('The query will be expanded into {} queries'.format(queries_to_execute))
+        logging.debug('The query will be expanded into {} queries'.format(queries_to_execute))
 
         if len(optimized_expanded_queries) > 1 or len(optimized_expanded_queries[0].fact_patterns) > 1:
             # database join for fact patterns seems to be very slow
