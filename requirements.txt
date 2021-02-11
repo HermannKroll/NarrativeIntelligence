@@ -16,3 +16,4 @@ pytest
 datrie
 asgiref
 stanza
+spacy
