@@ -203,76 +203,16 @@ def clean_extractions_in_database():
     session.commit()
 
 
-def mirror_symmetric_predicates():
-    """
-    Some predicates are symmetric - these predicates will be mirrored in the database
-    :return: None
-    """
-    session = Session.get()
-    logging.info('Mirroring symmetric predicates...')
-    for idx_pred, pred_to_mirror in enumerate(SYMMETRIC_PREDICATES):
-        start_time = datetime.now()
-        logging.info('Mirroring predicate: {}'.format(pred_to_mirror))
-        q = session.query(Predication)
-        q = q.filter(Predication.predicate_canonicalized == pred_to_mirror)
-        predication_values = []
-        count_mirrored = 0
-        for i, r in enumerate(session.execute(q)):
-            p = PredicationResult(*r)
-
-            try:
-                predication_values.append(dict(
-                    document_id=p.document_id,
-                    document_collection=p.document_collection,
-                    subject_id=p.object_id,
-                    subject_str=p.object_str,
-                    subject_type=p.object_type,
-                    predicate=p.predicate,
-                    predicate_canonicalized=p.predicate_canonicalized,
-                    object_id=p.subject_id,
-                    object_str=p.subject_str,
-                    object_type=p.subject_type,
-                    confidence=p.confidence,
-                    sentence_id=p.sentence_id,
-                    extraction_type=p.extraction_type
-                ))
-
-                if i % BULK_INSERT_AFTER_K == 0:
-                    session.bulk_insert_mappings(Predication, predication_values)
-                    session.commit()
-                    predication_values.clear()
-            except IntegrityError:
-                _insert_predication_skip_duplicates(session, predication_values)
-                predication_values.clear()
-
-            count_mirrored += 1
-        try:
-            # commit the remaining
-            session.bulk_insert_mappings(Predication, predication_values)
-            session.commit()
-            predication_values.clear()
-        except IntegrityError:
-            _insert_predication_skip_duplicates(session, predication_values)
-            predication_values.clear()
-
-        logging.info('{} facts mirrored for predicate: {} (in {}s)'.format(count_mirrored, pred_to_mirror,
-                                                                           datetime.now() - start_time))
-
-    logging.info('Mirroring predicates finished')
-
-
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
     logging.info('Applying rules...')
-
-    # dosage_form_rule()
-   # clean_extractions_in_database()
+    dosage_form_rule()
+    clean_extractions_in_database()
     clean_redundant_symmetric_predicates()
     logging.info('Finished...')
-    # mirror_symmetric_predicates()
 
 
 if __name__ == "__main__":
