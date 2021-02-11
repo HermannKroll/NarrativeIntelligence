@@ -126,18 +126,15 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     session.commit()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("word2vec_model", help='word2vec file')
-    parser.add_argument("output_distances", help='tsv export for distances')
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
-
+def canonicalize_predication_table(word2vec_model, output_distances):
+    """
+    Canonicalizes the predicates in the database
+    :param word2vec_model: a Word2Vec model
+    :param output_distances: a file where the predicate mapping will be stored
+    :return: None
+    """
     logging.info('Loading Word2Vec model...')
-    model = fasttext.load_model(args.word2vec_model)
+    model = fasttext.load_model(word2vec_model)
     logging.info('Creating predicate vocabulary...')
     pred_vocab = create_predicate_vocab()
     logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
@@ -148,10 +145,22 @@ def main():
     predicates = filter_predicate_list(predicates_with_count)
     logging.info('{} predicates obtained'.format(len(predicates)))
     logging.info('Matching predicates...')
-    best_matches = match_predicates(model, predicates, pred_vocab, args.output_distances)
+    best_matches = match_predicates(model, predicates, pred_vocab, output_distances)
     logging.info('Canonicalizing predicates...')
     canonicalize_predicates(best_matches)
     logging.info('Finished')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("word2vec_model", help='word2vec file')
+    parser.add_argument("output_distances", help='tsv export for distances')
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
+    canonicalize_predication_table(args.word2vec_model, args.output_distances)
 
 
 if __name__ == "__main__":
