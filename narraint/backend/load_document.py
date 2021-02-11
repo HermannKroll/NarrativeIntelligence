@@ -3,7 +3,7 @@ import json
 import logging
 import sys
 from datetime import datetime
-from typing import Tuple, Dict, Set
+from typing import Tuple, Dict
 
 from sqlalchemy.dialects.postgresql import insert
 
@@ -12,8 +12,8 @@ from narraint.backend.database import Session
 from narraint.backend.models import Document, Tag, Tagger, DocTaggedBy
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
+from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.extract import read_pubtator_documents
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, TAG_LINE_NORMAL, TAG_DOCUMENT_ID
 
 BULK_LOAD_COMMIT_AFTER = 50000
 PRINT_ETA_EVERY_K_DOCUMENTS = 100
@@ -64,26 +64,6 @@ def insert_taggers(*tagger_list):
     session.commit()
 
 
-def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str], Set]:
-    """
-    Get document ID, title, abstract and tags from PubTator document. Selects only the FIRST document.
-
-    :param pubtator_content: Input PubTator content
-    :return: Triple consisting of document ID, Triple consisting of Id, title, abstract and tags
-    """
-    m_tags = TAG_LINE_NORMAL.findall(pubtator_content)
-    m_documents = CONTENT_ID_TIT_ABS.findall(pubtator_content)
-    if m_documents:
-        document_id = int(m_documents[0][0])
-    else:
-        m_tag_doc_id = TAG_DOCUMENT_ID.search(pubtator_content)
-        document_id = int(m_tag_doc_id.group(1)) if m_tag_doc_id else None
-    document = (int(m_documents[0][0]), m_documents[0][1].strip(), m_documents[0][2].strip()) if m_documents else None
-    tags = set((int(m[0]), int(m[1]), int(m[2]), m[3].strip(), m[4].strip(), m[5].strip()) for m in m_tags if
-               int(m[0]) == document_id)
-    return document_id, document, tags
-
-
 def document_bulk_load(path, collection, tagger_mapping=None):
     """
        Bulk load a file in PubTator Format or a directory of PubTator files into the database.
@@ -121,41 +101,37 @@ def document_bulk_load(path, collection, tagger_mapping=None):
     tag_inserts = []
     doc_tagged_by_inserts = []
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
+        doc = TaggedDocument(pubtator_content)
         tagged_ent_types = set()
-        doc_id, d_content, d_tags = get_id_content_tag(pubtator_content)
-
         # skip included documents
-        if doc_id in db_doc_ids:
+        if doc.id in db_doc_ids:
             continue
 
         # Add document if its not already included
-        if d_content:
-            db_doc_ids.add(doc_id)
+        if doc.title:
+            db_doc_ids.add(doc.id)
             document_inserts.append(dict(
                 collection=collection,
-                id=d_content[0],
-                title=d_content[1],
-                abstract=d_content[2],
+                id=doc.id,
+                title=doc.title,
+                abstract=doc.abstract,
             ))
 
-        if doc_id not in db_doc_ids:
-            logging.warning("Document {} {} not in DB".format(collection, doc_id))
+        if doc.id not in db_doc_ids:
+            logging.warning("Document {} {} not in DB".format(collection, doc.id))
         # only if tagger mapping is set, tags will be inserted
-        if d_tags and tagger_mapping and doc_id in db_doc_ids:
-            # Filter tags (remove empty IDs)
-            d_tags = {x for x in d_tags if x[-1]}
-
+        if doc.tags and tagger_mapping and doc.id in db_doc_ids:
             # Add tags
-            for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-                tagged_ent_types.add(ent_type)
+            for tag in doc.tags:
+                tagged_ent_types.add(tag.ent_type)
 
                 tag_inserts.append(dict(
-                    ent_type=ent_type,
-                    start=start,
-                    end=end,
-                    ent_id=ent_id,
-                    ent_str=ent_str,
-                    document_id=d_id,
+                    ent_type=tag.ent_type,
+                    start=tag.start,
+                    end=tag.end,
+                    ent_id=tag.ent_id,
+                    ent_str=tag.text,
+                    document_id=doc.id,
                     document_collection=collection,
                 ))
 
@@ -163,7 +139,7 @@ def document_bulk_load(path, collection, tagger_mapping=None):
             for ent_type in tagged_ent_types:
                 tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
                 doc_tagged_by_inserts.append(dict(
-                    document_id=doc_id,
+                    document_id=doc.id,
                     document_collection=collection,
                     tagger_name=tagger_name,
                     tagger_version=tagger_version,
@@ -219,16 +195,15 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
 
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
+        doc = TaggedDocument(pubtator_content)
         tagged_ent_types = set()
-        doc_id, d_content, d_tags = get_id_content_tag(pubtator_content)
-
         # Add document
-        if d_content:
+        if doc.title:
             insert_document = insert(Document).values(
                 collection=collection,
-                id=d_content[0],
-                title=d_content[1],
-                abstract=d_content[2],
+                id=doc.id,
+                title=doc.title,
+                abstract=doc.abstract,
             )
             if not Session.is_sqlite:
                 insert_document = insert_document.on_conflict_do_nothing(
@@ -237,24 +212,21 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
             session.execute(insert_document)
 
         # only if tagger mapping is set, tags will be inserted
-        if d_tags and tagger_mapping:
+        if doc.tags and tagger_mapping:
             q_exists = session.query(Document) \
-                .filter(Document.id == doc_id, Document.collection == collection).exists()
+                .filter(Document.id == doc.id, Document.collection == collection).exists()
             if session.query(q_exists).scalar():
-                # Filter tags (remove empty IDs)
-                d_tags = {x for x in d_tags if x[-1]}
-
                 # Add tags
-                for d_id, start, end, ent_str, ent_type, ent_id in d_tags:
-                    tagged_ent_types.add(ent_type)
+                for tag in doc.tags:
+                    tagged_ent_types.add(tag.ent_type)
 
                     insert_tag = insert(Tag).values(
-                        ent_type=ent_type,
-                        start=start,
-                        end=end,
-                        ent_id=ent_id,
-                        ent_str=ent_str,
-                        document_id=d_id,
+                        ent_type=tag.ent_type,
+                        start=tag.start,
+                        end=tag.end,
+                        ent_id=tag.ent_id,
+                        ent_str=tag.text,
+                        document_id=doc.id,
                         document_collection=collection,
                     )
                     if not Session.is_sqlite:
@@ -267,7 +239,7 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
                 for ent_type in tagged_ent_types:
                     tagger_name, tagger_version = get_tagger_for_enttype(tagger_mapping, ent_type)
                     insert_doc_tagged_by = insert(DocTaggedBy).values(
-                        document_id=doc_id,
+                        document_id=doc.id,
                         document_collection=collection,
                         tagger_name=tagger_name,
                         tagger_version=tagger_version,
