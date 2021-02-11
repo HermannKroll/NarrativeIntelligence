@@ -84,7 +84,7 @@ def get_id_content_tag(pubtator_content: str) -> Tuple[int, Tuple[int, str, str]
     return document_id, document, tags
 
 
-def bulk_load(path, collection, tagger_mapping=None):
+def document_bulk_load(path, collection, tagger_mapping=None):
     """
        Bulk load a file in PubTator Format or a directory of PubTator files into the database.
        Do not use this method for parallel load - it will not check whether conflicts exists
@@ -190,7 +190,7 @@ def bulk_load(path, collection, tagger_mapping=None):
     logging.info("Added {} documents in {}".format(n_docs, datetime.now() - start_time))
 
 
-def load(path, collection, tagger_mapping=None, logger=None):
+def load_document(path, collection, tagger_mapping=None, logger=None):
     """
     Load a file in PubTator Format or a directory of PubTator files into the database.
     Works if multiple inserts run parallel
@@ -321,9 +321,9 @@ def main():
                             level=logging.INFO)
 
     if args.bulk:
-        bulk_load(args.input, args.collection, tagger_mapping)
+        document_bulk_load(args.input, args.collection, tagger_mapping)
     else:
-        load(args.input, args.collection, tagger_mapping)
+        load_document(args.input, args.collection, tagger_mapping)
 
 
 if __name__ == "__main__":

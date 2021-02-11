@@ -9,7 +9,7 @@ import multiprocessing
 from datetime import datetime
 from typing import Iterable
 
-from narraint.backend.load import load
+from narraint.backend.load_document import load_document
 from narraint.preprocessing.tagging.metadictagger import MetaDicTagger, MetaDicTaggerFactory
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator import count
@@ -94,7 +94,7 @@ def main(arguments=None):
     number_of_docs = prepare_input(ext_in_file, in_file, logger, ent_types, args.collection)
 
     if not args.skip_load:
-        load(in_file, args.collection, logger=logger)
+        load_document(in_file, args.collection, logger=logger)
     else:
         logger.info("Skipping bulk load")
 

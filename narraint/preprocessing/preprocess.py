@@ -14,7 +14,7 @@ from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.export import export
-from narraint.backend.load import load
+from narraint.backend.load_document import load_document
 from narraint.backend.models import DocTaggedBy
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.config import Config
@@ -248,7 +248,7 @@ def main(arguments=None):
     if args.skip_load:
         logger.info("Skipping bulk load")
     else:
-        load(in_dir, args.corpus, logger=logger)
+        load_document(in_dir, args.corpus, logger=logger)
     # Create list of tagging ent types
     tag_types = enttypes.ENT_TYPES_SUPPORTED_BY_TAGGERS if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
