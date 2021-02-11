@@ -15,7 +15,7 @@ import networkx as nx
 import shutil
 from spacy.lang.en import English
 
-from narraint.config import PATHIE_CONFIG
+from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 
 from narraint.progress import print_progress_with_eta
@@ -364,25 +364,23 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         logging.info('Workers terminated - Results written')
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
-    parser.add_argument("output", help="PathIE output file")
-    parser.add_argument("--workdir", help="working directory")
-    parser.add_argument("--conf", default=PATHIE_CONFIG)
-    parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
+def run_pathie(input, output, workdir=None, config=NLP_CONFIG, workers=1):
+    """
+    Runs PathIE based on Stanford CoreNLP toolkit
+    :param input: pubtator input file
+    :param output: pathie output file
+    :param workdir: workdir (if none a temp dir will be created)
+    :param config: NLP config
+    :param workers: amount of parallel workers
+    :return: None
+    """
     # Read config
-    with open(args.conf) as f:
+    with open(config) as f:
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
     tmp_dir_created = False
-    if args.workdir:
-        temp_dir = args.workdir
+    if workdir:
+        temp_dir = workdir
     else:
         tmp_dir_created = True
         temp_dir = tempfile.mkdtemp()
@@ -395,7 +393,7 @@ def main():
         os.mkdir(out_corenlp_dir)
     logging.info('Working in: {}'.format(temp_dir))
 
-    if args.workers == 1:
+    if workers == 1:
         logging.info('Init spacy nlp...')
         spacy_nlp = English()  # just the language with no model
         sentencizer = spacy_nlp.create_pipe("sentencizer")
@@ -406,10 +404,10 @@ def main():
 
     logging.info('counting documents...')
     # Prepare files
-    doc_count = count_documents(args.input)
+    doc_count = count_documents(input)
     logging.info('{} documents counted'.format(doc_count))
-    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
-                                                                   spacy_nlp, worker_count=args.workers)
+    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, input, temp_in_dir, filelist_fn,
+                                                                   spacy_nlp, worker_count=workers)
     if amount_files == 0:
         print('no files to process - stopping')
     else:
@@ -417,12 +415,27 @@ def main():
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, args.output, doc2tags, args.workers)
+        pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, output, doc2tags, workers)
         print(" done in {}".format(datetime.now() - start))
     if tmp_dir_created:
         logging.info(f'Removing {temp_dir}...')
         shutil.rmtree(temp_dir)
     logging.info('PathIE finished')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
+    parser.add_argument("output", help="PathIE output file")
+    parser.add_argument("--workdir", help="working directory")
+    parser.add_argument("--config", default=NLP_CONFIG)
+    parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
+    run_pathie(args.input, args.output, args.workdir, args.config, args.workers)
 
 
 if __name__ == "__main__":

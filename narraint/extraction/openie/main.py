@@ -9,7 +9,7 @@ from time import sleep
 import logging
 
 from narraint.progress import print_progress_with_eta
-from narraint.config import OPENIE_CONFIG
+from narraint.config import NLP_CONFIG
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 from narraint.pubtator.extract import read_pubtator_documents
 
@@ -151,25 +151,21 @@ def process_output(openie_out, outfile):
     logging.info('{} lines written'.format(tuples))
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
-                                      "pubtator files")
-    parser.add_argument("output", help="File with OpenIE results")
-    parser.add_argument("--conf", default=OPENIE_CONFIG)
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
-
+def run_corenlp_openie(input_file, output, config=NLP_CONFIG):
+    """
+    Executes the Stanford CoreNLP OpenIE extraction
+    :param input_file: pubtator input file
+    :param output: file to write the extractions to
+    :param config: NLP configuration
+    :return: None
+    """
     # Read config
-    with open(args.conf) as f:
+    with open(config) as f:
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
 
     # Prepare files
-    filelist_fn, out_fn, amount_files = prepare_files(args.input)
+    filelist_fn, out_fn, amount_files = prepare_files(input_file)
 
     if amount_files == 0:
         print('no files to process - stopping')
@@ -178,8 +174,21 @@ def main():
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        process_output(out_fn, args.output)
+        process_output(out_fn, output)
         print(" done in {}".format(datetime.now() - start))
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
+                                      "pubtator files")
+    parser.add_argument("output", help="File with OpenIE results")
+    parser.add_argument("--config", default=NLP_CONFIG)
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
+    run_corenlp_openie(args.input, args.output, args.config)
 
 
 if __name__ == "__main__":

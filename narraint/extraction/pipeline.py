@@ -16,7 +16,7 @@ from narraint.extraction.extraction_utils import filter_and_write_documents_to_t
 from narraint.extraction.openie.main import run_openie, process_output
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
-from narraint.config import OPENIE_CONFIG, PATHIE_CONFIG
+from narraint.config import NLP_CONFIG
 
 
 def retrieve_document_ids_to_process(idfile, document_collection, extraction_type):
@@ -59,7 +59,7 @@ def main():
     parser.add_argument("output", help="OpenIE results will be stored here")
     parser.add_argument("extraction_type", help="OpenIE | PathIE")
     parser.add_argument("-c", "--collection", required=True, help="Name of the given document collection")
-    parser.add_argument("--conf", help="OpenIE / PathIE Configuration file")
+    parser.add_argument("--config", help="OpenIE / PathIE Configuration file", default=NLP_CONFIG)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -69,14 +69,7 @@ def main():
     if args.extraction_type not in [PATHIE_EXTRACTION, OPENIE_EXTRACTION]:
         raise argparse.ArgumentError('extraction type must either be {} or {}'.format(PATHIE_EXTRACTION, OPENIE_EXTRACTION))
     # Read config
-    if args.conf:
-        config_file = args.conf
-    else:
-        if args.extraction_type == PATHIE_EXTRACTION:
-            config_file = PATHIE_CONFIG
-        else:
-            config_file = OPENIE_CONFIG
-    with open(config_file) as f:
+    with open(args.config) as f:
         conf = json.load(f)
         core_nlp_dir = conf["corenlp"]
 

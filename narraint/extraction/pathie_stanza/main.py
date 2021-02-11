@@ -5,13 +5,14 @@ import re
 import subprocess
 import sys
 import tempfile
+import stanza
 from datetime import datetime
 from time import sleep
 import logging
 import networkx as nx
 from spacy.lang.en import English
 
-from narraint.config import PATHIE_CONFIG
+from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir, \
     filter_document_sentences_without_tags
 
@@ -216,7 +217,6 @@ def convert_sentence_to_triples(doc_id: int, sentence, doc_tags):
 
     return extracted_tuples
 
-import stanza
 
 def pathie_extract_interactions(doc2sentences, doc2tags, amount_files, output):
     start_time = datetime.now()
@@ -308,16 +308,11 @@ def main():
     parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
     parser.add_argument("output", help="PathIE output file")
     parser.add_argument("--workdir", help="working directory")
-    parser.add_argument("--conf", default=PATHIE_CONFIG)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-    # Read config
-    with open(args.conf) as f:
-        conf = json.load(f)
-        core_nlp_dir = conf["corenlp"]
 
     if args.workdir:
         temp_dir = args.workdir
@@ -343,17 +338,17 @@ def main():
 
     doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, args.input, spacy_nlp)
     amount_files = len(doc2sentences)
-    #amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
-    #                                                               spacy_nlp)
+    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
+                                                                   spacy_nlp)
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        #pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn)
-        #print("Processing output ...", end="")
+        pathie_run_corenlp(temp_in_dir, out_corenlp_dir, filelist_fn)
+        print("Processing output ...", end="")
         start = datetime.now()
         # Process output
         pathie_extract_interactions(doc2sentences, doc2tags, amount_files, args.output)
-        #pathie_process_corenlp_output(out_corenlp_dir, amount_files, args.output, doc2tags)
+        pathie_process_corenlp_output(out_corenlp_dir, amount_files, args.output, doc2tags)
         print(" done in {}".format(datetime.now() - start))
 
 

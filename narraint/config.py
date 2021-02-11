@@ -53,14 +53,6 @@ PREPROCESS_CONFIG = os.path.join(CONFIG_DIR, 'preprocess.json')
 # NLP
 NLP_DATA = os.path.join(DATA_DIR, "stanfordnlp_resources")
 
-# Graph
-GRAPH_GV = os.path.join(DATA_DIR, "graph/graph.gv")
-
-# OpenIE
-OPENIE_CONFIG = os.path.join(CONFIG_DIR, "openie.json")
-
-# PathIE
-PATHIE_CONFIG = os.path.join(CONFIG_DIR, "pathie.json")
 
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
@@ -97,3 +89,7 @@ ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 
 # Autocompletion Index
 AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
+
+
+# NLP Config
+NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')
