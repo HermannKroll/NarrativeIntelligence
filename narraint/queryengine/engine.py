@@ -259,7 +259,7 @@ class QueryEngine:
 
         query_hit_limit = False
         if result_count >= QUERY_LIMIT:
-            logging.info(f'{result_count} hit query limit')
+            logging.debug(f'{result_count} hit query limit')
             query_hit_limit = True
 
         return results, query_hit_limit
@@ -280,7 +280,7 @@ class QueryEngine:
         for r in q_titles:
             title = r[1]
             if len(title) > 500:
-                logging.warning('Large title detected: {}'.format(r[0]))
+                logging.debug('Large title detected: {}'.format(r[0]))
                 title = title[0:500]
             doc2titles[int(r[0])] = title
 
@@ -290,7 +290,7 @@ class QueryEngine:
         for r in q_sentences:
             sent = r[1]
             if len(sent) > 1500:
-                logging.warning('long sentence detected for: {}'.format(r[0]))
+                logging.debug('long sentence detected for: {}'.format(r[0]))
                 sent = '{}[...]'.format(sent[0:1500])
             id2sentences[int(r[0])] = sent
 
