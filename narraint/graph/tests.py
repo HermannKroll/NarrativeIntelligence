@@ -1,7 +1,6 @@
 import tempfile
 import unittest
 
-from narraint.config import GRAPH_GV
 from narraint.graph.labeled import LabeledGraph
 
 
