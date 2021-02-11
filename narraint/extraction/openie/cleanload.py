@@ -526,7 +526,7 @@ def _clean_tuple_predicate_based(t: PRED):
                 t.s_id, t.s_str.strip(), t.s_type.strip(), t.o_id, t.o_str.strip(), t.o_type.strip())
 
 
-def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
+def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection, extraction_type=OPENIE_EXTRACTION):
     """
     cleans the open ie tuples by:
     1. applying an entity filter (keep only facts about entities)
@@ -534,6 +534,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
     :param doc_ids: a set of document ids
     :param openie_tuples: a list of openie tuples
     :param collection: document collection where the id's stem from (to retrieve entities from the database)
+    :param extraction_type: extraction type (OPENIE_EXTRACTION (default) or OPENIE6_EXTRACTION)
     :return:
     """
     logging.info('Beginning cleaning step...')
@@ -599,7 +600,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection):
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    insert_predications_into_db(tuples_cleaned, collection, extraction_type=OPENIE_EXTRACTION)
+    insert_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type)
 
 
 def main():

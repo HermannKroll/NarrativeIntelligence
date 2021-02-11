@@ -1,3 +1,4 @@
 {
-  "corenlp": "/home/kroll/tools/stanford-corenlp-4.1.0/"
+  "corenlp": "/home/kroll/tools/stanford-corenlp-4.1.0/",
+  "openie6": "/home/kroll/tools/openie6/"
 }
