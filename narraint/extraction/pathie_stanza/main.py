@@ -1,72 +1,22 @@
 import argparse
-import json
-import os
-import re
-import subprocess
-import sys
-import tempfile
 import stanza
 from datetime import datetime
-from time import sleep
 import logging
 import networkx as nx
 from spacy.lang.en import English
 
-from narraint.config import NLP_CONFIG
-from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir, \
-    filter_document_sentences_without_tags
+from narraint.extraction.extraction_utils import  filter_document_sentences_without_tags
 
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
-from narraint.pubtator.document import TaggedDocument, TaggedEntity
-from narraint.pubtator.extract import read_pubtator_documents
+from narraint.pubtator.document import  TaggedEntity
 
-NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
 IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
                       "adverse", "complications"]
 IMPORTANT_PHRASES = ["side effect", "drug toxicity", "drug injury"]
 
 
-def get_progress(out_corenlp_dir: str) -> int:
-    """
-    Get the current progress of the NLP tool
-    :param out_corenlp_dir: reads the output dir and checks how many .json files have been created already
-    :return: length of processed documents
-    """
-    hits = 0
-    for fn in os.listdir(out_corenlp_dir):
-        if fn.endswith('.json'):
-            hits += 1
-    return hits
-
-
-def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str):
-    """
-    Invokes the Stanford CoreNLP tool to process files
-    :param core_nlp_dir: CoreNLP tool directory
-    :param out_corenlp_dir: the output directory
-    :param filelist_fn: the path of the filelist which files should be processed
-    :return: None
-    """
-    start = datetime.now()
-    with open(filelist_fn) as f:
-        num_files = len(f.read().split("\n"))
-
-    run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
-    sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn)]
-    process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
-    start_time = datetime.now()
-    while process.poll() is None:
-        sleep(10)
-        print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
-                                print_every_k=1)
-    sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
-        get_progress(out_corenlp_dir), num_files, datetime.now() - start,
-    ))
-    sys.stdout.flush()
-
-
-def pathie_reconstruct_sentence_sequence_from_nlp_output(tokens):
+def pathie_stanza_reconstruct_sentence_sequence_from_nlp_output(tokens):
     token_sequence = []
     for t in tokens:
         t_txt = t["text"]
@@ -75,7 +25,7 @@ def pathie_reconstruct_sentence_sequence_from_nlp_output(tokens):
     return ''.join(token_sequence[:-1])
 
 
-def pathie_reconstruct_text_from_token_indexes(tokens, token_indexes):
+def pathie_stanza_reconstruct_text_from_token_indexes(tokens, token_indexes):
     sequence = []
     for t in tokens:
         if t["id"][0] in token_indexes:
@@ -84,7 +34,7 @@ def pathie_reconstruct_text_from_token_indexes(tokens, token_indexes):
     return ''.join(sequence[:-1])
 
 
-def pathie_find_tags_in_sentence(tokens, doc_tags: [TaggedEntity]):
+def pathie_stanza_find_tags_in_sentence(tokens, doc_tags: [TaggedEntity]):
     tag_token_index_sequences = []
     for tag in doc_tags:
         toks_for_tag = []
@@ -100,7 +50,7 @@ def pathie_find_tags_in_sentence(tokens, doc_tags: [TaggedEntity]):
     return tag_token_index_sequences
 
 
-def pathie_find_relations_in_sentence(tokens, sentence_text_lower):
+def pathie_stanza_find_relations_in_sentence(tokens, sentence_text_lower):
     idx2word = dict()
     # root is the empty word
     idx2word[0] = ""
@@ -147,7 +97,7 @@ def pathie_find_relations_in_sentence(tokens, sentence_text_lower):
     return verbs, vidx2text_and_lemma
 
 
-def convert_sentence_to_triples(doc_id: int, sentence, doc_tags):
+def pathie_stanza_convert_sentence_to_triples(doc_id: int, sentence, doc_tags):
     """
     PathIE extraction procedure
     1. Reads CoreNLP JSON output
@@ -166,14 +116,14 @@ def convert_sentence_to_triples(doc_id: int, sentence, doc_tags):
     sentence_lower = sentence.lower()
 
     # find all relations in the sentence
-    verbs, vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower)
+    verbs, vidx2text_and_lemma = pathie_stanza_find_relations_in_sentence(tokens, sentence_lower)
 
     # no verbs -> no extractions
     if len(verbs) == 0:
         return []
 
     # find entities in sentence
-    tag_sequences = pathie_find_tags_in_sentence(tokens, doc_tags)
+    tag_sequences = pathie_stanza_find_tags_in_sentence(tokens, doc_tags)
 
     dep_graph = nx.Graph()
     node_idxs = set()
@@ -218,7 +168,7 @@ def convert_sentence_to_triples(doc_id: int, sentence, doc_tags):
     return extracted_tuples
 
 
-def pathie_extract_interactions(doc2sentences, doc2tags, amount_files, output):
+def pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, output):
     start_time = datetime.now()
     logging.info('Initializing Stanza Pipeline...')
     nlp = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True)
@@ -231,7 +181,7 @@ def pathie_extract_interactions(doc2sentences, doc2tags, amount_files, output):
             processed_doc = nlp(doc_content)
             extracted_tuples = []
             for sent in processed_doc.sentences:
-                extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
+                extracted_tuples.extend(pathie_stanza_convert_sentence_to_triples(doc_id, sent, doc_tags))
 
             print_progress_with_eta("pathie: processing documents...", idx, amount_files, start_time, print_every_k=1)
             for e_tuple in extracted_tuples:
@@ -243,113 +193,44 @@ def pathie_extract_interactions(doc2sentences, doc2tags, amount_files, output):
                     f_out.write('\n' + line)
 
 
-def load_and_fix_json_nlp_data(json_path):
+def run_stanza_pathie(input_file, output):
     """
-    Loads and fixes a txt CoreNLP text json file
-    :param json_path: path to json file
-    :return: json object
-    """
-    with open(json_path, 'r') as f:
-        json_fixed_lines = []
-        for line in f:
-            if NUMBER_FIX_REGEX.findall(line):
-                json_fixed_lines.append(line.replace(',', '.', 1))
-            else:
-                json_fixed_lines.append(line)
-        return json.loads(''.join(json_fixed_lines))
-
-
-def process_json_file(doc_id, input_file, doc_tags):
-    """
-    Extracts facts out of a JSON file
-    :param doc_id: document id
-    :param input_file: JSON input file as a filename
-    :param doc_tags: set of tags in the corresponding document
-    :return: a list of extracted tuples
-    """
-    extracted_tuples = []
-    json_data = load_and_fix_json_nlp_data(input_file)
-    for sent in json_data["sentences"]:
-        extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
-    return extracted_tuples
-
-
-def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags):
-    """
-    Processes the CoreNLP output directory: iterates over all files and calls the process_json_file function
-    :param out_corenlp_dir: CoreNLP output directory (dir of .json files)
-    :param amount_files: amount of files
-    :param outfile: filename where all extractions will be stored
-    :param doc2tags: dict mapping doc ids to tags
+    Executes PathIE via Stanza
+    :param input_file: the PubTator input file (tags must be included)
+    :param output: extractions will be written to output
     :return: None
     """
-    tuples = 0
-    start_time = datetime.now()
-    with open(outfile, 'wt') as f_out:
-        first_line = True
-        for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
-            if filename.endswith('.json'):
-                doc_id = int(filename.split('.')[0])
-                extracted_tuples = process_json_file(doc_id, os.path.join(out_corenlp_dir, filename), doc2tags[doc_id])
-                tuples += len(extracted_tuples)
-                for e_tuple in extracted_tuples:
-                    line = '\t'.join([str(t) for t in e_tuple])
-                    if first_line:
-                        first_line = False
-                        f_out.write(line)
-                    else:
-                        f_out.write('\n' + line)
-            print_progress_with_eta("extracting triples", idx, amount_files, start_time, print_every_k=1)
-    logging.info('{} lines written'.format(tuples))
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
-    parser.add_argument("output", help="PathIE output file")
-    parser.add_argument("--workdir", help="working directory")
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
-
-    if args.workdir:
-        temp_dir = args.workdir
-    else:
-        temp_dir = tempfile.mkdtemp()
-    out_corenlp_dir = os.path.join(temp_dir, "output")
-    temp_in_dir = os.path.join(temp_dir, "input")
-    filelist_fn = os.path.join(temp_dir, "filelist.txt")
-    if not os.path.isdir(temp_in_dir):
-        os.mkdir(temp_in_dir)
-    if not os.path.isdir(out_corenlp_dir):
-        os.mkdir(out_corenlp_dir)
-    logging.info('Working in: {}'.format(temp_dir))
-
     logging.info('Init spacy nlp...')
     spacy_nlp = English()  # just the language with no model
     sentencizer = spacy_nlp.create_pipe("sentencizer")
     spacy_nlp.add_pipe(sentencizer)
 
     # Prepare files
-    doc_count = count_documents(args.input)
+    doc_count = count_documents(input_file)
     logging.info('{} documents counted'.format(doc_count))
 
-    doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, args.input, spacy_nlp)
-    amount_files = len(doc2sentences)
-    amount_files, doc2tags = filter_and_write_documents_to_tempdir(doc_count, args.input, temp_in_dir, filelist_fn,
-                                                                   spacy_nlp)
+    doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, input_file, spacy_nlp)
+    amount_files = len(doc2tags)
+
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        pathie_run_corenlp(temp_in_dir, out_corenlp_dir, filelist_fn)
-        print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        pathie_extract_interactions(doc2sentences, doc2tags, amount_files, args.output)
-        pathie_process_corenlp_output(out_corenlp_dir, amount_files, args.output, doc2tags)
+        pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, output)
         print(" done in {}".format(datetime.now() - start))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
+    parser.add_argument("output", help="PathIE output file")
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.DEBUG)
+    run_stanza_pathie(args.input, args.output)
 
 
 if __name__ == "__main__":
