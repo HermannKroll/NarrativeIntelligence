@@ -194,7 +194,7 @@ class TestDocument(unittest.TestCase):
         # 24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
         with open(get_test_resource_filepath('pubtator_composite_tags.txt'), 'rt') as f:
             content = f.read()
-        doc = TaggedDocument(content, spacy_nlp=self.nlp)
+        doc = TaggedDocument(content)
 
         self.assertIn('D007037', {t.ent_id for t in doc.tags})
         self.assertIn('D003128', {t.ent_id for t in doc.tags})
@@ -211,3 +211,12 @@ class TestDocument(unittest.TestCase):
                       doc.tags)
         self.assertIn(TaggedEntity(None, 24729111, 973, 977, "coma", "Disease", "D003128"),
                       doc.tags)
+
+    def test_empty_ent_id_in_tag(self):
+        with open(get_test_resource_filepath('pubtator_empty_id.txt'), 'rt') as f:
+            content = f.read()
+        doc = TaggedDocument(content)
+        # empty ids should be ignored
+        self.assertNotIn(TaggedEntity(None, 24729111, 0, 10, "Amiodarone", "Chemical", ""), doc.tags)
+
+
