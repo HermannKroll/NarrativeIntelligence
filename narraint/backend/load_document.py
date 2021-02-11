@@ -246,7 +246,7 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
                         ent_type=ent_type,
                     )
                     if not Session.is_sqlite:
-                        insert_doc_tagged_by= insert_doc_tagged_by.on_conflict_do_nothing(
+                        insert_doc_tagged_by = insert_doc_tagged_by.on_conflict_do_nothing(
                             index_elements=('document_id', 'document_collection',
                                             'tagger_name', 'tagger_version', 'ent_type'),
                         )
