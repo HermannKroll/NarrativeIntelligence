@@ -252,7 +252,7 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
                         )
                     session.execute(insert_doc_tagged_by)
             else:
-                if logger: logger.warning("Document {} {} not in DB".format(collection, doc_id))
+                if logger: logger.warning("Document {} {} not in DB".format(collection, doc.id))
 
         session.commit()
         if logger: print_progress_with_eta("Adding documents", idx, n_docs, start_time,
