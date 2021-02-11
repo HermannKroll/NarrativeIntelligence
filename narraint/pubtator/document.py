@@ -67,6 +67,13 @@ class TaggedDocument:
         self.abstract = self.abstract.strip()
         self.id = int(self.id)
         self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
+
+        # There are composite entity mentions like
+        # 24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
+        # does an entity id contain a composite delimiter |
+        if '|' in str([''.join([t.ent_id for t in self.tags])]):
+            self.split_composite_tags()
+
         self.entity_names = {t.text.lower() for t in self.tags}
         if spacy_nlp:
             # Indexes
@@ -76,6 +83,39 @@ class TaggedDocument:
             self.sentences_by_ent_id = defaultdict(set)  # Mesh->Sentence index
             self.entities_by_sentence = defaultdict(set)  # Use for _query processing
             self._create_index(spacy_nlp)
+
+    def split_composite_tags(self):
+        """
+        There are composite entity mentions like
+        24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
+        This method will split them to multiple tags (replaces self.tags)
+        :return: None
+        """
+        cleaned_composite_tags = []
+        for t in self.tags:
+            ent_id = t.ent_id
+            # composite tag detected
+            ent_str_split = []
+            if '\t' in ent_id:
+                # more explanations are given - split them (we ignore the rest)
+                ent_id, ent_str_split = t.ent_id.split('\t')
+                ent_str_split = ent_str_split.split('|')
+            if '|' in ent_id:
+                ent_ids = ent_id.split('|')
+                # if we do not have a concrete explanation (then duplicate the original string)
+                if len(ent_ids) != len(ent_str_split):
+                    ent_str_split = [t.text for i in range(0, len(ent_ids))]
+                for e_id, e_str in zip(ent_ids, ent_str_split):
+                    # find the new start and end
+                    e_start = t.start + t.text.find(e_str)
+                    e_stop = e_start + len(e_str)
+                    # create multiple tags for a composite tag
+                    cleaned_composite_tags.append(TaggedEntity(document=t.document, start=e_start, end=e_stop,
+                                                               text=e_str, ent_type=t.ent_type, ent_id=e_id))
+            else:
+                # just add the tag (it's a normal tag)
+                cleaned_composite_tags.append(t)
+        self.tags = cleaned_composite_tags
 
     def clean_tags(self):
         clean_tags = self.tags.copy()

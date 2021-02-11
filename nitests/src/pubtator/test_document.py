@@ -189,3 +189,25 @@ class TestDocument(unittest.TestCase):
         self.assertEqual({'DB11133'}, {t.ent_id for t in doc.entities_by_sentence[0]})
         self.assertEqual({'DB11133'}, {t.ent_id for t in doc.entities_by_sentence[3]})
 
+    def test_composite_tag_mention(self):
+        # There are composite entity mentions like
+        # 24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
+        with open(get_test_resource_filepath('pubtator_composite_tags.txt'), 'rt') as f:
+            content = f.read()
+        doc = TaggedDocument(content, spacy_nlp=self.nlp)
+
+        self.assertIn('D007037', {t.ent_id for t in doc.tags})
+        self.assertIn('D003128', {t.ent_id for t in doc.tags})
+        self.assertIn('D000638', {t.ent_id for t in doc.tags})
+        self.assertIn('D007037', {t.ent_id for t in doc.tags})
+        self.assertIn('D007035', {t.ent_id for t in doc.tags})
+
+        self.assertIn(TaggedEntity(None, 24729111, 19, 28, "myxoedema", "Disease", "D007037"),
+                      doc.tags)
+        self.assertIn(TaggedEntity(None, 24729111, 29, 33, "coma", "Disease", "D003128"),
+                      doc.tags)
+
+        self.assertIn(TaggedEntity(None, 24729111, 963, 972, "myxoedema", "Disease", "D007037"),
+                      doc.tags)
+        self.assertIn(TaggedEntity(None, 24729111, 973, 977, "coma", "Disease", "D003128"),
+                      doc.tags)
