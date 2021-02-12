@@ -141,6 +141,7 @@ class MeSHOntology:
         :param index_path: Path for index (default in project's config)
         :return: Nothing
         """
+        logging.info('Storing index to: {} '.format(index_path))
         with open(index_path, 'wb') as f:
             pickle.dump(self.__dict__, f)
 
