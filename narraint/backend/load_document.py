@@ -131,7 +131,7 @@ def document_bulk_load(path, collection, tagger_mapping=None):
                     end=tag.end,
                     ent_id=tag.ent_id,
                     ent_str=tag.text,
-                    document_id=doc.id,
+                    document_id=tag.document,
                     document_collection=collection,
                 ))
 
@@ -226,7 +226,7 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
                         end=tag.end,
                         ent_id=tag.ent_id,
                         ent_str=tag.text,
-                        document_id=doc.id,
+                        document_id=tag.document,
                         document_collection=collection,
                     )
                     if not Session.is_sqlite:
