@@ -127,7 +127,7 @@ class AutocompletionUtil:
                 self.add_entity_to_dict(entity_type, d_heading)
 
         logging.info('Adding entity tagger entries...')
-        tagger = EntityTagger()
+        tagger = EntityTagger.instance()
         know_entity_index = [(e_id, e_type) for e_id, _, e_type in entities]
         start_time = datetime.now()
         task_size = len(tagger.term2entity.items())
