@@ -3,6 +3,7 @@ This module contains constants which point to important directories.
 """
 import os
 
+
 GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 DATA_DIR = os.path.join(GIT_ROOT_DIR, "data")
@@ -93,3 +94,6 @@ AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
 
 # NLP Config
 NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')
+
+if not os.path.exists(TMP_DIR):
+    os.mkdir(TMP_DIR)
