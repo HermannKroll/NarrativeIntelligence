@@ -28,6 +28,8 @@ def proj_rel_path(path:str):
     return os.path.join(config.GIT_ROOT_DIR, path) if not path[0] == "/" else path
 
 def read_if_path(path_or_str):
+    if not path_or_str:
+        return path_or_str
     if os.path.isfile(proj_rel_path(path_or_str)):
         with open(path_or_str) as f:
             return f.read()

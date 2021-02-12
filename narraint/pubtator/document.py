@@ -62,11 +62,23 @@ class TaggedDocument:
         :param pubtator_content: content of a pubtator file or a pubtator filename
         """
         pubtator_content = tools.read_if_path(pubtator_content)
-        self.id, self.title, self.abstract = CONTENT_ID_TIT_ABS.match(pubtator_content).group(1, 2, 3)
-        self.title = self.title.strip()
-        self.abstract = self.abstract.strip()
-        self.id = int(self.id)
+        match = CONTENT_ID_TIT_ABS.match(pubtator_content)
+        if match:
+            self.id, self.title, self.abstract = match.group(1, 2, 3)
+            self.title = self.title.strip()
+            self.abstract = self.abstract.strip()
+            self.id = int(self.id)
+        else:
+            self.title = None
+            self.abstract = None
+            self.id = None
         self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
+        if not self.id and self.tags:
+            self.id = self.tags[0].document
+
+        # if multiple document tags are contained in a single doc - raise error
+        if len(set([t.document for t in self.tags])) > 1:
+            raise ValueError(f'Document contains tags for multiple document ids: {self.id}')
 
         # There are composite entity mentions like
         # 24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
@@ -171,30 +183,3 @@ class TaggedDocument:
     def __repr__(self):
         return "<Document {} {}>".format(self.id, self.title)
 
-
-class TaggedDocumentCollection:
-
-    def __init__(self, filename):
-        self.docs = []
-        self.docs_by_id = {}
-
-        # read from a single pubtator file
-        with open(filename, 'r') as f:
-            doc_lines = []
-            for line in f:
-                # split at only '\n' (empty new line)
-                if line == '\n':
-                    # skip multiple new lines
-                    if len(doc_lines) == 0:
-                        continue
-                    self._add_doc_from_content(''.join(doc_lines))
-                    doc_lines = []
-                else:
-                    doc_lines.append(line)
-
-    def _add_doc_from_content(self, content):
-        doc = TaggedDocument(content)
-        self.docs.append(doc)
-        if doc.id in self.docs_by_id:
-            raise Exception('ID already included in collection')
-        self.docs_by_id[doc.id] = doc

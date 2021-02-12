@@ -2,7 +2,7 @@ import unittest
 
 from spacy.lang.en import English
 
-from narraint.pubtator.document import TaggedEntity, TaggedDocument, TaggedDocumentCollection, parse_tag_list
+from narraint.pubtator.document import TaggedEntity, TaggedDocument, parse_tag_list
 from narraint.pubtator.extract import read_tagged_documents
 from nitests.util import get_test_resource_filepath
 
@@ -63,26 +63,6 @@ class TestDocument(unittest.TestCase):
                          doc.title.strip())
         self.assertEqual(0, len(doc.tags))
 
-    def test_load_pubtator_doc_collection(self):
-        col = TaggedDocumentCollection(get_test_resource_filepath('PubTatorCollection.txt'))
-
-        self.assertEqual(2, len(col.docs))
-
-        doc = col.docs[0]
-        self.assertEqual(1313813, doc.id)
-        self.assertEqual(
-            'Proteins are secreted by both constitutive and regulated secretory pathways in lactating mouse'
-            ' mammary epithelial cells',
-            doc.title.strip())
-        self.assertEqual(19, len(doc.tags))
-
-        doc = col.docs[1]
-        self.assertEqual(1313814, doc.id)
-        self.assertEqual(
-            'Nerve growth factor nonresponsive pheochromocytoma cells: altered internalization results in '
-            'signaling dysfunction',
-            doc.title.strip())
-        self.assertEqual(15, len(doc.tags))
 
     def test_split_sentences(self):
         content = ""
@@ -219,4 +199,28 @@ class TestDocument(unittest.TestCase):
         # empty ids should be ignored
         self.assertNotIn(TaggedEntity(None, 24729111, 0, 10, "Amiodarone", "Chemical", ""), doc.tags)
 
+    def test_only_tags_document(self):
+        # There are composite entity mentions like
+        # 24729111	19	33	myxoedema coma	Disease	D007037|D003128	myxoedema|coma
+        with open(get_test_resource_filepath('pubtator_only_tags.txt'), 'rt') as f:
+            content = f.read()
+        doc = TaggedDocument(content)
 
+        self.assertIsNone(doc.title)
+        self.assertIsNone(doc.abstract)
+        self.assertEqual(24729111, doc.id)
+        self.assertIn('D007037', {t.ent_id for t in doc.tags})
+        self.assertIn('D003128', {t.ent_id for t in doc.tags})
+        self.assertIn('D000638', {t.ent_id for t in doc.tags})
+        self.assertIn('D007037', {t.ent_id for t in doc.tags})
+        self.assertIn('D007035', {t.ent_id for t in doc.tags})
+
+        self.assertIn(TaggedEntity(None, 24729111, 19, 28, "myxoedema", "Disease", "D007037"),
+                      doc.tags)
+        self.assertIn(TaggedEntity(None, 24729111, 29, 33, "coma", "Disease", "D003128"),
+                      doc.tags)
+
+        self.assertIn(TaggedEntity(None, 24729111, 963, 972, "myxoedema", "Disease", "D007037"),
+                      doc.tags)
+        self.assertIn(TaggedEntity(None, 24729111, 973, 977, "coma", "Disease", "D003128"),
+                      doc.tags)
