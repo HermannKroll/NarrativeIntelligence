@@ -420,9 +420,6 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    if not os.path.exists(TMP_DIR):
-        os.mkdir(TMP_DIR)
-
     mesh = MeshResolver()
     mesh.build_index()
 
