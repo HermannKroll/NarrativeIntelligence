@@ -122,7 +122,7 @@ class MeSHOntology:
         """
         self._clear_index()
         logging.info('Loading MeSH...')
-        mesh = MeSHDB()
+        mesh = MeSHDB.instance()
         mesh.load_xml(mesh_file)
         descs = mesh.get_all_descs()
         logging.info('Processing descriptors...')
