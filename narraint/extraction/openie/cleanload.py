@@ -496,20 +496,22 @@ def _clean_tuple_predicate_based(t: PRED):
     start_pred = len(t.subj.split(' '))
     participe_past_detected = False
     for idx, tok in enumerate(tokens):
-        pos_tag = pos_tags[start_pred + idx][1]
-        if pos_tag == 'VBN':
-            participe_past_detected = True
+        try:
+            pos_tag = pos_tags[start_pred + idx][1]
+            if pos_tag == 'VBN':
+                participe_past_detected = True
 
-        # remove unnecessary phrases
-        if tok in TOKENS_TO_IGNORE:
+            # remove unnecessary phrases
+            if tok in TOKENS_TO_IGNORE:
+                continue
+            # remove adjectives and adverbs
+            syns = wordnet.synsets(tok)
+            if len(syns) > 0 and syns[0].pos() in ['a', 's', 'r']:
+                continue
+
+            pred_cleaned += tok + ' '
+        except IndexError:
             continue
-        # remove adjectives and adverbs
-        syns = wordnet.synsets(tok)
-        if len(syns) > 0 and syns[0].pos() in ['a', 's', 'r']:
-            continue
-
-        pred_cleaned += tok + ' '
-
     # clean the sentence
     cleaned_sentence = clean_sentence(t.sent).strip()
     # check for active and passive voice
@@ -526,7 +528,8 @@ def _clean_tuple_predicate_based(t: PRED):
                 t.s_id, t.s_str.strip(), t.s_type.strip(), t.o_id, t.o_str.strip(), t.o_type.strip())
 
 
-def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection, extraction_type=OPENIE_EXTRACTION):
+def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection, extraction_type=OPENIE_EXTRACTION,
+                  clean_genes=True):
     """
     cleans the open ie tuples by:
     1. applying an entity filter (keep only facts about entities)
@@ -535,6 +538,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection, extraction
     :param openie_tuples: a list of openie tuples
     :param collection: document collection where the id's stem from (to retrieve entities from the database)
     :param extraction_type: extraction type (OPENIE_EXTRACTION (default) or OPENIE6_EXTRACTION)
+    :param clean_genes: should the method clean gene ids? (replace them by locus descriptions)
     :return:
     """
     logging.info('Beginning cleaning step...')
@@ -600,7 +604,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection, extraction
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    insert_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type)
+    insert_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type, clean_genes=clean_genes)
 
 
 def main():
