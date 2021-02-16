@@ -88,6 +88,8 @@ class TaggedDocument:
 
         self.entity_names = {t.text.lower() for t in self.tags}
         if spacy_nlp:
+            if not self.title or not self.abstract:
+                raise ValueError(f'Cannot process document ({self.id}) without title or abstract')
             # Indexes
             # self.mesh_by_entity_name = {}  # Use to select mesh descriptor by given entity
             self.sentence_by_id = {}  # Use to build mesh->sentence index
