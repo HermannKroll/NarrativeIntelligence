@@ -100,7 +100,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    logging.info('Loading cdr relations...')
+    logging.info('Loading extraction relations...')
     correct_relations = defaultdict(set)
     for doc in read_pubtator_documents(pubtator_doc_paths[0]):
         for line in doc.split('\n'):
