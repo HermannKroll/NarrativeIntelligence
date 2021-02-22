@@ -99,9 +99,14 @@ def document_bulk_load(path, collection, tagger_mapping=None):
 
     document_inserts = []
     tag_inserts = []
+    if not tagger_mapping:
+        ignore_tags = True
+    else:
+        ignore_tags = False
+
     doc_tagged_by_inserts = []
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
-        doc = TaggedDocument(pubtator_content)
+        doc = TaggedDocument(pubtator_content, ignore_tags=ignore_tags)
         tagged_ent_types = set()
         # skip included documents
         if doc.id in db_doc_ids:
@@ -193,9 +198,13 @@ def load_document(path, collection, tagger_mapping=None, logger=None):
     sys.stdout.flush()
     if logger: logger.info("Found {} documents".format(n_docs))
 
+    if not tagger_mapping:
+        ignore_tags = True
+    else:
+        ignore_tags = False
     start_time = datetime.now()
     for idx, pubtator_content in enumerate(read_pubtator_documents(path)):
-        doc = TaggedDocument(pubtator_content)
+        doc = TaggedDocument(pubtator_content, ignore_tags=ignore_tags)
         tagged_ent_types = set()
         # Add document
         if doc.title:
