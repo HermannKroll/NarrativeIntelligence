@@ -94,7 +94,7 @@ def perform_chemprot_evaluation(correct_relations, extraction_type):
     for doc_id, extractions in correct_relations.items():
         if doc_id in extracted_relations:
             for p, s, o in extractions:
-                if (p, s, o) not in correct_relations[doc_id] and (p, o, s) not in correct_relations[doc_id]:
+                if (p, s, o) not in extracted_relations[doc_id] and (p, o, s) not in extracted_relations[doc_id]:
                     count_missing_extractions += 1
         else:
             count_missing_extractions += len(extractions)

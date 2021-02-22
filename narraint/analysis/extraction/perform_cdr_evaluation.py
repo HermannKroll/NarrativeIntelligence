@@ -48,9 +48,9 @@ RUN_OPENIE6 = False
 LOAD_STANZA_PATHIE = False
 LOAD_CORENLP_OPENIE = False
 LOAD_PATHIE = False
-LOAD_OPENIE6 = True
+LOAD_OPENIE6 = False
 
-CANONICALIZE_OUTPUT = True
+CANONICALIZE_OUTPUT = False
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
@@ -82,7 +82,7 @@ def perform_cdr_evaluation(correct_relations, extraction_type):
     for doc_id, extractions in correct_relations.items():
         if doc_id in extracted_induces:
             for s, o in extractions:
-                if (s, o) not in correct_relations[doc_id]:
+                if (s, o) not in extracted_induces[doc_id]:
                     count_missing_extractions += 1
         else:
             count_missing_extractions += len(extractions)
