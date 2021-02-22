@@ -1,9 +1,13 @@
 import logging
+from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 import lxml.etree as ET
 
 from narraint import config
+from narraint.config import MESH_DESCRIPTORS_FILE
+from narraint.entity.meshontology import MeSHOntology
+from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.dictagger import clean_vocab_word_by_split_rules
 from narraint.progress import print_progress_with_eta
 
@@ -12,6 +16,40 @@ def expand_vocabulary_term(term: str) -> str:
     if term.endswith('s') or term.endswith('e'):
         yield term[:-1]
     yield from [term, f'{term}e', f'{term}s']
+
+
+class DiseaseVocabulary:
+
+    @staticmethod
+    def create_disease_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
+        disease_by_term = defaultdict(set)
+
+        logging.info('Loading all disease descriptors...')
+        mesh_ontology = MeSHOntology.instance()
+        disease_descriptors = list([d for d in mesh_ontology.find_descriptors_start_with_tree_no('C')])
+        # add mental disorders
+        disease_descriptors.extend([d for d in mesh_ontology.find_descriptors_start_with_tree_no('F03')])
+
+        meshdb = MeSHDB.instance()
+        meshdb.load_xml(mesh_file, prefetch_all=True, force_load=True)
+        logging.info('Extracting MeSH information (terms) ...')
+        for d_id, d_head in disease_descriptors:
+            mesh_desc_data = meshdb.desc_by_id(d_id)
+            mesh_desc = f'MESH:{d_id}'
+
+            if expand_by_s_and_e:
+                for t_e in expand_vocabulary_term(d_head.lower().strip()):
+                    disease_by_term[t_e].add(mesh_desc)
+            else:
+                disease_by_term[d_head.lower().strip()].add(mesh_desc)
+            for t in mesh_desc_data.terms:
+                if expand_by_s_and_e:
+                    for t_e in expand_vocabulary_term(t.string.lower().strip()):
+                        disease_by_term[t_e].add(mesh_desc)
+                else:
+                    disease_by_term[t.string.lower().strip()].add(mesh_desc)
+
+        return disease_by_term
 
 
 class DrugBankChemicalVocabulary:

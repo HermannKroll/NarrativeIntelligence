@@ -41,7 +41,8 @@ DALL = {
     DRUG,
     EXCIPIENT,
     PLANT_FAMILY,
-    DRUGBANK_CHEMICAL
+    DRUGBANK_CHEMICAL,
+    DISEASE
 }
 
 # set of all tags which are supported by our taggers
@@ -75,7 +76,7 @@ TAG_TYPE_MAPPING = dict(
     DA="DALL"
 )
 
-DICT_TAG_TYPES = {"DF", "DR", "DC", "E", "PF", "DA"}
+DICT_TAG_TYPES = {"DF", "DR", "DC", "E", "PF", "DA", "D"}
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,

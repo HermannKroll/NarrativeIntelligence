@@ -77,6 +77,10 @@ EXCIPIENT_TAGGER_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'excipient_database_
 EXCIPIENT_TAGGER_DRUGBANK_EXCIPIENT_FILE = os.path.join(RESOURCE_DIR, 'drugbank_excipients.txt')
 EXCIPIENT_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "excipient_index_cache.pkl")
 
+# Disease Tagger
+DISEASE_TAGGER_DATABASE_FILE = MESH_DESCRIPTORS_FILE
+DISEASE_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, 'disease_index_cache.pkl')
+
 # MeSH SubHeadings for MEDLINE PubMed
 MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
 MESH2Doc_INDEX_PMC = os.path.join(TMP_DIR, "pmc_index.pkl")

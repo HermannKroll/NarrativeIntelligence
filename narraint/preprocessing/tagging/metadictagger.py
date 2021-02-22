@@ -5,7 +5,7 @@ from typing import List, Dict
 
 import narraint.preprocessing.tagging.dictagger as dt
 import narraint.entity.enttypes as et
-from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical
+from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical, disease
 from narraint.pubtator.document import TaggedEntity
 
 """
@@ -74,7 +74,8 @@ class MetaDicTaggerFactory:
         et.DOSAGE_FORM: dosage.DosageFormTagger,
         et.EXCIPIENT: excipient.ExcipientTagger,
         et.PLANT_FAMILY: plantfamily.PlantFamilyTagger,
-        et.DRUGBANK_CHEMICAL: drugbankchemical.DrugBankChemicalTagger
+        et.DRUGBANK_CHEMICAL: drugbankchemical.DrugBankChemicalTagger,
+        et.DISEASE: disease.DiseaseTagger
     }
 
     @staticmethod
