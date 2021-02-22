@@ -56,7 +56,7 @@ def parse_tag_list(path_or_str):
 
 class TaggedDocument:
 
-    def __init__(self, pubtator_content, spacy_nlp=None):
+    def __init__(self, pubtator_content, spacy_nlp=None, ignore_tags=False):
         """
         initialize a pubtator document
         :param pubtator_content: content of a pubtator file or a pubtator filename
@@ -72,9 +72,12 @@ class TaggedDocument:
             self.title = None
             self.abstract = None
             self.id = None
-        self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
-        if not self.id and self.tags:
-            self.id = self.tags[0].document
+        if ignore_tags:
+            self.tags = set()
+        else:
+            self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
+            if not self.id and self.tags:
+                self.id = self.tags[0].document
 
         # if multiple document tags are contained in a single doc - raise error
         if len(set([t.document for t in self.tags])) > 1:
