@@ -33,104 +33,6 @@ class PerformanceQueryEngine:
     def __init__(self):
         self.query_engine = QueryEngine()
 
-    def __construct_query(self, session, graph_query, doc_collection, extraction_type):
-        var_names = []
-        var_dict = {}
-
-        predication_aliases = []
-        for idx, _ in enumerate(graph_query):
-            predication_aliases.append(aliased(Predication, name='P{}'.format(idx)))
-
-        p0 = predication_aliases[0]
-        query = session.query(func.count())
-        for pred in predication_aliases:
-            query = query.filter(p0.document_id == pred.document_id)
-
-        for idx, (s, s_t, p, o, o_t) in enumerate(graph_query):
-            pred = predication_aliases[idx]
-            query = query.filter(pred.document_collection == doc_collection)
-            query = query.filter(pred.extraction_type == extraction_type)
-
-            # variable in pattern
-            if s.startswith('?') or p.startswith('?') or o.startswith('?'):
-                # the idea of the following blocks is as follows:
-                # if x ( here subject, predicate or object) is not a var -> just add a where condition
-                # if x is a variable
-                # check if x already occurred -> yes join both aliased predication together
-                # if x is new, just add it as the last predication of the variable
-                if not s.startswith('?'):
-                    query = query.filter(pred.subject_id == s)
-                    if s_t in [GENE, SPECIES]:
-                        query = query.filter(pred.subject_type == s_t)
-                else:
-                    var_name = VAR_NAME.search(s)
-                    if not var_name:
-                        raise ValueError('Variable name does not match regex: {}'.format(s))
-                    var_name = var_name.group(1)
-                    var_type = VAR_TYPE.search(s)
-                    if var_type:
-                        query = query.filter(pred.subject_type == var_type.group(1))
-                    if var_name not in var_dict:
-                        var_names.append((var_name, 'subject', idx))
-                        var_dict[var_name] = (pred, 'subject')
-                    else:
-                        last_pred, t = var_dict[var_name]
-                        if t == 'subject':
-                            query = query.filter(pred.subject_id == last_pred.subject_id)
-                        elif t == 'object':
-                            query = query.filter(pred.subject_id == last_pred.object_id)
-                        else:
-                            ValueError('Variable cannot be used as predicate and subject / object.')
-                if not o.startswith('?'):
-                    query = query.filter(pred.object_id == o)
-                    if o_t in [GENE, SPECIES]:
-                        query = query.filter(pred.object_type == o_t)
-                else:
-                    var_name = VAR_NAME.search(o)
-                    if not var_name:
-                        raise ValueError('Variable name does not match regex: {}'.format(o))
-                    var_name = var_name.group(1)
-                    var_type = VAR_TYPE.search(o)
-                    if var_type:
-                        query = query.filter(pred.object_type == var_type.group(1))
-                    if var_name not in var_dict:
-                        var_names.append((var_name, 'object', idx))
-                        var_dict[var_name] = (pred, 'object')
-                    else:
-                        last_pred, t = var_dict[var_name]
-                        if t == 'object':
-                            query = query.filter(pred.object_id == last_pred.object_id)
-                        elif t == 'subject':
-                            query = query.filter(pred.object_id == last_pred.subject_id)
-                        else:
-                            raise ValueError('Variable cannot be used as predicate and subject / object.')
-
-                if not p.startswith('?'):
-                    query = query.filter(pred.predicate_canonicalized == p)
-                else:
-                    query = query.filter(pred.predicate_canonicalized.isnot(None))
-                    var_type = VAR_TYPE_PREDICATE.search(p)
-                    if var_type:
-                        query = query.filter(pred.subject_type == var_type.group(1))
-                        query = query.filter(pred.object_type == var_type.group(2))
-                    if p not in var_dict:
-                        var_names.append((p, 'predicate', idx))
-                        var_dict[p] = (pred, 'predicate')
-                    else:
-                        last_pred, t = var_dict[p]
-                        if t == 'predicate':
-                            query = query.filter(pred.predicate_canonicalized == last_pred.predicate_canonicalized)
-                        else:
-                            raise ValueError('Variable cannot be used as predicate and subject / object.')
-            else:
-                query = query.filter(pred.subject_id == s, pred.object_id == o, pred.predicate_canonicalized == p)
-                if s_t in [GENE, SPECIES]:
-                    query = query.filter(pred.subject_type == s_t)
-                if o_t in [GENE, SPECIES]:
-                    query = query.filter(pred.object_type == o_t)
-
-        return query, var_names
-
     def query_with_graph_query(self, facts, doc_collection):
         if len(facts) == 0:
             raise ValueError('graph query must contain at least one fact')
@@ -141,7 +43,7 @@ class PerformanceQueryEngine:
                                                      f[2], [Entity(f[3], f[4])]))
 
         time_before_query = datetime.now()
-        results, limit_hit = self.query_engine.process_query_with_expansion(graph_query, doc_collection, likesearch=False)
+        results, limit_hit = self.query_engine.process_query_with_expansion(graph_query, doc_collection)
         time_after_query = datetime.now()
         result_size = len(set([r.document_id for r in results]))
 
