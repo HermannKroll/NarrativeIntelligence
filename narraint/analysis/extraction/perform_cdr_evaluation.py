@@ -22,7 +22,7 @@ from narraint.pubtator.extract import read_pubtator_documents
 
 pubtator_docs = ['CDR_TestSet.PubTator.txt'] # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']
 
-CDR2015_DIR = os.path.join(DATA_DIR, 'CDR2015')
+CDR2015_DIR = os.path.join(DATA_DIR, 'extraction/CDR2015')
 CDR2015_DIR_OUTPUT = os.path.join(CDR2015_DIR, 'output')
 pubtator_doc_paths = [os.path.join(CDR2015_DIR, d) for d in pubtator_docs]
 
