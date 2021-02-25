@@ -32,9 +32,9 @@ def main():
             for ent_id in t[5].split('|'):
                 correct_diseases[int(t[0])].add((int(t[1]), int(t[2]), ent_id))
         else:
-           correct_diseases[int(t[0])].add((int(t[1]), int(t[2]), t[5]))
+            correct_diseases[int(t[0])].add((int(t[1]), int(t[2]), t[5]))
 
-    print(f'{count_omim_tags} of {count_omim_tags+len(tags)} are ignored (omim is not supported)')
+    print(f'{count_omim_tags} of {count_omim_tags + len(tags)} are ignored (omim is not supported)')
 
     tagged_diseases = defaultdict(set)
     with open(NCBI_DISEASE_TAGGED_FILE, 'rt') as f:
