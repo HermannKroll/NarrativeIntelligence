@@ -6,7 +6,7 @@ import logging
 from narraint.config import DATA_DIR
 from narraint.pubtator.regex import TAG_LINE_NORMAL
 
-NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "extraction/ncbi_disease")
+NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
 
 NCBI_DISEASE_TEST_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBItestset_corpus.txt")
 NCBI_DISEASE_TAGGED_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'ncbi_documents.tagged.pubtator')
