@@ -1,9 +1,9 @@
 import logging
 import os
 
-from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
-from narraint.analysis.cikm2020.mesh_evaluation import pubmed_mesh_hits
-from narraint.analysis.cikm2020.search.strategy import OpenIESearchStrategy, PathIESearchStrategy, \
+from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
+from narraint.analysis.retrieval.mesh_evaluation import pubmed_mesh_hits
+from narraint.analysis.retrieval.search.strategy import OpenIESearchStrategy, PathIESearchStrategy, \
     SentenceEntityCooccurrence, SentenceFactCooccurrence, OpenIECorefSearchStrategy
 from narraint.analysis.pubmed_medline import PubMedMEDLINE, PMCIndex
 from narraint.backend.export import export

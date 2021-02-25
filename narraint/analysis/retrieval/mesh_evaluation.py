@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from narraint.analysis.cikm2020.helper import perform_evaluation
+from narraint.analysis.retrieval.helper import perform_evaluation
 from narraint.analysis.pubmed_medline import PubMedMEDLINE
 from narraint.backend.database import Session
 from narraint.backend.models import Predication

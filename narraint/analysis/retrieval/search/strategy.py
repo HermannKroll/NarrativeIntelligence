@@ -4,7 +4,7 @@ from itertools import product
 
 from nltk.stem.porter import *
 
-from narraint.analysis.cikm2020.experiment_config import EXP_TEXTS_DIRECTORY
+from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.meshontology import MeSHOntology
