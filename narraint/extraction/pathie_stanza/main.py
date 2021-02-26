@@ -29,12 +29,12 @@ def pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, ou
                 sent_dependencies = []
                 for dep in sent.dependencies:
                     w1, relation, w2 = dep
-                    sent_dependencies.append(PathIEDependency(w1, w2, relation))
+                    sent_dependencies.append(PathIEDependency(w1.id, w2.id, relation))
                 sent_tokens = []
                 for t in sent.tokens:
                     # fake before and after tokens because they are not available in stanza
                     sent_tokens.append(PathIEToken(t.text, t.text.lower(), "", " ",
-                                                   t.id, t.start_char, t.end_char,
+                                                   t.id[0], t.start_char, t.end_char,
                                                    t.words[0].pos, t.words[0].lemma))
 
                 extracted_tuples.extend(pathie_extract_facts_from_sentence(doc_id, doc_tags, sent_tokens,
