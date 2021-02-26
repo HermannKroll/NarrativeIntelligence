@@ -13,7 +13,6 @@ from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.progress import print_progress_with_eta
 from narraint.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.document import TaggedDocument, TaggedEntity
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
 
 
 class DictIndex:
@@ -77,9 +76,9 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         self.index_cache = index_cache
         self.source_file = source_file
         self.desc_by_term = {}
-        self.log_file = os.path.join(self.log_dir, f"{short_name}.log")
-        self.out_dir = os.path.join(self.root_dir, f"{short_name}_out")
-        self.in_dir = os.path.join(self.root_dir, f"{short_name}_in")
+        self.log_file = os.path.join(self.log_dir, f"{short_name}.log") if self.log_dir else None
+        self.out_dir = os.path.join(self.root_dir, f"{short_name}_out") if self.root_dir else None
+        self.in_dir = os.path.join(self.root_dir, f"{short_name}_in") if self.root_dir else None
 
     def get_types(self):
         return self.tag_types
@@ -145,7 +144,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             self.desc_by_term = {k: v for k, v in self.desc_by_term.items() if k.lower() not in blacklist_set}
             self._index_to_pickle()
         # Create output directory
-        os.makedirs(self.out_dir, exist_ok=True)
+        if self.out_dir:
+            os.makedirs(self.out_dir, exist_ok=True)
 
     def get_tags(self):
         return self._get_tags(self.out_dir)

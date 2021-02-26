@@ -11,12 +11,12 @@ from narraint.pubtator.extract import read_pubtator_documents
 from collections.abc import Sequence
 
 
-def filter_and_sanitize(in_file:str, out_file:str, filter_ids, logger=logging):
+def filter_and_sanitize(in_file:str, out_file:str, filter_ids, logger=logging, ignore_tags=True):
     os.makedirs(os.path.dirname(out_file), exist_ok=True)
     with open(out_file, "w+") as f:
         for n, doc in enumerate(read_pubtator_documents(in_file)):
             try:
-                tdoc = TaggedDocument(doc)
+                tdoc = TaggedDocument(doc, ignore_tags=ignore_tags)
             except:
                 logger.debug(f"ignored {n}th document, unable to parse")
                 continue

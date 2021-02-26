@@ -44,7 +44,7 @@ class Document(Base):
         title = ILLEGAL_CHAR.sub("", title).strip()
         abstract = unicodedata.normalize('NFD', abstract)
         abstract = ILLEGAL_CHAR.sub("", abstract).strip()
-        return "{id}|t| {tit}\n{id}|a| {abs}\n".format(id=did, tit=title,
+        return "{id}|t|{tit}\n{id}|a|{abs}\n".format(id=did, tit=title,
                                                        abs=abstract)
 
     @staticmethod

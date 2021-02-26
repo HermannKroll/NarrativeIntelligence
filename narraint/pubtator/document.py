@@ -9,10 +9,11 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 class TaggedEntity:
 
-    def __init__(self, tag_tuple=None, document=None, start=None, end=None, text=None, ent_type=None, ent_id=None):
+    def __init__(self, tag_tuple=None, document=None, start: int = None, end: int = None, text=None, ent_type=None,
+                 ent_id=None):
         self.document = int(tag_tuple[0]) if tag_tuple else document
-        self.start = int(tag_tuple[1]) if tag_tuple else start
-        self.end = int(tag_tuple[2]) if tag_tuple else end
+        self.start = int(tag_tuple[1]) if tag_tuple else int(start)
+        self.end = int(tag_tuple[2]) if tag_tuple else int(end)
         self.text = tag_tuple[3] if tag_tuple else text
         self.ent_type = ENTITY_TYPES[tag_tuple[4] if tag_tuple else ent_type]
         self.ent_id = tag_tuple[5] if tag_tuple else ent_id
@@ -73,7 +74,7 @@ class TaggedDocument:
             self.abstract = None
             self.id = None
         if ignore_tags:
-            self.tags = set()
+            self.tags = []
         else:
             self.tags = [TaggedEntity(t) for t in TAG_LINE_NORMAL.findall(pubtator_content)]
             if not self.id and self.tags:
@@ -187,4 +188,3 @@ class TaggedDocument:
 
     def __repr__(self):
         return "<Document {} {}>".format(self.id, self.title)
-
