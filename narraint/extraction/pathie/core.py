@@ -61,7 +61,7 @@ def pathie_find_relations_in_sentence(tokens: [PathIEToken], sentence_text_lower
     vidx2text_and_lemma = dict()
     for t in tokens:
         # it's a verb
-        if t.pos.startswith('V') and t.lemma not in ["have", "be"]:
+        if t.pos.startswith('V') and t.lemma not in ["have", "be", "do"]:
             vidx2text_and_lemma[t.index] = (t.text, t.lemma)
         else:
             # check if a keyword is mentioned
@@ -99,7 +99,9 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                        tokens: [PathIEToken],
                                        dependencies: [PathIEDependency],
                                        important_keywords: [str] = None,
-                                       important_phrases: [str] = None) -> [PathIEExtraction]:
+                                       important_phrases: [str] = None,
+                                       ignore_not_extractions = True,
+                                       ignore_may_extraction = True) -> [PathIEExtraction]:
     """
     Extracts fact from a sentence with PathIE
     :param doc_id: document id
@@ -116,6 +118,9 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     # find all relations in the sentence
     vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower,
                                                             important_keywords, important_phrases)
+    idx2token = {}
+    if ignore_not_extractions or ignore_may_extraction:
+        idx2token = {t.index : t for t in tokens}
 
     # no verbs -> no extractions
     if len(vidx2text_and_lemma) == 0:
@@ -130,6 +135,16 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     for dep in dependencies:
         governor = int(dep.governor_idx)
         dependent = int(dep.dependent_idx)
+        relation = dep.relation
+
+        # delete verbs that are connected with a not
+        if ignore_not_extractions:
+            if governor in vidx2text_and_lemma and relation == 'advmod' and idx2token[dependent].text_lower in ['not', 'nt']:
+                del vidx2text_and_lemma[governor]
+
+        if ignore_may_extraction:
+            if governor in vidx2text_and_lemma and relation == 'aux' and idx2token[dependent].text_lower in ['may', 'might']:
+                del vidx2text_and_lemma[governor]
 
         if governor not in node_idxs:
             dep_graph.add_node(governor)
@@ -138,6 +153,10 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
             dep_graph.add_node(dependent)
             node_idxs.add(dependent)
         dep_graph.add_edge(governor, dependent)
+
+    # maybe we have deleted all allowed verbs
+    if ignore_not_extractions and len(vidx2text_and_lemma) == 0:
+        return []
 
     extracted_tuples = []
     extracted_index = set()

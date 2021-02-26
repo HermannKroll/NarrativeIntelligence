@@ -34,6 +34,67 @@ class TestPathIECore(TestCase):
                                               PathIEDependency(2, 3, "X"),
                                               PathIEDependency(3, 4, "X")]
 
+        self.test_3_sentence = "This does not look like a test"
+        self.test_3_tokens = [PathIEToken("This", "this", "", " ", 1, 0, 4, "DT", ""),
+                              PathIEToken("does", "this", "", " ", 2, 5, 9, "VBZ", "do"),
+                              PathIEToken("not", "not", " ", " ", 3, 10, 13, "RB", "not"),
+                              PathIEToken("look", "look", " ", " ", 4, 14, 18, "VB", "look"),
+                              PathIEToken("like", "like", " ", " ", 5, 19, 23, "IN", "like"),
+                              PathIEToken("a", "a", " ", " ", 6, 24, 25, "DT", ""),
+                              PathIEToken("test", "test", " ", " ", 7, 26, 30, "NN", "")]
+
+        self.test_3_tags = [TaggedEntity(start=0, end=4, text="this", ent_type="Drug", ent_id="1"),
+                            TaggedEntity(start=26, end=30, text="test", ent_type="Disease", ent_id="2")]
+        self.test_3_dependencies = [PathIEDependency(4, 1, "nsubj"),
+                                    PathIEDependency(4, 2, "aux"),
+                                    PathIEDependency(4, 3, "advmod"),
+                                    PathIEDependency(4, 7, "obl")]
+
+        self.test_4_sentence = "This does not look like a test"
+        self.test_4_tokens = [PathIEToken("This", "this", "", " ", 1, 0, 4, "DT", ""),
+                              PathIEToken("does", "this", "", " ", 2, 5, 9, "VBZ", "do"),
+                              PathIEToken("nt", "nt", " ", " ", 3, 10, 13, "RB", "nt"),
+                              PathIEToken("look", "look", " ", " ", 4, 14, 18, "VB", "look"),
+                              PathIEToken("like", "like", " ", " ", 5, 19, 23, "IN", "like"),
+                              PathIEToken("a", "a", " ", " ", 6, 24, 25, "DT", ""),
+                              PathIEToken("test", "test", " ", " ", 7, 26, 30, "NN", "")]
+
+        self.test_4_tags = [TaggedEntity(start=0, end=4, text="this", ent_type="Drug", ent_id="1"),
+                            TaggedEntity(start=26, end=30, text="test", ent_type="Disease", ent_id="2")]
+        self.test_4_dependencies = [PathIEDependency(4, 1, "nsubj"),
+                                    PathIEDependency(4, 2, "aux"),
+                                    PathIEDependency(4, 3, "advmod"),
+                                    PathIEDependency(4, 7, "obl")]
+
+
+        self.test_5_sentence = "This may look like a test"
+        self.test_5_tokens = [PathIEToken("This", "this", "", " ", 1, 0, 4, "DT", ""),
+                              PathIEToken("may", "may", " ", " ", 2, 5, 8, "MD", "may"),
+                              PathIEToken("look", "look", " ", " ", 3, 9, 13, "VB", "look"),
+                              PathIEToken("like", "like", " ", " ", 4, 14, 18, "IN", "like"),
+                              PathIEToken("a", "a", " ", " ", 5, 19, 20, "DT", ""),
+                              PathIEToken("test", "test", " ", " ", 6, 21, 25, "NN", "")]
+
+        self.test_5_tags = [TaggedEntity(start=0, end=4, text="this", ent_type="Drug", ent_id="1"),
+                            TaggedEntity(start=21, end=25, text="test", ent_type="Disease", ent_id="2")]
+        self.test_5_dependencies = [PathIEDependency(3, 1, "nsubj"),
+                                    PathIEDependency(3, 2, "aux"),
+                                    PathIEDependency(3, 6, "obl")]
+
+        self.test_6_sentence = "This might look like a test"
+        self.test_6_tokens = [PathIEToken("This", "this", "", " ", 1, 0, 4, "DT", ""),
+                              PathIEToken("might", "might", " ", " ", 2, 5, 10, "MD", "might"),
+                              PathIEToken("look", "look", " ", " ", 3, 11, 15, "VB", "look"),
+                              PathIEToken("like", "like", " ", " ", 4, 16, 20, "IN", "like"),
+                              PathIEToken("a", "a", " ", " ", 5, 21, 22, "DT", ""),
+                              PathIEToken("test", "test", " ", " ", 6, 23, 27, "NN", "")]
+
+        self.test_6_tags = [TaggedEntity(start=0, end=4, text="this", ent_type="Drug", ent_id="1"),
+                            TaggedEntity(start=23, end=27, text="test", ent_type="Disease", ent_id="2")]
+        self.test_6_dependencies = [PathIEDependency(3, 1, "nsubj"),
+                                    PathIEDependency(3, 2, "aux"),
+                                    PathIEDependency(3, 6, "obl")]
+
     def test_reconstruct_sentence(self):
         sentence = self.test_sentence
         tokens = self.test_tokens
@@ -175,3 +236,70 @@ class TestPathIECore(TestCase):
         self.assertEqual("looks like", ext.predicate)
         self.assertEqual("look like", ext.predicate_lemmatized)
 
+    def test_pathie_extract_facts_from_sentence_3(self):
+        extractions = pathie_extract_facts_from_sentence(0, self.test_3_tags, self.test_3_tokens,
+                                                         self.test_3_dependencies,
+                                                         ignore_not_extractions=False)
+        self.assertEqual(1, len(extractions))
+        ext = extractions[0]
+        self.assertEqual(0, ext.document_id)
+        self.assertEqual("1", ext.subject_id)
+        self.assertEqual("Drug", ext.subject_type)
+        self.assertEqual("this", ext.subject_str)
+        self.assertEqual("2", ext.object_id)
+        self.assertEqual("Disease", ext.object_type)
+        self.assertEqual("look", ext.predicate)
+        self.assertEqual("look", ext.predicate_lemmatized)
+
+        extractions = pathie_extract_facts_from_sentence(0, self.test_3_tags, self.test_3_tokens,
+                                                         self.test_3_dependencies,
+                                                         ignore_not_extractions=True)
+        self.assertEqual(0, len(extractions))
+
+        extractions = pathie_extract_facts_from_sentence(0, self.test_4_tags, self.test_4_tokens,
+                                                         self.test_4_dependencies,
+                                                         ignore_not_extractions=True)
+        self.assertEqual(0, len(extractions))
+
+    def test_pathie_extract_facts_from_sentence_may(self):
+        extractions = pathie_extract_facts_from_sentence(0, self.test_5_tags, self.test_5_tokens,
+                                                         self.test_5_dependencies,
+                                                         ignore_not_extractions=True,
+                                                         ignore_may_extraction=False)
+        self.assertEqual(1, len(extractions))
+        ext = extractions[0]
+        self.assertEqual(0, ext.document_id)
+        self.assertEqual("1", ext.subject_id)
+        self.assertEqual("Drug", ext.subject_type)
+        self.assertEqual("this", ext.subject_str)
+        self.assertEqual("2", ext.object_id)
+        self.assertEqual("Disease", ext.object_type)
+        self.assertEqual("look", ext.predicate)
+        self.assertEqual("look", ext.predicate_lemmatized)
+
+        extractions = pathie_extract_facts_from_sentence(0, self.test_6_tags, self.test_6_tokens,
+                                                         self.test_6_dependencies,
+                                                         ignore_not_extractions=True,
+                                                         ignore_may_extraction=False)
+        self.assertEqual(1, len(extractions))
+        ext = extractions[0]
+        self.assertEqual(0, ext.document_id)
+        self.assertEqual("1", ext.subject_id)
+        self.assertEqual("Drug", ext.subject_type)
+        self.assertEqual("this", ext.subject_str)
+        self.assertEqual("2", ext.object_id)
+        self.assertEqual("Disease", ext.object_type)
+        self.assertEqual("look", ext.predicate)
+        self.assertEqual("look", ext.predicate_lemmatized)
+
+        extractions = pathie_extract_facts_from_sentence(0, self.test_5_tags, self.test_5_tokens,
+                                                         self.test_5_dependencies,
+                                                         ignore_not_extractions=True,
+                                                         ignore_may_extraction=True)
+        self.assertEqual(0, len(extractions))
+
+        extractions = pathie_extract_facts_from_sentence(0, self.test_6_tags, self.test_6_tokens,
+                                                         self.test_6_dependencies,
+                                                         ignore_not_extractions=True,
+                                                         ignore_may_extraction=True)
+        self.assertEqual(0, len(extractions))
