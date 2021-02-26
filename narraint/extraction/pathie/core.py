@@ -20,6 +20,11 @@ PathIEExtraction = namedtuple('PathIEExtraction', ["document_id", "subject_id", 
 
 
 def pathie_reconstruct_sentence_sequence_from_tokens(tokens: [PathIEToken]) -> str:
+    """
+    Reconstructs the whole sentence from the sequence of tokens
+    :param tokens: the sentence's PathIE tokens
+    :return: the sentence string stripped
+    """
     token_sequence = []
     for t in tokens:
         token_sequence.extend([t.text_before, t.text, t.text_after])
@@ -29,15 +34,29 @@ def pathie_reconstruct_sentence_sequence_from_tokens(tokens: [PathIEToken]) -> s
 
 
 def pathie_reconstruct_text_from_token_indexes(tokens: [PathIEToken], token_indexes: [int]):
+    """
+    PathIE Core Logic
+    Reconstruct the text of the given token indexes
+    :param tokens: a list of the sentence's PathIE tokens
+    :param token_indexes: the selected token indexes
+    :return: the computed string stripped
+    """
     sequence = []
     for t in tokens:
         if t.index in token_indexes:
-            sequence.extend([t.text, t.text_after])
+            sequence.extend([t.text_before, t.text, t.text_after])
     # remove the last element - it does not belong to the string (after token AFTER the last word)
-    return ''.join(sequence[:-1])
+    return ''.join(sequence[:-1]).replace('  ', ' ').strip()
 
 
 def pathie_find_tags_in_sentence(tokens: [PathIEToken], doc_tags: [TaggedEntity]):
+    """
+    PathIE Core Logic
+    Finds all entity annotations within a sentence and computes the corresponding token indexes
+    :param tokens: a list of PathIE tokens
+    :param doc_tags: a list of annotated tags within the document
+    :return: a set of tags mapped to sequences of token indexes
+    """
     tag_token_index_sequences = []
     for tag in doc_tags:
         toks_for_tag = []
@@ -55,6 +74,16 @@ def pathie_find_tags_in_sentence(tokens: [PathIEToken], doc_tags: [TaggedEntity]
 
 def pathie_find_relations_in_sentence(tokens: [PathIEToken], sentence_text_lower: str, important_keywords: [str] = None,
                                       important_phrases: [str] = None):
+    """
+    PathIE Core Logic
+    Finds suitable relations (verbs) or relevant keywords/keyphrases in a sentence texts
+    The corresponding token ids are computed and returnes
+    :param tokens: a list of PathIE toknes
+    :param sentence_text_lower: the sentence text in lower case
+    :param important_keywords: a list of important keywords (optional)
+    :param important_phrases: a list of important phrases (optional)
+    :return:
+    """
     idx2word = dict()
     # root is the empty word
     idx2word[0] = ""
@@ -110,10 +139,17 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     :param dependencies: a list of the sentence's dependencies
     :param important_keywords: a set of important lower-cased extraction keywords (single words like treatment)
     :param important_phrases: a set of important lower-cased extraction phrases (whole phrases)
+    :param ignore_not_extractions: ignores extractions that are associated with a not
+    :param ignore_may_extraction: ignores extractions that are associated with a may or might
     :return: a list of PathIE extractions
     """
     sentence = pathie_reconstruct_sentence_sequence_from_tokens(tokens).strip()
     sentence_lower = sentence.lower()
+
+    if not important_keywords:
+        important_keywords = IMPORTANT_KEYWORDS
+    if not important_phrases:
+        important_phrases = IMPORTANT_PHRASES
 
     # find all relations in the sentence
     vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower,
