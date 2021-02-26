@@ -18,6 +18,10 @@ def read_pathie_extractions_tsv(pathie_tsv_file: str):
                 doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, sentence = line.split('\t')
                 p = PRED(doc_id, "", pred, pred_lemma, "", 1.0, sentence, e1_id, e1_str, e1_type, e2_id, e2_str, e2_type)
                 extractions.append(p)
+                # flip triple
+                p = PRED(doc_id, "", pred, pred_lemma, "", 1.0, sentence, e2_id, e2_str, e2_type, e1_id, e1_str, e1_type)
+                extractions.append(p)
+
             except ValueError:
                 tup = line.split('\t')
                 logging.warning(f'skipping tuple: {tup}')
