@@ -32,8 +32,8 @@ CHEMPROT_RELATIONS_TSV = os.path.join(CHEMPROT_DIR, 'chemprot_test_relations_gs.
 CHEMPROT_OUTPUT_DIR = os.path.join(CHEMPROT_DIR, 'output')
 
 CHEMPROT_PUBTATOR = os.path.join(CHEMPROT_OUTPUT_DIR, 'documents.pubtator')
-CHEMPROT_PATHIE_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, "pathie.tsv")
-CHEMPROT_PATHIE_STANZA_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, 'pathie_stanza.tsv')
+CHEMPROT_PATHIE_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, "pathie_V2.tsv")
+CHEMPROT_PATHIE_STANZA_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, 'pathie_stanza_V2.tsv')
 
 CHEMPROT_OPENIE_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, 'openie.tsv')
 CHEMPROT_OPENIE6_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, 'openie6.tsv')

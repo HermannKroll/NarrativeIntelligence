@@ -11,22 +11,17 @@ import logging
 import queue
 
 import multiprocessing
-import networkx as nx
 import shutil
 from spacy.lang.en import English
 
 from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
+from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
 
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
-from narraint.pubtator.document import TaggedDocument, TaggedEntity
-from narraint.pubtator.extract import read_pubtator_documents
 
 NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
-IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
-                      "adverse", "complications"]
-IMPORTANT_PHRASES = ["side effect", "drug toxicity", "drug injury"]
 
 
 def get_progress(out_corenlp_dir: str) -> int:
@@ -68,160 +63,6 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
     sys.stdout.flush()
 
 
-def pathie_reconstruct_sentence_sequence_from_nlp_output(tokens):
-    token_sequence = []
-    for t in tokens:
-        t_txt = t["originalText"]
-        t_before = t["before"]
-        t_after = t["after"]
-        token_sequence.extend([t_txt, t_after])
-    # remove the last element - it does not belong to the string (after token AFTER the last word)
-    return ''.join(token_sequence[:-1])
-
-
-def pathie_reconstruct_text_from_token_indexes(tokens, token_indexes):
-    sequence = []
-    for t in tokens:
-        if t["index"] in token_indexes:
-            sequence.extend([t["originalText"], t["after"]])
-    # remove the last element - it does not belong to the string (after token AFTER the last word)
-    return ''.join(sequence[:-1])
-
-
-def pathie_find_tags_in_sentence(tokens, doc_tags: [TaggedEntity]):
-    tag_token_index_sequences = []
-    for tag in doc_tags:
-        toks_for_tag = []
-        start_token = None
-        for tok in tokens:
-            if tok["characterOffsetBegin"] >= tag.start and tok["characterOffsetEnd"] <= tag.end:
-                toks_for_tag.append(tok["index"])
-                if not start_token:
-                    start_token = tok["originalText"].lower()
-        # if we found a sequence and the start token matches
-        if toks_for_tag and tag.text.lower().startswith(start_token):
-            tag_token_index_sequences.append((tag, toks_for_tag))
-    return tag_token_index_sequences
-
-
-def pathie_find_relations_in_sentence(tokens, sentence_text_lower):
-    idx2word = dict()
-    # root is the empty word
-    idx2word[0] = ""
-    verbs = set()
-    vidx2text_and_lemma = dict()
-    for t in tokens:
-        t_id = t["index"]
-        t_txt = t["originalText"]
-        t_pos = t["pos"]
-        t_lemma = t["lemma"]
-        # it's a verb
-        if t_pos.startswith('V') and t_lemma not in ["have", "be"]:
-            vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
-            verbs.add((t_id, t_txt, t_lemma))
-        else:
-            # check if a keyword is mentioned
-            t_lower = t_txt.lower().strip()
-            for keyword in IMPORTANT_KEYWORDS:
-                if keyword in t_lower:  # partial included is enough
-                    vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
-                    verbs.add((t_id, t_txt, t_lemma))
-
-    for keyphrase in IMPORTANT_PHRASES:
-        if keyphrase in sentence_text_lower:
-            keyphrase_parts = keyphrase.split(' ')
-            parts_found = []
-            for part in keyphrase_parts:
-                for t in tokens:
-                    t_id = t["index"]
-                    t_txt = t["originalText"]
-                    t_lemma = t["lemma"]
-                    if t['originalText'].lower() in part:
-                        parts_found.append((t_id, t_txt, t_lemma))
-            if len(parts_found) == len(keyphrase_parts):
-                # the whole phrase was matched
-                t_txt = ' '.join([p[1] for p in parts_found])
-                t_lemma = ' '.join([p[2] for p in parts_found])
-                for p in parts_found:
-                    t_id = p[0]
-                    vidx2text_and_lemma[t_id] = (t_txt, t_lemma)
-                    verbs.add((t_id, t_txt, t_lemma))
-    return verbs, vidx2text_and_lemma
-
-
-def convert_sentence_to_triples(doc_id: int, sentence_json: dict, doc_tags):
-    """
-    PathIE extraction procedure
-    1. Reads CoreNLP JSON output
-    2. Converts EnhancedDependenciesPlusPlus into a graph
-    3. Performs a Path search on this graph between the entities
-    4. if a predicate / keyword is included on the path, a fact is extracted
-    :param doc_id: the document id
-    :param sentence_json: json sentence parse
-    :param doc_tags: dict mapping doc ids to tags
-    :return:
-    """
-    enhan_deps = sentence_json["enhancedPlusPlusDependencies"]
-    tokens = sentence_json["tokens"]
-    sentence = pathie_reconstruct_sentence_sequence_from_nlp_output(tokens).strip()
-    sentence_lower = sentence.lower()
-
-    # find all relations in the sentence
-    verbs, vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower)
-
-    # no verbs -> no extractions
-    if len(verbs) == 0:
-        return []
-
-    # find entities in sentence
-    tag_sequences = pathie_find_tags_in_sentence(tokens, doc_tags)
-
-    dep_graph = nx.Graph()
-    node_idxs = set()
-    for dep_json in enhan_deps:
-        dep = dep_json["dep"]
-        governor = int(dep_json["governor"])
-        governor_gloss = dep_json["governorGloss"]
-        dependent = int(dep_json["dependent"])
-        dependent_gloss = dep_json["dependentGloss"]
-
-        if governor not in node_idxs:
-            dep_graph.add_node(governor)
-            node_idxs.add(governor)
-        if dependent not in node_idxs:
-            dep_graph.add_node(dependent)
-            node_idxs.add(dependent)
-        dep_graph.add_edge(governor, dependent)
-
-    extracted_tuples = []
-    extracted_index = set()
-    for e1_idx, (e1_tag, e1_token_ids) in enumerate(tag_sequences):
-        for e1_tok_id in e1_token_ids:
-            for e2_idx, (e2_tag, e2_token_ids) in enumerate(tag_sequences):
-                # do not extract relations between the same entity
-                if e1_idx == e2_idx:
-                    continue
-                for e2_tok_id in e2_token_ids:
-                    try:
-                        for path in nx.all_shortest_paths(dep_graph, source=e1_tok_id, target=e2_tok_id):
-                            for n_idx in path:
-                                # does this path lead over a relation
-                                if n_idx in vidx2text_and_lemma:
-                                    # this is a valid path
-                                    v_txt, v_lemma = vidx2text_and_lemma[n_idx]
-                                    key = (e1_tag.ent_id, e1_tag.ent_type, v_lemma, e2_tag.ent_id, e2_tag.ent_type)
-                                    if key in extracted_index:
-                                        continue
-                                    extracted_index.add(key)
-                                    extracted_tuples.append((doc_id, e1_tag.ent_id, e1_tag.text, e1_tag.ent_type, v_txt,
-                                                             v_lemma,
-                                                             e2_tag.ent_id, e2_tag.text, e2_tag.ent_type, sentence))
-                    except nx.NetworkXNoPath:
-                        pass
-
-    return extracted_tuples
-
-
 def load_and_fix_json_nlp_data(json_path):
     """
     Loads and fixes a txt CoreNLP text json file
@@ -249,7 +90,18 @@ def process_json_file(doc_id, input_file, doc_tags):
     extracted_tuples = []
     json_data = load_and_fix_json_nlp_data(input_file)
     for sent in json_data["sentences"]:
-        extracted_tuples.extend(convert_sentence_to_triples(doc_id, sent, doc_tags))
+        sent_dependencies = []
+        for dep_json in sent["enhancedPlusPlusDependencies"]:
+            sent_dependencies.append(PathIEDependency(int(dep_json["governor"]), int(dep_json["dependent"]),
+                                                      dep_json["dep"]))
+
+        sent_tokens = []
+        for t in sent["tokens"]:
+            sent_tokens.append(PathIEToken(t["originalText"], t["originalText"].lower(), t["before"], t["after"],
+                                           int(t["index"]), int(t["characterOffsetBegin"]),
+                                           int(t["characterOffsetEnd"]), t["pos"], t["lemma"]))
+
+        extracted_tuples.extend(pathie_extract_facts_from_sentence(doc_id, doc_tags, sent_tokens, sent_dependencies))
     return extracted_tuples
 
 

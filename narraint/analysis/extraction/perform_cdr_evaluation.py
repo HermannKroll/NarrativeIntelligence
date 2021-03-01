@@ -28,8 +28,8 @@ pubtator_doc_paths = [os.path.join(CDR2015_DIR, d) for d in pubtator_docs]
 
 CDR2015_pubtator_extracted = os.path.join(CDR2015_DIR_OUTPUT, 'cdr_documents.pubtator')
 CDR2015_corenlp_openie_output = os.path.join(CDR2015_DIR_OUTPUT, 'corenlp_openie.tsv')
-CDR2015_pathie_output = os.path.join(CDR2015_DIR_OUTPUT, 'pathie_extractions.tsv')
-CDR2015_stanza_pathie_output = os.path.join(CDR2015_DIR_OUTPUT, 'pathie_stanza_extractions.tsv')
+CDR2015_pathie_output = os.path.join(CDR2015_DIR_OUTPUT, 'pathie_extractions_V2.tsv')
+CDR2015_stanza_pathie_output = os.path.join(CDR2015_DIR_OUTPUT, 'pathie_stanza_extractions_V2.tsv')
 CDR2015_openie6_output = os.path.join(CDR2015_DIR_OUTPUT, 'openie6_extractions.tsv')
 
 CDR2015_canonicalizing_distances = os.path.join(CDR2015_DIR_OUTPUT, 'canonicalizing_distances.tsv')
