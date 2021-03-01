@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 
 NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
 
-NCBI_DISEASE_TEST_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBIdevelopset_corpus.txt")
+NCBI_DISEASE_TEST_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBItestset_corpus.txt")
 NCBI_DISEASE_TAGGED_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'ncbi_documents_dev.tagged.pubtator')
 TAGGERONE_VOCAB = os.path.join(NCBI_DISEAE_TEST_DIR, 'taggerone/CTD_diseases.tsv')
 
@@ -40,8 +40,6 @@ def create_taggerone_vocab_dictagger():
                 names = [name for n in [row[0]]+row[7].split("|") for name in expand_vocabulary_term(n.lower()) ]
                 desc = {d for s in [row[1].split("|"), row[2].split("|")] for d in s if d}
                 #desc = {row[1]}
-                if len(desc)>1:
-                    pass
                 for name in names:
                     if name not in vocab:
                         vocab[name] = set()

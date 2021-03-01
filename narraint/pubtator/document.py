@@ -57,18 +57,23 @@ def parse_tag_list(path_or_str):
 
 class TaggedDocument:
 
-    def __init__(self, pubtator_content, spacy_nlp=None, ignore_tags=False):
+    def __init__(self, pubtator_content=None, spacy_nlp=None, ignore_tags=False, id=None, title=None, abstract=None):
         """
         initialize a pubtator document
         :param pubtator_content: content of a pubtator file or a pubtator filename
         """
-        pubtator_content = tools.read_if_path(pubtator_content)
-        match = CONTENT_ID_TIT_ABS.match(pubtator_content)
-        if match:
-            self.id, self.title, self.abstract = match.group(1, 2, 3)
-            self.title = self.title.strip()
-            self.abstract = self.abstract.strip()
-            self.id = int(self.id)
+        if pubtator_content:
+            pubtator_content = tools.read_if_path(pubtator_content)
+            match = CONTENT_ID_TIT_ABS.match(pubtator_content)
+            if match:
+                self.id, self.title, self.abstract = match.group(1, 2, 3)
+                self.title = self.title.strip()
+                self.abstract = self.abstract.strip()
+                self.id = int(self.id)
+        elif id and title and abstract:
+            self.id = id
+            self.title = title
+            self.abstract = abstract
         else:
             self.title = None
             self.abstract = None
