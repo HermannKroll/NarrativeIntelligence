@@ -57,26 +57,23 @@ The projects core, the `narraint` package, consists of several Python packages a
 
 | Package | Task |
 |-----------------|-----------------------------------------------------------------------------------------------|
-| `analysis` | Python scripts to compute database statistics |
+| `analysis` | Python scripts to compute database statistics and research stuff |
 | `backend` | Connection to database, loading and exporting |
-| `enitity` | Entity stuff like mapping entity ids to vocabulary headings |
+| `entity` | Entity stuff like mapping entity ids to vocabulary headings |
+| `cleaning` | Extraction DB cleaning (predicate cleaning and integrity constraints) |
 | `extraction` | Information Extraction methods to harvest facts out of text (OpenIE and PathIE)
 | `frontend` | Webserver the the user interface for querying with Narratives (FID Pharmazie) |
 | `graph` | Model for a labeled directed graph with useful tools (computing connectivity components, export to dot, etc) |
-| `lucence` | Scripts to Wrap Apache Lucene's functions
 | `mesh` | MeSH database wrapper, provides several functions to work on the MeSH tree |
-| `narrative` | Implementation of the Narrative querying |
 | `preprocessing` | Conversion and Named Entity Recognition on PubTator documents |
-| `pubmedutils` | Tools to query PMIDs from PubMed and PubTator files from Pubtator  |
 | `pubtator` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
-| `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (extracted by openie)  |
-| `semmeddb` | Connection Handling for a SemMedDB. Currently our prototype queries SemMedDB via this package for fact retrieval |
-| `stories` | Some experimental stuff to derive stories from documents |
-| `utils` | Several nice helper scripts | 
+| `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (extracted by openie)  
+| `semmeddb` | Wrapping functions to query SemMedDB and to convert the SemMedDB dumps to Postgres |
+| `util` | Several nice helper scripts | 
 
-## Named Entity Recognition
+## Entity Linking
 
-To perform Named Entity Recognition of documents use the `preprocessing` package. The documents must first be converted to the PubTator format ([example file](https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator?pmids=19894120)). Please note that the PubTator format is the central unit for this project and that all tools work with this format.
+To perform Entity Linking of documents use the `preprocessing` package. The documents must first be converted to the PubTator format ([example file](https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator?pmids=19894120)). Please note that the PubTator format is the central unit for this project and that all tools work with this format.
 
 The entry point `preprocess.py` takes a directory of PubTator files and generates a single file with all documents and tags.
 The documents and tags are all inserted into the database for later processing and retrieval.

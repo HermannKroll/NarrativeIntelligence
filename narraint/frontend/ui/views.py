@@ -1,7 +1,4 @@
-import asyncio
-import itertools
 import logging
-import random
 import re
 import traceback
 import sys
@@ -19,7 +16,7 @@ from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL, ALL, DISEASE
-from narraint.extraction.predicate_vocabulary import create_predicate_vocab
+from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine

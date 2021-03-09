@@ -9,10 +9,9 @@ from narraint.backend.database import Session
 from narraint.backend.export import export
 from narraint.backend.models import Document, Tag, Predication
 from narraint.config import DATA_DIR
-from narraint.entity import enttypes
-from narraint.entity.enttypes import DISEASE, CHEMICAL, GENE
-from narraint.extraction.apply_rules import clean_extractions_in_database
-from narraint.extraction.canonicalize_predicates import canonicalize_predication_table
+from narraint.entity.enttypes import CHEMICAL, GENE
+from narraint.cleaning.apply_rules import clean_extractions_in_database
+from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import run_openie6

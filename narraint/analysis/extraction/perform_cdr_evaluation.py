@@ -7,8 +7,8 @@ from narraint.backend.load_document import load_document, read_tagger_mapping, U
 from narraint.backend.models import Predication
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narraint.entity.enttypes import CHEMICAL, DISEASE
-from narraint.extraction.apply_rules import clean_extractions_in_database
-from narraint.extraction.canonicalize_predicates import canonicalize_predication_table
+from narraint.cleaning.apply_rules import clean_extractions_in_database
+from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import run_openie6
