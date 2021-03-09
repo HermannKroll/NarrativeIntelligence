@@ -1,7 +1,12 @@
+import logging
+
 from narraint.config import MESH_DESCRIPTORS_FILE
 from narraint.mesh.data import MeSHDB
 
-def get_nodes_from_treenumbers(tree_numbers):
+DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600", "J01.637.512.850", "J01.637.512.925"]
+
+
+def _get_nodes_from_treenumbers(meshdb, tree_numbers):
     visited = set()
     nodes = []
     for tn in tree_numbers:
@@ -27,19 +32,18 @@ def get_nodes_from_treenumbers(tree_numbers):
     return nodes
 
 
-def export_mesh_headings_for_teamproject(meshdb, output_file):
-    nodes = meshdb.get_all_descs()
-    print('{} nodes fetched from mesh'.format(len(nodes)))
-    export_str = 'Heading\tMESH Descriptor'
-    for n in nodes[1:]:
-        export_str += '\n{}\tMESH:{}'.format(n.heading, n.unique_id)
-    with open(output_file, 'w') as f:
-        f.write(export_str)
+def main():
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.INFO)
 
+    print('load mesh file...')
+    meshdb = MeSHDB.instance()
+    meshdb.load_xml(MESH_DESCRIPTORS_FILE)
+    print('beginning export...')
+    nodes = _get_nodes_from_treenumbers(meshdb, DOSAGE_FORM_TREE_NUMBERS)
 
-def export_mesh_subtrees_as_tsv(meshdb, tree_numbers, output_file):
-    nodes = get_nodes_from_treenumbers(tree_numbers)
-    with open(output_file, 'w') as f:
+    with open('dosage_forms_dict2020.tsv', 'w') as f:
         f.write('MESH Descriptor\tHeading\tTerms\n')
         for n in nodes:
             term_str = n.terms[0].string
@@ -53,12 +57,5 @@ def export_mesh_subtrees_as_tsv(meshdb, tree_numbers, output_file):
             f.write('MESH:{}\t{}\t{}\t{}\n'.format(n.unique_id, n.heading, term_str, tree_str))
 
 
-DOSAGE_FORM_TREE_NUMBERS = ["D26.255", "E02.319.300", "J01.637.512.600", "J01.637.512.850", "J01.637.512.925"]
-
-print('load mesh file...')
-meshdb = MeSHDB.instance()
-meshdb.load_xml(MESH_DESCRIPTORS_FILE)
-print('beginning export...')
-#export_mesh_subtrees_as_tsv(meshdb, DOSAGE_FORM_TREE_NUMBERS, 'dosage_forms_dict2020.tsv')
-export_mesh_headings_for_teamproject(meshdb, 'mesh_list.txt')
-print('export finished')
+if __name__ == "__main__":
+    main()

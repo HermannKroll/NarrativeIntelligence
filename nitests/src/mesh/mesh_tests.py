@@ -73,3 +73,12 @@ class Test(TestCase):
         c2 = self.db.desc_by_tree_number("D02.455.426.392.368.242.888.777")
         c3 = self.db.desc_by_tree_number("D02.455.426.392.368.242.888.777.500")
         self.assertListEqual(descs, sorted([c1, c2, c3]))
+
+    def test_desc_qualifiers(self):
+        desc1 = self.db.desc_by_id('D019454')
+        allowed_qualifiers = {'Q000662', 'Q000639', 'Q000706', 'Q000592', 'Q000523', 'Q000451',
+                              'Q000401', 'Q000379', 'Q000295', 'Q000266', 'Q000941', 'Q000191',
+                              'Q000145', 'Q000009'}
+        self.assertEqual(len(desc1.allowable_qualifiers_list), 14)
+        for q in desc1.allowable_qualifiers_list:
+            self.assertIn(q.qualifier_ui, allowed_qualifiers)

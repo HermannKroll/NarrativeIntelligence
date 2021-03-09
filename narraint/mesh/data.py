@@ -270,6 +270,13 @@ class SeeRelatedDescriptor(BaseNode):
     pass
 
 
+class AllowableQualifier(BaseNode):
+    _attrs = dict(
+        qualifier_ui=(get_text, "QualifierReferredTo/QualifierUI"),
+        qualifier_name=(get_text, "QualifierReferredTo/QualifierName/String")
+    )
+
+
 # noinspection PyUnresolvedReferences
 class Descriptor(BaseNode):
     _attrs = dict(
@@ -291,6 +298,7 @@ class Descriptor(BaseNode):
         see_related_list=(get_list, "SeeRelatedList", SeeRelatedDescriptor.from_element),
         tree_number_list=(get_list, "TreeNumberList", get_element_text, True),
         unique_id=(get_text, "DescriptorUI", True),
+        allowable_qualifiers_list=(get_list, "AllowableQualifiersList", AllowableQualifier.from_element)
     )
 
     @property
