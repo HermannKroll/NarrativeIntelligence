@@ -2,18 +2,14 @@ import logging
 from io import StringIO
 from collections import defaultdict
 from datetime import datetime
-from itertools import islice
 
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import update, and_, or_, delete
-from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.database import Session
-from narraint.backend.models import Predication, PredicationResult, PredicationToDelete
+from narraint.backend.models import Predication, PredicationToDelete
 from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
     PLANT_FAMILY
-from narraint.entity.meshontology import MeSHOntology
-from narraint.extraction.predicate_vocabulary import PRED_TO_REMOVE
+from narraint.cleaning.predicate_vocabulary import PRED_TO_REMOVE
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES
 

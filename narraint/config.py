@@ -25,10 +25,10 @@ SEMMEDDB_CONFIG = os.path.join(CONFIG_DIR, 'semmed.json')
 MESH_ONTOLOGY_INDEX_FILE = os.path.join(TMP_DIR, "mesh_ontology_index.pkl")
 
 # MESH
-MESH_DESCRIPTORS_FILE = os.path.join(DATA_DIR, "desc2020.xml")
-MESH_SUPPLEMENTARY_FILE = os.path.join(DATA_DIR, "supp2020.xml")
-MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2020_id2heading.pkl')
-MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'supp2020_id2heading.pkl')
+MESH_DESCRIPTORS_FILE = os.path.join(DATA_DIR, "desc2021.xml")
+MESH_SUPPLEMENTARY_FILE = os.path.join(DATA_DIR, "supp2021.xml")
+MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2021_id2heading.pkl')
+MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'supp2021_id2heading.pkl')
 
 # Drugbase
 DRUGBASE_XML_DUMP = os.path.join(DATA_DIR, "full_database.xml")
