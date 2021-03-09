@@ -205,7 +205,7 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 start = indexes[0]
                 end = indexes[-1] + len(words[-1])
                 if start > len(title):
-                    start = start - 1
+                    start = start
                 hits = list(self.generate_tagged_entities(end, pmid, start, term))
                 tags += hits
 
