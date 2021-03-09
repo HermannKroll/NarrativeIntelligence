@@ -22,7 +22,7 @@ from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
 
-CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot_test')
+CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot/chemprot_test')
 CHEMPROT_COLLECTION = 'ChemProt'
 
 CHEMPROT_DOCUMENTS = os.path.join(CHEMPROT_DIR, 'chemprot_test_abstracts_gs.tsv')
