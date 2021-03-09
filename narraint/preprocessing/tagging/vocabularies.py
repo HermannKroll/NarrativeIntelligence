@@ -2,6 +2,8 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
+from typing import List
+
 import lxml.etree as ET
 
 from narraint import config
@@ -20,39 +22,52 @@ def expand_vocabulary_term(term: str) -> str:
     yield from [term, f'{term}e', f'{term}s']
 
 
-class DiseaseVocabulary:
+class MeSHVocabulary:
+
 
     @staticmethod
-    def create_disease_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
-        disease_by_term = defaultdict(set)
-
-        logging.info('Loading all disease descriptors...')
+    def create_mesh_vocab(subtrees: List[str], mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
+        desc_by_term = defaultdict(set)
+        logging.info(f'Loading all MeSH descriptors for tree numbers: {subtrees}...')
         mesh_ontology = MeSHOntology.instance()
-        disease_descriptors = list([d for d in mesh_ontology.find_descriptors_start_with_tree_no('C')])
-        # add mental disorders
-        disease_descriptors.extend([d for d in mesh_ontology.find_descriptors_start_with_tree_no('F03')])
+        mesh_descs = []
+        for tn in subtrees:
+            mesh_descs.extend(list([d for d in mesh_ontology.find_descriptors_start_with_tree_no(tn)]))
 
         meshdb = MeSHDB.instance()
         meshdb.load_xml(mesh_file, prefetch_all=True, force_load=True)
         logging.info('Extracting MeSH information (terms) ...')
-        for d_id, d_head in disease_descriptors:
+        for d_id, d_head in mesh_descs:
             mesh_desc_data = meshdb.desc_by_id(d_id)
             mesh_desc = f'MESH:{d_id}'
 
             if expand_by_s_and_e:
                 for t_e in expand_vocabulary_term(d_head.lower().strip()):
-                    disease_by_term[t_e].add(mesh_desc)
+                    desc_by_term[t_e].add(mesh_desc)
             else:
-                disease_by_term[d_head.lower().strip()].add(mesh_desc)
+                desc_by_term[d_head.lower().strip()].add(mesh_desc)
             for t in mesh_desc_data.terms:
                 if expand_by_s_and_e:
                     for t_e in expand_vocabulary_term(t.string.lower().strip()):
-                        disease_by_term[t_e].add(mesh_desc)
+                        desc_by_term[t_e].add(mesh_desc)
                 else:
-                    disease_by_term[t.string.lower().strip()].add(mesh_desc)
+                    desc_by_term[t.string.lower().strip()].add(mesh_desc)
+        return desc_by_term
 
-        return disease_by_term
 
+class MethodVocabulary:
+
+    @staticmethod
+    def create_method_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
+        return MeSHVocabulary.create_mesh_vocab(['E'], mesh_file, expand_by_s_and_e)
+
+
+class DiseaseVocabulary:
+
+    @staticmethod
+    def create_disease_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
+        return MeSHVocabulary.create_mesh_vocab(['C', 'F03'], mesh_file, expand_by_s_and_e)
+        
 
 class DrugBankChemicalVocabulary:
 

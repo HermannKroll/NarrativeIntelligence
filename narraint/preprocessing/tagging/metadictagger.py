@@ -5,7 +5,7 @@ from typing import List, Dict
 
 import narraint.preprocessing.tagging.dictagger as dt
 import narraint.entity.enttypes as et
-from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical, disease
+from narraint.preprocessing.tagging import drug, dosage, excipient, plantfamily, drugbankchemical, disease, method
 from narraint.pubtator.document import TaggedEntity
 
 """
@@ -62,11 +62,9 @@ class MetaDicTagger(dt.DictTagger):
                     for desc in hits:
                         yield TaggedEntity((pmid, start, end, term, entType, desc))
 
-
-
-
     def get_types(self):
         return self.tag_types
+
 
 class MetaDicTaggerFactory:
     tagger_by_type: Dict[str, dt.DictTagger] = {
@@ -75,7 +73,8 @@ class MetaDicTaggerFactory:
         et.EXCIPIENT: excipient.ExcipientTagger,
         et.PLANT_FAMILY: plantfamily.PlantFamilyTagger,
         et.DRUGBANK_CHEMICAL: drugbankchemical.DrugBankChemicalTagger,
-        et.DISEASE: disease.DiseaseTagger
+        et.DISEASE: disease.DiseaseTagger,
+        et.METHOD: method.MethodTagger
     }
 
     @staticmethod
