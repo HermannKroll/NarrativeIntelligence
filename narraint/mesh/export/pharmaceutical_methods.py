@@ -4,6 +4,7 @@ from narraint.config import MESH_DESCRIPTORS_FILE
 from narraint.mesh.data import MeSHDB
 
 METHODS_QUALIFIER = 'Q000379'
+PM_TREE_NUMBERS_TO_KEEP = ['E']
 
 
 def main():
@@ -17,9 +18,10 @@ def main():
 
     relevant_descs = []
     for desc in meshdb.get_all_descs():
-        for q in desc.allowable_qualifiers_list:
-            if q.qualifier_ui == METHODS_QUALIFIER:
+        for tn in desc.tree_numbers:
+            if tn.startswith('E'):
                 relevant_descs.append(desc)
+                break
 
     logging.info(f'beginning export of {len(relevant_descs)} descriptors...')
     with open('pharmaceutical_methods_2021.tsv', 'w') as f:
@@ -31,7 +33,8 @@ def main():
                 term_str += '; {}'.format(t.string)
 
             for tn in d.tree_numbers:
-                f.write('{}\tMESH:{}\t{}\t{}\n'.format(tn, d.unique_id, d.heading, term_str))
+                if tn[0] in PM_TREE_NUMBERS_TO_KEEP:  # hand-crafted rules to keep tree numbers
+                    f.write('{}\tMESH:{}\t{}\t{}\n'.format(tn, d.unique_id, d.heading, term_str))
 
     logging.info('export finished')
 
