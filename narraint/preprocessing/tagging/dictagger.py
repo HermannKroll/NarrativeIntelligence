@@ -2,6 +2,7 @@ import copy
 import os
 import pickle
 import re
+import itertools as it
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from datetime import datetime
@@ -53,6 +54,8 @@ def split_indexed_words(content):
             word = word[:-1]
             word_offset += 1
         ind_words.append((word, ind))
+
+
         # index = last index + length of last word incl. offset
         next_index_word = next_index_word + len(word) + word_offset + 1
 
@@ -60,7 +63,7 @@ def split_indexed_words(content):
     amendment = []
     for word, index in ind_words:
         split = word.split("-")
-        if len(split) == 2 and split[1][-2:] == "ed":
+        if len(split) == 2 and split[1][-2:] in {"ed", "et"}:
             amendment.append((split[0], index))
     ind_words += amendment
     return ind_words
@@ -183,6 +186,8 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         :param in_doc: document containing title+abstract to tag. Is modified by adding tags
         :return: the modified in_doc
         """
+        and_check_range = 5
+        connector_words = {"and", "or"}
         abb_vocab = dict()
         out_doc = in_doc
         pmid, title, abstact = in_doc.id, in_doc.title, in_doc.abstract
@@ -200,9 +205,10 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
                 start = indexes[0]
                 end = indexes[-1] + len(words[-1])
                 if start > len(title):
-                    start = start - 1
+                    start = start
                 hits = list(self.generate_tagged_entities(end, pmid, start, term))
                 tags += hits
+
                 if self.config.custom_abbreviations and hits:
                     match = re.match(r" \(([^\(\)]*)\).*", content[indexes[-1] + len(words[-1]):])
                     if match:
@@ -213,20 +219,51 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         if abb_vocab:
             for spaces in range(self.config.dict_max_words):
                 for word_tuple in get_n_tuples(ind_words, spaces + 1):
-                    words, indexes = zip(*word_tuple)
-                    term = " ".join(words)
-                    start = indexes[0]
-                    end = indexes[-1] + len(words[-1])
-                    if start > len(title):
-                        start = start - 1
-                    hits = list(self.generate_tagged_entities(end, pmid, start, term, abb_vocab))
+                    hits = self.get_hits(word_tuple, abb_vocab, pmid, title)
                     tags += hits
 
         if self.config.dict_check_abbreviation:
             tags = DictTagger.clean_abbreviation_tags(tags, self.config.dict_min_full_tag_len)
 
+        # TODO: Check for instances like "breast and ovarian cancer"
+        for word_tuples in get_n_tuples(ind_words, and_check_range):
+            words, indexes = zip(*word_tuples)
+            if any([tag.start < indexes[-1] + 1 or indexes[0] < tag.end for tag in tags]):
+                for test_seq in DictTagger.conjunction_product(word_tuples):
+                    hits = self.get_hits(test_seq, abb_vocab, pmid, title)
+                    tags += hits
+
         out_doc.tags += tags
         return out_doc
+
+    def get_hits(self, word_tuple, abb_vocab, pmid, title):
+        words, indexes = zip(*word_tuple)
+        term = " ".join(words)
+        start = indexes[0]
+        end = indexes[-1] + len(words[-1])
+        if start > len(title):
+            start = start - 1
+        hits = list(self.generate_tagged_entities(end, pmid, start, term, abb_vocab))
+        return hits
+
+    connector_words = {"and", "or"}
+
+    @staticmethod
+    def conjunction_product(token_seq):
+        """ split token_seq at last conn_word, return product of all sub token sequences. Exclude connector words."""
+        cwords_indexes = [n for n, (w, i) in enumerate(token_seq) if w in DictTagger.connector_words]
+
+        if not cwords_indexes:
+            return []
+        left = token_seq[:max(cwords_indexes)]
+        right = token_seq[max(cwords_indexes):]
+
+        left = [(w, i) for w, i in left if w not in DictTagger.connector_words]
+        right = [(w, i) for w, i in right if w not in DictTagger.connector_words]
+
+        left_tuples = [t for n in range(1, len(left) + 1) for t in list(get_n_tuples(left, n))]
+        right_tuples = [t for n in range(1, len(right) + 1) for t in list(get_n_tuples(right, n))]
+        yield from [lt + rt for lt, rt in it.product(left_tuples, right_tuples)]
 
     def _tag(self, in_file, out_file):
         with open(in_file) as f:

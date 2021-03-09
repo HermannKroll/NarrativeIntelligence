@@ -15,6 +15,8 @@ from narraint.progress import print_progress_with_eta
 def expand_vocabulary_term(term: str) -> str:
     if term.endswith('s') or term.endswith('e'):
         yield term[:-1]
+    if term.endswith('or') and len(term) > 2:
+        yield term[:-2] + "our"
     yield from [term, f'{term}e', f'{term}s']
 
 

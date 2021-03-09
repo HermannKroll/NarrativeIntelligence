@@ -19,18 +19,21 @@ class TestDictagger(unittest.TestCase):
             "protein": {"Desc1"},
             "proteins": {"Desc1"},
             "phorbol": {"Desc2", "Desc3"},
-            "protein secretion": {"Desc4"}
+            "protein secretion": {"Desc4"},
+            "protein synthesis": {"Desc5"}
         }
         tagger._tag(proj_rel_path("nitests/resources/infiles/test_dictagger/PMC1313813Untagged.txt"),
                     out_file)
         self.assertTrue(os.path.isfile(out_file))
-        document = doc.parse_tag_list(out_file)
+        document = doc.TaggedDocument(in_file=out_file)
+        #document.clean_tags()
         self.assertTrue(document)
-        strings = [repr(tag) for tag in document]
+        strings = [repr(tag) for tag in document.tags]
         self.assertIn("<Entity 0,8,proteins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1608,1626,protein secretion,DosageForm,Desc4>", strings)
+
 
     def test_abbreviation_check(self):
         out_file = proj_rel_path("nitests/tmp/abbreviation_test_allowed.txt")
@@ -74,7 +77,13 @@ class TestDictagger(unittest.TestCase):
         self.assertIn(('carbon-copper', 32), indexed)
         self.assertNotIn(('carbon', 32), indexed)
 
-
+    def test_conjunction_product(self):
+        tuples = DictTagger.conjunction_product(split_indexed_words("brain, breast and ovarian cancer"))
+        desired = "[[('brain', 0), ('ovarian', 18)], [('brain', 0), ('cancer', 26)], [('brain', 0), ('ovarian', 18), " \
+                 "('cancer', 26)], [('breast', 7), ('ovarian', 18)], [('breast', 7), ('cancer', 26)], [('breast', 7), " \
+                 "('ovarian', 18), ('cancer', 26)], [('brain', 0), ('breast', 7), ('ovarian', 18)], [('brain', 0), " \
+                 "('breast', 7), ('cancer', 26)], [('brain', 0), ('breast', 7), ('ovarian', 18), ('cancer', 26)]]"
+        self.assertEqual(str(list(tuples)), desired)
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,35 +13,80 @@ from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
 from narraint.pubtator.document import parse_tag_list, TaggedEntity, TaggedDocument
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import TAG_LINE_NORMAL
-from nitests.util import create_test_kwargs  # meh
 from matplotlib import pyplot as plt
 
-NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
+ONLY_MESH = True
+tagtypes = None
+ENFORCE_TAGTYPES = True
 
-NCBI_DISEASE_TEST_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBIdevelopset_corpus.txt")
-NCBI_DISEASE_TAGGED_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'ncbi_documents_dev.tagged.pubtator')
-TAGGERONE_VOCAB = os.path.join(NCBI_DISEAE_TEST_DIR, 'taggerone/CTD_diseases.tsv')
+
+corpus = "ncbi"
+
+if corpus == "ncbi":
+    NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
+
+    PUBTATOR_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBItestset_corpus.txt")
+    VOCAB_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'taggerone/CTD_diseases.tsv')
+    ENFORCE_TAGTYPES = False
+    ONLY_MESH = True
+elif corpus == "ncbi_develop":
+    NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
+
+    PUBTATOR_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBIdevelopset_corpus.txt")
+    VOCAB_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'taggerone/CTD_diseases.tsv')
+    ENFORCE_TAGTYPES = False
+    ONLY_MESH = False
+elif corpus == "bc_d":
+    PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CDR.2.PubTator")
+    VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_diseases-2015-06-04.tsv")
+    tagtypes = ["Disease"]
+elif corpus == "bc_c":
+    PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CDR.2.PubTator")
+    VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_chemicals-2015-07-22.tsv")
+    tagtypes = ["Chemical"]
+elif corpus == "bc_d_test":
+    PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR_TEST/CDR_TestSet.PubTator.joint.txt")
+    VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_diseases-2015-06-04.tsv")
+    tagtypes = ["Disease"]
+elif corpus == "bc_c_test":
+    PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR_TEST/CDR_TestSet.PubTator.joint.txt")
+    VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_chemicals-2015-07-22.tsv")
+    tagtypes = ["Chemical"]
+
 
 use_taggerone_vocab = False
 substring_matching = True
+prefer_mesh = False
+if not tagtypes:
+    tagtypes = ["Disease"]
 
+# test file override
+#PUBTATOR_FILE = "/home/jan/cholesterol.pubtator"
 
 def create_taggerone_vocab_dictagger():
     tagger = DiseaseTagger(config=Config(PREPROCESS_CONFIG))
+    #min_len = tagger.config.dict_min_full_tag_len
+    min_len = 5
+    tagger.tag_types = tagtypes
     if use_taggerone_vocab:
         vocab = dict()
-        with open(TAGGERONE_VOCAB, newline='') as f:
+        with open(VOCAB_FILE, newline='') as f:
             vocab_reader = csv.reader(f, delimiter="\t")
             for row in vocab_reader:
                 if row[0].strip()[0] == "#":
                     continue
                 if len(row[0]) < tagger.config.dict_min_full_tag_len:
                     continue
-                names = [name for n in [row[0]]+row[7].split("|") for name in expand_vocabulary_term(n.lower()) ]
+                names = [name for n in [row[0]]+row[7].split("|") for name in expand_vocabulary_term(n.lower()) if len(n) >= min_len]
                 desc = {d for s in [row[1].split("|"), row[2].split("|")] for d in s if d}
+                if prefer_mesh:
+                    for d in desc:
+                        if d[:4] == "MESH":
+                            desc = {d}
+                            break
+                if ONLY_MESH:
+                    desc = {d for d in desc if d[:4] == "MESH"}
                 #desc = {row[1]}
-                if len(desc)>1:
-                    pass
                 for name in names:
                     if name not in vocab:
                         vocab[name] = set()
@@ -76,15 +121,22 @@ def run_test(s_e_tolerance: int=1):
 
     documents = dict()
     correct_diseases = defaultdict(set)
-    with open(NCBI_DISEASE_TEST_FILE, 'rt') as f:
+    with open(PUBTATOR_FILE, 'rt') as f:
         content = f.read()
     tags = [t for t in TAG_LINE_NORMAL.findall(content)]
     count_omim_tags = 0
+    count_idless_tags = 0
     for t in tags:
-        # consider mesh descriptors only
-        tag = TaggedEntity(document=t[0], start=t[1], end=t[2], text=t[3], ent_type="Disease", ent_id=t[5])
-        if not tag.ent_id.startswith('D') and not use_taggerone_vocab:
+        tagtype = t[4] if ENFORCE_TAGTYPES else tagtypes[0]
+        tag = TaggedEntity(document=t[0], start=t[1], end=t[2], text=t[3], ent_type=tagtype, ent_id=t[5])
+        if tagtypes and tag.ent_type not in tagtypes:
+            continue
+        if not tag.ent_id.startswith('D') and not tag.ent_id.startswith('C') and ONLY_MESH:
             count_omim_tags += 1
+            continue
+        #ignore tags without descriptor
+        if tag.ent_id == "-1":
+            count_idless_tags += 1
             continue
         # composite tag mention - allow all tags
         if '|' in tag.ent_id:
@@ -95,7 +147,10 @@ def run_test(s_e_tolerance: int=1):
         else:
             correct_diseases[int(tag.document)].add(tag)
 
-    logging.debug(f'{count_omim_tags} of {count_omim_tags + len(tags)} are ignored (omim is not supported)')
+    if ONLY_MESH:
+        logging.debug(f'{count_omim_tags} of {count_omim_tags + len(tags)} are ignored (non-mesh tags not supported)')
+    if count_idless_tags>0:
+        logging.debug(f'ignored {count_idless_tags} tags with id "-1" (idless)')
 
     tagged_diseases = defaultdict(set)
     # Read tags from file
@@ -104,11 +159,14 @@ def run_test(s_e_tolerance: int=1):
     #own_tags = parse_tag_list(content)
 
     # Tag on the fly
-    own_tags = tags_from_file(NCBI_DISEASE_TEST_FILE, tagger)
+    own_tags = tags_from_file(PUBTATOR_FILE, tagger)
     for t in own_tags:
-        if not t.ent_id[0:4]=="OMIM":
-         t.ent_id = t.ent_id[5:]
-         tagged_diseases[int(t.document)].add(t)
+        add = not ONLY_MESH
+        if t.ent_id[:5] == "MESH:":
+            t.ent_id = t.ent_id[5:]
+            add = True
+        if add:
+            tagged_diseases[int(t.document)].add(t)
 
 
 
@@ -172,8 +230,8 @@ def run_test(s_e_tolerance: int=1):
         else:
             count_missing_extractions += len(correct_tags)
 
-    precision = count_correct_extractions / (count_correct_extractions + count_wrong_extractions)
-    recall = count_correct_extractions / (count_correct_extractions + count_missing_extractions)
+    precision = count_correct_extractions / (count_correct_extractions + count_wrong_extractions) if (count_correct_extractions + count_missing_extractions) > 0 else 0
+    recall = count_correct_extractions / (count_correct_extractions + count_missing_extractions) if (count_correct_extractions + count_missing_extractions) > 0 else 0
     f1 = (2 * precision * recall) / (precision + recall) if (precision+recall)>0 else 0
     logging.info(f'Precision: {precision}')
     logging.info(f'Recall: {recall}')
