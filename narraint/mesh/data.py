@@ -254,7 +254,7 @@ class Concept(BaseNode):
         preferred_concept_yn=(get_attr, "PreferredConceptYN"),
         registry_number=(get_text, "RegistryNumber"),
         related_registry_number_list=(get_list, "RelatedRegistryNumberList", get_element_text),
-        scope_note=(get_text, "ScopeNote"),
+        _scope_note=(get_text, "ScopeNote"),
         term_list=(get_list, "TermList", Term.from_element, True),
         translators_english_scope_note=(get_text, "TranslatorsEnglishScopeNote"),
         translators_scope_note=(get_text, "TranslatorsScopeNote"),
@@ -267,6 +267,10 @@ class Concept(BaseNode):
     @property
     def concept_ui(self):
         return getattr(self, "_concept_ui")
+
+    @property
+    def scope_note(self):
+        return getattr(self, "_scope_note")
 
     def __str__(self):
         return "<Concept {} ({})>".format(self.name, self.concept_ui)
@@ -287,9 +291,17 @@ class SeeRelatedDescriptor(BaseNode):
 
 class AllowableQualifier(BaseNode):
     _attrs = dict(
-        qualifier_ui=(get_text, "QualifierReferredTo/QualifierUI"),
-        qualifier_name=(get_text, "QualifierReferredTo/QualifierName/String")
+        _qualifier_ui=(get_text, "QualifierReferredTo/QualifierUI"),
+        _qualifier_name=(get_text, "QualifierReferredTo/QualifierName/String")
     )
+
+    @property
+    def name(self):
+        return getattr(self, "_qualifier_name")
+
+    @property
+    def ui(self):
+        return getattr(self, "_qualifier_ui")
 
 
 # noinspection PyUnresolvedReferences
@@ -331,6 +343,14 @@ class Descriptor(BaseNode):
     @property
     def tree_numbers(self) -> List[str]:
         return getattr(self, "tree_number_list")
+
+    @property
+    def note(self) -> str:
+        return getattr(self, "mesh_note")
+
+    @property
+    def allowable_qualifiers(self) -> List[AllowableQualifier]:
+        return getattr(self, "allowable_qualifiers_list")
 
     @property
     def parents(self):
