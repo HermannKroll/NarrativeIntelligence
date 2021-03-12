@@ -3,24 +3,24 @@ XML Documentation: https://www.nlm.nih.gov/mesh/xml_data_elements.html
 """
 import itertools
 import sys
-import warnings
+from typing import List
 from datetime import datetime
 
 from lxml import etree
 
 from narraint.mesh.utils import get_text, get_attr, get_datetime, get_element_text, get_list
 
-QUERY_DESCRIPTOR_RECORD = "/DescriptorRecordSet/DescriptorRecord"
-QUERY_DESCRIPTOR_BY_ID = "/DescriptorRecordSet/DescriptorRecord/DescriptorUI[text()='{}']/parent::*"
-QUERY_DESCRIPTOR_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
+MESH_QUERY_DESCRIPTOR_RECORD = "/DescriptorRecordSet/DescriptorRecord"
+MESH_QUERY_DESCRIPTOR_BY_ID = "/DescriptorRecordSet/DescriptorRecord/DescriptorUI[text()='{}']/parent::*"
+MESH_QUERY_DESCRIPTOR_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
                                   "/TreeNumber[text()='{}']/parent::*/parent::*"
-QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
+MESH_QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER = "/DescriptorRecordSet/DescriptorRecord/TreeNumberList" \
                                       "/TreeNumber[starts-with(text(),'{}')]/parent::*/parent::*/DescriptorUI"
-QUERY_DESCRIPTOR_BY_HEADING_CONTAINS = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
+MESH_QUERY_DESCRIPTOR_BY_HEADING_CONTAINS = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
                                        "/String[contains(text(),'{}')]/parent::*/parent::*"
-QUERY_DESCRIPTOR_BY_HEADING_EXACT = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
+MESH_QUERY_DESCRIPTOR_BY_HEADING_EXACT = "/DescriptorRecordSet/DescriptorRecord/DescriptorName" \
                                     "/String[text()='{}']/parent::*/parent::*"
-QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptList/Concept/TermList/Term" \
+MESH_QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptList/Concept/TermList/Term" \
                            "/String[text()='{}']/parent::*/parent::*/parent::*/parent::*/parent::*"
 
 
@@ -81,7 +81,7 @@ class MeSHDB:
                     print("All descriptors loaded in {}".format(end - start))
 
     def prefetch_all(self, verbose=False):
-        records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
+        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
         total = len(records)
         last = 0
         if verbose:
@@ -100,12 +100,11 @@ class MeSHDB:
 
     def get_all_descs(self):
         descs = []
-        records = self.tree.xpath(QUERY_DESCRIPTOR_RECORD)
+        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
         for idx, record in enumerate(records):
             desc = Descriptor.from_element(record)
             descs.append(desc)
         return descs
-
 
     def add_desc(self, desc_obj):
         """
@@ -124,7 +123,7 @@ class MeSHDB:
 
     def desc_by_id(self, unique_id):
         if unique_id not in self._desc_by_id:
-            query = QUERY_DESCRIPTOR_BY_ID.format(unique_id)
+            query = MESH_QUERY_DESCRIPTOR_BY_ID.format(unique_id)
             desc_rec = self.tree.xpath(query)
             if desc_rec:
                 desc = Descriptor.from_element(desc_rec[0])
@@ -134,7 +133,7 @@ class MeSHDB:
         return self._desc_by_id[unique_id]
 
     def descs_under_tree_number(self, tree_number):
-        query = QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER.format(tree_number + ".")
+        query = MESH_QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER.format(tree_number + ".")
         records = self.tree.xpath(query)
         ids = [record.text.strip() for record in records]
         desc_list = [self.desc_by_id(uid) for uid in ids]
@@ -142,7 +141,7 @@ class MeSHDB:
 
     def desc_by_tree_number(self, tree_number):
         if tree_number not in self._desc_by_tree_number:
-            query = QUERY_DESCRIPTOR_BY_TREE_NUMBER.format(tree_number)
+            query = MESH_QUERY_DESCRIPTOR_BY_TREE_NUMBER.format(tree_number)
             desc_rec = self.tree.xpath(query)
             if desc_rec:
                 desc = Descriptor.from_element(desc_rec[0])
@@ -152,7 +151,7 @@ class MeSHDB:
         return self._desc_by_tree_number[tree_number]
 
     def descs_by_term(self, term):
-        query = QUERY_DESCRIPTOR_BY_TERM.format(term)
+        query = MESH_QUERY_DESCRIPTOR_BY_TERM.format(term)
         records = self.tree.xpath(query)
         desc_list = [Descriptor.from_element(record) for record in records]
         # Add to cache
@@ -165,9 +164,9 @@ class MeSHDB:
         if match_exact and name in self._desc_by_name:
             return [self._desc_by_name[name]]
         if match_exact:
-            query = QUERY_DESCRIPTOR_BY_HEADING_EXACT.format(name)
+            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_EXACT.format(name)
         else:
-            query = QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
+            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
         records = self.tree.xpath(query)
         desc_list = [Descriptor.from_element(record) for record in records]
         # Add to cache
@@ -216,17 +215,25 @@ class Term(BaseNode):
         lexical_tag=(get_attr, "LexicalTag"),
         record_preferred_term_yn=(get_attr, "RecordPreferredTermYN"),
         sort_version=(get_text, "SortVersion"),
-        string=(get_text, "String", True),
+        _string=(get_text, "String", True),
         term_note=(get_text, "TermNote"),
         term_ui=(get_text, "TermUI", True),
         thesaurus_id_list=(get_list, "ThesaurusIDList", get_element_text),
     )
 
+    @property
+    def id(self):
+        return getattr(self, "term_ui")
+
+    @property
+    def string(self):
+        return getattr(self, "_string")
+
     def __str__(self):
-        return "<Term {}>".format(getattr(self, "string"))
+        return "<Term {}>".format(self.string)
 
     def __repr__(self):
-        return "<Term {} at {}>".format(getattr(self, "string"), id(self))
+        return "<Term {} at {}>".format(self.string, self.id)
 
 
 # TODO: Add reference to concept
@@ -242,8 +249,8 @@ class Concept(BaseNode):
     _attrs = dict(
         cas_type_1_name=(get_text, "CASN1Name"),
         concept_relation_list=(get_list, "ConceptRelationList", ConceptRelation.from_element),
-        concept_ui=(get_text, "ConceptUI", True),
-        name=(get_text, "ConceptName/String", True),
+        _concept_ui=(get_text, "ConceptUI", True),
+        _name=(get_text, "ConceptName/String", True),
         preferred_concept_yn=(get_attr, "PreferredConceptYN"),
         registry_number=(get_text, "RegistryNumber"),
         related_registry_number_list=(get_list, "RelatedRegistryNumberList", get_element_text),
@@ -253,11 +260,19 @@ class Concept(BaseNode):
         translators_scope_note=(get_text, "TranslatorsScopeNote"),
     )
 
+    @property
+    def name(self):
+        return getattr(self, "_name")
+
+    @property
+    def concept_ui(self):
+        return getattr(self, "_concept_ui")
+
     def __str__(self):
-        return "<Concept {}>".format(getattr(self, "name"))
+        return "<Concept {} ({})>".format(self.name, self.concept_ui)
 
     def __repr__(self):
-        return "<Concept {} at {}>".format(getattr(self, "name"), id(self))
+        return "<Concept {} ({})>".format(self.name, self.concept_ui)
 
 
 # TODO: Add reference to descriptor
@@ -287,7 +302,7 @@ class Descriptor(BaseNode):
         date_revised=(get_datetime, "DateRevised"),
         date_established=(get_datetime, "DateEstablished", True),
         descriptor_class=(get_attr, "DescriptorClass"),
-        heading=(get_text, "DescriptorName/String", True),
+        _name=(get_text, "DescriptorName/String", True),
         history_note=(get_text, "HistoryNote"),
         nlm_classification_number=(get_text, "NLMClassificationNumber"),
         mesh_note=(get_text, "PublicMeSHNote"),
@@ -297,18 +312,24 @@ class Descriptor(BaseNode):
         scr_class=(get_attr, "SCRClass"),
         see_related_list=(get_list, "SeeRelatedList", SeeRelatedDescriptor.from_element),
         tree_number_list=(get_list, "TreeNumberList", get_element_text, True),
-        unique_id=(get_text, "DescriptorUI", True),
+        _unique_id=(get_text, "DescriptorUI", True),
         allowable_qualifiers_list=(get_list, "AllowableQualifiersList", AllowableQualifier.from_element)
     )
 
     @property
-    def tree_number(self):
-        warnings.simplefilter("always")
-        warnings.warn("Method is deprecated. Please use tree_numbers.", DeprecationWarning)
-        return self.tree_numbers[0] if self.tree_numbers else None
+    def heading(self) -> str:
+        return getattr(self, "_name")
 
     @property
-    def tree_numbers(self):
+    def name(self) -> str:
+        return getattr(self, "_name")
+
+    @property
+    def unique_id(self) -> str:
+        return getattr(self, "_unique_id")
+
+    @property
+    def tree_numbers(self) -> List[str]:
         return getattr(self, "tree_number_list")
 
     @property
@@ -338,7 +359,7 @@ class Descriptor(BaseNode):
         return [x for x in common if x]
 
     @property
-    def terms(self):
+    def terms(self) -> List[Term]:
         if not hasattr(self, "_terms"):
             terms = list(itertools.chain.from_iterable(c.term_list for c in self.concept_list))
             setattr(self, "_terms", terms)

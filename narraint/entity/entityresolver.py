@@ -44,9 +44,10 @@ class MeshResolver:
             pickle.dump(self.desc2heading, f)
 
         logging.info('Reading mesh supplementary file: {}'.format(mesh_supp_file))
-        mesh_supplementary = MeSHDBSupplementary.instance()
-        for desc in mesh_supplementary.get_all_descs(mesh_supp_file):
-            self.supplement_desc2heading[desc.unique_id] = desc.heading
+        mesh_supplementary: MeSHDBSupplementary = MeSHDBSupplementary.instance()
+        mesh_supplementary.load_xml(mesh_supp_file)
+        for record in mesh_supplementary.get_all_records():
+            self.supplement_desc2heading[record.unique_id] = record.name
         logging.info('Writing index ({} keys) to: {}'.format(len(self.supplement_desc2heading.keys()),
                                                              mesh_supp_index))
         with open(mesh_supp_index, 'wb') as f:

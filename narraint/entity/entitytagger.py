@@ -183,10 +183,11 @@ class EntityTagger:
                 self.term2entity[term].add(Entity('MESH:{}'.format(mesh_id), 'MESH'))
 
         logging.info('Reading mesh supplementary file: {}'.format(mesh_supp_file))
-        mesh_supplementary = MeSHDBSupplementary.instance()
-        for desc in mesh_supplementary.get_all_descs(mesh_supp_file):
-            desc_id = f'MESH:{desc.unique_id}'
-            term_l = desc.heading.lower()
+        mesh_supplementary: MeSHDBSupplementary = MeSHDBSupplementary.instance()
+        mesh_supplementary.load_xml(mesh_supp_file)
+        for record in mesh_supplementary.get_all_records():
+            desc_id = f'MESH:{record.unique_id}'
+            term_l = record.name.lower()
             self.term2entity[term_l].add(Entity(desc_id, 'MESH'))
         logging.info('MeSH Terms added')
 
