@@ -1,13 +1,18 @@
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
+from datetime import datetime
 from urllib.parse import quote
 
-from narraint.pubmedutils.progress import chunks, printProgressBar
+
 
 
 # Query pmid's from pmed
 # db: pubmed / pmc
+from narraint.progress import print_progress_with_eta
+from narraint.util.helpers import chunks
+
+
 def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=20000):
     """
     queries for PMIDs on pubmed by using a given query
@@ -98,7 +103,7 @@ def pubtator_crawl_pubtator_documents(pmids, format):
 
     domain = 'https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/RESTful/tmTool.cgi/'
     concept_mode = 'BioConcept'
-
+    start_time = datetime.now()
     if len(pmids) <= 100:
         # compute pmid str
         pmid_str = ''
@@ -124,8 +129,7 @@ def pubtator_crawl_pubtator_documents(pmids, format):
             pmid_str = pmid_str[:-1]
             # url call
             url = '{}/{}/{}/{}'.format(domain, concept_mode, pmid_str, format)
-            # print("Crawling (Step: {}/{}): {}".format(i,chunk_size, url))
-            printProgressBar(i, chunk_size, prefix='Crawling PMIDs from PubTator...')
+            print_progress_with_eta('Crawling PMIDs from PubTator...', i, chunk_size, start_time)
             # http get
             result_str += urllib.request.urlopen(url).read().decode('utf-8')
             # wait amount specifc amount of time
