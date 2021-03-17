@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from narraint.extraction.pathie.core import PathIEToken, pathie_reconstruct_sentence_sequence_from_tokens, \
     pathie_reconstruct_text_from_token_indexes, pathie_find_tags_in_sentence, pathie_find_relations_in_sentence, \
-    PathIEDependency, pathie_extract_facts_from_sentence
+    PathIEDependency, pathie_extract_facts_from_sentence, pathie_use_keywords_from_predicate_vocabulary
 from narraint.pubtator.document import TaggedEntity
 
 
@@ -95,6 +95,21 @@ class TestPathIECore(TestCase):
                                     PathIEDependency(3, 2, "aux"),
                                     PathIEDependency(3, 6, "obl")]
 
+    def test_extract_keywords_from_predicate_vocabulary(self):
+        TEST_VOCAB = dict(
+            upregulates=["upregulat*", "activat*", "up regulat*", "up-regulat*", "stimulat*"],
+            agonist=['agonist activat*', 'agonist inhibt*'])
+
+        keywords, keyphrases = pathie_use_keywords_from_predicate_vocabulary(TEST_VOCAB)
+        self.assertEqual(6, len(keywords))
+        self.assertEqual(3, len(keyphrases))
+        keywords_correct = ['upregulates', 'agonist', 'upregulat*', 'activat*', "up-regulat*", "stimulat*"]
+        for k in keywords:
+            self.assertIn(k, keywords_correct)
+        keyphrases_correct = ["up regulat*", 'agonist activat*', 'agonist inhibt*']
+        for k in keyphrases:
+            self.assertIn(k, keyphrases_correct)
+
     def test_reconstruct_sentence(self):
         sentence = self.test_sentence
         tokens = self.test_tokens
@@ -160,9 +175,48 @@ class TestPathIECore(TestCase):
         self.assertEqual(vidx2text_and_lemma[2], ('looks', 'look'))
         self.assertEqual(vidx2text_and_lemma[3], ('like', 'like'))
 
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_keywords=["*ike"])
+        # extract look
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks', 'look'))
+        self.assertEqual(vidx2text_and_lemma[3], ('like', 'like'))
+
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_keywords=["lik*"])
+        # extract look
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks', 'look'))
+        self.assertEqual(vidx2text_and_lemma[3], ('like', 'like'))
+
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_keywords=["*ik*"])
+        # extract look
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks', 'look'))
+        self.assertEqual(vidx2text_and_lemma[3], ('like', 'like'))
+
     def test_pathie_find_relations_in_sentence_phrases(self):
         vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
                                                                 important_phrases=["looks like"])
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks like', 'look like'))
+        self.assertEqual(vidx2text_and_lemma[3], ('looks like', 'look like'))
+
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_phrases=["looks lik*"])
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks like', 'look like'))
+        self.assertEqual(vidx2text_and_lemma[3], ('looks like', 'look like'))
+
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_phrases=["*ooks like"])
+        self.assertEqual(2, len(vidx2text_and_lemma))
+        self.assertEqual(vidx2text_and_lemma[2], ('looks like', 'look like'))
+        self.assertEqual(vidx2text_and_lemma[3], ('looks like', 'look like'))
+
+        vidx2text_and_lemma = pathie_find_relations_in_sentence(self.test_2_tokens, self.test_2_sentence.lower(),
+                                                                important_phrases=["*ooks lik*"])
         self.assertEqual(2, len(vidx2text_and_lemma))
         self.assertEqual(vidx2text_and_lemma[2], ('looks like', 'look like'))
         self.assertEqual(vidx2text_and_lemma[3], ('looks like', 'look like'))
@@ -182,9 +236,10 @@ class TestPathIECore(TestCase):
         self.assertEqual("look", ext.predicate_lemmatized)
 
     def test_pathie_extract_facts_from_sentence_with_not_connected_keywords(self):
+        vocab = dict(like=["like"])
         # Like should not effect the extraction because its not connected
         extractions = pathie_extract_facts_from_sentence(0, self.test_2_tags, self.test_2_tokens,
-                                                         self.test_2_dependencies, important_keywords=["like"])
+                                                         self.test_2_dependencies, predicate_vocabulary=vocab)
         self.assertEqual(1, len(extractions))
         ext = extractions[0]
         self.assertEqual(0, ext.document_id)
@@ -197,10 +252,12 @@ class TestPathIECore(TestCase):
         self.assertEqual("look", ext.predicate_lemmatized)
 
     def test_pathie_extract_facts_from_sentence_with_connected_keywords(self):
+        vocab = dict(like=["like"])
+
         # Like should not effect the extraction because its not connected
         extractions = pathie_extract_facts_from_sentence(0, self.test_2_tags, self.test_2_tokens,
                                                          self.test_2_dependencies_with_look,
-                                                         important_keywords=["like"])
+                                                         predicate_vocabulary=vocab)
         self.assertEqual(2, len(extractions))
         ext = extractions[0]
         self.assertEqual(0, ext.document_id)
@@ -223,8 +280,9 @@ class TestPathIECore(TestCase):
         self.assertEqual("like", ext.predicate_lemmatized)
 
     def test_pathie_extract_facts_from_sentence_with_phrase(self):
+        vocab = {"looks like": "looks like"}
         extractions = pathie_extract_facts_from_sentence(0, self.test_2_tags, self.test_2_tokens,
-                                                         self.test_2_dependencies, important_phrases=["looks like"])
+                                                         self.test_2_dependencies, predicate_vocabulary=vocab)
         self.assertEqual(1, len(extractions))
         ext = extractions[0]
         self.assertEqual(0, ext.document_id)

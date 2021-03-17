@@ -1,13 +1,9 @@
 from collections import namedtuple
+from typing import Dict, List
 
 import networkx as nx
 
 from narraint.pubtator.document import TaggedEntity
-
-IMPORTANT_KEYWORDS = ["treat", "metabol", "inhibit", "therapy",
-                      "adverse", "complications"]
-IMPORTANT_PHRASES = ["side effect", "drug toxicity", "drug injury"]
-
 
 PathIEToken = namedtuple('PathIEToken', ["text", "text_lower", "text_before", "text_after", "index", "charStart",
                                          "charEnd", "pos", "lemma"])
@@ -17,6 +13,26 @@ PathIEDependency = namedtuple('PathIEDependency', ["governor_idx", "dependent_id
 PathIEExtraction = namedtuple('PathIEExtraction', ["document_id", "subject_id", "subject_str", "subject_type",
                                                    "predicate", "predicate_lemmatized", "object_id", "object_str",
                                                    "object_type", "sentence"])
+
+
+def pathie_use_keywords_from_predicate_vocabulary(predicate_vocabulary: Dict[str, List[str]]):
+    """
+    Extracts important keywords and keyphrases from the used predicate vocabulary
+    :param predicate_vocabulary: the predicate vocabulary
+    :return: a set of keywords, a set of important phrases (keywords are single terms, phrases consist of multiple terms)
+    """
+    important_keywords = set()
+    important_phrases = set()
+    if predicate_vocabulary:
+        vocabulary_terms = {k for k in predicate_vocabulary.keys()}
+        vocabulary_terms.update({v for predicates in predicate_vocabulary.values() for v in predicates})
+        for term in vocabulary_terms:
+            term = term.strip().lower()
+            if ' ' in term:
+                important_phrases.add(term)
+            else:
+                important_keywords.add(term)
+    return important_keywords, important_phrases
 
 
 def pathie_reconstruct_sentence_sequence_from_tokens(tokens: [PathIEToken]) -> str:
@@ -96,11 +112,19 @@ def pathie_find_relations_in_sentence(tokens: [PathIEToken], sentence_text_lower
             # check if a keyword is mentioned
             if important_keywords:
                 for keyword in important_keywords:
-                    if keyword in t.text_lower:  # partial included is enough
+                    if keyword.endswith('*') and t.text_lower.startswith(keyword[0:-1]):
                         vidx2text_and_lemma[t.index] = (t.text, t.lemma)
+                    elif keyword.startswith('*') and t.text_lower.endswith(keyword[1:]):
+                        vidx2text_and_lemma[t.index] = (t.text, t.lemma)
+                    elif keyword.startswith('*') and keyword.endswith('*') and keyword[1:-1] in t.text_lower:
+                        vidx2text_and_lemma[t.index] = (t.text, t.lemma)
+                    elif keyword == t.text_lower:
+                        vidx2text_and_lemma[t.index] = (t.text, t.lemma)
+
     if important_phrases:
         for phrase in important_phrases:
-            if phrase in sentence_text_lower:
+            phrase_without_star = phrase.replace('*', '')
+            if phrase_without_star in sentence_text_lower:
                 phrase_parts = phrase.split(' ')
                 phrase_matches = []
                 # Reconstruct match based on token indexes
@@ -108,9 +132,23 @@ def pathie_find_relations_in_sentence(tokens: [PathIEToken], sentence_text_lower
                 for j in range(0, len(tokens) - len(phrase_parts)):
                     phrase_matched = True
                     for i in range(0, len(phrase_parts)):
-                        if tokens[j + i].text_lower not in phrase_parts[i]:
-                            phrase_matched = False
-                            break
+                        kw = phrase_parts[i]
+                        if kw.endswith('*'):
+                            if not tokens[j + i].text_lower.startswith(kw[0:-1]):
+                                phrase_matched = False
+                                break
+                        elif kw.startswith('*'):
+                            if not tokens[j + i].text_lower.endswith(kw[1:]):
+                                phrase_matched = False
+                                break
+                        elif kw.startswith('*') and kw.endswith('*'):
+                            if kw[1:-1] not in tokens[j + i]:
+                                phrase_matched = False
+                                break
+                        else:
+                            if kw != tokens[j + i].text_lower:  # partial included is enough
+                                phrase_matched = False
+                                break
                     if phrase_matched:
                         phrase_matches.append([(t.index, t.text, t.lemma) for t in tokens[j:j + len(phrase_parts)]])
                 # go through all matches
@@ -127,8 +165,7 @@ def pathie_find_relations_in_sentence(tokens: [PathIEToken], sentence_text_lower
 def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                        tokens: [PathIEToken],
                                        dependencies: [PathIEDependency],
-                                       important_keywords: [str] = None,
-                                       important_phrases: [str] = None,
+                                       predicate_vocabulary: {str: [str]} = None,
                                        ignore_not_extractions = True,
                                        ignore_may_extraction = True) -> [PathIEExtraction]:
     """
@@ -137,8 +174,7 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     :param doc_tags: a set of document tags (TaggedEntity)
     :param tokens: a list of the sentence's PathIETokens
     :param dependencies: a list of the sentence's dependencies
-    :param important_keywords: a set of important lower-cased extraction keywords (single words like treatment)
-    :param important_phrases: a set of important lower-cased extraction phrases (whole phrases)
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :param ignore_not_extractions: ignores extractions that are associated with a not
     :param ignore_may_extraction: ignores extractions that are associated with a may or might
     :return: a list of PathIE extractions
@@ -146,10 +182,7 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     sentence = pathie_reconstruct_sentence_sequence_from_tokens(tokens).strip()
     sentence_lower = sentence.lower()
 
-    if not important_keywords:
-        important_keywords = IMPORTANT_KEYWORDS
-    if not important_phrases:
-        important_phrases = IMPORTANT_PHRASES
+    important_keywords, important_phrases = pathie_use_keywords_from_predicate_vocabulary(predicate_vocabulary)
 
     # find all relations in the sentence
     vidx2text_and_lemma = pathie_find_relations_in_sentence(tokens, sentence_lower,

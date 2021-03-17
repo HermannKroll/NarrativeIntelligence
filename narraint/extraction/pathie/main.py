@@ -12,6 +12,7 @@ import queue
 
 import multiprocessing
 import shutil
+
 from spacy.lang.en import English
 
 from narraint.config import NLP_CONFIG
@@ -79,12 +80,13 @@ def load_and_fix_json_nlp_data(json_path):
         return json.loads(''.join(json_fixed_lines))
 
 
-def process_json_file(doc_id, input_file, doc_tags):
+def process_json_file(doc_id, input_file, doc_tags, predicate_vocabulary: {str: [str]}):
     """
     Extracts facts out of a JSON file
     :param doc_id: document id
     :param input_file: JSON input file as a filename
     :param doc_tags: set of tags in the corresponding document
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :return: a list of extracted tuples
     """
     extracted_tuples = []
@@ -101,17 +103,20 @@ def process_json_file(doc_id, input_file, doc_tags):
                                            int(t["index"]), int(t["characterOffsetBegin"]),
                                            int(t["characterOffsetEnd"]), t["pos"], t["lemma"]))
 
-        extracted_tuples.extend(pathie_extract_facts_from_sentence(doc_id, doc_tags, sent_tokens, sent_dependencies))
+        extracted_tuples.extend(pathie_extract_facts_from_sentence(doc_id, doc_tags, sent_tokens, sent_dependencies,
+                                                                   predicate_vocabulary=predicate_vocabulary))
     return extracted_tuples
 
 
-def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags):
+def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags,
+                                  predicate_vocabulary: {str: [str]}):
     """
     Processes the CoreNLP output directory: iterates over all files and calls the process_json_file function
     :param out_corenlp_dir: CoreNLP output directory (dir of .json files)
     :param amount_files: amount of files
     :param outfile: filename where all extractions will be stored
     :param doc2tags: dict mapping doc ids to tags
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :return: None
     """
     tuples = 0
@@ -121,7 +126,8 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
         for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
             if filename.endswith('.json'):
                 doc_id = int(filename.split('.')[0])
-                extracted_tuples = process_json_file(doc_id, os.path.join(out_corenlp_dir, filename), doc2tags[doc_id])
+                extracted_tuples = process_json_file(doc_id, os.path.join(out_corenlp_dir, filename),
+                                                     doc2tags[doc_id], predicate_vocabulary=predicate_vocabulary)
                 tuples += len(extracted_tuples)
                 for e_tuple in extracted_tuples:
                     line = '\t'.join([str(t) for t in e_tuple])
@@ -135,11 +141,13 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
 
 
 def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Queue,
-                                                      results: multiprocessing.Queue):
+                                                      results: multiprocessing.Queue,
+                                                      predicate_vocabulary: {str: [str]}):
     """
     Helper method to process the CoreNLP output in parallel
     :param tasks: the queue of tasks
     :param results: the queue the results will be put to
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :return: None
     """
     logging.info('Worker processing the PathIE output started')
@@ -151,7 +159,7 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
                 logging.info('Nothing to stop - stop here')
                 continue
             doc_id, filepath, doc_tags = task
-            tuples = process_json_file(doc_id, filepath, doc_tags)
+            tuples = process_json_file(doc_id, filepath, doc_tags, predicate_vocabulary=predicate_vocabulary)
             if tuples:
                 extracted_tuples.extend(tuples)
         except queue.Empty:
@@ -162,18 +170,22 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
     logging.info('Worker finished')
 
 
-def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, outfile, doc2tags, workers=1):
+def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, outfile, doc2tags,
+                                               predicate_vocabulary: {str: [str]}, workers=1):
     """
     Parallelized version of the PathIE CoreNLP output processing steps
     :param out_corenlp_dir: the directory of the CoreNLP output
     :param amount_files: the number of files to show a progress
     :param outfile: the outfile where the extracted tuples will be written to
     :param doc2tags: dict mapping doc_ids to tags
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
+
     :param workers: the number of workers
     :return: None
     """
     if workers == 1:
-        pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags)
+        pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2tags,
+                                      predicate_vocabulary=predicate_vocabulary)
     else:
         task_queue = multiprocessing.Queue()
         result_queue = multiprocessing.Queue()
@@ -191,7 +203,7 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         processes = []
         for i in range(0, workers):
             p = multiprocessing.Process(target=pathie_process_corenlp_output_parallelized_worker,
-                                        args=(task_queue, result_queue))
+                                        args=(predicate_vocabulary, task_queue, result_queue))
             processes.append(p)
             p.start()
 
@@ -216,13 +228,15 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         logging.info('Workers terminated - Results written')
 
 
-def run_pathie(input, output, workdir=None, config=NLP_CONFIG, workers=1):
+def run_pathie(input, output, workdir=None, config=NLP_CONFIG,
+               predicate_vocabulary: {str: [str]} = None, workers=1):
     """
     Runs PathIE based on Stanford CoreNLP toolkit
     :param input: pubtator input file
     :param output: pathie output file
     :param workdir: workdir (if none a temp dir will be created)
     :param config: NLP config
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :param workers: amount of parallel workers
     :return: None
     """
@@ -267,7 +281,8 @@ def run_pathie(input, output, workdir=None, config=NLP_CONFIG, workers=1):
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, output, doc2tags, workers)
+        pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, output, doc2tags,
+                                                   predicate_vocabulary=predicate_vocabulary, workers=workers)
         print(" done in {}".format(datetime.now() - start))
     if tmp_dir_created:
         logging.info(f'Removing {temp_dir}...')

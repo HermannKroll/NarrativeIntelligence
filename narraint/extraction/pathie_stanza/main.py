@@ -11,7 +11,18 @@ from narraint.progress import print_progress_with_eta
 from narraint.pubtator.count import count_documents
 
 
-def pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, output):
+def pathie_stanza_extract_interactions(doc2sentences, doc2tags, file_count, output,
+                                       predicate_vocabulary: {str: [str]}):
+    """
+    Perform extraction based on PathIE Stanza
+    Invokes Stanza to produce the corresponding tokenization and dependency parsing
+    :param doc2sentences: a dict that maps a document id to a list of sentences
+    :param doc2tags: a dict that maps a document to its corresponding tags
+    :param file_count: the number of files for progress estimation
+    :param output: the output that should be written
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
+    :return: None
+    """
     start_time = datetime.now()
     logging.info('Initializing Stanza Pipeline...')
     nlp = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma,depparse', use_gpu=True)
@@ -38,9 +49,10 @@ def pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, ou
                                                    t.words[0].pos, t.words[0].lemma))
 
                 extracted_tuples.extend(pathie_extract_facts_from_sentence(doc_id, doc_tags, sent_tokens,
-                                                                           sent_dependencies))
+                                                                           sent_dependencies,
+                                                                           predicate_vocabulary=predicate_vocabulary))
 
-            print_progress_with_eta("pathie: processing documents...", idx, amount_files, start_time, print_every_k=1)
+            print_progress_with_eta("pathie: processing documents...", idx, file_count, start_time, print_every_k=1)
             for e_tuple in extracted_tuples:
                 line = '\t'.join([str(t) for t in e_tuple])
                 if first_line:
@@ -50,11 +62,12 @@ def pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, ou
                     f_out.write('\n' + line)
 
 
-def run_stanza_pathie(input_file, output):
+def run_stanza_pathie(input_file, output, predicate_vocabulary: {str: [str]} = None):
     """
     Executes PathIE via Stanza
     :param input_file: the PubTator input file (tags must be included)
     :param output: extractions will be written to output
+    :param predicate_vocabulary: the predicate vocabulary if special words are given
     :return: None
     """
     logging.info('Init spacy nlp...')
@@ -74,7 +87,8 @@ def run_stanza_pathie(input_file, output):
     else:
         start = datetime.now()
         # Process output
-        pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, output)
+        pathie_stanza_extract_interactions(doc2sentences, doc2tags, amount_files, output,
+                                           predicate_vocabulary=predicate_vocabulary)
         print(" done in {}".format(datetime.now() - start))
 
 
