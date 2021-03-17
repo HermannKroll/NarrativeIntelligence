@@ -10,7 +10,6 @@ from narraint.backend.export import export
 from narraint.backend.models import Document, Tag, Predication
 from narraint.config import DATA_DIR
 from narraint.entity.enttypes import CHEMICAL, GENE
-from narraint.cleaning.apply_rules import clean_extractions_in_database
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
@@ -20,6 +19,19 @@ from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
+
+CHEMPROT_VOCABULARY = dict(
+    upregulates=["upregulat*", "activat*", "up regulat*", "up-regulat*", "stimulat*", "increase"],
+    inhibits=['downregulat*', 'inhibit*', 'supress*', 'inhibit*', "decrease", "disrupt"],
+    agonist=['agonist activat*', 'agonist inhibt*'],
+    antagonist=["antagonis*"],
+    substrate=['produc*', 'substrat*'],
+    associated=["contain", "convert", "yield", "isolate", "generate", "synthesize", "grow",
+                            "occures", "evaluate", "augment", "effect", "develop", "affect", "contribute", "involve",
+                        "associated with", "isa", "same as", "coexists with", "process", "method of", "part of",
+                            "associate", "correlate", "play role", "play", "limit", "show", "present",
+               "exhibit", "find", "form", "bind"]
+)
 
 CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot/chemprot_test')
 CHEMPROT_COLLECTION = 'ChemProt'
@@ -61,13 +73,13 @@ LOAD_OPENIE6 = False
 CANONICALIZE_OUTPUT = False
 
 
-def perform_chemprot_evaluation(correct_relations, extraction_type):
-    relations = ['inhibits']#['inhibits', 'induces']
+def perform_chemprot_evaluation(correct_relations, extraction_type, predicate):
+  #  relations = ['inhibits'] # , 'upregulates', 'agonist', 'antagonist', 'substrate']
     session = Session.get()
     q = session.query(Predication.document_id, Predication.predicate_canonicalized,
                       Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CHEMPROT_COLLECTION) \
-        .filter(Predication.predicate_canonicalized.in_(relations))\
+        .filter(Predication.predicate_canonicalized == predicate)\
         .filter(Predication.subject_type == CHEMICAL)\
         .filter(Predication.object_type == GENE)\
         .filter(Predication.extraction_type == extraction_type)
@@ -156,7 +168,7 @@ def main():
 
     if RUN_PATHIE:
         logging.info('Running PathIE...')
-        run_pathie(CHEMPROT_PUBTATOR, CHEMPROT_PATHIE_OUTPUT)
+        run_pathie(CHEMPROT_PUBTATOR, CHEMPROT_PATHIE_OUTPUT, predicate_vocabulary=CHEMPROT_VOCABULARY)
 
     if LOAD_PATHIE:
         logging.info('Reading extraction from tsv file...')
@@ -168,7 +180,7 @@ def main():
 
     if RUN_STANZA_PATHIE:
         logging.info('Running Stanza PathIE...')
-        run_stanza_pathie(CHEMPROT_PUBTATOR, CHEMPROT_PATHIE_STANZA_OUTPUT)
+        run_stanza_pathie(CHEMPROT_PUBTATOR, CHEMPROT_PATHIE_STANZA_OUTPUT, predicate_vocabulary=CHEMPROT_VOCABULARY)
 
     if LOAD_STANZA_PATHIE:
         logging.info('Reading extraction from tsv file...')
@@ -200,8 +212,10 @@ def main():
 
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
-        canonicalize_predication_table(WORD2VEC_MODEL, CP_canonicalizing_distances)
-        clean_extractions_in_database()
+        canonicalize_predication_table(WORD2VEC_MODEL, CP_canonicalizing_distances,
+                                       predicate_vocabulary=CHEMPROT_VOCABULARY,
+                                       document_collection=CHEMPROT_COLLECTION)
+        #clean_extractions_in_database()
 
     logging.info('Loading correct relations...')
     gold_relations = defaultdict(set)
@@ -213,28 +227,37 @@ def main():
             arg2 = arg2[5:]
             if relation_type == 'CPR:4':
                 gold_relations[doc_id].add(('inhibits', arg1, arg2))
-            #if relation_type == 'CPR:3':
-             #   gold_relations[doc_id].add(('upregulates', arg1, arg2))
+            if relation_type == 'CPR:3':
+                gold_relations[doc_id].add(('upregulates', arg1, arg2))
+            if relation_type == 'CPR:5':
+                gold_relations[doc_id].add(('agonist', arg1, arg2))
+            if relation_type == 'CPR:6':
+                gold_relations[doc_id].add(('antagonist', arg1, arg2))
+            if relation_type == 'CPR:9':
+                gold_relations[doc_id].add(('substrate', arg1, arg2))
 
-    logging.info('=' * 60)
-    logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')
-    perform_chemprot_evaluation(gold_relations, PATHIE_EXTRACTION)
-    logging.info('=' * 60)
+    for predicate in ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate']:
+        logging.info(f'Checking {predicate}')
 
-    logging.info('=' * 60)
-    logging.info(f'Begin evaluation for {PATHIE_STANZA_EXTRACTION}...')
-    perform_chemprot_evaluation(gold_relations, PATHIE_STANZA_EXTRACTION)
-    logging.info('=' * 60)
+        logging.info('=' * 60)
+        logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')
+        perform_chemprot_evaluation(gold_relations, PATHIE_EXTRACTION, predicate)
+        logging.info('=' * 60)
 
-    logging.info('=' * 60)
-    logging.info(f'Begin evaluation for {OPENIE_EXTRACTION}...')
-    perform_chemprot_evaluation(gold_relations, OPENIE_EXTRACTION)
-    logging.info('=' * 60)
+        logging.info('=' * 60)
+        logging.info(f'Begin evaluation for {PATHIE_STANZA_EXTRACTION}...')
+        perform_chemprot_evaluation(gold_relations, PATHIE_STANZA_EXTRACTION, predicate)
+        logging.info('=' * 60)
 
-    logging.info('=' * 60)
-    logging.info(f'Begin evaluation for {OPENIE6_EXTRACTION}...')
-    perform_chemprot_evaluation(gold_relations, OPENIE6_EXTRACTION)
-    logging.info('=' * 60)
+        logging.info('=' * 60)
+        logging.info(f'Begin evaluation for {OPENIE_EXTRACTION}...')
+        perform_chemprot_evaluation(gold_relations, OPENIE_EXTRACTION, predicate)
+        logging.info('=' * 60)
+
+        logging.info('=' * 60)
+        logging.info(f'Begin evaluation for {OPENIE6_EXTRACTION}...')
+        perform_chemprot_evaluation(gold_relations, OPENIE6_EXTRACTION, predicate)
+        logging.info('=' * 60)
 
 
 if __name__ == "__main__":

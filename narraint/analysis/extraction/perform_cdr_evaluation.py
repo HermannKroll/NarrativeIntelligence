@@ -5,6 +5,7 @@ from collections import defaultdict
 from narraint.backend.database import Session
 from narraint.backend.load_document import load_document, read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers
 from narraint.backend.models import Predication
+from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narraint.entity.enttypes import CHEMICAL, DISEASE
 from narraint.cleaning.apply_rules import clean_extractions_in_database
@@ -20,7 +21,7 @@ from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, P
 from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.extract import read_pubtator_documents
 
-pubtator_docs = ['CDR_TestSet.PubTator.txt'] # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']
+pubtator_docs = ['CDR_TestSet.PubTator.txt']  # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']
 
 CDR2015_DIR = os.path.join(DATA_DIR, 'extraction/CDR2015')
 CDR2015_DIR_OUTPUT = os.path.join(CDR2015_DIR, 'output')
@@ -34,7 +35,6 @@ CDR2015_openie6_output = os.path.join(CDR2015_DIR_OUTPUT, 'openie6_extractions.t
 
 CDR2015_canonicalizing_distances = os.path.join(CDR2015_DIR_OUTPUT, 'canonicalizing_distances.tsv')
 WORD2VEC_MODEL = '/home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin'
-
 
 CDR2015_COLLECTION = 'CDR2015'
 EXTRACT_PUBTATOR_DOCUMENTS = False
@@ -50,7 +50,7 @@ LOAD_CORENLP_OPENIE = False
 LOAD_PATHIE = False
 LOAD_OPENIE6 = False
 
-CANONICALIZE_OUTPUT = False
+CANONICALIZE_OUTPUT = True
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
@@ -58,7 +58,7 @@ def perform_cdr_evaluation(correct_relations, extraction_type):
     q = session.query(Predication.document_id, Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CDR2015_COLLECTION) \
         .filter(Predication.predicate_canonicalized == 'induces') \
-        .filter(Predication.subject_type == CHEMICAL).filter(Predication.object_type == DISEASE)\
+        .filter(Predication.subject_type == CHEMICAL).filter(Predication.object_type == DISEASE) \
         .filter(Predication.extraction_type == extraction_type)
 
     extracted_induces = defaultdict(set)
@@ -173,7 +173,9 @@ def main():
 
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
-        canonicalize_predication_table(WORD2VEC_MODEL, CDR2015_canonicalizing_distances)
+        canonicalize_predication_table(WORD2VEC_MODEL, CDR2015_canonicalizing_distances,
+                                       document_collection=CDR2015_COLLECTION,
+                                       predicate_vocabulary=create_predicate_vocab())
         clean_extractions_in_database()
 
     logging.info('=' * 60)
