@@ -47,6 +47,7 @@ def add_engine_pidguard(engine):
 class Session:
     _instance = None
     is_sqlite = False
+    is_postgres = False
 
     def _load_config(self):
         with open(BACKEND_CONFIG) as f:
@@ -82,6 +83,7 @@ class Session:
         if self.sqlite_path:
             return f"sqlite:///{self.sqlite_path}"
         else:
+            Session.is_postgres = True
             return "postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}".format(
                 user=self.config["POSTGRES_USER"],
                 password=self.config["POSTGRES_PW"],
