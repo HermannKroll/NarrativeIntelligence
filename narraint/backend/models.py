@@ -145,9 +145,9 @@ class Predication(Base):
         ForeignKeyConstraint(('sentence_id',), ('sentence.id',)),
         PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
         # TODO: This index will consume much disk space around 1.2 times the table size
-        UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
-                         'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
-                         sqlite_on_conflict='IGNORE'),
+    #    UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
+     #                    'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
+      #                   sqlite_on_conflict='IGNORE'),
     )
 
     id = Column(BigInteger, autoincrement=True)
