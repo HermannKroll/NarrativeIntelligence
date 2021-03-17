@@ -16,25 +16,32 @@ def main():
     meshdb: MeSHDB = MeSHDB.instance()
     meshdb.load_xml(MESH_DESCRIPTORS_FILE)
 
-    relevant_descs = []
-    for desc in meshdb.get_all_descs():
-        for tn in desc.tree_numbers:
-            if tn.startswith('E'):
-                relevant_descs.append(desc)
-                break
-
-    logging.info(f'beginning export of {len(relevant_descs)} descriptors...')
+    logging.info('beginning export of descriptors...')
     with open('pharmaceutical_methods_2021.tsv', 'w') as f:
-        f.write('MeSH Tree\tMeSH Descriptor\tHeading\tTerms\n')
-        for d in relevant_descs:
+        f.write('MeSH Descriptor\tHeading\tMeSH Tree\tTerms\n')
+        for d in meshdb.get_all_descs():
+            has_correct_tree = False
+            for tn in d.tree_numbers:
+                if tn.startswith('E'):
+                    has_correct_tree = True
+                    break
+            # ignore descriptor
+            if not has_correct_tree:
+                continue
             # get all synonyms
             term_str = d.terms[0].string
             for t in d.terms[1:]:
                 term_str += '; {}'.format(t.string)
 
-            for tn in d.tree_numbers:
-                if tn[0] in PM_TREE_NUMBERS_TO_KEEP:  # hand-crafted rules to keep tree numbers
-                    f.write('{}\tMESH:{}\t{}\t{}\n'.format(tn, d.unique_id, d.heading, term_str))
+            tree_str = None
+            for t in d.tree_numbers:
+                if t.startswith('E'):
+                    if tree_str:
+                        tree_str += '; {}'.format(t)
+                    else:
+                        tree_str = t
+
+            f.write('{}\t{}\t{}\t{}\n'.format(d.unique_id, d.heading, tree_str, term_str))
 
     logging.info('export finished')
 
