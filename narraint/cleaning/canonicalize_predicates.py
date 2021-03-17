@@ -12,9 +12,6 @@ from narraint.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, PRED_TO_REMOVE
 from narraint.progress import print_progress_with_eta
 
-MIN_DISTANCE_THRESHOLD = 0.4
-MIN_PREDICATE_COUNT_THRESHOLD = 0.001
-
 
 def transform_predicate(predicate: str):
     """
@@ -31,15 +28,35 @@ def transform_predicate(predicate: str):
     return predicate
 
 
-def filter_predicate_list(predicates_with_count):
+def is_predicate_equal_to_vocab(predicate: str, vocab_term: str) -> bool:
+    """
+    fast regex check for vocab terms that starts or ends with a *
+    Quickly checks, whether the predicate is a direct match to the vocab term
+    :param predicate: the predicate
+    :param vocab_term: a vocab term (may starting and/or ending with *)
+    :return: true if both are equal
+    """
+    if vocab_term.startswith('*') and predicate.endswith(vocab_term[1:]):
+        return True
+    if vocab_term.endswith('*') and predicate.startswith(vocab_term[:-1]):
+        return True
+    if vocab_term.startswith('*') and vocab_term.endswith('*') and vocab_term[1:-1] in predicate:
+        return True
+    if vocab_term == predicate:
+        return True
+    return False
+
+
+def filter_predicate_list(predicates_with_count, min_predicate_threshold):
     """
     Filters a list with predicates and counts by a minimum count threshold
     :param predicates_with_count: list of tuples (pred, count_of_pred)
-    :return: a list of filtered predicates (count >= MIN_PREDICATE_COUNT)
+    :param min_predicate_threshold: how often should a predicate occur at minimum (0.1 means that the predicate appears in at least 10% of all extractions)
+    :return: a list of filtered predicates (pred_count >= min_predicate_threshold * all_count)
     """
     predicates = []
     pred_sum = sum([x[1] for x in predicates_with_count])
-    min_count = int(MIN_PREDICATE_COUNT_THRESHOLD * pred_sum)
+    min_count = int(min_predicate_threshold * pred_sum)
     logging.info(f'Minimum threshold for predicates is: {min_count}')
     for pred, count in predicates_with_count:
         if count >= min_count:
@@ -61,22 +78,25 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, o
     with open(output_file, 'wt') as f:
         vocab_vectors = []
         for k, v_preds in vocab_predicates.items():
-            vocab_vectors.append((k, transform_predicate(k), model.get_word_vector(transform_predicate(k))))
+            k_os = k.replace('*', '')
+            vocab_vectors.append((k, transform_predicate(k), model.get_word_vector(transform_predicate(k_os))))
             for v_p in v_preds:
-                vocab_vectors.append((k, transform_predicate(v_p), model.get_word_vector(transform_predicate(v_p))))
+                v_p_os = v_p.replace('*', '')
+                vocab_vectors.append((k, transform_predicate(v_p), model.get_word_vector(transform_predicate(v_p_os))))
 
         start_time = datetime.now()
         best_matches = {}
         i = 0
         task_size = len(predicates) * len(vocab_vectors)
         for p in predicates:
-            vec = model.get_word_vector(p)
+            p_transformed = transform_predicate(p)
+            vec = model.get_word_vector(p_transformed)
             best_match = None
             min_distance = 1.0
             for p_v_idx, (p_can_v, p_pred, p_v) in enumerate(vocab_vectors):
                 current_distance = abs(cosine(vec, p_v))
                 f.write('{}\t{}\t{}\n'.format(p, p_pred, current_distance))
-                if p_pred == p:
+                if is_predicate_equal_to_vocab(p, p_pred):
                     # identity is best match
                     min_distance = 0.0
                     best_match = (p_can_v, min_distance)
@@ -95,10 +115,11 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, o
         return best_matches
 
 
-def canonicalize_predicates(best_matches: {str: (str, float)}):
+def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_threshold: float):
     """
     Canonicalizes Predicates by resolving synonymous predicates. This procedure updates the database
     :param best_matches: dictionary which maps a predicate to a canonicalized predicate and a distance score
+    :param min_distance_threshold: all predicates that have a match with a distance blow minimum threshold distance are canonicalized
     :return: None
     """
     session = Session.get()
@@ -107,7 +128,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     logging.info('Finalizing update plan...')
     pred_can2preds = defaultdict(set)
     for pred, (pred_canonicalized, min_distance) in best_matches.items():
-        if min_distance > MIN_DISTANCE_THRESHOLD:
+        if min_distance > min_distance_threshold:
             pred_canonicalized = PRED_TO_REMOVE
         pred_can2preds[pred_canonicalized].add(pred)
 
@@ -125,28 +146,37 @@ def canonicalize_predicates(best_matches: {str: (str, float)}):
     session.commit()
 
 
-def canonicalize_predication_table(word2vec_model, output_distances):
+def canonicalize_predication_table(word2vec_model, output_distances, predicate_vocabulary=None, document_collection=None,
+                                   min_distance_threshold=0.4, min_predicate_threshold=0.001):
     """
     Canonicalizes the predicates in the database
     :param word2vec_model: a Word2Vec model
     :param output_distances: a file where the predicate mapping will be stored
+    :param predicate_vocabulary: the predicate vocabulary
+    :param document_collection: the document collection to canonicalize
+    :param min_predicate_threshold: how often should a predicate occur at minimum (0.1 means that the predicate appears in at least 10% of all extractions)
+    :param min_distance_threshold: all predicates that have a match with a distance blow minimum threshold distance are canonicalized
     :return: None
     """
     logging.info('Loading Word2Vec model...')
     model = fasttext.load_model(word2vec_model)
-    logging.info('Creating predicate vocabulary...')
-    pred_vocab = create_predicate_vocab()
+    if not predicate_vocabulary:
+        logging.info('Creating predicate vocabulary...')
+        pred_vocab = create_predicate_vocab()
+    else:
+        pred_vocab = predicate_vocabulary
     logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
     logging.info('Retrieving predicates from db...')
-    predicates_with_count = Predication.query_predicates_with_count(session=Session.get())
+    predicates_with_count = Predication.query_predicates_with_count(session=Session.get(),
+                                                                    document_collection=document_collection)
     logging.info(f'{len(predicates_with_count)} predicates with count retrieved')
     logging.info('Filtering with minimum count...')
-    predicates = filter_predicate_list(predicates_with_count)
+    predicates = filter_predicate_list(predicates_with_count, min_predicate_threshold)
     logging.info('{} predicates obtained'.format(len(predicates)))
     logging.info('Matching predicates...')
     best_matches = match_predicates(model, predicates, pred_vocab, output_distances)
     logging.info('Canonicalizing predicates...')
-    canonicalize_predicates(best_matches)
+    canonicalize_predicates(best_matches, min_distance_threshold)
     logging.info('Finished')
 
 
