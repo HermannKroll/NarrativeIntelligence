@@ -146,7 +146,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
     session.commit()
 
 
-def canonicalize_predication_table(word2vec_model, output_distances, predicate_vocabulary=None, document_collection=None,
+def canonicalize_predication_table(word2vec_model, output_distances, predicate_vocabulary, document_collection=None,
                                    min_distance_threshold=0.4, min_predicate_threshold=0.001):
     """
     Canonicalizes the predicates in the database
@@ -189,7 +189,8 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-    canonicalize_predication_table(args.word2vec_model, args.output_distances)
+    canonicalize_predication_table(args.word2vec_model, args.output_distances,
+                                   predicate_vocabulary=create_predicate_vocab())
 
 
 if __name__ == "__main__":
