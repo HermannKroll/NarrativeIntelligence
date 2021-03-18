@@ -159,6 +159,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
         taggers.append(dictfactory.create_MetaDicTagger())
 
     for tagger in taggers:
+        tagger.base_insert_tagger()
         start = dti.datetime.now()
         logger.info("Preparing {}".format(tagger.name))
         for target_type in tagger.get_types():
