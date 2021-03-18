@@ -146,7 +146,7 @@ class BaseTagger(Thread):
         self.logger.info("Committed successfully")
 
     def base_insert_tagger(self):
-        #self.logger.info('Add tagger')
+        self.logger.info('Add tagger')
         tagger_name = self.__name__
         tagger_version = self.__version__
         insert_taggers((tagger_name, tagger_version))
