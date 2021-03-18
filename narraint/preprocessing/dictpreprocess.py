@@ -45,7 +45,7 @@ def main(arguments=None):
     parser = ArgumentParser(description="Tag given documents in pubtator format and insert tags into database")
 
     group_tag = parser.add_argument_group("Tagging")
-    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", required=True)
+    parser.add_argument("-t", "--tag", choices=TAG_TYPE_MAPPING.keys(), nargs="+", default="DA")
     parser.add_argument("-c", "--collection", required=True)
 
     group_settings = parser.add_argument_group("Settings")
@@ -104,7 +104,6 @@ def main(arguments=None):
     metafactory = MetaDicTaggerFactory(ent_types, kwargs)
     metatag = metafactory.create_MetaDicTagger()
     metatag.prepare()
-
 
     def generate_tasks():
         for doc in read_pubtator_documents(in_file):
