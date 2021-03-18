@@ -91,7 +91,6 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
 def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls, logger):
     session = Session.get()
     result = session.query(DocTaggedBy).filter(
-        DocTaggedBy.document_id.in_(target_ids),
         DocTaggedBy.document_collection == collection,
         DocTaggedBy.ent_type == ent_type,
         DocTaggedBy.tagger_name == tagger_cls.__name__,
