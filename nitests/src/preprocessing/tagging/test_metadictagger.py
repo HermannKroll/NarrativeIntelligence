@@ -54,7 +54,7 @@ class TestMetadictagger(unittest.TestCase):
         out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
         out_file.clean_tags()
         self.assertIn(TaggedEntity(None, 32926513, 61, 78, "hydrogen peroxide", "Excipient", "DB11091"), out_file.tags)
-        self.assertIn(TaggedEntity(None, 32926513, 90, 108, "hydrogen peroxide", "Excipient", "DB11091"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 91, 108, "hydrogen peroxide", "Excipient", "DB11091"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 109, 117, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 344, 352, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 461, 469, "h 2 o 2", "Excipient", "DB11091"), out_file.tags)
@@ -75,12 +75,12 @@ class TestMetadictagger(unittest.TestCase):
 
 
 def assert_tags_pmc_4297_5600(test_suit, tags_4297, tags_5600):
-    test_suit.assertIn("<Entity 399,426,intraventricular injection,DosageForm,MESH:D007276>", tags_4297)
-    test_suit.assertIn("<Entity 636,646,injection,DosageForm,MESH:D007267>", tags_4297)
+    test_suit.assertIn("<Entity 400,426,intraventricular injection,DosageForm,MESH:D007276>", tags_4297)
+    test_suit.assertIn("<Entity 637,646,injection,DosageForm,MESH:D007267>", tags_4297)
 
-    test_suit.assertIn("<Entity 209,219,sparteine,Drug,DB06727>", tags_5600)
-    test_suit.assertIn("<Entity 189,205,4-aminopyridine,Drug,DB06637>", tags_5600)
-    test_suit.assertIn("<Entity 826,836,potassium,Excipient,DB14500>", tags_5600)
+    test_suit.assertIn("<Entity 210,219,sparteine,Drug,DB06727>", tags_5600)
+    test_suit.assertIn("<Entity 190,205,4-aminopyridine,Drug,DB06637>", tags_5600)
+    test_suit.assertIn("<Entity 827,836,potassium,Excipient,DB14500>", tags_5600)
 
 
 if __name__ == '__main__':

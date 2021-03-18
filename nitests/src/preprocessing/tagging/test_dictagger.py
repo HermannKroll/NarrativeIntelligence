@@ -30,9 +30,9 @@ class TestDictagger(unittest.TestCase):
         self.assertTrue(document)
         strings = [repr(tag) for tag in document.tags]
         self.assertIn("<Entity 0,8,proteins,DosageForm,Desc1>", strings)
-        self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
-        self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
-        self.assertIn("<Entity 1608,1626,protein secretion,DosageForm,Desc4>", strings)
+        self.assertIn("<Entity 1104,1112,proteins,DosageForm,Desc1>", strings)
+        self.assertIn("<Entity 1104,1112,proteins,DosageForm,Desc1>", strings)
+        self.assertIn("<Entity 1609,1626,protein secretion,DosageForm,Desc4>", strings)
 
 
     def test_abbreviation_check(self):
@@ -48,9 +48,9 @@ class TestDictagger(unittest.TestCase):
         document = doc.parse_tag_list(out_file)
         self.assertTrue(document)
         strings = [repr(tag) for tag in document]
-        self.assertIn("<Entity 20,28,aspirin,Drug,Desc1>", strings)
-        self.assertIn("<Entity 29,33,asa,Drug,Desc1>", strings)
-        self.assertIn("<Entity 51,55,asa,Drug,Desc1>", strings)
+        self.assertIn("<Entity 21,28,aspirin,Drug,Desc1>", strings)
+        self.assertIn("<Entity 30,33,asa,Drug,Desc1>", strings)
+        self.assertIn("<Entity 52,55,asa,Drug,Desc1>", strings)
 
     def test_abbreviation_not_allowed_check(self):
         out_file = proj_rel_path("nitests/tmp/abbreviation_test_not_allowed.txt")
@@ -66,7 +66,7 @@ class TestDictagger(unittest.TestCase):
         document = doc.parse_tag_list(out_file)
         self.assertTrue(document)
         strings = [repr(tag) for tag in document]
-        self.assertIn("<Entity 51,61,metformin,Drug,Desc2>", strings)
+        self.assertIn("<Entity 52,61,metformin,Drug,Desc2>", strings)
         self.assertNotIn("ASA", strings)
 
     def test_split_indexed_words(self):
