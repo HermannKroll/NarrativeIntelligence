@@ -24,161 +24,6 @@ MESH_QUERY_DESCRIPTOR_BY_TERM = "/DescriptorRecordSet/DescriptorRecord/ConceptLi
                            "/String[text()='{}']/parent::*/parent::*/parent::*/parent::*/parent::*"
 
 
-# noinspection PyTypeChecker,PyUnresolvedReferences
-class MeSHDB:
-    """
-    Class is a Singleton for the MeSH database. You can load a descriptor file and query descriptors with the functions
-
-    - desc_by_id
-    - desc_by_tree_number
-    - descs_by_name
-    - descs_by_term
-
-    Use the instance() method to get a MeSHDB instance.
-    """
-    __instance = None
-
-    @staticmethod
-    def instance():
-        if MeSHDB.__instance is None:
-            MeSHDB()
-        return MeSHDB.__instance
-
-    def get_index(self):
-        return dict(
-            _desc_by_id=self._desc_by_id,
-            _desc_by_tree_number=self._desc_by_tree_number,
-            _desc_by_name=self._desc_by_name,
-        )
-
-    def set_index(self, index):
-        for key, value in index.items():
-            setattr(self, key, value)
-
-    def __init__(self):
-        self.tree = None
-        self._desc_by_id = dict()
-        self._desc_by_tree_number = dict()
-        self._desc_by_name = dict()
-        if MeSHDB.__instance is not None:
-            raise Exception("This class is a singleton!")
-        else:
-            MeSHDB.__instance = self
-
-    def load_xml(self, filename, prefetch_all=False, verbose=False, force_load=False):
-        if not self._desc_by_id or force_load:
-            start = datetime.now()
-            with open(filename) as f:
-                self.tree = etree.parse(f)
-            end = datetime.now()
-            if verbose:
-                print("XML loaded in {}".format(end - start))
-            if prefetch_all:
-                start = datetime.now()
-                self.prefetch_all(verbose)
-                end = datetime.now()
-                if verbose:
-                    print("All descriptors loaded in {}".format(end - start))
-
-    def prefetch_all(self, verbose=False):
-        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
-        total = len(records)
-        last = 0
-        if verbose:
-            sys.stdout.write("Indexing ...")
-            sys.stdout.flush()
-        for idx, record in enumerate(records):
-            desc = Descriptor.from_element(record)
-            self.add_desc(desc)
-            if verbose and int((idx + 1.0) / total * 100.0) > last:
-                last = int((idx + 1.0) / total * 100.0)
-                sys.stdout.write("\rIndexing ... {} %".format(last))
-                sys.stdout.flush()
-        if verbose:
-            sys.stdout.write("\rIndexing ... done\n")
-            sys.stdout.flush()
-
-    def get_all_descs(self):
-        descs = []
-        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
-        for idx, record in enumerate(records):
-            desc = Descriptor.from_element(record)
-            descs.append(desc)
-        return descs
-
-    def add_desc(self, desc_obj):
-        """
-        Adds an descriptor to the indexes.
-
-        .. note::
-
-           The try-except was introduced because some descriptors (e.g., Female) don't have a tre number.
-
-        :param desc_obj: Descriptor object to add
-        """
-        self._desc_by_id[desc_obj.unique_id] = desc_obj
-        for tn in desc_obj.tree_numbers:
-            self._desc_by_tree_number[tn] = desc_obj
-        self._desc_by_name[desc_obj.heading] = desc_obj
-
-    def desc_by_id(self, unique_id):
-        if unique_id not in self._desc_by_id:
-            query = MESH_QUERY_DESCRIPTOR_BY_ID.format(unique_id)
-            desc_rec = self.tree.xpath(query)
-            if desc_rec:
-                desc = Descriptor.from_element(desc_rec[0])
-                self.add_desc(desc)
-            else:
-                raise ValueError("Descriptor {} not found.".format(unique_id))
-        return self._desc_by_id[unique_id]
-
-    def descs_under_tree_number(self, tree_number):
-        query = MESH_QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER.format(tree_number + ".")
-        records = self.tree.xpath(query)
-        ids = [record.text.strip() for record in records]
-        desc_list = [self.desc_by_id(uid) for uid in ids]
-        return sorted(desc_list)
-
-    def desc_by_tree_number(self, tree_number):
-        if tree_number not in self._desc_by_tree_number:
-            query = MESH_QUERY_DESCRIPTOR_BY_TREE_NUMBER.format(tree_number)
-            desc_rec = self.tree.xpath(query)
-            if desc_rec:
-                desc = Descriptor.from_element(desc_rec[0])
-                self.add_desc(desc)
-            else:
-                raise ValueError("Descriptor {} not found.".format(tree_number))
-        return self._desc_by_tree_number[tree_number]
-
-    def descs_by_term(self, term):
-        query = MESH_QUERY_DESCRIPTOR_BY_TERM.format(term)
-        records = self.tree.xpath(query)
-        desc_list = [Descriptor.from_element(record) for record in records]
-        # Add to cache
-        for desc in desc_list:
-            if desc.unique_id not in self._desc_by_id:
-                self.add_desc(desc)
-        return desc_list
-
-    def descs_by_name(self, name, match_exact=True, search_terms=True):
-        if match_exact and name in self._desc_by_name:
-            return [self._desc_by_name[name]]
-        if match_exact:
-            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_EXACT.format(name)
-        else:
-            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
-        records = self.tree.xpath(query)
-        desc_list = [Descriptor.from_element(record) for record in records]
-        # Add to cache
-        for desc in desc_list:
-            if desc.unique_id not in self._desc_by_id:
-                self.add_desc(desc)
-        # Search by terms
-        if not desc_list and search_terms:
-            desc_list = self.descs_by_term(name)
-        # Return
-        return desc_list
-
 
 class BaseNode:
     _attrs = dict()
@@ -393,3 +238,160 @@ class Descriptor(BaseNode):
 
     def __lt__(self, other):
         return self.unique_id < other.unique_id
+
+
+# noinspection PyTypeChecker,PyUnresolvedReferences
+class MeSHDB:
+    """
+    Class is a Singleton for the MeSH database. You can load a descriptor file and query descriptors with the functions
+
+    - desc_by_id
+    - desc_by_tree_number
+    - descs_by_name
+    - descs_by_term
+
+    Use the instance() method to get a MeSHDB instance.
+    """
+    __instance = None
+
+    @staticmethod
+    def instance():
+        if MeSHDB.__instance is None:
+            MeSHDB()
+        return MeSHDB.__instance
+
+    def get_index(self):
+        return dict(
+            _desc_by_id=self._desc_by_id,
+            _desc_by_tree_number=self._desc_by_tree_number,
+            _desc_by_name=self._desc_by_name,
+        )
+
+    def set_index(self, index):
+        for key, value in index.items():
+            setattr(self, key, value)
+
+    def __init__(self):
+        self.tree = None
+        self._desc_by_id = dict()
+        self._desc_by_tree_number = dict()
+        self._desc_by_name = dict()
+        if MeSHDB.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            MeSHDB.__instance = self
+
+    def load_xml(self, filename, prefetch_all=False, verbose=False, force_load=False):
+        if not self._desc_by_id or force_load:
+            start = datetime.now()
+            with open(filename) as f:
+                self.tree = etree.parse(f)
+            end = datetime.now()
+            if verbose:
+                print("XML loaded in {}".format(end - start))
+            if prefetch_all:
+                start = datetime.now()
+                self.prefetch_all(verbose)
+                end = datetime.now()
+                if verbose:
+                    print("All descriptors loaded in {}".format(end - start))
+
+    def prefetch_all(self, verbose=False):
+        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
+        total = len(records)
+        last = 0
+        if verbose:
+            sys.stdout.write("Indexing ...")
+            sys.stdout.flush()
+        for idx, record in enumerate(records):
+            desc = Descriptor.from_element(record)
+            self.add_desc(desc)
+            if verbose and int((idx + 1.0) / total * 100.0) > last:
+                last = int((idx + 1.0) / total * 100.0)
+                sys.stdout.write("\rIndexing ... {} %".format(last))
+                sys.stdout.flush()
+        if verbose:
+            sys.stdout.write("\rIndexing ... done\n")
+            sys.stdout.flush()
+
+    def get_all_descs(self) -> List[Descriptor]:
+        descs = []
+        records = self.tree.xpath(MESH_QUERY_DESCRIPTOR_RECORD)
+        for idx, record in enumerate(records):
+            desc = Descriptor.from_element(record)
+            descs.append(desc)
+        return descs
+
+    def add_desc(self, desc_obj):
+        """
+        Adds an descriptor to the indexes.
+
+        .. note::
+
+           The try-except was introduced because some descriptors (e.g., Female) don't have a tre number.
+
+        :param desc_obj: Descriptor object to add
+        """
+        self._desc_by_id[desc_obj.unique_id] = desc_obj
+        for tn in desc_obj.tree_numbers:
+            self._desc_by_tree_number[tn] = desc_obj
+        self._desc_by_name[desc_obj.heading] = desc_obj
+
+    def desc_by_id(self, unique_id):
+        if unique_id not in self._desc_by_id:
+            query = MESH_QUERY_DESCRIPTOR_BY_ID.format(unique_id)
+            desc_rec = self.tree.xpath(query)
+            if desc_rec:
+                desc = Descriptor.from_element(desc_rec[0])
+                self.add_desc(desc)
+            else:
+                raise ValueError("Descriptor {} not found.".format(unique_id))
+        return self._desc_by_id[unique_id]
+
+    def descs_under_tree_number(self, tree_number):
+        query = MESH_QUERY_DESCRIPTOR_IDS_BY_TREE_NUMBER.format(tree_number + ".")
+        records = self.tree.xpath(query)
+        ids = [record.text.strip() for record in records]
+        desc_list = [self.desc_by_id(uid) for uid in ids]
+        return sorted(desc_list)
+
+    def desc_by_tree_number(self, tree_number):
+        if tree_number not in self._desc_by_tree_number:
+            query = MESH_QUERY_DESCRIPTOR_BY_TREE_NUMBER.format(tree_number)
+            desc_rec = self.tree.xpath(query)
+            if desc_rec:
+                desc = Descriptor.from_element(desc_rec[0])
+                self.add_desc(desc)
+            else:
+                raise ValueError("Descriptor {} not found.".format(tree_number))
+        return self._desc_by_tree_number[tree_number]
+
+    def descs_by_term(self, term):
+        query = MESH_QUERY_DESCRIPTOR_BY_TERM.format(term)
+        records = self.tree.xpath(query)
+        desc_list = [Descriptor.from_element(record) for record in records]
+        # Add to cache
+        for desc in desc_list:
+            if desc.unique_id not in self._desc_by_id:
+                self.add_desc(desc)
+        return desc_list
+
+    def descs_by_name(self, name, match_exact=True, search_terms=True):
+        if match_exact and name in self._desc_by_name:
+            return [self._desc_by_name[name]]
+        if match_exact:
+            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_EXACT.format(name)
+        else:
+            query = MESH_QUERY_DESCRIPTOR_BY_HEADING_CONTAINS.format(name)
+        records = self.tree.xpath(query)
+        desc_list = [Descriptor.from_element(record) for record in records]
+        # Add to cache
+        for desc in desc_list:
+            if desc.unique_id not in self._desc_by_id:
+                self.add_desc(desc)
+        # Search by terms
+        if not desc_list and search_terms:
+            desc_list = self.descs_by_term(name)
+        # Return
+        return desc_list
+
