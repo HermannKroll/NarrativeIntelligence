@@ -14,7 +14,9 @@ def get_document_ids(path: str):
         with open(path) as f:
             for line in f:
                 ids.update(int(x) for x in DOCUMENT_ID.findall(line))
-                ids.update(int(x) for x in TAG_DOCUMENT_ID.findall(line))
+                # search only for tag ids if no title lines were found before
+                if len(ids) == 0:
+                    ids.update(int(x) for x in TAG_DOCUMENT_ID.findall(line))
     return ids
 
 
