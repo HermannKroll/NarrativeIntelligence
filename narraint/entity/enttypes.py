@@ -17,6 +17,7 @@ EXCIPIENT = "Excipient"
 PLANT_FAMILY = "PlantFamily"
 DRUGBANK_CHEMICAL = "DrugBankChemical"
 METHOD = "Method"
+LAB_METHOD = "LabMethod"
 
 ALL = (
     DOSAGE_FORM,
@@ -35,7 +36,8 @@ ALL = (
     EXCIPIENT,
     PLANT_FAMILY,
     DRUGBANK_CHEMICAL,
-    METHOD
+    METHOD,
+    LAB_METHOD
 )
 
 DALL = {
@@ -45,7 +47,8 @@ DALL = {
     PLANT_FAMILY,
     DRUGBANK_CHEMICAL,
     DISEASE,
-    METHOD
+    METHOD,
+    LAB_METHOD
 }
 
 # set of all tags which are supported by our taggers
@@ -77,11 +80,12 @@ TAG_TYPE_MAPPING = dict(
     V=VARIANT,
     CL=CELLLINE,
     M=METHOD,
+    LM=LAB_METHOD,
     A="ALL",
     DA="DALL"
 )
 
-DICT_TAG_TYPES = {"DF", "DR", "DC", "E", "PF", "DA", "D", "M"}
+DICT_TAG_TYPES = {"DF", "DR", "DC", "E", "PF", "DA", "D", "M", "LM"}
 
 ENTITY_TYPES = dict(
     Chemical=CHEMICAL,
@@ -102,5 +106,6 @@ ENTITY_TYPES = dict(
     Excipient=EXCIPIENT,
     PlantFamily=PLANT_FAMILY,
     DrugBankChemical=DRUGBANK_CHEMICAL,
-    Method=METHOD
+    Method=METHOD,
+    LabMethod=LAB_METHOD
 )

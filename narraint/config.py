@@ -3,7 +3,6 @@ This module contains constants which point to important directories.
 """
 import os
 
-
 GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 DATA_DIR = os.path.join(GIT_ROOT_DIR, "data")
@@ -11,8 +10,15 @@ RESOURCE_DIR = os.path.join(GIT_ROOT_DIR, "resources")
 CONFIG_DIR = os.path.join(GIT_ROOT_DIR, "config")
 LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
+TMP_DIR_TAGGER = os.path.join(TMP_DIR, 'tagger')
 CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
+
+if not os.path.isdir(TMP_DIR):
+    os.makedirs(TMP_DIR)
+
+if not os.path.isdir(TMP_DIR_TAGGER):
+    os.makedirs(TMP_DIR_TAGGER)
 
 # UMLS
 UMLS_DATA = os.path.join(DATA_DIR, "umls/MRCONSO.RRF.gz")
@@ -54,44 +60,47 @@ PREPROCESS_CONFIG = os.path.join(CONFIG_DIR, 'preprocess.json')
 # NLP
 NLP_DATA = os.path.join(DATA_DIR, "stanfordnlp_resources")
 
-
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
-#Dict Tagger
+# Dict Tagger
 DICT_TAGGER_BLACKLIST = os.path.join(RESOURCE_DIR, "dict_tagger_blacklist.txt")
 
 # DosageForm Tagger
-DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "df_index_cache.pkl")
+DOSAGE_FORM_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, "dosage_form_cache.pkl")
 DOSAGE_ADDITIONAL_DESCS = os.path.join(RESOURCE_DIR, "df_additional_descs.txt")
 DOSAGE_ADDITIONAL_DESCS_TERMS = os.path.join(RESOURCE_DIR, "df_additional_descs_terms.txt")
 DOSAGE_FID_DESCS = os.path.join(RESOURCE_DIR, "df_fid_descriptors.txt")
 
-#Drug Tagger
-DRUG_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "dr_index_cache.pkl")
+# Drug Tagger
+DRUG_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, "drug_cache.pkl")
 DRUGBANK_CHEMICAL_DATABASE_FILE = os.path.join(RESOURCE_DIR, "drugbank_chemicals.txt")
-DRUGBANK_CHEMICAL_INDEX_CACHE = os.path.join(TMP_DIR, "dc_index_cache.pkl")
+DRUGBANK_CHEMICAL_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, "drugbank_chemical_cache.pkl")
 
 # Excipient Tagger
 EXCIPIENT_TAGGER_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'excipient_database_2020.csv')
 EXCIPIENT_TAGGER_DRUGBANK_EXCIPIENT_FILE = os.path.join(RESOURCE_DIR, 'drugbank_excipients.txt')
-EXCIPIENT_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, "excipient_index_cache.pkl")
+EXCIPIENT_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, "excipient_cache.pkl")
 
 # Disease Tagger
 DISEASE_TAGGER_DATABASE_FILE = MESH_DESCRIPTORS_FILE
-DISEASE_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, 'disease_index_cache.pkl')
+DISEASE_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, 'disease_cache.pkl')
 
 # Method Tagger
+METHOD_CLASSIFICATION_FILE = os.path.join(RESOURCE_DIR, "method_classification.tsv")
 METHOD_TAGGER_DATABASE_FILE = MESH_DESCRIPTORS_FILE
-METHOD_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR, 'method_index_cache.pkl')
+METHOD_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, 'method_cache.pkl')
+
+LAB_METHOD_TAGGER_DATABASE_FILE = MESH_DESCRIPTORS_FILE
+LAB_METHOD_TAGGER_INDEX_CACHE = os.path.join(TMP_DIR_TAGGER, 'lab_method_cache.pkl')
+
+# Plant Family Tagger
+PLANT_FAMILTY_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'plant_families_2020.txt')
+PLANT_FAMILTY_INDEX_CACHE = os.path.join(TMP_DIR, 'plant_families_cache.pkl')
 
 # MeSH SubHeadings for MEDLINE PubMed
 MESH2DOC_INDEX_Pubmed = os.path.join(TMP_DIR, "pubmed_medline_index.pickle")
 MESH2Doc_INDEX_PMC = os.path.join(TMP_DIR, "pmc_index.pkl")
-
-# Plant Family Tagger
-PLANT_FAMILTY_DATABASE_FILE = os.path.join(RESOURCE_DIR, 'plant_families_2020.txt')
-PLANT_FAMILTY_INDEX_CACHE = os.path.join(TMP_DIR, 'pf_index_cache.pkl')
 
 # Entity Tagging index
 ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
@@ -99,9 +108,6 @@ ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 # Autocompletion Index
 AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
 
-
 # NLP Config
 NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')
 
-if not os.path.exists(TMP_DIR):
-    os.mkdir(TMP_DIR)

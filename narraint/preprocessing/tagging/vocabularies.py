@@ -7,46 +7,54 @@ from typing import List
 import lxml.etree as ET
 
 from narraint import config
-from narraint.config import MESH_DESCRIPTORS_FILE
-from narraint.entity.meshontology import MeSHOntology
+from narraint.config import MESH_DESCRIPTORS_FILE, METHOD_CLASSIFICATION_FILE
+from narraint.entity.enttypes import METHOD, LAB_METHOD
 from narraint.mesh.data import MeSHDB
 from narraint.preprocessing.tagging.dictagger import clean_vocab_word_by_split_rules
 from narraint.progress import print_progress_with_eta
 
 
 def expand_vocabulary_term(term: str) -> str:
+    if term.endswith('y'):
+        yield f'{term[:-1]}ies'
+    if term.endswith('ies'):
+        yield f'{term[:-3]}y'
     if term.endswith('s') or term.endswith('e'):
         yield term[:-1]
     if term.endswith('or') and len(term) > 2:
         yield term[:-2] + "our"
+    if term.endswith('our') and len(term) > 3:
+        yield term[:-3] + "or"
     yield from [term, f'{term}e', f'{term}s']
 
 
 class MeSHVocabulary:
 
-
     @staticmethod
     def create_mesh_vocab(subtrees: List[str], mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
         desc_by_term = defaultdict(set)
-        logging.info(f'Loading all MeSH descriptors for tree numbers: {subtrees}...')
-        mesh_ontology = MeSHOntology.instance()
-        mesh_descs = []
-        for tn in subtrees:
-            mesh_descs.extend(list([d for d in mesh_ontology.find_descriptors_start_with_tree_no(tn)]))
 
         meshdb = MeSHDB.instance()
-        meshdb.load_xml(mesh_file, prefetch_all=True, force_load=True)
+        meshdb.load_xml(mesh_file)
         logging.info('Extracting MeSH information (terms) ...')
-        for d_id, d_head in mesh_descs:
-            mesh_desc_data = meshdb.desc_by_id(d_id)
-            mesh_desc = f'MESH:{d_id}'
+        for desc in meshdb.get_all_descs():
+            has_correct_tree = False
+            # check if a descriptor's tree matches the allowed subtrees
+            for tn in desc.tree_numbers:
+                for allowed_tree in subtrees:
+                    if tn.startswith(allowed_tree):
+                        has_correct_tree = True
+            # ignore descriptor
+            if not has_correct_tree:
+                continue
 
+            mesh_desc = f'MESH:{desc.unique_id}'
             if expand_by_s_and_e:
-                for t_e in expand_vocabulary_term(d_head.lower().strip()):
+                for t_e in expand_vocabulary_term(desc.name.lower().strip()):
                     desc_by_term[t_e].add(mesh_desc)
             else:
-                desc_by_term[d_head.lower().strip()].add(mesh_desc)
-            for t in mesh_desc_data.terms:
+                desc_by_term[desc.name.lower().strip()].add(mesh_desc)
+            for t in desc.terms:
                 if expand_by_s_and_e:
                     for t_e in expand_vocabulary_term(t.string.lower().strip()):
                         desc_by_term[t_e].add(mesh_desc)
@@ -58,8 +66,50 @@ class MeSHVocabulary:
 class MethodVocabulary:
 
     @staticmethod
-    def create_method_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
-        return MeSHVocabulary.create_mesh_vocab(['E'], mesh_file, expand_by_s_and_e)
+    def read_method_classification(file=METHOD_CLASSIFICATION_FILE):
+        desc2class = {}
+        with open(file, 'rt') as f:
+            for line in f:
+                comps = line.strip().split('\t')
+                if len(comps) == 2 and comps[0] == 'l':
+                    desc2class[comps[1]] = LAB_METHOD
+                elif len(comps) == 2 and comps[0] == 'unspezif.':
+                    desc2class[comps[1]] = None
+                else:
+                    desc2class[comps[0]] = METHOD
+        return desc2class
+
+    @staticmethod
+    def enhance_methods_by_rules(term2desc: {str: str}):
+        term2desc_copy = term2desc.copy()
+        for term, descs in term2desc.items():
+            if 'metric' in term:
+                term2desc_copy[term.replace('metric', 'metry')] = descs
+            if 'metry' in term:
+                term2desc_copy[term.replace('metry', 'metric')] = descs
+            if 'stain' in term and not 'staining' in term:
+                term2desc_copy[term.replace('stain', 'staining')] = descs
+            if 'staining' in term:
+                term2desc_copy[term.replace('staining', 'stain')] = descs
+
+        return term2desc_copy
+
+    @staticmethod
+    def create_method_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_terms=True, method_type=METHOD):
+        term2desc = MeSHVocabulary.create_mesh_vocab(['E'], mesh_file, expand_terms)
+        term2desc = MethodVocabulary.enhance_methods_by_rules(term2desc)
+        desc2class = MethodVocabulary.read_method_classification()
+        term2methods = {k: list([d for d in descs if desc2class[d] == method_type]) for k, descs in term2desc.items()}
+        return {k: v for k, v in term2methods.items() if v and len(v) > 0}
+
+
+class LabMethodVocabulary:
+
+    @staticmethod
+    def create_lab_method_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_terms=True):
+        term2desc = MethodVocabulary.create_method_vocabulary(mesh_file, expand_terms=expand_terms, method_type=LAB_METHOD)
+        term2desc['assay'].append('FIDXPM1')
+        return term2desc
 
 
 class DiseaseVocabulary:
@@ -67,7 +117,7 @@ class DiseaseVocabulary:
     @staticmethod
     def create_disease_vocabulary(mesh_file=MESH_DESCRIPTORS_FILE, expand_by_s_and_e=True):
         return MeSHVocabulary.create_mesh_vocab(['C', 'F03'], mesh_file, expand_by_s_and_e)
-        
+
 
 class DrugBankChemicalVocabulary:
 
@@ -263,14 +313,30 @@ class PlantFamilyVocabulary:
 
     @staticmethod
     def read_plant_family_vocabulary(plant_family_database=config.PLANT_FAMILTY_DATABASE_FILE,
-                                     expand_terms_by_e=True):
+                                     expand_terms=True):
         term_to_plant_family = {}
         with open(plant_family_database, 'rt') as f:
             for line in f:
                 plant_family = line.strip()
                 plant_family_lower = plant_family.lower()
-                if expand_terms_by_e:
-                    plant_family_terms = [plant_family_lower, f'{plant_family_lower}e']
+                if expand_terms:
+                    plant_family_terms = [plant_family_lower]
+                    if plant_family.endswith('a'):
+                        plant_family_terms.extend([f'{plant_family_lower}e',
+                                                   f'{plant_family_lower}s', # for the stupid ones :)
+                                                  f'{plant_family_lower}rum'])
+                    if plant_family.endswith('ae'):
+                        plant_family_terms.extend([plant_family_lower[:-1],
+                                                   f'{plant_family_lower[:-1]}s',
+                                                   f'{plant_family_lower}rum'])
+                    if plant_family.endswith('us'):
+                        plant_family_terms.extend([plant_family_lower[:-1],
+                                                   f'{plant_family_lower[:-1]}um'])
+                    if plant_family.endswith('um'):
+                        plant_family_terms.extend([f'{plant_family_lower[:-2]}i',
+                                                   f'{plant_family_lower}s', # for the stupid ones :)
+                                                   f'{plant_family_lower[:-2]}a',
+                                                   f'{plant_family_lower[:-2]}orum'])
                 else:
                     plant_family_terms = [plant_family_lower]
                 for term in plant_family_terms:

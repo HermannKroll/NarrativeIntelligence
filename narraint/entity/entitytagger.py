@@ -158,7 +158,7 @@ class EntityTagger:
         Add all plant family names
         :return:
         """
-        for family_name in PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms_by_e=False):
+        for family_name in PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms=False):
             self.term2entity[family_name.strip().lower()].add(Entity(family_name.capitalize(), PLANT_FAMILY))
 
     def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE, mesh_supp_file=MESH_SUPPLEMENTARY_FILE):
