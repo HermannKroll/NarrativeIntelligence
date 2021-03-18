@@ -104,13 +104,16 @@ def main(arguments=None):
     metafactory = MetaDicTaggerFactory(ent_types, kwargs)
     metatag = metafactory.create_MetaDicTagger()
     metatag.prepare()
+    metatag.base_insert_tagger()
 
     def generate_tasks():
         for doc in read_pubtator_documents(in_file):
-            yield TaggedDocument(doc)
+            yield TaggedDocument(doc, ignore_tags=True)
 
     def do_task(in_doc: TaggedDocument):
-        return metatag.tag_doc(in_doc)
+        tagged_doc = metatag.tag_doc(in_doc)
+        tagged_doc.clean_tags()
+        return tagged_doc
 
     docs_done = multiprocessing.Value('i', 0)
     docs_to_do = multiprocessing.Value('i', number_of_docs)
@@ -119,7 +122,6 @@ def main(arguments=None):
     def consume_task(out_doc: TaggedDocument):
         docs_done.value += 1
         print_progress_with_eta("Tagging...", docs_done.value, docs_to_do.value, start, print_every_k=1000, logger=logger)
-        out_doc.clean_tags()
         if out_doc.tags:
             metatag.base_insert_tags(out_doc)
 
