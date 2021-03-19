@@ -151,7 +151,7 @@ class BaseTagger(Thread):
         tagger_version = self.__version__
         insert_taggers((tagger_name, tagger_version))
 
-    def base_insert_tags(self, doc:TaggedDocument):
+    def base_insert_tags(self, doc:TaggedDocument, auto_commit=True):
         session = Session.get()
 
         #self.logger.info("Add tags")
@@ -170,7 +170,6 @@ class BaseTagger(Thread):
                     index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
                 )
             session.execute(insert_tag)
-            session.commit()
 
         #self.logger.info("Add doc_tagged_by")
         successful_ent_types = set(t.ent_type for t in doc.tags)
@@ -188,8 +187,8 @@ class BaseTagger(Thread):
                                     'tagger_name', 'tagger_version', 'ent_type'),
                 )
             session.execute(insert_doc_tagged_by)
+        if auto_commit:
             session.commit()
-
 
     def get_tags(self):
         """

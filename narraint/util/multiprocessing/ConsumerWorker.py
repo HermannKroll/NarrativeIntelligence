@@ -8,18 +8,18 @@ from narraint.util.multiprocessing.WorkerProcess import WorkerProcess
 
 
 class ConsumerWorker(WorkerProcess):
-    def __init__(self, result_queue: multiprocessing.Queue, consume, no_workers):
+    def __init__(self, result_queue: multiprocessing.Queue, consume, no_workers, shutdown=None):
         """
 
         :param result_queue:
         :param consume: Callable, gets result and consumes it
-        :param prepare:
         :param shutdown:
         """
         super().__init__()
 
         self.result_queue = result_queue
         self.__consume = consume
+        self.__shutdown = shutdown
         self.__running = True
         self.__no_workers=no_workers
 
@@ -37,6 +37,8 @@ class ConsumerWorker(WorkerProcess):
             except queue.Empty:
                 sleep(0.1)
                 continue
+        if self.__shutdown:
+            self.__shutdown()
 
     def stop(self):
         self.__running = False

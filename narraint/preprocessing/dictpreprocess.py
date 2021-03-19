@@ -9,6 +9,7 @@ import multiprocessing
 from datetime import datetime
 from typing import Iterable
 
+from narraint.backend.database import Session
 from narraint.backend.load_document import load_document
 from narraint.preprocessing.tagging.metadictagger import MetaDicTagger, MetaDicTaggerFactory
 from narraint.progress import print_progress_with_eta
@@ -26,7 +27,8 @@ from narraint.util.multiprocessing.ProducerWorker import ProducerWorker
 from narraint.util.multiprocessing.Worker import Worker
 
 
-def prepare_input(in_file:str, out_file: str, logger: logging.Logger, ent_types: Iterable[str], collection: str) -> int:
+def prepare_input(in_file: str, out_file: str, logger: logging.Logger, ent_types: Iterable[str],
+                  collection: str) -> int:
     if not os.path.exists(in_file):
         logger.error("Input file not found!")
         return False
@@ -38,7 +40,6 @@ def prepare_input(in_file:str, out_file: str, logger: logging.Logger, ent_types:
         todo_ids |= get_untagged_doc_ids_by_ent_type(collection, in_ids, ent_type, MetaDicTagger, logger)
     filter_and_sanitize(in_file, out_file, todo_ids, logger)
     return len(todo_ids)
-
 
 
 def main(arguments=None):
@@ -121,22 +122,29 @@ def main(arguments=None):
 
     def consume_task(out_doc: TaggedDocument):
         docs_done.value += 1
-        print_progress_with_eta("Tagging...", docs_done.value, docs_to_do.value, start, print_every_k=1000, logger=logger)
+        print_progress_with_eta("Tagging...", docs_done.value, docs_to_do.value, start, print_every_k=1000,
+                                logger=logger)
         if out_doc.tags:
-            metatag.base_insert_tags(out_doc)
+            metatag.base_insert_tags(out_doc, auto_commit=False)
+
+        if docs_done.value % 10000 == 0:
+            Session.get().commit()
+
+    def shutdown_consumer():
+        Session.get().commit()
 
     task_queue = multiprocessing.Queue()
     result_queue = multiprocessing.Queue()
     producer = ProducerWorker(task_queue, generate_tasks, args.workers)
     workers = [Worker(task_queue, result_queue, do_task) for n in range(args.workers)]
-    consumer = ConsumerWorker(result_queue, consume_task, args.workers)
+    consumer = ConsumerWorker(result_queue, consume_task, args.workers, shutdown=shutdown_consumer)
 
     producer.start()
     for w in workers:
         w.start()
     consumer.start()
     consumer.join()
-    logger.info(f"finished in {(datetime.now()-start).total_seconds()} seconds")
+    logger.info(f"finished in {(datetime.now() - start).total_seconds()} seconds")
 
     if not args.workdir:
         logger.info(f'Remove temp directory: {root_dir}')
