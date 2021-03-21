@@ -213,19 +213,19 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     predications_len = len(predications)
     for idx, p in enumerate(predications):
         subj_ids = set()
-        if p.s_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.s_id.startswith('MESH:'):
+        if p.s_id.startswith('MESH:'):
             try:
-                subj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.s_id[5:]))
+                subj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.s_id[5:]))
             except KeyError:
-                subj_ids.add(p.s_id)
+                continue
         else:
             subj_ids = [p.s_id]
         obj_ids = set()
-        if p.o_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.o_id.startswith('MESH:'):
+        if p.o_id.startswith('MESH:'):
             try:
-                obj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.o_id[5:]))
+                obj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.o_id[5:]))
             except KeyError:
-                obj_ids.add(p.o_id)
+                continue
         else:
             obj_ids = [p.o_id]
         for s_id in subj_ids:
