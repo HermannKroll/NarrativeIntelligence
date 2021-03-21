@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from narraint.config import MESH_DESCRIPTORS_FILE, MESH_ONTOLOGY_INDEX_FILE
+from narraint.entity.enttypes import DOSAGE_FORM, METHOD, DISEASE
 from narraint.mesh.data import MeSHDB, Descriptor
 from narraint.progress import print_progress_with_eta
 
@@ -26,6 +27,17 @@ MESH_TREE_NAMES = dict(
     V="Publication Characteristics",
     Z="Geographicals"
 )
+
+MESH_TREE_TO_ENTITY_TYPE = {
+    "D26.255": DOSAGE_FORM,  # Dosage Forms
+  #  "E02.319.300": DOSAGE_FORM,  # Drug Delivery Systems
+    "J01.637.512.600": DOSAGE_FORM,  # Nanoparticles
+    "J01.637.512.850": DOSAGE_FORM,  # Nanotubes
+    "J01.637.512.925": DOSAGE_FORM, # Nanowires
+    "E": METHOD,
+    "C": DISEASE,
+    "F03": DISEASE
+}
 
 
 class MeSHOntology:
@@ -68,7 +80,7 @@ class MeSHOntology:
         :return: Nothing
         """
         if tree_no in self.treeno2desc:
-            raise KeyError('tree number is already mapped to: {}'.format(self.treeno2desc[tree_no] ))
+            raise KeyError('tree number is already mapped to: {}'.format(self.treeno2desc[tree_no]))
         self.treeno2desc[tree_no] = (descriptor_id, descriptor_heading)
 
     def find_descriptors_start_with_tree_no(self, tree_no: str) -> [(str, str)]:
@@ -113,6 +125,37 @@ class MeSHOntology:
         :return: List of tree numbers
         """
         return self.descriptor2treeno[descriptor_id]
+
+    def get_tree_numbers_with_entity_type_for_descriptor(self, descriptor_id: str) -> [str]:
+        """
+        Gets all tree numbers that are mapped to a known entity type
+        raises key error if descriptor is not known
+        :param descriptor_id: the mesh descriptor id
+        :return: list of tree numbers
+        """
+        relevant_tree_numbers = []
+        for tn in self.descriptor2treeno[descriptor_id]:
+            try:
+                if MeSHOntology.tree_number_to_entity_type(tn):
+                    relevant_tree_numbers.append(tn)
+            except KeyError:
+                pass
+        if len(relevant_tree_numbers) == 0:
+            raise KeyError(f'Descriptor {descriptor_id} has no relevant tree numbers')
+        return relevant_tree_numbers
+
+    @staticmethod
+    def tree_number_to_entity_type(tree_number: str) -> str:
+        """
+        Computes the entity type for a given tree number
+        raises a key error if no entity type was found
+        :param tree_number: the tree number to check
+        :return: the entity type
+        """
+        for k, v in MESH_TREE_TO_ENTITY_TYPE.items():
+            if tree_number.startswith(k):
+                return v
+        raise KeyError(f'No entity type for tree number {tree_number} found')
 
     def build_index_from_mesh(self, mesh_file=MESH_DESCRIPTORS_FILE):
         """
@@ -167,8 +210,8 @@ class MeSHOntology:
                 sub_descriptors.add(res)
         return sub_descriptors
 
-
-    def get_name_for_tree(self, tree_start_character):
+    @staticmethod
+    def get_name_for_tree(tree_start_character):
         """
         Returns the official name for the mesh tree name
         :param tree_start_character: the starting character

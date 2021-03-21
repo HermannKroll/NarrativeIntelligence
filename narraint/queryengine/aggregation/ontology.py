@@ -165,7 +165,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         pref_desc_id, pref_desc_name = self.mesh_ontology.get_descriptor_for_tree_no(pref_current)
                         pref_desc_id = 'MESH:' + pref_desc_id
                         pref_desc_name = pref_current + '.' + pref_desc_name
-                        pref_desc_type = self.mesh_ontology.get_name_for_tree(pref[0])
+                        pref_desc_type = MeSHOntology.get_name_for_tree(pref[0])
 
                         pref_desc_substitution = QueryEntitySubstitution(pref_desc_name, pref_desc_id, pref_desc_type,
                                                                          pref_desc_name)
