@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
 from narraint.backend.models import Document, Predication, Sentence
@@ -80,7 +80,7 @@ class QueryEngine:
                 # if x is new, just add it as the last predication of the variable
                 if not s.startswith('?'):
                     if likesearch and should_perform_like_search_for_entity(s, s_t):
-                        query = query.filter(pred.subject_id.like('{}%'.format(s)))
+                        query = query.filter(and_(pred.subject_id.like('{}%'.format(s)), pred.subject_type == s_t))
                     else:
                         query = query.filter(pred.subject_id == s)
                 else:
@@ -108,7 +108,7 @@ class QueryEngine:
                             ValueError('Variable cannot be used as predicate and subject / object.')
                 if not o.startswith('?'):
                     if likesearch and should_perform_like_search_for_entity(o, o_t):
-                        query = query.filter(pred.object_id.like('{}%'.format(o)))
+                        query = query.filter(and_(pred.object_id.like('{}%'.format(o)), pred.object_type == o_t))
                     else:
                         query = query.filter(pred.object_id == o)
                 else:
@@ -155,11 +155,11 @@ class QueryEngine:
                             raise ValueError('Variable cannot be used as predicate and subject / object.')
             else:
                 if likesearch and should_perform_like_search_for_entity(s, s_t):
-                    query = query.filter(pred.subject_id.like('{}%'.format(s)))
+                    query = query.filter(and_(pred.subject_id.like('{}%'.format(s)), pred.subject_type == s_t))
                 else:
                     query = query.filter(pred.subject_id == s)
                 if likesearch and should_perform_like_search_for_entity(o, o_t):
-                    query = query.filter(pred.object_id.like('{}%'.format(o)))
+                    query = query.filter(and_(pred.object_id.like('{}%'.format(o)), pred.object_type == o_t))
                 else:
                     query = query.filter(pred.object_id == o)
                 if p == DO_NOT_CARE_PREDICATE:
@@ -180,9 +180,9 @@ class QueryEngine:
         query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch,
                                                  document_ids)
 
-      #  sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
+        #  sql_query = str(query.statement.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
         logging.debug('executing sql statement for: {}'.format(query_patterns))
-       # logging.debug('sql statement is: {}'.format(sql_query))
+        # logging.debug('sql statement is: {}'.format(sql_query))
         var_names = []
         for v, _, _ in var_info:
             var_names.append(v)
@@ -253,7 +253,7 @@ class QueryEngine:
 
         results = list(doc2result.values())
 
-        #logging.debug('{} database tuples retrieved'.format(result_count))
+        # logging.debug('{} database tuples retrieved'.format(result_count))
         logging.debug('{} distinct doc ids retrieved'.format(len(doc_ids)))
         # logging.debug("{} results with doc ids: {}".format(len(results), doc_ids))
 
@@ -475,8 +475,8 @@ class QueryEngine:
                                      .format(fp))
                 graph_patterns.append((fp.subjects[0], fp.predicate, fp.objects[0]))
             results, hit_limit = self.query_with_graph_query(graph_patterns, document_collection,
-                                                  extraction_type, query, query_titles_and_sentences=False,
-                                                  likesearch=likesearch)
+                                                             extraction_type, query, query_titles_and_sentences=False,
+                                                             likesearch=likesearch)
             if hit_limit:
                 query_limit_hit = True
 
