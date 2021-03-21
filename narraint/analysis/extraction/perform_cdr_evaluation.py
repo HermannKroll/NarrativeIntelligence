@@ -3,7 +3,8 @@ import os
 from collections import defaultdict
 
 from narraint.backend.database import Session
-from narraint.backend.load_document import load_document, read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers
+from narraint.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
+    document_bulk_load
 from narraint.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
@@ -127,7 +128,7 @@ def main():
         tagger_list = list(tagger_mapping.values())
         tagger_list.append(UNKNOWN_TAGGER)
         insert_taggers(*tagger_list)
-        load_document(CDR2015_pubtator_extracted, CDR2015_COLLECTION, tagger_mapping=tagger_mapping)
+        document_bulk_load(CDR2015_pubtator_extracted, CDR2015_COLLECTION, tagger_mapping=tagger_mapping)
 
     if RUN_CORENLP_OPENIE:
         logging.info('Running StanfordCoreNLP...')

@@ -118,10 +118,7 @@ class BaseTagger(Thread):
                 document_id=d_id,
                 document_collection=self.collection,
             )
-            if not Session.is_sqlite:
-                insert_tag = insert_tag.on_conflict_do_nothing(
-                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
-                )
+
             session.execute(insert_tag)
             session.commit()
 
@@ -135,11 +132,7 @@ class BaseTagger(Thread):
                 tagger_version=tagger_version,
                 ent_type=ent_type,
             )
-            if not Session.is_sqlite:
-                insert_doc_tagged_by = insert_doc_tagged_by.on_conflict_do_nothing(
-                    index_elements=('document_id', 'document_collection',
-                                    'tagger_name', 'tagger_version', 'ent_type'),
-                )
+
             session.execute(insert_doc_tagged_by)
             session.commit()
 
@@ -154,9 +147,13 @@ class BaseTagger(Thread):
     def base_insert_tags(self, doc:TaggedDocument, auto_commit=True):
         session = Session.get()
 
-        #self.logger.info("Add tags")
+        tagged_ent_types = set()
+        tag_inserts = []
+        # Add tags
         for tag in doc.tags:
-            insert_tag = insert(Tag).values(
+            tagged_ent_types.add(tag.ent_type)
+
+            tag_inserts.append(dict(
                 ent_type=tag.ent_type,
                 start=tag.start,
                 end=tag.end,
@@ -164,29 +161,22 @@ class BaseTagger(Thread):
                 ent_str=tag.text,
                 document_id=tag.document,
                 document_collection=self.collection,
-            )
-            if not Session.is_sqlite:
-                insert_tag = insert_tag.on_conflict_do_nothing(
-                    index_elements=('document_id', 'document_collection', 'start', 'end', 'ent_type', 'ent_id'),
-                )
-            session.execute(insert_tag)
+            ))
 
-        #self.logger.info("Add doc_tagged_by")
-        successful_ent_types = set(t.ent_type for t in doc.tags)
-        for ent_type in successful_ent_types:
-            insert_doc_tagged_by = insert(DocTaggedBy).values(
+        doc_tagged_by_inserts = []
+        # Add DocTaggedBy
+        for ent_type in tagged_ent_types:
+            doc_tagged_by_inserts.append(dict(
                 document_id=doc.id,
                 document_collection=self.collection,
                 tagger_name=self.__name__,
                 tagger_version=self.__version__,
                 ent_type=ent_type,
-            )
-            if not Session.is_sqlite:
-                insert_doc_tagged_by = insert_doc_tagged_by.on_conflict_do_nothing(
-                    index_elements=('document_id', 'document_collection',
-                                    'tagger_name', 'tagger_version', 'ent_type'),
-                )
-            session.execute(insert_doc_tagged_by)
+            ))
+
+        session.bulk_insert_mappings(Tag, tag_inserts)
+        session.bulk_insert_mappings(DocTaggedBy, doc_tagged_by_inserts)
+
         if auto_commit:
             session.commit()
 

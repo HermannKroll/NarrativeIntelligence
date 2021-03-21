@@ -14,18 +14,13 @@ from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.export import export
-from narraint.backend.load_document import load_document
+from narraint.backend.load_document import document_bulk_load
 from narraint.backend.models import DocTaggedBy
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.config import Config
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
-from narraint.preprocessing.tagging.dosage import DosageFormTagger
-from narraint.preprocessing.tagging.drug import DrugTagger
-from narraint.preprocessing.tagging.drugbankchemical import DrugBankChemicalTagger
-from narraint.preprocessing.tagging.excipient import ExcipientTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
-from narraint.preprocessing.tagging.plantfamily import PlantFamilyTagger
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
 from narraint.preprocessing.tagging import metadictagger as mt
@@ -248,7 +243,7 @@ def main(arguments=None):
     if args.skip_load:
         logger.info("Skipping bulk load")
     else:
-        load_document(in_dir, args.corpus, logger=logger)
+        document_bulk_load(in_dir, args.corpus, logger=logger)
     # Create list of tagging ent types
     tag_types = enttypes.ENT_TYPES_SUPPORTED_BY_TAGGERS if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 
