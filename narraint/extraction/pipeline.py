@@ -9,6 +9,7 @@ from typing import Set
 
 from spacy.lang.en import English
 
+from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
@@ -65,11 +66,11 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
     session = Session.get()
     session.bulk_insert_mappings(DocProcessedByIE, doc_inserts)
     session.commit()
-    logging.info('{} document ids have been inserted')
+    logging.info(f'{len(doc_inserts)} document ids have been inserted')
 
 
 def process_documents_ids_in_pipeline(document_ids: [int], document_collection, extraction_type, workers=1,
-                                     corenlp_config=NLP_CONFIG):
+                                      corenlp_config=NLP_CONFIG, check_document_ids=True):
     """
     Performs fact extraction for the given documents with the selected extraction type
     The document texts and tags will be exported automatically
@@ -80,6 +81,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
     :param extraction_type: the extraction type (e.g. PathIE)
     :param workers: the number of parallel workers (if extraction method is parallelized)
     :param corenlp_config: the nlp config
+    :param check_document_ids: should the the document ids be checked against db
     :return: None
     """
     # Read config
@@ -100,7 +102,10 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 
     logging.info('Process will work in: {}'.format(working_dir))
     # first get a list of all document ids which have to be processed
-    ids_to_process = retrieve_document_ids_to_process(document_ids, document_collection, extraction_type)
+    if check_document_ids:
+        ids_to_process = retrieve_document_ids_to_process(document_ids, document_collection, extraction_type)
+    else:
+        ids_to_process = document_ids
     # export them with their tags
     export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=document_collection,
            content=True)
@@ -115,6 +120,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
                                                                      ie_input_dir, ie_filelist_file, spacy_nlp,
                                                                      workers)
     time_filtered = datetime.now()
+    time_load = datetime.now()
     if amount_ie_docs == 0:
         logging.info('No files to process for IE - stopping')
     else:
@@ -125,17 +131,16 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 
             pathie_run_corenlp(core_nlp_dir, corenlp_output_dir, ie_filelist_file)
 
-            logging.info("Processing output ...", end="")
+            logging.info("Processing output ...")
             start = datetime.now()
             # Process output
             pathie_process_corenlp_output_parallelized(corenlp_output_dir, amount_ie_docs, ie_output_file, doc2tags,
-                                                       workers=workers)
+                                                       workers=workers, predicate_vocabulary=create_predicate_vocab())
             logging.info((" done in {}".format(datetime.now() - start)))
 
             logging.info('Loading extractions into database...')
             time_load = datetime.now()
-            predications = read_pathie_extractions_tsv(ie_output_file)
-            load_pathie_extractions(predications, document_collection, extraction_type)
+            load_pathie_extractions(ie_output_file, document_collection, extraction_type)
         elif extraction_type == PATHIE_STANZA_EXTRACTION:
             # Todo: Implement
             raise NotImplementedError
@@ -147,7 +152,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
     mark_document_as_processed_by_ie(ids_to_process, document_collection, extraction_type)
     logging.info('Process finished in {}s ({}s export, {}s filtering, {}s ie and {}s load)'
                  .format(time_open_ie - time_start, time_exported - time_start, time_filtered - time_exported,
-                         time_open_ie - time_filtered, time_open_ie-time_load))
+                         time_open_ie - time_filtered, time_open_ie - time_load))
 
     logging.info('Removing temp directory...')
     shutil.rmtree(working_dir)
@@ -157,7 +162,6 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("idfile", help="Document ID file (documents must be in database)")
-    parser.add_argument("output", help="OpenIE results will be stored here")
     parser.add_argument("-et", "--extraction_type", required=True, help="OpenIE|PathIE|PathIEStanza")
     parser.add_argument("-c", "--collection", required=True, help="Name of the given document collection")
     parser.add_argument("--config", help="OpenIE / PathIE Configuration file", default=NLP_CONFIG)
@@ -171,9 +175,9 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    if args.extraction_type not in [PATHIE_EXTRACTION, OPENIE_EXTRACTION]:
-        error_msg = 'extraction type must either be {} or {}'.format(PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION,
-                                                                     OPENIE_EXTRACTION)
+    if args.extraction_type not in [PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE_EXTRACTION]:
+        error_msg = 'extraction type must either be {}, {} or {}'.format(PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION,
+                                                                         OPENIE_EXTRACTION)
         raise argparse.ArgumentError(None, message=error_msg)
 
     logging.info('Reading id file: {}'.format(args.idfile))
@@ -182,14 +186,14 @@ def main():
 
     logging.info(f'{len(document_ids)} documents in id file')
     document_ids_to_process = retrieve_document_ids_to_process(document_ids, args.collection, args.extraction_type)
-
     num_of_chunks = int(len(document_ids_to_process) / args.batch_size)
     logging.info(f'Splitting task into {num_of_chunks} chunks...')
-    for idx, batch_ids in enumerate(chunks(document_ids_to_process, args.batch_size)):
+    for idx, batch_ids in enumerate(chunks(list(document_ids_to_process), args.batch_size)):
         logging.info('=' * 60)
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
-        process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config)
+        process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
+                                          check_document_ids=False) # have been checked before
 
 
 if __name__ == "__main__":
