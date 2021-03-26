@@ -28,22 +28,27 @@ def openie6_read_extractions(openie6_output):
         # read all lines for a single doc
         doc_id, sentence_txt = 0, ""
         for line in f:
-            if not line or line == '\n':
-                continue
-            if not line.startswith('0.') and not line.startswith('1.'):
-                doc_id, sentence_txt = line.split('.', maxsplit=1)
-                doc_id = int(doc_id)
-                sentence_txt = sentence_txt.strip()
-            else:
-                confidence, extraction = line.strip().split(": (", maxsplit=1)
-                if extraction.count(';') < 2:
-                    logging.info(f'Skip extraction because no object was found: {extraction}')
-                # split by ';'
-                subj_txt, pred_txt, obj_txt = extraction.split(';', maxsplit=2)
-                pred_lemma = ' '.join([token.lemma_ for token in nlp(pred_txt)])
-                ex_tuple = OPENIE_TUPLE(int(doc_id), subj_txt, pred_txt, pred_lemma, obj_txt, confidence, sentence_txt)
-                tuples.append(ex_tuple)
+            try:
+                if not line or line == '\n':
+                    continue
+                if not line.startswith('0.') and not line.startswith('1.'):
+                    doc_id, sentence_txt = line.split('.', maxsplit=1)
+                    doc_id = int(doc_id)
+                    sentence_txt = sentence_txt.strip()
+                else:
+                    if not doc_id or not sentence_txt:
+                        continue
+                    confidence, extraction = line.strip().split(": (", maxsplit=1)
+                    if extraction.count(';') < 2:
+                        logging.info(f'Skip extraction because no object was found: {extraction}')
+                    # split by ';'
+                    subj_txt, pred_txt, obj_txt = extraction.split(';', maxsplit=2)
+                    pred_lemma = ' '.join([token.lemma_ for token in nlp(pred_txt)])
+                    ex_tuple = OPENIE_TUPLE(int(doc_id), subj_txt, pred_txt, pred_lemma, obj_txt, confidence, sentence_txt)
+                    tuples.append(ex_tuple)
                 doc_ids.add(doc_id)
+            except ValueError:
+                continue
     return tuples
 
 
