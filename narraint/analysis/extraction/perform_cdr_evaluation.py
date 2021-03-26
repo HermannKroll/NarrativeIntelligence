@@ -51,7 +51,7 @@ LOAD_CORENLP_OPENIE = False
 LOAD_PATHIE = False
 LOAD_OPENIE6 = False
 
-CANONICALIZE_OUTPUT = True
+CANONICALIZE_OUTPUT = False
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
