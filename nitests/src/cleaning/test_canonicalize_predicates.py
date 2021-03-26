@@ -12,6 +12,8 @@ class CanonicalizePredicateTestCase(unittest.TestCase):
         self.assertTrue(is_predicate_equal_to_vocab("produce", "produc*"))
         self.assertTrue(is_predicate_equal_to_vocab("produce", "*duc*"))
 
+        self.assertTrue(is_predicate_equal_to_vocab("inhibitory", "inhibit*"))
+
     def test_transform_predicate(self):
         self.assertEqual("produce", transform_predicate("produce"))
         self.assertEqual("produce", transform_predicate("produced"))
