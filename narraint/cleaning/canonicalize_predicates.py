@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import fasttext
 from datetime import datetime
-from sqlalchemy import update
+from sqlalchemy import update, and_
 from scipy.spatial.distance import cosine
 
 from narraint.backend.database import Session
@@ -24,7 +24,7 @@ def transform_predicate(predicate: str):
     if predicate.endswith('s'):
         return predicate[:-1]
     if predicate.endswith('ed'):
-        return predicate[:-1]
+        return predicate[:-2]
     return predicate
 
 
@@ -77,12 +77,14 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, o
 
     with open(output_file, 'wt') as f:
         vocab_vectors = []
-        for k, v_preds in vocab_predicates.items():
-            k_os = k.replace('*', '')
-            vocab_vectors.append((k, transform_predicate(k), model.get_word_vector(transform_predicate(k_os))))
+        for goal_relation, v_preds in vocab_predicates.items():
+            k_os = goal_relation.replace('*', '')
+            vocab_vectors.append((goal_relation, transform_predicate(goal_relation),
+                                  model.get_word_vector(transform_predicate(k_os))))
             for v_p in v_preds:
                 v_p_os = v_p.replace('*', '')
-                vocab_vectors.append((k, transform_predicate(v_p), model.get_word_vector(transform_predicate(v_p_os))))
+                vocab_vectors.append((goal_relation, transform_predicate(v_p),
+                                      model.get_word_vector(transform_predicate(v_p_os))))
 
         start_time = datetime.now()
         best_matches = {}
@@ -93,17 +95,17 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, o
             vec = model.get_word_vector(p_transformed)
             best_match = None
             min_distance = 1.0
-            for p_v_idx, (p_can_v, p_pred, p_v) in enumerate(vocab_vectors):
+            for p_v_idx, (goal_relation, p_pred, p_v) in enumerate(vocab_vectors):
                 current_distance = abs(cosine(vec, p_v))
                 f.write('{}\t{}\t{}\n'.format(p, p_pred, current_distance))
                 if is_predicate_equal_to_vocab(p, p_pred):
                     # identity is best match
                     min_distance = 0.0
-                    best_match = (p_can_v, min_distance)
+                    best_match = (goal_relation, min_distance)
                     break
                 if not best_match or current_distance < min_distance:
                     min_distance = current_distance
-                    best_match = (p_can_v, min_distance)
+                    best_match = (goal_relation, min_distance)
 
                 print_progress_with_eta('computing distances...', i, task_size, start_time)
                 i += 1
@@ -115,11 +117,12 @@ def match_predicates(model, predicates: [str], vocab_predicates: {str: [str]}, o
         return best_matches
 
 
-def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_threshold: float):
+def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_threshold: float, document_collection: str):
     """
     Canonicalizes Predicates by resolving synonymous predicates. This procedure updates the database
     :param best_matches: dictionary which maps a predicate to a canonicalized predicate and a distance score
     :param min_distance_threshold: all predicates that have a match with a distance blow minimum threshold distance are canonicalized
+    :param document_collection: the document collection to canonicalize
     :return: None
     """
     session = Session.get()
@@ -136,7 +139,8 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
     task_size = len(pred_can2preds)
     i = 0
     for pred_canonicalized, preds in pred_can2preds.items():
-        stmt = update(Predication).where(Predication.predicate.in_(preds)). \
+        stmt = update(Predication).where(and_(Predication.predicate.in_(preds),
+                                              Predication.document_collection == document_collection)). \
             values(predicate_canonicalized=pred_canonicalized)
         session.execute(stmt)
         print_progress_with_eta('updating...', i, task_size, start_time, print_every_k=1)
@@ -176,7 +180,7 @@ def canonicalize_predication_table(word2vec_model, output_distances, predicate_v
     logging.info('Matching predicates...')
     best_matches = match_predicates(model, predicates, pred_vocab, output_distances)
     logging.info('Canonicalizing predicates...')
-    canonicalize_predicates(best_matches, min_distance_threshold)
+    canonicalize_predicates(best_matches, min_distance_threshold, document_collection)
     logging.info('Finished')
 
 
