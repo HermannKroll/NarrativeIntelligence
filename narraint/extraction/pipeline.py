@@ -5,15 +5,13 @@ import tempfile
 from datetime import datetime
 import logging
 import shutil
-from typing import Set
-
 from spacy.lang.en import English
 
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.backend.export import export
-from narraint.backend.models import DocProcessedByIE
+from narraint.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.load_extractions import read_pathie_extractions_tsv, load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
@@ -21,7 +19,7 @@ from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, P
 from narraint.config import NLP_CONFIG
 from narraint.util.helpers import chunks
 
-DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 1000000
+DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
 
 
 def retrieve_document_ids_to_process(document_ids: [int], document_collection: str, extraction_type: str):
@@ -34,8 +32,15 @@ def retrieve_document_ids_to_process(document_ids: [int], document_collection: s
     :return: a set of document ids that have not been processed yet
     """
     logging.info('{} ids retrieved from id file..'.format(len(document_ids)))
-    logging.info('Retrieving already processed document ids from database...')
     session = Session.get()
+    logging.info('Retrieving document ids from document table...')
+    doc_ids_in_db = set()
+    q = session.query(Document.id).filter(Document.collection == document_collection)
+    for r in session.execute(q):
+        doc_ids_in_db.add(r[0])
+
+    logging.info('{} document ids in Document table'.format(len(doc_ids_in_db)))
+    logging.info('Retrieving already processed document ids from database...')
     q = session.query(DocProcessedByIE.document_id) \
         .filter_by(document_collection=document_collection) \
         .filter_by(extraction_type=extraction_type)
@@ -43,7 +48,8 @@ def retrieve_document_ids_to_process(document_ids: [int], document_collection: s
     for r in session.execute(q):
         processed_ids.add(r[0])
     logging.info('{} document ids are in the database'.format(len(processed_ids)))
-    missing_ids = document_ids.difference(processed_ids)
+    missing_ids = document_ids.intersection(doc_ids_in_db)
+    missing_ids = missing_ids.difference(processed_ids)
     logging.info('{} ids have already been processed and will be skipped'.format(len(document_ids) - len(missing_ids)))
     logging.info('{} remaining document ids to process...'.format(len(missing_ids)))
     return missing_ids
@@ -173,7 +179,7 @@ def main():
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 
     if args.extraction_type not in [PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE_EXTRACTION]:
         error_msg = 'extraction type must either be {}, {} or {}'.format(PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION,
@@ -193,7 +199,7 @@ def main():
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
-                                          check_document_ids=False) # have been checked before
+                                          check_document_ids=False, workers=args.workers) # have been checked before
 
 
 if __name__ == "__main__":
