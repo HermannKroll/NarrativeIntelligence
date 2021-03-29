@@ -24,7 +24,7 @@ def transform_predicate(predicate: str):
     if predicate.endswith('s'):
         return predicate[:-1]
     if predicate.endswith('ed'):
-        return predicate[:-2]
+        return predicate[:-1]
     return predicate
 
 
