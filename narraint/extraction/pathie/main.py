@@ -54,8 +54,9 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
+    print_progress_with_eta('CoreNLP running...', 0, num_files, start_time,  print_every_k=1)
     while process.poll() is None:
-        sleep(5)
+        sleep(10)
         print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
                                 print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
