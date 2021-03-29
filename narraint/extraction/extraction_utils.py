@@ -42,7 +42,7 @@ def filter_document_content(pubtator_content: str, spacy_nlp):
                     t_start_end = t_start_new + len(t.text)
                     tag_terms.add((doc_id, t_start_new, t_start_end, t.text, t.ent_type, t.ent_id))
                 except ValueError:
-                    logging.warning(f'Cannot find "{t.text.lower()}" in "{sentence_str_lower}"')
+                    logging.debug(f'Cannot find "{t.text.lower()}" in "{sentence_str_lower}"')
 
             tag_original_character_offset += len(sentence_str)
             filtered_content.append(sentence_str)
