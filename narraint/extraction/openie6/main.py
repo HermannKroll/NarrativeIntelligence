@@ -68,7 +68,7 @@ def openie6_convert_pubtator_to_openie6_input(doc2sentences, openie6_input):
         for idx, (doc_id, sentences) in enumerate(doc2sentences.items()):
             for sent in sentences:
                 f_out.write('{}. {}.\n'.format(doc_id, sent))
-            print_progress_with_eta('Writing {} documents as OpenIE 6 input...', idx, doc_size, start_time)
+            print_progress_with_eta(f'Writing {doc_size} documents as OpenIE 6 input...', idx, doc_size, start_time)
     logging.info('Conversion finished')
 
 
