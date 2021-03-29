@@ -1,9 +1,7 @@
-import os
 from collections import defaultdict
 
 from narraint import tools
 from narraint.backend.models import Tag, Document
-from narraint.entity.enttypes import ENTITY_TYPES
 from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 
@@ -15,10 +13,8 @@ class TaggedEntity:
         self.start = int(tag_tuple[1]) if tag_tuple else int(start)
         self.end = int(tag_tuple[2]) if tag_tuple else int(end)
         self.text = tag_tuple[3] if tag_tuple else text
-        self.ent_type = ENTITY_TYPES[tag_tuple[4] if tag_tuple else ent_type]
+        self.ent_type = tag_tuple[4] if tag_tuple else ent_type
         self.ent_id = tag_tuple[5] if tag_tuple else ent_id
-        if self.ent_type not in ENTITY_TYPES:
-            raise KeyError('entity type not supported yet: {}'.format(tag_tuple))
 
     def __str__(self):
         return Tag.create_pubtator(self.document, self.start, self.end, self.text, self.ent_type, self.ent_id)
@@ -57,15 +53,11 @@ def parse_tag_list(path_or_str):
 
 class TaggedDocument:
 
-    def __init__(self, pubtator_content=None, spacy_nlp=None, in_file = None, ignore_tags=False, id=None, title=None, abstract=None):
+    def __init__(self, pubtator_content=None, spacy_nlp=None, ignore_tags=False, id=None, title=None, abstract=None):
         """
         initialize a pubtator document
         :param pubtator_content: content of a pubtator file or a pubtator filename
         """
-        if not pubtator_content and in_file:
-            with open(in_file) as f:
-                pubtator_content = f.read()
-
         if pubtator_content:
             pubtator_content = tools.read_if_path(pubtator_content)
             match = CONTENT_ID_TIT_ABS.match(pubtator_content)
