@@ -83,6 +83,22 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     return tagger_by_ent_type
 
 
+def get_untagged_doc_ids_by_tagger(collection, target_ids, tagger_cls, logger):
+    session = Session.get()
+    result = session.query(DocTaggedBy).filter(
+        DocTaggedBy.document_collection == collection,
+        DocTaggedBy.tagger_name == tagger_cls.__name__,
+        DocTaggedBy.tagger_version == tagger_cls.__version__,
+    ).values(DocTaggedBy.document_id)
+    present_ids = set(x[0] for x in result)
+    logger.debug(
+        "Retrieved {} ids (collection={},tagger={}/{})".format(
+            len(present_ids), collection, tagger_cls.__name__, tagger_cls.__version__
+        ))
+    missing_ids = target_ids.difference(present_ids)
+    return missing_ids
+
+
 def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls, logger):
     session = Session.get()
     result = session.query(DocTaggedBy).filter(
