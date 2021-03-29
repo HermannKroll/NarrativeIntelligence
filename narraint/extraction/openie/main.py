@@ -82,7 +82,7 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
 
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_fn, filelist_fn)]
-    process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
+    process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
