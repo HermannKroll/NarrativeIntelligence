@@ -13,7 +13,7 @@ ENTITY_TYPE_VARIABLE = "Variable"
 
 MESH_ONTOLOGY = 'MESH_ONTOLOGY'
 
-LIKE_SEARCH_FOR_ENTITY_TYPES = {DOSAGE_FORM, DISEASE, GENE}
+LIKE_SEARCH_FOR_ENTITY_TYPES = {DOSAGE_FORM, DISEASE} #, GENE}
 
 PREDICATE_ASSOCIATED = "associated"
 DO_NOT_CARE_PREDICATE = PREDICATE_ASSOCIATED
@@ -24,7 +24,8 @@ ENTITY_TYPE_EXPANSION = dict(
 )
 
 PREDICATE_EXPANSION = dict(
-    interacts=['interacts', 'metabolises', 'inhibits']
+    interacts=['interacts', 'metabolises', 'inhibits'],
+    decreases=['decreases', 'inhibits']
 )
 
 SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases"}
@@ -39,7 +40,8 @@ PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT}, {
                     'interacts': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY},
                                   {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY}),
                     'metabolises': ({GENE}, {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}),
-                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}, {GENE})
+                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}, {GENE}),
+                    'method': ({METHOD, LAB_METHOD}, {CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY})
                     }
 
 
