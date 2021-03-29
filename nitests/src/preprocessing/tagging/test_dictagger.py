@@ -35,7 +35,10 @@ class TestDictagger(unittest.TestCase):
         tagger._tag(proj_rel_path("nitests/resources/infiles/test_dictagger/PMC1313813Untagged.txt"),
                     out_file)
         self.assertTrue(os.path.isfile(out_file))
-        document = doc.TaggedDocument(in_file=out_file)
+        content = ""
+        with open(out_file, 'rt') as f:
+            content = f.read()
+        document = doc.TaggedDocument(content)
         # document.clean_tags()
         self.assertTrue(document)
         strings = [repr(tag) for tag in document.tags]
