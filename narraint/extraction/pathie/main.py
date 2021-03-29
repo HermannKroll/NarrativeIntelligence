@@ -203,7 +203,7 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         processes = []
         for i in range(0, workers):
             p = multiprocessing.Process(target=pathie_process_corenlp_output_parallelized_worker,
-                                        args=(predicate_vocabulary, task_queue, result_queue))
+                                        args=(task_queue, result_queue, predicate_vocabulary))
             processes.append(p)
             p.start()
 
