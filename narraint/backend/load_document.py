@@ -103,7 +103,7 @@ def document_bulk_load(path, collection, tagger_mapping=None, logger=logging):
         doc = TaggedDocument(pubtator_content, ignore_tags=ignore_tags)
         tagged_ent_types = set()
         # Add document if its not already included
-        if doc.id not in db_doc_ids and doc.title:
+        if doc.id not in db_doc_ids and (doc.title or doc.title):
             db_doc_ids.add(doc.id)
             document_inserts.append(dict(
                 collection=collection,
@@ -113,7 +113,7 @@ def document_bulk_load(path, collection, tagger_mapping=None, logger=logging):
             ))
 
         if doc.id not in db_doc_ids:
-            logger.warning("Document {} {} not in DB".format(collection, doc.id))
+            logger.warning("Document {} {} is not inserted into DB (no title and no abstract)".format(collection, doc.id))
         # only if tagger mapping is set, tags will be inserted
         if doc.tags and tagger_mapping and doc.id in db_doc_ids:
             # Add tags
