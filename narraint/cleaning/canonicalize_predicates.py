@@ -139,9 +139,13 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
     task_size = len(pred_can2preds)
     i = 0
     for pred_canonicalized, preds in pred_can2preds.items():
-        stmt = update(Predication).where(and_(Predication.predicate.in_(preds),
-                                              Predication.document_collection == document_collection)). \
-            values(predicate_canonicalized=pred_canonicalized)
+        if document_collection:
+            stmt = update(Predication).where(and_(Predication.predicate.in_(preds),
+                                                  Predication.document_collection == document_collection)). \
+                values(predicate_canonicalized=pred_canonicalized)
+        else:
+            stmt = update(Predication).where(Predication.predicate.in_(preds)). \
+                values(predicate_canonicalized=pred_canonicalized)
         session.execute(stmt)
         print_progress_with_eta('updating...', i, task_size, start_time, print_every_k=1)
         i += 1
@@ -151,7 +155,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
 
 
 def canonicalize_predication_table(word2vec_model, output_distances, predicate_vocabulary, document_collection=None,
-                                   min_distance_threshold=0.4, min_predicate_threshold=0.001):
+                                   min_distance_threshold=0.4, min_predicate_threshold=0.0001):
     """
     Canonicalizes the predicates in the database
     :param word2vec_model: a Word2Vec model
