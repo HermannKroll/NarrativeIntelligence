@@ -8,13 +8,10 @@ DELETE FROM Predication WHERE predicate IN
 	(SELECT distinct predicate FROM Predication GROUP BY predicate HAVING COUNT(*) < 50000);
 
 
+DELETE FROM Predication Where subject_id = '' or object_id = '';
+
 -- Rewrites the Predication table and deletes removed tuples
 VACUUM FULL PREDICATION;
 REINDEX TABLE PREDICATION;
-
-
--- Clean the Sentence table
-DELETE FROM SENTENCE WHERE id NOT IN (SELECT DISTINCT SENTENCE_ID FROM Predication);
-
 
 VACUUM FULL SENTENCE;
