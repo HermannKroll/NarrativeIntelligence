@@ -6,7 +6,7 @@ from narraint.entity.entityresolver import MeshResolver, GeneResolver, SpeciesRe
 from narraint.entity.entitytagger import EntityTagger
 from narraint.entity.genemapper import GeneMapper
 from narraint.entity.meshontology import MeSHOntology
-from ui.autocompletion import AutocompletionUtil
+from narraint.frontend.ui.autocompletion import AutocompletionUtil
 from narraint.config import BACKEND_CONFIG
 
 
