@@ -176,11 +176,14 @@ class EntityTagger:
         logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
         for mesh_id, mesh_term in mesh_mappings:
             term = mesh_term.lower()
-            tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
-            for tn in tree_nos:
-                # find the given entity type for the tree number
-                ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                self.term2entity[term].add(Entity(tn, ent_type))
+            try:
+                tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                for tn in tree_nos:
+                    # find the given entity type for the tree number
+                    ent_type = MeSHOntology.tree_number_to_entity_type(tn)
+                    self.term2entity[term].add(Entity(tn, ent_type))
+            except KeyError:
+                pass
 
     def _add_drugbank_tags(self):
         logging.info('Adding DrugBank terms...')
