@@ -23,7 +23,6 @@ from narraint.preprocessing.tagging.dnorm import DNorm
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.preprocessing.tagging import metadictagger as mt
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
 from narraint.pubtator.extract import collect_ids_from_dir
 from narraint.pubtator.sanitize import sanitize
@@ -138,10 +137,6 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     mapping_file_id = dict()
     missing_files_type = dict()
 
-    # Hard coded, really not nice
-    dict_types = mt.MetaDicTaggerFactory.get_supported_tagtypes() & set(tag_types)
-
-
     # Get tagger classes
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
 
@@ -151,7 +146,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
     # Get input documents for each tagger
     for tag_type in tag_types:
-        tagger_cls = tagger_by_ent_type[tag_type] if tag_type not in dict_types else mt.MetaDicTagger
+        tagger_cls = tagger_by_ent_type[tag_type]
         missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls, logger)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
@@ -164,10 +159,6 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir, logger=logger,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
-
-    if dict_types:
-        dictfactory = mt.MetaDicTaggerFactory(dict_types, kwargs)
-        taggers.append(dictfactory.create_MetaDicTagger())
 
     for tagger in taggers:
         tagger.base_insert_tagger()
