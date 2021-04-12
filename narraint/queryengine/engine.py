@@ -331,10 +331,6 @@ class QueryEngine:
         :param likesearch: performs like searches for subjects and objects
         :return: a list of QueryDocumentResults, if the query limit was hit
         """
-        graph_query = QueryOptimizer.optimize_query(graph_query)
-        if not graph_query:
-            logging.debug('Query wont yield results - returning empty list')
-            return [], False
         start_time = datetime.now()
         query_limit_hit = False
         # The query expander will generate a list of queries to execute
