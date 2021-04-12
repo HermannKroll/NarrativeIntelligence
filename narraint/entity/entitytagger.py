@@ -6,18 +6,17 @@ import pickle
 import gzip
 from itertools import islice
 
+
 from narraint.backend.database import Session
 from narraint.backend.models import Tag
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, \
-    MESH_SUPPLEMENTARY_FILE, ENTITY_TAGGING_INDEX, GENE_FILE
+    ENTITY_TAGGING_INDEX, GENE_FILE
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
-from narraint.mesh.supplementary import MeSHDBSupplementary
 from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
-from narraint.queryengine.query_hints import MESH_ONTOLOGY
 
 
 class DosageFormTaggerVocabulary:
