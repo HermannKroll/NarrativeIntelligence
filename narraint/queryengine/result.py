@@ -2,7 +2,8 @@ from collections import defaultdict
 
 from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL
+from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, METHOD, \
+    LAB_METHOD
 from narraint.entity.meshontology import MeSHOntology
 
 
@@ -32,7 +33,8 @@ class QueryEntitySubstitution:
             return self.entity_id  # id is already the name
         try:
             # Convert MeSH Tree Numbers to MeSH Descriptors
-            if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not self.entity_id.startswith('MESH:'):
+            if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM, METHOD, LAB_METHOD] \
+                    and not self.entity_id.startswith('MESH:'):
                 mesh_ontology = MeSHOntology.instance()
                 try:
                     self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
