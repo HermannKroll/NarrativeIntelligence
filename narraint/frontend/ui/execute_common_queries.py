@@ -4,6 +4,9 @@ from narraint.frontend.ui.search_cache import SearchCache
 from narraint.frontend.ui.views import View, convert_query_text_to_fact_patterns
 
 COMMON_QUERIES = [
+    '?X(Method) method Simvastatin',
+    '?X(LabMethod) method Simvastatin',
+    'Mass Spectrometry method Simvastatin',
     'Simvastatin treats ?X(Disease)',
     'Metformin treats "Diabetes Mellitus"',
     'Simvastatin treats Hypercholesterolemia',

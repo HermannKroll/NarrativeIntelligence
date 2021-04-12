@@ -8,7 +8,7 @@ import os
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS
+    PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
 from narraint.entity.meshontology import MeSHOntology
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
@@ -30,7 +30,7 @@ class AutocompletionUtil:
             raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
         else:
             self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target", SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG,
-                                   DRUGBANK_CHEMICAL}
+                                   DRUGBANK_CHEMICAL, METHOD, LAB_METHOD}
             self.logger = logger
             self.known_terms = set()
             self.trie = None
@@ -93,8 +93,8 @@ class AutocompletionUtil:
         # check all known mesh entities
         known_mesh_prefixes = set()
         for e_id, e_str, e_type in entities:
-            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith(
-                    'DB'):
+            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM, METHOD, LAB_METHOD] \
+                    and not e_id.startswith('MESH:') and not e_id.startswith('DB'):
                 # Split MeSH Tree No by .
                 split_tree_number = e_id.split('.')
                 # add all known concepts and superconcepts to our index
@@ -109,31 +109,29 @@ class AutocompletionUtil:
         mesh_to_export = itertools.chain(mesh_ontology.find_descriptors_start_with_tree_no("D"),
                                          mesh_ontology.find_descriptors_start_with_tree_no("C"),
                                          mesh_ontology.find_descriptors_start_with_tree_no("J01"),
-                                         mesh_ontology.find_descriptors_start_with_tree_no("E02"))
+                                         mesh_ontology.find_descriptors_start_with_tree_no("E"))
         for d_id, d_heading in mesh_to_export:
             export_desc = False
             entity_type = None
-            for tn in mesh_ontology.get_tree_numbers_for_descriptor(d_id):
-                if tn in known_mesh_prefixes:
-                    if tn.startswith('D'):
-                        entity_type = CHEMICAL
-                    elif tn.startswith('C'):
-                        entity_type = DISEASE
-                    else:
-                        entity_type = DOSAGE_FORM
-                    export_desc = True
-                    break
-            if export_desc:
-                self.add_entity_to_dict(entity_type, d_heading)
+            try:
+                for tn in mesh_ontology.get_tree_numbers_for_descriptor(d_id):
+                    if tn in known_mesh_prefixes:
+                        entity_type = MeSHOntology.tree_number_to_entity_type(tn)
+                        export_desc = True
+                        break
+                if export_desc:
+                    self.add_entity_to_dict(entity_type, d_heading)
+            except KeyError:
+                pass
 
         logging.info('Adding entity tagger entries...')
         tagger = EntityTagger.instance()
-        know_entity_index = [(e_id, e_type) for e_id, _, e_type in entities]
+       # know_entity_index = [f'{e_type}_{e_id}' for e_id, _, e_type in entities]
         start_time = datetime.now()
         task_size = len(tagger.term2entity.items())
         for idx, (term, t_entities) in enumerate(tagger.term2entity.items()):
             for e in t_entities:
-                #   if (e.entity_id, e.entity_type) in know_entity_index:
+               # if f'{e.entity_type}_{e.entity_id}' in know_entity_index:
                 self.add_entity_to_dict(e.entity_type, term)
             print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
 
@@ -161,7 +159,7 @@ class AutocompletionUtil:
         hits = self.autocomplete(start_str)
         hits.sort()
         formatted_hits = []
-        for h in hits[0:10]:
+        for h in hits[0:retrieve_k]:
             formatted_hits.append(AutocompletionUtil.capitalize_entity(h))
         return formatted_hits
 
