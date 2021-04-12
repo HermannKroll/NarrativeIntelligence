@@ -10,7 +10,7 @@ from sqlalchemy import Boolean, Column, String, Float, Integer, DateTime, Foreig
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from narraint.entity.enttypes import GENE
+from narraint.entity.enttypes import GENE, SPECIES
 from narraint.pubtator.regex import ILLEGAL_CHAR
 
 Base = declarative_base()
@@ -128,6 +128,19 @@ class Tag(Base):
             except ValueError:
                 continue
         logging.info('{} gene ids retrieved'.format(len(gene_ids_in_db)))
+        return gene_ids_in_db
+
+    @staticmethod
+    def get_species_ids(session):
+        logging.info('Querying species ids in Tag table...')
+        gene_ids_in_db = set()
+        q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_type == SPECIES)
+        for r in session.execute(q):
+            try:
+                gene_ids_in_db.add(int(r[0]))
+            except ValueError:
+                continue
+        logging.info('{} species ids retrieved'.format(len(gene_ids_in_db)))
         return gene_ids_in_db
 
 

@@ -1,6 +1,5 @@
 import gzip
 import logging
-import os
 import pickle
 from collections import defaultdict
 from datetime import datetime
@@ -190,6 +189,7 @@ class SpeciesResolver:
         return s2n
 
     def build_index(self, species_input=TAXONOMY_FILE, index_file=TAXONOMY_INDEX_FILE):
+        species_ids_in_db = Tag.get_species_ids(Session.get())
         logging.info('Reading species input file: {}'.format(species_input))
         with gzip.open(species_input, 'rt') as f:
             for line in islice(f, 1, None):
@@ -197,6 +197,10 @@ class SpeciesResolver:
                     components = line.split('\t')
                     species_id = components[0]
                     name = components[2]
+
+                    # skip species that are not in the Tag table
+                    if int(species_id) not in species_ids_in_db:
+                        continue
 
                     if self.NAME_COMMON in line:
                         self.speciesid2name[species_id][self.NAME_COMMON_SHORTCUT] = name
