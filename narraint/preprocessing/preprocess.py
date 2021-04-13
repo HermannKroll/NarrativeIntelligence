@@ -14,21 +14,15 @@ from narraint.entity import enttypes
 from narraint.backend.database import Session
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.backend.export import export
-from narraint.backend.load_document import load_document
+from narraint.backend.load_document import document_bulk_load
 from narraint.backend.models import DocTaggedBy
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.config import Config
 from narraint.preprocessing.tagging.base import BaseTagger
 from narraint.preprocessing.tagging.dnorm import DNorm
-from narraint.preprocessing.tagging.dosage import DosageFormTagger
-from narraint.preprocessing.tagging.drug import DrugTagger
-from narraint.preprocessing.tagging.drugbankchemical import DrugBankChemicalTagger
-from narraint.preprocessing.tagging.excipient import ExcipientTagger
 from narraint.preprocessing.tagging.gnormplus import GNormPlus
-from narraint.preprocessing.tagging.plantfamily import PlantFamilyTagger
 from narraint.preprocessing.tagging.taggerone import TaggerOne
 from narraint.preprocessing.tagging.tmchem import TMChem
-from narraint.preprocessing.tagging import metadictagger as mt
 from narraint.pubtator.distribute import distribute_workload, create_parallel_dirs, split_composites
 from narraint.pubtator.extract import collect_ids_from_dir
 from narraint.pubtator.sanitize import sanitize
@@ -88,6 +82,22 @@ def get_tagger_by_ent_type(tag_types, use_tagger_one):
     return tagger_by_ent_type
 
 
+def get_untagged_doc_ids_by_tagger(collection, target_ids, tagger_cls, logger):
+    session = Session.get()
+    result = session.query(DocTaggedBy).filter(
+        DocTaggedBy.document_collection == collection,
+        DocTaggedBy.tagger_name == tagger_cls.__name__,
+        DocTaggedBy.tagger_version == tagger_cls.__version__,
+    ).values(DocTaggedBy.document_id)
+    present_ids = set(x[0] for x in result)
+    logger.debug(
+        "Retrieved {} ids (collection={},tagger={}/{})".format(
+            len(present_ids), collection, tagger_cls.__name__, tagger_cls.__version__
+        ))
+    missing_ids = target_ids.difference(present_ids)
+    return missing_ids
+
+
 def get_untagged_doc_ids_by_ent_type(collection, target_ids, ent_type, tagger_cls, logger):
     session = Session.get()
     result = session.query(DocTaggedBy).filter(
@@ -127,10 +137,6 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     mapping_file_id = dict()
     missing_files_type = dict()
 
-    # Hard coded, really not nice
-    dict_types = mt.MetaDicTaggerFactory.get_supported_tagtypes() & set(tag_types)
-
-
     # Get tagger classes
     tagger_by_ent_type = get_tagger_by_ent_type(tag_types, use_tagger_one)
 
@@ -140,7 +146,7 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
 
     # Get input documents for each tagger
     for tag_type in tag_types:
-        tagger_cls = tagger_by_ent_type[tag_type] if tag_type not in dict_types else mt.MetaDicTagger
+        tagger_cls = tagger_by_ent_type[tag_type]
         missing_ids = get_untagged_doc_ids_by_ent_type(collection, target_ids, tag_type, tagger_cls, logger)
         missing_files_type[tag_type] = frozenset(mapping_id_file[x] for x in missing_ids)
         task_list_fn = os.path.join(root_dir, "tasklist_{}.txt".format(tag_type.lower()))
@@ -153,10 +159,6 @@ def preprocess(collection, root_dir, input_dir, log_dir, logger, output_filename
     kwargs = dict(collection=collection, root_dir=root_dir, input_dir=input_dir, logger=logger,
                   log_dir=log_dir, config=conf, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
     taggers: List[BaseTagger] = [tagger_cls(**kwargs) for tagger_cls in set(tagger_by_ent_type.values())]
-
-    if dict_types:
-        dictfactory = mt.MetaDicTaggerFactory(dict_types, kwargs)
-        taggers.append(dictfactory.create_MetaDicTagger())
 
     for tagger in taggers:
         tagger.base_insert_tagger()
@@ -248,7 +250,7 @@ def main(arguments=None):
     if args.skip_load:
         logger.info("Skipping bulk load")
     else:
-        load_document(in_dir, args.corpus, logger=logger)
+        document_bulk_load(in_dir, args.corpus, logger=logger)
     # Create list of tagging ent types
     tag_types = enttypes.ENT_TYPES_SUPPORTED_BY_TAGGERS if "A" in args.tag else [TAG_TYPE_MAPPING[x] for x in args.tag]
 

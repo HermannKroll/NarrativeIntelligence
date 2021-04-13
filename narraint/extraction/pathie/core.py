@@ -201,6 +201,7 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     # convert the grammatical structure of the sentence into a graph
     dep_graph = nx.Graph()
     node_idxs = set()
+    node_ids_to_ignore = set()
     for dep in dependencies:
         governor = int(dep.governor_idx)
         dependent = int(dep.dependent_idx)
@@ -210,9 +211,11 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
         if ignore_not_extractions:
             if governor in vidx2text_and_lemma and relation == 'advmod' and idx2token[dependent].text_lower in ['not', 'nt']:
                 del vidx2text_and_lemma[governor]
+                node_ids_to_ignore.add(governor)
 
         if ignore_may_extraction:
             if governor in vidx2text_and_lemma and relation == 'aux' and idx2token[dependent].text_lower in ['may', 'might']:
+                node_ids_to_ignore.add(governor)
                 del vidx2text_and_lemma[governor]
 
         if governor not in node_idxs:
@@ -241,7 +244,17 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                 for e2_tok_id in e2_token_ids:
                     try:
                         for path in nx.all_shortest_paths(dep_graph, source=e1_tok_id, target=e2_tok_id):
+                            path_nodes = []
+                            # check if the path includes some nodes that must be ignored (not or may)
                             for n_idx in path:
+                                path_nodes.append(n_idx)
+                                if n_idx in node_ids_to_ignore:
+                                    path_nodes = None
+                                    break
+                            if not path_nodes:
+                                continue
+                            # extract all facts from this path
+                            for n_idx in path_nodes:
                                 # does this path lead over a relation
                                 if n_idx in vidx2text_and_lemma:
                                     # this is a valid path

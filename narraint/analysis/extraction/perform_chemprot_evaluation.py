@@ -2,6 +2,8 @@ import os
 
 import logging
 from collections import defaultdict
+from datetime import datetime
+from itertools import islice
 
 from sqlalchemy import insert
 
@@ -19,26 +21,31 @@ from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
+from narraint.progress import print_progress_with_eta
 
 CHEMPROT_VOCABULARY = dict(
-    upregulates=["upregulat*", "activat*", "up regulat*", "up-regulat*", "stimulat*", "increase"],
-    inhibits=['downregulat*', 'inhibit*', 'supress*', 'inhibit*', "decrease", "disrupt"],
-    agonist=['agonist activat*', 'agonist inhibt*'],
-    antagonist=["antagonis*"],
-    substrate=['produc*', 'substrat*'],
-    associated=["contain", "convert", "yield", "isolate", "generate", "synthesize", "grow",
-                            "occures", "evaluate", "augment", "effect", "develop", "affect", "contribute", "involve",
-                        "associated with", "isa", "same as", "coexists with", "process", "method of", "part of",
-                            "associate", "correlate", "play role", "play", "limit", "show", "present",
-               "exhibit", "find", "form", "bind"]
+    upregulates=["upregulat*", "up regulat*", "up-regulat*", "stimulat*", "activat*", "increase", 'potentiate', 'induce'],
+    inhibits=['downregulat*', 'down-regulat*', 'inhibit*', 'supress*', "decrease", "disrupt", "reduce"],
+    agonist=['agonist activat*', 'agonist inhibt*', 'agoni*'],
+    antagonist=["antagoni*"],
+    substrate=['substrat*', 'metabolite', 'catalyze', 'express', 'synthesize', 'generate'],
+    associated=['produc*', "contain", "convert", "yield", "isolate", "grow", "involve",  'mediate', 'convert',
+                "occures", "evaluate", "augment", "effect", "develop", "affect", "contribute",
+                "associated with", "isa", "same as", "coexists with", "process", "method of", "part of",
+                "associate", "correlate", "play role", "play", "limit", "show", "present",
+                "exhibit", "find", "form", "bind", "improve", 'alleviate', 'protect', 'abolish',
+                'prevent', 'sensitize', 'regulate', 'act', 'modulate']
 )
 
-CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot/chemprot_test')
+CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot/processed')
+#CHEMPROT_COLLECTION = 'ChemProtTrain'
+# Test data:
 CHEMPROT_COLLECTION = 'ChemProt'
 
-CHEMPROT_DOCUMENTS = os.path.join(CHEMPROT_DIR, 'chemprot_test_abstracts_gs.tsv')
-CHEMPROT_TAGS_TSV = os.path.join(CHEMPROT_DIR, 'chemprot_test_entities_gs.tsv')
-CHEMPROT_RELATIONS_TSV = os.path.join(CHEMPROT_DIR, 'chemprot_test_relations_gs.tsv')
+CHEMPROT_DATASET = os.path.join(CHEMPROT_DIR, "test.tsv")
+# CHEMPROT_DOCUMENTS = os.path.join(CHEMPROT_DIR, 'chemprot_test_abstracts_gs.tsv')
+# CHEMPROT_TAGS_TSV = os.path.join(CHEMPROT_DIR, 'chemprot_test_entities_gs.tsv')
+# CHEMPROT_RELATIONS_TSV = os.path.join(CHEMPROT_DIR, 'chemprot_test_relations_gs.tsv')
 
 CHEMPROT_OUTPUT_DIR = os.path.join(CHEMPROT_DIR, 'output')
 
@@ -52,9 +59,8 @@ CHEMPROT_OPENIE6_OUTPUT = os.path.join(CHEMPROT_OUTPUT_DIR, 'openie6.tsv')
 CP_canonicalizing_distances = os.path.join(CHEMPROT_OUTPUT_DIR, 'canonicalizing_distances.tsv')
 WORD2VEC_MODEL = '/home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin'
 
-
 CP_LOAD_DOCUMENTS_AND_TAGS = False
-CP_EXPORT_PUBTATOR_DOCUMENTS = False
+CP_EXPORT_PUBTATOR_DOCUMENTS = True
 
 RUN_PATHIE = False
 LOAD_PATHIE = False
@@ -62,57 +68,67 @@ LOAD_PATHIE = False
 RUN_STANZA_PATHIE = False
 LOAD_STANZA_PATHIE = False
 
-
 RUN_CORENLP_OPENIE = False
 LOAD_CORENLP_OPENIE = False
 
 RUN_OPENIE6 = False
 LOAD_OPENIE6 = False
 
-
 CANONICALIZE_OUTPUT = False
 
 
-def perform_chemprot_evaluation(correct_relations, extraction_type, predicate):
-  #  relations = ['inhibits'] # , 'upregulates', 'agonist', 'antagonist', 'substrate']
+def perform_chemprot_evaluation(correct_relations, extraction_type, relations):
     session = Session.get()
     q = session.query(Predication.document_id, Predication.predicate_canonicalized,
                       Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CHEMPROT_COLLECTION) \
-        .filter(Predication.predicate_canonicalized == predicate)\
-        .filter(Predication.subject_type == CHEMICAL)\
-        .filter(Predication.object_type == GENE)\
+        .filter(Predication.predicate_canonicalized.in_(relations)) \
+        .filter(Predication.subject_type == CHEMICAL) \
+        .filter(Predication.object_type == GENE) \
         .filter(Predication.extraction_type == extraction_type)
 
     extracted_relations = defaultdict(set)
     for r in session.execute(q):
         doc_id, relation, subject_id, object_id = int(r[0]), r[1], r[2], r[3]
-        extracted_relations[doc_id].add((relation, subject_id, object_id))
+        extracted_relations[doc_id].add(relation)
 
     count_correct_extractions = 0
     count_wrong_extractions = 0
+    wrong_found_ids = set()
     for doc_id, extractions in extracted_relations.items():
         if doc_id in correct_relations:
-            for p, s, o in extractions:
-                if (p, s, o) in correct_relations[doc_id] or (p, o, s) in correct_relations[doc_id]:
+            for p in extractions:
+                if p in correct_relations[doc_id]:
                     count_correct_extractions += 1
                 else:
+                    wrong_found_ids.add(doc_id)
                     count_wrong_extractions += 1
         else:
+            wrong_found_ids.add(doc_id)
             count_wrong_extractions += len(extractions)
 
+    missed_ids = set()
     count_missing_extractions = 0
     for doc_id, extractions in correct_relations.items():
         if doc_id in extracted_relations:
-            for p, s, o in extractions:
-                if (p, s, o) not in extracted_relations[doc_id] and (p, o, s) not in extracted_relations[doc_id]:
+            for p in extractions:
+                if p not in extracted_relations[doc_id]:
+                    missed_ids.add(doc_id)
                     count_missing_extractions += 1
         else:
+            missed_ids.add(doc_id)
             count_missing_extractions += len(extractions)
 
-    precision = count_correct_extractions / (count_correct_extractions + count_wrong_extractions)
-    recall = count_correct_extractions / (count_correct_extractions + count_missing_extractions)
-    f1 = (2 * precision * recall) / (precision + recall)
+    if count_correct_extractions > 0:
+        precision = count_correct_extractions / (count_correct_extractions + count_wrong_extractions)
+        recall = count_correct_extractions / (count_correct_extractions + count_missing_extractions)
+        f1 = (2 * precision * recall) / (precision + recall)
+    else:
+        precision, recall, f1 = 0.0, 0.0, 0.0
+    wrong_str = ', '.join([str(i) for i in wrong_found_ids])
+    missed_str = ', '.join([str(i) for i in missed_ids])
+    logging.info(f'wrong: ({wrong_str})')
+    logging.info(f'missed: ({missed_str})')
     logging.info(f'Precision: {precision}')
     logging.info(f'Recall: {recall}')
     logging.info(f'F1-measure: {f1} ')
@@ -124,41 +140,58 @@ def main():
                         level=logging.INFO)
 
     if not os.path.isdir(CHEMPROT_OUTPUT_DIR):
-        os.mkdir(CHEMPROT_OUTPUT_DIR)
+        os.makedirs(CHEMPROT_OUTPUT_DIR)
+
+    logging.info(f'Loading dataset: {CHEMPROT_DATASET}...')
+    id2docid, id2sentence, id2relation = {}, {}, {}
+    with open(CHEMPROT_DATASET, 'rt') as f:
+        for idx, line in enumerate(islice(f, 1, None)):
+            document, sentence, relation = line.strip().split('\t')
+            document_id = int(document.split('.')[0])
+            id2docid[idx] = document_id
+            id2sentence[idx] = sentence.strip()
+            id2relation[idx] = relation.strip()
 
     if CP_LOAD_DOCUMENTS_AND_TAGS:
         logging.info('Loading documents...')
         session = Session.get()
-        with open(CHEMPROT_DOCUMENTS, 'rt') as f:
-            for line in f:
-                doc_id, title, abstract = line.split('\t', maxsplit=2)
+        start_time = datetime.now()
+        for idx, (document_id, sentence) in enumerate(id2sentence.items()):
+            print_progress_with_eta('loading documents', idx, len(id2sentence), start_time, print_every_k=100)
+            sentence = sentence.replace('@CHEMICAL$', '@Chemical')
+            sentence = sentence.replace('@GENE$', '@Gene')
+            insert_document = insert(Document).values(
+                collection=CHEMPROT_COLLECTION,
+                id=document_id,
+                title=sentence,
+                abstract="T",
+            )
+            session.execute(insert_document)
 
-                insert_document = insert(Document).values(
-                    collection=CHEMPROT_COLLECTION,
-                    id=int(doc_id),
-                    title=title,
-                    abstract=abstract,
-                )
-                session.execute(insert_document)
-        logging.info('Loading tags...')
-        with open(CHEMPROT_TAGS_TSV, 'rt') as f:
-            for line in f:
-                doc_id, ent_id, ent_type, start, end, ent_str = line.replace('\n', '').split('\t')
-                if ent_type == 'CHEMICAL':
-                    ent_type = CHEMICAL
-                else:
-                    ent_type = GENE
+            chemical_pos = sentence.find('@Chemical')
+            insert_chemical = insert(Tag).values(
+                ent_type=CHEMICAL,
+                start=chemical_pos,
+                end=chemical_pos + len('@Chemical'),
+                ent_id=CHEMICAL,
+                ent_str='@Chemical',
+                document_id=document_id,
+                document_collection=CHEMPROT_COLLECTION,
+            )
+            session.execute(insert_chemical)
 
-                insert_tag = insert(Tag).values(
-                    ent_type=ent_type,
-                    start=start,
-                    end=end,
-                    ent_id=ent_id,
-                    ent_str=ent_str,
-                    document_id=int(doc_id),
-                    document_collection=CHEMPROT_COLLECTION,
-                )
-                session.execute(insert_tag)
+            gene_pos = sentence.find('@Gene')
+            insert_chemical = insert(Tag).values(
+                ent_type=GENE,
+                start=gene_pos,
+                end=gene_pos + len('@Gene'),
+                ent_id=GENE,
+                ent_str="@Gene",
+                document_id=document_id,
+                document_collection=CHEMPROT_COLLECTION,
+            )
+            session.execute(insert_chemical)
+
         logging.info('Commit loading...')
         session.commit()
 
@@ -207,57 +240,82 @@ def main():
     if LOAD_OPENIE6:
         logging.info('Loading OpenIE 6.0 extractions...')
         doc_ids, openie_tuples = read_stanford_openie_input(CHEMPROT_OPENIE6_OUTPUT)
-        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, extraction_type=OPENIE6_EXTRACTION, clean_genes=False)
+        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, extraction_type=OPENIE6_EXTRACTION,
+                      clean_genes=False)
         logging.info('finished')
 
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
         canonicalize_predication_table(WORD2VEC_MODEL, CP_canonicalizing_distances,
                                        predicate_vocabulary=CHEMPROT_VOCABULARY,
-                                       document_collection=CHEMPROT_COLLECTION)
-        #clean_extractions_in_database()
+                                       document_collection=CHEMPROT_COLLECTION,
+                                       min_predicate_threshold=0)
+        # clean_extractions_in_database()
 
     logging.info('Loading correct relations...')
     gold_relations = defaultdict(set)
-    with open(CHEMPROT_RELATIONS_TSV, 'rt') as f:
-        for line in f:
-            doc_id, relation_type, do_eval, relation, arg1, arg2 = line.replace('\n', '').split('\t')
-            doc_id = int(doc_id)
-            arg1 = arg1[5:]
-            arg2 = arg2[5:]
-            if relation_type == 'CPR:4':
-                gold_relations[doc_id].add(('inhibits', arg1, arg2))
-            if relation_type == 'CPR:3':
-                gold_relations[doc_id].add(('upregulates', arg1, arg2))
-            if relation_type == 'CPR:5':
-                gold_relations[doc_id].add(('agonist', arg1, arg2))
-            if relation_type == 'CPR:6':
-                gold_relations[doc_id].add(('antagonist', arg1, arg2))
-            if relation_type == 'CPR:9':
-                gold_relations[doc_id].add(('substrate', arg1, arg2))
+    for document_id, relation in id2relation.items():
+        if relation == 'CPR:4':
+            gold_relations[document_id].add('inhibits')
+        if relation == 'CPR:3':
+            gold_relations[document_id].add('upregulates')
+        if relation == 'CPR:5':
+            gold_relations[document_id].add('agonist')
+        if relation == 'CPR:6':
+            gold_relations[document_id].add('antagonist')
+        if relation == 'CPR:9':
+            gold_relations[document_id].add('substrate')
 
     for predicate in ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate']:
+        gold_relations_for_type = {k: v for k, v in gold_relations.items() if predicate in v}
         logging.info(f'Checking {predicate}')
 
         logging.info('=' * 60)
         logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')
-        perform_chemprot_evaluation(gold_relations, PATHIE_EXTRACTION, predicate)
+        perform_chemprot_evaluation(gold_relations_for_type, PATHIE_EXTRACTION, [predicate])
         logging.info('=' * 60)
 
         logging.info('=' * 60)
         logging.info(f'Begin evaluation for {PATHIE_STANZA_EXTRACTION}...')
-        perform_chemprot_evaluation(gold_relations, PATHIE_STANZA_EXTRACTION, predicate)
+        perform_chemprot_evaluation(gold_relations_for_type, PATHIE_STANZA_EXTRACTION, [predicate])
         logging.info('=' * 60)
 
         logging.info('=' * 60)
         logging.info(f'Begin evaluation for {OPENIE_EXTRACTION}...')
-        perform_chemprot_evaluation(gold_relations, OPENIE_EXTRACTION, predicate)
+        perform_chemprot_evaluation(gold_relations_for_type, OPENIE_EXTRACTION, [predicate])
         logging.info('=' * 60)
 
         logging.info('=' * 60)
         logging.info(f'Begin evaluation for {OPENIE6_EXTRACTION}...')
-        perform_chemprot_evaluation(gold_relations, OPENIE6_EXTRACTION, predicate)
+        perform_chemprot_evaluation(gold_relations_for_type, OPENIE6_EXTRACTION, [predicate])
         logging.info('=' * 60)
+
+    logging.info('=' * 60)
+    logging.info('=' * 60)
+    logging.info('=' * 60)
+    logging.info('=' * 60)
+    logging.info('=' * 60)
+    logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')
+    perform_chemprot_evaluation(gold_relations, PATHIE_EXTRACTION,
+                                ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate'])
+
+    logging.info('=' * 60)
+    logging.info(f'Begin evaluation for {PATHIE_STANZA_EXTRACTION}...')
+    perform_chemprot_evaluation(gold_relations, PATHIE_STANZA_EXTRACTION,
+                                ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate'])
+    logging.info('=' * 60)
+
+    logging.info('=' * 60)
+    logging.info(f'Begin evaluation for {OPENIE_EXTRACTION}...')
+    perform_chemprot_evaluation(gold_relations, OPENIE_EXTRACTION,
+                                ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate'])
+    logging.info('=' * 60)
+
+    logging.info('=' * 60)
+    logging.info(f'Begin evaluation for {OPENIE6_EXTRACTION}...')
+    perform_chemprot_evaluation(gold_relations, OPENIE6_EXTRACTION,
+                                ['inhibits', 'upregulates', 'agonist', 'antagonist', 'substrate'])
+    logging.info('=' * 60)
 
 
 if __name__ == "__main__":

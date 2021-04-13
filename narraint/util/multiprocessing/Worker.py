@@ -11,7 +11,7 @@ SHUTDOWN_SIGNAL = "shutdown_signal"
 
 class Worker(WorkerProcess):
     def __init__(self, task_queue: multiprocessing.Queue, result_queue: multiprocessing.Queue,
-                 do_task):
+                 do_task, prepare=None, shutdown=None):
         """
 
         :param task_queue:
@@ -25,8 +25,12 @@ class Worker(WorkerProcess):
         self.result_queue = result_queue
         self.__do_task = do_task
         self.__running = True
+        self.__prepare = prepare
+        self.__shutdown = shutdown
 
     def run(self):
+        if self.__prepare:
+            self.__prepare()
         while self.__running:
             try:
                 task = self.task_queue.get(timeout=1)
@@ -39,6 +43,8 @@ class Worker(WorkerProcess):
             except queue.Empty:
                 sleep(0.1)
                 continue
+        if self.__shutdown:
+            self.__shutdown()
 
     def stop(self):
         self.__running = False

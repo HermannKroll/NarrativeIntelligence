@@ -14,6 +14,17 @@ from narraint.backend.models import Base
 from narraint.config import BACKEND_CONFIG
 
 
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.expression import Insert
+from sqlalchemy.dialects.postgresql.dml import OnConflictDoNothing
+
+
+@compiles(Insert, 'postgresql')
+def prefix_inserts(insert, compiler, **kw):
+    insert._post_values_clause = OnConflictDoNothing()
+    return compiler.visit_insert(insert, **kw)
+
+
 def add_engine_pidguard(engine):
     """Add multiprocessing guards.
 

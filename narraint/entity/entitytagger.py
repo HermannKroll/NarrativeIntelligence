@@ -6,16 +6,16 @@ import pickle
 import gzip
 from itertools import islice
 
+
 from narraint.backend.database import Session
 from narraint.backend.models import Tag
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, \
-    MESH_SUPPLEMENTARY_FILE, ENTITY_TAGGING_INDEX, GENE_FILE
+    ENTITY_TAGGING_INDEX, GENE_FILE
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
-from narraint.mesh.supplementary import MeSHDBSupplementary
 from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
 
 
@@ -139,9 +139,9 @@ class EntityTagger:
                     try:
                         tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(df_id)
                         for tn in tree_nos:
-                            self.term2entity[term].add(Entity(tn, 'MESH_ONTOLOGY'))
+                            self.term2entity[term].add(Entity(tn, DOSAGE_FORM))
                     except KeyError:
-                        self.term2entity[term].add(Entity('MESH:{}'.format(df_id), 'MESH'))
+                        self.term2entity[term].add(Entity('MESH:{}'.format(df_id), DOSAGE_FORM))
                 else:
                     self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
 
@@ -161,7 +161,7 @@ class EntityTagger:
         for family_name in PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms=False):
             self.term2entity[family_name.strip().lower()].add(Entity(family_name.capitalize(), PLANT_FAMILY))
 
-    def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE, mesh_supp_file=MESH_SUPPLEMENTARY_FILE):
+    def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
         meshdb = MeSHDB.instance()
         meshdb.load_xml(mesh_file)
@@ -178,18 +178,11 @@ class EntityTagger:
             try:
                 tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
                 for tn in tree_nos:
-                    self.term2entity[term].add(Entity(tn, 'MESH_ONTOLOGY'))
+                    # find the given entity type for the tree number
+                    ent_type = MeSHOntology.tree_number_to_entity_type(tn)
+                    self.term2entity[term].add(Entity(tn, ent_type))
             except KeyError:
-                self.term2entity[term].add(Entity('MESH:{}'.format(mesh_id), 'MESH'))
-
-        logging.info('Reading mesh supplementary file: {}'.format(mesh_supp_file))
-        mesh_supplementary: MeSHDBSupplementary = MeSHDBSupplementary.instance()
-        mesh_supplementary.load_xml(mesh_supp_file)
-        for record in mesh_supplementary.get_all_records():
-            desc_id = f'MESH:{record.unique_id}'
-            term_l = record.name.lower()
-            self.term2entity[term_l].add(Entity(desc_id, 'MESH'))
-        logging.info('MeSH Terms added')
+                pass
 
     def _add_drugbank_tags(self):
         logging.info('Adding DrugBank terms...')
@@ -198,7 +191,7 @@ class EntityTagger:
                                                                                       expand_term_with_e_and_s=False)
         for term, dbids in drug_terms2dbid.items():
             for dbid in dbids:
-                self.term2entity[term.lower()].add(Entity(dbid, 'Drug'))
+                self.term2entity[term.lower()].add(Entity(dbid, DRUG))
         logging.info('DrugBank terms added')
 
     def tag_entity(self, term: str):

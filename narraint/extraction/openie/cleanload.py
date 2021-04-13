@@ -213,19 +213,19 @@ def transform_mesh_ids_to_prefixes(predications: List[PRED]):
     predications_len = len(predications)
     for idx, p in enumerate(predications):
         subj_ids = set()
-        if p.s_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.s_id.startswith('MESH:'):
+        if p.s_id.startswith('MESH:'):
             try:
-                subj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.s_id[5:]))
+                subj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.s_id[5:]))
             except KeyError:
-                subj_ids.add(p.s_id)
+                continue
         else:
             subj_ids = [p.s_id]
         obj_ids = set()
-        if p.o_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and p.o_id.startswith('MESH:'):
+        if p.o_id.startswith('MESH:'):
             try:
-                obj_ids.update(mesh_ontology.get_tree_numbers_for_descriptor(p.o_id[5:]))
+                obj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.o_id[5:]))
             except KeyError:
-                obj_ids.add(p.o_id)
+                continue
         else:
             obj_ids = [p.o_id]
         for s_id in subj_ids:
@@ -339,18 +339,9 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     logging.info(f'Last highest sentence_id was: {last_highest_sentence_id}')
     logging.info(f'Querying duplicates from database (collection: {collection} and extraction type: {extraction_type})')
     session = Session.get()
-    # loading all ready known predications for collections
-    q_known = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
-                            Predication.predicate, Predication.object_id, Predication.object_type,
-                            Predication.sentence_id). \
-        filter(Predication.document_collection == collection). \
-        filter(Predication.extraction_type == extraction_type)
 
-    duplicate_check = set()
     logging.info('Check duplicates only within this session...')
-    #for r in session.execute(q_known):
-    #    duplicate_check.add((r[0], r[1], r[2], r[3], r[4], r[5], sentid2hash[int(r[6])]))
-    #logging.info(f'{len(duplicate_check)} entries retrieved from db')
+    duplicate_check = set()
 
     last_highest_sentence_id += 1
     len_tuples = len(tuples_cleaned)
@@ -363,8 +354,8 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
         # Todo: Very dirty fix here
         if len(p.s_str) < MIN_SUBJECT_OR_OBJECT_LEN or len(p.o_str) < MIN_SUBJECT_OR_OBJECT_LEN:
             continue
-        # Todo: dirty fix here
-        if p.s_id == '-' or p.o_id == '-':
+        # Todo: dirty fix here empty id or ner id
+        if p.s_id == '-' or p.o_id == '-' or not p.s_id.strip() or not p.o_id.strip():
             continue
         # Clean dirty predicates (only one character)
         if len(p.pred_cleaned) < 2:

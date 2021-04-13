@@ -176,7 +176,8 @@ let optionMapping = {
     "interacts": 5,
     "inhibits": 6,
     "metabolises": 7,
-    "treats" : 8
+    "method": 8,
+    "treats" : 9
 }
 
 function example_search(search_str) {

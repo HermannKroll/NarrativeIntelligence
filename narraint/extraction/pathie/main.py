@@ -52,8 +52,9 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
 
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn)]
-    process = subprocess.Popen(sp_args, cwd=core_nlp_dir)
+    process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
+    print_progress_with_eta('CoreNLP running...', 0, num_files, start_time,  print_every_k=1)
     while process.poll() is None:
         sleep(10)
         print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
@@ -150,13 +151,13 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
     :param predicate_vocabulary: the predicate vocabulary if special words are given
     :return: None
     """
-    logging.info('Worker processing the PathIE output started')
+    logging.debug('Worker processing the PathIE output started')
     extracted_tuples = []
     while tasks.qsize() > 0:
         try:
             task = tasks.get(timeout=1)
             if task is None:
-                logging.info('Nothing to stop - stop here')
+                logging.debug('Nothing to stop - stop here')
                 continue
             doc_id, filepath, doc_tags = task
             tuples = process_json_file(doc_id, filepath, doc_tags, predicate_vocabulary=predicate_vocabulary)
@@ -167,7 +168,7 @@ def pathie_process_corenlp_output_parallelized_worker(tasks: multiprocessing.Que
             sleep(0.1)
             continue
     results.put(extracted_tuples)
-    logging.info('Worker finished')
+    logging.debug('Worker finished')
 
 
 def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, outfile, doc2tags,
@@ -203,7 +204,7 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         processes = []
         for i in range(0, workers):
             p = multiprocessing.Process(target=pathie_process_corenlp_output_parallelized_worker,
-                                        args=(predicate_vocabulary, task_queue, result_queue))
+                                        args=(task_queue, result_queue, predicate_vocabulary))
             processes.append(p)
             p.start()
 
@@ -223,7 +224,7 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
         logging.info('Waiting for workers to terminate...')
         for p in processes:
             while p.is_alive():
-                logging.info('join thread')
+                logging.debug('join thread')
                 p.join(timeout=1)
         logging.info('Workers terminated - Results written')
 

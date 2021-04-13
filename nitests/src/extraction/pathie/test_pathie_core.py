@@ -314,6 +314,12 @@ class TestPathIECore(TestCase):
                                                          ignore_not_extractions=True)
         self.assertEqual(0, len(extractions))
 
+        extractions = pathie_extract_facts_from_sentence(0, self.test_3_tags, self.test_3_tokens,
+                                                         self.test_3_dependencies,
+                                                         predicate_vocabulary={"look": ["look"]},
+                                                         ignore_not_extractions=True)
+        self.assertEqual(0, len(extractions))
+
         extractions = pathie_extract_facts_from_sentence(0, self.test_4_tags, self.test_4_tokens,
                                                          self.test_4_dependencies,
                                                          ignore_not_extractions=True)

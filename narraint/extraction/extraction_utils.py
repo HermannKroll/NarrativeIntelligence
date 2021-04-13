@@ -42,7 +42,7 @@ def filter_document_content(pubtator_content: str, spacy_nlp):
                     t_start_end = t_start_new + len(t.text)
                     tag_terms.add((doc_id, t_start_new, t_start_end, t.text, t.ent_type, t.ent_id))
                 except ValueError:
-                    logging.warning(f'Cannot find "{t.text.lower()}" in "{sentence_str_lower}"')
+                    logging.debug(f'Cannot find "{t.text.lower()}" in "{sentence_str_lower}"')
 
             tag_original_character_offset += len(sentence_str)
             filtered_content.append(sentence_str)
@@ -82,7 +82,7 @@ def filter_document_sentences_without_tags_parallelized_worker(tasks: multiproce
     :param results: a multiprocessing queue where all results will be stored
     :return: None
     """
-    logging.info('Worker started')
+    logging.debug('Worker started')
     doc2tags = dict()
     doc2sentences = dict()
     spacy_nlp = English()  # just the language with no model
@@ -105,7 +105,7 @@ def filter_document_sentences_without_tags_parallelized_worker(tasks: multiproce
             sleep(0.1)
             continue
     results.put((doc2sentences, doc2tags))
-    logging.info('Worker finished')
+    logging.debug('Worker finished')
 
 
 def filter_document_sentences_without_tags_parallelized(doc_len: int, input_file: str, spacy_nlp, worker_count: int):
@@ -129,7 +129,7 @@ def filter_document_sentences_without_tags_parallelized(doc_len: int, input_file
             print_progress_with_eta('adding documents...', idx, doc_len, start_time, print_every_k=100)
             task_queue.put(pubtator_content)
 
-        logging.info(f'Starting {worker_count} workers...')
+        logging.debug(f'Starting {worker_count} workers...')
         result_queue = multiprocessing.Queue()
         processes = []
         for i in range(0, worker_count):
@@ -138,19 +138,19 @@ def filter_document_sentences_without_tags_parallelized(doc_len: int, input_file
             processes.append(p)
             p.start()
 
-        logging.info('Collecting results...')
+        logging.debug('Collecting results...')
         doc2sentences, doc2tags = dict(), dict()
         for p in processes:
             task_doc2sentences, task_doc2tags = result_queue.get()
             doc2sentences.update(task_doc2sentences)
             doc2tags.update(task_doc2tags)
 
-        logging.info('Waiting for workers to terminate...')
+        logging.debug('Waiting for workers to terminate...')
         for p in processes:
             while p.is_alive():
-                logging.info('join thread')
+                logging.debug('join thread')
                 p.join(timeout=1)
-        logging.info('Workers terminated')
+        logging.debug('Workers terminated')
         return doc2sentences, doc2tags
 
 

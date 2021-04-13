@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from narraint.entity.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM
+from narraint.entity.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
 from narraint.entity.meshontology import MeSHOntology
 from narraint.queryengine.aggregation.base import QueryResultAggregationStrategy
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
@@ -53,7 +53,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for res in results:
                         substitution = res.var2substitution[v]
                         retrieved_ent_types.add(substitution.entity_type)
-                        if substitution.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM]:
+                        if substitution.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM, METHOD, LAB_METHOD]:
                             id_without_mesh = substitution.entity_id[5:]
                             try:
                                 pref_tree_numbers = self.mesh_ontology.get_tree_numbers_for_descriptor(id_without_mesh)
@@ -82,6 +82,11 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     dosage_form_aggregation.add_query_result(dosage_form_tree_2)
                     dosage_form_aggregation.add_query_result(dosage_form_tree_3)
                     ent_type_aggregation.append((DOSAGE_FORM, dosage_form_aggregation))
+                if METHOD in retrieved_ent_types or LAB_METHOD in retrieved_ent_types:
+                    method_tree = self._build_tree_structure(var2prefix_substitution_list, "E")
+                    method_aggregation = self._create_query_aggregate("", "", METHOD, METHOD)
+                    method_aggregation.add_query_result(method_tree)
+                    ent_type_aggregation.append((METHOD, method_aggregation))
                 if CHEMICAL in retrieved_ent_types:
                     chemical_tree = self._build_tree_structure(var2prefix_substitution_list, "D")
                     chemical_aggregation = self._create_query_aggregate("", "", CHEMICAL, CHEMICAL)
@@ -165,7 +170,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         pref_desc_id, pref_desc_name = self.mesh_ontology.get_descriptor_for_tree_no(pref_current)
                         pref_desc_id = 'MESH:' + pref_desc_id
                         pref_desc_name = pref_current + '.' + pref_desc_name
-                        pref_desc_type = self.mesh_ontology.get_name_for_tree(pref[0])
+                        pref_desc_type = MeSHOntology.get_name_for_tree(pref[0])
 
                         pref_desc_substitution = QueryEntitySubstitution(pref_desc_name, pref_desc_id, pref_desc_type,
                                                                          pref_desc_name)

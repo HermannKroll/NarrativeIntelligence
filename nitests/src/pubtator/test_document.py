@@ -63,7 +63,6 @@ class TestDocument(unittest.TestCase):
                          doc.title.strip())
         self.assertEqual(0, len(doc.tags))
 
-
     def test_split_sentences(self):
         content = ""
         with open(get_test_resource_filepath('PubMed26.txt'), 'rt') as f:
@@ -95,6 +94,13 @@ class TestDocument(unittest.TestCase):
 
         self.assertEqual("Certain facets of this problem are discussed.",
                          doc.sentence_by_id[15].text)
+
+    def test_split_sentences2(self):
+        text = "This is a text about the cyp3.a4 enzyme. Lets see whether splitting works."
+        doc_nlp = self.nlp(text)
+        sentences = list([str(s) for s in doc_nlp.sents])
+        self.assertEqual("This is a text about the cyp3.a4 enzyme.", sentences[0])
+        self.assertEqual("Lets see whether splitting works.", sentences[1])
 
     def test_find_correct_tags(self):
         content = ""

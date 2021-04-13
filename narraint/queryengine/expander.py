@@ -43,6 +43,6 @@ class QueryExpander:
 
             else:
                 expanded_queries.append(GraphQuery([FactPattern(fp.subjects, fp.predicate, fp.objects)]))
-                query_fact_patterns_expanded.append([(fp.subjects[0], fp.predicate, fp.objects[0])])
+                query_fact_patterns_expanded.append([(list(fp.subjects)[0], fp.predicate, list(fp.objects)[0])])
 
         return expanded_queries

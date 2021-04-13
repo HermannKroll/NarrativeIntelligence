@@ -1,7 +1,6 @@
 from unittest import TestCase
 
 from narraint.config import PLANT_FAMILTY_DATABASE_FILE
-from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.entitytagger import EntityTagger
 from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary
 

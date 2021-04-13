@@ -122,6 +122,7 @@
                             <option value="interacts">interacts</option>
                             <option value="inhibits">inhibits</option>
                             <option value="metabolises">metabolises</option>
+                            <option value="method">method</option>
                             <option value="treats">treats</option>
 
                         </select>
@@ -190,6 +191,18 @@
                 <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
                      data-parent="#accordionExample">
                     <div class="card-body">
+                        <div class="alert alert-info" role="alert">
+                            Methods
+                        </div>
+                         <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass Spectrometry method Simvastatin
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method Simvastatin
+                        </button>
                         <div class="alert alert-info" role="alert">
                             Treatment
                         </div>
