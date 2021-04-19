@@ -16,11 +16,11 @@ from narraint.pubtator.regex import TAG_LINE_NORMAL
 from matplotlib import pyplot as plt
 
 ONLY_MESH = True
-tagtypes = None
+TAGTYPES = None
 ENFORCE_TAGTYPES = True
 
 
-corpus = "ncbi"
+corpus = "ncbi_develop"
 
 if corpus == "ncbi":
     NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
@@ -28,7 +28,7 @@ if corpus == "ncbi":
     PUBTATOR_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, "NCBItestset_corpus.txt")
     VOCAB_FILE = os.path.join(NCBI_DISEAE_TEST_DIR, 'taggerone/CTD_diseases.tsv')
     ENFORCE_TAGTYPES = False
-    ONLY_MESH = True
+    ONLY_MESH = False
 elif corpus == "ncbi_develop":
     NCBI_DISEAE_TEST_DIR = os.path.join(DATA_DIR, "NER/ncbi_disease")
 
@@ -39,36 +39,37 @@ elif corpus == "ncbi_develop":
 elif corpus == "bc_d":
     PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CDR.2.PubTator")
     VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_diseases-2015-06-04.tsv")
-    tagtypes = ["Disease"]
+    TAGTYPES = ["Disease"]
 elif corpus == "bc_c":
     PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CDR.2.PubTator")
     VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_chemicals-2015-07-22.tsv")
-    tagtypes = ["Chemical"]
+    TAGTYPES = ["Chemical"]
 elif corpus == "bc_d_test":
     PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR_TEST/CDR_TestSet.PubTator.joint.txt")
     VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_diseases-2015-06-04.tsv")
-    tagtypes = ["Disease"]
+    TAGTYPES = ["Disease"]
 elif corpus == "bc_c_test":
     PUBTATOR_FILE = os.path.join(DATA_DIR, "NER/BC5CDR_TEST/CDR_TestSet.PubTator.joint.txt")
     VOCAB_FILE = os.path.join(DATA_DIR, "NER/BC5CDR/CTD_chemicals-2015-07-22.tsv")
-    tagtypes = ["Chemical"]
+    TAGTYPES = ["Chemical"]
 
+stopwords = ["disease", "included", "syndrome"]
 
-use_taggerone_vocab = False
-substring_matching = True
-prefer_mesh = False
-if not tagtypes:
-    tagtypes = ["Disease"]
+CUSTOM_VOCAB = True
+SUBSTRING_MATCHING = True
+PREFER_MESH = True
+if not TAGTYPES:
+    TAGTYPES = ["Disease"]
 
 # test file override
-#PUBTATOR_FILE = "/home/jan/cholesterol.pubtator"
+#PUBTATOR_FILE = "/home/jan/dict_test/9620771.txt"
 
 def create_taggerone_vocab_dictagger():
     tagger = DiseaseTagger(config=Config(PREPROCESS_CONFIG))
     #min_len = tagger.config.dict_min_full_tag_len
     min_len = 5
-    tagger.tag_types = tagtypes
-    if use_taggerone_vocab:
+    tagger.tag_types = TAGTYPES
+    if CUSTOM_VOCAB:
         vocab = dict()
         with open(VOCAB_FILE, newline='') as f:
             vocab_reader = csv.reader(f, delimiter="\t")
@@ -77,9 +78,9 @@ def create_taggerone_vocab_dictagger():
                     continue
                 if len(row[0]) < tagger.config.dict_min_full_tag_len:
                     continue
-                names = [name for n in [row[0]]+row[7].split("|") for name in expand_vocabulary_term(n.lower()) if len(n) >= min_len]
+                names = [name for n in [row[0]]+row[7].split("|") for name in expand_vocabulary_term(n.lower()) if len(n) >= min_len and n.lower() not in stopwords and name not in stopwords]
                 desc = {d for s in [row[1].split("|"), row[2].split("|")] for d in s if d}
-                if prefer_mesh:
+                if PREFER_MESH:
                     for d in desc:
                         if d[:4] == "MESH":
                             desc = {d}
@@ -127,9 +128,9 @@ def run_test(s_e_tolerance: int=1):
     count_omim_tags = 0
     count_idless_tags = 0
     for t in tags:
-        tagtype = t[4] if ENFORCE_TAGTYPES else tagtypes[0]
+        tagtype = t[4] if ENFORCE_TAGTYPES else TAGTYPES[0]
         tag = TaggedEntity(document=t[0], start=t[1], end=t[2], text=t[3], ent_type=tagtype, ent_id=t[5])
-        if tagtypes and tag.ent_type not in tagtypes:
+        if TAGTYPES and tag.ent_type not in TAGTYPES:
             continue
         if not tag.ent_id.startswith('D') and not tag.ent_id.startswith('C') and ONLY_MESH:
             count_omim_tags += 1
@@ -177,7 +178,7 @@ def run_test(s_e_tolerance: int=1):
             correct_list = [(t.start, t.end, t.ent_id) for t in correct_diseases[doc_id]]
             for tag in tags:
                 matched = False
-                if not substring_matching:
+                if not SUBSTRING_MATCHING:
                     for x,y in itertools.product(range(-start_end_tolerance,start_end_tolerance), range(-start_end_tolerance,start_end_tolerance)):
                         if (tag.start + x, tag.end+y, tag.ent_id) in correct_list:
                             count_correct_extractions += 1
@@ -207,7 +208,7 @@ def run_test(s_e_tolerance: int=1):
             tagged_list = [(t.start, t.end, t.ent_id) for t in tagged_diseases[doc_id]]
             for tag in correct_tags:
                 matched = False
-                if not substring_matching:
+                if not SUBSTRING_MATCHING:
                     for x, y in itertools.product(range(-start_end_tolerance,start_end_tolerance),
                                                   range(-start_end_tolerance,start_end_tolerance)):
                         if (tag.start + x, tag.end + y, tag.ent_id) in tagged_list:
@@ -257,8 +258,8 @@ def run_single_test():
     run_test(1)
 
 def compare_our_taggerone():
-    global use_taggerone_vocab
-    use_taggerone_vocab = False
+    global CUSTOM_VOCAB
+    CUSTOM_VOCAB = False
     run_test(1)
 
 

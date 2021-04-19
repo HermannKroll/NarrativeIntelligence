@@ -16,9 +16,9 @@ STOPWORD_LIST = tools.proj_rel_path("narraint/analysis/ner/bc2gn_stopwords.txt")
 BC2GN_DIR = os.path.join(DATA_DIR, "NER/biocreative2normalization/")
 BC2GN_VOCAB = os.path.join(BC2GN_DIR, "entrezGeneLexicon.list")
 BC2GN_PUTATOR = "/home/jan/bc2GNtest.pubtator" #"/home/jan/12065586.txt"
-output = "/home/jan/bc2GNtest.pubtator.tagged"
+output = "/home/jan/bc2GNtest5.pubtator.tagged"
 
-Config.dict_min_full_tag_len=3
+Config.dict_min_full_tag_len=5
 
 
 def create_bc2gn_vocab_dictagger():
@@ -35,11 +35,13 @@ def create_bc2gn_vocab_dictagger():
             for name in row[1:]:
                 name = name.lower()
                 if name in stopwords:
+                    pass
                     continue
                 for n in expand_vocabulary_term(name):
                     if n not in vocab:
                         vocab[n] = set()
                     if n in stopwords:
+                        pass
                         continue
                     vocab[n] |= {row[0]}
 
