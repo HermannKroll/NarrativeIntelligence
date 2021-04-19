@@ -1,4 +1,7 @@
 import logging
+import csv
+import os
+
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
@@ -170,7 +173,9 @@ class DrugTaggerVocabulary:
     def create_drugbank_vocabulary_from_source(source_file=config.DRUGBASE_XML_DUMP, drug_min_name_length=3,
                                                check_products=0, drug_max_per_product=2, ignore_excipient_terms=True,
                                                ignore_drugbank_chemicals=True,
-                                               expand_term_with_e_and_s=True):
+                                               expand_term_with_e_and_s=True,
+                                               use_chembl_synonyms=False, chembl_file = os.path.join(config.DATA_DIR, "chembl_synonyms.csv")):
+
         # TODO real check
         drug_number = 13581  # subprocess.check_output(f"grep -c '^<drug' {self.source_file}")
         start = datetime.now()
@@ -179,6 +184,10 @@ class DrugTaggerVocabulary:
         pref = '{http://www.drugbank.ca}'
         desc_by_term = {}
         drugs_without_description_and_indication = 0
+
+        #TODO:add config
+        if use_chembl_synonyms:
+            chemblid2synonym = get_chemblid2synonym(chembl_file)
 
         # read excipient terms if they should be ignored
         if ignore_excipient_terms:
@@ -219,8 +228,19 @@ class DrugTaggerVocabulary:
                 for exp_prop in exp_props:
                     if exp_prop.find(f'{pref}kind').text == "Molecular Formula":
                         name_elements.append(exp_prop.find(f'{pref}value'))
-            names = {ne.text for ne in name_elements if len(ne.text) >= drug_min_name_length}
+
+            names = {ne.text for ne in name_elements}
+            if use_chembl_synonyms:
+                chembl_id = ""
+                for ext_id  in elem.find(f"{pref}external-identifiers"):
+                    if ext_id.find(f"{pref}resource").text == "ChEMBL":
+                        chembl_id = ext_id.find(f"{pref}identifier").text
+                        break
+                if chembl_id and chembl_id in chemblid2synonym:
+                    names |= chemblid2synonym[chembl_id]
+            names = {n for n in names if len(n) >= drug_min_name_length}
             names = {clean_vocab_word_by_split_rules(n.lower()) for n in names}
+
 
             # ignore dbid if it's already an excipient
             if ignore_excipient_terms and len([n for n in names if n in excipient_terms]) > 0:
@@ -236,12 +256,24 @@ class DrugTaggerVocabulary:
                     desc_by_term[n].add(desc)
                 else:
                     desc_by_term[n] = {desc, }
+
         if drug_max_per_product > 0:
             desc_by_term = {k: v
                             for k, v in desc_by_term.items()
                             if len(v) <= drug_max_per_product}
         return desc_by_term
 
+
+def get_chemblid2synonym(csv_file):
+    with open(csv_file) as f:
+        reader = csv.reader(f, delimiter=',', quotechar='"',)
+        index = {}
+        for row in reader:
+            if row[0] not in index:
+                index[row[0]]=set()
+            index[row[0]].add(row[1].lower())
+            index[row[0]].add(row[2].lower())
+        return(index)
 
 class ExcipientVocabulary:
 

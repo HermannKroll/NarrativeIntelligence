@@ -61,6 +61,16 @@ def mesh_synonyms(tree_number_list, output):
         write(os.path.join(output, "Descriptors_{}.tsv".format(desc.heading.replace(" ", "_"))), lines)
 
 
+def reverse_set_index(index_in):
+    index_out = {}
+    for k,vs in index_in.items():
+        for v in vs:
+            if v not in index_out:
+                index_out[v] = set()
+            index_out[v].add(k)
+    return index_out
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--build-index", action="store_true")
