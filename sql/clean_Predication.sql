@@ -10,6 +10,11 @@ DELETE FROM Predication WHERE predicate IN
 
 DELETE FROM Predication Where subject_id = '' or object_id = '';
 
+-- Delete two frequent methods
+DELETE FROM Predication WHERE predicate_canonicalized = 'method' and (subject_id = 'E02.319' or subject_id = 'E02');
+-- Delete Sprains and Strains
+DELETE FROM Predication WHERE (subject_type = 'Disease' and subject_id = 'C26.844') or (object_type = 'Disease' and object_id = 'C26.844');
+
 -- Rewrites the Predication table and deletes removed tuples
 VACUUM FULL PREDICATION;
 REINDEX TABLE PREDICATION;

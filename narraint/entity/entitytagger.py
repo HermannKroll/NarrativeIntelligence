@@ -179,10 +179,13 @@ class EntityTagger:
                 tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
                 for tn in tree_nos:
                     # find the given entity type for the tree number
-                    ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                    self.term2entity[term].add(Entity(tn, ent_type))
+                    try:
+                        ent_type = MeSHOntology.tree_number_to_entity_type(tn)
+                        self.term2entity[term].add(Entity(tn, ent_type))
+                    except KeyError:
+                        continue
             except KeyError:
-                pass
+                continue
 
     def _add_drugbank_tags(self):
         logging.info('Adding DrugBank terms...')
@@ -207,7 +210,7 @@ class EntityTagger:
             else:
                 t_low_n = f'{t_low}s'
             if t_low_n not in self.term2entity:
-                raise KeyError('Does not know an entity for term: {}'.format(t_low))
+                raise KeyError('Does not know an entity for term: {}'.format(term))
             else:
                 t_low = t_low_n
         return self.term2entity[t_low]
