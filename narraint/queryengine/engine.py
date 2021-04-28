@@ -333,6 +333,10 @@ class QueryEngine:
         """
         start_time = datetime.now()
         query_limit_hit = False
+        graph_query = QueryOptimizer.optimize_query(graph_query)
+        if not graph_query:
+            logging.debug('Query wont yield results - returning empty list')
+            return [], False
         # The query expander will generate a list of queries to execute
         # Each query consists of a set of facts
         # The results of each fact pattern will be executed as being connected by an OR
@@ -498,6 +502,7 @@ class QueryEngine:
         time_needed = datetime.now() - start_time
         self.query_logger.write_log(time_needed, document_collection, graph_query, len(doc_ids))
 
+        results = self._merge_results(results)
         return sorted(results, key=lambda d: d.document_id, reverse=True), query_limit_hit
 
     @staticmethod
