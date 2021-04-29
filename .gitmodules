@@ -1,0 +1,3 @@
+[submodule "lib/NarrativeAnnotation"]
+	path = lib/NarrativeAnnotation
+	url = git@github.com:HermannKroll/NarrativeAnnotation.git
