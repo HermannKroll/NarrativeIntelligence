@@ -7,8 +7,8 @@ from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication, Document, Sentence
+from narant.backend.database import Session
+from narant.backend.models import Predication, Document, Sentence
 from narraint.progress import print_progress_with_eta
 
 TREX_DOCUMENT_COLLECTION = "trex"

@@ -4,8 +4,7 @@ import os
 
 
 import narraint.config as cnf
-from narraint.backend.database import Session
-from narraint.tools import proj_rel_path
+from narant.backend.database import Session
 from nitests.util import tmp_rel_path
 
 

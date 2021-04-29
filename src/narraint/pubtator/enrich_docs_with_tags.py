@@ -2,10 +2,9 @@ import argparse
 import logging
 from collections import defaultdict
 
-from narraint.backend.database import Session
-from narraint.backend.export import create_tag_query
-from narraint.backend.models import Document, Tag
-from narraint.entity import enttypes
+from narant.backend.database import Session
+from narant.backend.export import create_tag_query
+from narant.backend.models import Document, Tag
 from narraint.entity.enttypes import TAG_TYPE_MAPPING
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS

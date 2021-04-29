@@ -4,8 +4,8 @@ import logging
 from datetime import datetime
 import random
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narant.backend.database import Session
+from narant.backend.models import Predication
 from narraint.progress import print_progress_with_eta
 
 # 80% are valid and 20% are valid

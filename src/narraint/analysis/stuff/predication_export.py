@@ -4,8 +4,8 @@ import logging
 from sqlalchemy import or_
 
 from narraint.entity.meshontology import MeSHOntology
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narant.backend.database import Session
+from narant.backend.models import Predication
 from narraint.entity.enttypes import CHEMICAL, DISEASE
 
 

@@ -9,11 +9,11 @@ from spacy.lang.en import English
 
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.entity import enttypes
-from narraint.backend.database import Session
-from narraint.backend.export import export
-from narraint.backend.models import DocProcessedByIE, Document
+from narant.backend.database import Session
+from narant.backend.export import export
+from narant.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
-from narraint.extraction.pathie.load_extractions import read_pathie_extractions_tsv, load_pathie_extractions
+from narraint.extraction.pathie.load_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION
 from narraint.config import NLP_CONFIG

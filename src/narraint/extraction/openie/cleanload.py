@@ -11,9 +11,9 @@ from sqlalchemy.exc import IntegrityError
 
 from narraint.entity.meshontology import MeSHOntology
 from narraint.entity.entityresolver import GeneResolver
-from narraint.entity.enttypes import GENE, DISEASE, CHEMICAL, DOSAGE_FORM
-from narraint.backend.models import Tag, Predication, Sentence
-from narraint.backend.database import Session
+from narraint.entity.enttypes import GENE
+from narant.backend.models import Tag, Predication, Sentence
+from narant.backend.database import Session
 from narraint.extraction.versions import OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
 

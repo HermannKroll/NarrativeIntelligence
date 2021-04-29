@@ -9,8 +9,8 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from sqlalchemy import func
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narant.backend.database import Session
+from narant.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.entitytagger import EntityTagger

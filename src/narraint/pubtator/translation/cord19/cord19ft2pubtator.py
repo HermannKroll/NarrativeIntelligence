@@ -7,13 +7,13 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 
-from narraint.backend import models
-from narraint.backend.database import Session
-from narraint.backend.models import Document, DocumentTranslation
+from narant.backend import models
+from narant.backend.database import Session
+from narant.backend.models import Document, DocumentTranslation
 from narraint.progress import print_progress_with_eta
 from narraint.pubtator.translation.cord19.filereader import FileReader
 from narraint.pubtator.translation.cord19.metareader import MetaReader
-from narraint.pubtator.translation.md5_hasher import get_md5_hash, get_md5_hash_str
+from narraint.pubtator.translation.md5_hasher import get_md5_hash
 
 UNIQUE_ID_START = 100000
 NEXT_DOCUMENT_ID_OFFSET = 100000
