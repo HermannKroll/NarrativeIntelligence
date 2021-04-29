@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gzip
 import logging
 import pickle
@@ -349,7 +351,7 @@ class EntityResolver:
     """
     EntityResolver translates an entity id and an entity type to it's corresponding name
     EntityResolver is a singleton implementation, use EntityResolver.instance()
-    Automatically loads and initialise the resolvers for MeSH, Gene, Species and DosageForms
+    Automatically loads and initialise the resolvers for MeSH, DrugbankIDs, Gene, Species and DosageForms
     """
 
     __instance = None
@@ -375,7 +377,7 @@ class EntityResolver:
             EntityResolver.__instance = self
 
     @staticmethod
-    def instance():
+    def instance() -> EntityResolver:
         if EntityResolver.__instance is None:
             EntityResolver()
         return EntityResolver.__instance
