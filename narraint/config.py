@@ -37,7 +37,7 @@ MESH_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'desc2021_id2heading.pkl')
 MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE = os.path.join(TMP_DIR, 'supp2021_id2heading.pkl')
 
 # Drugbase
-DRUGBASE_XML_DUMP = os.path.join(DATA_DIR, "full_database.xml")
+DRUGBASE_XML_DUMP = os.path.join(DATA_DIR, "drugbank2021.xml")
 
 # GENE
 GENE_FILE = os.path.join(DATA_DIR, 'gene_info_2020.gz')
