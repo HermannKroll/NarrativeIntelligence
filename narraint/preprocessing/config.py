@@ -99,6 +99,10 @@ class Config:
     def dict_check_abbreviation(self):
         return self.config["dict"]["check_abbreviation"]
 
+    #@property
+    #def dict_resolve_conjunctions(self):
+    #    return self.config["dict"]["resolve_conjunctions"].lower=="true"
+
     @property
     def custom_abbreviations(self):
         return self.config["dict"]["custom_abbreviations"]

@@ -24,6 +24,8 @@ class DictIndex:
 
 
 def get_n_tuples(in_list, n):
+    if n == 0:
+        return []
     for i, element in enumerate(in_list):
         if i + n <= len(in_list):
             yield in_list[i:i + n]
@@ -226,13 +228,23 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
             tags = DictTagger.clean_abbreviation_tags(tags, self.config.dict_min_full_tag_len)
 
         # TODO: Check for instances like "breast and ovarian cancer"
-        for word_tuples in get_n_tuples(ind_words, and_check_range):
-            words, indexes = zip(*word_tuples)
-            if any([tag.start < indexes[-1] + 1 or indexes[0] < tag.end for tag in tags]):
-                for test_seq in DictTagger.conjunction_product(word_tuples):
-                    hits = self.get_hits(test_seq, abb_vocab, pmid, title)
-                    tags += hits
-
+        # if self.config.dict_resolve_conjunctions:
+        #     for word_tuples in get_n_tuples(ind_words, and_check_range):
+        #         words, indexes = zip(*word_tuples)
+        #         if any([tag.start < indexes[-1] + 1 or indexes[0] < tag.end for tag in tags]):
+        #             hits_in_group = []
+        #             conjunction_hit = False
+        #             for lt,rt in DictTagger.conjunction_product(word_tuples, seperated=True):
+        #                 hits = self.get_hits(lt+rt, abb_vocab, pmid, title)
+        #                 conjunction_hit |= not not hits and not lt == [] and not rt == []
+        #                 hits_in_group += hits
+        #             if hits_in_group and conjunction_hit:
+        #                 group_start = min(t.start for t in hits_in_group)
+        #                 group_end = max(t.end for t in hits_in_group)
+        #                 group_descs_types = {(t.ent_type, t.ent_id) for t in hits_in_group}
+        #                 ent_str = " ".join(w for w, i in word_tuples if i >= group_start and i+len(w) <= group_end)
+        #                 tags += [TaggedEntity(document=pmid, start=group_start, end=group_end, text=ent_str, ent_type=t[0],
+        #                                       ent_id=t[1]) for t in group_descs_types]
         out_doc.tags += tags
         return out_doc
 
@@ -249,11 +261,14 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
     connector_words = {"and", "or"}
 
     @staticmethod
-    def conjunction_product(token_seq):
-        """ split token_seq at last conn_word, return product of all sub token sequences. Exclude connector words."""
+    def conjunction_product(token_seq, seperated=False):
+        """
+        split token_seq at last conn_word, return product of all sub token sequences. Exclude connector words.
+        :param seperated: return left_tuples, right_tuples instead of left_tuples+right_tuples
+        """
         cwords_indexes = [n for n, (w, i) in enumerate(token_seq) if w in DictTagger.connector_words]
 
-        if not cwords_indexes:
+        if not cwords_indexes:# or max(cwords_indexes) in [0, len(token_seq)-1]:
             return []
         left = token_seq[:max(cwords_indexes)]
         right = token_seq[max(cwords_indexes):]
@@ -261,9 +276,9 @@ class DictTagger(BaseTagger, metaclass=ABCMeta):
         left = [(w, i) for w, i in left if w not in DictTagger.connector_words]
         right = [(w, i) for w, i in right if w not in DictTagger.connector_words]
 
-        left_tuples = [t for n in range(1, len(left) + 1) for t in list(get_n_tuples(left, n))]
-        right_tuples = [t for n in range(1, len(right) + 1) for t in list(get_n_tuples(right, n))]
-        yield from [lt + rt for lt, rt in it.product(left_tuples, right_tuples)]
+        left_tuples = [[]]+[t for n in range(0, len(left) + 1) for t in list(get_n_tuples(left, n))]
+        right_tuples = [[]]+[t for n in range(0, len(right) + 1) for t in list(get_n_tuples(right, n))]
+        yield from [(lt,rt) for lt, rt in it.product(left_tuples, right_tuples) if lt + rt]
 
     def _tag(self, in_file, out_file):
         with open(in_file) as f:
