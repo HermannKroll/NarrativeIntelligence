@@ -22,7 +22,15 @@ def create_test_kwargs(in_dir):
 
 
 def get_test_resource_filepath(filename):
-    return os.path.join(TEST_RESOURCES_DIR, filename)
+    return resource_rel_path(filename)
+
+
+def tmp_rel_path(path):
+    return proj_rel_path("src/nitests/tmp/" + path)
+
+
+def resource_rel_path(path):
+    return proj_rel_path("src/nitests/resources/" + path)
 
 
 def make_test_tempdir():

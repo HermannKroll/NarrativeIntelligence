@@ -15,8 +15,8 @@ class EntityTaggerTestCase(TestCase):
         Tests whether drugbank names and headings can be tagged correctly
         """
         metformin_tags = self.entity_tagger.tag_entity('metformin')
-        valid_metformin_ids = {'D02.078.370.141.450', 'DB00331'}
-        self.assertEqual(2, len(metformin_tags))
+        valid_metformin_ids = {'DB00331'}
+        self.assertEqual(1, len(metformin_tags))
         for t in metformin_tags:
             self.assertIn(t.entity_id, valid_metformin_ids)
         self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('metformine'))).entity_id)
@@ -25,8 +25,8 @@ class EntityTaggerTestCase(TestCase):
         self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('dimethylbiguanid'))).entity_id)
 
         simvastatin_tags = self.entity_tagger.tag_entity('simvastatin')
-        valid_simvastatin_ids = {'D02.455.426.559.847.638.400.900', 'D04.615.638.400.900', 'DB00641'}
-        self.assertEqual(3, len(simvastatin_tags))
+        valid_simvastatin_ids = {'DB00641'}
+        self.assertEqual(1, len(simvastatin_tags))
         for t in simvastatin_tags:
             self.assertIn(t.entity_id, valid_simvastatin_ids)
 

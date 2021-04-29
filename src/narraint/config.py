@@ -3,7 +3,7 @@ This module contains constants which point to important directories.
 """
 import os
 
-GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
 
 DATA_DIR = os.path.join(GIT_ROOT_DIR, "data")
 RESOURCE_DIR = os.path.join(GIT_ROOT_DIR, "resources")

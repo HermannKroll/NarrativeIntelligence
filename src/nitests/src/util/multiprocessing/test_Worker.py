@@ -90,7 +90,7 @@ class TestWorker(unittest.TestCase):
 
         workers = [Worker(task_queue, result_queue, do_task) for n in range(10)]
 
-        out_path = tools.proj_rel_path("nitests/tmp/out/multiout.txt")
+        out_path = util.tmp_rel_path("out/multiout.txt")
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
         consumer = FileConsumerWorker(result_queue, out_path, 10)
 

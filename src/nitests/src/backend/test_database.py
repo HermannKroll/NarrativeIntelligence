@@ -3,9 +3,10 @@ import pytest
 import os
 
 
-from narraint.config import BACKEND_CONFIG, GIT_ROOT_DIR
+import narraint.config as cnf
 from narraint.backend.database import Session
 from narraint.tools import proj_rel_path
+from nitests.util import tmp_rel_path
 
 
 class TestSession(unittest.TestCase):
@@ -14,8 +15,8 @@ class TestSession(unittest.TestCase):
     def test_sqlite_creation(self):
         session = Session.get()
         self.assertIsNotNone(session)
-        self.assertEqual(BACKEND_CONFIG,
-                         os.path.join(GIT_ROOT_DIR, "nitests/config/jsonfiles/backend.json"))
+        self.assertEqual(cnf.BACKEND_CONFIG,
+                         os.path.join(cnf.GIT_ROOT_DIR, "src/nitests/config/jsonfiles/backend.json"))
 
     def test_sqlite_ins_sel(self):
         session = Session.get()
@@ -23,7 +24,7 @@ class TestSession(unittest.TestCase):
         result = session.execute("SELECT * FROM tagger")
         for row in result:
             self.assertTrue(row['name'] == 'foo' and row['version'] == 'bar')
-        self.assertTrue(os.path.isfile(proj_rel_path("nitests/tmp/sqlite.db")))
+        self.assertTrue(os.path.isfile(tmp_rel_path("sqlite.db")))
 
 
 if __name__ == '__main__':

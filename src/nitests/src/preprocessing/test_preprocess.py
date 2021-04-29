@@ -18,7 +18,7 @@ class TestPreprocess(unittest.TestCase):
 
     def test_dictpreprocess_sinlge_worker(self):
         workdir = nitests.util.make_test_tempdir()
-        args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
+        args = [util.resource_rel_path('infiles/test_metadictagger'),
 
                 *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 1 -y".split()
                 ]
@@ -29,7 +29,7 @@ class TestPreprocess(unittest.TestCase):
 
     def test_dictpreprocess_dual_worker(self):
         workdir = nitests.util.make_test_tempdir()
-        args = [proj_rel_path('nitests/resources/infiles/test_metadictagger'),
+        args = [util.resource_rel_path('infiles/test_metadictagger'),
 
                 *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 2 -y".split()
                 ]

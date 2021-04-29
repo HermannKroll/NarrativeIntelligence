@@ -26,10 +26,10 @@ class TestMetadictagger(unittest.TestCase):
 
     def test_tag(self):
         in_1 = util.get_test_resource_filepath("infiles/test_metadictagger/4297.txt")
-        out_1 = tools.proj_rel_path("nitests/tmp/out/4297.txt")
+        out_1 = util.tmp_rel_path("out/4297.txt")
         os.makedirs(os.path.dirname(out_1), exist_ok=True)
         in_2 = util.get_test_resource_filepath("infiles/test_metadictagger/5600.txt")
-        out_2 = tools.proj_rel_path("nitests/tmp/out/5600.txt")
+        out_2 = util.tmp_rel_path("out/5600.txt")
         metatag = TestMetadictagger.make_metatag()
         metatag._tag(in_1, out_1)
         metatag._tag(in_2, out_2)

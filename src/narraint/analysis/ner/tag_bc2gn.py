@@ -12,7 +12,7 @@ from narraint.preprocessing.tagging.dictagger import DictTagger
 from narraint.preprocessing.tagging.disease import DiseaseTagger
 from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
 
-STOPWORD_LIST = tools.proj_rel_path("narraint/analysis/ner/bc2gn_stopwords.txt")
+STOPWORD_LIST = tools.proj_rel_path("data/bc2gn_stopwords.txt")
 BC2GN_DIR = os.path.join(DATA_DIR, "NER/biocreative2normalization/")
 BC2GN_VOCAB = os.path.join(BC2GN_DIR, "entrezGeneLexicon.list")
 BC2GN_PUTATOR = "/home/jan/bc2GNtest.pubtator" #"/home/jan/12065586.txt"

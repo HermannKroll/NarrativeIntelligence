@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from narraint import tools
 from narraint.backend.models import Base
-from narraint.config import BACKEND_CONFIG
+import narraint.config as cnf
 
 
 from sqlalchemy.ext.compiler import compiles
@@ -61,7 +61,8 @@ class Session:
     is_postgres = False
 
     def _load_config(self):
-        with open(BACKEND_CONFIG) as f:
+        print(cnf.BACKEND_CONFIG)
+        with open(cnf.BACKEND_CONFIG) as f:
             config = json.load(f)
         # TODO: why tf is there no wrapper?
         Session.is_sqlite = False or ("use_SQLite" in config and config["use_SQLite"])

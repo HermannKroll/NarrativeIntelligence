@@ -1,13 +1,16 @@
 import unittest
 import os
 
+import pytest
+
 from narraint.config import PREPROCESS_CONFIG
 from narraint.preprocessing.tagging.dictagger import DictTagger, split_indexed_words
 from narraint.preprocessing.tagging.dosage import DosageFormTagger
 from narraint.preprocessing.tagging.drug import DrugTagger
 from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
 from narraint.tools import proj_rel_path
-from nitests.util import make_test_tempdir, create_test_kwargs, get_test_resource_filepath
+from nitests.util import make_test_tempdir, create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
+    resource_rel_path
 import narraint.entity.enttypes as enttypes
 import narraint.pubtator.document as doc
 
@@ -23,7 +26,7 @@ class TestDictagger(unittest.TestCase):
         self.assertIn('colours', expand_vocabulary_term('colour'))
 
     def test_tag(self):
-        out_file = proj_rel_path("nitests/tmp/MC1313813Tagged.txt")
+        out_file = tmp_rel_path("MC1313813Tagged.txt")
         tagger = DosageFormTagger(**create_test_kwargs(get_test_resource_filepath("infiles/test_dictagger")))
         tagger.desc_by_term = {
             "protein": {"Desc1"},
@@ -32,7 +35,7 @@ class TestDictagger(unittest.TestCase):
             "protein secretion": {"Desc4"},
             "protein synthesis": {"Desc5"}
         }
-        tagger._tag(proj_rel_path("nitests/resources/infiles/test_dictagger/PMC1313813Untagged.txt"),
+        tagger._tag(resource_rel_path("infiles/test_dictagger/PMC1313813Untagged.txt"),
                     out_file)
         self.assertTrue(os.path.isfile(out_file))
         content = ""
@@ -48,13 +51,13 @@ class TestDictagger(unittest.TestCase):
         self.assertIn("<Entity 1609,1626,protein secretion,DosageForm,Desc4>", strings)
 
     def test_abbreviation_check(self):
-        out_file = proj_rel_path("nitests/tmp/abbreviation_test_allowed.txt")
+        out_file = tmp_rel_path("abbreviation_test_allowed.txt")
         tagger = DrugTagger(**create_test_kwargs(get_test_resource_filepath("infiles/test_dictagger")))
         tagger.desc_by_term = {
             "aspirin": {"Desc1"},
             "asa": {"Desc1"},
         }
-        tagger._tag(proj_rel_path("nitests/resources/infiles/test_dictagger/abbreviation_test_allowed.txt"),
+        tagger._tag(resource_rel_path("infiles/test_dictagger/abbreviation_test_allowed.txt"),
                     out_file)
         self.assertTrue(os.path.isfile(out_file))
         document = doc.parse_tag_list(out_file)
@@ -65,14 +68,14 @@ class TestDictagger(unittest.TestCase):
         self.assertIn("<Entity 52,55,asa,Drug,Desc1>", strings)
 
     def test_abbreviation_not_allowed_check(self):
-        out_file = proj_rel_path("nitests/tmp/abbreviation_test_not_allowed.txt")
+        out_file = tmp_rel_path("abbreviation_test_not_allowed.txt")
         tagger = DrugTagger(**create_test_kwargs(get_test_resource_filepath("infiles/test_dictagger")))
         tagger.desc_by_term = {
             "aspirin": {"Desc1"},
             "asa": {"Desc1"},
             "metformin": {"Desc2"}
         }
-        tagger._tag(proj_rel_path("nitests/resources/infiles/test_dictagger/abbreviation_test_not_allowed.txt"),
+        tagger._tag(resource_rel_path("infiles/test_dictagger/abbreviation_test_not_allowed.txt"),
                     out_file)
         self.assertTrue(os.path.isfile(out_file))
         document = doc.parse_tag_list(out_file)
@@ -89,6 +92,7 @@ class TestDictagger(unittest.TestCase):
         self.assertIn(('carbon-copper', 32), indexed)
         self.assertNotIn(('carbon', 32), indexed)
 
+    @pytest.mark.skip("unused")
     def test_conjunction_product(self):
         tuples = DictTagger.conjunction_product(split_indexed_words("brain, breast and ovarian cancer"))
         desired = "[[('brain', 0), ('ovarian', 18)], [('brain', 0), ('cancer', 26)], [('brain', 0), ('ovarian', 18), " \
