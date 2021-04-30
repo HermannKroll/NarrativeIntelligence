@@ -10,7 +10,7 @@ from scipy.spatial.distance import cosine
 from narrant.backend.database import Session
 from narrant.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, PRED_TO_REMOVE
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 
 def transform_predicate(predicate: str):

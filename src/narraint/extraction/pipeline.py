@@ -17,7 +17,7 @@ from narraint.extraction.pathie.load_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION
 from narraint.config import NLP_CONFIG
-from narraint.util.helpers import chunks
+from narrant.util.helpers import chunks
 
 DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
 

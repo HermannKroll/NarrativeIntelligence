@@ -8,7 +8,7 @@ from narrant.backend.database import Session
 from narrant.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.extraction.versions import PATHIE_EXTRACTION
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 

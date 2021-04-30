@@ -9,8 +9,8 @@ from urllib.parse import quote
 
 # Query pmid's from pmed
 # db: pubmed / pmc
-from narraint.progress import print_progress_with_eta
-from narraint.util.helpers import chunks
+from narrant.progress import print_progress_with_eta
+from narrant.util.helpers import chunks
 
 
 def pubmed_crawl_pmids(query, mail='ex@sample.com', tool='sampletool', db='pubmed', retmax=20000):

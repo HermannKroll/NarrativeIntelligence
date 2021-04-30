@@ -9,7 +9,7 @@ from time import sleep
 
 from spacy.lang.en import English
 
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narrant.pubtator.document import TaggedDocument, TaggedEntity
 from narrant.pubtator.extract import read_pubtator_documents
 

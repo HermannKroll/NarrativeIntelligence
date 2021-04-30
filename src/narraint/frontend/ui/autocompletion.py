@@ -8,7 +8,7 @@ from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 
 import datrie

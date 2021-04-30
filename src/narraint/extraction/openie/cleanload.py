@@ -15,7 +15,7 @@ from narrant.preprocessing.enttypes import GENE
 from narrant.backend.models import Tag, Predication, Sentence
 from narrant.backend.database import Session
 from narraint.extraction.versions import OPENIE_EXTRACTION
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
 MAX_SENTENCE_LENGTH = 3000

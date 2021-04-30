@@ -8,7 +8,7 @@ from narrant.backend.models import Predication
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, GENE
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 
 # See list of subheadings: https://www.ncbi.nlm.nih.gov/books/NBK3827/table/pubmedhelp.T.mesh_subheadings/

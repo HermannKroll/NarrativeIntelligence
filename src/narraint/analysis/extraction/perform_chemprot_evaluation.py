@@ -21,7 +21,7 @@ from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 CHEMPROT_VOCABULARY = dict(
     upregulates=["upregulat*", "up regulat*", "up-regulat*", "stimulat*", "activat*", "increase", 'potentiate', 'induce'],

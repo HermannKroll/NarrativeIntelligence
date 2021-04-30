@@ -11,7 +11,7 @@ from narrant.preprocessing.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE,
     PLANT_FAMILY, LAB_METHOD, METHOD
 from narraint.cleaning.predicate_vocabulary import PRED_TO_REMOVE, DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
     ASSOCIATED_PREDICATE_UNSURE
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES
 
 

@@ -8,7 +8,7 @@ from datetime import datetime
 from time import sleep
 import logging
 
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 from narraint.config import NLP_CONFIG
 from narrant.pubtator.regex import CONTENT_ID_TIT_ABS
 from narrant.pubtator.extract import read_pubtator_documents

@@ -4,10 +4,10 @@ import unittest
 import multiprocessing
 
 from narraint import tools
-from narraint.util.multiprocessing.ConsumerWorker import ConsumerWorker
-from narraint.util.multiprocessing.FileConsumerWorker import FileConsumerWorker
-from narraint.util.multiprocessing.ProducerWorker import ProducerWorker
-from narraint.util.multiprocessing.Worker import Worker
+from narrant.util.multiprocessing.ConsumerWorker import ConsumerWorker
+from narrant.util.multiprocessing.FileConsumerWorker import FileConsumerWorker
+from narrant.util.multiprocessing.ProducerWorker import ProducerWorker
+from narrant.util.multiprocessing.Worker import Worker
 from nitests import util
 
 

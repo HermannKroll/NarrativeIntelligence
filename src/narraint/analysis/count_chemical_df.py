@@ -5,7 +5,7 @@ from datetime import datetime
 
 from narrant.backend.database import Session
 from narrant.backend.models import Tag
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 
 MIN_DOCS_FOR_ENTITY = 10

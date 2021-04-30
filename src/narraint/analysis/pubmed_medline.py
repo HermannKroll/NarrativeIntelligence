@@ -9,7 +9,7 @@ from lxml import etree
 from narrant.backend.database import Session
 from narrant.backend.models import DocProcessedByIE
 from narraint.config import MESH2DOC_INDEX_Pubmed, MESH2Doc_INDEX_PMC
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 
 class PubMedMEDLINE:

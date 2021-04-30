@@ -18,7 +18,7 @@ from narrant.preprocessing.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOS
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
 from narraint.mesh.supplementary import MeSHDBSupplementary
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 
 class MeshResolver:

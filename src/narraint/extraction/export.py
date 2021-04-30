@@ -6,7 +6,7 @@ import random
 
 from narrant.backend.database import Session
 from narrant.backend.models import Predication
-from narraint.progress import print_progress_with_eta
+from narrant.progress import print_progress_with_eta
 
 # 80% are valid and 20% are valid
 SPLIT_THRESHOLD_FOR_TEST_AND_VALID = 0.8
