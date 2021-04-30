@@ -2,7 +2,7 @@ import shutil
 import os
 
 from narrant.backend.database import Session
-from narraint.tools import proj_rel_path
+from narrant.tools import proj_rel_path
 from nitests.util import tmp_rel_path
 
 

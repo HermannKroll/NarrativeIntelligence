@@ -3,7 +3,7 @@ import unittest
 
 import multiprocessing
 
-from narraint import tools
+from narrant import tools
 from narrant.util.multiprocessing.ConsumerWorker import ConsumerWorker
 from narrant.util.multiprocessing.FileConsumerWorker import FileConsumerWorker
 from narrant.util.multiprocessing.ProducerWorker import ProducerWorker

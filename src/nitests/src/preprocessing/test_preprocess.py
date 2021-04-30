@@ -8,7 +8,7 @@ import nitests.config.config as config
 import nitests.util
 
 from narrant.preprocessing import preprocess, dictpreprocess
-from narraint.tools import proj_rel_path
+from narrant.tools import proj_rel_path
 from narrant.pubtator.extract import read_tagged_documents
 from nitests import util
 from nitests.src.preprocessing.tagging.test_metadictagger import assert_tags_pmc_4297_5600

@@ -15,7 +15,7 @@ from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
-from narraint.mesh.data import MeSHDB
+from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
 
 

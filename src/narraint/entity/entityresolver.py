@@ -16,8 +16,8 @@ from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, M
 from narrant.preprocessing.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL
 from narraint.entity.meshontology import MeSHOntology
-from narraint.mesh.data import MeSHDB
-from narraint.mesh.supplementary import MeSHDBSupplementary
+from narrant.mesh.data import MeSHDB
+from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.progress import print_progress_with_eta
 
 

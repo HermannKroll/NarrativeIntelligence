@@ -3,7 +3,7 @@ import pickle
 from collections import defaultdict
 
 from narraint.config import MESH_DESCRIPTORS_FILE, DRUGBANK_ID_2_MESH_MAPPING_INDEX
-from narraint.mesh.data import MeSHDB
+from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.tagging.drug import DrugTaggerVocabulary
 
 DRUGBANK_TO_MESH_DISAMBIGUATION = {

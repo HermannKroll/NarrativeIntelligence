@@ -4,7 +4,7 @@ import csv
 
 import logging
 
-from narraint import tools
+from narrant import tools
 from narraint.analysis.ner.perform_ncbi_disease_test import tags_from_file
 from narraint.config import PREPROCESS_CONFIG, DATA_DIR
 from narrant.preprocessing.config import Config

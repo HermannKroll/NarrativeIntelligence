@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.config import MESH_SUPPLEMENTARY_FILE
-from narraint.mesh.supplementary import MeSHDBSupplementary
+from narrant.mesh.supplementary import MeSHDBSupplementary
 
 
 class Test(TestCase):

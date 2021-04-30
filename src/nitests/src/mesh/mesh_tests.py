@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.config import MESH_DESCRIPTORS_FILE
-from narraint.mesh.data import MeSHDB
+from narrant.mesh.data import MeSHDB
 
 
 class Test(TestCase):
