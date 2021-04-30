@@ -3,8 +3,8 @@ import logging
 
 from datetime import datetime
 
-from narant.backend.database import Session
-from narant.backend.models import Tag
+from narraint.backend.database import Session
+from narraint.backend.models import Tag
 from narraint.progress import print_progress_with_eta
 
 

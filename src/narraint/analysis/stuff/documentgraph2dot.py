@@ -1,9 +1,11 @@
+import argparse
 import logging
 
 from sqlalchemy import and_
 
-from narant.backend.database import Session
-from narant.backend.models import Predication
+from narraint.backend.database import Session
+from narraint.backend.models import Predication
+from narraint.entity.entityresolver import EntityResolver
 from narraint.graph.labeled import LabeledGraph
 
 

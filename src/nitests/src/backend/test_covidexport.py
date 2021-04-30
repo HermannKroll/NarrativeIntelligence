@@ -1,5 +1,5 @@
 import unittest
-from narant.backend.covidexport import create_sanitized_index
+from narraint.backend.covidexport import create_sanitized_index
 
 class TestCovidExport(unittest.TestCase):
     def test_create_sanitized_index(self):

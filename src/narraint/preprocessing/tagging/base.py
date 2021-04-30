@@ -5,9 +5,9 @@ from typing import List, Tuple, Dict, Set
 
 from sqlalchemy.dialects.postgresql import insert
 
-from narant.backend.database import Session
-from narant.backend.load_document import insert_taggers
-from narant.backend.models import Tag, DocTaggedBy
+from narraint.backend.database import Session
+from narraint.backend.load_document import insert_taggers
+from narraint.backend.models import Tag, DocTaggedBy
 from narraint.preprocessing.config import Config
 from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.regex import TAG_LINE_NORMAL

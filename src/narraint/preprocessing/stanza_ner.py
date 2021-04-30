@@ -7,8 +7,8 @@ import tempfile
 import multiprocessing
 from datetime import datetime
 
-from narant.backend.database import Session
-from narant.backend.load_document import document_bulk_load
+from narraint.backend.database import Session
+from narraint.backend.load_document import document_bulk_load
 
 from narraint.preprocessing.tagging.stanza import StanzaTagger
 from narraint.progress import print_progress_with_eta

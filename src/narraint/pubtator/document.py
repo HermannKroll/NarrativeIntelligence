@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from narraint import tools
-from narant.backend.models import Tag, Document
+from narraint.backend.models import Tag, Document
 from narraint.pubtator.regex import TAG_LINE_NORMAL, CONTENT_ID_TIT_ABS
 
 

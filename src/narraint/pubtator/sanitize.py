@@ -3,10 +3,12 @@ import os
 from shutil import copy
 from argparse import ArgumentParser
 
-from narant.backend.models import Document
+from narraint.backend.models import Document
 from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, ILLEGAL_CHAR
 from narraint.pubtator.extract import read_pubtator_documents
+
+from collections.abc import Sequence
 
 
 def filter_and_sanitize(in_file:str, out_file:str, filter_ids, logger=logging, ignore_tags=True):
