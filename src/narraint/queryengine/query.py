@@ -1,4 +1,4 @@
-from narraint.entity.entity import Entity
+from narrant.entity.entity import Entity
 from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE
 
 

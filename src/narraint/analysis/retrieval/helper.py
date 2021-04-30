@@ -1,6 +1,6 @@
 import logging
 
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 
 mesh_ontology = MeSHOntology()
 

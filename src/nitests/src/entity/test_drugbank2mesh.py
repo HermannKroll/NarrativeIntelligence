@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
+from narrant.entity.drugbank2mesh import DrugBank2MeSHMapper
 
 
 class DrugBank2MeSHTestCase(TestCase):

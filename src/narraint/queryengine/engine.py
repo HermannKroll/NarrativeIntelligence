@@ -12,7 +12,7 @@ from narrant.backend.models import Document, Predication, Sentence
 from narrant.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
-from narraint.entity.entity import Entity
+from narrant.entity.entity import Entity
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer

@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 
 
 def export_mesh_ontology_to_tsv(output):

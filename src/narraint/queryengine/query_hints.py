@@ -1,6 +1,6 @@
 import re
 
-from narraint.entity.entity import Entity
+from narrant.entity.entity import Entity
 from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES, \
     PLANT_FAMILY, LAB_METHOD, METHOD
 

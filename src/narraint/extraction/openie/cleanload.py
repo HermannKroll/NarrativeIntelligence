@@ -9,8 +9,8 @@ import nltk
 from nltk.corpus import wordnet
 from sqlalchemy.exc import IntegrityError
 
-from narraint.entity.meshontology import MeSHOntology
-from narraint.entity.entityresolver import GeneResolver
+from narrant.entity.meshontology import MeSHOntology
+from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
 from narrant.backend.models import Tag, Predication, Sentence
 from narrant.backend.database import Session

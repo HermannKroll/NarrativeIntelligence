@@ -1,7 +1,7 @@
 import logging
 
 from narraint.analysis.pubmed_medline import PubMedMEDLINE
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 from narraint.semmeddb.dbconnection import SemMedDB
 
 

@@ -5,7 +5,7 @@ from sqlalchemy import and_
 
 from narrant.backend.database import Session
 from narrant.backend.models import Predication
-from narraint.entity.entityresolver import EntityResolver
+from narrant.entity.entityresolver import EntityResolver
 from narraint.graph.labeled import LabeledGraph
 
 

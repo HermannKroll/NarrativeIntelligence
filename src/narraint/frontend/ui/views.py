@@ -11,9 +11,9 @@ from sqlalchemy import func
 
 from narrant.backend.database import Session
 from narrant.backend.models import Predication
-from narraint.entity.entity import Entity
-from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.entitytagger import EntityTagger
+from narrant.entity.entity import Entity
+from narrant.entity.entityresolver import EntityResolver
+from narrant.entity.entitytagger import EntityTagger
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL, ALL, DISEASE
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab

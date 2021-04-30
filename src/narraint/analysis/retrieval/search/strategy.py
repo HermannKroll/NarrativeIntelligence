@@ -5,9 +5,9 @@ from itertools import product
 from nltk.stem.porter import *
 
 from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
-from narraint.entity.entity import Entity
-from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.entity import Entity
+from narrant.entity.entityresolver import EntityResolver
+from narrant.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
 from narrant.pubtator.document import TaggedDocument
 from narraint.frontend.ui.views import convert_query_text_to_fact_patterns

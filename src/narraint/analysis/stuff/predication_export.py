@@ -3,7 +3,7 @@ import logging
 
 from sqlalchemy import or_
 
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 from narrant.backend.database import Session
 from narrant.backend.models import Predication
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE

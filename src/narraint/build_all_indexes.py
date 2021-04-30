@@ -1,11 +1,11 @@
 import logging
 import json
 
-from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
-from narraint.entity.entityresolver import MeshResolver, GeneResolver, SpeciesResolver, DrugBankResolver
-from narraint.entity.entitytagger import EntityTagger
-from narraint.entity.genemapper import GeneMapper
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.drugbank2mesh import DrugBank2MeSHMapper
+from narrant.entity.entityresolver import MeshResolver, GeneResolver, SpeciesResolver, DrugBankResolver
+from narrant.entity.entitytagger import EntityTagger
+from narrant.entity.genemapper import GeneMapper
+from narrant.entity.meshontology import MeSHOntology
 from narraint.frontend.ui.autocompletion import AutocompletionUtil
 from narraint.config import BACKEND_CONFIG
 

@@ -1,8 +1,8 @@
-from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
-from narraint.entity.entityresolver import EntityResolver
+from narrant.entity.drugbank2mesh import DrugBank2MeSHMapper
+from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, METHOD, \
     LAB_METHOD
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 
 
 class QueryEntitySubstitution:

@@ -1,10 +1,10 @@
 import itertools
 import logging
 
-from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.entitytagger import DosageFormTaggerVocabulary
+from narrant.entity.entityresolver import EntityResolver
+from narrant.entity.entitytagger import DosageFormTaggerVocabulary
 from narrant.preprocessing.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
-from narraint.entity.meshontology import MeSHOntology
+from narrant.entity.meshontology import MeSHOntology
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.engine import QueryEngine
 
