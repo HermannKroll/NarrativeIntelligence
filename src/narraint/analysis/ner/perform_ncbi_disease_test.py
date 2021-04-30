@@ -10,9 +10,9 @@ from narrant.preprocessing.config import Config
 from narrant.preprocessing.tagging.dictagger import DictTagger
 from narrant.preprocessing.tagging.disease import DiseaseTagger
 from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
-from narraint.pubtator.document import parse_tag_list, TaggedEntity, TaggedDocument
-from narraint.pubtator.extract import read_pubtator_documents
-from narraint.pubtator.regex import TAG_LINE_NORMAL
+from narrant.pubtator.document import parse_tag_list, TaggedEntity, TaggedDocument
+from narrant.pubtator.extract import read_pubtator_documents
+from narrant.pubtator.regex import TAG_LINE_NORMAL
 from matplotlib import pyplot as plt
 
 ONLY_MESH = True

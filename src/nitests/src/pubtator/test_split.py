@@ -1,8 +1,8 @@
 import unittest
 from nitests import util
-from narraint.pubtator.extract import read_tagged_documents
+from narrant.pubtator.extract import read_tagged_documents
 
-from narraint.pubtator import sanitize
+from narrant.pubtator import sanitize
 
 
 class TestSplit(unittest.TestCase):

@@ -20,7 +20,7 @@ from narraint.extraction.extraction_utils import filter_and_write_documents_to_t
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
 
 from narraint.progress import print_progress_with_eta
-from narraint.pubtator.count import count_documents
+from narrant.pubtator.count import count_documents
 
 NUMBER_FIX_REGEX = re.compile(r"\d+,\d+")
 

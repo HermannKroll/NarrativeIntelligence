@@ -9,7 +9,7 @@ from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
-from narraint.pubtator.document import TaggedDocument
+from narrant.pubtator.document import TaggedDocument
 from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 
 

@@ -4,8 +4,8 @@ import unittest
 from narrant.preprocessing.tagging.metadictagger import MetaDicTaggerFactory
 import narrant.preprocessing.enttypes as et
 import nitests.util as util
-from narraint.pubtator.document import parse_tag_list, TaggedEntity
-from narraint.pubtator.extract import read_tagged_documents
+from narrant.pubtator.document import parse_tag_list, TaggedEntity
+from narrant.pubtator.extract import read_tagged_documents
 
 
 class TestMetadictagger(unittest.TestCase):

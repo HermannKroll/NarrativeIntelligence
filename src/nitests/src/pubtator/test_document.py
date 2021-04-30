@@ -2,8 +2,8 @@ import unittest
 
 from spacy.lang.en import English
 
-from narraint.pubtator.document import TaggedEntity, TaggedDocument, parse_tag_list
-from narraint.pubtator.extract import read_tagged_documents
+from narrant.pubtator.document import TaggedEntity, TaggedDocument, parse_tag_list
+from narrant.pubtator.extract import read_tagged_documents
 from nitests.util import get_test_resource_filepath
 
 

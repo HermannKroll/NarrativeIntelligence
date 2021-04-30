@@ -16,7 +16,7 @@ from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
 from narraint.extraction.openie.cleanload import OPENIE_TUPLE
 from narraint.progress import print_progress_with_eta
-from narraint.pubtator.count import count_documents
+from narrant.pubtator.count import count_documents
 
 
 def openie6_read_extractions(openie6_output):

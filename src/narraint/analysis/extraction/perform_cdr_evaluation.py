@@ -19,8 +19,8 @@ from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
-from narraint.pubtator.document import TaggedDocument
-from narraint.pubtator.extract import read_pubtator_documents
+from narrant.pubtator.document import TaggedDocument
+from narrant.pubtator.extract import read_pubtator_documents
 
 pubtator_docs = ['CDR_TestSet.PubTator.txt']  # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']
 

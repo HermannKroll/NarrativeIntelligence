@@ -11,7 +11,7 @@ from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import run_openie6
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
-from narraint.pubtator.count import count_documents
+from narrant.pubtator.count import count_documents
 
 PERFORMANCE_TEST_DIR = os.path.join(DATA_DIR, 'performance/')
 

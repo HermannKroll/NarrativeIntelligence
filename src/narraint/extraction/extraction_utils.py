@@ -10,8 +10,8 @@ from time import sleep
 from spacy.lang.en import English
 
 from narraint.progress import print_progress_with_eta
-from narraint.pubtator.document import TaggedDocument, TaggedEntity
-from narraint.pubtator.extract import read_pubtator_documents
+from narrant.pubtator.document import TaggedDocument, TaggedEntity
+from narrant.pubtator.extract import read_pubtator_documents
 
 TAG_MIN_TEXT_LENGTH = 3
 

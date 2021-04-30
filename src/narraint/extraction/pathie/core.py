@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import networkx as nx
 
-from narraint.pubtator.document import TaggedEntity
+from narrant.pubtator.document import TaggedEntity
 
 PathIEToken = namedtuple('PathIEToken', ["text", "text_lower", "text_before", "text_after", "index", "charStart",
                                          "charEnd", "pos", "lemma"])

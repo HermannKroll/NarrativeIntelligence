@@ -1,7 +1,7 @@
 import os
 
 from narraint.config import DATA_DIR, PREPROCESS_CONFIG
-from narraint.pubtator.document import TaggedDocument
+from narrant.pubtator.document import TaggedDocument
 BC2GN_SRC_DIR = os.path.join(DATA_DIR, "NER/biocreative2normalization/trainingData/")
 output = os.path.join("/home/jan/bc2GNtraining.pubtator")
 

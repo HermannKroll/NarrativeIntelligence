@@ -10,8 +10,8 @@ import logging
 
 from narraint.progress import print_progress_with_eta
 from narraint.config import NLP_CONFIG
-from narraint.pubtator.regex import CONTENT_ID_TIT_ABS
-from narraint.pubtator.extract import read_pubtator_documents
+from narrant.pubtator.regex import CONTENT_ID_TIT_ABS
+from narrant.pubtator.extract import read_pubtator_documents
 
 
 def prepare_files(input):

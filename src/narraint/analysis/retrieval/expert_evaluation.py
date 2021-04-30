@@ -9,7 +9,7 @@ from narrant.backend.export import export
 from narrant.backend.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
 
 from narrant.preprocessing import enttypes
-from narraint.pubtator.split import split
+from narrant.pubtator.split import split
 from narraint.queryengine.engine import QueryEngine
 
 queries_pubmed = []
