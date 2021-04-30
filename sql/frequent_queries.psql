@@ -93,6 +93,9 @@ SELECT *
 FROM TAG
 WHERE ent_type = 'Method' and ent_str = 'weight';
 
+SELECT *
+FROM Tag
+WHERE document_collection = 'Test2' and ent_type = 'DrugBankChemical';
 
 SELECT COUNT(distinct document_id)
 FROM TAG
