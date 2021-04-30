@@ -7,11 +7,10 @@ from collections import defaultdict
 
 from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
-from sqlalchemy import or_
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
-from narraint.entity.enttypes import GENE, SPECIES
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
+from narrant.preprocessing.enttypes import GENE, SPECIES
 
 
 def get_facts_for_document_collection(document_collection):

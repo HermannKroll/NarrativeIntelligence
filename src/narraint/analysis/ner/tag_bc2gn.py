@@ -7,10 +7,10 @@ import logging
 from narraint import tools
 from narraint.analysis.ner.perform_ncbi_disease_test import tags_from_file
 from narraint.config import PREPROCESS_CONFIG, DATA_DIR
-from narraint.preprocessing.config import Config
-from narraint.preprocessing.tagging.dictagger import DictTagger
-from narraint.preprocessing.tagging.disease import DiseaseTagger
-from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
+from narrant.preprocessing.config import Config
+from narrant.preprocessing.tagging.dictagger import DictTagger
+from narrant.preprocessing.tagging.disease import DiseaseTagger
+from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
 
 STOPWORD_LIST = tools.proj_rel_path("data/bc2gn_stopwords.txt")
 BC2GN_DIR = os.path.join(DATA_DIR, "NER/biocreative2normalization/")

@@ -9,12 +9,12 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from sqlalchemy import func
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
 from narraint.entity.entitytagger import EntityTagger
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
+from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL, ALL, DISEASE
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology

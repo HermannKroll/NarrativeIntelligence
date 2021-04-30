@@ -3,10 +3,9 @@ from collections import defaultdict
 from datetime import datetime
 
 from narraint.analysis.retrieval.helper import perform_evaluation
-from narraint.analysis.pubmed_medline import PubMedMEDLINE
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
-from narraint.entity.enttypes import DISEASE, CHEMICAL, GENE
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
+from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, GENE
 from narraint.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.progress import print_progress_with_eta

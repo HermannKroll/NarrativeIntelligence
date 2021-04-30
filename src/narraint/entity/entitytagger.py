@@ -7,16 +7,16 @@ import gzip
 from itertools import islice
 
 
-from narraint.backend.database import Session
-from narraint.backend.models import Tag
+from narrant.backend.database import Session
+from narrant.backend.models import Tag
 from narraint.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, \
     ENTITY_TAGGING_INDEX, GENE_FILE
 from narraint.entity.entity import Entity
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY
+from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
+from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
 
 
 class DosageFormTaggerVocabulary:

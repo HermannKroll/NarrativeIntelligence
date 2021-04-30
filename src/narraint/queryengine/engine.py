@@ -8,8 +8,8 @@ from typing import List
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from narraint.backend.models import Document, Predication, Sentence
-from narraint.backend.database import Session
+from narrant.backend.models import Document, Predication, Sentence
+from narrant.backend.database import Session
 from sqlalchemy.dialects import postgresql
 
 from narraint.entity.entity import Entity

@@ -1,7 +1,7 @@
 from typing import List, Set
 
 from narraint.entity.entity import Entity
-from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE, MESH_ONTOLOGY, \
     SYMMETRIC_PREDICATES, PREDICATE_ASSOCIATED, have_entities_correct_order

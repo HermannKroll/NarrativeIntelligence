@@ -1,8 +1,8 @@
 import logging
 import random
 
-from narraint.backend.database import Session
-from narraint.backend.models import DocProcessedByOpenIE
+from narrant.backend.database import Session
+from narrant.backend.models import DocProcessedByOpenIE
 from narraint.pubmedutils import pubmed_crawl_pmids
 
 document_collections = ["PubMed"]

@@ -7,11 +7,11 @@ from itertools import islice
 
 from sqlalchemy import insert
 
-from narraint.backend.database import Session
-from narraint.backend.export import export
-from narraint.backend.models import Document, Tag, Predication
+from narrant.backend.database import Session
+from narrant.backend.export import export
+from narrant.backend.models import Document, Tag, Predication
 from narraint.config import DATA_DIR
-from narraint.entity.enttypes import CHEMICAL, GENE
+from narrant.preprocessing.enttypes import CHEMICAL, GENE
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie

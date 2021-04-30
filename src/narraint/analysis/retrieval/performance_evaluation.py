@@ -3,16 +3,13 @@ import random
 from datetime import datetime
 
 from sqlalchemy import func
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import aliased
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
 from narraint.entity.entity import Entity
-from narraint.entity.enttypes import GENE, SPECIES, CHEMICAL
 from narraint.extraction.versions import PATHIE_EXTRACTION
 from narraint.progress import print_progress_with_eta
-from narraint.queryengine.engine import VAR_NAME, VAR_TYPE, VAR_TYPE_PREDICATE, QueryEngine
+from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 
 RANDOM_FACTS = 100000

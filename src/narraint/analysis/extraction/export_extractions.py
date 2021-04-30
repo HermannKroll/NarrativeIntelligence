@@ -2,9 +2,9 @@ import logging
 
 from sqlalchemy import func
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication, Sentence
-from narraint.entity.enttypes import DRUG, DISEASE, GENE
+from narrant.backend.database import Session
+from narrant.backend.models import Predication, Sentence
+from narrant.preprocessing.enttypes import DRUG, GENE
 
 DOCUMENT_COLLECTION = 'PubMed'
 EXTRACTIONS_TO_EXPORT = 100

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from narraint.config import MESH_DESCRIPTORS_FILE, DRUGBANK_ID_2_MESH_MAPPING_INDEX
 from narraint.mesh.data import MeSHDB
-from narraint.preprocessing.tagging.drug import DrugTaggerVocabulary
+from narrant.preprocessing.tagging.drug import DrugTaggerVocabulary
 
 DRUGBANK_TO_MESH_DISAMBIGUATION = {
     "DB01221": "MESH:D007649",

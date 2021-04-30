@@ -1,12 +1,10 @@
 import logging
-import os
 import pickle
-from collections import defaultdict
 from datetime import datetime
 
 from narraint.config import MESH_DESCRIPTORS_FILE, MESH_ONTOLOGY_INDEX_FILE
-from narraint.entity.enttypes import DOSAGE_FORM, METHOD, DISEASE
-from narraint.mesh.data import MeSHDB, Descriptor
+from narrant.preprocessing.enttypes import DOSAGE_FORM, METHOD, DISEASE
+from narraint.mesh.data import MeSHDB
 from narraint.progress import print_progress_with_eta
 
 MESH_TREE_NAMES = dict(

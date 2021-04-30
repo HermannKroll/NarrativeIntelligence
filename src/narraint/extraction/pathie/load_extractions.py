@@ -3,7 +3,7 @@ import logging
 from typing import List
 from io import StringIO
 
-from narraint.backend.database import Session
+from narrant.backend.database import Session
 from narraint.extraction.versions import PATHIE_EXTRACTION, CORENLP_VERSION
 from narraint.extraction.openie.cleanload import PRED, insert_predications_into_db, clean_predications
 

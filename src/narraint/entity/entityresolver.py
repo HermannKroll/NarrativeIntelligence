@@ -8,12 +8,12 @@ from datetime import datetime
 from itertools import islice
 import lxml.etree as ET
 
-from narraint.backend.database import Session
-from narraint.backend.models import Tag
+from narrant.backend.database import Session
+from narrant.backend.models import Tag
 from narraint.config import GENE_FILE, GENE_INDEX_FILE, MESH_DESCRIPTORS_FILE, MESH_ID_TO_HEADING_INDEX_FILE, \
     TAXONOMY_INDEX_FILE, TAXONOMY_FILE, DOSAGE_FID_DESCS, MESH_SUPPLEMENTARY_FILE, \
-    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, TMP_DIR, DRUGBANK_ID2NAME_INDEX, DRUGBASE_XML_DUMP
-from narraint.entity.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, \
+    MESH_SUPPLEMENTARY_ID_TO_HEADING_INDEX_FILE, DRUGBANK_ID2NAME_INDEX, DRUGBASE_XML_DUMP
+from narrant.preprocessing.enttypes import GENE, CHEMICAL, DISEASE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, \
     DRUGBANK_CHEMICAL
 from narraint.entity.meshontology import MeSHOntology
 from narraint.mesh.data import MeSHDB

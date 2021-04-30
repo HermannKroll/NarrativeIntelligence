@@ -1,10 +1,9 @@
 from unittest import TestCase
 
 from narraint.entity.entity import Entity
-from narraint.entity.enttypes import DISEASE, DRUG, GENE, CHEMICAL
+from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE, CHEMICAL
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.query import FactPattern, GraphQuery
-from narraint.queryengine.query_hints import ENTITY_TYPE_EXPANSION
 
 
 class QueryExpanderTestCase(TestCase):

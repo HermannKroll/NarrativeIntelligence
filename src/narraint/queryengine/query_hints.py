@@ -1,7 +1,7 @@
 import re
 
 from narraint.entity.entity import Entity
-from narraint.entity.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES, \
+from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES, \
     PLANT_FAMILY, LAB_METHOD, METHOD
 
 QUERY_LIMIT = 50000

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from narraint.entity.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
+from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
 from narraint.entity.meshontology import MeSHOntology
 from narraint.queryengine.aggregation.base import QueryResultAggregationStrategy
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution

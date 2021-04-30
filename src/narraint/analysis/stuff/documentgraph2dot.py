@@ -3,8 +3,8 @@ import logging
 
 from sqlalchemy import and_
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
 from narraint.entity.entityresolver import EntityResolver
 from narraint.graph.labeled import LabeledGraph
 

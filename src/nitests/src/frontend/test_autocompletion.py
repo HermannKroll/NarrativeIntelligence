@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.config import PLANT_FAMILTY_DATABASE_FILE
-from narraint.preprocessing.tagging.vocabularies import ExcipientVocabulary
+from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary
 from narraint.frontend.ui.autocompletion import AutocompletionUtil
 
 

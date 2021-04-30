@@ -6,8 +6,8 @@ from datetime import datetime
 
 from lxml import etree
 
-from narraint.backend.database import Session
-from narraint.backend.models import DocProcessedByIE
+from narrant.backend.database import Session
+from narrant.backend.models import DocProcessedByIE
 from narraint.config import MESH2DOC_INDEX_Pubmed, MESH2Doc_INDEX_PMC
 from narraint.progress import print_progress_with_eta
 

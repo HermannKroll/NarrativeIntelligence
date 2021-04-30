@@ -7,7 +7,7 @@ import pytest
 import nitests.config.config as config
 import nitests.util
 
-from narraint.preprocessing import preprocess, dictpreprocess
+from narrant.preprocessing import preprocess, dictpreprocess
 from narraint.tools import proj_rel_path
 from narraint.pubtator.extract import read_tagged_documents
 from nitests import util

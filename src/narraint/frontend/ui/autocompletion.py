@@ -1,4 +1,3 @@
-import itertools
 import logging
 import pickle
 from datetime import datetime
@@ -7,9 +6,8 @@ import os
 
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
-from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, GENE, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
-from narraint.entity.meshontology import MeSHOntology
 from narraint.progress import print_progress_with_eta
 from narraint.queryengine.engine import QueryEngine
 

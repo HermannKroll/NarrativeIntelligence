@@ -3,15 +3,12 @@ import os
 
 import pytest
 
-from narraint.config import PREPROCESS_CONFIG
-from narraint.preprocessing.tagging.dictagger import DictTagger, split_indexed_words
-from narraint.preprocessing.tagging.dosage import DosageFormTagger
-from narraint.preprocessing.tagging.drug import DrugTagger
-from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
-from narraint.tools import proj_rel_path
-from nitests.util import make_test_tempdir, create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
+from narrant.preprocessing.tagging.dictagger import DictTagger, split_indexed_words
+from narrant.preprocessing.tagging.dosage import DosageFormTagger
+from narrant.preprocessing.tagging.drug import DrugTagger
+from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
+from nitests.util import create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
     resource_rel_path
-import narraint.entity.enttypes as enttypes
 import narraint.pubtator.document as doc
 
 

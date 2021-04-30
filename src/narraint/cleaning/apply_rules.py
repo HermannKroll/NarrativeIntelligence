@@ -5,9 +5,9 @@ from datetime import datetime
 
 from sqlalchemy import update, and_, or_, delete
 
-from narraint.backend.database import Session
-from narraint.backend.models import Predication, PredicationToDelete, Sentence
-from narraint.entity.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
+from narrant.backend.database import Session
+from narrant.backend.models import Predication, PredicationToDelete, Sentence
+from narrant.preprocessing.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
     PLANT_FAMILY, LAB_METHOD, METHOD
 from narraint.cleaning.predicate_vocabulary import PRED_TO_REMOVE, DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
     ASSOCIATED_PREDICATE_UNSURE

@@ -4,9 +4,9 @@ import logging
 from sqlalchemy import or_
 
 from narraint.entity.meshontology import MeSHOntology
-from narraint.backend.database import Session
-from narraint.backend.models import Predication
-from narraint.entity.enttypes import CHEMICAL, DISEASE
+from narrant.backend.database import Session
+from narrant.backend.models import Predication
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 
 
 def export_predication_core_as_tsv(output_file, document_collection, extraction_type):

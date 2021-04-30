@@ -3,9 +3,9 @@ from collections import defaultdict
 
 from sqlalchemy import func
 
-from narraint.backend.database import Session
-from narraint.backend.models import Tag, Document
-from narraint.entity.enttypes import DRUG, PLANT_FAMILY, DOSAGE_FORM, EXCIPIENT
+from narrant.backend.database import Session
+from narrant.backend.models import Tag, Document
+from narrant.preprocessing.enttypes import DRUG, PLANT_FAMILY, DOSAGE_FORM, EXCIPIENT
 
 ANNOTATIONS_TO_EXPORT = 50
 DOCUMENT_COLLECTION = 'PubMed'

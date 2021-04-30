@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-from narraint.preprocessing.utils import get_document_id, DocumentError
+from narrant.preprocessing.utils import get_document_id, DocumentError
 from narraint.pubtator.regex import DOCUMENT_ID
 from narraint.pubtator.document import TaggedDocument
 

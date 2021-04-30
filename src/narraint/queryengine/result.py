@@ -1,8 +1,6 @@
-from collections import defaultdict
-
 from narraint.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narraint.entity.entityresolver import EntityResolver
-from narraint.entity.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, METHOD, \
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, METHOD, \
     LAB_METHOD
 from narraint.entity.meshontology import MeSHOntology
 

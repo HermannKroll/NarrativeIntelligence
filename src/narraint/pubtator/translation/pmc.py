@@ -9,11 +9,11 @@ from argparse import ArgumentParser
 from typing import List
 from lxml import etree, html
 from narraint.config import PREPROCESS_CONFIG
-from narraint.preprocessing.collect import PMCCollector
-from narraint.preprocessing.config import Config
-from narraint.preprocessing.convertids import load_pmcids_to_pmid_index
+from narrant.preprocessing.collect import PMCCollector
+from narrant.preprocessing.config import Config
+from narrant.preprocessing.convertids import load_pmcids_to_pmid_index
 from narraint.pubtator import conversion_errors
-from narraint.backend.models import Document
+from narrant.backend.models import Document
 
 class PMCConverter:
     MAX_CONTENT_LENGTH = 1000000

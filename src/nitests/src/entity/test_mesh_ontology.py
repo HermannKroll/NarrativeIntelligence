@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from narraint.entity.enttypes import DISEASE, METHOD, DOSAGE_FORM
+from narrant.preprocessing.enttypes import DISEASE, METHOD, DOSAGE_FORM
 from narraint.entity.meshontology import MeSHOntology
 
 

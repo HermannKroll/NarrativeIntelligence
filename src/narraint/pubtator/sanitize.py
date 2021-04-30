@@ -3,7 +3,7 @@ import os
 from shutil import copy
 from argparse import ArgumentParser
 
-from narraint.backend.models import Document
+from narrant.backend.models import Document
 from narraint.pubtator.document import TaggedDocument
 from narraint.pubtator.regex import CONTENT_ID_TIT_ABS, ILLEGAL_CHAR
 from narraint.pubtator.extract import read_pubtator_documents

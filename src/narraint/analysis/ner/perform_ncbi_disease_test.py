@@ -6,10 +6,10 @@ from collections import defaultdict
 import logging
 
 from narraint.config import DATA_DIR, PREPROCESS_CONFIG
-from narraint.preprocessing.config import Config
-from narraint.preprocessing.tagging.dictagger import DictTagger
-from narraint.preprocessing.tagging.disease import DiseaseTagger
-from narraint.preprocessing.tagging.vocabularies import expand_vocabulary_term
+from narrant.preprocessing.config import Config
+from narrant.preprocessing.tagging.dictagger import DictTagger
+from narrant.preprocessing.tagging.disease import DiseaseTagger
+from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
 from narraint.pubtator.document import parse_tag_list, TaggedEntity, TaggedDocument
 from narraint.pubtator.extract import read_pubtator_documents
 from narraint.pubtator.regex import TAG_LINE_NORMAL

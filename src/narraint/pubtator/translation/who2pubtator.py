@@ -3,7 +3,7 @@ import logging
 from argparse import ArgumentParser
 from itertools import islice
 
-from narraint.backend.models import Document
+from narrant.backend.models import Document
 
 ARTIFICIL_IDS_START_AT = 100000000
 

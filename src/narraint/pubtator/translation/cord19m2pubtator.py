@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import csv
 from itertools import islice
 
-from narraint.backend.models import Document
+from narrant.backend.models import Document
 
 
 def main():

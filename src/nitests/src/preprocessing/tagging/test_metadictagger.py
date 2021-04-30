@@ -1,13 +1,9 @@
 import os
 import unittest
-import filecmp
 
-import pytest
-
-from narraint.preprocessing.tagging.metadictagger import MetaDicTaggerFactory, MetaDicTagger
-import narraint.entity.enttypes as et
+from narrant.preprocessing.tagging.metadictagger import MetaDicTaggerFactory
+import narrant.preprocessing.enttypes as et
 import nitests.util as util
-from narraint import tools
 from narraint.pubtator.document import parse_tag_list, TaggedEntity
 from narraint.pubtator.extract import read_tagged_documents
 

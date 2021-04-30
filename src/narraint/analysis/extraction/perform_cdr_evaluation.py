@@ -2,13 +2,13 @@ import logging
 import os
 from collections import defaultdict
 
-from narraint.backend.database import Session
-from narraint.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
+from narrant.backend.database import Session
+from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
     document_bulk_load
-from narraint.backend.models import Predication
+from narrant.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
-from narraint.entity.enttypes import CHEMICAL, DISEASE
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from narraint.cleaning.apply_rules import clean_extractions_in_database
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
