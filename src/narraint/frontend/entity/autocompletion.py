@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
-from narrant.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
+from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
 from narrant.progress import print_progress_with_eta
@@ -18,12 +18,12 @@ class AutocompletionUtil:
     __instance = None
 
     @staticmethod
-    def instance():
+    def instance(load_index=True):
         if AutocompletionUtil.__instance is None:
-            AutocompletionUtil()
+            AutocompletionUtil(load_index=load_index)
         return AutocompletionUtil.__instance
 
-    def __init__(self, logger=logging):
+    def __init__(self, logger=logging, load_index=True):
         if AutocompletionUtil.__instance is not None:
             raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
         else:
@@ -32,7 +32,8 @@ class AutocompletionUtil:
             self.logger = logger
             self.known_terms = set()
             self.trie = None
-            self.load_autocompletion_index()
+            if load_index:
+                self.load_autocompletion_index()
             AutocompletionUtil.__instance = self
 
     def build_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
