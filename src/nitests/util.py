@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from narrant.backend.database import Session
-from narraint.config import PREPROCESS_CONFIG
+from narrant.config import PREPROCESS_CONFIG
 from narrant.pubtator.document import TaggedEntity
 from narrant.pubtator.extract import collect_ids_from_dir
 from narrant.tools import proj_rel_path

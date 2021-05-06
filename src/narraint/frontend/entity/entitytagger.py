@@ -6,11 +6,10 @@ import pickle
 import gzip
 from itertools import islice
 
-
+from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.backend.database import Session
 from narrant.backend.models import Tag
-from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, \
-    ENTITY_TAGGING_INDEX, GENE_FILE
+from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY

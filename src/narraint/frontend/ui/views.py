@@ -22,7 +22,7 @@ from narraint.queryengine.aggregation.substitution import ResultAggregationBySub
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.frontend.ui.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 
 variable_type_mappings = {}
