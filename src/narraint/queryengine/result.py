@@ -74,13 +74,14 @@ class QueryFactExplanation:
     version of the predicate
     """
 
-    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str):
+    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str, predication_id):
         self.position = position
         self.sentence = sentence
         self.predicate = predicate
         self.predicate_canonicalized = predicate_canonicalized
         self.subject_str = subject_str
         self.object_str = object_str
+        self.predication_ids = {predication_id}
 
     def __str__(self):
         return '{} [{}, "{}" -> "{}", {}]'.format(self.sentence, self.subject_str, self.predicate,
@@ -89,7 +90,8 @@ class QueryFactExplanation:
     def to_dict(self):
         return dict(s=self.sentence, p=self.predicate,
                     p_c=self.predicate_canonicalized,
-                    s_str=self.subject_str, o_str=self.object_str, pos=self.position)
+                    s_str=self.subject_str, o_str=self.object_str, pos=self.position,
+                    ids=','.join([str(i) for i in self.predication_ids]))
 
 
 class QueryResultBase:
@@ -135,6 +137,7 @@ class QueryDocumentResult(QueryResultBase):
         """
         for e in self.explanations:
             if e.position == explanation.position and e.sentence == explanation.sentence:
+                e.predication_ids.update(explanation.predication_ids)
                 if explanation.predicate not in e.predicate:
                     e.predicate = e.predicate + '//' + explanation.predicate
                 if explanation.subject_str not in e.subject_str:

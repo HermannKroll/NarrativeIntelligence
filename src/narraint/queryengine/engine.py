@@ -43,11 +43,13 @@ class QueryEngine:
         for idx, p in enumerate(predication_aliases):
             # the first entry needs to project the document id
             if idx == 0:
-                projection_list.extend([p.document_id, p.subject_id, p.subject_str, p.subject_type,
+                projection_list.extend([p.id,
+                                        p.document_id, p.subject_id, p.subject_str, p.subject_type,
                                         p.predicate_canonicalized, p.object_id, p.object_str, p.object_type,
                                         p.confidence, p.predicate, p.sentence_id])
             else:
-                projection_list.extend([p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized,
+                projection_list.extend([p.id,
+                                        p.subject_id, p.subject_str, p.subject_type, p.predicate_canonicalized,
                                         p.object_id, p.object_str, p.object_type, p.confidence, p.predicate,
                                         p.sentence_id])
 
@@ -196,16 +198,16 @@ class QueryEngine:
             # extract var substitutions for pmid
             var2sub = {}
             for v, t, pred_pos in var_info:
-                offset = 1 + pred_pos * 10
+                offset = pred_pos * 11
 
                 if t == 'subject':
                     # it's ent_str, ent_id, ent_type
-                    var2sub[v] = QueryEntitySubstitution(r[offset + 1], r[offset], r[offset + 2])
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 3], r[offset + 2], r[offset + 4])
                 elif t == 'object':
                     # it's ent_str, ent_id, ent_type
-                    var2sub[v] = QueryEntitySubstitution(r[offset + 5], r[offset + 4], r[offset + 6])
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 7], r[offset + 6], r[offset + 8])
                 elif t == 'predicate':
-                    var2sub[v] = QueryEntitySubstitution(r[offset + 3], 'predicate', 'predicate')
+                    var2sub[v] = QueryEntitySubstitution(r[offset + 5], 'predicate', 'predicate')
                 else:
                     raise ValueError('Unknown position in query projection')
 
@@ -213,22 +215,23 @@ class QueryEngine:
             explanations = []
             conf = 0
             for i in range(0, len(query_patterns)):
-                offset = 1 + i * 10
-                subject_str = r[offset + 1]
-                object_str = r[offset + 5]
-                predicate_canonicalized = r[offset + 3]
-                predicate = r[offset + 8]
-                sentence_id = int(r[offset + 9])
+                offset = i * 11
+                predication_id = int(r[offset])
+                subject_str = r[offset + 3]
+                object_str = r[offset + 7]
+                predicate_canonicalized = r[offset + 5]
+                predicate = r[offset + 10]
+                sentence_id = int(r[offset + 11])
                 sentence_ids.add(sentence_id)
                 explanations.append(
                     QueryFactExplanation(i, sentence_id, predicate, predicate_canonicalized, subject_str,
-                                         object_str))
-                if r[offset + 7]:
-                    conf += float(r[offset + 7])
+                                         object_str, predication_id))
+                if r[offset + 9]:
+                    conf += float(r[offset + 9])
                 else:
                     conf += 0.0
             # create query result
-            doc_id = int(r[0])
+            doc_id = int(r[1])
             doc_ids.add(doc_id)
 
             # each document id + the variable substitution forms a unique document result
@@ -237,7 +240,7 @@ class QueryEngine:
                 var2sub_set.add('{}:{}'.format(k, v.entity_id))
             key = (doc_id, frozenset(var2sub_set))
             if key not in doc2result:
-                doc2result[key] = QueryDocumentResult(doc_id, r[1], var2sub, conf, explanations)
+                doc2result[key] = QueryDocumentResult(doc_id, None, var2sub, conf, explanations)
             else:
                 for e in explanations:
                     doc2result[key].integrate_explanation(e)

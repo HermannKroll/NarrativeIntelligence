@@ -457,15 +457,21 @@ const createExpandableAccordion = (first_call, divID) => {
 }
 
 
+function rateExtraction(correct, predication_ids_str){
+    console.log('nice - rated: ' + correct + ' for ' + predication_ids_str);
+    return true;
+}
+
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
     let document_id = queryResult["docid"];
     let title = queryResult["title"];
     let explanations = queryResult["e"];
-    let e_string = "";
+    let div_provenance_all = $('<div>');
     let j = -1;
     try {
         explanations.forEach(e => {
             let sentence = e["s"];
+            let predication_ids_str = e['ids'];
             // an explanation might have multiple subjects / predicates / objects separated by //
             e["s_str"].split('//').forEach(s => {
                 let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
@@ -476,7 +482,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
             });
             e["o_str"].split('//').forEach(o => {
-                let o_reg = new RegExp('(' + o + '[a-z]*)', 'gi');
+                let o_reg = new RegExp('(' + o + '[a-zg]*)', 'gi');
                 sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
             });
 
@@ -484,11 +490,44 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 j = parseInt(e["pos"]) + 1;
             }
             if (j !== parseInt(e["pos"]) + 1){
-                e_string += '<br>';
+                div_provenance_all.append($('<br>'));
                 j = parseInt(e["pos"]) + 1;
             }
-            e_string += j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
-                e["p_c"] + ", " + e["o_str"] + ']<br>';
+
+            let div_rate_pos = $('<img src="'+ok_symbol_url+'" height="30px">');
+            div_rate_pos.click(function(){ rateExtraction(true, predication_ids_str);});
+
+            let div_rate_neg = $('<img src="'+cancel_symbol_url+'" height="30px">');
+            div_rate_neg.click(function(){ rateExtraction(false, predication_ids_str);});
+            let div_col_rating = $('<div class="col-">');
+            div_col_rating.append(div_rate_pos);
+            div_col_rating.append(div_rate_neg);
+
+            let div_provenance = $('<div class="col">' +
+                j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                e["p_c"] + ", " + e["o_str"] + ']' +
+                '</div>');
+
+            let div_prov_example = $('<div class="container">');
+            let div_prov_example_row = $('<div class="row">');
+
+            div_prov_example_row.append(div_provenance);
+            div_prov_example_row.append(div_col_rating);
+            div_prov_example.append(div_prov_example_row);
+
+            div_provenance_all.append(div_prov_example);
+
+
+         /*   e_string += '<div class="container"><div class="row">'+
+                '<div class="col">' +
+                j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                e["p_c"] + ", " + e["o_str"] + ']' +
+                '</div>' +
+                 '<div class="col-">' + // + div_rate_pos + ' ' + div_rate_neg +
+                 '<img src="'+ok_symbol_url+'" height="30px" onclick="rateExtraction(true,\"'+ predication_ids_str +'\");">  ' +
+                '<img src="'+cancel_symbol_url+'" height="30px" onclick="rateExtraction(false,\"'+ predication_ids_str +'\");">' +
+                 '</div></div></div><br>'
+            ; */
         });
     } catch (SyntaxError) {
 
@@ -497,10 +536,17 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
         '<img src="'+pubpharm_image_url+'" height="25px">' +
         document_id + '</a>' + '<br><b>' + title + '</b><br></div></div><br>');
-    let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>' +
+
+    let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>');
+    let div_provenance_collapsable_block = $('<div id="prov_' + document_id + '" class="collapse">');
+    div_provenance_collapsable_block.append(div_provenance_all);
+
+
+ /*   let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>' +
         '<div id="prov_' + document_id + '" class="collapse">\n' +
-        e_string + '</div>')
-    divDoc.append(divProv);
+        e_string + '</div>') */
+    divDoc.append(div_provenance_button);
+    divDoc.append(div_provenance_collapsable_block);
     return divDoc;
 };
 
