@@ -94,11 +94,11 @@ class AutocompletionUtil:
         tagger = EntityTagger.instance()
         start_time = datetime.now()
         task_size = len(tagger.term2entity.items())
-        know_entity_index = [(e_type, e_id) for e_id, _, e_type in entities]
+     #   know_entity_index = [(e_type, e_id) for e_id, _, e_type in entities]
         for idx, (term, t_entities) in enumerate(tagger.term2entity.items()):
             for e in t_entities:
-                if (e.entity_type, e.entity_id) in know_entity_index:
-                    self.add_entity_to_dict(e.entity_type, term)
+      #          if (e.entity_type, e.entity_id) in know_entity_index:
+                self.add_entity_to_dict(e.entity_type, term)
             print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
 
         logging.info('Index built')
