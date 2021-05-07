@@ -466,18 +466,18 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     try {
         explanations.forEach(e => {
             let sentence = e["s"];
-            // an explanation might have multiple subjects / predicates / objects sperated by //
+            // an explanation might have multiple subjects / predicates / objects separated by //
             e["s_str"].split('//').forEach(s => {
-                let s_reg = new RegExp('(' + s + ')', 'gi');
-                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">' + s + "</code>")
+                let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
+                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">$1</code>')
             });
             e["p"].split('//').forEach(p => {
-                let p_reg = new RegExp('(' + p + ')', 'gi');
-                sentence = sentence.replaceAll(p_reg, '<mark>' + p + "</mark>")
+                let p_reg = new RegExp('(' + p + '[a-z]*)', 'gi');
+                sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
             });
             e["o_str"].split('//').forEach(o => {
-                let o_reg = new RegExp('(' + o + ')', 'gi');
-                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">' + o + "</code>")
+                let o_reg = new RegExp('(' + o + '[a-z]*)', 'gi');
+                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
             });
 
             if (j === -1){
@@ -494,8 +494,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     }
 
-    let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.ncbi.nlm.nih.gov/pubmed/' + document_id + '/" target="_blank">' +
-        '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/US-NLM-PubMed-Logo.svg/200px-US-NLM-PubMed-Logo.svg.png" width="80px" height="28px">' +
+    let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
+        '<img src="'+pubpharm_image_url+'" height="25px">' +
         document_id + '</a>' + '<br><b>' + title + '</b><br></div></div><br>');
     let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>' +
         '<div id="prov_' + document_id + '" class="collapse">\n' +
