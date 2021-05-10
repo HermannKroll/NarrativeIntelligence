@@ -1,7 +1,7 @@
 import unittest
 
 from narrant.preprocessing.enttypes import LAB_METHOD, METHOD
-from narrant.preprocessing.tagging.vocabularies import MethodVocabulary, PlantFamilyVocabulary
+from narrant.preprocessing.tagging.vocabularies import MethodVocabulary, PlantFamilyVocabulary, expand_vocabulary_term
 
 
 class VocabularyTest(unittest.TestCase):
@@ -89,3 +89,9 @@ class VocabularyTest(unittest.TestCase):
         self.assertIn("Arum", term2id['ara'])
         self.assertIn("Arum", term2id['arorum'])
         self.assertIn("Arum", term2id['arums'])
+
+    def test_expand_vocabulary_term(self):
+        terms = {"foo-bar-test", "color", "neighbour", "party", "mars", "more"}
+        check = terms | {"foo bar test", "foobartest", "colour", "neighbor", "mar", "mor", "colors", "colore", "marss"}
+        exp_terms = {t for tl in terms for t in expand_vocabulary_term(tl)}
+        self.assertTrue(check <= exp_terms)

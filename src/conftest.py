@@ -11,6 +11,6 @@ def pytest_sessionstart(session):
     import nitests.config.config_mod
     import narraint.config
     print("backend_config:" + narraint.config.BACKEND_CONFIG)
-    shutil.rmtree(tmp_rel_path(""))
-    os.mkdir(tmp_rel_path(""))
+    shutil.rmtree(tmp_rel_path(""), ignore_errors=True)
+    os.makedirs(tmp_rel_path(""))
     session = Session.get()
