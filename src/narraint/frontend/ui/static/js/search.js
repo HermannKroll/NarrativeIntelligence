@@ -73,7 +73,7 @@ function getCurrentQuery(){
     Object.values(queryPatternDict).forEach(val => {
         // do not add this pattern twice
         if(val[0] !== subject || val[1] !== predicate || val[2] !== object){
-            query =  (val[0] + ' ' + val[1] + ' ' +val[2] + '.') + query;
+            query =  (val[0] + ' ' + val[1] + ' ' +val[2] + '_AND_') + query;
         }
     });
 
@@ -186,7 +186,7 @@ function example_search(search_str) {
     console.log(search_str);
     //document.getElementById('id_keywords').value = search_str;
     let first = true;
-    search_str.split('.').forEach(comp => {
+    search_str.split('_AND_').forEach(comp => {
         let triple = split(comp.trim());
         if (first === false){
             let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
