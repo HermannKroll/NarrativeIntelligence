@@ -4,8 +4,8 @@ import logging
 from sqlalchemy import or_
 
 from narrant.entity.meshontology import MeSHOntology
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 
 
@@ -19,7 +19,7 @@ def export_predication_core_as_tsv(output_file, document_collection, extraction_
     :param extraction_type: the extraction type
     :return: None
     """
-    session = Session.get()
+    session = SessionExtended.get()
     query = session.query(Predication).yield_per(1000000)
     query = query.filter(Predication.document_collection == document_collection)
     query = query.filter(Predication.extraction_type == extraction_type)

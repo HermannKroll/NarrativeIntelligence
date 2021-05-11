@@ -7,8 +7,8 @@ from datetime import datetime
 from sqlalchemy import update, and_
 from scipy.spatial.distance import cosine
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, PRED_TO_REMOVE
 from narrant.progress import print_progress_with_eta
 
@@ -125,7 +125,7 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
     :param document_collection: the document collection to canonicalize
     :return: None
     """
-    session = Session.get()
+    session = SessionExtended.get()
     start_time = datetime.now()
 
     logging.info('Finalizing update plan...')
@@ -175,7 +175,7 @@ def canonicalize_predication_table(word2vec_model, output_distances, predicate_v
         pred_vocab = predicate_vocabulary
     logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
     logging.info('Retrieving predicates from db...')
-    predicates_with_count = Predication.query_predicates_with_count(session=Session.get(),
+    predicates_with_count = Predication.query_predicates_with_count(session=SessionExtended.get(),
                                                                     document_collection=document_collection)
     logging.info(f'{len(predicates_with_count)} predicates with count retrieved')
     logging.info('Filtering with minimum count...')

@@ -3,8 +3,8 @@ import logging
 
 from datetime import datetime
 
-from narrant.backend.database import Session
-from narrant.backend.models import Tag
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Tag
 from narrant.progress import print_progress_with_eta
 
 
@@ -45,7 +45,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    session = Session.get()
+    session = SessionExtended.get()
     logging.info("loading 'Chemical' tags from database...")
     chemical2docs = build_index(session, 'Chemical')
     logging.info('{} Chemicals load'.format(len(chemical2docs)))

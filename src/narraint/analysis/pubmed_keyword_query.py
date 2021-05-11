@@ -1,8 +1,8 @@
 import logging
 import random
 
-from narrant.backend.database import Session
-from narrant.backend.models import DocProcessedByOpenIE
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import DocProcessedByOpenIE
 from narraint.pubmedutils import pubmed_crawl_pmids
 
 document_collections = ["PubMed"]
@@ -13,7 +13,7 @@ keyword_queries = ["Simvastatin Cholesterol"]
 
 
 def retrieve_ids_in_openie_database(document_collection):
-    session = Session.get()
+    session = SessionExtended.get()
     logging.info('Querying for document ids processed by OpenIE in collection: {}'.format(document_collection))
     q = session.query(DocProcessedByOpenIE.document_id).filter_by(document_collection=document_collection)
     document_ids = set()

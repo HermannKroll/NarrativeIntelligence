@@ -3,7 +3,7 @@ import logging
 from typing import List
 from io import StringIO
 
-from narrant.backend.database import Session
+from narraint.backend.database import SessionExtended
 from narraint.extraction.versions import PATHIE_EXTRACTION, CORENLP_VERSION
 from narraint.extraction.openie.cleanload import PRED, insert_predications_into_db, clean_predications
 
@@ -63,7 +63,7 @@ def postgres_clean_and_export_predications_to_copy_load_tsv(tuples_cleaned: List
     # free memory here
     sentence_values.clear()
 
-    session = Session.get()
+    session = SessionExtended.get()
     connection = session.connection().connection
     cursor = connection.cursor()
     logging.info('Executing copy from sentence...')

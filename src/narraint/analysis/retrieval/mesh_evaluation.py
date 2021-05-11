@@ -3,8 +3,8 @@ from collections import defaultdict
 from datetime import datetime
 
 from narraint.analysis.retrieval.helper import perform_evaluation
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, GENE
 from narrant.entity.meshontology import MeSHOntology
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
@@ -95,7 +95,7 @@ query_predicates.append(("decreases", [CHEMICAL], [CHEMICAL, DISEASE]))
 
 
 query_engine = QueryEngine()
-session = Session.get()
+session = SessionExtended.get()
 mesh_ontology = MeSHOntology.instance()
 
 GENE_NCBI_TO_MESH_MAPPING = {"cyp3a4": 'MESH:D051544', # CYP3A4

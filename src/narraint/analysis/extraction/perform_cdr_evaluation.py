@@ -2,10 +2,10 @@ import logging
 import os
 from collections import defaultdict
 
-from narrant.backend.database import Session
+from narraint.backend.database import SessionExtended
 from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
     document_bulk_load
-from narrant.backend.models import Predication
+from narraint.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
@@ -55,7 +55,7 @@ CANONICALIZE_OUTPUT = False
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
-    session = Session.get()
+    session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CDR2015_COLLECTION) \
         .filter(Predication.predicate_canonicalized == 'induces') \

@@ -4,8 +4,8 @@ import logging
 from datetime import datetime
 import random
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.progress import print_progress_with_eta
 
 # 80% are valid and 20% are valid
@@ -17,7 +17,7 @@ def load_tuples_from_db():
     Loads the facts from the database
     :return: a set o tuples
     """
-    session = Session.get()
+    session = SessionExtended.get()
     query = session.query(Predication.document_id, Predication.subject_openie, Predication.predicate,
                           Predication.object_openie, Predication.sentence,
                           Predication.subject_id, Predication.subject_str, Predication.subject_type,

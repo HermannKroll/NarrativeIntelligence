@@ -4,8 +4,8 @@ from datetime import datetime
 
 from sqlalchemy import func
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.entity.entity import Entity
 from narraint.extraction.versions import PATHIE_EXTRACTION
 from narrant.progress import print_progress_with_eta
@@ -44,7 +44,7 @@ class PerformanceQueryEngine:
         time_after_query = datetime.now()
         result_size = len(set([r.document_id for r in results]))
 
-        #    session = Session.get()
+        #    session = SessionExtended.get()
         #   time_before_translation = datetime.now()
         #  query, var_info = self.__construct_query(session, graph_query, doc_collection, extraction_type)
         # time_after_translation = datetime.now()
@@ -65,7 +65,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    session = Session.get()
+    session = SessionExtended.get()
     q = session.query(Predication.subject_id, Predication.subject_type, Predication.predicate_canonicalized,
                       Predication.object_id, Predication.object_type) \
         .filter(Predication.predicate_canonicalized != None) \

@@ -6,8 +6,8 @@ from datetime import datetime
 
 from lxml import etree
 
-from narrant.backend.database import Session
-from narrant.backend.models import DocProcessedByIE
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import DocProcessedByIE
 from narraint.config import MESH2DOC_INDEX_Pubmed, MESH2Doc_INDEX_PMC
 from narrant.progress import print_progress_with_eta
 
@@ -172,7 +172,7 @@ def main():
     args = parser.parse_args()
 
     # Query database
-    session = Session.get()
+    session = SessionExtended.get()
     query = session.query(DocProcessedByIE.document_id).filter(DocProcessedByIE.document_collection == "PubMed")
     results = session.execute(query)
     db_pmids = set(x[0] for x in results)

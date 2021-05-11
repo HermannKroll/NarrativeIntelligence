@@ -3,14 +3,14 @@ import logging
 
 from sqlalchemy import and_
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.entity.entityresolver import EntityResolver
 from narraint.graph.labeled import LabeledGraph
 
 
 def export_document_graph_as_dot(output_dot, document_id, document_collection):
-    session = Session.get()
+    session = SessionExtended.get()
     #entity_resolver = EntityResolver.instance()
     query = session.query(Predication).filter(and_(Predication.document_id == document_id,
                                                    Predication.document_collection == document_collection))

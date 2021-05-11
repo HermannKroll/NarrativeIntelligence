@@ -7,8 +7,8 @@ import gzip
 from itertools import islice
 
 from narraint.config import ENTITY_TAGGING_INDEX
-from narrant.backend.database import Session
-from narrant.backend.models import Tag
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Tag
 from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
@@ -110,7 +110,7 @@ class EntityTagger:
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def _add_gene_terms(self, gene_input=GENE_FILE):
-        gene_ids_in_db = Tag.get_gene_ids(Session.get())
+        gene_ids_in_db = Tag.get_gene_ids(SessionExtended.get())
         logging.info('Reading gene input file: {}'.format(gene_input))
         with gzip.open(gene_input, 'rt') as f:
             for line in islice(f, 1, None):

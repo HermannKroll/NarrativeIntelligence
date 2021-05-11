@@ -12,8 +12,8 @@ from sqlalchemy.exc import IntegrityError
 from narrant.entity.meshontology import MeSHOntology
 from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
-from narrant.backend.models import Tag, Predication, Sentence
-from narrant.backend.database import Session
+from narraint.backend.models import Tag, Predication, Sentence
+from narraint.backend.database import SessionExtended
 from narraint.extraction.versions import OPENIE_EXTRACTION
 from narrant.progress import print_progress_with_eta
 
@@ -110,7 +110,7 @@ def load_tags_for_doc_ids(doc_ids, collection):
     :param collection: document collection
     :return: a dict mapping document ids to tuples (ent_id, ent_str, ent_type)
     """
-    session = Session.get()
+    session = SessionExtended.get()
     # get all tags for the given doc_ids
     query = session.query(Tag.document_id, Tag.ent_id, Tag.ent_str, Tag.ent_type)
     query = query.filter(Tag.document_collection == collection)
@@ -254,7 +254,7 @@ def load_sentences_with_hashes(document_collection: str):
     :return: a default dict mapping md5hashes to (sentence_id, sentence_text) tuples
     """
     logging.info('Retrieving known sentences for collection...')
-    session = Session.get()
+    session = SessionExtended.get()
     sentence_q = session.query(Sentence).filter(Sentence.document_collection == document_collection)
     hash2sentence = defaultdict(list)
     count = 0
@@ -270,7 +270,7 @@ def load_highest_sentence_id() -> int:
     Finds the highest sentence id in the sentence table
     :return: highest used sentence id
     """
-    session = Session.get()
+    session = SessionExtended.get()
     sentence_id = 0
     for q in session.execute(session.query(Sentence.id).order_by(Sentence.id.desc()).limit(1)):
         sentence_id = q[0]
@@ -338,7 +338,7 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     last_highest_sentence_id = load_highest_sentence_id()
     logging.info(f'Last highest sentence_id was: {last_highest_sentence_id}')
     logging.info(f'Querying duplicates from database (collection: {collection} and extraction type: {extraction_type})')
-    session = Session.get()
+    session = SessionExtended.get()
 
     logging.info('Check duplicates only within this session...')
     duplicate_check = set()
@@ -423,7 +423,7 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
                                                              clean_genes=clean_genes,
                                                              do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes)
     logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
-    session = Session.get()
+    session = SessionExtended.get()
 
     sentence_part = []
     logging.info('Inserting sentences...')

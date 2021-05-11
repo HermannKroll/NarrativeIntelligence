@@ -5,8 +5,8 @@ from datetime import datetime
 
 from sqlalchemy import update, and_, or_, delete
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication, PredicationToDelete, Sentence
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication, PredicationToDelete, Sentence
 from narrant.preprocessing.enttypes import DOSAGE_FORM, CHEMICAL, GENE, DISEASE, SPECIES, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
     PLANT_FAMILY, LAB_METHOD, METHOD
 from narraint.cleaning.predicate_vocabulary import PRED_TO_REMOVE, DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
@@ -27,7 +27,7 @@ def clean_predication_to_delete_table(session):
 
 
 def insert_predication_ids_to_delete(predication_ids: []):
-    session = Session.get()
+    session = SessionExtended.get()
     start_time = datetime.now()
     if Session.is_postgres:
         logging.info('Using fast postgres copy mode...')
@@ -109,7 +109,7 @@ def clean_redundant_predicate_tuples(session, symmetric_predicate_canonicalized:
 
 
 def clean_redundant_symmetric_predicates():
-    session = Session.get()
+    session = SessionExtended.get()
     clean_predication_to_delete_table(session)
 
     logging.info(f'Cleaning the following predicates: {SYMMETRIC_PREDICATES}')
@@ -127,7 +127,7 @@ def clean_redundant_symmetric_predicates():
 
 
 def clean_unreferenced_sentences():
-    session = Session.get()
+    session = SessionExtended.get()
     logging.info('Querying all sentence ids...')
     all_sent_ids = set()
     for r in session.execute(session.query(Sentence.id)):
@@ -159,7 +159,7 @@ def dosage_form_rule():
     :return: None
     """
     logging.info('Applying DosageForm rule...')
-    session = Session.get()
+    session = SessionExtended.get()
 
     logging.info(
         'Updating predicate to "{}" for (DosageForm, *) pairs'.format(DOSAGE_FORM_PREDICATE))
@@ -180,7 +180,7 @@ def method_rule():
     :return: None
     """
     logging.info('Applying DosageForm rule...')
-    session = Session.get()
+    session = SessionExtended.get()
 
     logging.info('Updating predicate to "{}" for (Method, *) pairs'.format(METHOD_PREDICATE))
     stmt_1 = update(Predication).where(Predication.subject_type.in_([METHOD, LAB_METHOD])). \
@@ -199,7 +199,7 @@ def clean_extractions_in_database():
     Some predicates are typed, e.g. treatments are between Chemical and Diseases - all other combinations are removed
     :return:
     """
-    session = Session.get()
+    session = SessionExtended.get()
 
     logging.info('Cleaning administered (DosageForm -> *)...')
     q_administered = update(Predication).where(and_(Predication.predicate_canonicalized == 'administered',

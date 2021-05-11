@@ -7,8 +7,8 @@ from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication, Document, Sentence
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication, Document, Sentence
 from narrant.progress import print_progress_with_eta
 
 TREX_DOCUMENT_COLLECTION = "trex"
@@ -28,7 +28,7 @@ def _get_processed_document_ids(session):
 
 
 def load_trex_dataset(input_dir):
-    session = Session.get()
+    session = SessionExtended.get()
     all_json = glob.glob(f'{input_dir}/**/*.json', recursive=True)
 
     start_time = datetime.now()

@@ -7,9 +7,9 @@ from itertools import islice
 
 from sqlalchemy import insert
 
-from narrant.backend.database import Session
+from narraint.backend.database import SessionExtended
 from narrant.backend.export import export
-from narrant.backend.models import Document, Tag, Predication
+from narraint.backend.models import Document, Tag, Predication
 from narraint.config import DATA_DIR
 from narrant.preprocessing.enttypes import CHEMICAL, GENE
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
@@ -78,7 +78,7 @@ CANONICALIZE_OUTPUT = False
 
 
 def perform_chemprot_evaluation(correct_relations, extraction_type, relations):
-    session = Session.get()
+    session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.predicate_canonicalized,
                       Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CHEMPROT_COLLECTION) \
@@ -154,7 +154,7 @@ def main():
 
     if CP_LOAD_DOCUMENTS_AND_TAGS:
         logging.info('Loading documents...')
-        session = Session.get()
+        session = SessionExtended.get()
         start_time = datetime.now()
         for idx, (document_id, sentence) in enumerate(id2sentence.items()):
             print_progress_with_eta('loading documents', idx, len(id2sentence), start_time, print_every_k=100)

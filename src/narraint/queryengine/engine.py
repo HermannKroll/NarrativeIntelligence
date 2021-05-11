@@ -8,8 +8,8 @@ from typing import List
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from narrant.backend.models import Document, Predication, Sentence
-from narrant.backend.database import Session
+from narraint.backend.models import Document, Predication, Sentence
+from narraint.backend.database import SessionExtended
 from sqlalchemy.dialects import postgresql
 
 from narrant.entity.entity import Entity
@@ -178,7 +178,7 @@ class QueryEngine:
         if len(query_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
 
-        session = Session.get()
+        session = SessionExtended.get()
         query, var_info = self.__construct_query(session, query_patterns, doc_collection, extraction_type, likesearch,
                                                  document_ids)
 
@@ -275,7 +275,7 @@ class QueryEngine:
         :param document_collection: the corresponding document collection
         :return: dict mapping docids to titles, dict mapping sentence ids to sentence texts
         """
-        session = Session.get()
+        session = SessionExtended.get()
         # Query the document titles
         q_titles = session.query(Document.id, Document.title).filter(Document.collection == document_collection)
         q_titles = q_titles.filter(Document.id.in_(doc_ids))
@@ -510,7 +510,7 @@ class QueryEngine:
 
     @staticmethod
     def query_predicates(collection=None):
-        session = Session.get()
+        session = SessionExtended.get()
         if not collection:
             query = session.query(Predication.predicate.distinct()). \
                 filter(Predication.predicate.isnot(None))
@@ -528,7 +528,7 @@ class QueryEngine:
 
     @staticmethod
     def query_entities():
-        session = Session.get()
+        session = SessionExtended.get()
         query_subjects = session.query(Predication.subject_id, Predication.subject_str,
                                        Predication.subject_type).distinct()
         query_subjects = query_subjects.filter(Predication.predicate_canonicalized.isnot(None))

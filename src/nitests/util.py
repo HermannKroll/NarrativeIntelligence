@@ -2,7 +2,7 @@ import logging
 import os
 import tempfile
 
-from narrant.backend.database import Session
+from narraint.backend.database import SessionExtended
 from narrant.config import PREPROCESS_CONFIG
 from narrant.pubtator.document import TaggedEntity
 from narrant.pubtator.extract import collect_ids_from_dir
@@ -43,7 +43,7 @@ def is_file_content_equal(file_1, file_2):
 
 
 def get_tags_from_database(doc_id=None):
-    session = Session.get()
+    session = SessionExtended.get()
     if id is None:
         result = session.execute("SELECT * FROM tag")
     else:
@@ -54,7 +54,7 @@ def get_tags_from_database(doc_id=None):
 
 def clear_database():
     """DANGER! ONLY USE IN TESTS, NOWHERE IN PRODUCTION CODE!"""
-    session = Session.get()
+    session = SessionExtended.get()
     if Session.is_sqlite:
         session.execute("DELETE FROM tag")
         session.execute("DELETE FROM doc_tagged_by")

@@ -8,8 +8,8 @@ from collections import defaultdict
 from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.preprocessing.enttypes import GENE, SPECIES
 
 
@@ -21,7 +21,7 @@ def get_facts_for_document_collection(document_collection):
     :return: a dict mapping a document id to a set of facts in it
     """
     logging.info('Retrieving facts for collection: {}'.format(document_collection))
-    session = Session.get()
+    session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
                       Predication.predicate_canonicalized,
                       Predication.object_id, Predication.object_type).yield_per(100000)\

@@ -9,8 +9,8 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from sqlalchemy import func
 
-from narrant.backend.database import Session
-from narrant.backend.models import Predication
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -386,7 +386,7 @@ class StatsView(TemplateView):
         if request.is_ajax():
             if "query" in request.GET:
                 if not StatsView.stats_query_results:
-                    session = Session.get()
+                    session = SessionExtended.get()
                     try:
                         logging.info('Processing database statistics...')
                         StatsView.stats_query_results = session.query(Predication.predicate_canonicalized,

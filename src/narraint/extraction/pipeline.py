@@ -9,9 +9,9 @@ from spacy.lang.en import English
 
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narrant.preprocessing import enttypes
-from narrant.backend.database import Session
+from narraint.backend.database import SessionExtended
 from narrant.backend.export import export
-from narrant.backend.models import DocProcessedByIE, Document
+from narraint.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.load_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
@@ -32,7 +32,7 @@ def retrieve_document_ids_to_process(document_ids: [int], document_collection: s
     :return: a set of document ids that have not been processed yet
     """
     logging.info('{} ids retrieved from id file..'.format(len(document_ids)))
-    session = Session.get()
+    session = SessionExtended.get()
     logging.info('Retrieving document ids from document table...')
     doc_ids_in_db = set()
     q = session.query(Document.id).filter(Document.collection == document_collection)
@@ -69,7 +69,7 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
         doc_inserts.append(dict(document_id=doc_id,
                                 document_collection=document_collection,
                                 extraction_type=extraction_type))
-    session = Session.get()
+    session = SessionExtended.get()
     session.bulk_insert_mappings(DocProcessedByIE, doc_inserts)
     session.commit()
     logging.info(f'{len(doc_inserts)} document ids have been inserted')

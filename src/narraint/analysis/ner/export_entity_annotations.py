@@ -3,8 +3,8 @@ from collections import defaultdict
 
 from sqlalchemy import func
 
-from narrant.backend.database import Session
-from narrant.backend.models import Tag, Document
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Tag, Document
 from narrant.preprocessing.enttypes import DRUG, PLANT_FAMILY, DOSAGE_FORM, EXCIPIENT
 
 ANNOTATIONS_TO_EXPORT = 50
@@ -56,7 +56,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
     
-    session = Session.get()
+    session = SessionExtended.get()
 
     logging.info('exporting drug annotations...')
     rand_drug_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION)\
