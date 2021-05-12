@@ -20,16 +20,34 @@ let CYTOSCAPE_STYLE = [
     }
 ];
 
-function escapeString(input_string){
-    if(input_string.includes(' ')){
-        return '"'+input_string+'"';
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function getUserIDFromLocalStorage() {
+    if(!localStorage.getItem('userid')){
+        console.log("no user id found in local storage");
+        let userid = uuidv4();
+        localStorage.setItem('userid', userid);
+        return userid;
+    }
+    return localStorage.getItem('userid');
+}
+
+
+function escapeString(input_string) {
+    if (input_string.includes(' ')) {
+        return '"' + input_string + '"';
     }
     return input_string;
 }
 
-function getTextOrPlaceholderFromElement(element_id){
+function getTextOrPlaceholderFromElement(element_id) {
     let text = document.getElementById(element_id).value;
-    if(text.length > 0){
+    if (text.length > 0) {
         return text;
     } else {
         return "";
@@ -45,9 +63,11 @@ const getUniqueListID = () => {
 }
 
 let queryPatternDict = {};
+
 function addQueryPattern(id, subject, predicate, object) {
     queryPatternDict[id] = [subject, predicate, object];
 }
+
 function removeQueryPattern(id) {
     delete queryPatternDict[id];
 }
@@ -55,44 +75,44 @@ function removeQueryPattern(id) {
 function removeAllQueryPatterns() {
     let ids = Object.keys(queryPatternDict);
     ids.forEach(id => {
-       removeQueryPattern(id);
+        removeQueryPattern(id);
     });
 }
 
-function getCurrentQuery(){
+function getCurrentQuery() {
     let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input =  document.getElementById('input_predicate');
+    let predicate_input = document.getElementById('input_predicate');
     let predicate = predicate_input.options[predicate_input.selectedIndex].value;
     let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
 
     let query = "";
-    if(subject.length > 0 && object.length > 0 ){
-        query = (subject + ' ' + predicate + ' ' +object);
+    if (subject.length > 0 && object.length > 0) {
+        query = (subject + ' ' + predicate + ' ' + object);
     }
 
     Object.values(queryPatternDict).forEach(val => {
         // do not add this pattern twice
-        if(val[0] !== subject || val[1] !== predicate || val[2] !== object){
-            query =  (val[0] + ' ' + val[1] + ' ' +val[2] + '_AND_') + query;
+        if (val[0] !== subject || val[1] !== predicate || val[2] !== object) {
+            query = (val[0] + ' ' + val[1] + ' ' + val[2] + '_AND_') + query;
         }
     });
 
     return query;
 }
 
-function createQueryListItem(subject, predicate, object){
+function createQueryListItem(subject, predicate, object) {
     let uniqueListItemID = getUniqueListID();
     addQueryPattern(uniqueListItemID, subject, predicate, object);
-    let deleteEvent = '$(\'#'+uniqueListItemID+'\').remove();removeQueryPattern(\''+uniqueListItemID+'\');'
-    let listItem = $('<li id="'+uniqueListItemID+'" class="list-group-item">'
-        +'<div class="container">' +
+    let deleteEvent = '$(\'#' + uniqueListItemID + '\').remove();removeQueryPattern(\'' + uniqueListItemID + '\');'
+    let listItem = $('<li id="' + uniqueListItemID + '" class="list-group-item">'
+        + '<div class="container">' +
         '  <div class="row">' +
-        '    <div class="col-sm"><span class="name">' +subject + '</span></div>' +
-        '    <div class="col-sm"><span class="name">' +predicate + '</span></div>' +
-        '    <div class="col-sm"><span class="name">' +object + '</span></div>' +
-        '    <div class="col-sm"><button class="btn btn-danger btn-xs pull-right remove-item" onclick="'+deleteEvent+'">-</button></div>' +
+        '    <div class="col-sm"><span class="name">' + subject + '</span></div>' +
+        '    <div class="col-sm"><span class="name">' + predicate + '</span></div>' +
+        '    <div class="col-sm"><span class="name">' + object + '</span></div>' +
+        '    <div class="col-sm"><button class="btn btn-danger btn-xs pull-right remove-item" onclick="' + deleteEvent + '">-</button></div>' +
         '  </div>' +
-        '</div>'+
+        '</div>' +
         '</li>');
     $('#query_builder_list').append(listItem);
     document.getElementById('input_subject').value = "";
@@ -100,19 +120,19 @@ function createQueryListItem(subject, predicate, object){
     document.getElementById('input_object').value = "";
 }
 
-function addQueryPart(){
+function addQueryPart() {
     let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input =  document.getElementById('input_predicate');
+    let predicate_input = document.getElementById('input_predicate');
     let predicate = predicate_input.options[predicate_input.selectedIndex].value;
     let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
     let query_text = subject + ' ' + predicate + ' ' + object;
 
-    if (subject.length === 0){
+    if (subject.length === 0) {
         $('#alert_translation').text('subject is empty');
         $('#alert_translation').fadeIn();
         return;
     }
-    if (object.length === 0){
+    if (object.length === 0) {
         $('#alert_translation').text('object is empty');
         $('#alert_translation').fadeIn();
     }
@@ -126,7 +146,7 @@ function addQueryPart(){
 
     request.done(function (response) {
         let answer = response['valid']
-        if(answer === "True"){
+        if (answer === "True") {
             $('#alert_translation').hide();
             createQueryListItem(subject, predicate, object)
         } else {
@@ -143,10 +163,10 @@ function addQueryPart(){
 }
 
 
-function clearQueryBuilder(){
+function clearQueryBuilder() {
     removeAllQueryPatterns();
     let queryBuilder = document.getElementById('query_builder_list');
-    while(queryBuilder.firstChild){
+    while (queryBuilder.firstChild) {
         queryBuilder.removeChild(queryBuilder.firstChild);
     }
 }
@@ -177,7 +197,7 @@ let optionMapping = {
     "inhibits": 6,
     "metabolises": 7,
     "method": 8,
-    "treats" : 9
+    "treats": 9
 }
 
 function example_search(search_str) {
@@ -188,9 +208,9 @@ function example_search(search_str) {
     let first = true;
     search_str.split('_AND_').forEach(comp => {
         let triple = split(comp.trim());
-        if (first === false){
+        if (first === false) {
             let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-            let predicate_input =  document.getElementById('input_predicate');
+            let predicate_input = document.getElementById('input_predicate');
             let predicate = predicate_input.options[predicate_input.selectedIndex].value;
             let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
             createQueryListItem(subject, predicate, object);
@@ -223,85 +243,84 @@ const setButtonSearching = isSearching => {
     }
 };
 
-$(document).on('keydown',function(e){
-  var $target = $(e.target||e.srcElement);
-  if(e.keyCode === 8 && !$target.is('input,[contenteditable="true"],textarea'))
-  {
-    e.preventDefault();
-  }
+$(document).on('keydown', function (e) {
+    var $target = $(e.target || e.srcElement);
+    if (e.keyCode === 8 && !$target.is('input,[contenteditable="true"],textarea')) {
+        e.preventDefault();
+    }
 })
 
 $(document).ready(function () {
     $("#search_form").submit(search);
 
     $('#input_subject').autocomplete({
-                    minLength: 0,
-                    autoFocus: true,
-                    source: function (request, response) {
-                        let relevantTerm = request.term;
-                        $.ajax({
-                            type: "GET",
-                            url: autocompletion_url,
-                            data: {
-                                term: relevantTerm
-                            },
-                            success: function (data){
-                                // delegate back to autocomplete, but extract the last term
-                                response(data["terms"]);
-                            }
-                        });
-                    }
-                    ,
-                    focus: function () {
-                        // prevent value inserted on focus
-                        return false;
-                    }
-                    ,
-                    select: function (event, ui) {
-                        this.value = ui.item.value.trim();
-                        return false;
-                    }
-                }).on("keydown", function (event) {
-                // don't navigate away from the field on tab when selecting an item
-                if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
-                    event.preventDefault();
+        minLength: 0,
+        autoFocus: true,
+        source: function (request, response) {
+            let relevantTerm = request.term;
+            $.ajax({
+                type: "GET",
+                url: autocompletion_url,
+                data: {
+                    term: relevantTerm
+                },
+                success: function (data) {
+                    // delegate back to autocomplete, but extract the last term
+                    response(data["terms"]);
                 }
             });
+        }
+        ,
+        focus: function () {
+            // prevent value inserted on focus
+            return false;
+        }
+        ,
+        select: function (event, ui) {
+            this.value = ui.item.value.trim();
+            return false;
+        }
+    }).on("keydown", function (event) {
+        // don't navigate away from the field on tab when selecting an item
+        if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
+            event.preventDefault();
+        }
+    });
 
 
     $('#input_object').autocomplete({
-                    minLength: 0,
-                    autoFocus: true,
-                    source: function (request, response) {
-                        let relevantTerm = request.term;
-                        $.ajax({
-                            type: "GET",
-                            url: autocompletion_url,
-                            data: {
-                                term: relevantTerm
-                            },
-                            success: function (data){
-                                // delegate back to autocomplete, but extract the last term
-                                response(data["terms"]);
-                            }
-                        });
-                    }
-                    ,
-                    focus: function () {
-                        // prevent value inserted on focus
-                        return false;
-                    }
-                    ,
-                    select: function (event, ui) {
-                        this.value = ui.item.value.trim();
-                        return false;
-                    }
-                }).on("keydown", function (event) {
-                // don't navigate away from the field on tab when selecting an item
-                if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
-                    event.preventDefault();
+        minLength: 0,
+        autoFocus: true,
+        source: function (request, response) {
+            let relevantTerm = request.term;
+            $.ajax({
+                type: "GET",
+                url: autocompletion_url,
+                data: {
+                    term: relevantTerm
+                },
+                success: function (data) {
+                    // delegate back to autocomplete, but extract the last term
+                    response(data["terms"]);
                 }
             });
+        }
+        ,
+        focus: function () {
+            // prevent value inserted on focus
+            return false;
+        }
+        ,
+        select: function (event, ui) {
+            this.value = ui.item.value.trim();
+            return false;
+        }
+    }).on("keydown", function (event) {
+        // don't navigate away from the field on tab when selecting an item
+        if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
+            event.preventDefault();
+        }
+    });
 
 });
 
@@ -311,12 +330,12 @@ const search = (event) => {
     event.preventDefault();
     let query = getCurrentQuery();
     let data_source = "PubMed"
-     /*
-     if (document.getElementById('radio_pmc').checked) {
-         data_source = "PMC"
-     } else if(document.getElementById('radio_pubmed').checked) {
-         data_source = "PubMed"
-     } */
+    /*
+    if (document.getElementById('radio_pmc').checked) {
+        data_source = "PMC"
+    } else if(document.getElementById('radio_pubmed').checked) {
+        data_source = "PubMed"
+    } */
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -348,7 +367,7 @@ const search = (event) => {
         divDocuments.empty();
 
         let valid_query = response["valid_query"];
-        if (valid_query === true){
+        if (valid_query === true) {
             let query_len = 0;
 
             // Print query translation
@@ -365,7 +384,7 @@ const search = (event) => {
 
             let documents_header = $("#header_documents");
             let document_header_appendix = "";
-            if (query_limit_hit === true){
+            if (query_limit_hit === true) {
                 document_header_appendix = " (Truncated)"
             }
             if (result_size >= 0) {
@@ -397,8 +416,6 @@ const search = (event) => {
 };
 
 
-
-
 let uniqueAccordionIDCounter = 0;
 const getUniqueAccordionID = () => {
     uniqueAccordionIDCounter += 1
@@ -414,12 +431,12 @@ const getUniqueBodyID = () => {
 let globalAccordionDict = {};
 
 const createExpandListElement = (divID, next_element_count) => {
-    let btnid = 'exp'+ divID
-    let cardid = 'exp_card_'+ divID
-    let divExpand = $('<div class="card" id="'+cardid+'"><div class="card-body">' +
-        '<button class="btn btn-link" id="'+btnid+'">... click to expand (' + next_element_count  + " left)"+ '</button>' +
+    let btnid = 'exp' + divID
+    let cardid = 'exp_card_' + divID
+    let divExpand = $('<div class="card" id="' + cardid + '"><div class="card-body">' +
+        '<button class="btn btn-link" id="' + btnid + '">... click to expand (' + next_element_count + " left)" + '</button>' +
         '</div></div>');
-    $(document).on('click', '#'+btnid, function(){
+    $(document).on('click', '#' + btnid, function () {
         createExpandableAccordion(false, divID)
     });
     return divExpand;
@@ -435,12 +452,12 @@ const createExpandableAccordion = (first_call, divID) => {
     let global_result_size = globalAccordionDict[divID][6];
     let i = 0;
     // remove the last expand button
-    if (first_call === false){
-        $('#'+'exp_card_'+ divID).remove();
+    if (first_call === false) {
+        $('#' + 'exp_card_' + divID).remove();
     }
 
     let nextResultList = [];
-    resultList.forEach(res =>{
+    resultList.forEach(res => {
         i += 1;
         if (i < MAX_SHOWN_ELEMENTS) {
             let j = i + global_result_size;
@@ -450,15 +467,34 @@ const createExpandableAccordion = (first_call, divID) => {
         }
     });
     // add a expand button
-    if(i > MAX_SHOWN_ELEMENTS){
+    if (i > MAX_SHOWN_ELEMENTS) {
         current_div.append(createExpandListElement(divID, nextResultList.length));
     }
     globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList, global_result_size + i];
 }
 
 
-function rateExtraction(correct, predication_ids_str){
-    console.log('nice - rated: ' + correct + ' for ' + predication_ids_str);
+function rateExtraction(correct, predication_ids_str) {
+    let userid = getUserIDFromLocalStorage();
+    console.log('nice user ' + userid+ '  - has rated: ' + correct + ' for ' + predication_ids_str);
+    let request = $.ajax({
+        url: feedback_url,
+        data: {
+            predicationids: predication_ids_str,
+            rating: correct,
+            userid: userid
+        }
+    });
+
+    request.done(function (response) {
+         showInfoAtBottom("Thank you for your Feedback!")
+    });
+
+    request.fail(function (result) {
+         showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+    });
+
+
     return true;
 }
 
@@ -486,22 +522,27 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
             });
 
-            if (j === -1){
+            if (j === -1) {
                 j = parseInt(e["pos"]) + 1;
             }
-            if (j !== parseInt(e["pos"]) + 1){
+            if (j !== parseInt(e["pos"]) + 1) {
                 div_provenance_all.append($('<br>'));
                 j = parseInt(e["pos"]) + 1;
             }
 
-            let div_rate_pos = $('<img src="'+ok_symbol_url+'" height="30px">');
-            div_rate_pos.click(function(){ rateExtraction(true, predication_ids_str);});
+            let div_rate_pos = $('<img src="' + ok_symbol_url + '" height="30px">');
+            div_rate_pos.click(function () {
+                rateExtraction(true, predication_ids_str);
+            });
 
-            let div_rate_neg = $('<img src="'+cancel_symbol_url+'" height="30px">');
-            div_rate_neg.click(function(){ rateExtraction(false, predication_ids_str);});
+            let div_rate_neg = $('<img src="' + cancel_symbol_url + '" height="30px">');
+            div_rate_neg.click(function () {
+                rateExtraction(false, predication_ids_str);
+            });
             let div_col_rating = $('<div class="col-">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
+
 
             let div_provenance = $('<div class="col">' +
                 j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
@@ -518,33 +559,19 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             div_provenance_all.append(div_prov_example);
 
 
-         /*   e_string += '<div class="container"><div class="row">'+
-                '<div class="col">' +
-                j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
-                e["p_c"] + ", " + e["o_str"] + ']' +
-                '</div>' +
-                 '<div class="col-">' + // + div_rate_pos + ' ' + div_rate_neg +
-                 '<img src="'+ok_symbol_url+'" height="30px" onclick="rateExtraction(true,\"'+ predication_ids_str +'\");">  ' +
-                '<img src="'+cancel_symbol_url+'" height="30px" onclick="rateExtraction(false,\"'+ predication_ids_str +'\");">' +
-                 '</div></div></div><br>'
-            ; */
         });
     } catch (SyntaxError) {
 
     }
 
     let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
-        '<img src="'+pubpharm_image_url+'" height="25px">' +
+        '<img src="' + pubpharm_image_url + '" height="25px">' +
         document_id + '</a>' + '<br><b>' + title + '</b><br></div></div><br>');
 
     let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div id="prov_' + document_id + '" class="collapse">');
     div_provenance_collapsable_block.append(div_provenance_all);
 
-
- /*   let divProv = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>' +
-        '<div id="prov_' + document_id + '" class="collapse">\n' +
-        e_string + '</div>') */
     divDoc.append(div_provenance_button);
     divDoc.append(div_provenance_collapsable_block);
     return divDoc;
@@ -576,7 +603,7 @@ const createDocumentList = (results, query_len) => {
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse show" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     // tbd: grid
     let divCardBodyID = getUniqueBodyID();
-    let divCardBody = $('<div class="card-body" id="'+divCardBodyID+'"></div>');
+    let divCardBody = $('<div class="card-body" id="' + divCardBodyID + '"></div>');
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
@@ -615,21 +642,20 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         if (ent_name === ent_type) {
             var_sub = ent_name;
         }
-        if (ent_id.slice(0,2) === "DB") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+        if (ent_id.slice(0, 2) === "DB") {
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
-        }
-        else if (ent_id.slice(0, 5) === 'MESH:') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+        } else if (ent_id.slice(0, 5) === 'MESH:') {
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Species') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else if (ent_type === 'Gene') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name  + ' (' + "Target" + ' <a onclick="event.stopPropagation()"' +
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {

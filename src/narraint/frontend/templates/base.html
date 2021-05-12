@@ -27,17 +27,29 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item" id="nav_item_search">
+                    <a class="nav-link" href="{% url 'search' %}">Search</a>
+                </li>
+                <li class="nav-item" id="nav_item_stats">
+                    <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
+                </li>
                 <li class="nav-item">
-                    <a href="{% url 'search' %}">Search</a>
-                    <a href="{% url 'stats' %}">Statistics</a>
-                    <a href="https://blogs.tu-braunschweig.de/pubpharm/impressum/">Impressum</a>
-                    <img src="{% static 'fid_logo.png' %}"  height="50px" alt="FID Logo" >
-            <!--        <img src="{% static 'narrative_designer.png' %}"  height="50px" alt="NarrativeDesigner" > -->
-                    <img src="{% static 'ifislogo.png' %}" height="50px" alt="ifis Logo"/>
+                    <a class="nav-link" href="https://blogs.tu-braunschweig.de/pubpharm/impressum/">Impressum</a>
                 </li>
             </ul>
         </div>
+        <img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo">
+        <img src="{% static 'ifislogo.png' %}" height="50px" alt="ifis Logo"/>
     </div>
+</nav>
+
+<nav class="navbar fixed-bottom navbar-light" style="background-color: #e3f2fd;" id="nav_bar_bottom">
+    <a class="navbar-brand mx-auto">
+        <div class="alert alert-info" id="info_for_user" role="alert">
+            Thank you for your Feedback!
+        </div>
+    </a>
+
 </nav>
 
 {% block content %}{% endblock %}
@@ -51,6 +63,24 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous" type="text/javascript"></script>
+
+<script>
+    let nav_bar_bottom = $("#nav_bar_bottom");
+    let info_element = $('#info_for_user');
+
+    nav_bar_bottom.hide();
+    function showInfoAtBottom(text){
+        nav_bar_bottom.show();
+        info_element.text(text);
+        info_element.fadeIn();
+
+        setTimeout(function (){
+            nav_bar_bottom.fadeOut();
+            nav_bar_bottom.hide();
+        }, 1500);
+
+    }
+</script>
 
 {% block javascript %}{% endblock %}
 </body>

@@ -5,7 +5,7 @@ import logging
 from typing import List, Tuple
 
 from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
-    BigInteger, func
+    BigInteger, func, insert
 
 import narrant
 from narrant.backend.models import Base
@@ -108,6 +108,24 @@ class Predication(Extended):
             predicates_with_count.append((r[0], int(r[1])))
         logging.info('{} predicates queried in {}s'.format(len(predicates_with_count), datetime.now() - start_time))
         return sorted(predicates_with_count, key=lambda x: x[1], reverse=True)
+
+
+class PredicationRating(Extended):
+    __tablename__ = "predication_rating"
+    __table_args__ = (
+        ForeignKeyConstraint(('predication_id',), ('predication.id',)),
+        PrimaryKeyConstraint('user_id', 'predication_id', sqlite_on_conflict='IGNORE')
+    )
+    user_id = Column(String)
+    predication_id = Column(BigInteger)
+    rating = Column(String)
+    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
+
+    @staticmethod
+    def insert_user_rating(session, user_id: str, predication_id: int, rating: str):
+        insert_stmt = insert(PredicationRating).values(user_id=user_id, predication_id=predication_id, rating=rating)
+        session.execute(insert_stmt)
+        session.commit()
 
 
 class PredicationToDelete(Extended):

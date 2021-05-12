@@ -1,33 +1,26 @@
 import logging
-import re
 import traceback
 import sys
-from typing import List
-
-from asgiref.sync import sync_to_async
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication
+from narraint.backend.models import Predication, PredicationRating
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
-from narraint.queryengine.query import GraphQuery
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
-
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-
 
 
 class View:
@@ -59,42 +52,32 @@ class View:
         return cls._instance
 
 
-
-
-@sync_to_async
-def sync_autocompletion(search_string: str) -> List[str]:
-    return View.instance().autocompletion.compute_autocompletion_list(search_string)
-
-
-async def get_autocompletion(request):
+def get_autocompletion(request):
     completion_terms = []
     if "term" in request.GET:
         search_string = str(request.GET.get("term", "").strip())
-        completion_terms = await sync_to_async(sync_autocompletion, thread_sensitive=False)(search_string)
+        completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
     return JsonResponse(dict(terms=completion_terms))
 
 
-@sync_to_async
-def sync_convert_query(search_string: str) -> (GraphQuery, str):
-    return View.instance().translation.convert_query_text_to_fact_patterns(search_string)
-
-
-async def get_check_query(request):
-    if "query" in request.GET:
+def get_check_query(request):
+    try:
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
-        query_fact_patterns, query_trans_string = await sync_to_async(sync_convert_query, thread_sensitive=False)(search_string)
+        query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+            search_string)
         if query_fact_patterns:
             logging.info('query is valid')
             return JsonResponse(dict(valid="True"))
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid=query_trans_string))
-    return JsonResponse(dict(valid="False"))
+    except:
+        return JsonResponse(dict(valid="False"))
 
-@sync_to_async
-def sync_process_query(request):
+
+def get_query(request):
     results_converted = []
     valid_query = False
     query_limit_hit = False
@@ -109,7 +92,8 @@ def sync_process_query(request):
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
-        query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+        query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+            query)
         if data_source not in ["PMC", "PubMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
@@ -154,25 +138,30 @@ def sync_process_query(request):
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
                 results_converted = substitution_ontology.rank_results(results).to_dict()
-            return valid_query, results_converted, query_trans_string, query_limit_hit
-    except Exception:
-        results_converted = []
-        query_trans_string = "keyword query cannot be converted (syntax error)"
-        traceback.print_exc(file=sys.stdout)
-    return valid_query, results_converted, query_trans_string, query_limit_hit
-
-
-async def get_query(request):
-    if "query" in request.GET:
-        valid_query, results_converted, query_trans_string, query_limit_hit = \
-            await sync_to_async(sync_process_query, thread_sensitive=False)(request)
         return JsonResponse(
             dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
                  query_limit_hit=query_limit_hit))
-    else:
-        return JsonResponse(
-            dict(valid_query="", results=[], query_translation="",
-                 query_limit_hit="False"))
+    except Exception:
+        query_trans_string = "keyword query cannot be converted (syntax error)"
+        traceback.print_exc(file=sys.stdout)
+        return JsonResponse(dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+
+
+def get_feedback(request):
+    try:
+        predication_ids = str(request.GET.get("predicationids", "").strip())
+        rating = str(request.GET.get("rating", "").strip())
+        userid = str(request.GET.get("userid", "").strip())
+
+        session = SessionExtended.get()
+        for pred_id in predication_ids.split(','):
+            PredicationRating.insert_user_rating(session, userid, int(pred_id), rating)
+
+        logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
+        return HttpResponse(status=200)
+    except:
+        traceback.print_exc(file=sys.stdout)
+        return HttpResponse(status=500)
 
 
 class SearchView(TemplateView):
