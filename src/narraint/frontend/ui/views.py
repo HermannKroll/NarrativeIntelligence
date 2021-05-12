@@ -2,6 +2,7 @@ import logging
 import traceback
 import sys
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
 
@@ -76,7 +77,8 @@ def get_check_query(request):
     except:
         return JsonResponse(dict(valid="False"))
 
-
+# invokes Django to compress the results
+@gzip_page
 def get_query(request):
     results_converted = []
     valid_query = False
@@ -144,7 +146,8 @@ def get_query(request):
     except Exception:
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
-        return JsonResponse(dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+        return JsonResponse(
+            dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
 
 
 def get_feedback(request):
@@ -196,4 +199,11 @@ class StatsView(TemplateView):
                 return JsonResponse(
                     dict(results=StatsView.stats_query_results)
                 )
+        return super().get(request, *args, **kwargs)
+
+
+class HelpView(TemplateView):
+    template_name = "ui/help.html"
+
+    def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)

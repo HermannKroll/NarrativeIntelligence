@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Statistics per Predicate and Extraction Type{% endblock %}
+
+{% block content %}
+
+
+    <div class="container margin-top">
+        <a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
+        <br>
+        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a>
+        <div class="row">
+            <div class="col">
+                <table id="help_table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col" data-sortable="true">Predicate</th>
+                        <th scope="col" data-sortable="true">Explanation</th>
+                    </tr>
+                    </thead>
+                    <tbody id="help_table_body">
+                    <tr>
+                        <td>associated</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>administered</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>compares</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>decreases</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>induces</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>interacts</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>inhibits</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>metabolises</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>method</td>
+                        <td>test</td>
+                    </tr>
+                    <tr>
+                        <td>treats</td>
+                        <td>test</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+
+        $("#nav_item_search").removeClass("active");
+        $("#nav_item_help").addClass("active");
+        $("#nav_item_stats").removeClass("active");
+
+    </script>
+{% endblock %}
