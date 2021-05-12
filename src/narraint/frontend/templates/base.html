@@ -43,9 +43,28 @@
     </div>
 </nav>
 
-<nav class="navbar fixed-bottom navbar-light" style="background-color: #e3f2fd;" id="nav_bar_bottom">
+<div class="fixed-bottom p-4 toast bg-dark text-white w-100 mw-100" role="alert" data-autohide="false" id="cookie_toast"  style="display:none;">
+    <div class="toast-body p-4 d-flex flex-column">
+        <h4>Cookie Warning</h4>
+        <p>
+        This website will generate a random user id to store your ratings on the server. The user id is just a random number and is not associated with personal data.
+        </p>
+        <div class="ml-auto">
+            <button type="button" class="btn btn-outline-light mr-3" id="cookiebtnDeny">
+                Deny
+            </button>
+            <button type="button" class="btn btn-light" id="cookiebtnAccept">
+                Accept
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+<nav class="navbar fixed-bottom navbar-light"  style="display:none;" style="background-color: #e3f2fd;" id="nav_bar_bottom">
     <a class="navbar-brand mx-auto">
-        <div class="alert alert-info" id="info_for_user" role="alert">
+        <div class="alert alert-info" id="info_for_user" style="display:none;" role="alert">
             Thank you for your Feedback!
         </div>
     </a>
@@ -75,9 +94,10 @@
         info_element.fadeIn();
 
         setTimeout(function (){
+            info_element.fadeOut();
             nav_bar_bottom.fadeOut();
-            nav_bar_bottom.hide();
         }, 1500);
+
 
     }
 </script>

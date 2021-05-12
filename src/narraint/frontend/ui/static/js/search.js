@@ -27,12 +27,28 @@ function uuidv4() {
   });
 }
 
+
+$('#cookiebtnDeny').click(()=>{
+    $('.toast').toast('hide')
+    let cookie_toast = $('#cookie_toast');
+    cookie_toast.hide();
+})
+
+$('#cookiebtnAccept').click(()=>{
+    let userid = uuidv4();
+    localStorage.setItem('userid', userid);
+    $('.toast').toast('hide')
+    let cookie_toast = $('#cookie_toast');
+    cookie_toast.hide();
+})
+
 function getUserIDFromLocalStorage() {
     if(!localStorage.getItem('userid')){
         console.log("no user id found in local storage");
-        let userid = uuidv4();
-        localStorage.setItem('userid', userid);
-        return userid;
+        let cookie_toast = $('#cookie_toast');
+        cookie_toast.show();
+        cookie_toast.toast('show')
+        return "cookie";
     }
     return localStorage.getItem('userid');
 }
@@ -476,6 +492,10 @@ const createExpandableAccordion = (first_call, divID) => {
 
 function rateExtraction(correct, predication_ids_str) {
     let userid = getUserIDFromLocalStorage();
+    if (userid === "cookie"){
+        console.log("waiting for cookie consent")
+        return;
+    }
     console.log('nice user ' + userid+ '  - has rated: ' + correct + ' for ' + predication_ids_str);
     let request = $.ajax({
         url: feedback_url,
