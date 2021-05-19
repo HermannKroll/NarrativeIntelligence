@@ -550,12 +550,12 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 j = parseInt(e["pos"]) + 1;
             }
 
-            let div_rate_pos = $('<img src="' + ok_symbol_url + '" height="30px">');
+            let div_rate_pos = $('<img style="cursor: pointer" src="' + ok_symbol_url + '" height="30px">');
             div_rate_pos.click(function () {
                 rateExtraction(true, predication_ids_str);
             });
 
-            let div_rate_neg = $('<img src="' + cancel_symbol_url + '" height="30px">');
+            let div_rate_neg = $('<img style="cursor: pointer" src="' + cancel_symbol_url + '" height="30px">');
             div_rate_neg.click(function () {
                 rateExtraction(false, predication_ids_str);
             });
