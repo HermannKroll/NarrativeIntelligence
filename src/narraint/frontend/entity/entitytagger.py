@@ -191,7 +191,7 @@ class EntityTagger:
         logging.info('Adding DrugBank terms...')
         drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=False,
                                                                                       ignore_drugbank_chemicals=False,
-                                                                                      expand_term_with_e_and_s=False)
+                                                                                      expand_term=False)
         for term, dbids in drug_terms2dbid.items():
             for dbid in dbids:
                 self.term2entity[term.lower()].add(Entity(dbid, DRUG))

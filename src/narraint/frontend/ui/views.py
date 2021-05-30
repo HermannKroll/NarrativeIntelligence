@@ -1,7 +1,15 @@
+import base64
+import json
 import logging
+import os
 import traceback
 import sys
+from datetime import datetime
+from io import BytesIO
+
+from PIL import Image
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
@@ -9,6 +17,7 @@ from sqlalchemy import func
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
 from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.frontend.settings.base import DJANGO_PROJ_DIR
 from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -162,6 +171,25 @@ def get_feedback(request):
 
         logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
         return HttpResponse(status=200)
+    except:
+        traceback.print_exc(file=sys.stdout)
+        return HttpResponse(status=500)
+
+
+@csrf_exempt
+def post_report(request):
+    try:
+        req_data = json.loads(request.body.decode("utf-8"))
+        report_description = req_data.get("description", "")
+        report_img_64 = req_data.get("img64", "")
+        report_path = os.path.join(DJANGO_PROJ_DIR, f"reports/{datetime.now():%Y-%m-%d_%H:%M:%S}")
+        os.makedirs(report_path, exist_ok=True)
+        with open(os.path.join(report_path, "description.txt"), "w+") as f:
+            f.write(report_description)
+        img = Image.open(BytesIO(base64.b64decode(report_img_64[22:])))
+        img.save(os.path.join(report_path, "screenshot.png"), 'PNG')
+        return HttpResponse(status=200)
+
     except:
         traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)

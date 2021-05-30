@@ -79,3 +79,9 @@
 #help_search {
     display: none;
 }
+
+.feedbackbtn {
+    position: fixed;
+    bottom: 5px;
+    right: 10px;
+}

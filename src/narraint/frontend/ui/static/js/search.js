@@ -241,6 +241,40 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
+function openFeedback() {
+    const screenshotTarget = document.body;
+    html2canvas(screenshotTarget, {scrollX:0, scrollY:0}).then((canvas) => {
+        const base64image = canvas.toDataURL("image/png");
+        $("#screenshot").attr("src", base64image);
+    })
+    $("#feedbackModal").modal("toggle");
+}
+
+function closeFeedback(send=false) {
+    if(send) {
+        const params = {
+            description: $("#feedbackText").val(),
+            img64: $("#screenshot").attr("src")
+        };
+        const options = {
+            method: 'POST',
+            body: JSON.stringify( params )
+        };
+        fetch(report_url, options).then( response => {
+            if(response.ok) {
+                alert("Report successfully sent!");
+                $("#feedbackModal").modal("toggle");
+                $("#feedbackText").val("");
+            } else {
+                alert("Sending report has failed!");
+            }
+            }
+        )
+    } else {
+        $("#feedbackModal").modal("toggle");
+    }
+}
+
 const setButtonSearching = isSearching => {
     let btn = $('#btn_search');
     let help = $('#help_search');
