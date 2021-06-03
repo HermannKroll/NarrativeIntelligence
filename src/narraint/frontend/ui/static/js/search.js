@@ -593,12 +593,12 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
             div_rate_neg.click(function () {
                 rateExtraction(false, predication_ids_str);
             });
-            let div_col_rating = $('<div class="col-">');
+            let div_col_rating = $('<div class="col-1">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
 
 
-            let div_provenance = $('<div class="col">' +
+            let div_provenance = $('<div class="col-11">' +
                 j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
                 e["p_c"] + ", " + e["o_str"] + ']' +
                 '</div>');

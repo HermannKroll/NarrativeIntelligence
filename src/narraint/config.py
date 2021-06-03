@@ -13,6 +13,7 @@ TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
 TMP_DIR_TAGGER = os.path.join(TMP_DIR, 'tagger')
 CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
+REPORT_DIR = os.path.join(GIT_ROOT_DIR, 'reports')
 
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)

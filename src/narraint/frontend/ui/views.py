@@ -16,6 +16,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
+from narraint.config import REPORT_DIR
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.frontend.settings.base import DJANGO_PROJ_DIR
 from narrant.entity.entityresolver import EntityResolver
@@ -182,7 +183,7 @@ def post_report(request):
         req_data = json.loads(request.body.decode("utf-8"))
         report_description = req_data.get("description", "")
         report_img_64 = req_data.get("img64", "")
-        report_path = os.path.join(DJANGO_PROJ_DIR, f"reports/{datetime.now():%Y-%m-%d_%H:%M:%S}")
+        report_path = os.path.join(REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)

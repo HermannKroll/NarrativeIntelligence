@@ -150,7 +150,7 @@ class EntityTagger:
         Add all excipient terms to the internal dict
         :return:
         """
-        for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms_by_e_and_s=False):
+        for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms=False):
             self.term2entity[excipient_name.lower()].add(Entity(excipient_name.capitalize(), EXCIPIENT))
 
     def _add_plant_families(self):
@@ -191,7 +191,7 @@ class EntityTagger:
         logging.info('Adding DrugBank terms...')
         drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=False,
                                                                                       ignore_drugbank_chemicals=False,
-                                                                                      expand_term=False)
+                                                                                      expand_terms=False)
         for term, dbids in drug_terms2dbid.items():
             for dbid in dbids:
                 self.term2entity[term.lower()].add(Entity(dbid, DRUG))
