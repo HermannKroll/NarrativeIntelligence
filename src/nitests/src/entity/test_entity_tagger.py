@@ -112,7 +112,7 @@ class EntityTaggerTestCase(TestCase):
         """
         Tests whether excipient names can be tagged correctly
         """
-        excipient_names = [n for n in ExcipientVocabulary.read_excipients_names(expand_terms_by_e_and_s=False)]
+        excipient_names = [n for n in ExcipientVocabulary.read_excipients_names(expand_terms=False)]
         for en in excipient_names:
             self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
 
