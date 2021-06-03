@@ -110,6 +110,7 @@ venv.bak/
 # Files
 data/
 tmp/
+reports/
 
 # macOS
 .DS_Store
