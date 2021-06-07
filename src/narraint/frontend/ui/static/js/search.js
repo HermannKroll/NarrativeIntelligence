@@ -247,6 +247,7 @@ document.getElementById("screenshot").addEventListener('load', (e) => {
 });
 
 async function openFeedback() {
+    $("#reportSpinner").addClass("busy");
     const screenshotTarget = document.body;
     let canvas = await html2canvas(screenshotTarget, {scrollX:0, scrollY:0})
 
@@ -254,6 +255,8 @@ async function openFeedback() {
     let screenshot = $("#screenshot")
     await screenshot.attr("src", base64image);
     $("#feedbackModal").modal("toggle");
+    $("#reportSpinner").removeClass("busy");
+
 
     $("#screenshotCanvas").remove();
 

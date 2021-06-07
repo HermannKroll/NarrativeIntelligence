@@ -283,9 +283,11 @@
 
     </div>
     <!-- Feedback stuff-->
+
     <button type="button" class="btn btn-primary feedbackbtn"
                                 onclick="openFeedback()">
                             Report bug
+       <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
     </button>
     <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
       <div class="modal-dialog modal-xl" role="document">
