@@ -241,20 +241,75 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
-function openFeedback() {
+let imgrect = {width: 0, height:0};
+document.getElementById("screenshot").addEventListener('load', (e) => {
+    imgrect = e.target.getBoundingClientRect();
+});
+
+async function openFeedback() {
     const screenshotTarget = document.body;
-    html2canvas(screenshotTarget, {scrollX:0, scrollY:0}).then((canvas) => {
-        const base64image = canvas.toDataURL("image/png");
-        $("#screenshot").attr("src", base64image);
-    })
+    let canvas = await html2canvas(screenshotTarget, {scrollX:0, scrollY:0})
+
+    const base64image = canvas.toDataURL("image/png");
+    let screenshot = $("#screenshot")
+    await screenshot.attr("src", base64image);
     $("#feedbackModal").modal("toggle");
+
+    $("#screenshotCanvas").remove();
+
+    $("#screenshotContainer").append('<canvas class="coveringCanvas" id="screenshotCanvas"></canvas>')
+
+    let screenshotCanvas = $("#screenshotCanvas");
+    screenshotCanvas.attr('width', canvas.width);
+    screenshotCanvas.attr('height', canvas.height);
+    let pos = {x:0, y:0};
+    screenshotCanvas.mousemove(draw);
+    screenshotCanvas.mousedown(setPosition);
+    screenshotCanvas.mouseenter(setPosition);
+    screenshotCanvas.mouseenter(() => {document})
+    let ctx = screenshotCanvas[0].getContext('2d')
+
+
+
+    function draw(e) {
+
+        console.log("draw")
+        if(e.buttons !== 1) return;
+
+        ctx.beginPath();
+
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#c0392b';
+
+        ctx.moveTo(pos.x, pos.y);
+        setPosition(e);
+        ctx.lineTo(pos.x, pos.y);
+
+        ctx.stroke();
+    }
+
+    function setPosition(e) {
+        console.log("setposition")
+        let rect = e.target.getBoundingClientRect();
+        pos.x = (e.clientX - rect.left)*canvas.width/imgrect.width;
+        pos.y = (e.clientY - rect.top)*canvas.height/imgrect.height;
+    }
 }
 
 function closeFeedback(send=false) {
     if(send) {
+        let combine_canvas = document.createElement("canvas");
+        let dim = document.getElementById('screenshotCanvas');
+        combine_canvas.width = dim.width;
+        combine_canvas.height = dim.height;
+        let ctx = combine_canvas.getContext('2d')
+        ctx.drawImage(document.getElementById('screenshot'),0,0)
+        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0)
+
         const params = {
             description: $("#feedbackText").val(),
-            img64: $("#screenshot").attr("src")
+            img64: combine_canvas.toDataURL("image/png")
         };
         const options = {
             method: 'POST',
@@ -273,6 +328,12 @@ function closeFeedback(send=false) {
     } else {
         $("#feedbackModal").modal("toggle");
     }
+}
+
+const reset_scanvas = () => {
+    const canvas = document.getElementById("screenshotCanvas");
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width, canvas.height);
 }
 
 const setButtonSearching = isSearching => {

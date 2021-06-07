@@ -85,3 +85,20 @@
     bottom: 5px;
     right: 10px;
 }
+
+.insideWrapper{
+    width:100%; height:100%;
+    position:relative;}
+
+.coveringCanvas{
+    width:100%; height:100%;
+    position:absolute; top:0px; left:0px;
+    cursor: crosshair;
+}
+
+@media (min-width: 768px) {
+  .modal-xl {
+    width: 90%;
+   max-width:1200px;
+  }
+}

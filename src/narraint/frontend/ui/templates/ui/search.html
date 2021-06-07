@@ -5,11 +5,7 @@
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/ui.css' %}" type="text/css"/>
 
 
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 
 {% endblock %}
 
@@ -291,8 +287,8 @@
                                 onclick="openFeedback()">
                             Report bug
     </button>
-    <div class="modal" tabindex="-1" role="dialog" id="feedbackModal">
-      <div class="modal-dialog" role="document">
+    <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
+      <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Send feedback with screenshot</h5>
@@ -301,8 +297,23 @@
             </button>
           </div>
           <div class="modal-body">
-            <img src="null" id="screenshot" class="img-fluid">
-              <p>Please describe the problem you have encountered:</p>
+              <div class="container">
+                  <div class="row mt-2">
+                      <div class="outsideWrapper">
+                      <div class="insideWrapper" id="screenshotContainer">
+                          <img src="null" id="screenshot" class="img-fluid coveredImage border border-primary">
+                          <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                      </div>
+                  </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col text-center">
+                          <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset</button>
+                      </div>
+                  </div>
+              </div>
+
+              <p>Please mark the problematic section on the image above and/or describe the problem you have encountered:</p>
             <textarea class="form-control" id="feedbackText" rows="3"></textarea>
           </div>
           <div class="modal-footer">
