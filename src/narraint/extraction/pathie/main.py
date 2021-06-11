@@ -38,12 +38,13 @@ def get_progress(out_corenlp_dir: str) -> int:
     return hits
 
 
-def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str):
+def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str, worker_no: int):
     """
     Invokes the Stanford CoreNLP tool to process files
     :param core_nlp_dir: CoreNLP tool directory
     :param out_corenlp_dir: the output directory
     :param filelist_fn: the path of the filelist which files should be processed
+    :param worker_no: number of parallel workers
     :return: None
     """
     start = datetime.now()
@@ -51,7 +52,8 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
         num_files = len(f.read().split("\n"))
 
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
-    sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn)]
+    sp_args = ["/bin/bash", "-c", "{} {} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn,
+                                                          worker_no)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
     print_progress_with_eta('CoreNLP running...', 0, num_files, start_time,  print_every_k=1)
@@ -278,7 +280,7 @@ def run_pathie(input, output, workdir=None, config=NLP_CONFIG,
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn)
+        pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn, worker_no=workers)
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output

@@ -7,6 +7,8 @@ from narraint.backend.database import SessionExtended
 from narraint.extraction.versions import PATHIE_EXTRACTION, CORENLP_VERSION
 from narraint.extraction.openie.cleanload import PRED, insert_predications_into_db, clean_predications
 
+from narrant.backend.database import Session
+
 
 def read_pathie_extractions_tsv(pathie_tsv_file: str):
     """

@@ -10,11 +10,12 @@ import logging
 
 from narrant.progress import print_progress_with_eta
 from narraint.config import NLP_CONFIG
+from narrant.pubtator.document import TaggedDocument
 from narrant.pubtator.regex import CONTENT_ID_TIT_ABS
 from narrant.pubtator.extract import read_pubtator_documents
 
 
-def prepare_files(input):
+def openie_prepare_files(input):
     """
     Converts a PubTator file into plain texts files which can be processed by OpenIE
     Easily speaking, writes title and abstract of a PubTator file to a plain text file
@@ -33,14 +34,13 @@ def prepare_files(input):
     amount_files = 0
     logging.info('counting files to process....')
     for document_content in read_pubtator_documents(input):
-        match = CONTENT_ID_TIT_ABS.match(document_content)
-        if not match:
+        doc = TaggedDocument(pubtator_content=document_content)
+        if not doc or not doc.title or not doc.abstract:
             amount_skipped_files += 1
         else:
             amount_files += 1
-            pmid, title, abstract = match.group(1, 2, 3)
-            content = f"{title}. {abstract}"
-            input_file = os.path.join(temp_in_dir, "{}.txt".format(pmid))
+            content = f"{doc.title}. {doc.abstract}"
+            input_file = os.path.join(temp_in_dir, "{}.txt".format(doc.id))
             input_files.append(input_file)
             with open(input_file, "w") as f:
                 f.write(content)
@@ -51,7 +51,7 @@ def prepare_files(input):
     return filelist_fn, out_fn, amount_files
 
 
-def get_progress(out_fn):
+def openie_get_progress(out_fn):
     """
     Get the progress of how many files have already been processed by OpenIE
     :param out_fn: The output file of OpenIE
@@ -68,7 +68,7 @@ def get_progress(out_fn):
             return len(set(doc_names))
 
 
-def run_openie(core_nlp_dir, out_fn, filelist_fn):
+def openie_run(core_nlp_dir: str, out_fn: str, filelist_fn: str):
     """
     Invokes the startup of OpenIE
     :param core_nlp_dir: Directory of Stanford OpenIE toolkit (CoreNLP(
@@ -86,14 +86,14 @@ def run_openie(core_nlp_dir, out_fn, filelist_fn):
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        print_progress_with_eta('OpenIE running...', get_progress(out_fn), num_files, start_time, print_every_k=1)
+        print_progress_with_eta('OpenIE running...', openie_get_progress(out_fn), num_files, start_time, print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
-        get_progress(out_fn), num_files, datetime.now() - start,
+        openie_get_progress(out_fn), num_files, datetime.now() - start,
     ))
     sys.stdout.flush()
 
 
-def match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
+def openie_match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
     """
     matches the predicate tokens in the sentence and extracts the correct pos tags
     :param pred: predicate string
@@ -127,7 +127,13 @@ def match_pred_tokens(pred, pos_tags, pred_start, pred_end, sent):
         return ' '.join(pred_pos_tags_list)
 
 
-def process_output(openie_out, outfile):
+def openie_process_output(openie_out: str, outfile: str):
+    """
+    Transforms the CoreNLP OpenIE Output format to an internal format
+    :param openie_out: the OpenIE output file
+    :param outfile: the path to the transformed output file
+    :return: None
+    """
     tuples = 0
     with open(openie_out, 'r') as f_out, open(outfile, 'w') as f_conv:
         for idx, line in enumerate(f_out):
@@ -165,23 +171,23 @@ def run_corenlp_openie(input_file, output, config=NLP_CONFIG):
         core_nlp_dir = conf["corenlp"]
 
     # Prepare files
-    filelist_fn, out_fn, amount_files = prepare_files(input_file)
+    filelist_fn, out_fn, amount_files = openie_prepare_files(input_file)
 
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        run_openie(core_nlp_dir, out_fn, filelist_fn)
+        openie_run(core_nlp_dir, out_fn, filelist_fn)
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
-        process_output(out_fn, output)
+        openie_process_output(out_fn, output)
         print(" done in {}".format(datetime.now() - start))
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="single pubtator file (containing multiple documents) or directory of "
-                                      "pubtator files")
-    parser.add_argument("output", help="File with OpenIE results")
+    parser.add_argument("input", help="Path to input document/documents")
+    parser.add_argument("output", help="OpenIE filtered output results")
     parser.add_argument("--config", default=NLP_CONFIG)
     args = parser.parse_args()
 

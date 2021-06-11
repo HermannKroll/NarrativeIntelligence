@@ -15,7 +15,8 @@ from narraint.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.load_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
-from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION
+from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
+    OPENIE6_EXTRACTION
 from narraint.config import NLP_CONFIG
 from narrant.util.helpers import chunks
 
@@ -135,7 +136,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
             if not os.path.exists(corenlp_output_dir):
                 os.mkdir(corenlp_output_dir)
 
-            pathie_run_corenlp(core_nlp_dir, corenlp_output_dir, ie_filelist_file)
+            pathie_run_corenlp(core_nlp_dir, corenlp_output_dir, ie_filelist_file, worker_no=workers)
 
             logging.info("Processing output ...")
             start = datetime.now()
@@ -151,6 +152,9 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
             # Todo: Implement
             raise NotImplementedError
         elif extraction_type == OPENIE_EXTRACTION:
+            # Todo: Implement
+            raise NotImplementedError
+        elif extraction_type == OPENIE6_EXTRACTION:
             # Todo: Implement
             raise NotImplementedError
     time_open_ie = datetime.now()
@@ -199,7 +203,7 @@ def main():
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
-                                          check_document_ids=False, workers=args.workers) # have been checked before
+                                          check_document_ids=False, workers=args.workers)  # have been checked before
 
 
 if __name__ == "__main__":
