@@ -9,7 +9,7 @@ from scipy.spatial.distance import cosine
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, PRED_TO_REMOVE
+from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, PRED_TO_REMOVE, RelationVocabulary
 from narrant.progress import print_progress_with_eta
 
 
@@ -192,13 +192,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("word2vec_model", help='word2vec file')
     parser.add_argument("output_distances", help='tsv export for distances')
+    parser.add_argument('--relation_vocab', required=True, help='Path to a relation vocabulary (tsv file)')
+
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
+
+    relation_vocab = RelationVocabulary()
+    relation_vocab.load_from_tsv_file(args.relation_vocab)
     canonicalize_predication_table(args.word2vec_model, args.output_distances,
-                                   predicate_vocabulary=create_predicate_vocab())
+                                   predicate_vocabulary=relation_vocab.relation_dict)
 
 
 if __name__ == "__main__":
