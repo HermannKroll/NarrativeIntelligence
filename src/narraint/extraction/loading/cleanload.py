@@ -13,7 +13,7 @@ from narraint.backend.database import SessionExtended
 from narrant.progress import print_progress_with_eta
 
 BULK_INSERT_AFTER_K = 10000
-MAX_SENTENCE_LENGTH = 3000
+MAX_SENTENCE_LENGTH = 1000
 MIN_SUBJECT_OR_OBJECT_LEN = 3
 
 # A list of words to ignore in OpenIE extractions
@@ -136,10 +136,10 @@ def load_sentences_with_hashes(document_collection: str):
     """
     logging.info('Retrieving known sentences for collection...')
     session = SessionExtended.get()
-    sentence_q = session.query(Sentence).filter(Sentence.document_collection == document_collection)
+    sentence_q = session.query(Sentence.id, Sentence.md5hash).filter(Sentence.document_collection == document_collection)
     hash2sentence = {}
     for sent in sentence_q:
-        hash2sentence[sent.md5hash] = sent.id
+        hash2sentence[sent[1]] = sent[0]
     logging.info(f'{len(hash2sentence)} sentences retrieved')
     return hash2sentence
 
@@ -163,6 +163,8 @@ def clean_sentence_str(sentence: str) -> str:
     :param sentence: the sentence to clean
     :return: a cleaned version of the sentence
     """
+    if len(sentence) > MAX_SENTENCE_LENGTH:
+        sentence = sentence[0:MAX_SENTENCE_LENGTH]
     return sentence.replace('\t', ' ').replace('\n', ' ').replace('\\', '\\\\')
 
 
@@ -179,8 +181,8 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     """
     if clean_genes:
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
-    if do_transform_mesh_ids_to_prefixes:
-        tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
+    #if do_transform_mesh_ids_to_prefixes:
+     #   tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
     hash2sentence = load_sentences_with_hashes(collection)
     sentid2hash = {v: k for k, v in hash2sentence.items()}
     inserted_sentence_ids = set([k for k in sentid2hash.keys()])
@@ -222,7 +224,7 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
         # no sentence_id found
         else:
             sentence_id = last_highest_sentence_id
-            hash2sentence[sent_hash].append((sentence_id, sentence_txt))
+            hash2sentence[sent_hash] = sentence_id
             last_highest_sentence_id += 1
 
         predication_values.append(dict(
