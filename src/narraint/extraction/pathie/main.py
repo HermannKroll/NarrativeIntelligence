@@ -15,6 +15,7 @@ import shutil
 
 from spacy.lang.en import English
 
+from narraint.cleaning.predicate_vocabulary import RelationVocabulary
 from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
@@ -38,12 +39,13 @@ def get_progress(out_corenlp_dir: str) -> int:
     return hits
 
 
-def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str):
+def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str, worker_no: int):
     """
     Invokes the Stanford CoreNLP tool to process files
     :param core_nlp_dir: CoreNLP tool directory
     :param out_corenlp_dir: the output directory
     :param filelist_fn: the path of the filelist which files should be processed
+    :param worker_no: number of parallel workers
     :return: None
     """
     start = datetime.now()
@@ -51,7 +53,8 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
         num_files = len(f.read().split("\n"))
 
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
-    sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn)]
+    sp_args = ["/bin/bash", "-c", "{} {} {} {} {}".format(run_script, core_nlp_dir, out_corenlp_dir, filelist_fn,
+                                                          worker_no)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
     print_progress_with_eta('CoreNLP running...', 0, num_files, start_time,  print_every_k=1)
@@ -278,7 +281,7 @@ def run_pathie(input, output, workdir=None, config=NLP_CONFIG,
     if amount_files == 0:
         print('no files to process - stopping')
     else:
-        pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn)
+        pathie_run_corenlp(core_nlp_dir, out_corenlp_dir, filelist_fn, worker_no=workers)
         print("Processing output ...", end="")
         start = datetime.now()
         # Process output
@@ -297,13 +300,22 @@ def main():
     parser.add_argument("output", help="PathIE output file")
     parser.add_argument("--workdir", help="working directory")
     parser.add_argument("--config", default=NLP_CONFIG)
+    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (tsv file)')
     parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-    run_pathie(args.input, args.output, args.workdir, args.config, args.workers)
+    if args.relation_vocab:
+        relation_vocab = RelationVocabulary()
+        relation_vocab.load_from_tsv_file(args.relation_vocab)
+
+        run_pathie(args.input, args.output, args.workdir, args.config, workers=args.workers,
+                   predicate_vocabulary=relation_vocab.relation_dict)
+    else:
+        run_pathie(args.input, args.output, args.workdir, args.config, workers=args.workers)
+
 
 
 if __name__ == "__main__":

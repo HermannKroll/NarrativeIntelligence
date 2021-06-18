@@ -12,7 +12,7 @@ PathIEDependency = namedtuple('PathIEDependency', ["governor_idx", "dependent_id
 
 PathIEExtraction = namedtuple('PathIEExtraction', ["document_id", "subject_id", "subject_str", "subject_type",
                                                    "predicate", "predicate_lemmatized", "object_id", "object_str",
-                                                   "object_type", "sentence"])
+                                                   "object_type", "confidence", "sentence"])
 
 
 def pathie_use_keywords_from_predicate_vocabulary(predicate_vocabulary: Dict[str, List[str]]):
@@ -235,6 +235,7 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
     # perform the extraction
     # PathIE performs a nested loop search upon the entity start tokens and computes shortest path between them
     # if a verb, keyword or keyphrase appears on the path, a fact will be extracted
+    sent_len = len(idx2token)
     for e1_idx, (e1_tag, e1_token_ids) in enumerate(tag_sequences):
         for e1_tok_id in e1_token_ids:
             for e2_idx, (e2_tag, e2_token_ids) in enumerate(tag_sequences):
@@ -266,12 +267,21 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                         continue
                                     extracted_index.add(key_e1_e2)
                                     extracted_index.add(key_e2_e1)
+
+                                    path_len = len(path_nodes)
+                                    # only entities + verb
+                                    if path_len <= 3:
+                                        confidence = 1.0
+                                    # decrease confidence for every other token on the path
+                                    else:
+                                        confidence = max(1.0 - 0.1 * float(path_len), 0.0)
+
                                     extracted_tuples.append(
                                         PathIEExtraction(doc_id,
                                                          e1_tag.ent_id, e1_tag.text, e1_tag.ent_type,
                                                          v_txt, v_lemma,
                                                          e2_tag.ent_id, e2_tag.text, e2_tag.ent_type,
-                                                         sentence))
+                                                         confidence, sentence))
                     except nx.NetworkXNoPath:
                         pass
 

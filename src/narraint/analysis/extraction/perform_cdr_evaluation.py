@@ -13,7 +13,7 @@ from narraint.cleaning.apply_rules import clean_extractions_in_database
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
-from narraint.extraction.openie6.main import run_openie6
+from narraint.extraction.openie6.main import openie6_run
 from narraint.extraction.pathie.load_extractions import read_pathie_extractions_tsv
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
@@ -164,7 +164,7 @@ def main():
 
     if RUN_OPENIE6:
         logging.info('Running OpenIE6...')
-        run_openie6(CDR2015_pubtator_extracted, CDR2015_openie6_output)
+        openie6_run(CDR2015_pubtator_extracted, CDR2015_openie6_output)
 
     if LOAD_OPENIE6:
         logging.info('Loading OpenIE 6.0 extractions...')

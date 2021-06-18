@@ -4,8 +4,10 @@ from typing import List
 from io import StringIO
 
 from narraint.backend.database import SessionExtended
-from narraint.extraction.versions import PATHIE_EXTRACTION, CORENLP_VERSION
-from narraint.extraction.openie.cleanload import PRED, insert_predications_into_db, clean_predications
+from narraint.extraction.loading.cleanload import PRED, clean_predications, insert_predications_into_db
+from narraint.extraction.versions import PATHIE_EXTRACTION
+
+from narrant.backend.database import Session
 
 
 def read_pathie_extractions_tsv(pathie_tsv_file: str):
@@ -18,12 +20,12 @@ def read_pathie_extractions_tsv(pathie_tsv_file: str):
     with open(pathie_tsv_file, 'rt') as f:
         for line in f:
             try:
-                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, sentence = line.split('\t')
-                p = PRED(doc_id, "", pred, pred_lemma, "", 1.0, sentence, e1_id, e1_str, e1_type, e2_id, e2_str, e2_type)
+                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, conf, sentence = line.split('\t')
+                p = PRED(doc_id, "", pred, pred_lemma, "", conf, sentence, e1_id, e1_str, e1_type, e2_id, e2_str, e2_type)
                 extractions.append(p)
                 # flip triple
-                p = PRED(doc_id, "", pred, pred_lemma, "", 1.0, sentence, e2_id, e2_str, e2_type, e1_id, e1_str, e1_type)
-                extractions.append(p)
+              #  p = PRED(doc_id, "", pred, pred_lemma, "", 1.0, sentence, e2_id, e2_str, e2_type, e1_id, e1_str, e1_type)
+               # extractions.append(p)
 
             except ValueError:
                 tup = line.split('\t')

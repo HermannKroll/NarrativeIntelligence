@@ -8,7 +8,7 @@ from spacy.lang.en import English
 from narraint.config import DATA_DIR
 from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
 from narraint.extraction.openie.main import run_corenlp_openie
-from narraint.extraction.openie6.main import run_openie6
+from narraint.extraction.openie6.main import openie6_run
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narrant.pubtator.count import count_documents
@@ -83,7 +83,7 @@ def main():
         start = datetime.now()
         if RUN_OPENIE6:
             logging.info('Running OpenIE6...')
-            run_openie6(TEST_FILE, OUT_OPENIE6)
+            openie6_run(TEST_FILE, OUT_OPENIE6)
 
         openie6_time = datetime.now() - start
         logging.error(f'CoreNLP OpenIE6 takes {openie6_time}s')

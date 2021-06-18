@@ -7,7 +7,7 @@ import logging
 import shutil
 from spacy.lang.en import English
 
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
+from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, RelationVocabulary
 from narrant.preprocessing import enttypes
 from narraint.backend.database import SessionExtended
 from narrant.backend.export import export
@@ -15,7 +15,8 @@ from narraint.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.load_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
-from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION
+from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
+    OPENIE6_EXTRACTION
 from narraint.config import NLP_CONFIG
 from narrant.util.helpers import chunks
 
@@ -76,7 +77,8 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
 
 
 def process_documents_ids_in_pipeline(document_ids: [int], document_collection, extraction_type, workers=1,
-                                      corenlp_config=NLP_CONFIG, check_document_ids=True):
+                                      corenlp_config=NLP_CONFIG, check_document_ids=True,
+                                      relation_vocab: RelationVocabulary=None):
     """
     Performs fact extraction for the given documents with the selected extraction type
     The document texts and tags will be exported automatically
@@ -88,6 +90,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
     :param workers: the number of parallel workers (if extraction method is parallelized)
     :param corenlp_config: the nlp config
     :param check_document_ids: should the the document ids be checked against db
+    :param relation_vocab: the relation vocabulary for PathIE (optional)
     :return: None
     """
     # Read config
@@ -135,13 +138,15 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
             if not os.path.exists(corenlp_output_dir):
                 os.mkdir(corenlp_output_dir)
 
-            pathie_run_corenlp(core_nlp_dir, corenlp_output_dir, ie_filelist_file)
+            pathie_run_corenlp(core_nlp_dir, corenlp_output_dir, ie_filelist_file, worker_no=workers)
 
             logging.info("Processing output ...")
             start = datetime.now()
+
+            pred_vocab = relation_vocab.relation_dict if relation_vocab else None
             # Process output
             pathie_process_corenlp_output_parallelized(corenlp_output_dir, amount_ie_docs, ie_output_file, doc2tags,
-                                                       workers=workers, predicate_vocabulary=create_predicate_vocab())
+                                                       workers=workers, predicate_vocabulary=pred_vocab)
             logging.info((" done in {}".format(datetime.now() - start)))
 
             logging.info('Loading extractions into database...')
@@ -151,6 +156,9 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
             # Todo: Implement
             raise NotImplementedError
         elif extraction_type == OPENIE_EXTRACTION:
+            # Todo: Implement
+            raise NotImplementedError
+        elif extraction_type == OPENIE6_EXTRACTION:
             # Todo: Implement
             raise NotImplementedError
     time_open_ie = datetime.now()
@@ -175,11 +183,18 @@ def main():
     parser.add_argument("-bs", "--batch_size",
                         help="Batch size (how many documents should be processed and loaded in a batch)",
                         default=DOCUMENTS_TO_PROCESS_IN_ONE_BATCH, type=int)
+    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (tsv file)')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
+
+    if args.relation_vocab:
+        relation_vocab = RelationVocabulary()
+        relation_vocab.load_from_tsv_file(args.relation_vocab)
+    else:
+        relation_vocab = None
 
     if args.extraction_type not in [PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE_EXTRACTION]:
         error_msg = 'extraction type must either be {}, {} or {}'.format(PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION,
@@ -199,7 +214,7 @@ def main():
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
-                                          check_document_ids=False, workers=args.workers) # have been checked before
+                                          check_document_ids=False, workers=args.workers, relation_vocab=relation_vocab)
 
 
 if __name__ == "__main__":
