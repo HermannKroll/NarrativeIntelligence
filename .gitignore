@@ -129,3 +129,4 @@ config/*
 docker/*.tgz
 docker/GNormPlusJava.zip
 docker/TaggerOne/models
+/tmp-/

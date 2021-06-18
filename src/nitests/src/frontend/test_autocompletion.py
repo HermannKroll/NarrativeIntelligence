@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from narraint.config import PLANT_FAMILTY_DATABASE_FILE
+from narrant.config import PLANT_FAMILTY_DATABASE_FILE
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary
-from narraint.frontend.ui.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.autocompletion import AutocompletionUtil
 
 
 class AutocompletionTestCase(TestCase):
