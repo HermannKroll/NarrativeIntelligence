@@ -160,3 +160,18 @@ class DocProcessedByIE(Extended):
     document_collection = Column(String)
     extraction_type = Column(String)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
+
+
+class PredicationDenorm(Extended):
+    __tablename__ = "predication_denorm"
+    __table_args__ = (
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
+    )
+    id = Column(BigInteger, nullable=False, autoincrement=True)
+    subject_id = Column(String, nullable=False, index=True)
+    subject_type = Column(String, nullable=False)
+    predicate_canonicalized = Column(String, nullable=False, index=True)
+    object_id = Column(String, nullable=False, index=True)
+    object_type = Column(String, nullable=False)
+    document_ids = Column(String, nullable=False)
+    provenance_mapping = Column(String, nullable=False)
