@@ -39,6 +39,20 @@ class DocumentTranslation(narrant.backend.models.DocumentTranslation):
     pass
 
 
+class DocumentMetadata(Extended):
+    __tablename__ = 'document_metadata'
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
+    )
+
+    document_id = Column(BigInteger, nullable=False)
+    document_collection = Column(String, nullable=False)
+    authors = Column(String, nullable=True)
+    journals = Column(String, nullable=True)
+    publication_year = Column(String, nullable=True)
+
+
 class Predication(Extended):
     __tablename__ = "predication"
     __table_args__ = (
@@ -67,7 +81,9 @@ class Predication(Extended):
     extraction_type = Column(String, nullable=False)
 
     def __str__(self):
-        return "<{}>\t<{}>\t<{}>".format(self.subject_id, self.predicate, self.object_id)
+        return "<{} ({})>\t<{}>\t<{} ({})>".format(self.subject_id, self.subject_type,
+                                              self.predicate_canonicalized,
+                                              self.object_id, self.object_type)
 
     def __repr__(self):
         return "<Predication {}>".format(self.id)
