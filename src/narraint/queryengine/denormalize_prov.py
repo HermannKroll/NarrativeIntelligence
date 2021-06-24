@@ -12,7 +12,7 @@ import json
 def denormalize_predication_table():
     session = SessionExtended.get()
     logging.info('Counting the number of predications...')
-    pred_count = session.query(Predication).count()
+    pred_count = session.query(Predication).filter(Predication.predicate_canonicalized != None).count()
 
     start_time = datetime.now()
     # "is not None" instead of "!=" None" DOES NOT WORK!
