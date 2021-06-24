@@ -31,8 +31,8 @@ def main():
         logging.info('=' * 60)
         logging.info('Computing tagging index...')
 
-        #entity_tagger = EntityTagger.instance(load_index=False)
-        #entity_tagger.store_index()
+        entity_tagger = EntityTagger.instance(load_index=False)
+        entity_tagger.store_index()
 
         ac = AutocompletionUtil.instance(load_index=False)
         ac.build_autocompletion_index()
