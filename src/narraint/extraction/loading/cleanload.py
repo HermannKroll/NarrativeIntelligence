@@ -5,6 +5,7 @@ from typing import List
 import hashlib
 from io import StringIO
 
+from narraint.config import BULK_INSERT_AFTER_K
 from narrant.entity.meshontology import MeSHOntology
 from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
@@ -12,7 +13,6 @@ from narraint.backend.models import Predication, Sentence
 from narraint.backend.database import SessionExtended
 from narrant.progress import print_progress_with_eta
 
-BULK_INSERT_AFTER_K = 10000
 MAX_SENTENCE_LENGTH = 1000
 MIN_SUBJECT_OR_OBJECT_LEN = 3
 
@@ -356,7 +356,7 @@ def insert_predications_into_db(predication_values, sentence_values):
         session.bulk_insert_mappings(Predication, predication_part)
         session.commit()
         predication_part.clear()
-        logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
+        logging.info('Insert finished ({} facts inserted)'.format(len_tuples))
 
 
 def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
