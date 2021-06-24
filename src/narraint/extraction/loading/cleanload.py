@@ -3,7 +3,7 @@ from collections import namedtuple
 from datetime import datetime
 from typing import List
 import hashlib
-
+from io import StringIO
 
 from narrant.entity.meshontology import MeSHOntology
 from narrant.entity.entityresolver import GeneResolver
@@ -256,8 +256,111 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     return predication_values, sentence_values
 
 
-def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                do_transform_mesh_ids_to_prefixes=True):
+def postgres_clean_and_export_predications_to_copy_load_tsv(predication_values, sentence_values):
+    """
+    insert a list of cleaned tuples into the database (bulk insert)
+    does not check for collisions
+    :param predication_values: list of predication values
+    :param sentence_values: list of sentence values
+    :return: Nothing
+    """
+    sentence_values_len = len(sentence_values)
+    predication_values_len = len(predication_values)
+    session = SessionExtended.get()
+    connection = session.connection().connection
+    if sentence_values_len > 0:
+        logging.info(f'Exporting {len(sentence_values)} sentences to memory file')
+        sent_keys = ["id", "document_id", "document_collection", "text", "md5hash"]
+        f_sent = StringIO()
+        for idx, sent_value in enumerate(sentence_values):
+            sent_str = '{}'.format('\t'.join([str(sent_value[k]) for k in sent_keys]))
+            if idx == 0:
+                f_sent.write(sent_str)
+            else:
+                f_sent.write(f'\n{sent_str}')
+        # free memory here
+        sentence_values.clear()
+
+        cursor = connection.cursor()
+        logging.info('Executing copy from sentence...')
+        f_sent.seek(0)
+        cursor.copy_from(f_sent, 'Sentence', sep='\t', columns=sent_keys)
+        logging.info('Committing...')
+        connection.commit()
+        f_sent.close()
+
+    if predication_values_len > 0:
+        logging.info(f'Exporting {len(predication_values)} predications to memory file')
+        pred_keys = ['document_id', 'document_collection', 'subject_id', 'subject_str', 'subject_type', 'predicate',
+                     'object_id', 'object_str', 'object_type', 'confidence', 'sentence_id', 'extraction_type']
+
+        f_pred = StringIO()
+        for idx, pred_val in enumerate(predication_values):
+            pred_str = '{}'.format('\t'.join([str(pred_val[k]) for k in pred_keys]))
+            if idx == 0:
+                f_pred.write(pred_str)
+            else:
+                f_pred.write(f'\n{pred_str}')
+        # free memory here
+        predication_values.clear()
+
+        logging.info('Executing copy from predication...')
+        cursor = connection.cursor()
+        f_pred.seek(0)
+        cursor.copy_from(f_pred, 'Predication', sep='\t', columns=pred_keys)
+        logging.info('Committing...')
+        connection.commit()
+        f_pred.close()
+        logging.info(f'Finished {sentence_values_len} sentences and {predication_values_len} predications have been '
+                     f'inserted')
+
+
+def insert_predications_into_db(predication_values, sentence_values):
+    """
+    Insert predication and sentence values to db
+    :param predication_values: a list of predication values
+    :param sentence_values: a list of sentence values
+    :return: None
+    """
+    session = SessionExtended.get()
+    # use fast postgres insert if possible
+    if SessionExtended.is_postgres:
+        postgres_clean_and_export_predications_to_copy_load_tsv(predication_values, sentence_values)
+    else:
+        sentence_part = []
+        logging.info('Inserting sentences...')
+        len_tuples = len(sentence_values)
+        start_time = datetime.now()
+        for i, s in enumerate(sentence_values):
+            sentence_part.append(s)
+            if i % BULK_INSERT_AFTER_K == 0:
+                session.bulk_insert_mappings(Sentence, sentence_part)
+                session.commit()
+                sentence_part.clear()
+            print_progress_with_eta("Inserting sentences...", i, len_tuples, start_time)
+        session.bulk_insert_mappings(Sentence, sentence_part)
+        session.commit()
+        sentence_part.clear()
+
+        predication_part = []
+        logging.info('Inserting predications...')
+        len_tuples = len(predication_values)
+        start_time = datetime.now()
+        for i, p in enumerate(predication_values):
+            predication_part.append(p)
+            if i % BULK_INSERT_AFTER_K == 0:
+                session.bulk_insert_mappings(Predication, predication_part)
+                session.commit()
+                predication_part.clear()
+            print_progress_with_eta("Inserting predications...", i, len_tuples, start_time)
+        session.bulk_insert_mappings(Predication, predication_part)
+        session.commit()
+        predication_part.clear()
+        logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
+
+
+def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
+                                        do_transform_mesh_ids_to_prefixes=True):
     """
      insert a list of cleaned tuples into the database (bulk insert)
      does not check for collisions
@@ -272,37 +375,5 @@ def insert_predications_into_db(tuples_cleaned: List[PRED], collection, extracti
                                                              clean_genes=clean_genes,
                                                              do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes)
     logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
-    session = SessionExtended.get()
-
-    sentence_part = []
-    logging.info('Inserting sentences...')
-    len_tuples = len(sentence_values)
-    start_time = datetime.now()
-    for i, s in enumerate(sentence_values):
-        sentence_part.append(s)
-        if i % BULK_INSERT_AFTER_K == 0:
-            session.bulk_insert_mappings(Sentence, sentence_part)
-            session.commit()
-            sentence_part.clear()
-        print_progress_with_eta("Inserting sentences...", i, len_tuples, start_time)
-    session.bulk_insert_mappings(Sentence, sentence_part)
-    session.commit()
-    sentence_part.clear()
-
-    predication_part = []
-    logging.info('Inserting predications...')
-    len_tuples = len(predication_values)
-    start_time = datetime.now()
-    for i, p in enumerate(predication_values):
-        predication_part.append(p)
-        if i % BULK_INSERT_AFTER_K == 0:
-            session.bulk_insert_mappings(Predication, predication_part)
-            session.commit()
-            predication_part.clear()
-        print_progress_with_eta("Inserting predications...", i, len_tuples, start_time)
-    session.bulk_insert_mappings(Predication, predication_part)
-    session.commit()
-    predication_part.clear()
-    logging.info('Insert finished ({} facts inserted)'.format(len(tuples_cleaned)))
-
+    insert_predications_into_db(predication_values, sentence_values)
 
