@@ -73,7 +73,7 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
             if journal_year and (not publication_year or publication_year < journal_year):
                 publication_year = journal_year
 
-        journals = ' | '.join(journal_list)
+        journals = ' | '.join(journal_list).replace('\\', ' ')
 
         if authors or journals or publication_year:
             metadata_to_insert.append(dict(document_id=pmid, document_collection=document_collection,
