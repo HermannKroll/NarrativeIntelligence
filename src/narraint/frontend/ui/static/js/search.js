@@ -760,7 +760,12 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         if (ent_name === ent_type) {
             var_sub = ent_name;
         }
-        if (ent_id.slice(0, 2) === "DB") {
+         if (ent_id.slice(0, 6) === "CHEMBL"){
+             button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://www.ebi.ac.uk/chembl/compound_report_card/' + ent_id + '" target="_blank"' +
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+         }
+        else if (ent_id.slice(0, 2) === "DB") {
             button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
