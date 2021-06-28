@@ -60,6 +60,6 @@ def get_tags_from_database(doc_id=None):
 def clear_database():
     """DANGER! ONLY USE IN TESTS, NOWHERE IN PRODUCTION CODE!"""
     session = SessionExtended.get()
-    if Session.is_sqlite:
+    if SessionExtended.is_sqlite:
         session.execute("DELETE FROM tag")
         session.execute("DELETE FROM doc_tagged_by")
