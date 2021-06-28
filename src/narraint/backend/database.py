@@ -13,5 +13,4 @@ class SessionExtended(Session):
             cls._instance = Session.get(connection_config, declarative_base)
             SessionExtended.is_postgres = cls._instance.is_postgres
             SessionExtended.is_sqlite = cls._instance.is_sqlite
-        return cls._instance.session
-
+        return cls._instance
