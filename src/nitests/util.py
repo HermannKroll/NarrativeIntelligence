@@ -2,11 +2,12 @@ import logging
 import os
 import tempfile
 
+
 from narraint.backend.database import SessionExtended
 from narrant.config import PREPROCESS_CONFIG
+from narraint.config import GIT_ROOT_DIR
 from narrant.pubtator.document import TaggedEntity
 from narrant.pubtator.extract import collect_ids_from_dir
-from narrant.tools import proj_rel_path
 from nitests.config.config import TEST_RESOURCES_DIR
 import narrant.preprocessing.config as cnf
 
@@ -33,6 +34,10 @@ def resource_rel_path(path):
     return proj_rel_path("src/nitests/resources/" + path)
 
 
+
+def proj_rel_path(path):
+    return os.path.join(GIT_ROOT_DIR, path)
+
 def make_test_tempdir():
     return tempfile.mkdtemp()
 
@@ -55,6 +60,6 @@ def get_tags_from_database(doc_id=None):
 def clear_database():
     """DANGER! ONLY USE IN TESTS, NOWHERE IN PRODUCTION CODE!"""
     session = SessionExtended.get()
-    if Session.is_sqlite:
+    if SessionExtended.is_sqlite:
         session.execute("DELETE FROM tag")
         session.execute("DELETE FROM doc_tagged_by")

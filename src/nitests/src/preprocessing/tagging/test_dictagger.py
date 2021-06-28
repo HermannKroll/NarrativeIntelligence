@@ -89,15 +89,6 @@ class TestDictagger(unittest.TestCase):
         self.assertIn(('carbon-copper', 32), indexed)
         self.assertNotIn(('carbon', 32), indexed)
 
-    @pytest.mark.skip("unused")
-    def test_conjunction_product(self):
-        tuples = DictTagger.conjunction_product(split_indexed_words("brain, breast and ovarian cancer"))
-        desired = "[[('brain', 0), ('ovarian', 18)], [('brain', 0), ('cancer', 26)], [('brain', 0), ('ovarian', 18), " \
-                  "('cancer', 26)], [('breast', 7), ('ovarian', 18)], [('breast', 7), ('cancer', 26)], [('breast', 7), " \
-                  "('ovarian', 18), ('cancer', 26)], [('brain', 0), ('breast', 7), ('ovarian', 18)], [('brain', 0), " \
-                  "('breast', 7), ('cancer', 26)], [('brain', 0), ('breast', 7), ('ovarian', 18), ('cancer', 26)]]"
-        self.assertEqual(str(list(tuples)), desired)
-
 
 if __name__ == '__main__':
     unittest.main()
