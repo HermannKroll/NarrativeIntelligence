@@ -8,7 +8,7 @@ from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, Pr
     BigInteger, func, insert
 
 import narrant
-from narrant.backend.models import Base
+from narrant.backend.models import Base, DatabaseTable
 
 Extended = Base
 
@@ -39,7 +39,21 @@ class DocumentTranslation(narrant.backend.models.DocumentTranslation):
     pass
 
 
-class Predication(Extended):
+class DocumentMetadata(Extended, DatabaseTable):
+    __tablename__ = 'document_metadata'
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
+    )
+
+    document_id = Column(BigInteger, nullable=False)
+    document_collection = Column(String, nullable=False)
+    authors = Column(String, nullable=True)
+    journals = Column(String, nullable=True)
+    publication_year = Column(String, nullable=True)
+
+
+class Predication(Extended, DatabaseTable):
     __tablename__ = "predication"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
@@ -67,7 +81,9 @@ class Predication(Extended):
     extraction_type = Column(String, nullable=False)
 
     def __str__(self):
-        return "<{}>\t<{}>\t<{}>".format(self.subject_id, self.predicate, self.object_id)
+        return "<{} ({})>\t<{}>\t<{} ({})>".format(self.subject_id, self.subject_type,
+                                                   self.predicate_canonicalized,
+                                                   self.object_id, self.object_type)
 
     def __repr__(self):
         return "<Predication {}>".format(self.id)
@@ -110,7 +126,21 @@ class Predication(Extended):
         return sorted(predicates_with_count, key=lambda x: x[1], reverse=True)
 
 
-class PredicationRating(Extended):
+class PredicationDenorm(Extended, DatabaseTable):
+    __tablename__ = "predication_denorm"
+    __table_args__ = (
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
+    )
+    id = Column(BigInteger, nullable=False, autoincrement=True)
+    subject_id = Column(String, nullable=False, index=True)
+    subject_type = Column(String, nullable=False, index=True)
+    predicate_canonicalized = Column(String, nullable=False, index=True)
+    object_id = Column(String, nullable=False, index=True)
+    object_type = Column(String, nullable=False, index=True)
+    provenance_mapping = Column(String, nullable=False)
+
+
+class PredicationRating(Extended, DatabaseTable):
     __tablename__ = "predication_rating"
     __table_args__ = (
         ForeignKeyConstraint(('predication_id',), ('predication.id',)),
@@ -128,7 +158,7 @@ class PredicationRating(Extended):
         session.commit()
 
 
-class PredicationToDelete(Extended):
+class PredicationToDelete(Extended, DatabaseTable):
     __tablename__ = "predication_to_delete"
     __table_args__ = (
         PrimaryKeyConstraint('predication_id', sqlite_on_conflict='IGNORE'),
@@ -136,7 +166,7 @@ class PredicationToDelete(Extended):
     predication_id = Column(BigInteger)
 
 
-class Sentence(Extended):
+class Sentence(Extended, DatabaseTable):
     __tablename__ = "sentence"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
@@ -150,7 +180,7 @@ class Sentence(Extended):
     md5hash = Column(String, nullable=False)
 
 
-class DocProcessedByIE(Extended):
+class DocProcessedByIE(Extended, DatabaseTable):
     __tablename__ = "doc_processed_by_ie"
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),

@@ -12,10 +12,11 @@ from narraint.backend.models import Tag
 from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
-from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY
+from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, CHEMICAL
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
-from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugTaggerVocabulary
+from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugVocabulary, \
+    ChemicalVocabulary
 
 
 class DosageFormTaggerVocabulary:
@@ -104,7 +105,8 @@ class EntityTagger:
         self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
-        self._add_drugbank_tags()
+        self._add_chembl_drugs()
+        self._add_chembl_chemicals()
         self._add_fid_dosageform_terms()
         self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
@@ -181,21 +183,27 @@ class EntityTagger:
                     # find the given entity type for the tree number
                     try:
                         ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                        self.term2entity[term].add(Entity(tn, ent_type))
+                        self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
                     except KeyError:
                         continue
             except KeyError:
                 continue
 
-    def _add_drugbank_tags(self):
-        logging.info('Adding DrugBank terms...')
-        drug_terms2dbid = DrugTaggerVocabulary.create_drugbank_vocabulary_from_source(ignore_excipient_terms=False,
-                                                                                      ignore_drugbank_chemicals=False,
-                                                                                      expand_terms=False)
-        for term, dbids in drug_terms2dbid.items():
-            for dbid in dbids:
-                self.term2entity[term.lower()].add(Entity(dbid, DRUG))
-        logging.info('DrugBank terms added')
+    def _add_chembl_drugs(self):
+        logging.info('Adding ChEMBL drugs...')
+        drug_terms2dbid = DrugVocabulary.create_drug_vocabulary_from_chembl(ignore_excipient_terms=False,
+                                                                            ignore_drugbank_chemicals=False,
+                                                                            expand_terms=False)
+        for term, chids in drug_terms2dbid.items():
+            for chid in chids:
+                self.term2entity[term.lower()].add(Entity(chid, DRUG))
+
+    def _add_chembl_chemicals(self):
+        logging.info('Adding ChEMBL chemicals...')
+        drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
+        for term, chids in drug_terms2dbid.items():
+            for chid in chids:
+                self.term2entity[term.lower()].add(Entity(chid, CHEMICAL))
 
     def tag_entity(self, term: str):
         """

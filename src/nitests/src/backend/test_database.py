@@ -3,27 +3,22 @@ import pytest
 import os
 
 
-import narraint.config as cnf
+import narrant.config as cnf
 from narraint.backend.database import SessionExtended
+from narrant.backend.models import Tag, Tagger
 from narrant.tools import proj_rel_path
 from nitests.util import tmp_rel_path
 
 
 class TestSession(unittest.TestCase):
 
-    @pytest.mark.order1
-    def test_sqlite_creation(self):
-        session = SessionExtended.get()
-        self.assertIsNotNone(session)
-        self.assertEqual(cnf.BACKEND_CONFIG,
-                         os.path.join(cnf.GIT_ROOT_DIR, "src/nitests/config/jsonfiles/backend.json"))
-
     def test_sqlite_ins_sel(self):
         session = SessionExtended.get()
         session.execute("INSERT INTO tagger VALUES ('foo', 'bar')")
-        result = session.execute("SELECT * FROM tagger")
+        session.query
+        result = session.query(Tagger)
         for row in result:
-            self.assertTrue(row['name'] == 'foo' and row['version'] == 'bar')
+            self.assertTrue(row.name == 'foo' and row.version == 'bar')
         self.assertTrue(os.path.isfile(tmp_rel_path("sqlite.db")))
 
 

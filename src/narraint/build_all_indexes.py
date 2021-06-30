@@ -3,7 +3,7 @@ import json
 
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.config import BACKEND_CONFIG
+from narraint.config import BACKEND_CONFIG
 
 
 def main():
@@ -31,8 +31,8 @@ def main():
         logging.info('=' * 60)
         logging.info('Computing tagging index...')
 
-        #entity_tagger = EntityTagger.instance(load_index=False)
-        #entity_tagger.store_index()
+        entity_tagger = EntityTagger.instance(load_index=False)
+        entity_tagger.store_index()
 
         ac = AutocompletionUtil.instance(load_index=False)
         ac.build_autocompletion_index()

@@ -30,10 +30,13 @@ PREDICATE_EXPANSION = dict(
 
 SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases"}
 
-PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT}, {DISEASE, SPECIES}),
-                    'administered': ({DOSAGE_FORM, METHOD, LAB_METHOD}, {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
+PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT},
+                               {DISEASE, SPECIES}),
+                    'administered': ({DOSAGE_FORM, METHOD, LAB_METHOD},
+                                     {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
                                                      PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
-                    'method': ({METHOD, LAB_METHOD}, {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
+                    'method': ({METHOD, LAB_METHOD},
+                               {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
                                                       PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
                     'induces': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY},
                                 {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY}),
@@ -41,8 +44,10 @@ PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT}, {
                                   {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY}),
                     'interacts': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY},
                                   {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, GENE, PLANT_FAMILY}),
-                    'metabolises': ({GENE}, {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}),
-                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}, {GENE}),
+                    'metabolises': ({GENE},
+                                    {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY}),
+                    'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, PLANT_FAMILY},
+                                 {GENE}),
                     }
 
 
@@ -53,8 +58,15 @@ def sort_symmetric_arguments(subject_id, subject_type, object_id, object_type):
         return object_id, object_type, subject_id, subject_type
 
 
+def are_subject_and_object_correctly_ordered(subject_id, object_id):
+    if subject_id < object_id:
+        return True
+    else:
+        return False
+
 def have_entities_correct_order(arg1: Entity, arg2: Entity):
     return arg1.entity_id < arg2.entity_id
+
 
 
 def should_perform_like_search_for_entity(entity_id, entity_type):

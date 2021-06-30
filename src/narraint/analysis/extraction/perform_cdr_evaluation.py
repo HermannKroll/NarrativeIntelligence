@@ -9,7 +9,7 @@ from narraint.backend.models import Predication
 from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
-from narraint.cleaning.apply_rules import clean_extractions_in_database
+from narraint.cleaning.apply_rules import check_type_constraints
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
@@ -177,7 +177,7 @@ def main():
         canonicalize_predication_table(WORD2VEC_MODEL, CDR2015_canonicalizing_distances,
                                        document_collection=CDR2015_COLLECTION,
                                        predicate_vocabulary=create_predicate_vocab())
-        clean_extractions_in_database()
+        check_type_constraints()
 
     logging.info('=' * 60)
     logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')

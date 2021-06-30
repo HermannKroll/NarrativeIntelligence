@@ -15,6 +15,10 @@ CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
 REPORT_DIR = os.path.join(GIT_ROOT_DIR, 'reports')
 
+
+QUERY_YIELD_PER_K = 1000000
+BULK_INSERT_AFTER_K = 100000
+
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
 

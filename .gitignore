@@ -130,3 +130,4 @@ docker/*.tgz
 docker/GNormPlusJava.zip
 docker/TaggerOne/models
 /tmp-/
+/src/nitests/config/jsonfiles/backend.json

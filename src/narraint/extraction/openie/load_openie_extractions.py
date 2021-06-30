@@ -10,7 +10,7 @@ from nltk.corpus import wordnet
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
-from narraint.extraction.loading.cleanload import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, insert_predications_into_db
+from narraint.extraction.loading.cleanload import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, clean_and_load_predications_into_db
 from narraint.extraction.versions import OPENIE_EXTRACTION
 from narrant.progress import print_progress_with_eta
 
@@ -237,7 +237,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
             continue
         doc_tags = doc2tags[openie_t.doc_id]
         # go trough all detected entities in the subject and object part of the open ie triple
-        sub_ents, obj_ents = get_subject_and_object_entities(doc_tags, openie_t.subj, openie_t.obj)
+        sub_ents, obj_ents = get_subject_and_object_entities(doc_tags, openie_t.subj, openie_t.obj, entity_filter)
         for s_txt, s_id, s_type in sub_ents:
             for o_txt, o_id, o_type in obj_ents:
                 # check if tuple is already extracted for sentence
@@ -276,7 +276,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    insert_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type, clean_genes=clean_genes)
+    clean_and_load_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type, clean_genes=clean_genes)
 
 
 def main():
