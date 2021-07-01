@@ -137,7 +137,6 @@ class PredicationDenorm(Extended, DatabaseTable):
     predicate_canonicalized = Column(String, nullable=False, index=True)
     object_id = Column(String, nullable=False, index=True)
     object_type = Column(String, nullable=False, index=True)
-    document_ids = Column(String, nullable=False)
     provenance_mapping = Column(String, nullable=False)
 
 

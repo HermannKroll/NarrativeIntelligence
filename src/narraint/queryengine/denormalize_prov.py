@@ -59,7 +59,7 @@ def denormalize_predication_table():
             predicate_canonicalized=k[2],
             object_id=k[3],
             object_type=k[4],
-            document_ids=json.dumps(fact_to_doc_ids[k]),
+       #     document_ids=json.dumps(fact_to_doc_ids[k]),
             provenance_mapping=json.dumps(fact_to_prov_ids[k])
         ))
 

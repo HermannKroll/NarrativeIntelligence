@@ -3,7 +3,7 @@ import json
 
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.config import BACKEND_CONFIG
+from narraint.config import BACKEND_CONFIG
 
 
 def main():
