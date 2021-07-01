@@ -163,12 +163,13 @@ def get_query(request):
 def get_feedback(request):
     try:
         predication_ids = str(request.GET.get("predicationids", "").strip())
+        query = str(request.GET.get("query", "").strip())
         rating = str(request.GET.get("rating", "").strip())
         userid = str(request.GET.get("userid", "").strip())
 
         session = SessionExtended.get()
         for pred_id in predication_ids.split(','):
-            PredicationRating.insert_user_rating(session, userid, int(pred_id), rating)
+            PredicationRating.insert_user_rating(session, userid, query, int(pred_id), rating)
 
         logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
         return HttpResponse(status=200)

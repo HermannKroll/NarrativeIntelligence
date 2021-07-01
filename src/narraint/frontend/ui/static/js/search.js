@@ -590,6 +590,7 @@ const createExpandableAccordion = (first_call, divID) => {
 
 function rateExtraction(correct, predication_ids_str) {
     let userid = getUserIDFromLocalStorage();
+    let query = "test";
     if (userid === "cookie"){
         console.log("waiting for cookie consent")
         return;
@@ -599,6 +600,7 @@ function rateExtraction(correct, predication_ids_str) {
         url: feedback_url,
         data: {
             predicationids: predication_ids_str,
+            query: query,
             rating: correct,
             userid: userid
         }
