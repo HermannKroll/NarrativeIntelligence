@@ -23,7 +23,7 @@ class TestPreprocess(unittest.TestCase):
                 *f"-t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 1 -y".split()
                 ]
         dictpreprocess.main(args)
-        doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
+        doc1, doc2 = util.get_tags_from_database(5297), util.get_tags_from_database(5600)
         assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
         util.clear_database()
 
