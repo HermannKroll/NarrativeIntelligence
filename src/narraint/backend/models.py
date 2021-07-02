@@ -147,13 +147,13 @@ class PredicationRating(Extended, DatabaseTable):
         PrimaryKeyConstraint('user_id', 'query', 'predication_id', sqlite_on_conflict='IGNORE')
     )
     user_id = Column(String)
-    query = Column(Query)
+    query = Column(String)
     predication_id = Column(BigInteger)
     rating = Column(String)
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     @staticmethod
-    def insert_user_rating(session, user_id: str, predication_id: int, rating: str):
+    def insert_user_rating(session, user_id: str, query: str, predication_id: int, rating: str):
         insert_stmt = insert(PredicationRating).values(user_id=user_id, query=query, predication_id=predication_id, rating=rating)
         session.execute(insert_stmt)
         session.commit()
