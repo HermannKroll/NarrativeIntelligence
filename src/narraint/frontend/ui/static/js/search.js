@@ -1,4 +1,5 @@
 let MAX_SHOWN_ELEMENTS = 10;
+let latest_valid_query = ''
 
 let CYTOSCAPE_STYLE = [
     {
@@ -483,6 +484,7 @@ const search = (event) => {
         let valid_query = response["valid_query"];
         if (valid_query === true) {
             let query_len = 0;
+            latest_valid_query = query
 
             // Print query translation
             let query_translation = $("#query_translation");
@@ -599,6 +601,7 @@ function rateExtraction(correct, predication_ids_str) {
         url: feedback_url,
         data: {
             predicationids: predication_ids_str,
+            query: latest_valid_query,
             rating: correct,
             userid: userid
         }
