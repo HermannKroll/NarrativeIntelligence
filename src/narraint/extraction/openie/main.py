@@ -34,7 +34,7 @@ def openie_prepare_files(input):
     amount_files = 0
     logging.info('counting files to process....')
     for document_content in read_pubtator_documents(input):
-        doc = TaggedDocument(pubtator_content=document_content)
+        doc = TaggedDocument(from_str=document_content)
         if not doc or not doc.title or not doc.abstract:
             amount_skipped_files += 1
         else:

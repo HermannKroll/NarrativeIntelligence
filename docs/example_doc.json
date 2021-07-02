@@ -7,9 +7,9 @@
     {
       "id": "2099",
       "mention": "estrogen receptor 1",
-      "start": 28, // Python: (title + " " + abstract)[start:end]==mention
-      "type": "Gene",
-      "end": 47
+      "start": 28, // Python: (title + " " + abstract)[start:end]==mention,
+      "end": 47,
+      "type": "Gene"
     }
     //...
   ]

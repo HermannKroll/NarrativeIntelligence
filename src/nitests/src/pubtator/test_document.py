@@ -1,10 +1,11 @@
+import json
 import unittest
 
 from spacy.lang.en import English
 
 from narrant.pubtator.document import TaggedEntity, TaggedDocument, parse_tag_list
 from narrant.pubtator.extract import read_tagged_documents
-from nitests.util import get_test_resource_filepath
+from nitests.util import get_test_resource_filepath, tmp_rel_path
 
 
 class TestDocument(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestDocument(unittest.TestCase):
         self.assertIn("<Entity 0,8,prote ins,DosageForm,Desc1>", strings)
         self.assertIn("<Entity 1103,1112,proteins,DosageForm,Desc1>", strings)
 
-    def test_Tagged_Document(self):
+    def test_Tagged_Document_from_putatorfile(self):
         in_file = get_test_resource_filepath("infiles/test_metadictagger/abbrev_tagged.txt")
         tagged_doc = [d for d in read_tagged_documents(in_file)][0]
         self.assertIn(TaggedEntity(None, 32926486, 97,111,"ethylene oxide", "Excipient", "Ethylene oxide"),
@@ -38,6 +39,27 @@ class TestDocument(unittest.TestCase):
                       tagged_doc.tags)
         self.assertNotIn(TaggedEntity(None, 32926486, 97, 105, "ethylene", "Excipient", "Ethylene"),
                       tagged_doc.tags)
+
+    def test_Tagged_Document_read_write_pubtator(self):
+        in_file = get_test_resource_filepath("infiles/test_metadictagger/abbrev_tagged.txt")
+        out_file = tmp_rel_path("tagdoc_out.txt")
+        tagged_doc = TaggedDocument(in_file)
+        with open(out_file, "w+") as of:
+            of.write(str(tagged_doc))
+        with open(in_file) as inf, open(out_file) as of:
+            self.assertEqual(inf.read(), of.read())
+
+    def test_Tagged_Document_read_write_json(self):
+        in_file = get_test_resource_filepath("infiles/test_metadictagger/abbrev_tagged.json")
+        out_file = tmp_rel_path("tagdoc_out.txt")
+        tagged_doc = TaggedDocument(in_file)
+        with open(out_file, "w+") as of:
+            json.dump(tagged_doc.to_dict(), of)
+            print(json.dumps(tagged_doc.to_dict()))
+        with open(in_file) as inf, open(out_file) as of:
+            self.assertEqual(inf.read(), of.read())
+
+
 
     def test_load_tagged_pubtator_doc(self):
         content = ""
