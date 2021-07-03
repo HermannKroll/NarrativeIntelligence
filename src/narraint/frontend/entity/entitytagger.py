@@ -261,19 +261,24 @@ class EntityTagger:
         """
         Tags an entity by given a string
         :param term: the entity term
-        :return: an entity as (entity_id, entity_type)
+        :return: a list of entities (entity_id, entity_type)
         """
         t_low = term.lower().strip()
-        if t_low not in self.term2entity:
-            if t_low[-1] == 's':
-                t_low_n = t_low[:-2]
-            else:
-                t_low_n = f'{t_low}s'
-            if t_low_n not in self.term2entity:
-                raise KeyError('Does not know an entity for term: {}'.format(term))
-            else:
-                t_low = t_low_n
-        return self.term2entity[t_low]
+        entities = set()
+        # check direct string
+        if t_low in self.term2entity:
+            entities.update(self.term2entity[t_low])
+        # also add plural if possible
+        if t_low[-1] != 's' and f'{t_low}s' in self.term2entity:
+            entities.update(self.term2entity[f'{t_low}s'])
+        # check singular form
+        if t_low[-1] == 's' and t_low[:-1] in self.term2entity:
+            entities.update(self.term2entity[t_low[:-1]])
+
+        if len(entities) == 0:
+            raise KeyError('Does not know an entity for term: {}'.format(term))
+
+        return entities
 
 
 def main():
