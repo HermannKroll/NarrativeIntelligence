@@ -2,7 +2,7 @@ import logging
 
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.frontend.ui.views import View
+from narraint.queryengine.engine import QueryEngine
 
 COMMON_QUERIES = [
     '?X(Method) method Simvastatin',
@@ -43,16 +43,13 @@ def execute_common_queries():
     translation = QueryTranslation()
     for q in COMMON_QUERIES:
         logging.info('Caching Query: {}'.format(q))
-        query_fact_patterns, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
+        graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
         for collection in DOCUMENT_COLLECTIONS:
 
-            results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(query_fact_patterns,
-                                                                                                 collection,
-                                                                                                 extraction_type="",
-                                                                                                 query=q)
+            results = QueryEngine.process_query_with_expansion(graph_query)
             logging.info('Write results to cache...')
             try:
-                cache.add_result_to_cache(collection, query_fact_patterns, results, query_limit_hit)
+                cache.add_result_to_cache(collection, graph_query, results)
             except Exception:
                 logging.error('Cannot store query result to cache...')
 
