@@ -1,3 +1,4 @@
+import csv
 import logging
 import string
 from collections import defaultdict
@@ -10,7 +11,7 @@ from itertools import islice
 
 import datrie
 
-from narraint.config import ENTITY_TAGGING_INDEX
+from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
 from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
@@ -110,6 +111,7 @@ class EntityTagger:
         self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
+        self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
         self._add_fid_dosageform_terms()
@@ -224,6 +226,29 @@ class EntityTagger:
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
                 self.term2entity[term.lower()].add(Entity(chid, DRUG))
+
+    def _add_chembl_atc_classes(self):
+        """
+        Adds a mapping from atc 4 level names to all ChEMBL ids that are in that class
+        :return: None
+        """
+        # read also atc classes
+        logging.info('Adding ATC Chembl information...')
+        level4_to_chemlbids = defaultdict(set)
+        level4_to_name = {}
+        chemblid_to_level4 = defaultdict(set)
+        with open(CHEMBL_ATC_CLASSIFICATION_FILE, 'rt') as f:
+            reader = csv.reader(f, delimiter=',')
+            for row in islice(reader, 1, None):
+                c_id, level4, level4_name = row[0], row[1], row[2]
+                level4_to_chemlbids[level4].add(c_id)
+                chemblid_to_level4[c_id].add(level4)
+                level4_to_name[level4] = level4_name
+
+        for level4, chemblids in level4_to_chemlbids.items():
+            level4_name = level4_to_name[level4]
+            for chid in chemblids:
+                self.term2entity[level4_name.strip().lower()].add(Entity(chid, DRUG))
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
