@@ -133,14 +133,14 @@ def get_query(request):
             except Exception:
                 logging.error('Cannot load query result from cache...')
                 cached_results = None
+                cache_hit = False
             if cached_results:
                 logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                 results = cached_results
             else:
                 results = QueryEngine.process_query_with_expansion(graph_query)
                 try:
-                    View.instance().cache.add_result_to_cache(document_collection, graph_query,
-                                                              results, query_limit_hit)
+                    View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
                 except Exception:
                     logging.error('Cannot store query result to cache...')
             time_needed = datetime.now() - start_time
