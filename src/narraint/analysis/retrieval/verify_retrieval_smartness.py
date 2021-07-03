@@ -56,17 +56,16 @@ def main():
                         level=logging.INFO)
 
     translation = QueryTranslation()
-    query_engine = QueryEngine()
     for q in COMMON_QUERIES:
         logging.info('Executing Query: {}'.format(q))
         query_fact_patterns, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
         logging.info(f'Translated Query is: {query_fact_patterns}')
         for collection in DOCUMENT_COLLECTIONS:
             new_time = datetime.now()
-            results_new, query_limit_hit = query_engine.process_query_with_expansion(query_fact_patterns)
+            results_new = QueryEngine.process_query_with_expansion(query_fact_patterns)
             new_time = datetime.now() - new_time
             result_new_ids = {r.document_id for r in results_new}
-            logging.info(f'Found {len(results_new)} result with new query')
+            logging.info(f'Found {len(result_new_ids)} result with new query')
             logging.info(f'New time: {new_time}s')
 
 
