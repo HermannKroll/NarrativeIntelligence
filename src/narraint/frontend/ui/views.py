@@ -156,7 +156,7 @@ def get_query(request):
                 results_converted = substitution_ontology.rank_results(results).to_dict()
         return JsonResponse(
             dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
-                 query_limit_hit=query_limit_hit))
+                 query_limit_hit="False"))
     except Exception:
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
