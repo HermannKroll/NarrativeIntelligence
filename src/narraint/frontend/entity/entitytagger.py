@@ -1,10 +1,14 @@
 import logging
+import string
 from collections import defaultdict
 
 import pickle
 
 import gzip
+from datetime import datetime
 from itertools import islice
+
+import datrie
 
 from narraint.config import ENTITY_TAGGING_INDEX
 from narraint.backend.database import SessionExtended
@@ -17,6 +21,7 @@ from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugVocabulary, \
     ChemicalVocabulary
+from narrant.progress import print_progress_with_eta
 
 
 class DosageFormTaggerVocabulary:
@@ -167,23 +172,45 @@ class EntityTagger:
         logging.info('Reading mesh file: {}'.format(mesh_file))
         meshdb = MeSHDB.instance()
         meshdb.load_xml(mesh_file)
-        mesh_mappings = []
+        mesh_mappings = defaultdict(set)
         for desc in meshdb.get_all_descs():
             mesh_id, mesh_head = desc.unique_id, desc.heading
-            mesh_mappings.append((mesh_id, mesh_head))
+            mesh_mappings[mesh_id].add(mesh_head)
             for term in desc.terms:
-                mesh_mappings.append((mesh_id, term.string))
+                mesh_mappings[mesh_id].add(term.string)
+
+        logging.info('Computing Trie for fast lookup...')
+        start_time = datetime.now()
+        mesh_trie = datrie.Trie(string.printable)
+        for idx, mesh_id in enumerate(mesh_mappings):
+            print_progress_with_eta("computing trie", idx, len(mesh_mappings), start_time, print_every_k=10)
+            try:
+                tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                for tn in tree_nos:
+                    tn_and_id = f'{tn.lower()}:{mesh_id}'
+                    mesh_trie[tn_and_id] = tn_and_id
+            except KeyError:
+                continue
+
+        logging.info('Finished')
 
         logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
-        for mesh_id, mesh_term in mesh_mappings:
-            term = mesh_term.lower()
+        start_time = datetime.now()
+        for idx, (mesh_id, mesh_terms) in enumerate(mesh_mappings.items()):
+            print_progress_with_eta("adding mesh terms", idx, len(mesh_mappings), start_time, print_every_k=10)
             try:
                 tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
                 for tn in tree_nos:
                     # find the given entity type for the tree number
                     try:
                         ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                        self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
+                        sub_descs = mesh_trie.keys(tn.lower())
+                        for mesh_term in mesh_terms:
+                            term = mesh_term.lower()
+                            self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
+                            self.term2entity[term].update([Entity(f'MESH:{s.split(":")[1]}', ent_type)
+                                                           for s in sub_descs if s != mesh_id])
+
                     except KeyError:
                         continue
             except KeyError:
