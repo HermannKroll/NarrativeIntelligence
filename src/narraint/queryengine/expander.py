@@ -1,11 +1,38 @@
 import itertools
-from typing import List
+from typing import List, Set
 
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import PREDICATE_EXPANSION, SYMMETRIC_PREDICATES
+from narraint.queryengine.query_hints import PREDICATE_EXPANSION, SYMMETRIC_PREDICATES, ENTITY_TYPE_EXPANSION
 
 
 class QueryExpander:
+
+    @staticmethod
+    def expand_entity_types(entity_types: List[str]) -> List[str]:
+        entity_types_ex = set([t for t in entity_types])
+        for entity_type in entity_types:
+            if entity_type in ENTITY_TYPE_EXPANSION:
+                entity_types_ex.update(ENTITY_TYPE_EXPANSION[entity_type])
+        return list(entity_types_ex)
+
+    @staticmethod
+    def expand_fact_pattern(fact_pattern: FactPattern) -> List[FactPattern]:
+        predicate = fact_pattern.predicate
+        if predicate in PREDICATE_EXPANSION or predicate in SYMMETRIC_PREDICATES:
+            expansion = []
+            if predicate in PREDICATE_EXPANSION:
+                predicates = PREDICATE_EXPANSION[predicate]
+                expansion = list([FactPattern(fact_pattern.subjects, p, fact_pattern.objects) for p in predicates])
+            else:
+                predicates = [predicate]
+
+            if predicate in SYMMETRIC_PREDICATES:
+                expansion.extend(list([FactPattern(fact_pattern.objects, p, fact_pattern.subjects) for p in predicates]))
+
+            return expansion
+        else:
+            return []
+
 
     @staticmethod
     def expand_query(graph_query: GraphQuery) -> List[GraphQuery]:

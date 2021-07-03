@@ -22,20 +22,20 @@ let CYTOSCAPE_STYLE = [
 ];
 
 function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 
-$('#cookiebtnDeny').click(()=>{
+$('#cookiebtnDeny').click(() => {
     $('.toast').toast('hide')
     let cookie_toast = $('#cookie_toast');
     cookie_toast.hide();
 })
 
-$('#cookiebtnAccept').click(()=>{
+$('#cookiebtnAccept').click(() => {
     let userid = uuidv4();
     localStorage.setItem('userid', userid);
     $('.toast').toast('hide')
@@ -44,7 +44,7 @@ $('#cookiebtnAccept').click(()=>{
 })
 
 function getUserIDFromLocalStorage() {
-    if(!localStorage.getItem('userid')){
+    if (!localStorage.getItem('userid')) {
         console.log("no user id found in local storage");
         let cookie_toast = $('#cookie_toast');
         cookie_toast.show();
@@ -242,7 +242,7 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
-let imgrect = {width: 0, height:0};
+let imgrect = {width: 0, height: 0};
 document.getElementById("screenshot").addEventListener('load', (e) => {
     imgrect = e.target.getBoundingClientRect();
 });
@@ -250,7 +250,7 @@ document.getElementById("screenshot").addEventListener('load', (e) => {
 async function openFeedback() {
     $("#reportSpinner").addClass("busy");
     const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX:0, scrollY:0})
+    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0})
 
     const base64image = canvas.toDataURL("image/png");
     let screenshot = $("#screenshot")
@@ -266,19 +266,20 @@ async function openFeedback() {
     let screenshotCanvas = $("#screenshotCanvas");
     screenshotCanvas.attr('width', canvas.width);
     screenshotCanvas.attr('height', canvas.height);
-    let pos = {x:0, y:0};
+    let pos = {x: 0, y: 0};
     screenshotCanvas.mousemove(draw);
     screenshotCanvas.mousedown(setPosition);
     screenshotCanvas.mouseenter(setPosition);
-    screenshotCanvas.mouseenter(() => {document})
+    screenshotCanvas.mouseenter(() => {
+        document
+    })
     let ctx = screenshotCanvas[0].getContext('2d')
-
 
 
     function draw(e) {
 
         console.log("draw")
-        if(e.buttons !== 1) return;
+        if (e.buttons !== 1) return;
 
         ctx.beginPath();
 
@@ -296,19 +297,19 @@ async function openFeedback() {
     function setPosition(e) {
         console.log("setposition")
         let rect = e.target.getBoundingClientRect();
-        pos.x = (e.clientX - rect.left)*canvas.width/imgrect.width;
-        pos.y = (e.clientY - rect.top)*canvas.height/imgrect.height;
+        pos.x = (e.clientX - rect.left) * canvas.width / imgrect.width;
+        pos.y = (e.clientY - rect.top) * canvas.height / imgrect.height;
     }
 }
 
-function closeFeedback(send=false) {
-    if(send) {
+function closeFeedback(send = false) {
+    if (send) {
         let combine_canvas = document.createElement("canvas");
         let dim = document.getElementById('screenshotCanvas');
         combine_canvas.width = dim.width;
         combine_canvas.height = dim.height;
         let ctx = combine_canvas.getContext('2d')
-        ctx.drawImage(document.getElementById('screenshot'),0,0)
+        ctx.drawImage(document.getElementById('screenshot'), 0, 0)
         ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0)
 
         const params = {
@@ -317,16 +318,16 @@ function closeFeedback(send=false) {
         };
         const options = {
             method: 'POST',
-            body: JSON.stringify( params )
+            body: JSON.stringify(params)
         };
-        fetch(report_url, options).then( response => {
-            if(response.ok) {
-                alert("Report successfully sent!");
-                $("#feedbackModal").modal("toggle");
-                $("#feedbackText").val("");
-            } else {
-                alert("Sending report has failed!");
-            }
+        fetch(report_url, options).then(response => {
+                if (response.ok) {
+                    alert("Report successfully sent!");
+                    $("#feedbackModal").modal("toggle");
+                    $("#feedbackText").val("");
+                } else {
+                    alert("Sending report has failed!");
+                }
             }
         )
     } else {
@@ -337,7 +338,7 @@ function closeFeedback(send=false) {
 const reset_scanvas = () => {
     const canvas = document.getElementById("screenshotCanvas");
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 const setButtonSearching = isSearching => {
@@ -589,14 +590,19 @@ const createExpandableAccordion = (first_call, divID) => {
     globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList, global_result_size + i];
 }
 
+let rateButtonID = 0;
+const getUniqueRateButtonID = () => {
+    rateButtonID += 1;
+    return 'rb_' + rateButtonID;
+}
 
 function rateExtraction(correct, predication_ids_str) {
     let userid = getUserIDFromLocalStorage();
-    if (userid === "cookie"){
+    if (userid === "cookie") {
         console.log("waiting for cookie consent")
-        return;
+        return false;
     }
-    console.log('nice user ' + userid+ '  - has rated: ' + correct + ' for ' + predication_ids_str);
+    console.log('nice user ' + userid + '  - has rated: ' + correct + ' for ' + predication_ids_str);
     let request = $.ajax({
         url: feedback_url,
         data: {
@@ -608,21 +614,18 @@ function rateExtraction(correct, predication_ids_str) {
     });
 
     request.done(function (response) {
-         showInfoAtBottom("Thank you for your Feedback!")
+        showInfoAtBottom("Thank you for your Feedback!")
     });
 
     request.fail(function (result) {
-         showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+        showInfoAtBottom("Your feedback couldn't be transferred - please try again")
     });
 
 
     return true;
 }
 
-const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
-    let document_id = queryResult["docid"];
-    let title = queryResult["title"];
-    let explanations = queryResult["e"];
+const createProvenanceDivElement = (explanations) => {
     let div_provenance_all = $('<div>');
     let j = -1;
     try {
@@ -651,15 +654,25 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
                 j = parseInt(e["pos"]) + 1;
             }
 
-            let div_rate_pos = $('<img style="cursor: pointer" src="' + ok_symbol_url + '" height="30px">');
+            let rate_pos_id = getUniqueRateButtonID();
+            let div_rate_pos = $('<img style="cursor: pointer" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+            let rate_neg_id = getUniqueRateButtonID();
+            let div_rate_neg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+
             div_rate_pos.click(function () {
-                rateExtraction(true, predication_ids_str);
+                if (rateExtraction(true, predication_ids_str)) {
+                    $('#' + rate_pos_id).fadeOut();
+                    $('#' + rate_neg_id).fadeOut();
+                }
+
+            });
+            div_rate_neg.click(function () {
+                if (rateExtraction(false, predication_ids_str)) {
+                    $('#' + rate_pos_id).fadeOut();
+                    $('#' + rate_neg_id).fadeOut();
+                }
             });
 
-            let div_rate_neg = $('<img style="cursor: pointer" src="' + cancel_symbol_url + '" height="30px">');
-            div_rate_neg.click(function () {
-                rateExtraction(false, predication_ids_str);
-            });
             let div_col_rating = $('<div class="col-1">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
@@ -684,14 +697,52 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     } catch (SyntaxError) {
 
     }
+    return div_provenance_all;
+}
+
+function queryAndVisualizeProvenanceInformation(provenance, unique_div_id) {
+    let request = $.ajax({
+        url: provenance_url,
+        data: {
+            prov: JSON.stringify(provenance)
+        }
+    });
+
+    request.done(function (response) {
+        let explanations = response["result"]["exp"];
+        let prov_div = createProvenanceDivElement(explanations);
+        $('#' + unique_div_id).append(prov_div);
+    });
+
+    request.fail(function (result) {
+        showInfoAtBottom("Query for provenance failed - please try again")
+    });
+}
+
+const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
+    let document_id = queryResult["docid"];
+    let title = queryResult["title"];
+    let authors = queryResult["authors"];
+    let journals = queryResult["journals"];
+    let year = queryResult["year"];
+    let prov_ids = queryResult["prov"];
+
 
     let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
         '<img src="' + pubpharm_image_url + '" height="25px">' +
-        document_id + '</a>' + '<br><b>' + title + '</b><br></div></div><br>');
+        document_id + '</a>' + '<br><b>' + title + '</b><br>' +
+        "in: " + journals + " | " + year + '<br>' +
+        "by: " + authors + '<br>' +
+        '</div></div><br>');
 
-    let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#prov_' + document_id + '">Provenance</button>');
-    let div_provenance_collapsable_block = $('<div id="prov_' + document_id + '" class="collapse">');
-    div_provenance_collapsable_block.append(div_provenance_all);
+    let unique_div_id = "prov_" + document_id;
+    let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#' + unique_div_id + '">Provenance</button>');
+    let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
+    div_provenance_button.click(function () {
+        if ($('#' + unique_div_id).html() === "") {
+            queryAndVisualizeProvenanceInformation(prov_ids, unique_div_id);
+        }
+    });
 
     divDoc.append(div_provenance_button);
     divDoc.append(div_provenance_collapsable_block);
@@ -763,12 +814,11 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         if (ent_name === ent_type) {
             var_sub = ent_name;
         }
-         if (ent_id.slice(0, 6) === "CHEMBL"){
-             button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+        if (ent_id.slice(0, 6) === "CHEMBL") {
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ebi.ac.uk/chembl/compound_report_card/' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
-         }
-        else if (ent_id.slice(0, 2) === "DB") {
+        } else if (ent_id.slice(0, 2) === "DB") {
             button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
                 'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'

@@ -18,7 +18,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
 from narraint.config import REPORT_DIR
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.frontend.frontend.settings.base import DJANGO_PROJ_DIR
+from narraint.queryengine.logger import QueryLogger
 from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -36,9 +36,8 @@ logger = logging.getLogger(__name__)
 
 class View:
     """
-    Singleton encapsulating the former global query_engine, entity_tagger and cache
+    Singleton encapsulating the former global entity_tagger and cache
     """
-    query_engine = None
     entity_tagger = None
     cache = None
 
@@ -55,11 +54,11 @@ class View:
             cls._instance = cls.__new__(cls)
             # init resolver here
             cls.resolver = EntityResolver.instance()
-            cls.query_engine = QueryEngine()
             cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil.instance()
             cls.translation = QueryTranslation()
+            cls.query_logger = QueryLogger()
         return cls._instance
 
 
@@ -104,7 +103,7 @@ def get_query(request):
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
 
-        query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+        graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
         if data_source not in ["PMC", "PubMed"]:
             results_converted = []
@@ -113,22 +112,24 @@ def get_query(request):
         elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
             query_trans_string = "Outer ranking strategy is unknown"
             logger.error('parsing error')
-        elif not query_fact_patterns or len(query_fact_patterns.fact_patterns) == 0:
+        elif not graph_query or len(graph_query.fact_patterns) == 0:
             results_converted = []
             logger.error('parsing error')
         elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
-                query_fact_patterns) > 1:
+                graph_query) > 1:
             results_converted = []
             nt_string = ""
             query_trans_string = "Do not support multiple variables in an ontology-based ranking"
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
-            logger.info(f'Translated Query is: {str(query_fact_patterns)}')
+            logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
             document_collection = data_source
+            start_time = datetime.now()
+            cache_hit = False
             try:
-                cached_results, query_limit_hit = View.instance().cache.load_result_from_cache(document_collection,
-                                                                                               query_fact_patterns)
+                cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
+                cache_hit = True
             except Exception:
                 logging.error('Cannot load query result from cache...')
                 cached_results = None
@@ -136,13 +137,16 @@ def get_query(request):
                 logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                 results = cached_results
             else:
-                results, query_limit_hit = View.instance().query_engine.process_query_with_expansion(
-                    query_fact_patterns, document_collection, query=query)
+                results = QueryEngine.process_query_with_expansion(graph_query)
                 try:
-                    View.instance().cache.add_result_to_cache(document_collection, query_fact_patterns,
+                    View.instance().cache.add_result_to_cache(document_collection, graph_query,
                                                               results, query_limit_hit)
                 except Exception:
                     logging.error('Cannot store query result to cache...')
+            time_needed = datetime.now() - start_time
+            result_ids = {r.document_id for r in results}
+            View.instance().query_logger.write_log(time_needed, document_collection, cache_hit, len(result_ids),
+                                                   graph_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
@@ -158,6 +162,16 @@ def get_query(request):
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
             dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+
+
+def get_provenance(request):
+    try:
+        fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
+        result = QueryEngine.query_provenance_information(fp2prov_ids)
+        return JsonResponse(dict(result=result.to_dict()))
+    except:
+        traceback.print_exc(file=sys.stdout)
+        return HttpResponse(status=500)
 
 
 def get_feedback(request):
