@@ -1,11 +1,12 @@
 import logging
 
+from narraint.queryengine.engine import QueryEngine
 from narrant.entity.meshontology import MeSHOntology
 
 mesh_ontology = MeSHOntology()
 
 
-def perform_evaluation(query_engine, query_fact_patterns, document_collection, extraction_type,
+def perform_evaluation(query_fact_patterns, document_collection, extraction_type,
                        ids_correct, id_sample=None, do_expansion=False, print_expansion=False):
     """
     performs the evaluation of our graph query system
@@ -34,15 +35,16 @@ def perform_evaluation(query_engine, query_fact_patterns, document_collection, e
         pred = query_fact_patterns[0][2]
         for d_id, d_head in sub_descriptors:
             expaned_obj_id = 'MESH:{}'.format(d_id)
+            # Todo: Fix it
+            raise NotImplementedError
             query_fact_patterns_new = [(sub_id, sub_type, pred, expaned_obj_id, object_type)]
-            query_results = query_engine.query_with_graph_query(query_fact_patterns_new, document_collection,
-                                                                extraction_type)
+            query_results = QueryEngine.process_query_with_expansion(query_fact_patterns_new)
             retrieved_ids = set([q_r.document_id for q_r in query_results])
             if print_expansion:
                 logging.info('{} hits for descriptor: {}'.format(len(retrieved_ids), d_head))
             doc_ids.update(retrieved_ids)
     else:
-        query_results = query_engine.query_with_graph_query(query_fact_patterns, document_collection, extraction_type)
+        query_results = QueryEngine.process_query_with_expansion(query_fact_patterns)
         doc_ids = set([q_r.document_id for q_r in query_results])
     if id_sample:
         doc_hits = doc_ids.intersection(id_sample)

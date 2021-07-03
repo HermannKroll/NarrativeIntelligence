@@ -2,7 +2,9 @@ import logging
 import datetime
 from itertools import islice
 
-files_to_analyse = ["performance_query_1.tsv", "performance_query_2.tsv", "performance_query_3.tsv",
+files_to_analyse = ["performance_query_1.tsv", "performance_query_1_with_exp.tsv",
+                    "performance_query_2.tsv", "performance_query_2_with_exp.tsv",
+                    "performance_query_3.tsv", "performance_query_3_with_exp.tsv",
                     "performance_query_variable_1.tsv", "performance_query_variable_2.tsv"]
 
 
@@ -35,10 +37,14 @@ def main():
         logging.info('Analysing: {}'.format(file))
         logging.info('-' * 60)
         with open(file, 'rt') as fp:
+            if 'exp' in file:
+                logging.info('Counting only lines that includes "MESH"')
             count = 0
             avg_time_query = 0
             avg_result_size = 0
             for line in islice(fp, 1, None):
+                if 'exp' in file and 'MESH' not in line:
+                    continue
                 time_query, result_size, _ = line.split('\t')
                 count += 1
                 time_query_datetime = convert_time_to_milliseconds(time_query)
