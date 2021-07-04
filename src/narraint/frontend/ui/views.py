@@ -146,7 +146,7 @@ def get_query(request):
             time_needed = datetime.now() - start_time
             result_ids = {r.document_id for r in results}
             View.instance().query_logger.write_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                   graph_query)
+                                                   query, graph_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
