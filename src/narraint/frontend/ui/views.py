@@ -19,6 +19,7 @@ from narraint.backend.models import Predication, PredicationRating
 from narraint.config import REPORT_DIR
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.logger import QueryLogger
+from narraint.queryengine.optimizer import QueryOptimizer
 from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
@@ -145,8 +146,9 @@ def get_query(request):
                     logging.error('Cannot store query result to cache...')
             time_needed = datetime.now() - start_time
             result_ids = {r.document_id for r in results}
+            opt_query = QueryOptimizer.optimize_query(graph_query)
             View.instance().query_logger.write_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                   query, graph_query)
+                                                   query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
