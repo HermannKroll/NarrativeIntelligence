@@ -30,7 +30,7 @@ PREDICATE_EXPANSION = dict(
 
 SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases"}
 
-PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT},
+PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY},
                                {DISEASE, SPECIES}),
                     'administered': ({DOSAGE_FORM, METHOD, LAB_METHOD},
                                      {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
