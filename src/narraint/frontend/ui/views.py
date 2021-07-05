@@ -140,6 +140,7 @@ def get_query(request):
                 results = cached_results
             else:
                 results = QueryEngine.process_query_with_expansion(graph_query)
+                cache_hit = False
                 try:
                     View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
                 except Exception:
