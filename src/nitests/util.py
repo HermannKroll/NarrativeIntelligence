@@ -49,7 +49,7 @@ def is_file_content_equal(file_1, file_2):
 
 def get_tags_from_database(doc_id=None):
     session = SessionExtended.get()
-    if id is None:
+    if doc_id is None:
         result = session.execute("SELECT * FROM tag")
     else:
         result = session.execute(f"SELECT * FROM TAG WHERE document_id={doc_id}")
