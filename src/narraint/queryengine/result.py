@@ -1,6 +1,5 @@
 from typing import Dict, Set
 
-from narrant.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, METHOD, \
     LAB_METHOD
@@ -40,15 +39,6 @@ class QueryEntitySubstitution:
                     self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
                 except KeyError:
                     pass
-
-            # Translate Chemicals to DrugBank ids if possible
-            if self.entity_type in [CHEMICAL]:
-                mapper = DrugBank2MeSHMapper.instance()
-                mapping = mapper.get_dbid_for_meshid(self.entity_id)
-                if mapping:
-                    self.entity_id = mapping
-                    # Todo: not the best solution :/ Think about excipient and drugbank chemicals
-                    self.entity_type = DRUG
 
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type,
                                                                resolve_gene_by_id=False)
