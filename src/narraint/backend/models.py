@@ -53,6 +53,21 @@ class DocumentMetadata(Extended, DatabaseTable):
     publication_year = Column(String, nullable=True)
 
 
+class DocumentMetadataService(Extended, DatabaseTable):
+    __tablename__ = 'document_metadata_service'
+    __table_args__ = (
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
+    )
+
+    document_id = Column(BigInteger, nullable=False)
+    document_collection = Column(String, nullable=False)
+    title = Column(String, nullable=True)
+    authors = Column(String, nullable=True)
+    journals = Column(String, nullable=True)
+    publication_year = Column(String, nullable=True)
+
+
 class Predication(Extended, DatabaseTable):
     __tablename__ = "predication"
     __table_args__ = (

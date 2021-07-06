@@ -123,22 +123,19 @@ class QueryTranslation:
             try:
                 s = self.convert_text_to_entity(s_t)
             except ValueError as e:
-                explanation_str += '{} (subject error)\n'.format(e)
                 self.logger.error('error unknown subject: {}'.format(e))
-                return None, explanation_str
+                return None, '{} (subject error)\n'.format(e)
 
             try:
                 o = self.convert_text_to_entity(o_t)
             except ValueError as e:
-                explanation_str += '{} (object error)\n'.format(e)
                 self.logger.error('error unknown object: {}'.format(e))
-                return None, explanation_str
+                return None,  '{} (object error)\n'.format(e)
 
             p = p_t.lower()
             if p not in self.allowed_predicates:
-                explanation_str += "{} (predicate error)\n".format(p_t)
                 self.logger.error("error unknown predicate: {}".format(p_t))
-                return None, explanation_str
+                return None, "{} (predicate error)\n".format(p_t)
 
             explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt.strip(), s, p, o)
             graph_query.add_fact_pattern(FactPattern(s, p, o))

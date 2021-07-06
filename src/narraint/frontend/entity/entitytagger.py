@@ -1,12 +1,17 @@
+import csv
 import logging
+import string
 from collections import defaultdict
 
 import pickle
 
 import gzip
+from datetime import datetime
 from itertools import islice
 
-from narraint.config import ENTITY_TAGGING_INDEX
+import datrie
+
+from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
 from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
@@ -17,6 +22,7 @@ from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugVocabulary, \
     ChemicalVocabulary
+from narrant.progress import print_progress_with_eta
 
 
 class DosageFormTaggerVocabulary:
@@ -105,6 +111,7 @@ class EntityTagger:
         self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
+        self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
         self._add_fid_dosageform_terms()
@@ -167,23 +174,45 @@ class EntityTagger:
         logging.info('Reading mesh file: {}'.format(mesh_file))
         meshdb = MeSHDB.instance()
         meshdb.load_xml(mesh_file)
-        mesh_mappings = []
+        mesh_mappings = defaultdict(set)
         for desc in meshdb.get_all_descs():
             mesh_id, mesh_head = desc.unique_id, desc.heading
-            mesh_mappings.append((mesh_id, mesh_head))
+            mesh_mappings[mesh_id].add(mesh_head)
             for term in desc.terms:
-                mesh_mappings.append((mesh_id, term.string))
+                mesh_mappings[mesh_id].add(term.string)
+
+        logging.info('Computing Trie for fast lookup...')
+        start_time = datetime.now()
+        mesh_trie = datrie.Trie(string.printable)
+        for idx, mesh_id in enumerate(mesh_mappings):
+            print_progress_with_eta("computing trie", idx, len(mesh_mappings), start_time, print_every_k=10)
+            try:
+                tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                for tn in tree_nos:
+                    tn_and_id = f'{tn.lower()}:{mesh_id}'
+                    mesh_trie[tn_and_id] = tn_and_id
+            except KeyError:
+                continue
+
+        logging.info('Finished')
 
         logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
-        for mesh_id, mesh_term in mesh_mappings:
-            term = mesh_term.lower()
+        start_time = datetime.now()
+        for idx, (mesh_id, mesh_terms) in enumerate(mesh_mappings.items()):
+            print_progress_with_eta("adding mesh terms", idx, len(mesh_mappings), start_time, print_every_k=10)
             try:
                 tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
                 for tn in tree_nos:
                     # find the given entity type for the tree number
                     try:
                         ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                        self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
+                        sub_descs = mesh_trie.keys(tn.lower())
+                        for mesh_term in mesh_terms:
+                            term = mesh_term.lower()
+                            self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
+                            self.term2entity[term].update([Entity(f'MESH:{s.split(":")[1]}', ent_type)
+                                                           for s in sub_descs if s != mesh_id])
+
                     except KeyError:
                         continue
             except KeyError:
@@ -198,6 +227,29 @@ class EntityTagger:
             for chid in chids:
                 self.term2entity[term.lower()].add(Entity(chid, DRUG))
 
+    def _add_chembl_atc_classes(self):
+        """
+        Adds a mapping from atc 4 level names to all ChEMBL ids that are in that class
+        :return: None
+        """
+        # read also atc classes
+        logging.info('Adding ATC Chembl information...')
+        level4_to_chemlbids = defaultdict(set)
+        level4_to_name = {}
+        chemblid_to_level4 = defaultdict(set)
+        with open(CHEMBL_ATC_CLASSIFICATION_FILE, 'rt') as f:
+            reader = csv.reader(f, delimiter=',')
+            for row in islice(reader, 1, None):
+                c_id, level4, level4_name = row[0], row[1], row[2]
+                level4_to_chemlbids[level4].add(c_id)
+                chemblid_to_level4[c_id].add(level4)
+                level4_to_name[level4] = level4_name
+
+        for level4, chemblids in level4_to_chemlbids.items():
+            level4_name = level4_to_name[level4]
+            for chid in chemblids:
+                self.term2entity[level4_name.strip().lower()].add(Entity(chid, DRUG))
+
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
         drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
@@ -209,19 +261,24 @@ class EntityTagger:
         """
         Tags an entity by given a string
         :param term: the entity term
-        :return: an entity as (entity_id, entity_type)
+        :return: a list of entities (entity_id, entity_type)
         """
         t_low = term.lower().strip()
-        if t_low not in self.term2entity:
-            if t_low[-1] == 's':
-                t_low_n = t_low[:-2]
-            else:
-                t_low_n = f'{t_low}s'
-            if t_low_n not in self.term2entity:
-                raise KeyError('Does not know an entity for term: {}'.format(term))
-            else:
-                t_low = t_low_n
-        return self.term2entity[t_low]
+        entities = set()
+        # check direct string
+        if t_low in self.term2entity:
+            entities.update(self.term2entity[t_low])
+        # also add plural if possible
+        if t_low[-1] != 's' and f'{t_low}s' in self.term2entity:
+            entities.update(self.term2entity[f'{t_low}s'])
+        # check singular form
+        if t_low[-1] == 's' and t_low[:-1] in self.term2entity:
+            entities.update(self.term2entity[t_low[:-1]])
+
+        if len(entities) == 0:
+            raise KeyError('Does not know an entity for term: {}'.format(term))
+
+        return entities
 
 
 def main():

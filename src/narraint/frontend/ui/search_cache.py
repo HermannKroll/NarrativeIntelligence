@@ -19,12 +19,11 @@ class SearchCache:
         path = os.path.join(CACHE_DIR, '{}_{}.pkl'.format(document_collection, key))
         return path
 
-    def add_result_to_cache(self, document_collection, graph_query: GraphQuery, results: [QueryDocumentResult],
-                            query_limit_hit):
+    def add_result_to_cache(self, document_collection, graph_query: GraphQuery, results: [QueryDocumentResult]):
         path = self.convert_query_to_path(document_collection, graph_query)
         logging.info(f'Write results to cache: {path}')
         with open(path, 'wb') as f:
-            return pickle.dump((results, query_limit_hit), f)
+            return pickle.dump(results, f)
 
     def load_result_from_cache(self, document_collection, graph_query: GraphQuery):
         path = self.convert_query_to_path(document_collection, graph_query)
@@ -32,4 +31,4 @@ class SearchCache:
             logging.info(f'Loading results from cache: {path}')
             with open(path, 'rb') as f:
                 return pickle.load(f)
-        return None, None
+        return None

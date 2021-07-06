@@ -1,25 +1,34 @@
 import logging
+from collections import defaultdict
+from datetime import datetime
 
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.engine import QueryEngine
 
 COMMON_QUERIES = [
+    'Metformin administered Injections',
+    "Metformin treats ?X(Disease) _AND_ ?X(Disease) associated Human",
+    'Simvastatin induces Rhabdomyolysis',
+    'Mass Spectrometry method Simvastatin',
+    'Simvastatin associated human',
+    'Metformin associated human',
+    'Metformin treats "Diabetes Mellitus"',
+    'Metformin treats Diabetes Mellitus _AND_ Metformin associated human',
+    'Simvastatin treats Diabetes Mellitus _AND_ Simvastatin associated human',
+    'Amiodarone treats Diabetes Mellitus _AND_ Amiodarone associated human',
+    'Metformin treats Diabetes Mellitus _AND_ Metformin associated ?X(Drug)',
     '?X(Method) method Simvastatin',
     '?X(LabMethod) method Simvastatin',
-    'Mass Spectrometry method Simvastatin',
     'Simvastatin treats ?X(Disease)',
     'Metformin treats "Diabetes Mellitus"',
     'Simvastatin treats Hypercholesterolemia',
     'Metformin treats ?X(Disease)',
     'Metformin treats ?X(Species)',
     'Metformin administered ?X(DosageForm)',
-    'Metformin administered Injections',
     'Metformin inhibits mtor',
     'Metformin inhibits ?X(Target)',
     '?X(Drug) inhibits cyp3a4',
     'cyp3a4 metabolises Simvastatin',
-    'Simvastatin induces Rhabdomyolysis',
     'Simvastatin induces Muscular Diseases',
     'Metformin treats Diabetes Mellitus _AND_ Metformin associated human',
     'Metformin treats Diabetes Mellitus _AND_ Metformin associated ?X(Drug)',
@@ -38,27 +47,26 @@ COMMON_QUERIES = [
 DOCUMENT_COLLECTIONS = ['PubMed']  # , 'PMC']
 
 
-def execute_common_queries():
-    cache = SearchCache()
-    translation = QueryTranslation()
-    for q in COMMON_QUERIES:
-        logging.info('Caching Query: {}'.format(q))
-        graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
-        for collection in DOCUMENT_COLLECTIONS:
-
-            results = QueryEngine.process_query_with_expansion(graph_query)
-            logging.info('Write results to cache...')
-            try:
-                cache.add_result_to_cache(collection, graph_query, results)
-            except Exception:
-                logging.error('Cannot store query result to cache...')
-
-
 def main():
+    """
+    Performes the performance evaluation and stores the results as .tsv files
+    """
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
-    execute_common_queries()
+
+    translation = QueryTranslation()
+    for q in COMMON_QUERIES:
+        logging.info('Executing Query: {}'.format(q))
+        query_fact_patterns, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
+        logging.info(f'Translated Query is: {query_fact_patterns}')
+        for collection in DOCUMENT_COLLECTIONS:
+            new_time = datetime.now()
+            results_new = QueryEngine.process_query_with_expansion(query_fact_patterns)
+            new_time = datetime.now() - new_time
+            result_new_ids = {r.document_id for r in results_new}
+            logging.info(f'Found {len(result_new_ids)} result with new query')
+            logging.info(f'New time: {new_time}s')
 
 
 if __name__ == "__main__":

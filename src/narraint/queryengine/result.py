@@ -1,3 +1,5 @@
+from typing import Dict, Set
+
 from narrant.entity.drugbank2mesh import DrugBank2MeSHMapper
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, METHOD, \
@@ -94,37 +96,10 @@ class QueryFactExplanation:
                     ids=','.join([str(i) for i in self.predication_ids]))
 
 
-class QueryResultBase:
-    """
-    Abstract class forming the foundation for the resulting structure
-    """
+class QueryExplanation:
 
-    def to_dict(self):
-        """
-        Converts all internal attributes to a dictionary (needed for the JSON conversion)
-        :return:
-        """
-        raise NotImplementedError
-
-    def get_result_size(self):
-        """
-        Estimates the size of all contained results
-        :return:
-        """
-        raise NotImplementedError
-
-
-class QueryDocumentResult(QueryResultBase):
-    """
-    Represents document result
-    """
-
-    def __init__(self, document_id, title, var2substitution, confidence, explanations: [QueryFactExplanation]):
-        self.document_id = document_id
-        self.title = title
-        self.var2substitution = var2substitution
-        self.confidence = confidence
-        self.explanations = explanations
+    def __init__(self):
+        self.explanations = []
 
     def integrate_explanation(self, explanation: QueryFactExplanation):
         """
@@ -151,7 +126,48 @@ class QueryDocumentResult(QueryResultBase):
     def to_dict(self):
         self.explanations.sort(key=lambda x: x.position)
         e_dict = [e.to_dict() for e in self.explanations]
-        return dict(t="doc", docid=self.document_id, title=self.title, e=e_dict)
+        return dict(exp=e_dict)
+
+
+class QueryResultBase:
+    """
+    Abstract class forming the foundation for the resulting structure
+    """
+
+    def to_dict(self):
+        """
+        Converts all internal attributes to a dictionary (needed for the JSON conversion)
+        :return:
+        """
+        raise NotImplementedError
+
+    def get_result_size(self):
+        """
+        Estimates the size of all contained results
+        :return:
+        """
+        raise NotImplementedError
+
+
+class QueryDocumentResult(QueryResultBase):
+    """
+    Represents document result
+    """
+
+    def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: str,
+                 var2substitution, confidence, position2provenance_ids: Dict[int, Set[int]]):
+        self.document_id = document_id
+        self.title = title
+        self.journals = journals
+        self.authors = authors
+        self.publication_year = publication_year
+        self.var2substitution = var2substitution
+        self.confidence = confidence
+        self.position2provenance_ids = {k: list(v) for k, v in position2provenance_ids.items()}
+
+    def to_dict(self):
+        return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,
+                    journals=self.journals, year=self.publication_year, prov=self.position2provenance_ids)
 
     def get_result_size(self):
         return 1
@@ -232,4 +248,3 @@ class QueryResultAggregateList(QueryResultBase):
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
-

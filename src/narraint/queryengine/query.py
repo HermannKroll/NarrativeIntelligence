@@ -1,5 +1,5 @@
 from narrant.entity.entity import Entity
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, VAR_NAME
 
 
 class FactPattern:
@@ -17,6 +17,25 @@ class FactPattern:
             if o.entity_type == ENTITY_TYPE_VARIABLE:
                 return True
         return False
+
+    def has_entity(self):
+        for s in self.subjects:
+            if s.entity_type != ENTITY_TYPE_VARIABLE:
+                return True
+        for o in self.objects:
+            if o.entity_type != ENTITY_TYPE_VARIABLE:
+                return True
+        return False
+
+    def get_variable_names(self):
+        var_names = []
+        for s in self.subjects:
+            if s.entity_type == ENTITY_TYPE_VARIABLE:
+                var_names.append(VAR_NAME.search(s.entity_id).group(1))
+        for o in self.objects:
+            if o.entity_type == ENTITY_TYPE_VARIABLE:
+                var_names.append(VAR_NAME.search(o.entity_id).group(1))
+        return var_names
 
     def __eq__(self, other):
         if self.predicate != other.predicate:
@@ -45,6 +64,12 @@ class GraphQuery:
             self.fact_patterns = list()
         else:
             self.fact_patterns = fact_patterns
+
+    def has_entity(self):
+        for fp in self.fact_patterns:
+            if fp.has_entity():
+                return True
+        return False
 
     def add_fact_pattern(self, fact_pattern: FactPattern):
         self.fact_patterns.append(fact_pattern)
