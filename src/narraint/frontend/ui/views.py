@@ -8,7 +8,7 @@ from datetime import datetime
 from io import BytesIO
 
 from PIL import Image
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
@@ -98,6 +98,11 @@ def get_query(request):
         query = str(request.GET.get("query", "").strip())
         data_source = str(request.GET.get("data_source", "").strip())
         outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        end_pos = request.GET.get("end_pos").strip()
+        if end_pos not in (None, ''):
+            end_pos = int(end_pos)
+        else:
+            end_pos = None
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
         logging.info("Selected data source is {}".format(data_source))
@@ -153,7 +158,7 @@ def get_query(request):
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
-                results_converted = substitution_aggregation.rank_results(results).to_dict()
+                results_converted = substitution_aggregation.rank_results(results, end_pos).to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
                 results_converted = substitution_ontology.rank_results(results).to_dict()
