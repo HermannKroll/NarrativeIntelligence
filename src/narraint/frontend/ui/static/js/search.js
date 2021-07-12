@@ -1,5 +1,6 @@
 let MAX_SHOWN_ELEMENTS = 10;
-let latest_valid_query = ''
+let latest_valid_query = '';
+let DEFAULT_RESULT_DIVS_LIMIT = 500;
 
 let CYTOSCAPE_STYLE = [
     {
@@ -440,6 +441,10 @@ $(document).ready(function () {
 
 });
 
+$('#togBtn').change(function() {
+    document.getElementById('btn_search').click();
+})
+
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#alert_translation').hide();
@@ -452,6 +457,11 @@ const search = (event) => {
     } else if(document.getElementById('radio_pubmed').checked) {
         data_source = "PubMed"
     } */
+
+    let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
+    if ($('#togBtn').prop('checked')) {
+        end_pos = null;
+    }
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -468,7 +478,9 @@ const search = (event) => {
         data: {
             query: query,
             data_source: data_source,
-            outer_ranking: outer_ranking /*,
+            outer_ranking: outer_ranking,
+            end_pos: end_pos,
+            /*,
             inner_ranking: inner_ranking*/
         }
     });

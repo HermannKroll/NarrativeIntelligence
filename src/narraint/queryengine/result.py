@@ -194,6 +194,8 @@ class QueryDocumentResultList(QueryResultBase):
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
 
+    def set_slice(self, end_pos):
+        self.results = self.results[:end_pos]
 
 class QueryResultAggregate(QueryResultBase):
     """
@@ -238,3 +240,6 @@ class QueryResultAggregateList(QueryResultBase):
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
+
+    def set_slice(self, end_pos):
+        self.results = self.results[:end_pos]
