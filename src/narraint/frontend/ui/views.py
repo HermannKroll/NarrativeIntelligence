@@ -99,9 +99,9 @@ def get_query(request):
         data_source = str(request.GET.get("data_source", "").strip())
         outer_ranking = str(request.GET.get("outer_ranking", "").strip())
         end_pos = request.GET.get("end_pos").strip()
-        if end_pos not in (None, ''):
+        try:
             end_pos = int(end_pos)
-        else:
+        except:
             end_pos = None
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')

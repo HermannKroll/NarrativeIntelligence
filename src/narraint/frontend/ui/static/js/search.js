@@ -441,27 +441,19 @@ $(document).ready(function () {
 
 });
 
-$('#togBtn').change(function() {
-    document.getElementById('btn_search').click();
-})
-
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
     let data_source = "PubMed"
+    let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
     /*
     if (document.getElementById('radio_pmc').checked) {
         data_source = "PMC"
     } else if(document.getElementById('radio_pubmed').checked) {
         data_source = "PubMed"
     } */
-
-    let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
-    if ($('#togBtn').prop('checked')) {
-        end_pos = null;
-    }
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -471,6 +463,7 @@ const search = (event) => {
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
     console.log("Inner Ranking: " + inner_ranking)
+    console.log("Result Divs Limit: " + DEFAULT_RESULT_DIVS_LIMIT)
     setButtonSearching(true);
 
     let request = $.ajax({
