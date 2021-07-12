@@ -24,7 +24,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
 
-    def rank_results(self, results: [QueryDocumentResult]):
+    def rank_results(self, results: [QueryDocumentResult], end_pos=None):
         self._clear_state()
         for r in results:
             self._add_query_result(r)
@@ -43,6 +43,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             unsorted_list.sort(key=lambda x: x[0], reverse=True)
             for _, res in unsorted_list:
                 query_result.add_query_result(res)
+            query_result.set_slice(end_pos)
             return query_result
         else:
             # no variable is used
