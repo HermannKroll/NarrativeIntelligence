@@ -32,7 +32,7 @@ SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases"}
 
 PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PLANT_FAMILY},
                                {DISEASE, SPECIES}),
-                    'administered': ({DOSAGE_FORM, METHOD, LAB_METHOD},
+                    'administered': ({DOSAGE_FORM},
                                      {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
                                                      PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
                     'method': ({METHOD, LAB_METHOD},
