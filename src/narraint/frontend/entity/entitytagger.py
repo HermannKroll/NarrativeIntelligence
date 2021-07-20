@@ -145,12 +145,7 @@ class EntityTagger:
                 term = t.strip().lower()
                 # its a mesh descriptor
                 if df_id.startswith('D'):
-                    try:
-                        tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(df_id)
-                        for tn in tree_nos:
-                            self.term2entity[term].add(Entity(tn, DOSAGE_FORM))
-                    except KeyError:
-                        self.term2entity[term].add(Entity('MESH:{}'.format(df_id), DOSAGE_FORM))
+                    self.term2entity[term].add(Entity(f'MESH:{df_id}', DOSAGE_FORM))
                 else:
                     self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
 
@@ -265,6 +260,8 @@ class EntityTagger:
         """
         t_low = term.lower().strip()
         entities = set()
+        if not t_low:
+            raise KeyError('Does not know an entity for empty term: {}'.format(term))
         # check direct string
         if t_low in self.term2entity:
             entities.update(self.term2entity[t_low])
@@ -286,7 +283,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_tagger = EntityTagger.instance()
+    entity_tagger = EntityTagger.instance(load_index=False)
     entity_tagger.store_index()
 
 
