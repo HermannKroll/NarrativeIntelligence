@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from narrant.config import PLANT_FAMILTY_DATABASE_FILE
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narrant.entity.entity import Entity
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary
 
 
@@ -15,41 +16,37 @@ class EntityTaggerTestCase(TestCase):
         Tests whether drugbank names and headings can be tagged correctly
         """
         metformin_tags = self.entity_tagger.tag_entity('metformin')
-        valid_metformin_ids = {'DB00331'}
+        valid_metformin_ids = {'CHEMBL1431'}
         self.assertEqual(1, len(metformin_tags))
         for t in metformin_tags:
             self.assertIn(t.entity_id, valid_metformin_ids)
-        self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('metformine'))).entity_id)
-        self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('Metforminum'))).entity_id)
-        self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('Dimethylbiguanid'))).entity_id)
-        self.assertEqual('DB00331', next(iter(self.entity_tagger.tag_entity('dimethylbiguanid'))).entity_id)
+        self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('LA-6023')])
+        self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('Metformin')])
 
         simvastatin_tags = self.entity_tagger.tag_entity('simvastatin')
-        valid_simvastatin_ids = {'DB00641'}
+        valid_simvastatin_ids = {'CHEMBL1064'}
         self.assertEqual(1, len(simvastatin_tags))
         for t in simvastatin_tags:
             self.assertIn(t.entity_id, valid_simvastatin_ids)
 
-        self.assertEqual('DB00641', next(iter(self.entity_tagger.tag_entity('Simvastatinum'))).entity_id)
-        self.assertEqual('DB00641', next(iter(self.entity_tagger.tag_entity('Simvastatina'))).entity_id)
-        self.assertEqual('DB00641', next(iter(self.entity_tagger.tag_entity(
-            '2,2-dimethylbutyric acid, 8-ester with (4R,6R)-6-(2-((1S,2S,6R,8S,8aR)-1,2,6,7,8,8a-hexahydro-8-hydroxy-2,6-dimethyl-1-naphthyl)ethyl)tetrahydro-4-hydroxy-2H-pyran-2-one'))).entity_id)
+        self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('SYNVINOLIN'))).entity_id)
+        self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('Simvastatin hydroxy acid'))).entity_id)
+        self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('MK-0733'))).entity_id)
 
         acetarsol_tags = self.entity_tagger.tag_entity('acetarsol')
-        valid_acetarsol_ids = {'DB13268', 'MESH:C005284'}
+        valid_acetarsol_ids = {'CHEMBL1330792'}
         for t in acetarsol_tags:
             self.assertIn(t.entity_id, valid_acetarsol_ids)
 
-        valid_amantadine_ids = {'D02.455.426.100.050.035', 'DB00915'}
+        valid_amantadine_ids = {'CHEMBL660'}
         for t in self.entity_tagger.tag_entity('Amantadine'):
             self.assertIn(t.entity_id, valid_amantadine_ids)
 
-        self.assertEqual('DB00915', next(iter(self.entity_tagger.tag_entity('1-adamantanamine'))).entity_id)
-        self.assertEqual('DB00915', next(iter(self.entity_tagger.tag_entity('Amantadina'))).entity_id)
-        self.assertEqual('DB00915', next(iter(self.entity_tagger.tag_entity('Amantadinum'))).entity_id)
-        self.assertEqual('DB00915', next(iter(self.entity_tagger.tag_entity('Aminoadamantane'))).entity_id)
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Symadine')])
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('AMANTADINE')])
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Symmetrel')])
 
-        valid_avapritinib_ids = {'MESH:C000707147', 'DB15233'}
+        valid_avapritinib_ids = {'CHEMBL4204794'}
         for t in self.entity_tagger.tag_entity('Avapritinib'):
             self.assertIn(t.entity_id, valid_avapritinib_ids)
 
@@ -58,11 +55,9 @@ class EntityTaggerTestCase(TestCase):
         Tests whether MeSH entries can be tagged correctly
         :return:
         """
-        valid_diabetes_tn = {'C18.452.394.750', 'C19.246'}
-        for t in self.entity_tagger.tag_entity('Diabetes Mellitus'):
-            self.assertIn(t.entity_id, valid_diabetes_tn)
+        self.assertIn('MESH:D003920', [t.entity_id for t in self.entity_tagger.tag_entity('Diabetes Mellitus')])
 
-        valid_diabetes_2_tn = {'C18.452.394.750.149', 'C19.246.300'}
+        valid_diabetes_2_tn = {'MESH:D003924'}
         diabetes_2_names = ['Diabetes Mellitus, Adult-Onset', 'Diabetes Mellitus, Ketosis-Resistant',
                             'Diabetes Mellitus, Maturity-Onset',
                             'Diabetes Mellitus, Non Insulin Dependent',
@@ -83,7 +78,7 @@ class EntityTaggerTestCase(TestCase):
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(dn)])
             self.assertGreaterEqual(len(found_ids.intersection(valid_diabetes_2_tn)), len(valid_diabetes_2_tn))
 
-        valid_neoplasms_ids = {'C04'}
+        valid_neoplasms_ids = {'MESH:D009369'}
         neoplasms_terms = ['Neoplasms',
                            'Benign Neoplasms',
                            'Cancer',
@@ -114,7 +109,8 @@ class EntityTaggerTestCase(TestCase):
         """
         excipient_names = [n for n in ExcipientVocabulary.read_excipients_names(expand_terms=False)]
         for en in excipient_names:
-            self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
+            if en.strip():
+                self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
 
     def test_gene_names(self):
         valid_cyp3a4_symbol = {'cyp3a4'}
@@ -140,7 +136,7 @@ class EntityTaggerTestCase(TestCase):
             self.assertGreaterEqual(len(found_ids.intersection(valid_cyp3a5_symbol)), len(valid_cyp3a5_symbol))
 
     def test_nano_particle(self):
-        valid_nano_particle_id = {'J01.637.512.600'}
+        valid_nano_particle_id = {'MESH:D053758'}
         names = ['nano particle', 'nano-particle', 'nano particles', 'nanoparticle', 'nanoparticles']
         for n in names:
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(n)])
