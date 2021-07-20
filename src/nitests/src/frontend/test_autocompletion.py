@@ -11,13 +11,17 @@ class AutocompletionTestCase(TestCase):
         self.autocompletion :AutocompletionUtil = AutocompletionUtil.instance()
 
     def test_autocompletion_drugs(self):
-        metformin_gold = ["metformin", "metformina", "metformine", "metforminum"]
-        metformin_ac_test = self.autocompletion.autocomplete("metformin")
+        metformin_gold = ["metformin"]
+        metformin_ac_test = self.autocompletion.autocomplete("metfor")
         for test in metformin_gold:
             self.assertIn(test, metformin_ac_test)
 
-        simvastatin_gold = ["simvastatin", "simvastatina", "simvastatine", "simvastatinum"]
-        simvastatin_ac_test = self.autocompletion.autocomplete("simvastatin")
+        metformin_ac_test = self.autocompletion.autocomplete("metform")
+        for test in metformin_gold:
+            self.assertIn(test, metformin_ac_test)
+
+        simvastatin_gold = ["simvastatin"]
+        simvastatin_ac_test = self.autocompletion.autocomplete("simvasta")
         for test in simvastatin_gold:
             self.assertIn(test, simvastatin_ac_test)
 
