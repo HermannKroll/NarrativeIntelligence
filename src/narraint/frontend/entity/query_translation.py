@@ -1,7 +1,7 @@
 import logging
 import re
 
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE

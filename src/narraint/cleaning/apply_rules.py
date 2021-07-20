@@ -10,7 +10,7 @@ from narraint.backend.models import Predication, PredicationToDelete, Sentence
 from narraint.extraction.loading.cleanload import insert_predications_into_db
 from narrant.backend.database import Session
 from narrant.preprocessing.enttypes import DOSAGE_FORM,LAB_METHOD, METHOD
-from narraint.cleaning.predicate_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
+from narraint.cleaning.relation_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
     ASSOCIATED_PREDICATE_UNSURE
 from narrant.progress import print_progress_with_eta
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \

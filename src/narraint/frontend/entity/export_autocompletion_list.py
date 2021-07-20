@@ -5,7 +5,7 @@ from narrant.entity.entityresolver import EntityResolver
 from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary
 from narrant.preprocessing.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
 from narrant.entity.meshontology import MeSHOntology
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab
 from narraint.queryengine.engine import QueryEngine
 
 

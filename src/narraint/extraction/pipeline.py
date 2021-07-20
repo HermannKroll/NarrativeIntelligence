@@ -7,7 +7,7 @@ import logging
 import shutil
 from spacy.lang.en import English
 
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab, RelationVocabulary
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab, RelationVocabulary
 from narrant.preprocessing import enttypes
 from narraint.backend.database import SessionExtended
 from narrant.backend.export import export
@@ -183,7 +183,7 @@ def main():
     parser.add_argument("-bs", "--batch_size",
                         help="Batch size (how many documents should be processed and loaded in a batch)",
                         default=DOCUMENTS_TO_PROCESS_IN_ONE_BATCH, type=int)
-    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (tsv file)')
+    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (json file)')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -192,7 +192,7 @@ def main():
 
     if args.relation_vocab:
         relation_vocab = RelationVocabulary()
-        relation_vocab.load_from_tsv_file(args.relation_vocab)
+        relation_vocab.load_from_json(args.relation_vocab)
     else:
         relation_vocab = None
 

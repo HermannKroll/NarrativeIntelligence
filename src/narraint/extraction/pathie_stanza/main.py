@@ -4,7 +4,7 @@ from datetime import datetime
 import logging
 from spacy.lang.en import English
 
-from narraint.cleaning.predicate_vocabulary import RelationVocabulary
+from narraint.cleaning.relation_vocabulary import RelationVocabulary
 from narraint.extraction.extraction_utils import  filter_document_sentences_without_tags
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
 
@@ -97,7 +97,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="PubTator file / directory of PubTator files - PubTator files must include Tags")
     parser.add_argument("output", help="PathIE output file")
-    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (tsv file)')
+    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (json file)')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -106,7 +106,7 @@ def main():
 
     if args.relation_vocab:
         relation_vocab = RelationVocabulary()
-        relation_vocab.load_from_tsv_file(args.relation_vocab)
+        relation_vocab.load_from_json(args.relation_vocab)
 
         run_stanza_pathie(args.input, args.output, predicate_vocabulary=relation_vocab.relation_dict)
     else:

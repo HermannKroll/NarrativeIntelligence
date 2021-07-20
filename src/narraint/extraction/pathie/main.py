@@ -15,7 +15,7 @@ import shutil
 
 from spacy.lang.en import English
 
-from narraint.cleaning.predicate_vocabulary import RelationVocabulary
+from narraint.cleaning.relation_vocabulary import RelationVocabulary
 from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
@@ -300,7 +300,7 @@ def main():
     parser.add_argument("output", help="PathIE output file")
     parser.add_argument("--workdir", help="working directory")
     parser.add_argument("--config", default=NLP_CONFIG)
-    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (tsv file)')
+    parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (json file)')
     parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
     args = parser.parse_args()
 
@@ -309,7 +309,7 @@ def main():
                         level=logging.DEBUG)
     if args.relation_vocab:
         relation_vocab = RelationVocabulary()
-        relation_vocab.load_from_tsv_file(args.relation_vocab)
+        relation_vocab.load_from_json(args.relation_vocab)
 
         run_pathie(args.input, args.output, args.workdir, args.config, workers=args.workers,
                    predicate_vocabulary=relation_vocab.relation_dict)

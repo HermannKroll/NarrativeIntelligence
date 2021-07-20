@@ -6,7 +6,7 @@ from narraint.backend.database import SessionExtended
 from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
     document_bulk_load
 from narraint.backend.models import Predication
-from narraint.cleaning.predicate_vocabulary import create_predicate_vocab
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from narraint.cleaning.apply_rules import check_type_constraints
