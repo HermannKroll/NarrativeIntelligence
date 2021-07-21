@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
 
-from narraint.frontend.ui.views import StatsView, HelpView
+from narraint.frontend.ui.views import StatsView, HelpView, DocumentView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'', include('ui.urls')),
     path("stats/", never_cache(StatsView.as_view()), name="stats"),
     path("help/", never_cache(HelpView.as_view()), name="help"),
+    path("document/", never_cache(DocumentView.as_view()), name="document"),
 ]

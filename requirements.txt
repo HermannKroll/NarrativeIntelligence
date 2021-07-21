@@ -18,3 +18,4 @@ asgiref
 stanza
 spacy
 ijson
+Pillow

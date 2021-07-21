@@ -63,6 +63,37 @@ class View:
         return cls._instance
 
 
+def get_document_graph(request):
+    if "document" in request.GET:
+        document_id = str(request.GET.get("document", "").strip())
+        try:
+            document_id = int(document_id)
+            session = SessionExtended.get()
+            query = session.query(Predication).filter(Predication.document_collection == 'PubMed')
+            query = query.filter(Predication.document_id == document_id)
+            query = query.filter(Predication.predicate_canonicalized.isnot(None))
+            facts = set()
+            nodes = set()
+            for r in query:
+                subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type)
+                object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type)
+                subject_name = f'{subject_name} ({r.subject_type})'
+                object_name = f'{object_name} ({r.object_type})'
+                key = subject_name, r.predicate_canonicalized, object_name
+                facts.add(key)
+                nodes.add(subject_name)
+                nodes.add(object_name)
+
+            result = []
+            for s, p, o in facts:
+                result.append(dict(s=s, p=p, o=o))
+            logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
+            return JsonResponse(dict(nodes=list(nodes), facts=result))
+        except ValueError:
+            return JsonResponse(dict(nodes=[], facts=[]))
+    return JsonResponse(dict(nodes=[], facts=[]))
+
+
 def get_autocompletion(request):
     completion_terms = []
     if "term" in request.GET:
@@ -256,6 +287,13 @@ class StatsView(TemplateView):
 
 class HelpView(TemplateView):
     template_name = "ui/help.html"
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class DocumentView(TemplateView):
+    template_name = "ui/document.html"
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
