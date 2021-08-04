@@ -1,6 +1,6 @@
 {
   "use_SQLite": true,
-  "SQLite_path": "src/nitests/tmp/sqlite.db",
+  "SQLite_path": "/home/jan/narint/src/nitests/tmp/sqlite.db",
   "POSTGRES_DB": "taggingdbtest",
   "POSTGRES_HOST": "134.169.32.169",
   "POSTGRES_PORT": "5432",
