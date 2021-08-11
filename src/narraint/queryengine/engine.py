@@ -217,7 +217,7 @@ class QueryEngine:
         start_time = datetime.now()
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
-            logging.debug('Query wont yield results - returning empty list')
+            logging.debug('Query will not yield results - returning empty list')
             return []
 
         collection2valid_doc_ids = defaultdict(set)
@@ -249,6 +249,7 @@ class QueryEngine:
                     collection2valid_doc_ids[d_col].update(doc_ids_for_fp)
                 else:
                     collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp)
+
             # fact pattern has a variable
             if len(var2subs) > 0:
                 for var_name in var2subs:
@@ -308,10 +309,16 @@ class QueryEngine:
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
                     title, authors, journals, year = doc2metadata[int(d_id)]
+                    # get month from title
+                    month = journals.split('(')[-1].split(' ')[0]
+                    if month in month_dict:
+                        month = month_dict[month]
+                    else:
+                        month = '0'
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
-                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year,
+                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                              {}, 0.0, fp2prov))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
@@ -342,6 +349,12 @@ class QueryEngine:
                                                                                 shared_sub[idx][1])
 
                         title, authors, journals, year = doc2metadata[int(d_id)]
+                        # get month from title
+                        month = journals.split('(')[-1].split(' ')[0]
+                        if month in month_dict:
+                            month = month_dict[month]
+                        else:
+                            month = '0'
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
@@ -353,7 +366,7 @@ class QueryEngine:
                             else:
                                 fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
 
-                        query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year,
+                        query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                                  var2sub_for_doc, 0.0, fp2prov))
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
@@ -395,3 +408,18 @@ class QueryEngine:
 
         logging.info('{} entities queried in {}s'.format(len(entities), datetime.now() - start_time))
         return entities
+
+month_dict = {
+    "1": "1", "01": "1", "Jan": "1", "January": "1",
+    "2": "2", "02": "2", "Feb": "2", "February": "2",
+    "3": "3", "03": "3", "Mar": "3", "March": "3",
+    "4": "4", "04": "4", "Apr": "4", "April": "4",
+    "5": "5", "05": "5", "May": "5",
+    "6": "6", "06": "6", "Jun": "6", "June": "6",
+    "7": "7", "07": "7", "Jul": "7", "July": "7",
+    "8": "8", "08": "8", "Aug": "8", "August": "8",
+    "9": "9", "09": "9", "Sep": "9", "September": "9",
+    "10": "10", "Oct": "10", "October": "10",
+    "11": "11", "Nov": "11", "November": "11",
+    "12": "12", "Dec": "12", "December": "12"
+}

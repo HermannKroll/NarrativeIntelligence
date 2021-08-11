@@ -275,8 +275,15 @@
         -->
         <div id="resultdiv">
             <br>
-            <h2 id="header_documents">Documents</h2>
-
+            <h2 id="document_header">Documents</h2>
+            <select class="form-select float-right" id="select_sorting_year" style="width: auto">
+                <option selected value="True">Year (desc)</option>
+                <option value="False">Year (asc)</option>
+            </select>
+            <select class="form-select float-right" id="select_sorting_freq" style="width: auto">
+                <option selected value="True">Frequence (desc)</option>
+                <option value="False">Frequence (asc)</option>
+            </select>
         </div>
         <div class="row margin-top" id="div_wrapper_documents">
             <div id="div_documents"></div>

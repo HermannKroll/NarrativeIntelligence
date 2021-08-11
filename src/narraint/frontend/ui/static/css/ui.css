@@ -105,3 +105,8 @@
 
 #reportSpinner {display:none}
 .busy {display:inline-block !important;}
+
+#document_header {
+    margin: 0;
+    display: inline-block;
+}

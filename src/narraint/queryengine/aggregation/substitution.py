@@ -24,7 +24,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
 
-    def rank_results(self, results: [QueryDocumentResult], end_pos=None):
+    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc, year_sort_desc, end_pos=None):
         self._clear_state()
         for r in results:
             self._add_query_result(r)
@@ -36,11 +36,12 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
                 query_aggregate = QueryResultAggregate(var2subs)
                 for res in results:
                     query_aggregate.add_query_result(res)
+                query_aggregate.sort_results_by_date(year_sort_desc)
                 unsorted_list.append((len(query_aggregate.results), query_aggregate))
 
             # sort by amount of documents and create desired output
             query_result = QueryResultAggregateList()
-            unsorted_list.sort(key=lambda x: x[0], reverse=True)
+            unsorted_list.sort(key=lambda x: x[0], reverse=freq_sort_desc)
             for _, res in unsorted_list:
                 query_result.add_query_result(res)
             query_result.set_slice(end_pos)
@@ -76,4 +77,3 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         else:
             self.__doc_ids_per_aggregation[key].add(result.document_id)
             self.aggregation[key] = ([result], result.var2substitution)
-

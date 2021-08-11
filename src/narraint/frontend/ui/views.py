@@ -129,7 +129,17 @@ def get_query(request):
         query = str(request.GET.get("query", "").strip())
         data_source = str(request.GET.get("data_source", "").strip())
         outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
+        year_sort_desc = str(request.GET.get("year_sort", "").strip())
         end_pos = request.GET.get("end_pos").strip()
+        if freq_sort_desc == 'False':
+            freq_sort_desc = False
+        else:
+            freq_sort_desc = True
+        if year_sort_desc == 'False':
+            year_sort_desc = False
+        else:
+            year_sort_desc = True
         try:
             end_pos = int(end_pos)
         except:
@@ -175,6 +185,7 @@ def get_query(request):
                 logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                 results = cached_results
             else:
+                # run query
                 results = QueryEngine.process_query_with_expansion(graph_query)
                 cache_hit = False
                 try:
@@ -189,7 +200,7 @@ def get_query(request):
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
-                results_converted = substitution_aggregation.rank_results(results, end_pos).to_dict()
+                results_converted = substitution_aggregation.rank_results(results, freq_sort_desc, year_sort_desc, end_pos).to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
                 results_converted = substitution_ontology.rank_results(results).to_dict()

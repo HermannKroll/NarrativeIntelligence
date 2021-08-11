@@ -144,20 +144,22 @@ class QueryDocumentResult(QueryResultBase):
     Represents document result
     """
 
-    def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: str,
+    def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: str, month: str,
                  var2substitution, confidence, position2provenance_ids: Dict[int, Set[int]]):
         self.document_id = document_id
         self.title = title
+        self.month = month
         self.journals = journals
         self.authors = authors
         self.publication_year = publication_year
+        self.publication_year_int = int(self.publication_year) if publication_year not in ("", None, "None") else 0
         self.var2substitution = var2substitution
         self.confidence = confidence
         self.position2provenance_ids = {k: list(v) for k, v in position2provenance_ids.items()}
 
     def to_dict(self):
         return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,
-                    journals=self.journals, year=self.publication_year, prov=self.position2provenance_ids)
+                    journals=self.journals, year=self.publication_year, month=self.month, prov=self.position2provenance_ids)
 
     def get_result_size(self):
         return 1
@@ -221,6 +223,9 @@ class QueryResultAggregate(QueryResultBase):
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
+
+    def sort_results_by_date(self, year_sort_desc):
+        self.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=year_sort_desc)
 
 
 class QueryResultAggregateList(QueryResultBase):

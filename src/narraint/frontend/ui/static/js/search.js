@@ -448,12 +448,16 @@ const search = (event) => {
     let query = getCurrentQuery();
     let data_source = "PubMed"
     let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
-    /*
-    if (document.getElementById('radio_pmc').checked) {
-        data_source = "PMC"
-    } else if(document.getElementById('radio_pubmed').checked) {
-        data_source = "PubMed"
-    } */
+    let freq_element = document.getElementById("select_sorting_freq");
+    let freq_sort_desc = freq_element.value;
+    let year_element = document.getElementById("select_sorting_year");
+    let year_sort_desc = year_element.value;
+        /*
+        if (document.getElementById('radio_pmc').checked) {
+            data_source = "PMC"
+        } else if(document.getElementById('radio_pubmed').checked) {
+            data_source = "PubMed"
+        } */
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -463,6 +467,8 @@ const search = (event) => {
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
     console.log("Inner Ranking: " + inner_ranking)
+    console.log("Sorting by frequency (desc): " + freq_sort_desc)
+    console.log("Sorting by year (desc): " + year_sort_desc)
     console.log("Result Divs Limit: " + DEFAULT_RESULT_DIVS_LIMIT)
     setButtonSearching(true);
 
@@ -472,6 +478,8 @@ const search = (event) => {
             query: query,
             data_source: data_source,
             outer_ranking: outer_ranking,
+            freq_sort: freq_sort_desc,
+            year_sort: year_sort_desc,
             end_pos: end_pos,
             /*,
             inner_ranking: inner_ranking*/

@@ -152,7 +152,7 @@ class QueryOptimizer:
         1. remove redundant entity ids in subject or object
         2. remove duplicated fact patterns
         3. order fact patterns by pushing patterns with variables in the end
-        4. change order of subject or object if predicate typy constraint is hurt
+        4. change order of subject or object if predicate type constraint is hurt
         :param graph_query:
         :param and_mod: should the fact patterns be treated as being connected by AND (yes if true)? else OR
         :return:
