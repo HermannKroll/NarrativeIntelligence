@@ -36,7 +36,8 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
                 query_aggregate = QueryResultAggregate(var2subs)
                 for res in results:
                     query_aggregate.add_query_result(res)
-                query_aggregate.sort_results_by_date(year_sort_desc)
+                # sort by year, month
+                self.sort_docs_by_year(query_aggregate, year_sort_desc)
                 unsorted_list.append((len(query_aggregate.results), query_aggregate))
 
             # sort by amount of documents and create desired output
@@ -52,7 +53,11 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             for _, (results, var2subs) in self.aggregation.items():
                 for res in results:
                     query_result.add_query_result(res)
+            self.sort_docs_by_year(query_result, year_sort_desc)
             return query_result
+
+    def sort_docs_by_year(self, docs, year_sort_desc):
+        return docs.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=year_sort_desc)
 
     def _add_query_result(self, result: QueryDocumentResult):
         if not self.var_names:

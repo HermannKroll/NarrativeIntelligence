@@ -144,12 +144,12 @@ class QueryDocumentResult(QueryResultBase):
     Represents document result
     """
 
-    def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: str, month: str,
+    def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: str,
                  var2substitution, confidence, position2provenance_ids: Dict[int, Set[int]]):
         self.document_id = document_id
         self.title = title
-        self.month = month
         self.journals = journals
+        self.month = self.extract_month_from_journals(self.journals)
         self.authors = authors
         self.publication_year = publication_year
         self.publication_year_int = int(self.publication_year) if publication_year not in ("", None, "None") else 0
@@ -176,6 +176,13 @@ class QueryDocumentResult(QueryResultBase):
             if v.entity_id != v_o.entity_id or v.entity_type != v_o.entity_type:
                 return False
         return True
+
+    def extract_month_from_journals(self, journals):
+        month = journals.split('(')[-1].split(' ')[0]
+        if month in month_dict:
+            return month_dict[month]
+        else:
+            return '0'
 
 
 class QueryDocumentResultList(QueryResultBase):
@@ -248,3 +255,18 @@ class QueryResultAggregateList(QueryResultBase):
 
     def set_slice(self, end_pos):
         self.results = self.results[:end_pos]
+
+month_dict = {
+    "1": "1", "01": "1", "Jan": "1", "January": "1",
+    "2": "2", "02": "2", "Feb": "2", "February": "2",
+    "3": "3", "03": "3", "Mar": "3", "March": "3",
+    "4": "4", "04": "4", "Apr": "4", "April": "4",
+    "5": "5", "05": "5", "May": "5",
+    "6": "6", "06": "6", "Jun": "6", "June": "6",
+    "7": "7", "07": "7", "Jul": "7", "July": "7",
+    "8": "8", "08": "8", "Aug": "8", "August": "8",
+    "9": "9", "09": "9", "Sep": "9", "September": "9",
+    "10": "10", "Oct": "10", "October": "10",
+    "11": "11", "Nov": "11", "November": "11",
+    "12": "12", "Dec": "12", "December": "12"
+}
