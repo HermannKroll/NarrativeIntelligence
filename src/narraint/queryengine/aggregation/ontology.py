@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
@@ -37,8 +38,9 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self._pref_trees_visited.clear()
         self._pref_tree_nodes_with_docs.clear()
 
-    def rank_results(self, results: [QueryDocumentResult]):
+    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc, year_sort_desc):
         self._clear_state()
+        self.year_sort_desc = year_sort_desc
 
         if results:
             self.var_names = sorted(list(results[0].var2substitution.keys()))
@@ -101,14 +103,14 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 if misc_document_results:
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
-                        misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results)
+                        misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results, freq_sort_desc)
                         misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH Taxonomy)', f'{ent_type} (No MeSH Taxonomy)')
                         misc_aggregation.add_query_result(misc_aggregation_list)
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 
                 resulting_tree = QueryResultAggregateList()
-                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=True):
-                    self._sort_node_result_list(aggregation)
+                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=freq_sort_desc):
+                    self._sort_node_result_list(aggregation, freq_sort_desc)
                     resulting_tree.add_query_result(aggregation)
                 return resulting_tree
             else:
@@ -116,6 +118,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 query_result = QueryDocumentResultList()
                 for res in results:
                     query_result.add_query_result(res)
+                    query_result.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=self.year_sort_desc)
                 return query_result
         else:
             return QueryDocumentResultList()
@@ -130,12 +133,13 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
             return True
         return False
 
-    def _sort_node_result_list(self, node):
+    def _sort_node_result_list(self, node, freq_sort_desc):
         if self._node_has_result_list(node):
             for res in node.results:
                 if self._node_has_result_list(res):
-                    self._sort_node_result_list(res)
-            node.results.sort(key=lambda x: x.get_result_size(), reverse=True)
+                    self._sort_node_result_list(res, freq_sort_desc)
+            node.results.sort(key=lambda x: x.get_result_size(), reverse=freq_sort_desc)
+
 
     def _populate_tree_structure(self, var2prefix_document_result_list):
         for v in self.var_names:

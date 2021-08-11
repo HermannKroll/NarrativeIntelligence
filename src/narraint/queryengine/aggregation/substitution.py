@@ -24,7 +24,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
 
-    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc, year_sort_desc, end_pos=None):
+    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc=True, year_sort_desc=True, end_pos=None):
         self._clear_state()
         for r in results:
             self._add_query_result(r)

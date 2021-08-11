@@ -159,7 +159,7 @@ class QueryDocumentResult(QueryResultBase):
 
     def to_dict(self):
         return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,
-                    journals=self.journals, year=self.publication_year, month=self.month, prov=self.position2provenance_ids)
+                    journals=self.journals, year=self.publication_year, prov=self.position2provenance_ids)
 
     def get_result_size(self):
         return 1
@@ -183,7 +183,6 @@ class QueryDocumentResult(QueryResultBase):
             return month_dict[month]
         else:
             return '0'
-
 
 class QueryDocumentResultList(QueryResultBase):
     """
@@ -231,7 +230,7 @@ class QueryResultAggregate(QueryResultBase):
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
 
-    def sort_results_by_date(self, year_sort_desc):
+    def _sort_results_by_year(self, year_sort_desc):
         self.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=year_sort_desc)
 
 

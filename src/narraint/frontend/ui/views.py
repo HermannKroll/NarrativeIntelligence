@@ -203,7 +203,7 @@ def get_query(request):
                 results_converted = substitution_aggregation.rank_results(results, freq_sort_desc, year_sort_desc, end_pos).to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
-                results_converted = substitution_ontology.rank_results(results).to_dict()
+                results_converted = substitution_ontology.rank_results(results, freq_sort_desc, year_sort_desc).to_dict()
         return JsonResponse(
             dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
                  query_limit_hit="False"))
