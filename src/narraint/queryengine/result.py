@@ -66,13 +66,14 @@ class QueryFactExplanation:
     version of the predicate
     """
 
-    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str, predication_id):
+    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str, confidence, predication_id):
         self.position = position
         self.sentence = sentence
         self.predicate = predicate
         self.predicate_canonicalized = predicate_canonicalized
         self.subject_str = subject_str
         self.object_str = object_str
+        self.confidence = confidence
         self.predication_ids = {predication_id}
 
     def __str__(self):
@@ -82,7 +83,7 @@ class QueryFactExplanation:
     def to_dict(self):
         return dict(s=self.sentence, p=self.predicate,
                     p_c=self.predicate_canonicalized,
-                    s_str=self.subject_str, o_str=self.object_str, pos=self.position,
+                    s_str=self.subject_str, o_str=self.object_str, pos=self.position, conf=self.confidence,
                     ids=','.join([str(i) for i in self.predication_ids]))
 
 

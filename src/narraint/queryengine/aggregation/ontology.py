@@ -1,4 +1,3 @@
-import logging
 from collections import defaultdict
 
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD

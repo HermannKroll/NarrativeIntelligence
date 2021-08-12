@@ -693,7 +693,7 @@ const createProvenanceDivElement = (explanations) => {
 
             let div_provenance = $('<div class="col-11">' +
                 j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
-                e["p_c"] + ", " + e["o_str"] + ']' +
+                e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
                 '</div>');
 
             let div_prov_example = $('<div class="container">');

@@ -32,7 +32,7 @@ class QueryEngine:
         session = SessionExtended.get()
         query = session.query(Predication.id,
                               Predication.sentence_id, Predication.predicate, Predication.predicate_canonicalized,
-                              Predication.subject_str, Predication.object_str) \
+                              Predication.subject_str, Predication.object_str, Predication.confidence) \
             .filter(Predication.id.in_(predication_ids))
 
         prov_id2fp_idx = defaultdict(set)
@@ -46,7 +46,7 @@ class QueryEngine:
             sentence_ids.add(r[1])
             for fp_idx in prov_id2fp_idx[r[0]]:
                 query_explanation.integrate_explanation(
-                    QueryFactExplanation(fp_idx, r[1], r[2], r[3], r[4], r[5], r[0]))
+                    QueryFactExplanation(fp_idx, r[1], r[2], r[3], r[4], r[5], r[6], r[0]))
 
         # replace all sentence ids by sentence str
         id2sentence = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
