@@ -40,6 +40,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
 
     def rank_results(self, results: [QueryDocumentResult], freq_sort_desc, year_sort_desc):
         self._clear_state()
+        self.freq_sort_desc = freq_sort_desc
         self.year_sort_desc = year_sort_desc
 
         if results:
@@ -109,8 +110,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 
                 resulting_tree = QueryResultAggregateList()
-                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=freq_sort_desc):
-                    self._sort_node_result_list(aggregation, freq_sort_desc)
+                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=self.freq_sort_desc):
+                    self._sort_node_result_list(aggregation)
                     resulting_tree.add_query_result(aggregation)
                 return resulting_tree
             else:
@@ -133,13 +134,20 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
             return True
         return False
 
-    def _sort_node_result_list(self, node, freq_sort_desc):
+    def _sort_node_result_list(self, node):
         if self._node_has_result_list(node):
+            result_docs = []
             for res in node.results:
                 if self._node_has_result_list(res):
-                    self._sort_node_result_list(res, freq_sort_desc)
-            node.results.sort(key=lambda x: x.get_result_size(), reverse=freq_sort_desc)
-
+                    self._sort_node_result_list(res)
+                if isinstance(res, QueryDocumentResult):
+                    result_docs.append(res)
+            node.results.sort(key=lambda x: x.get_result_size(), reverse=self.freq_sort_desc)
+            if result_docs:
+                for res in result_docs:
+                    node.results.remove(res)
+                result_docs.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=self.year_sort_desc)
+                node.results.extend(result_docs)
 
     def _populate_tree_structure(self, var2prefix_document_result_list):
         for v in self.var_names:
