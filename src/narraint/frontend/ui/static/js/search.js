@@ -243,6 +243,13 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
+document.getElementById("select_sorting_year").addEventListener("change", function() {
+    document.getElementById("btn_search").click()
+});
+document.getElementById("select_sorting_freq").addEventListener("change", function() {
+    document.getElementById("btn_search").click()
+});
+
 let imgrect = {width: 0, height: 0};
 document.getElementById("screenshot").addEventListener('load', (e) => {
     imgrect = e.target.getBoundingClientRect();
