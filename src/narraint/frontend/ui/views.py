@@ -33,6 +33,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
+DO_CACHING = False
 
 
 class View:
@@ -173,25 +174,27 @@ def get_query(request):
             valid_query = True
             document_collection = data_source
             start_time = datetime.now()
-            cache_hit = False
-            try:
-                cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
-                cache_hit = True
-            except Exception:
-                logging.error('Cannot load query result from cache...')
-                cached_results = None
+            if DO_CACHING:
                 cache_hit = False
-            if cached_results:
+                try:
+                    cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
+                    cache_hit = True
+                except Exception:
+                    logging.error('Cannot load query result from cache...')
+                    cached_results = None
+                    cache_hit = False
+            if DO_CACHING and cached_results:
                 logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
                 results = cached_results
             else:
                 # run query
                 results = QueryEngine.process_query_with_expansion(graph_query)
                 cache_hit = False
-                try:
-                    View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
-                except Exception:
-                    logging.error('Cannot store query result to cache...')
+                if DO_CACHING:
+                    try:
+                        View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
+                    except Exception:
+                        logging.error('Cannot store query result to cache...')
             time_needed = datetime.now() - start_time
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
