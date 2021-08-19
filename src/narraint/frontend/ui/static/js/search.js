@@ -542,6 +542,9 @@ const search = (event) => {
         // Disable button
         setButtonSearching(false);
 
+        document.getElementById("select_sorting_year").removeAttribute("hidden");
+        document.getElementById("select_sorting_freq").removeAttribute("hidden");
+
     });
 
     request.fail(function (result) {
