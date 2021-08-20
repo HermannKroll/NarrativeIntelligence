@@ -73,11 +73,17 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
                 journal_elem_year = journal.findall('./JournalIssue/PubDate/MedlineDate')
                 if len(journal_elem_year):
                     art_date = journal_elem_year[0].text
-                    journal_year, journal_month = art_date.split(' ', maxsplit=1)
+                    if ' ' in art_date:
+                        journal_year, journal_month = art_date.split(' ', maxsplit=1)
+                    else:
+                        journal_year = art_date
+                        journal_month = None
             journal_volume = journal_elem_volume[0].text if len(journal_elem_volume) else ""
             journal_issue = journal_elem_issue[0].text if len(journal_elem_issue) else ""
+            datestring = f'{journal_month} ' if journal_month else ""
+            datestring += journal_year if journal_year else ""
             journal_list.append(
-                f'{journal_title}, Vol. {journal_volume} No. {journal_issue} ({journal_month} {journal_year})')
+                f'{journal_title}, Vol. {journal_volume} No. {journal_issue} ({datestring})')
             if journal_year and (not publication_year or publication_year < journal_year):
                 publication_year = journal_year
 
