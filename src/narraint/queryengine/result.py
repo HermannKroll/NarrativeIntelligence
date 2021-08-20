@@ -31,20 +31,11 @@ class QueryEntitySubstitution:
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
         try:
-            # Convert MeSH Tree Numbers to MeSH Descriptors
-            if self.entity_type in [CHEMICAL, DISEASE, DOSAGE_FORM, METHOD, LAB_METHOD] \
-                    and not self.entity_id.startswith('MESH:'):
-                mesh_ontology = MeSHOntology.instance()
-                try:
-                    self.entity_id = 'MESH:{}'.format(mesh_ontology.get_descriptor_for_tree_no(self.entity_id)[0])
-                except KeyError:
-                    pass
-
             ent_name = entity_resolver.get_name_for_var_ent_id(self.entity_id, self.entity_type,
                                                                resolve_gene_by_id=False)
         except KeyError:
-            ent_name = self.entity_str
-        if ent_name == self.entity_id:
+            ent_name = self.entity_str if self.entity_str else self.entity_id
+        if ent_name == self.entity_id and self.entity_str:
             ent_name = self.entity_str
         return ent_name
 
@@ -66,7 +57,8 @@ class QueryFactExplanation:
     version of the predicate
     """
 
-    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str, confidence, predication_id):
+    def __init__(self, position, sentence, predicate, predicate_canonicalized, subject_str, object_str, confidence,
+                 predication_id):
         self.position = position
         self.sentence = sentence
         self.predicate = predicate
@@ -185,6 +177,7 @@ class QueryDocumentResult(QueryResultBase):
         else:
             return '0'
 
+
 class QueryDocumentResultList(QueryResultBase):
     """
     Represents a list of document results
@@ -205,6 +198,7 @@ class QueryDocumentResultList(QueryResultBase):
 
     def set_slice(self, end_pos):
         self.results = self.results[:end_pos]
+
 
 class QueryResultAggregate(QueryResultBase):
     """
@@ -255,6 +249,7 @@ class QueryResultAggregateList(QueryResultBase):
 
     def set_slice(self, end_pos):
         self.results = self.results[:end_pos]
+
 
 month_dict = {
     "1": "1", "01": "1", "Jan": "1", "January": "1",
