@@ -174,8 +174,9 @@ def get_query(request):
             valid_query = True
             document_collection = data_source
             start_time = datetime.now()
+            cached_results = None
+            cache_hit = False
             if DO_CACHING:
-                cache_hit = False
                 try:
                     cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
                     cache_hit = True
