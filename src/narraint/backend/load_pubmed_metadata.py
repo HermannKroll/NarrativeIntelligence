@@ -38,8 +38,8 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
         pmid = int(pmids[0].text)
         if pmid not in document_ids or pmid in pmids_processed:
             continue
-
         pmids_processed.add(pmid)
+
         authors_list = []
         for author in article.findall('./MedlineCitation/Article/AuthorList/Author'):
             forename = author.findall('./ForeName')
@@ -64,8 +64,16 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
             journal_elem_issue = journal.findall('./JournalIssue/Issue')
 
             journal_title = journal_elem_title[0].text if len(journal_elem_title) else ""
-            journal_year = journal_elem_year[0].text if len(journal_elem_year) else None
-            journal_month = journal_elem_month[0].text if len(journal_elem_month) else None
+            journal_year = None
+            journal_month = None
+            if len(journal_elem_year):
+                journal_year = journal_elem_year[0].text
+                journal_month = journal_elem_month[0].text if len(journal_elem_month) else None
+            else:
+                journal_elem_year = journal.findall('./JournalIssue/PubDate/MedlineDate')
+                if len(journal_elem_year):
+                    art_date = journal_elem_year[0].text
+                    journal_year, journal_month = art_date.split(' ', maxsplit=1)
             journal_volume = journal_elem_volume[0].text if len(journal_elem_volume) else ""
             journal_issue = journal_elem_issue[0].text if len(journal_elem_issue) else ""
             journal_list.append(
