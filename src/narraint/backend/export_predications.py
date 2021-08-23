@@ -5,14 +5,14 @@ import pathlib as pl
 import logging
 
 import argparse
-import sqlalchemy.orm
+
 
 import narraint.backend.database as db
 import narraint.backend.models as models
 from narrant.progress import Progress
 
 import rdflib
-from sqlalchemy.sql import select
+
 
 def export(out_file:tp.Union[pl.Path,str]=None, ids=None, collection=None):
     session = db.SessionExtended.get()
@@ -34,6 +34,7 @@ def export(out_file:tp.Union[pl.Path,str]=None, ids=None, collection=None):
     logging.info(f"Writing graph to {out_file}...")
     output_graph.serialize(destination=out_file)
     logging.info("done!")
+
 
 def main(args=None):
     parser = argparse.ArgumentParser("Export predications to file")
