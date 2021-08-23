@@ -19,3 +19,4 @@ stanza
 spacy
 ijson
 Pillow
+rdflib
