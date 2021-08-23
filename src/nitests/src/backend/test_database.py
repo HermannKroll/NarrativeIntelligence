@@ -15,7 +15,6 @@ class TestSession(unittest.TestCase):
     def test_sqlite_ins_sel(self):
         session = SessionExtended.get()
         session.execute("INSERT INTO tagger VALUES ('foo', 'bar')")
-        session.query
         result = session.query(Tagger)
         for row in result:
             self.assertTrue(row.name == 'foo' and row.version == 'bar')
