@@ -80,45 +80,6 @@ def clean_and_translate_gene_ids(predications: List[PRED]):
     return predications_cleaned
 
 
-def transform_mesh_ids_to_prefixes(predications: List[PRED]):
-    """
-    Transforms the MeSH ids of all facts to MeSH tree numbers
-    If a descriptor has multiple tree numbers, the fact will be duplicated
-    :param predications: a list of predications
-    :return: a list of transformed predications
-    """
-    logging.info('Transforming entity ids to prefixes...')
-    predications_cleaned = []
-    mesh_ontology = MeSHOntology.instance()
-    start_time = datetime.now()
-    predications_len = len(predications)
-    for idx, p in enumerate(predications):
-        subj_ids = set()
-        if p.s_id.startswith('MESH:'):
-            try:
-                subj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.s_id[5:]))
-            except KeyError:
-                continue
-        else:
-            subj_ids = [p.s_id]
-        obj_ids = set()
-        if p.o_id.startswith('MESH:'):
-            try:
-                obj_ids.update(mesh_ontology.get_tree_numbers_with_entity_type_for_descriptor(p.o_id[5:]))
-            except KeyError:
-                continue
-        else:
-            obj_ids = [p.o_id]
-        for s_id in subj_ids:
-            for o_id in obj_ids:
-                p_cleaned = PRED(p.doc_id, p.subj, p.pred, p.pred_cleaned, p.obj, p.conf, p.sent, s_id, p.s_str,
-                                 p.s_type, o_id, p.o_str, p.o_type)
-                predications_cleaned.append(p_cleaned)
-        print_progress_with_eta('transforming mesh ids to tree prefixes...', idx, predications_len, start_time)
-    logging.info('{} predications obtained'.format(len(predications_cleaned)))
-    return predications_cleaned
-
-
 def text_to_md5hash(text: str) -> str:
     """
     Converts a arbitrary string to a md5 hash
@@ -168,21 +129,17 @@ def clean_sentence_str(sentence: str) -> str:
     return sentence.replace('\t', ' ').replace('\n', ' ').replace('\\', '\\\\')
 
 
-def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                       do_transform_mesh_ids_to_prefixes=True):
+def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True):
     """
     Cleans a list of predications based on a set of filters
     :param tuples_cleaned: a list of PRED tuples
     :param collection: the document collection
     :param extraction_type: extraction type like OpenIE or PathIE
     :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
-    :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
     :return: a list of sentence objects to insert, a list of predication values to insert
     """
     if clean_genes:
         tuples_cleaned = clean_and_translate_gene_ids(tuples_cleaned)
-    #if do_transform_mesh_ids_to_prefixes:
-     #   tuples_cleaned = transform_mesh_ids_to_prefixes(tuples_cleaned)
     hash2sentence = load_sentences_with_hashes(collection)
     sentid2hash = {v: k for k, v in hash2sentence.items()}
     inserted_sentence_ids = set([k for k in sentid2hash.keys()])
@@ -359,8 +316,7 @@ def insert_predications_into_db(predication_values, sentence_values):
         logging.info('Insert finished ({} facts inserted)'.format(len_tuples))
 
 
-def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True,
-                                        do_transform_mesh_ids_to_prefixes=True):
+def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, extraction_type, clean_genes=True):
     """
      insert a list of cleaned tuples into the database (bulk insert)
      does not check for collisions
@@ -368,12 +324,10 @@ def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, 
      :param collection: the document collection
      :param extraction_type: extraction type like OpenIE or PathIE
      :param clean_genes: if true the genes will be cleaned (multiple genes are split and ids are translated to symbols)
-     :param do_transform_mesh_ids_to_prefixes: if true all MeSH ids will be translated to MeSH tree numbers
      :return: Nothing
      """
     predication_values, sentence_values = clean_predications(tuples_cleaned, collection, extraction_type,
-                                                             clean_genes=clean_genes,
-                                                             do_transform_mesh_ids_to_prefixes=do_transform_mesh_ids_to_prefixes)
+                                                             clean_genes=clean_genes)
     logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
     insert_predications_into_db(predication_values, sentence_values)
 
