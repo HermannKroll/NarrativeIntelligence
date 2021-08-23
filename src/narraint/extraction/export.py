@@ -18,8 +18,8 @@ def load_tuples_from_db():
     :return: a set o tuples
     """
     session = SessionExtended.get()
-    query = session.query(Predication.document_id, Predication.subject_openie, Predication.predicate,
-                          Predication.object_openie, Predication.sentence,
+    query = session.query(Predication.document_id, Predication.subject_str, Predication.predicate,
+                          Predication.object_str, Predication.sentence_id,
                           Predication.subject_id, Predication.subject_str, Predication.subject_type,
                           Predication.object_id, Predication.object_str, Predication.object_type)
     logging.info("loading predication tuples from db...")
