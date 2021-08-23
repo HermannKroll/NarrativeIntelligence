@@ -1,5 +1,7 @@
 import json
 
+from typing import List
+
 
 class RelationTypeConstraintStore:
 
@@ -11,6 +13,12 @@ class RelationTypeConstraintStore:
             self.constraints = json.load(f)
 
         self._verify_integrity()
+
+    def get_subject_constraints(self, relation: str) -> List[str]:
+        return self.constraints[relation]["subjects"]
+
+    def get_object_constraints(self, relation: str) -> List[str]:
+        return self.constraints[relation]["objects"]
 
     def _verify_integrity(self):
         for relation, constraint in self.constraints.items():
