@@ -140,6 +140,31 @@ class Predication(Extended, DatabaseTable):
         logging.info('{} predicates queried in {}s'.format(len(predicates_with_count), datetime.now() - start_time))
         return sorted(predicates_with_count, key=lambda x: x[1], reverse=True)
 
+    @staticmethod
+    def query_predicates_with_mapping_and_count(session, document_collection=None) -> List[Tuple[str, str, int]]:
+        """
+        Queries predicates with the corresponding relation mapping and count of tuples
+        :param session: session handle
+        :param document_collection: document collection
+        :return: a list of tuples (predicate, predicate_canonicalized, count of entries)
+        """
+        if not document_collection:
+            query = session.query(Predication.predicate, Predication.predicate_canonicalized,
+                                  func.count(Predication.predicate)) \
+                .group_by(Predication.predicate, Predication.predicate_canonicalized)
+        else:
+            query = session.query(Predication.predicate, Predication.predicate_canonicalized,
+                                  func.count(Predication.predicate)) \
+                .filter(Predication.document_collection == document_collection) \
+                .group_by(Predication.predicate, Predication.predicate_canonicalized)
+
+        predicates_with_count = []
+        start_time = datetime.now()
+        for r in session.execute(query):
+            predicates_with_count.append((r[0], r[1], int(r[2])))
+        logging.info('{} predicates queried in {}s'.format(len(predicates_with_count), datetime.now() - start_time))
+        return sorted(predicates_with_count, key=lambda x: x[2], reverse=True)
+
 
 class PredicationDenorm(Extended, DatabaseTable):
     __tablename__ = "predication_denorm"
