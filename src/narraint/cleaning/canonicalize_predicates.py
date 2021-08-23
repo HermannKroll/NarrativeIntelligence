@@ -9,7 +9,7 @@ from scipy.spatial.distance import cosine
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.cleaning.relation_vocabulary import create_predicate_vocab, PRED_TO_REMOVE, RelationVocabulary
+from narraint.cleaning.relation_vocabulary import PRED_TO_REMOVE, RelationVocabulary
 from narrant.progress import print_progress_with_eta
 
 
@@ -168,12 +168,7 @@ def canonicalize_predication_table(word2vec_model, output_distances, predicate_v
     """
     logging.info('Loading Word2Vec model...')
     model = fasttext.load_model(word2vec_model)
-    if not predicate_vocabulary:
-        logging.info('Creating predicate vocabulary...')
-        pred_vocab = create_predicate_vocab()
-    else:
-        pred_vocab = predicate_vocabulary
-    logging.info('{} predicates in vocabulary'.format(len(pred_vocab)))
+    logging.info('{} predicates in vocabulary'.format(len(predicate_vocabulary)))
     logging.info('Retrieving predicates from db...')
     predicates_with_count = Predication.query_predicates_with_count(session=SessionExtended.get(),
                                                                     document_collection=document_collection)
@@ -182,7 +177,7 @@ def canonicalize_predication_table(word2vec_model, output_distances, predicate_v
     predicates = filter_predicate_list(predicates_with_count, min_predicate_threshold)
     logging.info('{} predicates obtained'.format(len(predicates)))
     logging.info('Matching predicates...')
-    best_matches = match_predicates(model, predicates, pred_vocab, output_distances)
+    best_matches = match_predicates(model, predicates, predicate_vocabulary, output_distances)
     logging.info('Canonicalizing predicates...')
     canonicalize_predicates(best_matches, min_distance_threshold, document_collection)
     logging.info('Finished')
@@ -193,6 +188,10 @@ def main():
     parser.add_argument("word2vec_model", help='word2vec file')
     parser.add_argument("output_distances", help='tsv export for distances')
     parser.add_argument('--relation_vocab', required=True, help='Path to a relation vocabulary (json file)')
+    parser.add_argument('--min_distance', required=False, help='Minimum distance in the vector space',
+                        default=0.4)
+    parser.add_argument('--min_predicate_threshold', required=False,
+                        help='Minimum number of occurrences for predicates', default=0.0001)
 
     args = parser.parse_args()
 
@@ -203,7 +202,9 @@ def main():
     relation_vocab = RelationVocabulary()
     relation_vocab.load_from_json(args.relation_vocab)
     canonicalize_predication_table(args.word2vec_model, args.output_distances,
-                                   predicate_vocabulary=relation_vocab.relation_dict)
+                                   predicate_vocabulary=relation_vocab.relation_dict,
+                                   min_distance_threshold=args.min_distance,
+                                   min_predicate_threshold=args.min_predicate_threshold)
 
 
 if __name__ == "__main__":
