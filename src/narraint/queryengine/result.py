@@ -145,7 +145,7 @@ class QueryDocumentResult(QueryResultBase):
         self.month = self.extract_month_from_journals(self.journals)
         self.authors = authors
         self.publication_year = publication_year
-        self.publication_year_int = int(self.publication_year) if publication_year not in ("", None, "None") else 0
+        self.publication_year_int = int(self.publication_year) if publication_year.isdigit() else 0
         self.var2substitution = var2substitution
         self.confidence = confidence
         self.position2provenance_ids = {k: list(v) for k, v in position2provenance_ids.items()}
