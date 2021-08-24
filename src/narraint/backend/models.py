@@ -104,18 +104,29 @@ class Predication(Extended, DatabaseTable):
         return "<Predication {}>".format(self.id)
 
     @staticmethod
-    def query_predication_count(session, predicate_canonicalized=None):
+    def iterate_predications(session, document_collection=None, bulk_query_cursor_count = 100000):
+        pred_query = session.query(Predication).filter(Predication.predicate_canonicalized != None)
+        if document_collection:
+            pred_query = pred_query.filter(Predication.document_collection == document_collection)
+        pred_query = pred_query.yield_per(bulk_query_cursor_count)
+        for res in pred_query:
+            yield res
+
+    @staticmethod
+    def query_predication_count(session, document_collection=None, predicate_canonicalized=None):
         """
         Counts the number of rows in Predicate
         :param session: session handle
+        :param document_collection: count only in document collection
         :param predicate_canonicalized: if given the predication is filtered by this predicate_canonicalized
         :return: the number of rows
         """
+        query = session.query(Predication)
+        if document_collection:
+            query = query.filter(Predication.document_collection == document_collection)
         if predicate_canonicalized:
-            return session.query(Predication).filter(Predication.predicate_canonicalized == predicate_canonicalized) \
-                .count()
-        else:
-            return session.query(Predication).count()
+            query = query.filter(Predication.predicate_canonicalized == predicate_canonicalized)
+        return query.count()
 
     @staticmethod
     def query_predicates_with_count(session, document_collection=None) -> List[Tuple[str, int]]:

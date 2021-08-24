@@ -4,6 +4,8 @@ import logging
 from datetime import datetime
 import random
 
+import csv
+
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
 from narrant.progress import print_progress_with_eta
@@ -12,15 +14,17 @@ from narrant.progress import print_progress_with_eta
 SPLIT_THRESHOLD_FOR_TEST_AND_VALID = 0.8
 
 
-def load_tuples_from_db():
+def load_predications_from_db():
     """
     Loads the facts from the database
     :return: a set o tuples
     """
     session = SessionExtended.get()
-    query = session.query(Predication.document_id, Predication.subject_str, Predication.predicate,
+    query = session.query(Predication.document_id,
+                          Predication.subject_str, Predication.subject_id, Predication.subject_str,
+                          Predication.predicate,
                           Predication.object_str, Predication.sentence_id,
-                          Predication.subject_id, Predication.subject_str, Predication.subject_type,
+                          Predication.subject_type,
                           Predication.object_id, Predication.object_str, Predication.object_type)
     logging.info("loading predication tuples from db...")
     rows = session.execute(query)
@@ -56,7 +60,7 @@ def export_to_cesi(output):
     :param output: output filename
     :return: None
     """
-    tuples_cached = load_tuples_from_db()
+    tuples_cached = load_predications_from_db()
     aggregation = aggregate_triples(tuples_cached)
 
     logging.info('exporting {} entries in CESI format to {}'.format(len(aggregation), output))
@@ -93,45 +97,20 @@ def export_to_cesi(output):
     logging.info('export finished')
 
 
-def export_to_tsv(output):
-    """
-    Exports the database tuples as a CSV
-    :param output: output filename
-    :return: None
-    """
-    tuples = load_tuples_from_db()
-    tuples_len = len(tuples)
-    logging.info('exporting {} entries in TSV format to {}'.format(tuples_len, output))
-    start_time = datetime.now()
-    with open(output, 'w') as f:
-        f.write('doc_id\tsubject_openie\tpredicate\tobject_openie\tsub_id\tsub_str\tsub_type\tobj_id\tobj_str'
-                '\tobject_type\tsentence')
-        for i, t in enumerate(tuples):
-            doc_id, subj, pred, obj, sent, sub_id, sub_ent, sub_type, obj_id, obj_ent, obj_type = t
-            f.write('\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(doc_id, subj, pred, obj, sub_id, sub_ent,
-                                                                          sub_type, obj_id, obj_ent, obj_type, sent))
-
-            print_progress_with_eta("exporting", i, tuples_len, start_time)
-    logging.info('export finished')
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("output", help='export file (if CESI _test and _valid will also be created)')
-    parser.add_argument("-f", "--format",  action='store', choices=["CESI", "TSV"],
-                        help='export format (supported: CESI | TSV)', required=True)
+
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    if args.format == 'CESI':
-        logging.info('exporting in CESI format...')
-        export_to_cesi(args.output)
-    elif args.format == 'TSV':
-        logging.info("exporting in TSV format...")
-        export_to_tsv(args.output)
+    logging.info('exporting in CESI format...')
+    export_to_cesi(args.output)
 
 
 if __name__ == "__main__":
