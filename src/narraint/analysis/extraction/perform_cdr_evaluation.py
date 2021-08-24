@@ -176,7 +176,7 @@ def main():
         logging.info('Canonicalizing output...')
         canonicalize_predication_table(WORD2VEC_MODEL, CDR2015_canonicalizing_distances,
                                        document_collection=CDR2015_COLLECTION,
-                                       predicate_vocabulary=create_predicate_vocab())
+                                       relation_vocabulary=create_predicate_vocab())
         check_type_constraints()
 
     logging.info('=' * 60)

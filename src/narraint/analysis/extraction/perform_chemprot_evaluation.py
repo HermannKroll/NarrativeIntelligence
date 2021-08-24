@@ -247,7 +247,7 @@ def main():
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
         canonicalize_predication_table(WORD2VEC_MODEL, CP_canonicalizing_distances,
-                                       predicate_vocabulary=CHEMPROT_VOCABULARY,
+                                       relation_vocabulary=CHEMPROT_VOCABULARY,
                                        document_collection=CHEMPROT_COLLECTION,
                                        min_predicate_threshold=0)
         # clean_extractions_in_database()
