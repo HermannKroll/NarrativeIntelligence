@@ -14,11 +14,10 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
     """
     Exports the database tuples as a CSV
     :param output_file: output filename
-    :param document_collection:
-    :param export_metadata:
+    :param document_collection: only export statements in this document collection (optional)
+    :param export_metadata: if true metadata will also be extracted
     :return: None
     """
-
     session = SessionExtended.get()
     logging.info('Counting predications...')
     count = Predication.query_predication_count(session, predicate_canonicalized=None,
