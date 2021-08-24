@@ -11,34 +11,34 @@ class RelationTypeConstraintChecking(unittest.TestCase):
 
     def setUp(self) -> None:
         session = SessionExtended.get()
-        documents = [dict(id=1, collection="Test", title="ABC", abstract=""),
-                     dict(id=2, collection="Test", title="DEF", abstract="")]
+        documents = [dict(id=1, collection="Test_Type_Checking", title="ABC", abstract=""),
+                     dict(id=2, collection="Test_Type_Checking", title="DEF", abstract="")]
         Document.bulk_insert_values_into_table(session, documents)
 
-        sentences = [dict(id=1, document_id=1, document_collection="Test", text="Hello", md5hash="1"),
-                     dict(id=2, document_id=1, document_collection="Test", text="World", md5hash="2")]
+        sentences = [dict(id=1, document_id=1, document_collection="Test_Type_Checking", text="Hello", md5hash="1"),
+                     dict(id=2, document_id=1, document_collection="Test_Type_Checking", text="World", md5hash="2")]
         Sentence.bulk_insert_values_into_table(session, sentences)
 
         predications = [dict(id=1,
-                             document_id=1, document_collection="Test",
+                             document_id=1, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Drug", subject_str="",
                              predicate="treats", predicate_canonicalized="treats",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=1, extraction_type="PathIE"),
                         dict(id=2,
-                             document_id=1, document_collection="Test",
+                             document_id=1, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Disease", subject_str="",
                              predicate="treats", predicate_canonicalized="treats",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=1, extraction_type="PathIE"),
                         dict(id=3,
-                             document_id=2, document_collection="Test",
+                             document_id=2, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Disease", subject_str="",
                              predicate="induces", predicate_canonicalized="induces",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=2, extraction_type="PathIE"),
                         dict(id=4,
-                             document_id=2, document_collection="Test",
+                             document_id=2, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Gene", subject_str="",
                              predicate="induces", predicate_canonicalized="induces",
                              object_id="B", object_type="Gene", object_str="",
@@ -50,7 +50,7 @@ class RelationTypeConstraintChecking(unittest.TestCase):
         store = RelationTypeConstraintStore()
         store.load_from_json(util.get_test_resource_filepath('cleaning/pharm_relation_type_constraints.json'))
 
-        delete_predications_hurting_type_constraints(store, "Test")
+        delete_predications_hurting_type_constraints(store, "Test_Type_Checking")
 
         session = SessionExtended.get()
         self.assertIsNotNone(session.query(Predication).filter(Predication.id == 1).first())
