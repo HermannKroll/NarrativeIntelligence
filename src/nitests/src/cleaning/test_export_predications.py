@@ -1,8 +1,10 @@
 import unittest
 
+import rdflib
+
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Sentence, Predication
-from narraint.extraction.export_predications import export_predications_as_tsv
+from narraint.extraction.export_predications import export_predications_as_tsv, export_predications_as_rdf
 from nitests import util
 
 
@@ -90,3 +92,16 @@ class ExportPredicationsTest(unittest.TestCase):
                       tuples)
         self.assertIn(('2', 'Test_Export', 'C', 'Gene', '', 'induce', 'induces', 'D', 'Gene', '', '2', 'PathIE'),
                       tuples)
+
+    def test_export_predications_as_rdf(self):
+        output_file = util.tmp_rel_path("export_predications.rdf")
+        export_predications_as_rdf(output_file, document_collection="Test_Export")
+
+        g = rdflib.Graph()
+        g.parse(output_file, format="turtle")
+        tuples = set([(s.split('/')[-1], p.split('/')[-1], o.split('/')[-1]) for s, p, o in g])
+        self.assertEqual(4, len(tuples))
+        self.assertIn(('A', 'treats', 'B'), tuples)
+        self.assertIn(('C', 'treats', 'B'), tuples)
+        self.assertIn(('A', 'induces', 'B'), tuples)
+        self.assertIn(('C', 'induces', 'D'), tuples)
