@@ -19,25 +19,25 @@ class RelationTypeConstraintChecking(unittest.TestCase):
                      dict(id=2, document_id=1, document_collection="Test_Type_Checking", text="World", md5hash="2")]
         Sentence.bulk_insert_values_into_table(session, sentences)
 
-        predications = [dict(id=1,
+        predications = [dict(id=31,
                              document_id=1, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Drug", subject_str="",
                              predicate="treats", predicate_canonicalized="treats",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=1, extraction_type="PathIE"),
-                        dict(id=2,
+                        dict(id=32,
                              document_id=1, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Disease", subject_str="",
                              predicate="treats", predicate_canonicalized="treats",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=1, extraction_type="PathIE"),
-                        dict(id=3,
+                        dict(id=33,
                              document_id=2, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Disease", subject_str="",
                              predicate="induces", predicate_canonicalized="induces",
                              object_id="B", object_type="Disease", object_str="",
                              sentence_id=2, extraction_type="PathIE"),
-                        dict(id=4,
+                        dict(id=34,
                              document_id=2, document_collection="Test_Type_Checking",
                              subject_id="A", subject_type="Gene", subject_str="",
                              predicate="induces", predicate_canonicalized="induces",
@@ -53,7 +53,7 @@ class RelationTypeConstraintChecking(unittest.TestCase):
         delete_predications_hurting_type_constraints(store, "Test_Type_Checking")
 
         session = SessionExtended.get()
-        self.assertIsNotNone(session.query(Predication).filter(Predication.id == 1).first())
-        self.assertIsNone(session.query(Predication).filter(Predication.id == 2).first())
-        self.assertIsNotNone(session.query(Predication).filter(Predication.id == 3).first())
-        self.assertIsNone(session.query(Predication).filter(Predication.id == 4).first())
+        self.assertIsNotNone(session.query(Predication).filter(Predication.id == 31).first())
+        self.assertIsNone(session.query(Predication).filter(Predication.id == 32).first())
+        self.assertIsNotNone(session.query(Predication).filter(Predication.id == 33).first())
+        self.assertIsNone(session.query(Predication).filter(Predication.id == 34).first())
