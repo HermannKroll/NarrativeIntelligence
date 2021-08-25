@@ -271,7 +271,7 @@ def check_type_constraints():
         ))
 
     logging.info(f'Insert {len(predication_values)} reordered predications to database')
-    insert_predications_into_db(predication_values, [])
+    Predication.bulk_insert_values_into_table(session, predication_values)
     logging.info(f'Deleting {len(preds_to_reorder)} old and wrongly ordered predications')
     subquery = session.query(PredicationToDelete.predication_id).subquery()
     stmt = delete(Predication).where(Predication.id.in_(subquery))
