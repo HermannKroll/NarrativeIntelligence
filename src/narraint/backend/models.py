@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Tuple
 
 from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
-    BigInteger, func, insert
+    BigInteger, func, insert, Integer
 
 import narrant
 from narrant.backend.models import Base, DatabaseTable
@@ -74,14 +74,10 @@ class Predication(Extended, DatabaseTable):
     __table_args__ = (
         ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
         ForeignKeyConstraint(('sentence_id',), ('sentence.id',)),
-        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
-        # TODO: This index will consume much disk space around 1.2 times the table size
-        #    UniqueConstraint('document_id', 'document_collection', 'subject_id', 'subject_type',
-        #                    'predicate', 'object_id', 'object_type', 'extraction_type', 'sentence_id',
-        #                   sqlite_on_conflict='IGNORE'),
+        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE')
     )
 
-    id = Column(BigInteger, autoincrement=True)
+    id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
     subject_id = Column(String, nullable=False)
@@ -192,10 +188,8 @@ class Predication(Extended, DatabaseTable):
 
 class PredicationDenorm(Extended, DatabaseTable):
     __tablename__ = "predication_denorm"
-    __table_args__ = (
-        PrimaryKeyConstraint('id', sqlite_on_conflict='IGNORE'),
-    )
-    id = Column(BigInteger, nullable=False, autoincrement=True)
+
+    id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
     subject_id = Column(String, nullable=False, index=True)
     subject_type = Column(String, nullable=False, index=True)
     relation = Column(String, nullable=False, index=True)
