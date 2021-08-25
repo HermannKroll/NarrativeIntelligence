@@ -13,7 +13,7 @@ from narraint.backend.database import SessionExtended
 from narrant.backend.export import export
 from narraint.backend.models import DocProcessedByIE, Document
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
-from narraint.extraction.pathie.load_extractions import load_pathie_extractions
+from narraint.extraction.pathie.load_pathie_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
