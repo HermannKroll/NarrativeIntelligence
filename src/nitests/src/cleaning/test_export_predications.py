@@ -84,13 +84,13 @@ class ExportPredicationsTest(unittest.TestCase):
                        "predicate", "relation",
                        "object_id", "object_type", "object_str",
                        "sentence_id", "extraction_type"), tuples)
-        self.assertIn(('1', 'Test_Export', 'A', 'Drug', 'ab', 'treat', 'treats', 'B', 'Disease', 'bc', '1', 'PathIE'),
+        self.assertIn(('1', 'Test_Export', 'A', 'Drug', 'ab', 'treat', 'treats', 'B', 'Disease', 'bc', 'Hello', 'PathIE'),
                       tuples)
-        self.assertIn(('1', 'Test_Export', 'C', 'Disease', 'c a', 'treat', 'treats', 'B', 'Disease', 'b a', '1', 'PathIE'),
+        self.assertIn(('1', 'Test_Export', 'C', 'Disease', 'c a', 'treat', 'treats', 'B', 'Disease', 'b a', 'Hello', 'PathIE'),
                       tuples)
-        self.assertIn(('2', 'Test_Export', 'A', 'Disease', 'a', 'induce', 'induces', 'B', 'Disease', 'b', '2', 'PathIE'),
+        self.assertIn(('2', 'Test_Export', 'A', 'Disease', 'a', 'induce', 'induces', 'B', 'Disease', 'b', 'World. Nice', 'PathIE'),
                       tuples)
-        self.assertIn(('2', 'Test_Export', 'C', 'Gene', '', 'induce', 'induces', 'D', 'Gene', '', '2', 'PathIE'),
+        self.assertIn(('2', 'Test_Export', 'C', 'Gene', '', 'induce', 'induces', 'D', 'Gene', '', 'World. Nice', 'PathIE'),
                       tuples)
 
     def test_export_predications_as_rdf(self):

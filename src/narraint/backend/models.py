@@ -115,6 +115,17 @@ class Predication(Extended, DatabaseTable):
             yield res
 
     @staticmethod
+    def iterate_predications_joined_sentences(session, document_collection=None,
+                             bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
+        pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id)\
+            .filter(Predication.predicate_canonicalized != None)
+        if document_collection:
+            pred_query = pred_query.filter(Predication.document_collection == document_collection)
+        pred_query = pred_query.yield_per(bulk_query_cursor_count)
+        for res in pred_query:
+            yield res
+
+    @staticmethod
     def query_predication_count(session, document_collection=None, predicate_canonicalized=None):
         """
         Counts the number of rows in Predicate

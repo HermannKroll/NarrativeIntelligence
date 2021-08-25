@@ -81,13 +81,13 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
                              "predicate", "relation",
                              "object_id", "object_type", "object_str",
                              "sentence_id", "extraction_type"])
-            for idx, pred in enumerate(Predication.iterate_predications(session,
+            for idx, pred in enumerate(Predication.iterate_predications_joined_sentences(session,
                                                                         document_collection=document_collection)):
-                writer.writerow([pred.document_id, pred.document_collection,
-                                 pred.subject_id, pred.subject_type, pred.subject_str,
-                                 pred.predicate, pred.predicate_canonicalized,
-                                 pred.object_id, pred.object_type, pred.object_str,
-                                 pred.sentence_id, pred.extraction_type])
+                writer.writerow([pred.Predication.document_id, pred.Predication.document_collection,
+                                 pred.Predication.subject_id, pred.Predication.subject_type, pred.Predication.subject_str,
+                                 pred.Predication.predicate, pred.Predication.predicate_canonicalized,
+                                 pred.Predication.object_id, pred.Predication.object_type, pred.Predication.object_str,
+                                 pred.Sentence.text, pred.Predication.extraction_type])
                 print_progress_with_eta("exporting", idx, count, start_time)
         else:
             writer.writerow(["subject_id", "relation", "object_id"])
