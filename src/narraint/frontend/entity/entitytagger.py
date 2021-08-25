@@ -1,25 +1,23 @@
 import csv
+import gzip
 import logging
+import pickle
 import string
 from collections import defaultdict
-
-import pickle
-
-import gzip
 from datetime import datetime
 from itertools import islice
 
 import datrie
 
-from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
+from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
 from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
-from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, CHEMICAL
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
+from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, CHEMICAL
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugVocabulary, \
     ChemicalVocabulary
 from narrant.progress import print_progress_with_eta

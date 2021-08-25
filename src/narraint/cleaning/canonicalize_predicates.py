@@ -1,12 +1,12 @@
 import argparse
 import logging
 from collections import defaultdict
+from datetime import datetime
 from typing import List, Tuple
 
 import fasttext
-from datetime import datetime
-from sqlalchemy import update, and_
 from scipy.spatial.distance import cosine
+from sqlalchemy import update, and_
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
@@ -221,7 +221,8 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
     session.commit()
 
 
-def canonicalize_predication_table(relation_vocabulary: RelationVocabulary, document_collection=None, word2vec_model_file=None,
+def canonicalize_predication_table(relation_vocabulary: RelationVocabulary, document_collection=None,
+                                   word2vec_model_file=None,
                                    output_distances=None, min_distance_threshold=0.4, min_predicate_threshold=0.0001):
     """
     Canonicalizes the predicates against the relation vocabulary and updates the database

@@ -1,5 +1,4 @@
 import logging
-import random
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import DocProcessedByOpenIE
@@ -7,8 +6,10 @@ from narraint.pubmedutils import pubmed_crawl_pmids
 
 document_collections = ["PubMed"]
 keyword_queries = ["Simvastatin Cholesterol"]
-#document_collections = ["PubMed", "PMC"]
-#keyword_queries = ["Simvastatin Rhabdomyolysis", "Simvastatin Cholesterol", "Metformin Diabetes Mellitus",
+
+
+# document_collections = ["PubMed", "PMC"]
+# keyword_queries = ["Simvastatin Rhabdomyolysis", "Simvastatin Cholesterol", "Metformin Diabetes Mellitus",
 #                   "Metformin MTOR"]
 
 
@@ -28,7 +29,6 @@ def apply_keyword_query(query, document_collection):
     return set([int(doc_id) for doc_id in pubmed_ids])
 
 
-
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
@@ -46,9 +46,9 @@ def main():
             with open("ids.txt", "wt") as f:
                 for doc_id in pubmed_doc_ids_in_db:
                     f.write(str(doc_id) + '\n')
-            #logging.info('{} documents have been processed by OpenIE and are in database'.format(len(pubmed_doc_ids_in_db)))
-            #pubmed_doc_ids_in_db_sample = random.sample(pubmed_doc_ids_in_db, 25)
-            #logging.info('The following ids were sampled: {}'.format(pubmed_doc_ids_in_db_sample))
+            # logging.info('{} documents have been processed by OpenIE and are in database'.format(len(pubmed_doc_ids_in_db)))
+            # pubmed_doc_ids_in_db_sample = random.sample(pubmed_doc_ids_in_db, 25)
+            # logging.info('The following ids were sampled: {}'.format(pubmed_doc_ids_in_db_sample))
 
 
 if __name__ == "__main__":

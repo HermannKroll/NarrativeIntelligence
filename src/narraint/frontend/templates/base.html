@@ -33,7 +33,7 @@
                 <li class="nav-item" id="nav_item_stats">
                     <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
                 </li>
-                   <li class="nav-item" id="nav_item_help">
+                <li class="nav-item" id="nav_item_help">
                     <a class="nav-link" href="{% url 'help' %}">Help</a>
                 </li>
                 <li class="nav-item">
@@ -46,11 +46,13 @@
     </div>
 </nav>
 
-<div class="fixed-bottom p-4 toast bg-dark text-white w-100 mw-100" role="alert" data-autohide="false" id="cookie_toast"  style="display:none;">
+<div class="fixed-bottom p-4 toast bg-dark text-white w-100 mw-100" role="alert" data-autohide="false" id="cookie_toast"
+     style="display:none;">
     <div class="toast-body p-4 d-flex flex-column">
         <h4>Cookie Warning</h4>
         <p>
-        This website will generate a random user id to store your ratings on the server. The user id is just a random number and is not associated with personal data.
+            This website will generate a random user id to store your ratings on the server. The user id is just a
+            random number and is not associated with personal data.
         </p>
         <div class="ml-auto">
             <button type="button" class="btn btn-outline-light mr-3" id="cookiebtnDeny">
@@ -64,8 +66,8 @@
 </div>
 
 
-
-<nav class="navbar fixed-bottom navbar-light"  style="display:none;" style="background-color: #e3f2fd;" id="nav_bar_bottom">
+<nav class="navbar fixed-bottom navbar-light" style="display:none;" style="background-color: #e3f2fd;"
+     id="nav_bar_bottom">
     <a class="navbar-brand mx-auto">
         <div class="alert alert-info" id="info_for_user" style="display:none;" role="alert">
             Thank you for your Feedback!
@@ -87,8 +89,11 @@
         crossorigin="anonymous" type="text/javascript"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+        crossorigin="anonymous"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script>
@@ -96,12 +101,13 @@
     let info_element = $('#info_for_user');
 
     nav_bar_bottom.hide();
-    function showInfoAtBottom(text){
+
+    function showInfoAtBottom(text) {
         nav_bar_bottom.show();
         info_element.text(text);
         info_element.fadeIn();
 
-        setTimeout(function (){
+        setTimeout(function () {
             info_element.fadeOut();
             nav_bar_bottom.fadeOut();
         }, 1500);

@@ -27,7 +27,6 @@ class RelationVocabulary:
                                      f'(found * in {syn} for relation {relation}')
 
 
-
 def create_predicate_vocab():
     return dict(administered=['receiv*', 'administrat*'],
                 associated=['associat*', 'contain', 'produce', 'convert', 'yield', 'isolate', 'generate', 'synthesize',
@@ -35,10 +34,11 @@ def create_predicate_vocab():
                             'involve', 'isa', 'same as', 'coexists with', 'process', 'part of', 'associate',
                             'play', 'limit', 'show', 'present', 'exhibit', 'find', 'form'],
                 compares=['compar*', 'correlate*', 'correspond*'],
-                induces=['stimulat*', 'increas*', 'potentiat*', 'enhanc*' , 'activat*', 'lead', 'cause', 'side effect*',
+                induces=['stimulat*', 'increas*', 'potentiat*', 'enhanc*', 'activat*', 'lead', 'cause', 'side effect*',
                          'adverse', 'complication*', 'drug toxicit*', 'drug injur*', 'upregulat*', 'up regulat*',
                          'up-regulat*'],
-                decreases=['reduc*', 'lower*', 'attenuat*', 'mediate', 'downregulat*', 'down-regulat*', 'down regulat*'],
+                decreases=['reduc*', 'lower*', 'attenuat*', 'mediate', 'downregulat*', 'down-regulat*',
+                           'down regulat*'],
                 interacts=['bind', 'interact*', 'target*', 'regulat*', 'block*'],
                 metabolises=["metabol*"],
                 inhibits=['disrupt*', 'suppres*', 'inhibit*', 'disturb*'],

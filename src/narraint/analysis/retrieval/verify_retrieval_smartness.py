@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from datetime import datetime
 
 from narraint.frontend.entity.query_translation import QueryTranslation

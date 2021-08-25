@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from narrant.preprocessing.tagging.metadictagger import MetaDicTaggerFactory
 import narrant.preprocessing.enttypes as et
 import nitests.util as util
+from narrant.preprocessing.tagging.metadictagger import MetaDicTaggerFactory
 from narrant.pubtator.document import parse_tag_list, TaggedEntity
 from narrant.pubtator.extract import read_tagged_documents
 
@@ -17,7 +17,6 @@ class TestMetadictagger(unittest.TestCase):
         self.assertIn("MESH:D007267", metatag._vocabs[et.DOSAGE_FORM]["injection"])
         self.assertIn("Agave", metatag._vocabs[et.PLANT_FAMILY]["agave"])
         self.assertIn("CHEMBL412873", metatag._vocabs[et.DRUG]["sparteine"])
-
 
     def test_tag(self):
         in_1 = util.get_test_resource_filepath("infiles/test_metadictagger/4297.txt")
@@ -48,8 +47,10 @@ class TestMetadictagger(unittest.TestCase):
         metatag = TestMetadictagger.make_metatag()
         out_file = metatag.tag_doc([d for d in read_tagged_documents(in_file)][0])
         out_file.clean_tags()
-        self.assertIn(TaggedEntity(None, 32926513, 61, 78, "hydrogen peroxide", "Excipient", "CHEMBL71595"), out_file.tags)
-        self.assertIn(TaggedEntity(None, 32926513, 91, 108, "hydrogen peroxide", "Excipient", "CHEMBL71595"), out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 61, 78, "hydrogen peroxide", "Excipient", "CHEMBL71595"),
+                      out_file.tags)
+        self.assertIn(TaggedEntity(None, 32926513, 91, 108, "hydrogen peroxide", "Excipient", "CHEMBL71595"),
+                      out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 109, 117, "h 2 o 2", "Excipient", "CHEMBL71595"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 344, 352, "h 2 o 2", "Excipient", "CHEMBL71595"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926513, 461, 469, "h 2 o 2", "Excipient", "CHEMBL71595"), out_file.tags)

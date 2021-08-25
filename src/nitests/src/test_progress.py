@@ -1,5 +1,5 @@
 import unittest
-import narrant.progress
+
 
 class TestProgress(unittest.TestCase):
     def test_progress(self):

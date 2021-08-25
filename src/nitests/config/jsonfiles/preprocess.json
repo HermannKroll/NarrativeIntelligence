@@ -14,14 +14,14 @@
   },
   "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
   "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2",
-   "dict": {
+  "dict": {
     "max_words": 5,
     "check_abbreviation": "true",
     "custom_abbreviations": "true",
     "min_full_tag_len": 5
   },
   "drug": {
-    "check_products" : 0,
+    "check_products": 0,
     "max_per_product": 2,
     "min_name_length": 3,
     "ignore_excipient_terms": 1

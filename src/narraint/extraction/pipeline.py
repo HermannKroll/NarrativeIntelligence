@@ -1,23 +1,24 @@
 import argparse
 import json
+import logging
 import os
+import shutil
 import tempfile
 from datetime import datetime
-import logging
-import shutil
+
 from spacy.lang.en import English
 
-from narraint.cleaning.relation_vocabulary import RelationVocabulary
-from narrant.preprocessing import enttypes
 from narraint.backend.database import SessionExtended
-from narrant.backend.export import export
 from narraint.backend.models import DocProcessedByIE, Document
+from narraint.cleaning.relation_vocabulary import RelationVocabulary
+from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.loading.load_pathie_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
-from narraint.config import NLP_CONFIG
+from narrant.backend.export import export
+from narrant.preprocessing import enttypes
 from narrant.util.helpers import chunks
 
 DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
@@ -78,7 +79,7 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
 
 def process_documents_ids_in_pipeline(document_ids: [int], document_collection, extraction_type, workers=1,
                                       corenlp_config=NLP_CONFIG, check_document_ids=True,
-                                      relation_vocab: RelationVocabulary=None):
+                                      relation_vocab: RelationVocabulary = None):
     """
     Performs fact extraction for the given documents with the selected extraction type
     The document texts and tags will be exported automatically

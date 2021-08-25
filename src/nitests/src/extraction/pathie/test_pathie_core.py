@@ -66,7 +66,6 @@ class TestPathIECore(TestCase):
                                     PathIEDependency(4, 3, "advmod"),
                                     PathIEDependency(4, 7, "obl")]
 
-
         self.test_5_sentence = "This may look like a test"
         self.test_5_tokens = [PathIEToken("This", "this", "", " ", 1, 0, 4, "DT", ""),
                               PathIEToken("may", "may", " ", " ", 2, 5, 8, "MD", "may"),

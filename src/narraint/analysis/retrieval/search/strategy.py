@@ -1,16 +1,16 @@
-import os
 import math
+import os
 from itertools import product
 
 from nltk.stem.porter import *
 
 from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
+from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
+from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
-from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
 from narrant.pubtator.document import TaggedDocument
-from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 
 
 def compute_f_measure(precision, recall):
@@ -105,7 +105,7 @@ class SentenceEntityCooccurrence(TextSearchStrategy):
         self.name = "SentenceEntityCooccurrence"
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
-    float, float, float):
+            float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
         document_hits = set()
         for doc_id in ids_sample:
@@ -136,7 +136,7 @@ class SentenceFactCooccurrence(TextSearchStrategy):
         self.name = "SentenceFactCooccurrence"
 
     def perform_search(self, query: str, document_collection: str, ids_sample: {int}, ids_correct: {int}) -> (
-    float, float, float):
+            float, float, float):
         graph_query, _ = convert_query_text_to_fact_patterns(query)
         document_hits = set()
         for doc_id in ids_sample:

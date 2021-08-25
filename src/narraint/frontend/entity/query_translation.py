@@ -130,7 +130,7 @@ class QueryTranslation:
                 o = self.convert_text_to_entity(o_t)
             except ValueError as e:
                 self.logger.error('error unknown object: {}'.format(e))
-                return None,  '{} (object error)\n'.format(e)
+                return None, '{} (object error)\n'.format(e)
 
             p = p_t.lower()
             if p not in self.allowed_predicates:

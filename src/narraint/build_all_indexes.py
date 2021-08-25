@@ -1,9 +1,9 @@
-import logging
 import json
+import logging
 
+from narraint.config import BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narraint.config import BACKEND_CONFIG
 
 
 def main():

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from narrant.preprocessing.enttypes import DISEASE, METHOD, DOSAGE_FORM
 from narrant.entity.meshontology import MeSHOntology
+from narrant.preprocessing.enttypes import DISEASE, METHOD, DOSAGE_FORM
 
 
 class MeSHOntologyTestCase(TestCase):

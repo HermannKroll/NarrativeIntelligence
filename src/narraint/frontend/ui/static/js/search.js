@@ -243,10 +243,10 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
-document.getElementById("select_sorting_year").addEventListener("change", function() {
+document.getElementById("select_sorting_year").addEventListener("change", function () {
     document.getElementById("btn_search").click()
 });
-document.getElementById("select_sorting_freq").addEventListener("change", function() {
+document.getElementById("select_sorting_freq").addEventListener("change", function () {
     document.getElementById("btn_search").click()
 });
 
@@ -459,12 +459,12 @@ const search = (event) => {
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
-        /*
-        if (document.getElementById('radio_pmc').checked) {
-            data_source = "PMC"
-        } else if(document.getElementById('radio_pubmed').checked) {
-            data_source = "PubMed"
-        } */
+    /*
+    if (document.getElementById('radio_pmc').checked) {
+        data_source = "PMC"
+    } else if(document.getElementById('radio_pubmed').checked) {
+        data_source = "PubMed"
+    } */
 
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;

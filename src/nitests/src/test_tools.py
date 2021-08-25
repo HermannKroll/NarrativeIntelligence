@@ -1,4 +1,5 @@
 import unittest
+
 import narrant.tools as tl
 from nitests.util import get_test_resource_filepath
 

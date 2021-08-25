@@ -1,10 +1,10 @@
 from unittest import TestCase
 
+from narraint.queryengine.optimizer import QueryOptimizer
+from narraint.queryengine.query import GraphQuery, FactPattern
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, MESH_ONTOLOGY
 from narrant.entity.entity import Entity
 from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE
-from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.optimizer import QueryOptimizer
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, MESH_ONTOLOGY
 
 
 class QueryOptimizerTestCase(TestCase):
@@ -197,7 +197,6 @@ class QueryOptimizerTestCase(TestCase):
         optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
         self.assertIsNone(optimized_fp)
 
-
         # should not flip this
         fp = FactPattern([Entity('B', DRUG)], "associated", [Entity("A", GENE)])
         optimized_fp = QueryOptimizer.optimize_symmetric_predicate_fp(fp)
@@ -229,9 +228,10 @@ class QueryOptimizerTestCase(TestCase):
         self.assertEqual("cyp3a4", next(iter(optimized_fp.objects)).entity_id)
 
     def test_optimize_query_bug_variable_OR(self):
-        q = GraphQuery([FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
-                        FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
-                                    [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
+        q = GraphQuery(
+            [FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
+             FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
+                         [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
         optimized_q = QueryOptimizer.optimize_query(q, and_mod=False)
         optimized_fp = optimized_q.fact_patterns[0]
         self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)
@@ -242,9 +242,10 @@ class QueryOptimizerTestCase(TestCase):
         self.assertEqual("D08.811.682.690.708.170.495.500", next(iter(optimized_fp.objects)).entity_id)
 
     def test_optimize_query_bug_variable_AND(self):
-        q = GraphQuery([FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
-                        FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
-                                    [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
+        q = GraphQuery(
+            [FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts", [Entity('cyp3a4', GENE)]),
+             FactPattern([Entity('?drug(Drug)', ENTITY_TYPE_VARIABLE)], "interacts",
+                         [Entity('D08.811.682.690.708.170.495.500', MESH_ONTOLOGY)])])
         optimized_q = QueryOptimizer.optimize_query(q, and_mod=True)
         optimized_fp = optimized_q.fact_patterns[0]
         self.assertEqual("?drug(Drug)", next(iter(optimized_fp.subjects)).entity_id)

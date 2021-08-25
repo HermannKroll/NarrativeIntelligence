@@ -92,6 +92,7 @@ class VocabularyTest(unittest.TestCase):
 
     def test_expand_vocabulary_term(self):
         terms = {"foo-bar-test", "bar foo test", "color", "neighbour", "party", "mars", "more"}
-        check = terms | {"foo bar test", "foobartest", "bar-foo-test", "barfootest", "colour", "neighbor", "mar", "mor", "colors", "colore", "marss"}
+        check = terms | {"foo bar test", "foobartest", "bar-foo-test", "barfootest", "colour", "neighbor", "mar", "mor",
+                         "colors", "colore", "marss"}
         exp_terms = {te for t in terms for te in expand_vocabulary_term(t)}
         self.assertTrue(check <= exp_terms)

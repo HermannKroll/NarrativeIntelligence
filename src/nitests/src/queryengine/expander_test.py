@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE, CHEMICAL
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.query import FactPattern, GraphQuery
+from narrant.entity.entity import Entity
+from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE, CHEMICAL
 
 
 class QueryExpanderTestCase(TestCase):
@@ -63,4 +63,3 @@ class QueryExpanderTestCase(TestCase):
         self.assertEqual("Metformin", next(iter(queries_expanded[0].fact_patterns[0].subjects)).entity_id)
         self.assertEqual("inhibits", queries_expanded[0].fact_patterns[0].predicate)
         self.assertEqual("mtor", next(iter(queries_expanded[0].fact_patterns[0].objects)).entity_id)
-

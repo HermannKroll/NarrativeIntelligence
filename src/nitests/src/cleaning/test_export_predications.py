@@ -84,14 +84,18 @@ class ExportPredicationsTest(unittest.TestCase):
                        "predicate", "relation",
                        "object_id", "object_type", "object_str",
                        "sentence_id", "extraction_type"), tuples)
-        self.assertIn(('1', 'Test_Export', 'A', 'Drug', 'ab', 'treat', 'treats', 'B', 'Disease', 'bc', 'Hello', 'PathIE'),
+        self.assertIn(
+            ('1', 'Test_Export', 'A', 'Drug', 'ab', 'treat', 'treats', 'B', 'Disease', 'bc', 'Hello', 'PathIE'),
+            tuples)
+        self.assertIn(
+            ('1', 'Test_Export', 'C', 'Disease', 'c a', 'treat', 'treats', 'B', 'Disease', 'b a', 'Hello', 'PathIE'),
+            tuples)
+        self.assertIn(('2', 'Test_Export', 'A', 'Disease', 'a', 'induce', 'induces', 'B', 'Disease', 'b', 'World. Nice',
+                       'PathIE'),
                       tuples)
-        self.assertIn(('1', 'Test_Export', 'C', 'Disease', 'c a', 'treat', 'treats', 'B', 'Disease', 'b a', 'Hello', 'PathIE'),
-                      tuples)
-        self.assertIn(('2', 'Test_Export', 'A', 'Disease', 'a', 'induce', 'induces', 'B', 'Disease', 'b', 'World. Nice', 'PathIE'),
-                      tuples)
-        self.assertIn(('2', 'Test_Export', 'C', 'Gene', '', 'induce', 'induces', 'D', 'Gene', '', 'World. Nice', 'PathIE'),
-                      tuples)
+        self.assertIn(
+            ('2', 'Test_Export', 'C', 'Gene', '', 'induce', 'induces', 'D', 'Gene', '', 'World. Nice', 'PathIE'),
+            tuples)
 
     def test_export_predications_as_rdf(self):
         output_file = util.tmp_rel_path("export_predications.ttl")
@@ -113,7 +117,7 @@ class ExportPredicationsTest(unittest.TestCase):
         g = rdflib.Graph()
         g.parse(output_file, format="turtle")
         tuples = set([(s.split('/')[-1], p.split('/')[-1], o.split('/')[-1]) for s, p, o in g])
-        self.assertEqual(4*12+2, len(tuples))
+        self.assertEqual(4 * 12 + 2, len(tuples))
 
         self.assertIn(('sentence_id_11', 'text', 'Hello'), tuples)
         self.assertIn(('sentence_id_12', 'text', 'World. Nice'), tuples)
@@ -168,4 +172,3 @@ class ExportPredicationsTest(unittest.TestCase):
         self.assertIn(('statement_14', 'object_str', rdflib.term.Literal('')), tuples)
         self.assertIn(('statement_14', 'sentence_id', 'sentence_id_12'), tuples)
         self.assertIn(('statement_14', 'extraction_type', 'PathIE'), tuples)
-

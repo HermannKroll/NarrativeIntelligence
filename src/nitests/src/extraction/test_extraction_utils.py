@@ -1,8 +1,9 @@
 from unittest import TestCase
 
-from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
-from nitests.util import get_test_resource_filepath, make_test_tempdir
 from spacy.lang.en import English
+
+from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
+from nitests.util import get_test_resource_filepath
 
 
 class ExtractionUtilsTestCase(TestCase):
@@ -101,6 +102,3 @@ class ExtractionUtilsTestCase(TestCase):
             for tag in doc2tags[doc_id]:
                 t_id, t_text, t_start, t_end = tag.ent_id, tag.text, tag.start, tag.end
                 self.assertEqual(t_text, new_text[t_start:t_end])
-
-
-

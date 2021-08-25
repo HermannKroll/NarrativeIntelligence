@@ -7,13 +7,13 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.frontend.entity.query_translation import QueryTranslation
-from narrant.entity.entity import Entity
 from narraint.extraction.versions import PATHIE_EXTRACTION
-from narrant.entity.entityresolver import EntityResolver
-from narrant.progress import print_progress_with_eta
+from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
+from narrant.entity.entity import Entity
+from narrant.entity.entityresolver import EntityResolver
+from narrant.progress import print_progress_with_eta
 
 RANDOM_FACTS = 1000000
 QUERIES_WITH_ONE_PRED = 10000
@@ -39,14 +39,16 @@ class PerformanceQueryEngine:
         for f in facts:
             if f[0].startswith('MESH'):
                 try:
-                    subjects = self.translation.entity_tagger.tag_entity(self.resolver.get_name_for_var_ent_id(f[0], f[1]))
+                    subjects = self.translation.entity_tagger.tag_entity(
+                        self.resolver.get_name_for_var_ent_id(f[0], f[1]))
                 except:
                     subjects = [Entity(f[0], f[1])]
             else:
                 subjects = [Entity(f[0], f[1])]
             if f[3].startswith('MESH'):
                 try:
-                    objects = self.translation.entity_tagger.tag_entity(self.resolver.get_name_for_var_ent_id(f[3], f[4]))
+                    objects = self.translation.entity_tagger.tag_entity(
+                        self.resolver.get_name_for_var_ent_id(f[3], f[4]))
                 except:
                     objects = [Entity(f[3], f[4])]
             else:
@@ -63,7 +65,6 @@ class PerformanceQueryEngine:
     def query_with_graph_query(self, graph_query: GraphQuery):
         if len(graph_query.fact_patterns) == 0:
             raise ValueError('graph query must contain at least one fact')
-
 
         time_before_query = datetime.now()
         results, limit_hit = QueryEngine.process_query_with_expansion(graph_query)
@@ -181,7 +182,8 @@ def main():
             fact_query = engine.compute_query(facts)
             time_query, result_size = engine.query_with_graph_query(fact_query)
             f.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
-            print_progress_with_eta('analysing performance III', i, QUERIES_WITH_THREE_PRED, start_time, print_every_k=1)
+            print_progress_with_eta('analysing performance III', i, QUERIES_WITH_THREE_PRED, start_time,
+                                    print_every_k=1)
 
     logging.info('III: analysing performance: queries with 3 predicate...')
     with open('performance_query_3_with_exp.tsv', 'wt') as f:
@@ -192,8 +194,8 @@ def main():
             fact_query = engine.compute_query_with_expansion(facts)
             time_query, result_size = engine.query_with_graph_query(fact_query)
             f.write('\n{}\t{}\t{}'.format(time_query, result_size, fact_query))
-            print_progress_with_eta('analysing performance III', i, QUERIES_WITH_THREE_PRED, start_time, print_every_k=1)
-
+            print_progress_with_eta('analysing performance III', i, QUERIES_WITH_THREE_PRED, start_time,
+                                    print_every_k=1)
 
     logging.info('IV: analysing performance: queries with 1 variable and 1 predicate...')
     with open('performance_query_variable_1.tsv', 'wt') as fp:

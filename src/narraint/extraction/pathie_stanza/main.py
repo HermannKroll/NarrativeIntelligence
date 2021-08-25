@@ -1,13 +1,13 @@
 import argparse
-import stanza
-from datetime import datetime
 import logging
+from datetime import datetime
+
+import stanza
 from spacy.lang.en import English
 
 from narraint.cleaning.relation_vocabulary import RelationVocabulary
-from narraint.extraction.extraction_utils import  filter_document_sentences_without_tags
+from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
-
 from narrant.progress import print_progress_with_eta
 from narrant.pubtator.count import count_documents
 

@@ -1,15 +1,13 @@
-import unittest
 import os
+import unittest
 
-import pytest
-
-from narrant.preprocessing.tagging.dictagger import DictTagger, split_indexed_words
+import narrant.pubtator.document as doc
+from narrant.preprocessing.tagging.dictagger import split_indexed_words
 from narrant.preprocessing.tagging.dosage import DosageFormTagger
 from narrant.preprocessing.tagging.drug import DrugTagger
 from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
 from nitests.util import create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
     resource_rel_path
-import narrant.pubtator.document as doc
 
 
 class TestDictagger(unittest.TestCase):

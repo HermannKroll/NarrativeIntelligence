@@ -1,14 +1,12 @@
 from unittest import TestCase
 
-from narrant.config import PLANT_FAMILTY_DATABASE_FILE
-from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 
 
 class AutocompletionTestCase(TestCase):
 
     def setUp(self) -> None:
-        self.autocompletion :AutocompletionUtil = AutocompletionUtil.instance()
+        self.autocompletion: AutocompletionUtil = AutocompletionUtil.instance()
 
     def test_autocompletion_drugs(self):
         metformin_gold = ["metformin"]
@@ -71,6 +69,3 @@ class AutocompletionTestCase(TestCase):
                                 'Petroselinum', 'Plukenetia']
         for pf in plant_families_in_db:
             self.assertIn(pf.lower(), self.autocompletion.autocomplete(pf.lower()[0:len(pf) - 2]))
-
-
-

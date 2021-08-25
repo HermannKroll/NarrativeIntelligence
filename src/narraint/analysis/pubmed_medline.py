@@ -183,7 +183,7 @@ def main():
         desc_to_pmids = load_files(args.dir, db_pmids)
 
         print("\nPickling index ...")
-        with open(args.build_index, "wb")as f:
+        with open(args.build_index, "wb") as f:
             pickle.dump(desc_to_pmids, f)
     elif args.query:
         qi = PubMedMEDLINE()

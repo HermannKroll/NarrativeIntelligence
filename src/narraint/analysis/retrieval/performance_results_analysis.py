@@ -1,5 +1,4 @@
 import logging
-import datetime
 from itertools import islice
 
 files_to_analyse = ["performance_query_1.tsv", "performance_query_1_with_exp.tsv",

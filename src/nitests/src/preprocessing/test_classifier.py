@@ -1,6 +1,5 @@
-import unittest
-
 import re
+import unittest
 
 from narrant.preprocessing.classifier import Classifyer
 from narrant.pubtator.document import TaggedDocument

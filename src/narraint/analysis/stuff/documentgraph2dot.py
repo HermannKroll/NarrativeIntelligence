@@ -1,20 +1,18 @@
-import argparse
 import logging
 
 from sqlalchemy import and_
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narrant.entity.entityresolver import EntityResolver
 from narraint.graph.labeled import LabeledGraph
 
 
 def export_document_graph_as_dot(output_dot, document_id, document_collection):
     session = SessionExtended.get()
-    #entity_resolver = EntityResolver.instance()
+    # entity_resolver = EntityResolver.instance()
     query = session.query(Predication).filter(and_(Predication.document_id == document_id,
                                                    Predication.document_collection == document_collection))
-   # query = query.filter(Predication.extraction_type == 'PathIE')
+    # query = query.filter(Predication.extraction_type == 'PathIE')
 
     graph = LabeledGraph()
     has_edge = False
@@ -25,11 +23,11 @@ def export_document_graph_as_dot(output_dot, document_id, document_collection):
             subject_id = pred.subject_id
             if subject_id not in translation:
                 translation[pred.subject_id] = pred.subject_str
-           # subject_id = entity_resolver.get_name_for_var_ent_id(pred.subject_id, pred.subject_type,
-                                        #                         resolve_gene_by_id=False)
+            # subject_id = entity_resolver.get_name_for_var_ent_id(pred.subject_id, pred.subject_type,
+            #                         resolve_gene_by_id=False)
             predicate = pred.relation
-            #object_id = entity_resolver.get_name_for_var_ent_id(pred.object_id, pred.object_type,
-             #                                                   resolve_gene_by_id=False)
+            # object_id = entity_resolver.get_name_for_var_ent_id(pred.object_id, pred.object_type,
+            #                                                   resolve_gene_by_id=False)
             object_id = pred.object_id
             if object_id not in translation:
                 translation[object_id] = pred.object_str
@@ -44,11 +42,10 @@ def export_document_graph_as_dot(output_dot, document_id, document_collection):
         graph.save_to_dot(output_dot)
 
 
-
 def main():
-   # parser = argparse.ArgumentParser()
- #   parser.add_argument("output")
-  #  args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    #   parser.add_argument("output")
+    #  args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',

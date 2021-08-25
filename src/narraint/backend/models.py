@@ -1,7 +1,6 @@
+import logging
 from collections import namedtuple
 from datetime import datetime
-
-import logging
 from typing import List, Tuple
 
 from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
@@ -106,7 +105,8 @@ class Predication(Extended, DatabaseTable):
         return "<Predication {}>".format(self.id)
 
     @staticmethod
-    def iterate_predications(session, document_collection=None, bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
+    def iterate_predications(session, document_collection=None,
+                             bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
         pred_query = session.query(Predication).filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
@@ -116,8 +116,8 @@ class Predication(Extended, DatabaseTable):
 
     @staticmethod
     def iterate_predications_joined_sentences(session, document_collection=None,
-                             bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
-        pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id)\
+                                              bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
+        pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id) \
             .filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
@@ -218,7 +218,8 @@ class PredicationRating(Extended, DatabaseTable):
 
     @staticmethod
     def insert_user_rating(session, user_id: str, query: str, predication_id: int, rating: str):
-        insert_stmt = insert(PredicationRating).values(user_id=user_id, query=query, predication_id=predication_id, rating=rating)
+        insert_stmt = insert(PredicationRating).values(user_id=user_id, query=query, predication_id=predication_id,
+                                                       rating=rating)
         session.execute(insert_stmt)
         session.commit()
 

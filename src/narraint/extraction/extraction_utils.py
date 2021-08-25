@@ -1,10 +1,8 @@
 import logging
-import os
-from datetime import datetime
-
 import multiprocessing
-
+import os
 import queue
+from datetime import datetime
 from time import sleep
 
 from spacy.lang.en import English
@@ -75,7 +73,8 @@ def filter_document_sentences_without_tags(doc_len: int, input_file: str, spacy_
     return doc2sentences, doc2tags
 
 
-def filter_document_sentences_without_tags_parallelized_worker(tasks: multiprocessing.Queue, results: multiprocessing.Queue):
+def filter_document_sentences_without_tags_parallelized_worker(tasks: multiprocessing.Queue,
+                                                               results: multiprocessing.Queue):
     """
     Parallelized worker for document filtering (keep only sentences with two tags)
     :param tasks: a multiprocessing queue with all tasks
@@ -134,7 +133,7 @@ def filter_document_sentences_without_tags_parallelized(doc_len: int, input_file
         processes = []
         for i in range(0, worker_count):
             p = multiprocessing.Process(target=filter_document_sentences_without_tags_parallelized_worker,
-                                        args=(task_queue,result_queue))
+                                        args=(task_queue, result_queue))
             processes.append(p)
             p.start()
 

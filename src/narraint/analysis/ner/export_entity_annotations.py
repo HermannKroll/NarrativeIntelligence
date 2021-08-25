@@ -18,11 +18,11 @@ def export_annotations(session, annotation_query, filename):
     for t in annotation_query:
         document_ids.add(t.document_id)
         doc2tags[t.document_id].add((t.ent_type, t.ent_id, t.ent_str, t.start, t.end))
-    
-    doc_query = session.query(Document).filter(Document.collection == DOCUMENT_COLLECTION)\
+
+    doc_query = session.query(Document).filter(Document.collection == DOCUMENT_COLLECTION) \
         .filter(Document.id.in_(document_ids))
-    
-    doc2content = {} 
+
+    doc2content = {}
     for doc in doc_query:
         content = f'{doc.title} {doc.abstract}'
         doc2content[doc.id] = (doc.title, content)
@@ -55,16 +55,16 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
-    
+
     session = SessionExtended.get()
 
     logging.info('exporting drug annotations...')
-    rand_drug_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION)\
+    rand_drug_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION) \
         .filter(Tag.ent_type == DRUG).order_by(func.random()).limit(ANNOTATIONS_TO_EXPORT)
     export_annotations(session, rand_drug_query, 'annotations_drug.tsv')
 
     logging.info('exporting plant families...')
-    rand_pf_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION)\
+    rand_pf_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION) \
         .filter(Tag.ent_type == PLANT_FAMILY).order_by(func.random()).limit(ANNOTATIONS_TO_EXPORT)
     export_annotations(session, rand_pf_query, 'annotations_plant_family.tsv')
 
@@ -78,6 +78,7 @@ def main():
         .filter(Tag.ent_type == EXCIPIENT).order_by(func.random()).limit(ANNOTATIONS_TO_EXPORT)
     export_annotations(session, rand_df_query, 'annotations_excipients.tsv')
     logging.info('Finished')
+
 
 if __name__ == "__main__":
     main()

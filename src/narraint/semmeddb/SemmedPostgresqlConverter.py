@@ -29,7 +29,7 @@ for line in inFile:
         continue
     # Insert-statement must be CREATE TABLE GENERIC_CONCEPT
     # INSERT INTO `PREDICATION` VALUES  -> INSERT INTO PREDICATION VALUES
-    insertSplit = line.split('(', 1) # first split
+    insertSplit = line.split('(', 1)  # first split
     # Remove ever ` in the first part
     insertSplit[0] = insertSplit[0].replace('`', '')
 
@@ -58,7 +58,4 @@ outFile.close()
 if outputCreate is not None:
     outputCreateFile.close()
 
-
 print("Converting finished!")
-
-

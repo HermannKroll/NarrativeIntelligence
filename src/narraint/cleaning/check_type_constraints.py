@@ -7,7 +7,6 @@ from sqlalchemy import delete
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete
 from narraint.cleaning.relation_type_constraints import RelationTypeConstraintStore
-
 from narrant.progress import print_progress_with_eta
 
 BULK_QUERY_CURSOR_COUNT = 100000
@@ -47,12 +46,12 @@ def delete_predications_hurting_type_constraints(relation_type_constraints: Rela
     logging.info(f'{pred_count} predications were found')
     logging.info('Querying predications...')
     if document_collection:
-        pred_query = session.query(Predication)\
-            .filter(Predication.relation != None)\
-            .filter(Predication.document_collection == document_collection)\
+        pred_query = session.query(Predication) \
+            .filter(Predication.relation != None) \
+            .filter(Predication.document_collection == document_collection) \
             .yield_per(BULK_QUERY_CURSOR_COUNT)
     else:
-        pred_query = session.query(Predication).filter(Predication.relation != None)\
+        pred_query = session.query(Predication).filter(Predication.relation != None) \
             .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
     for idx, pred in enumerate(pred_query):

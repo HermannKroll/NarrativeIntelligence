@@ -25,36 +25,36 @@
                     <div class="form-group">
 
 
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
-                        <select class="custom-select" id="input_predicate">
-                            <option value="associated">associated</option>
-                            <option value="administered">administered</option>
-                            <option value="compares">compares</option>
-                            <option value="decreases">decreases</option>
-                            <option value="induces">induces</option>
-                            <option value="interacts">interacts</option>
-                            <option value="inhibits">inhibits</option>
-                            <option value="metabolises">metabolises</option>
-                            <option value="method">method</option>
-                            <option value="treats">treats</option>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
+                            <select class="custom-select" id="input_predicate">
+                                <option value="associated">associated</option>
+                                <option value="administered">administered</option>
+                                <option value="compares">compares</option>
+                                <option value="decreases">decreases</option>
+                                <option value="induces">induces</option>
+                                <option value="interacts">interacts</option>
+                                <option value="inhibits">inhibits</option>
+                                <option value="metabolises">metabolises</option>
+                                <option value="method">method</option>
+                                <option value="treats">treats</option>
 
-                        </select>
-                        <input type="text" class="form-control" placeholder="enter object" id="input_object">
-                        <div class="input-group-append">
-                            <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
-                            <button class="btn btn-primary" type="submit" id="btn_search">Search</button>
+                            </select>
+                            <input type="text" class="form-control" placeholder="enter object" id="input_object">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
+                                <button class="btn btn-primary" type="submit" id="btn_search">Search</button>
+                            </div>
                         </div>
-                    </div>
-                   <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
-                        Please be patient. This process can take up to one minute.
-                    </p>
+                        <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                            Please be patient. This process can take up to one minute.
+                        </p>
 
-                    <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
-                        This is a danger alert—check it out!
-                    </div>
-                    <ul class="list-group" id="query_builder_list">
-                    </ul>
+                        <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
+                            This is a danger alert—check it out!
+                        </div>
+                        <ul class="list-group" id="query_builder_list">
+                        </ul>
 
                         <!--
                         <label><strong>Data Source:</strong></label><br>
@@ -108,20 +108,23 @@
                         <div class="alert alert-info" role="alert">
                             Methods
                         </div>
-                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass Spectrometry method Simvastatin
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
+                            Spectrometry method Simvastatin
                         </button>
                         <button type="button" class="btn btn-outline-primary"
                                 onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method Simvastatin
+                                onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
+                            Simvastatin
                         </button>
                         <div class="alert alert-info" role="alert">
                             Treatment
                         </div>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin treats
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
+                            treats
                             "Diabetes Mellitus"
                         </button>
                         <button type="button" class="btn btn-outline-primary"
@@ -203,7 +206,8 @@
                             Rhabdomyolysis
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">Simvastatin induces
+                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">
+                            Simvastatin induces
                             Muscular Diseases
                         </button>
 
@@ -247,32 +251,32 @@
             </div>
         </div>
 
-                <!--
-        <div class="accordion" id="accordionQueryTranslation">
-            <div class="card mb-3">
-                <div class="card-header text-center" id="headingOne">
-                    <h2 class="mb-0">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse"
-                                data-target="#collapseTutorial"
-                                aria-expanded="false" aria-controls="collapseOne">
-                            Tutorials / Getting Started
-                        </button>
-                    </h2>
+        <!--
+<div class="accordion" id="accordionQueryTranslation">
+    <div class="card mb-3">
+        <div class="card-header text-center" id="headingOne">
+            <h2 class="mb-0">
+                <button class="btn btn-primary" type="button" data-toggle="collapse"
+                        data-target="#collapseTutorial"
+                        aria-expanded="false" aria-controls="collapseOne">
+                    Tutorials / Getting Started
+                </button>
+            </h2>
+        </div>
+
+
+        <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
+             data-parent="#accordionQueryTranslation">
+            <div class="card-body">
+                <div>
+                    In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
                 </div>
-
-
-                <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
-                     data-parent="#accordionQueryTranslation">
-                    <div class="card-body">
-                        <div>
-                            In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
-        -->
+
+    </div>
+</div>
+-->
         <div id="resultdiv">
             <br>
             <h2 id="document_header">Documents</h2>
@@ -293,45 +297,49 @@
     <!-- Feedback stuff-->
 
     <button type="button" class="btn btn-primary feedbackbtn"
-                                onclick="openFeedback()">
-                            Report bug
-       <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+            onclick="openFeedback()">
+        Report bug
+        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
     </button>
     <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
-      <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Send feedback with screenshot</h5>
-            <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-              <div class="container">
-                  <div class="row mt-2">
-                      <div class="outsideWrapper">
-                      <div class="insideWrapper" id="screenshotContainer">
-                          <img src="null" id="screenshot" class="img-fluid coveredImage border border-primary">
-                          <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
-                      </div>
-                  </div>
-                  </div>
-                  <div class="row mt-2">
-                      <div class="col text-center">
-                          <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset</button>
-                      </div>
-                  </div>
-              </div>
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send feedback with screenshot</h5>
+                    <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <div class="outsideWrapper">
+                                <div class="insideWrapper" id="screenshotContainer">
+                                    <img src="null" id="screenshot"
+                                         class="img-fluid coveredImage border border-primary">
+                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset</button>
+                            </div>
+                        </div>
+                    </div>
 
-              <p>Please mark the problematic section on the image above and/or describe the problem you have encountered:</p>
-            <textarea class="form-control" id="feedbackText" rows="3"></textarea>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send Report</button>
-          </div>
+                    <p>Please mark the problematic section on the image above and/or describe the problem you have
+                        encountered:</p>
+                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                        Report
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
 {% endblock %}

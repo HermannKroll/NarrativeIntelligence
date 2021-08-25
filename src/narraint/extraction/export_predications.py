@@ -1,10 +1,9 @@
 import argparse
-import logging
-from datetime import datetime
-import typing as tp
-import pathlib as pl
-
 import csv
+import logging
+import pathlib as pl
+import typing as tp
+from datetime import datetime
 
 import rdflib
 
@@ -30,18 +29,30 @@ def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_col
     for n, row in enumerate(Predication.iterate_predications(session, document_collection=document_collection)):
         prog.print_progress(n + 1)
         if export_metadata:
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_id"), rdflib.URIRef(str(row.document_id))))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_collection"), rdflib.URIRef(row.document_collection)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_id"), rdflib.URIRef(row.subject_id)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_type"), rdflib.URIRef(row.subject_type)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_str"), rdflib.Literal(row.subject_str)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("predicate"), rdflib.Literal(row.predicate)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("relation"), rdflib.Literal(row.relation)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_id"), rdflib.URIRef(row.object_id)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_type"), rdflib.URIRef(row.object_type)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_str"), rdflib.Literal(row.object_str)))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("sentence_id"), rdflib.Literal(f'sentence_id_{row.sentence_id}')))
-            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("extraction_type"), rdflib.Literal(row.extraction_type)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_id"),
+                              rdflib.URIRef(str(row.document_id))))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_collection"),
+                              rdflib.URIRef(row.document_collection)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_id"), rdflib.URIRef(row.subject_id)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_type"), rdflib.URIRef(row.subject_type)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_str"), rdflib.Literal(row.subject_str)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("predicate"), rdflib.Literal(row.predicate)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("relation"), rdflib.Literal(row.relation)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_id"), rdflib.URIRef(row.object_id)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_type"), rdflib.URIRef(row.object_type)))
+            output_graph.add(
+                (rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_str"), rdflib.Literal(row.object_str)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("sentence_id"),
+                              rdflib.Literal(f'sentence_id_{row.sentence_id}')))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("extraction_type"),
+                              rdflib.Literal(row.extraction_type)))
         else:
             output_graph.add((rdflib.URIRef(row.subject_id),
                               rdflib.URIRef(row.relation),
@@ -58,7 +69,7 @@ def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_col
     logging.info("done!")
 
 
-def export_predications_as_tsv(output_file:str, document_collection=None, export_metadata=False):
+def export_predications_as_tsv(output_file: str, document_collection=None, export_metadata=False):
     """
     Exports the database tuples as a CSV
     :param output_file: output filename
@@ -82,9 +93,10 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
                              "object_id", "object_type", "object_str",
                              "sentence_id", "extraction_type"])
             for idx, pred in enumerate(Predication.iterate_predications_joined_sentences(session,
-                                                                        document_collection=document_collection)):
+                                                                                         document_collection=document_collection)):
                 writer.writerow([pred.Predication.document_id, pred.Predication.document_collection,
-                                 pred.Predication.subject_id, pred.Predication.subject_type, pred.Predication.subject_str,
+                                 pred.Predication.subject_id, pred.Predication.subject_type,
+                                 pred.Predication.subject_str,
                                  pred.Predication.predicate, pred.Predication.relation,
                                  pred.Predication.object_id, pred.Predication.object_type, pred.Predication.object_str,
                                  pred.Sentence.text, pred.Predication.extraction_type])
@@ -103,7 +115,8 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("output", help='Path for the output file')
-    parser.add_argument("-c", "--collection", required=False, help='Export statements only for this document collection')
+    parser.add_argument("-c", "--collection", required=False,
+                        help='Export statements only for this document collection')
     parser.add_argument("--metadata", required=False, action="store_true", help='Should metadata be exported?')
     parser.add_argument("-f", "--format", action='store', choices=["rdf", "tsv"],
                         help='export format (supported: rdf (turtle) | tsv)', required=True)

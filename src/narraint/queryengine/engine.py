@@ -5,9 +5,8 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Set, Dict, List
 
-from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
 from narraint.backend.database import SessionExtended
-
+from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern

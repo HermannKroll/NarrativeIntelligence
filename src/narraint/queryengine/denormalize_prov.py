@@ -1,12 +1,13 @@
+import json
 import logging
 from collections import defaultdict
 from datetime import datetime
+
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
 from narraint.backend.models import PredicationDenorm
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narrant.progress import print_progress_with_eta
-import json
 
 
 def denormalize_predication_table():
@@ -16,7 +17,7 @@ def denormalize_predication_table():
 
     start_time = datetime.now()
     # "is not None" instead of "!=" None" DOES NOT WORK!
-    prov_query = session.query(Predication).filter(Predication.relation != None)\
+    prov_query = session.query(Predication).filter(Predication.relation != None) \
         .yield_per(QUERY_YIELD_PER_K)
 
     insert_list = []
@@ -59,7 +60,7 @@ def denormalize_predication_table():
             relation=k[2],
             object_id=k[3],
             object_type=k[4],
-       #     document_ids=json.dumps(fact_to_doc_ids[k]),
+            #     document_ids=json.dumps(fact_to_doc_ids[k]),
             provenance_mapping=json.dumps(fact_to_prov_ids[k])
         ))
 

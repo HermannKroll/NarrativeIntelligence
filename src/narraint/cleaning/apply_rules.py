@@ -1,20 +1,20 @@
 import logging
-from io import StringIO
 from collections import defaultdict
 from datetime import datetime
+from io import StringIO
 
 from sqlalchemy import update, or_, delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete, Sentence
-from narraint.extraction.loading.cleanload import insert_predications_into_db
-from narrant.backend.database import Session
-from narrant.preprocessing.enttypes import DOSAGE_FORM,LAB_METHOD, METHOD
 from narraint.cleaning.relation_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
     ASSOCIATED_PREDICATE_UNSURE
-from narrant.progress import print_progress_with_eta
+from narraint.extraction.loading.cleanload import insert_predications_into_db
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     are_subject_and_object_correctly_ordered
+from narrant.backend.database import Session
+from narrant.preprocessing.enttypes import DOSAGE_FORM, LAB_METHOD, METHOD
+from narrant.progress import print_progress_with_eta
 
 BULK_INSERT_PRED_TO_DELETE_AFTER_K = 1000000
 BULK_QUERY_CURSOR_COUNT = 100000
@@ -84,7 +84,7 @@ def clean_redundant_predicate_tuples(session, symmetric_relation: str):
     query = session.query(Predication.id, Predication.sentence_id,
                           Predication.subject_id, Predication.subject_type,
                           Predication.predicate,
-                          Predication.object_id,  Predication.object_type)\
+                          Predication.object_id, Predication.object_type) \
         .filter(Predication.relation == symmetric_relation)
 
     sentence2pred = defaultdict(set)
@@ -92,11 +92,12 @@ def clean_redundant_predicate_tuples(session, symmetric_relation: str):
     start_time = datetime.now()
     logging.info('Computing duplicated values...')
     for idx, row in enumerate(session.execute(query)):
-        p_id, sent_id, subj_id, subj_type, predicate, obj_id, obj_type = int(row[0]), int(row[1]), row[2], row[3], row[4], row[5], row[6]
+        p_id, sent_id, subj_id, subj_type, predicate, obj_id, obj_type = int(row[0]), int(row[1]), row[2], row[3], row[
+            4], row[5], row[6]
 
         # symmetric relation - delete one direction
         sorted_arguments = sort_symmetric_arguments(subj_id, subj_type, obj_id, obj_type)
-        if sorted_arguments[0] == subj_id: # are the arguments sorted correctly?
+        if sorted_arguments[0] == subj_id:  # are the arguments sorted correctly?
             key = sorted_arguments[0], sorted_arguments[1], predicate, sorted_arguments[2], sorted_arguments[3]
             # yes - does the fact exists multiple times?
             if key not in sentence2pred[sent_id]:
@@ -214,7 +215,7 @@ def check_type_constraints():
     pred_count = session.query(Predication).count()
     logging.info(f'{pred_count} predications were found')
     logging.info('Querying predications...')
-    pred_query = session.query(Predication).filter(Predication.relation != None)\
+    pred_query = session.query(Predication).filter(Predication.relation != None) \
         .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
     for idx, pred in enumerate(pred_query):
@@ -247,7 +248,7 @@ def check_type_constraints():
     logging.info(f'Reordering {len(preds_to_reorder)} predication subject and objects...')
     insert_predication_ids_to_delete(preds_to_reorder)
     subquery = session.query(PredicationToDelete.predication_id).subquery()
-    pred_query = session.query(Predication).filter(Predication.id.in_(subquery))\
+    pred_query = session.query(Predication).filter(Predication.id.in_(subquery)) \
         .yield_per(BULK_QUERY_CURSOR_COUNT)
     predication_values = []
     start_time = datetime.now()
@@ -289,8 +290,8 @@ def main():
     dosage_form_rule()
     method_rule()
     check_type_constraints()
-  #  clean_redundant_symmetric_predicates()
- #   clean_unreferenced_sentences()
+    #  clean_redundant_symmetric_predicates()
+    #   clean_unreferenced_sentences()
     logging.info('Finished...')
 
 

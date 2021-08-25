@@ -2,13 +2,13 @@ import base64
 import json
 import logging
 import os
-import traceback
 import sys
+import traceback
 from datetime import datetime
 from io import BytesIO
 
 from PIL import Image
-from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
@@ -17,16 +17,16 @@ from sqlalchemy import func
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
 from narraint.config import REPORT_DIR
-from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.queryengine.logger import QueryLogger
-from narraint.queryengine.optimizer import QueryOptimizer
-from narrant.entity.entityresolver import EntityResolver
+from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
-from narraint.frontend.ui.search_cache import SearchCache
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.queryengine.logger import QueryLogger
+from narraint.queryengine.optimizer import QueryOptimizer
+from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -76,8 +76,10 @@ def get_document_graph(request):
             facts = set()
             nodes = set()
             for r in query:
-                subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type, resolve_gene_by_id=False)
-                object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type, resolve_gene_by_id=False)
+                subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
+                                                                                resolve_gene_by_id=False)
+                object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
+                                                                               resolve_gene_by_id=False)
                 subject_name = f'{subject_name} ({r.subject_type})'
                 object_name = f'{object_name} ({r.object_type})'
                 key = subject_name, r.relation, object_name
@@ -118,6 +120,7 @@ def get_check_query(request):
             return JsonResponse(dict(valid=query_trans_string))
     except:
         return JsonResponse(dict(valid="False"))
+
 
 # invokes Django to compress the results
 @gzip_page
@@ -204,10 +207,12 @@ def get_query(request):
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
-                results_converted = substitution_aggregation.rank_results(results, freq_sort_desc, year_sort_desc, end_pos).to_dict()
+                results_converted = substitution_aggregation.rank_results(results, freq_sort_desc, year_sort_desc,
+                                                                          end_pos).to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
-                results_converted = substitution_ontology.rank_results(results, freq_sort_desc, year_sort_desc).to_dict()
+                results_converted = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                       year_sort_desc).to_dict()
         return JsonResponse(
             dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
                  query_limit_hit="False"))

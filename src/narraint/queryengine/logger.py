@@ -1,8 +1,8 @@
-import os
 import logging
+import os
 import time
 
-from narraint.config import TMP_DIR, UMLS_DATA, SEMMEDDB_CONFIG, LOG_DIR
+from narraint.config import LOG_DIR
 from narraint.queryengine.query import GraphQuery
 
 

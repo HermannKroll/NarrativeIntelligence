@@ -5,8 +5,8 @@ Use dataset: 2019AA UMLS Metathesaurus Files
 - [MRCONSO.RRF](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html)
 - [Information](https://www.ncbi.nlm.nih.gov/books/NBK9685/#ch03.sec3.3.4)
 """
-import json
 import gzip
+import json
 from datetime import datetime
 
 from narraint.config import UMLS_DATA, UMLS_MAPPING

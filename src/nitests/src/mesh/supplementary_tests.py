@@ -8,7 +8,7 @@ class Test(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.db : MeSHDBSupplementary = MeSHDBSupplementary.instance()
+        cls.db: MeSHDBSupplementary = MeSHDBSupplementary.instance()
         cls.db.load_xml(MESH_SUPPLEMENTARY_FILE)
 
     def test_record_values(self):

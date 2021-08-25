@@ -15,7 +15,6 @@ CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
 REPORT_DIR = os.path.join(GIT_ROOT_DIR, 'reports')
 
-
 QUERY_YIELD_PER_K = 1000000
 BULK_INSERT_AFTER_K = 100000
 
@@ -32,7 +31,6 @@ UMLS_MAPPING = os.path.join(DATA_DIR, "umls/mapping.json")
 # SemMed
 SEMMEDDB_CONFIG = os.path.join(CONFIG_DIR, 'semmed.json')
 
-
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 
@@ -47,4 +45,3 @@ AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
 
 # NLP Config
 NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')
-

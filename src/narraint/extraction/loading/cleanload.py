@@ -1,16 +1,15 @@
+import hashlib
 import logging
 from collections import namedtuple
 from datetime import datetime
-from typing import List
-import hashlib
 from io import StringIO
+from typing import List
 
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Predication, Sentence
 from narraint.config import BULK_INSERT_AFTER_K
-from narrant.entity.meshontology import MeSHOntology
 from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
-from narraint.backend.models import Predication, Sentence
-from narraint.backend.database import SessionExtended
 from narrant.progress import print_progress_with_eta
 
 MAX_SENTENCE_LENGTH = 1000
@@ -97,7 +96,8 @@ def load_sentences_with_hashes(document_collection: str):
     """
     logging.info('Retrieving known sentences for collection...')
     session = SessionExtended.get()
-    sentence_q = session.query(Sentence.id, Sentence.md5hash).filter(Sentence.document_collection == document_collection)
+    sentence_q = session.query(Sentence.id, Sentence.md5hash).filter(
+        Sentence.document_collection == document_collection)
     hash2sentence = {}
     for sent in sentence_q:
         hash2sentence[sent[1]] = sent[0]
@@ -330,4 +330,3 @@ def clean_and_load_predications_into_db(tuples_cleaned: List[PRED], collection, 
                                                              clean_genes=clean_genes)
     logging.info(f'{len(predication_values)} predications and {len(sentence_values)} sentences to insert...')
     insert_predications_into_db(predication_values, sentence_values)
-

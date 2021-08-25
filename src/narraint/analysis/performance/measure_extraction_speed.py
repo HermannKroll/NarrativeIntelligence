@@ -1,5 +1,4 @@
 import logging
-
 import os
 from datetime import datetime
 
@@ -19,7 +18,7 @@ OUT_PATHIE = os.path.join(PERFORMANCE_TEST_DIR, 'pathie_output.tsv')
 OUT_PATHIE_STANZA = os.path.join(PERFORMANCE_TEST_DIR, 'pathie_stanza_output.tsv')
 OUT_OPENIE = os.path.join(PERFORMANCE_TEST_DIR, 'openie_output.tsv')
 OUT_OPENIE6 = os.path.join(PERFORMANCE_TEST_DIR, 'openie6_output.tsv')
-#TEST_FILE = os.path.join(PERFORMANCE_TEST_DIR, 'small_test.pubtator')
+# TEST_FILE = os.path.join(PERFORMANCE_TEST_DIR, 'small_test.pubtator')
 TEST_FILE = os.path.join(PERFORMANCE_TEST_DIR, 'performance_evaluation_sample_10k.tagged.pubtator')
 TIME_FILE = os.path.join(PERFORMANCE_TEST_DIR, "runtimes.tsv")
 TEST_COLLECTION = 'PubMed'
@@ -49,11 +48,10 @@ def main():
         sentence_count = sum([len(sents) for doc_id, sents in doc2sentences.items()])
         logging.error(f'Found {tag_count} tags and {sentence_count}')
 
-
     times = []
     for i in range(0, RUNS):
-        logging.error('='*60)
-        logging.error(f'      Run {i+1}           ')
+        logging.error('=' * 60)
+        logging.error(f'      Run {i + 1}           ')
         logging.error('=' * 60)
 
         start = datetime.now()
@@ -96,6 +94,7 @@ def main():
             f.write(f'\n{t_pi}\t{t_pi_s}\t{t_oi}\t{t_oi6}')
 
     print(times)
+
 
 if __name__ == '__main__':
     main()

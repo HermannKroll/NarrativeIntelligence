@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Set
+from typing import List
 
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import PREDICATE_EXPANSION, SYMMETRIC_PREDICATES, ENTITY_TYPE_EXPANSION
@@ -27,12 +27,12 @@ class QueryExpander:
                 predicates = [predicate]
 
             if predicate in SYMMETRIC_PREDICATES:
-                expansion.extend(list([FactPattern(fact_pattern.objects, p, fact_pattern.subjects) for p in predicates]))
+                expansion.extend(
+                    list([FactPattern(fact_pattern.objects, p, fact_pattern.subjects) for p in predicates]))
 
             return expansion
         else:
             return []
-
 
     @staticmethod
     def expand_query(graph_query: GraphQuery) -> List[GraphQuery]:

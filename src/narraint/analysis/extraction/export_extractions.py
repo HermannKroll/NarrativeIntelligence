@@ -12,10 +12,10 @@ EXTRACTIONS_TO_EXPORT = 100
 
 def export_extractions_with_predicate(session, predicate, filename):
     logging.info(f'exporting "{predicate}" extractions...')
-    extraction_query = session.query(Predication, Sentence).filter(Predication.sentence_id == Sentence.id)\
+    extraction_query = session.query(Predication, Sentence).filter(Predication.sentence_id == Sentence.id) \
         .filter(Predication.document_collection == DOCUMENT_COLLECTION) \
-        .filter(Predication.relation == predicate).\
-        filter(Predication.subject_type == GENE).filter(Predication.object_type == DRUG)\
+        .filter(Predication.relation == predicate). \
+        filter(Predication.subject_type == GENE).filter(Predication.object_type == DRUG) \
         .order_by(func.random()).limit(EXTRACTIONS_TO_EXPORT)
 
     # sentence ids to load
@@ -25,14 +25,11 @@ def export_extractions_with_predicate(session, predicate, filename):
         f.write('\t'.join(attributes))
         for pred in extraction_query:
             values = [str(pred.Predication.document_id), pred.Sentence.text,
-                      pred.Predication.subject_str,  pred.Predication.subject_id, pred.Predication.subject_type,
+                      pred.Predication.subject_str, pred.Predication.subject_id, pred.Predication.subject_type,
                       pred.Predication.predicate, pred.Predication.relation,
                       pred.Predication.object_str, pred.Predication.object_id, pred.Predication.object_type]
             value_str = '\t'.join(values)
             f.write(f'\n{value_str}')
-
-
-
 
 
 def main():
@@ -42,8 +39,6 @@ def main():
 
     session = SessionExtended.get()
     export_extractions_with_predicate(session, "metabolises", "extractions_metabolises.tsv")
-
-
 
 
 if __name__ == "__main__":

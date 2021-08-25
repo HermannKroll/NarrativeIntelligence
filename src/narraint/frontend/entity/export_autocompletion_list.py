@@ -1,12 +1,12 @@
 import itertools
 import logging
 
-from narrant.entity.entityresolver import EntityResolver
-from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary
-from narrant.preprocessing.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
-from narrant.entity.meshontology import MeSHOntology
 from narraint.cleaning.relation_vocabulary import create_predicate_vocab
+from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary
 from narraint.queryengine.engine import QueryEngine
+from narrant.entity.entityresolver import EntityResolver
+from narrant.entity.meshontology import MeSHOntology
+from narrant.preprocessing.enttypes import GENE, SPECIES, CHEMICAL, DISEASE, DOSAGE_FORM
 
 
 def main():
@@ -52,7 +52,8 @@ def main():
         # check all known mesh entities
         known_mesh_prefixes = set()
         for e_id, e_str, e_type in entities:
-            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith('DB'):
+            if e_type in [CHEMICAL, DISEASE, DOSAGE_FORM] and not e_id.startswith('MESH:') and not e_id.startswith(
+                    'DB'):
                 # Split MeSH Tree No by .
                 split_tree_number = e_id.split('.')
                 # add all known concepts and superconcepts to our index
@@ -60,7 +61,7 @@ def main():
                 # D02.255
                 # D02.255.234
                 for x in range(0, len(split_tree_number)):
-                    known_prefix = '.'.join(split_tree_number[0:x+1])
+                    known_prefix = '.'.join(split_tree_number[0:x + 1])
                     known_mesh_prefixes.add(known_prefix)
 
         # write the mesh tree C and D

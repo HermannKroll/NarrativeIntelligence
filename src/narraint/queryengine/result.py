@@ -1,9 +1,6 @@
 from typing import Dict, Set
 
 from narrant.entity.entityresolver import EntityResolver
-from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, DRUG, METHOD, \
-    LAB_METHOD
-from narrant.entity.meshontology import MeSHOntology
 
 
 class QueryEntitySubstitution:

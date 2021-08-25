@@ -91,7 +91,7 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
 
         if authors or journals or publication_year:
             metadata_to_insert.append(dict(document_id=pmid, document_collection=document_collection,
-                 authors=authors, journals=journals, publication_year=publication_year))
+                                           authors=authors, journals=journals, publication_year=publication_year))
     return metadata_to_insert, pmids_processed
 
 
@@ -111,7 +111,7 @@ def pubmed_medline_load_metadata_from_dictionary(directory, document_collection=
     logging.info(f'{len(document_ids)} retrieved')
 
     logging.info(f'Querying documents that have metadata already...')
-    d2_query = session.query(DocumentMetadata.document_id)\
+    d2_query = session.query(DocumentMetadata.document_id) \
         .filter(DocumentMetadata.document_collection == document_collection)
     document_id_processed = set([d[0] for d in d2_query])
     logging.info(f'{len(document_id_processed)} documents have already metadata...')
@@ -121,7 +121,8 @@ def pubmed_medline_load_metadata_from_dictionary(directory, document_collection=
     start = datetime.now()
     for idx, fn in enumerate(files):
         print_progress_with_eta("Loading PubMed Medline metadata", idx, len(files), start, 1)
-        metadata_to_insert, pmids_processed = pubmed_medline_load_document_metadata(fn, document_ids, document_collection)
+        metadata_to_insert, pmids_processed = pubmed_medline_load_document_metadata(fn, document_ids,
+                                                                                    document_collection)
         DocumentMetadata.bulk_insert_values_into_table(session, metadata_to_insert)
         document_ids = document_ids - pmids_processed
 

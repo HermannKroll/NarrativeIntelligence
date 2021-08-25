@@ -10,7 +10,8 @@ from nltk.corpus import wordnet
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
-from narraint.extraction.loading.cleanload import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, clean_and_load_predications_into_db
+from narraint.extraction.loading.cleanload import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, \
+    clean_and_load_predications_into_db
 from narraint.extraction.versions import OPENIE_EXTRACTION
 from narrant.progress import print_progress_with_eta
 
@@ -276,13 +277,15 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
         '{} facts skipped (too long sentences) in {} documents'.format(skipped_tuples, len(skipped_in_docs)))
     logging.info('Cleaning finished...')
 
-    clean_and_load_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type, clean_genes=clean_genes)
+    clean_and_load_predications_into_db(tuples_cleaned, collection, extraction_type=extraction_type,
+                                        clean_genes=clean_genes)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help='OpenIE export file (exported by main.py / pipeline.py')
-    parser.add_argument("-c", "--collection", required=True, help='document collection to which the document ids belong')
+    parser.add_argument("-c", "--collection", required=True,
+                        help='document collection to which the document ids belong')
     parser.add_argument("--entity_filter", default=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER,
                         help="the entity filter mode", choices=list(OpenIEEntityFilterMode))
 

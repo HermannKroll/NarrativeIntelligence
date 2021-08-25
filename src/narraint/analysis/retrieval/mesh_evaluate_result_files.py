@@ -21,7 +21,8 @@ def main():
             for line in islice(f, 1, None):
                 comps = line.split('\t')
                 sub_id, obj_id = comps[0], comps[1]
-                pubmed_hits, graph_hits, precision, recall = int(comps[2]), int(comps[3]), float(comps[4]), float(comps[5])
+                pubmed_hits, graph_hits, precision, recall = int(comps[2]), int(comps[3]), float(comps[4]), float(
+                    comps[5])
                 query_len += 1
                 if pubmed_hits >= 3 and graph_hits >= 3:
                     counted_queries += 1

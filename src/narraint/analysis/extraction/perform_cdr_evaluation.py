@@ -2,23 +2,24 @@ import logging
 import os
 from collections import defaultdict
 
+from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
+
 from narraint.backend.database import SessionExtended
-from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
-    document_bulk_load
 from narraint.backend.models import Predication
-from narraint.cleaning.relation_vocabulary import create_predicate_vocab
-from narraint.config import DATA_DIR, RESOURCE_DIR
-from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from narraint.cleaning.apply_rules import check_type_constraints
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
-from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab
+from narraint.config import DATA_DIR, RESOURCE_DIR
+from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import openie6_run
-from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
+from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
+    document_bulk_load
+from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from narrant.pubtator.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 

@@ -76,7 +76,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         # add this document to the value based aggregation
         if key in self.aggregation:
             # skip already included documents
-            #if result.doc_id in self.__doc_ids_per_aggregation[key]:
+            # if result.doc_id in self.__doc_ids_per_aggregation[key]:
             self.aggregation[key][0].append(result)
             self.__doc_ids_per_aggregation[key].add(result.document_id)
         else:

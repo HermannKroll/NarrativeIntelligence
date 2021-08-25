@@ -143,56 +143,59 @@ $(function () { // function to pull the wordlist from url_data and save it in va
 });
 
 
-$(function() { // pulls the predicate names
-  $.ajax({
-    url: url_predicates,
-    type: "GET",
-    success: function(data) { // autocompletion for edges
-      predicates = data.split(",");
-      $( "#inpedge" ).autocomplete({
-        source: predicates,
-        appendTo : document.getElementById("edgemod"),
-        minLength: 1
-      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
-        var that = this;
-        var val = that.element.val();
+$(function () { // pulls the predicate names
+    $.ajax({
+        url: url_predicates,
+        type: "GET",
+        success: function (data) { // autocompletion for edges
+            predicates = data.split(",");
+            $("#inpedge").autocomplete({
+                source: predicates,
+                appendTo: document.getElementById("edgemod"),
+                minLength: 1
+            }).data("ui-autocomplete")._renderMenu = function (ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+                var that = this;
+                var val = that.element.val();
 
-        newEdgePrefix = inpedge.value.toLowerCase();
-        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
-          return value.label.toLowerCase().startsWith(newEdgePrefix);
-        });
-        if(items.length == 0) { // if the input is a substring but no prefix, the input is shown as an autocomplete option
-          items.push({label:inpedge.value, value: inpedge.value});
-        } else if(items.length > 5) {
-          items.splice(5, items.length-5);
-        }
-        $.each(items, function(index, item) {
-          that._renderItemData(ul, item);
-        });
-      };
-      $( "#inprenameedge" ).autocomplete({
-        source: predicates,
-        appendTo : document.getElementById("renameedgemod"),
-        minLength: 1
-      }).data("ui-autocomplete")._renderMenu = function(ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
-        var that = this;
-        var val = that.element.val();
+                newEdgePrefix = inpedge.value.toLowerCase();
+                items = items.filter(function (value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+                    return value.label.toLowerCase().startsWith(newEdgePrefix);
+                });
+                if (items.length == 0) { // if the input is a substring but no prefix, the input is shown as an autocomplete option
+                    items.push({label: inpedge.value, value: inpedge.value});
+                } else if (items.length > 5) {
+                    items.splice(5, items.length - 5);
+                }
+                $.each(items, function (index, item) {
+                    that._renderItemData(ul, item);
+                });
+            };
+            $("#inprenameedge").autocomplete({
+                source: predicates,
+                appendTo: document.getElementById("renameedgemod"),
+                minLength: 1
+            }).data("ui-autocomplete")._renderMenu = function (ul, items) { // see https://stackoverflow.com/questions/32414466/jquery-ui-autocomplete-alphabetical-ordering-followed-by-matches-in-other-words answer of user guest271314
+                var that = this;
+                var val = that.element.val();
 
-        renameEdgePrefix = document.getElementById("inprenameedge").value.toLowerCase();
-        items = items.filter(function(value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
-          return value.label.toLowerCase().startsWith(renameEdgePrefix);
-        });
-        if(items.length == 0) {  // if the input is a substring but no prefix, the input is shown as an autocomplete option
-          items.push({label:document.getElementById("inprenameedge").value, value: document.getElementById("inprenameedge").value});
-        } else if(items.length > 5) {
-          items.splice(5, items.length-5);
+                renameEdgePrefix = document.getElementById("inprenameedge").value.toLowerCase();
+                items = items.filter(function (value, index, arr) { // filter the list so that only the words are shown that have the exact prefix
+                    return value.label.toLowerCase().startsWith(renameEdgePrefix);
+                });
+                if (items.length == 0) {  // if the input is a substring but no prefix, the input is shown as an autocomplete option
+                    items.push({
+                        label: document.getElementById("inprenameedge").value,
+                        value: document.getElementById("inprenameedge").value
+                    });
+                } else if (items.length > 5) {
+                    items.splice(5, items.length - 5);
+                }
+                $.each(items, function (index, item) {
+                    that._renderItemData(ul, item);
+                });
+            };
         }
-        $.each(items, function(index, item) {
-          that._renderItemData(ul, item);
-        });
-      };
-    }
-  });
+    });
 });
 
 
@@ -275,7 +278,7 @@ function dialogReName() { // this function is used to rename existing nodes
             his_undo[count_undo].push(tempNode);
             count_undo++;
             nodes.update({id: tmpNode, label: label, color: '#97C2FC', 'title': dict_LabelMesh[label]}); // update the node
-        }  else {
+        } else {
             setTimeout(function () { // show an alert
                     alert('The label should be in the list.');
                     renameNodeMod.click();
@@ -779,19 +782,19 @@ document.addEventListener('keydown', function (params) {
 
     }
     // Keycode for adding new node (n)
-    else if(event.keyCode == 78 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
-      var myElement = document.getElementById("nodeMod");
-      myElement.click();
-      network.unselectAll();
-      inpnode.focus();
-      setTimeout(function() {
-        inpnode.value = "";
-      }
-      , 1);
+    else if (event.keyCode == 78 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
+        var myElement = document.getElementById("nodeMod");
+        myElement.click();
+        network.unselectAll();
+        inpnode.focus();
+        setTimeout(function () {
+                inpnode.value = "";
+            }
+            , 1);
     }
     // Keycode for adding new edge (e)
-    else if(event.keyCode == 69 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
-      network.addEdgeMode();
+    else if (event.keyCode == 69 && !(document.activeElement == inpnode) && !(document.activeElement == document.getElementById("inprename")) && !(document.activeElement == document.getElementById("inprenameedge")) && !(document.activeElement == inpedge) && !(document.activeElement == document.getElementById("inprenamecluster"))) {
+        network.addEdgeMode();
     }
     createQuery();
 });
@@ -968,8 +971,8 @@ function redo() {
     createQuery();
 }
 
-function escapeTripleSequence(str){
-    if(str.includes(" ")){
+function escapeTripleSequence(str) {
+    if (str.includes(" ")) {
         return "\"" + str + "\"";
     } else {
         return str;

@@ -1,14 +1,13 @@
 import argparse
-import os
 import json
-from datetime import datetime
 import logging
-
+import os
+import subprocess
+from datetime import datetime
 from time import sleep
 from typing import List
 
 import spacy
-import subprocess
 from spacy.lang.en import English
 
 from narraint.config import NLP_CONFIG
@@ -48,7 +47,8 @@ def openie6_read_extractions(openie6_output: str) -> List[OPENIE_TUPLE]:
                     # split by ';'
                     subj_txt, pred_txt, obj_txt = extraction.split(';', maxsplit=2)
                     pred_lemma = ' '.join([token.lemma_ for token in nlp(pred_txt)])
-                    ex_tuple = OPENIE_TUPLE(int(doc_id), subj_txt, pred_txt, pred_lemma, obj_txt, confidence, sentence_txt)
+                    ex_tuple = OPENIE_TUPLE(int(doc_id), subj_txt, pred_txt, pred_lemma, obj_txt, confidence,
+                                            sentence_txt)
                     tuples.append(ex_tuple)
                 doc_ids.add(doc_id)
             except ValueError:

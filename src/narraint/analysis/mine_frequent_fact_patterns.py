@@ -1,10 +1,9 @@
 import argparse
 import logging
+from collections import defaultdict
 from operator import and_
 
 import pandas as pd
-from collections import defaultdict
-
 from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
 
@@ -24,11 +23,11 @@ def get_facts_for_document_collection(document_collection):
     session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
                       Predication.relation,
-                      Predication.object_id, Predication.object_type).yield_per(100000)\
-        .filter_by(document_collection=document_collection).filter(Predication.relation.isnot(None))\
-        .filter(Predication.relation != 'associated')\
-        .filter(Predication.relation != 'PRED_TO_REMOVE')\
-        .filter(and_(Predication.subject_type != "Species", Predication.object_type != "Species"))\
+                      Predication.object_id, Predication.object_type).yield_per(100000) \
+        .filter_by(document_collection=document_collection).filter(Predication.relation.isnot(None)) \
+        .filter(Predication.relation != 'associated') \
+        .filter(Predication.relation != 'PRED_TO_REMOVE') \
+        .filter(and_(Predication.subject_type != "Species", Predication.object_type != "Species")) \
         .filter(Predication.subject_id != Predication.object_id)
 
     doc2facts = defaultdict(set)

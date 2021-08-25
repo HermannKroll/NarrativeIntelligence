@@ -1,7 +1,8 @@
 import re
 
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, SPECIES, \
+from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, DRUGBANK_CHEMICAL, \
+    SPECIES, \
     PLANT_FAMILY, LAB_METHOD, METHOD
 
 QUERY_LIMIT = 50000
@@ -34,10 +35,10 @@ PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT, PL
                                {DISEASE, SPECIES}),
                     'administered': ({DOSAGE_FORM},
                                      {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
-                                                     PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
+                                      PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
                     'method': ({METHOD, LAB_METHOD},
                                {SPECIES, DISEASE, CHEMICAL, DRUG, DRUGBANK_CHEMICAL, EXCIPIENT,
-                                                      PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
+                                PLANT_FAMILY, DOSAGE_FORM, LAB_METHOD, METHOD}),
                     'induces': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY},
                                 {CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY}),
                     'decreases': ({CHEMICAL, DRUG, EXCIPIENT, DRUGBANK_CHEMICAL, DISEASE, PLANT_FAMILY},
@@ -64,9 +65,9 @@ def are_subject_and_object_correctly_ordered(subject_id, object_id):
     else:
         return False
 
+
 def have_entities_correct_order(arg1: Entity, arg2: Entity):
     return arg1.entity_id < arg2.entity_id
-
 
 
 def should_perform_like_search_for_entity(entity_id, entity_type):

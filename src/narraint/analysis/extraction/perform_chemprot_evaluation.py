@@ -1,35 +1,35 @@
-import os
-
 import logging
+import os
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 
+from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from sqlalchemy import insert
 
 from narraint.backend.database import SessionExtended
-from narrant.backend.export import export
 from narraint.backend.models import Document, Tag, Predication
-from narraint.config import DATA_DIR
-from narrant.preprocessing.enttypes import CHEMICAL, GENE
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
-from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
+from narraint.config import DATA_DIR
+from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import openie6_run
-from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
+from narrant.backend.export import export
+from narrant.preprocessing.enttypes import CHEMICAL, GENE
 from narrant.progress import print_progress_with_eta
 
 CHEMPROT_VOCABULARY = dict(
-    upregulates=["upregulat*", "up regulat*", "up-regulat*", "stimulat*", "activat*", "increase", 'potentiate', 'induce'],
+    upregulates=["upregulat*", "up regulat*", "up-regulat*", "stimulat*", "activat*", "increase", 'potentiate',
+                 'induce'],
     inhibits=['downregulat*', 'down-regulat*', 'inhibit*', 'supress*', "decrease", "disrupt", "reduce"],
     agonist=['agonist activat*', 'agonist inhibt*', 'agoni*'],
     antagonist=["antagoni*"],
     substrate=['substrat*', 'metabolite', 'catalyze', 'express', 'synthesize', 'generate'],
-    associated=['produc*', "contain", "convert", "yield", "isolate", "grow", "involve",  'mediate', 'convert',
+    associated=['produc*', "contain", "convert", "yield", "isolate", "grow", "involve", 'mediate', 'convert',
                 "occures", "evaluate", "augment", "effect", "develop", "affect", "contribute",
                 "associated with", "isa", "same as", "coexists with", "process", "method of", "part of",
                 "associate", "correlate", "play role", "play", "limit", "show", "present",
@@ -38,7 +38,7 @@ CHEMPROT_VOCABULARY = dict(
 )
 
 CHEMPROT_DIR = os.path.join(DATA_DIR, 'extraction/chemprot/processed')
-#CHEMPROT_COLLECTION = 'ChemProtTrain'
+# CHEMPROT_COLLECTION = 'ChemProtTrain'
 # Test data:
 CHEMPROT_COLLECTION = 'ChemProt'
 

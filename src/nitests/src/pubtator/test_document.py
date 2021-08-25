@@ -26,7 +26,7 @@ class TestDocument(unittest.TestCase):
     def test_Tagged_Document_from_putatorfile(self):
         in_file = get_test_resource_filepath("infiles/test_metadictagger/abbrev_tagged.txt")
         tagged_doc = [d for d in read_tagged_documents(in_file)][0]
-        self.assertIn(TaggedEntity(None, 32926486, 97,111,"ethylene oxide", "Excipient", "Ethylene oxide"),
+        self.assertIn(TaggedEntity(None, 32926486, 97, 111, "ethylene oxide", "Excipient", "Ethylene oxide"),
                       tagged_doc.tags)
         self.assertIn(TaggedEntity(None, 32926486, 97, 111, "Ethylene Oxide", "Chemical", "MESH:D005027"),
                       tagged_doc.tags)
@@ -38,7 +38,7 @@ class TestDocument(unittest.TestCase):
         self.assertIn(TaggedEntity(None, 32926486, 97, 111, "Ethylene Oxide", "Chemical", "MESH:D005027"),
                       tagged_doc.tags)
         self.assertNotIn(TaggedEntity(None, 32926486, 97, 105, "ethylene", "Excipient", "Ethylene"),
-                      tagged_doc.tags)
+                         tagged_doc.tags)
 
     def test_Tagged_Document_read_write_pubtator(self):
         in_file = get_test_resource_filepath("infiles/test_metadictagger/abbrev_tagged.txt")
@@ -58,8 +58,6 @@ class TestDocument(unittest.TestCase):
             print(json.dumps(tagged_doc.to_dict()))
         with open(in_file) as inf, open(out_file) as of:
             self.assertEqual(inf.read(), of.read())
-
-
 
     def test_load_tagged_pubtator_doc(self):
         content = ""

@@ -1,9 +1,8 @@
 import logging
 
 from narraint.analysis.pubmed_medline import PubMedMEDLINE
-from narrant.entity.meshontology import MeSHOntology
 from narraint.semmeddb.dbconnection import SemMedDB
-
+from narrant.entity.meshontology import MeSHOntology
 
 
 def main():
@@ -68,7 +67,8 @@ def main():
         # Q000009: adverse effects https://meshb.nlm.nih.gov/record/ui?ui=Q000009
         d_metabol_adverse_effect = d_metabol_mesh + '_Q000009'
 
-        pubmed_query = [d_inhibits_mesh, d_metabol_mesh, gene_desc]#, d_metabol_accumulation, d_metabol_adverse_effect]
+        pubmed_query = [d_inhibits_mesh, d_metabol_mesh,
+                        gene_desc]  # , d_metabol_accumulation, d_metabol_adverse_effect]
         pmids = pubmed.get_ids(pubmed_query)
         if len(pmids) > 0:
             for pmid in pmids:
@@ -80,7 +80,7 @@ def main():
                             grounded_drug_combination_with_disease.add((d_inhibits_mesh, d_metabol_mesh, desc))
 
             # Todo: Get Descriptors for each ids and build a distinct set of diseases
-            #logging.info('{} documents found'.format(len(pmids)))
+            # logging.info('{} documents found'.format(len(pmids)))
             grounded_drug_combinations.add((d_inhibits_mesh, d_metabol_mesh))
             grounded += 1
     logging.info('{} of {} narratives can be grounded'.format(grounded, translated_narratives))

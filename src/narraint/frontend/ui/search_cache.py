@@ -1,7 +1,7 @@
+import hashlib
 import logging
 import os
 import pickle
-import hashlib
 
 from narraint.config import CACHE_DIR
 from narraint.queryengine.query import GraphQuery

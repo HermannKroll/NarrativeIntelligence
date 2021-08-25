@@ -1,11 +1,11 @@
 from collections import defaultdict
 
-from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
-from narrant.entity.meshontology import MeSHOntology
 from narraint.queryengine.aggregation.base import QueryResultAggregationStrategy
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList, QueryResultAggregate, \
     QueryResultAggregateList, QueryEntitySubstitution
+from narrant.entity.meshontology import MeSHOntology
+from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
 
 MISCELLANEOUS_PREFIX = "Miscellaneous"
 
@@ -103,13 +103,16 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 if misc_document_results:
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
-                        misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results, freq_sort_desc)
-                        misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH Taxonomy)', f'{ent_type} (No MeSH Taxonomy)')
+                        misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results,
+                                                                                              freq_sort_desc)
+                        misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH Taxonomy)',
+                                                                        f'{ent_type} (No MeSH Taxonomy)')
                         misc_aggregation.add_query_result(misc_aggregation_list)
                         ent_type_aggregation.append((ent_type, misc_aggregation))
 
                 resulting_tree = QueryResultAggregateList()
-                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(), reverse=self.freq_sort_desc):
+                for _, aggregation in sorted(ent_type_aggregation, key=lambda x: x[1].get_result_size(),
+                                             reverse=self.freq_sort_desc):
                     self._sort_node_result_list(aggregation)
                     resulting_tree.add_query_result(aggregation)
                 return resulting_tree
@@ -118,7 +121,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 query_result = QueryDocumentResultList()
                 for res in results:
                     query_result.add_query_result(res)
-                    query_result.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=self.year_sort_desc)
+                    query_result.results.sort(key=lambda x: (x.publication_year_int, int(x.month)),
+                                              reverse=self.year_sort_desc)
                 return query_result
         else:
             return QueryDocumentResultList()
@@ -156,9 +160,10 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 except KeyError:
                     # we do not want to other trees than C or D
                     pass
-                    #print('Error: no tree node for prefix {}'.format(tree_prefix))
+                    # print('Error: no tree node for prefix {}'.format(tree_prefix))
 
-    def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="", depth=0) -> QueryResultAggregateList():
+    def _build_tree_structure(self, var2prefix_substitution_list, prefix_start="",
+                              depth=0) -> QueryResultAggregateList():
         results = QueryResultAggregateList()
         for v in self.var_names:
             for pref, substitution in var2prefix_substitution_list[v]:

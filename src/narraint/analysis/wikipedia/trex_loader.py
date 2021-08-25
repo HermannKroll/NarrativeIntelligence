@@ -84,7 +84,7 @@ def load_trex_dataset(input_dir):
                     subject_str = subject_ent['surfaceform']
                     predicate = fact['predicate']['surfaceform']
                     if not predicate:
-                        predicate = "" # db does enforce not null here
+                        predicate = ""  # db does enforce not null here
                     relation = _convert_wikidata_uri_to_id(fact['predicate']['uri'])
                     object_ent = fact['object']
                     object_id = _convert_wikidata_uri_to_id(object_ent['uri'])

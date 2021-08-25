@@ -1,7 +1,3 @@
-
-
-
-
 const setButtonSearching = isSearching => {
     let btn = $('#btn_search_doc');
     let help = $('#help_search');
@@ -20,7 +16,7 @@ const setButtonSearching = isSearching => {
     }
 };
 
-function visualize_document_graph(document_graph){
+function visualize_document_graph(document_graph) {
     let nodes = document_graph["nodes"];
     let node2id = {};
     let id = 1;
@@ -52,29 +48,29 @@ function visualize_document_graph(document_graph){
         edges: edgesToCreate
     };
     var options = {
-    interaction: {
-        multiselect: true,
-        hover: true,
-    },
-    physics: {
-        enabled: true,
-        barnesHut: {
-            gravitationalConstant: -3000,
-            centralGravity: 0.0,
-            springLength: 140,
-            springConstant: 0.03,
-            damping: 0.70,
-            avoidOverlap: 0.3
+        interaction: {
+            multiselect: true,
+            hover: true,
         },
-        stabilization: {
+        physics: {
             enabled: true,
-            iterations: 1000,
-            updateInterval: 100,
-            onlyDynamicEdges: false,
-            fit: true
-        },
-    }
-};
+            barnesHut: {
+                gravitationalConstant: -3000,
+                centralGravity: 0.0,
+                springLength: 140,
+                springConstant: 0.03,
+                damping: 0.70,
+                avoidOverlap: 0.3
+            },
+            stabilization: {
+                enabled: true,
+                iterations: 1000,
+                updateInterval: 100,
+                onlyDynamicEdges: false,
+                fit: true
+            },
+        }
+    };
 
     // initialize your network!
     var network = new vis.Network(container, data, options);
@@ -102,7 +98,7 @@ const search_document = (event) => {
 
     request.fail(function (result) {
         console.log('error')
-          setButtonSearching(false);
+        setButtonSearching(false);
 
     });
 };

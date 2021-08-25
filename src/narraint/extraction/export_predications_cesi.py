@@ -1,10 +1,8 @@
 import argparse
 import json
 import logging
-from datetime import datetime
 import random
-
-import csv
+from datetime import datetime
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
@@ -95,8 +93,6 @@ def export_to_cesi(output):
         f_test.close()
         f_valid.close()
     logging.info('export finished')
-
-
 
 
 def main():

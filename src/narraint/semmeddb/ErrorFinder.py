@@ -1,9 +1,5 @@
 import argparse
 
-
-
-
-
 # Init Argparse
 parser = argparse.ArgumentParser(description='convert a csv-file to NTriple formatted file')
 parser.add_argument('input', nargs='?', help='input mysql semmed statement')
@@ -34,7 +30,7 @@ for line in inFile:
 
     # Insert-statement must be CREATE TABLE GENERIC_CONCEPT
     # INSERT INTO `PREDICATION` VALUES  -> INSERT INTO PREDICATION VALUES
-    insertSplit = line.split('(', 1) # first split
+    insertSplit = line.split('(', 1)  # first split
     # Remove ever ` in the first part
     insertSplit[0] = insertSplit[0].replace('`', '')
     # Another Problem: ' in text, its in mysql \' escaped. Postgresql needs ''
@@ -42,16 +38,16 @@ for line in inFile:
 
     countA = insertSplit[1].count('\'')
     if countA % 2 != 0:
-       # Split Statement on ),(
-       insertValues = insertSplit[1].split('),(')
-       for val in insertValues:
-           countB = val.count('\'')
-           if countB % 2 != 0:
-               print("Ungerade Anzahl {} in :".format(countB) + val)
-               outFile.write("Ungerade Anzahl: {}".format(countB) + ":" + val + "\n")
+        # Split Statement on ),(
+        insertValues = insertSplit[1].split('),(')
+        for val in insertValues:
+            countB = val.count('\'')
+            if countB % 2 != 0:
+                print("Ungerade Anzahl {} in :".format(countB) + val)
+                outFile.write("Ungerade Anzahl: {}".format(countB) + ":" + val + "\n")
 
-    #Write Statement to file and add the splitted '('
-    #outFile.write(insertSplit[0] + '(' + insertSplit[1])
+    # Write Statement to file and add the splitted '('
+    # outFile.write(insertSplit[0] + '(' + insertSplit[1])
 
     if i % 10000 == 0:
         print("Processed {} lines...".format(i))
@@ -62,7 +58,4 @@ outFile.close()
 if outputCreate is not None:
     outputCreateFile.close()
 
-
 print("Converting finished!")
-
-

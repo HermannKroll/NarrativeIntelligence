@@ -1,15 +1,15 @@
 import argparse
 import json
+import logging
 import os
 import subprocess
 import sys
 import tempfile
 from datetime import datetime
 from time import sleep
-import logging
 
-from narrant.progress import print_progress_with_eta
 from narraint.config import NLP_CONFIG
+from narrant.progress import print_progress_with_eta
 from narrant.pubtator.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 
@@ -85,7 +85,8 @@ def openie_run(core_nlp_dir: str, out_fn: str, filelist_fn: str):
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
-        print_progress_with_eta('OpenIE running...', openie_get_progress(out_fn), num_files, start_time, print_every_k=1)
+        print_progress_with_eta('OpenIE running...', openie_get_progress(out_fn), num_files, start_time,
+                                print_every_k=1)
     sys.stdout.write("\rProgress: {}/{} ... done in {}\n".format(
         openie_get_progress(out_fn), num_files, datetime.now() - start,
     ))

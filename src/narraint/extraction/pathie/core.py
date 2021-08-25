@@ -166,8 +166,8 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                        tokens: [PathIEToken],
                                        dependencies: [PathIEDependency],
                                        predicate_vocabulary: {str: [str]} = None,
-                                       ignore_not_extractions = True,
-                                       ignore_may_extraction = True) -> [PathIEExtraction]:
+                                       ignore_not_extractions=True,
+                                       ignore_may_extraction=True) -> [PathIEExtraction]:
     """
     Extracts fact from a sentence with PathIE
     :param doc_id: document id
@@ -189,7 +189,7 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                                             important_keywords, important_phrases)
     idx2token = {}
     if ignore_not_extractions or ignore_may_extraction:
-        idx2token = {t.index : t for t in tokens}
+        idx2token = {t.index: t for t in tokens}
 
     # no verbs -> no extractions
     if len(vidx2text_and_lemma) == 0:
@@ -209,12 +209,14 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
 
         # delete verbs that are connected with a not
         if ignore_not_extractions:
-            if governor in vidx2text_and_lemma and relation == 'advmod' and idx2token[dependent].text_lower in ['not', 'nt']:
+            if governor in vidx2text_and_lemma and relation == 'advmod' and idx2token[dependent].text_lower in ['not',
+                                                                                                                'nt']:
                 del vidx2text_and_lemma[governor]
                 node_ids_to_ignore.add(governor)
 
         if ignore_may_extraction:
-            if governor in vidx2text_and_lemma and relation == 'aux' and idx2token[dependent].text_lower in ['may', 'might']:
+            if governor in vidx2text_and_lemma and relation == 'aux' and idx2token[dependent].text_lower in ['may',
+                                                                                                             'might']:
                 node_ids_to_ignore.add(governor)
                 del vidx2text_and_lemma[governor]
 
@@ -261,8 +263,10 @@ def pathie_extract_facts_from_sentence(doc_id: int, doc_tags: [TaggedEntity],
                                     # this is a valid path
                                     v_txt, v_lemma = vidx2text_and_lemma[n_idx]
                                     # only extract one direction
-                                    key_e1_e2 = (e1_tag.ent_id, e1_tag.ent_type, v_lemma, e2_tag.ent_id, e2_tag.ent_type)
-                                    key_e2_e1 = (e2_tag.ent_id, e2_tag.ent_type, v_lemma, e1_tag.ent_id, e1_tag.ent_type)
+                                    key_e1_e2 = (
+                                    e1_tag.ent_id, e1_tag.ent_type, v_lemma, e2_tag.ent_id, e2_tag.ent_type)
+                                    key_e2_e1 = (
+                                    e2_tag.ent_id, e2_tag.ent_type, v_lemma, e1_tag.ent_id, e1_tag.ent_type)
                                     if key_e1_e2 in extracted_index or key_e2_e1 in extracted_index:
                                         continue
                                     extracted_index.add(key_e1_e2)

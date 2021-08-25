@@ -1,5 +1,5 @@
-from narrant.entity.entity import Entity
 from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, VAR_NAME
+from narrant.entity.entity import Entity
 
 
 class FactPattern:

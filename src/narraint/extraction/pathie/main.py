@@ -1,17 +1,16 @@
 import argparse
 import json
+import logging
+import multiprocessing
 import os
+import queue
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 from datetime import datetime
 from time import sleep
-import logging
-import queue
-
-import multiprocessing
-import shutil
 
 from spacy.lang.en import English
 
@@ -19,7 +18,6 @@ from narraint.cleaning.relation_vocabulary import RelationVocabulary
 from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.pathie.core import PathIEDependency, PathIEToken, pathie_extract_facts_from_sentence
-
 from narrant.progress import print_progress_with_eta
 from narrant.pubtator.count import count_documents
 
@@ -57,7 +55,7 @@ def pathie_run_corenlp(core_nlp_dir: str, out_corenlp_dir: str, filelist_fn: str
                                                           worker_no)]
     process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     start_time = datetime.now()
-    print_progress_with_eta('CoreNLP running...', 0, num_files, start_time,  print_every_k=1)
+    print_progress_with_eta('CoreNLP running...', 0, num_files, start_time, print_every_k=1)
     while process.poll() is None:
         sleep(10)
         print_progress_with_eta('CoreNLP running...', get_progress(out_corenlp_dir), num_files, start_time,
@@ -315,7 +313,6 @@ def main():
                    predicate_vocabulary=relation_vocab.relation_dict)
     else:
         run_pathie(args.input, args.output, args.workdir, args.config, workers=args.workers)
-
 
 
 if __name__ == "__main__":

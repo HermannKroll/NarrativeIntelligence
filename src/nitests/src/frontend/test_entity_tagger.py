@@ -1,8 +1,7 @@
 from unittest import TestCase
 
-from narrant.config import PLANT_FAMILTY_DATABASE_FILE
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.entity.entity import Entity
+from narrant.config import PLANT_FAMILTY_DATABASE_FILE
 from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary
 
 

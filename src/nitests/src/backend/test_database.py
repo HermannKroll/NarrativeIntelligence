@@ -1,12 +1,8 @@
-import unittest
-import pytest
 import os
+import unittest
 
-
-import narrant.config as cnf
 from narraint.backend.database import SessionExtended
-from narrant.backend.models import Tag, Tagger
-from narrant.tools import proj_rel_path
+from narrant.backend.models import Tagger
 from nitests.util import tmp_rel_path
 
 

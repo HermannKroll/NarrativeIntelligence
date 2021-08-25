@@ -1,6 +1,5 @@
 import argparse
 import logging
-
 from datetime import datetime
 
 from narraint.backend.database import SessionExtended

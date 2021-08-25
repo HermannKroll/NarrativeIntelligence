@@ -1,4 +1,3 @@
-import tempfile
 import unittest
 
 from narraint.graph.labeled import LabeledGraph
