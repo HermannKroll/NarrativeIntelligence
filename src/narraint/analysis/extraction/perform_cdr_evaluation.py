@@ -6,7 +6,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
 from narraint.cleaning.apply_rules import check_type_constraints
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
-from narraint.cleaning.relation_vocabulary import create_predicate_vocab
+from narraint.cleaning.relation_vocabulary import create_predicate_vocab, RelationVocabulary
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from narraint.extraction.loading.load_extractions import clean_and_load_predications_into_db
 from narraint.extraction.loading.load_openie_extractions import read_stanford_openie_input, clean_open_ie, \
@@ -40,8 +40,8 @@ CDR2015_canonicalizing_distances = os.path.join(CDR2015_DIR_OUTPUT, 'canonicaliz
 WORD2VEC_MODEL = '/home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin'
 
 CDR2015_COLLECTION = 'CDR2015'
-EXTRACT_PUBTATOR_DOCUMENTS = False
-LOAD_PUBTATOR_DOCUMENT = False
+EXTRACT_PUBTATOR_DOCUMENTS = True
+LOAD_PUBTATOR_DOCUMENT = True
 
 RUN_CORENLP_OPENIE = False
 RUN_PATHIE = True
@@ -50,10 +50,10 @@ RUN_OPENIE6 = False
 
 LOAD_STANZA_PATHIE = False
 LOAD_CORENLP_OPENIE = False
-LOAD_PATHIE = False
+LOAD_PATHIE = True
 LOAD_OPENIE6 = False
 
-CANONICALIZE_OUTPUT = False
+CANONICALIZE_OUTPUT = True
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
@@ -178,10 +178,12 @@ def main():
 
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
+        relation_vocab = RelationVocabulary()
+        relation_vocab.load_from_json("cdr_relation_vocab.json")
         canonicalize_predication_table(word2vec_model_file=WORD2VEC_MODEL,
                                        output_distances=CDR2015_canonicalizing_distances,
                                        document_collection=CDR2015_COLLECTION,
-                                       relation_vocabulary=create_predicate_vocab())
+                                       relation_vocabulary=relation_vocab)
         check_type_constraints()
 
     logging.info('=' * 60)

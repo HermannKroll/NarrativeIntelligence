@@ -101,8 +101,8 @@ def clean_predications(tuples_cleaned: List[PRED], collection, extraction_type, 
     for i, p in enumerate(tuples_cleaned):
         sentence_txt = p.sent.replace('\n', '')
         # Todo: Very dirty fix here
-        if len(p.s_str) < MIN_SUBJECT_OR_OBJECT_LEN or len(p.o_str) < MIN_SUBJECT_OR_OBJECT_LEN:
-            continue
+       # if len(p.s_str) < MIN_SUBJECT_OR_OBJECT_LEN or len(p.o_str) < MIN_SUBJECT_OR_OBJECT_LEN:
+        #    continue
         # Todo: dirty fix here empty id or ner id
         if p.s_id == '-' or p.o_id == '-' or not p.s_id.strip() or not p.o_id.strip():
             continue
