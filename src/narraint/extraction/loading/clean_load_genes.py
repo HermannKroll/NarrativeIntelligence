@@ -1,10 +1,15 @@
 import logging
+from collections import namedtuple
 from datetime import datetime
+from typing import List
 
-from narraint.extraction.loading.load_extractions import PRED
+
 from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
 from narrant.progress import print_progress_with_eta
+
+PRED = namedtuple('Predication', ['doc_id', 'subj', 'pred', 'pred_cleaned', 'obj', 'conf', 'sent', 's_id', 's_str',
+                                  's_type', 'o_id', 'o_str', 'o_type'])
 
 
 def clean_and_translate_gene_ids(predications: List[PRED]):
