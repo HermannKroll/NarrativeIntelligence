@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from narraint.extraction.loading.cleanload import PRED
+from narraint.extraction.loading.load_extractions import PRED
 from narrant.entity.entityresolver import GeneResolver
 from narrant.preprocessing.enttypes import GENE
 from narrant.progress import print_progress_with_eta

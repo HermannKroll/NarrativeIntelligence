@@ -9,7 +9,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete, Sentence
 from narraint.cleaning.relation_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
     ASSOCIATED_PREDICATE_UNSURE
-from narraint.extraction.loading.cleanload import insert_predications_into_db
+from narraint.extraction.loading.load_extractions import insert_predications_into_db
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     are_subject_and_object_correctly_ordered
 from narrant.backend.database import Session

@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from narraint.extraction.loading.cleanload import PRED, clean_and_load_predications_into_db
+from narraint.extraction.loading.load_extractions import PRED, clean_and_load_predications_into_db
 from narraint.extraction.versions import PATHIE_EXTRACTION
 
 

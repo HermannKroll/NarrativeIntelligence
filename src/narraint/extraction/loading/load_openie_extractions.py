@@ -10,7 +10,7 @@ from nltk.corpus import wordnet
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
-from narraint.extraction.loading.cleanload import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, \
+from narraint.extraction.loading.load_extractions import PRED, TOKENS_TO_IGNORE, MAX_SENTENCE_LENGTH, \
     clean_and_load_predications_into_db
 from narraint.extraction.versions import OPENIE_EXTRACTION
 from narrant.progress import print_progress_with_eta
