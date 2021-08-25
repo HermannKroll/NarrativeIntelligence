@@ -2,14 +2,15 @@ import logging
 import os
 from collections import defaultdict
 
-from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
-
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
 from narraint.cleaning.apply_rules import check_type_constraints
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.cleaning.relation_vocabulary import create_predicate_vocab
 from narraint.config import DATA_DIR, RESOURCE_DIR
+from narraint.extraction.loading.load_extractions import clean_and_load_predications_into_db
+from narraint.extraction.loading.load_openie_extractions import read_stanford_openie_input, clean_open_ie, \
+    OpenIEEntityFilterMode
 from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import openie6_run
@@ -43,7 +44,7 @@ EXTRACT_PUBTATOR_DOCUMENTS = False
 LOAD_PUBTATOR_DOCUMENT = False
 
 RUN_CORENLP_OPENIE = False
-RUN_PATHIE = False
+RUN_PATHIE = True
 RUN_STANZA_PATHIE = False
 RUN_OPENIE6 = False
 
@@ -138,7 +139,8 @@ def main():
     if LOAD_CORENLP_OPENIE:
         logging.info('Loading CoreNLP OpenIE extractions...')
         doc_ids, openie_tuples = read_stanford_openie_input(CDR2015_corenlp_openie_output)
-        clean_open_ie(doc_ids, openie_tuples, CDR2015_COLLECTION)
+        clean_open_ie(doc_ids, openie_tuples, CDR2015_COLLECTION,
+                      entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
         logging.info('finished')
 
     if RUN_PATHIE:
@@ -149,7 +151,7 @@ def main():
         logging.info('Reading extraction from tsv file...')
         predications = read_pathie_extractions_tsv(CDR2015_pathie_output)
         logging.info('{} extractions read'.format(len(predications)))
-        insert_predications_into_db(predications, CDR2015_COLLECTION, extraction_type=PATHIE_EXTRACTION)
+        clean_and_load_predications_into_db(predications, CDR2015_COLLECTION, extraction_type=PATHIE_EXTRACTION)
         logging.info('finished')
 
     if RUN_STANZA_PATHIE:
@@ -160,7 +162,7 @@ def main():
         logging.info('Reading extraction from tsv file...')
         predications = read_pathie_extractions_tsv(CDR2015_stanza_pathie_output)
         logging.info('{} extractions read'.format(len(predications)))
-        insert_predications_into_db(predications, CDR2015_COLLECTION, extraction_type=PATHIE_STANZA_EXTRACTION)
+        clean_and_load_predications_into_db(predications, CDR2015_COLLECTION, extraction_type=PATHIE_STANZA_EXTRACTION)
         logging.info('finished')
 
     if RUN_OPENIE6:
@@ -170,12 +172,14 @@ def main():
     if LOAD_OPENIE6:
         logging.info('Loading OpenIE 6.0 extractions...')
         doc_ids, openie_tuples = read_stanford_openie_input(CDR2015_openie6_output)
-        clean_open_ie(doc_ids, openie_tuples, CDR2015_COLLECTION, extraction_type=OPENIE6_EXTRACTION)
+        clean_open_ie(doc_ids, openie_tuples, CDR2015_COLLECTION, extraction_type=OPENIE6_EXTRACTION,
+                      entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
         logging.info('finished')
 
     if CANONICALIZE_OUTPUT:
         logging.info('Canonicalizing output...')
-        canonicalize_predication_table(WORD2VEC_MODEL, CDR2015_canonicalizing_distances,
+        canonicalize_predication_table(word2vec_model_file=WORD2VEC_MODEL,
+                                       output_distances=CDR2015_canonicalizing_distances,
                                        document_collection=CDR2015_COLLECTION,
                                        relation_vocabulary=create_predicate_vocab())
         check_type_constraints()
