@@ -3,7 +3,7 @@ import logging
 from collections import namedtuple, defaultdict
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, Tuple
 
 import nltk
 from nltk.corpus import wordnet
@@ -111,7 +111,7 @@ def get_subject_and_object_entities(doc_tags, ie_sub: str, ie_obj: str, entity_f
     return subs_included, objs_included
 
 
-def load_tags_for_doc_ids(doc_ids: List[int], collection: str) -> {str: List[str, str, str]}:
+def load_tags_for_doc_ids(doc_ids: List[int], collection: str) -> {str: List[Tuple[str, str, str]]}:
     """
     loads the database entity tags for a list of doc_ids
     :param doc_ids: sequence of doc_ids
