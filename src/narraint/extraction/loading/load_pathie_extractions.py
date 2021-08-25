@@ -16,7 +16,7 @@ def read_pathie_extractions_tsv(pathie_tsv_file: str, load_symmetric=True):
     with open(pathie_tsv_file, 'rt') as f:
         for line in f:
             try:
-                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, conf, sentence = line.split(
+                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, conf, sentence = line.strip().split(
                     '\t')
                 p = PRED(doc_id, "", pred, pred_lemma, "", conf, sentence, e1_id, e1_str, e1_type, e2_id, e2_str,
                          e2_type)
