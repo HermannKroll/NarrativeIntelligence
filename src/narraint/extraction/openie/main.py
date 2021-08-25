@@ -11,7 +11,6 @@ import logging
 from narrant.progress import print_progress_with_eta
 from narraint.config import NLP_CONFIG
 from narrant.pubtator.document import TaggedDocument
-from narrant.pubtator.regex import CONTENT_ID_TIT_ABS
 from narrant.pubtator.extract import read_pubtator_documents
 
 
