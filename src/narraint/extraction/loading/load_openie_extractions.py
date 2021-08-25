@@ -282,7 +282,7 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help='OpenIE export file (exported by main.py / pipeline.py')
-    parser.add_argument("-c", "--collection", required=True, help='document collection to which the ids belong')
+    parser.add_argument("-c", "--collection", required=True, help='document collection to which the document ids belong')
     parser.add_argument("--entity_filter", default=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER,
                         help="the entity filter mode", choices=list(OpenIEEntityFilterMode))
 
