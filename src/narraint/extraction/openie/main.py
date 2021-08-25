@@ -81,7 +81,7 @@ def openie_run(core_nlp_dir: str, out_fn: str, filelist_fn: str):
 
     run_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run.sh")
     sp_args = ["/bin/bash", "-c", "{} {} {} {}".format(run_script, core_nlp_dir, out_fn, filelist_fn)]
-    process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    process = subprocess.Popen(sp_args, cwd=core_nlp_dir, stdout=subprocess.DEVNULL)
     start_time = datetime.now()
     while process.poll() is None:
         sleep(30)
@@ -140,7 +140,7 @@ def openie_process_output(openie_out: str, outfile: str):
             tuples += 1
             components = line.strip().split("\t")
             # e.g. first line looks like /tmp/tmpwi57otrk/input/1065332.txt (so pmid is between last / and .)
-            pmid = components[0].split("/")[-1].split('.')[0]
+            doc_id = components[0].split("/")[-1].split('.')[0]
             subj = components[2].lower()
             pred = components[3].lower()
             obj = components[4].lower()
@@ -148,7 +148,7 @@ def openie_process_output(openie_out: str, outfile: str):
             sent = components[-5]
             pred_lemma = components[-2]
 
-            res = [pmid, subj, pred, pred_lemma, obj, conf, sent]
+            res = [doc_id, subj, pred, pred_lemma, obj, conf, sent]
             if idx == 0:
                 f_conv.write('\t'.join(t for t in res))
             else:
