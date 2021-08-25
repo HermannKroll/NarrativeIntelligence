@@ -77,15 +77,15 @@ def insert_predication_ids_to_delete(predication_ids: [int]):
     logging.debug(f'{len(predication_ids)} ids have been inserted')
 
 
-def clean_redundant_predicate_tuples(session, symmetric_predicate_canonicalized: str):
+def clean_redundant_predicate_tuples(session, symmetric_relation: str):
     logging.info('Counting predication...')
-    predication_count = Predication.query_predication_count(session, symmetric_predicate_canonicalized)
+    predication_count = Predication.query_predication_count(session, symmetric_relation)
     logging.info('Querying relevant predication entries...')
     query = session.query(Predication.id, Predication.sentence_id,
                           Predication.subject_id, Predication.subject_type,
                           Predication.predicate,
                           Predication.object_id,  Predication.object_type)\
-        .filter(Predication.predicate_canonicalized == symmetric_predicate_canonicalized)
+        .filter(Predication.relation == symmetric_relation)
 
     sentence2pred = defaultdict(set)
     preds2delete = set()
@@ -109,7 +109,7 @@ def clean_redundant_predicate_tuples(session, symmetric_predicate_canonicalized:
             # arguments are not in the correct order
             preds2delete.add(p_id)
 
-        print_progress_with_eta(f"computing duplicated {symmetric_predicate_canonicalized} values...",
+        print_progress_with_eta(f"computing duplicated {symmetric_relation} values...",
                                 idx, predication_count, start_time)
 
     if predication_count > 0:
@@ -167,7 +167,7 @@ def clean_unreferenced_sentences():
 
 def dosage_form_rule():
     """
-    Any predicate_canonicalized between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
+    Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
     :return: None
     """
     logging.info('Applying DosageForm rule...')
@@ -177,14 +177,14 @@ def dosage_form_rule():
         'Updating predicate to "{}" for (DosageForm, *) pairs'.format(DOSAGE_FORM_PREDICATE))
     stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
                                            Predication.object_type == DOSAGE_FORM)). \
-        values(predicate_canonicalized=DOSAGE_FORM_PREDICATE)
+        values(relation=DOSAGE_FORM_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
 
 def method_rule():
     """
-    Any predicate_canonicalized between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
+    Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
     :return: None
     """
     logging.info('Applying DosageForm rule...')
@@ -193,7 +193,7 @@ def method_rule():
     logging.info('Updating predicate to "{}" for (Method, *) pairs'.format(METHOD_PREDICATE))
     stmt_1 = update(Predication).where(or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
                                            Predication.object_type.in_([METHOD, LAB_METHOD]))). \
-        values(predicate_canonicalized=METHOD_PREDICATE)
+        values(relation=METHOD_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
@@ -214,16 +214,16 @@ def check_type_constraints():
     pred_count = session.query(Predication).count()
     logging.info(f'{pred_count} predications were found')
     logging.info('Querying predications...')
-    pred_query = session.query(Predication).filter(Predication.predicate_canonicalized != None)\
+    pred_query = session.query(Predication).filter(Predication.relation != None)\
         .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
     for idx, pred in enumerate(pred_query):
         print_progress_with_eta("checking type constraints", idx, pred_count, start_time)
-        if pred.predicate_canonicalized in PREDICATE_TYPING:
-            s_types, o_types = PREDICATE_TYPING[pred.predicate_canonicalized]
+        if pred.relation in PREDICATE_TYPING:
+            s_types, o_types = PREDICATE_TYPING[pred.relation]
             if pred.subject_type in s_types and pred.object_type in o_types:
                 # if ids are wrongly ordered
-                if pred.predicate_canonicalized in SYMMETRIC_PREDICATES \
+                if pred.relation in SYMMETRIC_PREDICATES \
                         and are_subject_and_object_correctly_ordered(pred.subject_id, pred.object_id):
                     preds_to_reorder.add(pred.id)
                 # everything is fine
@@ -238,7 +238,7 @@ def check_type_constraints():
     logging.info(f'Mapping {len(preds_to_associate)} predications to associate...')
     insert_predication_ids_to_delete(preds_to_associate)
     subquery = session.query(PredicationToDelete.predication_id).subquery()
-    stmt = update(Predication).where(Predication.id.in_(subquery)).values(predicate_canonicalized=ASSOCIATED_PREDICATE_UNSURE)
+    stmt = update(Predication).where(Predication.id.in_(subquery)).values(relation=ASSOCIATED_PREDICATE_UNSURE)
     session.execute(stmt)
     logging.debug('Committing...')
     session.commit()
@@ -260,7 +260,7 @@ def check_type_constraints():
             object_str=pred.subject_str,
             object_type=pred.subject_type,
             predicate=pred.predicate,
-            predicate_canonucalized=pred.predicate_canonicalized,
+            predicate_canonucalized=pred.relation,
             subject_id=pred.object_id,
             subject_str=pred.object_str,
             subject_type=pred.object_type,

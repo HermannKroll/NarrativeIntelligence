@@ -16,40 +16,40 @@ class ExportPredicationsTest(unittest.TestCase):
                      dict(id=2, collection="Test_Export", title="DEF", abstract="")]
         Document.bulk_insert_values_into_table(session, documents)
 
-        sentences = [dict(id=1, document_id=1, document_collection="Test_Export", text="Hello", md5hash="1"),
-                     dict(id=2, document_id=1, document_collection="Test_Export", text="World. Nice", md5hash="2")]
+        sentences = [dict(id=11, document_id=1, document_collection="Test_Export", text="Hello", md5hash="1"),
+                     dict(id=12, document_id=1, document_collection="Test_Export", text="World. Nice", md5hash="2")]
         Sentence.bulk_insert_values_into_table(session, sentences)
 
         predications = [dict(id=11,
                              document_id=1, document_collection="Test_Export",
                              subject_id="A", subject_type="Drug", subject_str="ab",
-                             predicate="treat", predicate_canonicalized="treats",
+                             predicate="treat", relation="treats",
                              object_id="B", object_type="Disease", object_str="bc",
-                             sentence_id=1, extraction_type="PathIE"),
+                             sentence_id=11, extraction_type="PathIE"),
                         dict(id=12,
                              document_id=1, document_collection="Test_Export",
                              subject_id="C", subject_type="Disease", subject_str="c a",
-                             predicate="treat", predicate_canonicalized="treats",
+                             predicate="treat", relation="treats",
                              object_id="B", object_type="Disease", object_str="b a",
-                             sentence_id=1, extraction_type="PathIE"),
+                             sentence_id=11, extraction_type="PathIE"),
                         dict(id=13,
                              document_id=2, document_collection="Test_Export",
                              subject_id="A", subject_type="Disease", subject_str="a",
-                             predicate="induce", predicate_canonicalized="induces",
+                             predicate="induce", relation="induces",
                              object_id="B", object_type="Disease", object_str="b",
-                             sentence_id=2, extraction_type="PathIE"),
+                             sentence_id=12, extraction_type="PathIE"),
                         dict(id=14,
                              document_id=2, document_collection="Test_Export",
                              subject_id="C", subject_type="Gene", subject_str="",
-                             predicate="induce", predicate_canonicalized="induces",
+                             predicate="induce", relation="induces",
                              object_id="D", object_type="Gene", object_str="",
-                             sentence_id=2, extraction_type="PathIE"),
+                             sentence_id=12, extraction_type="PathIE"),
                         dict(id=15,
                              document_id=2, document_collection="Test_Export_Not",
                              subject_id="C", subject_type="Gene", subject_str="",
-                             predicate="induce", predicate_canonicalized="induces",
+                             predicate="induce", relation="induces",
                              object_id="D", object_type="Gene", object_str="",
-                             sentence_id=2, extraction_type="PathIE")
+                             sentence_id=12, extraction_type="PathIE")
                         ]
         Predication.bulk_insert_values_into_table(session, predications)
 
@@ -115,57 +115,57 @@ class ExportPredicationsTest(unittest.TestCase):
         tuples = set([(s.split('/')[-1], p.split('/')[-1], o.split('/')[-1]) for s, p, o in g])
         self.assertEqual(4*12+2, len(tuples))
 
-        self.assertIn(('sentence_id_1', 'text', 'Hello'), tuples)
-        self.assertIn(('sentence_id_2', 'text', 'World. Nice'), tuples)
-        self.assertIn(('11', 'document_id', '1'), tuples)
-        self.assertIn(('11', 'document_collection', 'Test_Export'), tuples)
-        self.assertIn(('11', 'subject_id', 'A'), tuples)
-        self.assertIn(('11', 'subject_type', 'Drug'), tuples)
-        self.assertIn(('11', 'subject_str', 'ab'), tuples)
-        self.assertIn(('11', 'predicate', 'treat'), tuples)
-        self.assertIn(('11', 'relation', 'treats'), tuples)
-        self.assertIn(('11', 'object_id', 'B'), tuples)
-        self.assertIn(('11', 'object_type', 'Disease'), tuples)
-        self.assertIn(('11', 'object_str', 'bc'), tuples)
-        self.assertIn(('11', 'sentence_id', 'sentence_id_1'), tuples)
-        self.assertIn(('11', 'extraction_type', 'PathIE'), tuples)
+        self.assertIn(('sentence_id_11', 'text', 'Hello'), tuples)
+        self.assertIn(('sentence_id_12', 'text', 'World. Nice'), tuples)
+        self.assertIn(('statement_11', 'document_id', '1'), tuples)
+        self.assertIn(('statement_11', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('statement_11', 'subject_id', 'A'), tuples)
+        self.assertIn(('statement_11', 'subject_type', 'Drug'), tuples)
+        self.assertIn(('statement_11', 'subject_str', 'ab'), tuples)
+        self.assertIn(('statement_11', 'predicate', 'treat'), tuples)
+        self.assertIn(('statement_11', 'relation', 'treats'), tuples)
+        self.assertIn(('statement_11', 'object_id', 'B'), tuples)
+        self.assertIn(('statement_11', 'object_type', 'Disease'), tuples)
+        self.assertIn(('statement_11', 'object_str', 'bc'), tuples)
+        self.assertIn(('statement_11', 'sentence_id', 'sentence_id_11'), tuples)
+        self.assertIn(('statement_11', 'extraction_type', 'PathIE'), tuples)
 
-        self.assertIn(('12', 'document_id', '1'), tuples)
-        self.assertIn(('12', 'document_collection', 'Test_Export'), tuples)
-        self.assertIn(('12', 'subject_id', 'C'), tuples)
-        self.assertIn(('12', 'subject_type', 'Disease'), tuples)
-        self.assertIn(('12', 'subject_str', 'c a'), tuples)
-        self.assertIn(('12', 'predicate', 'treat'), tuples)
-        self.assertIn(('12', 'relation', 'treats'), tuples)
-        self.assertIn(('12', 'object_id', 'B'), tuples)
-        self.assertIn(('12', 'object_type', 'Disease'), tuples)
-        self.assertIn(('12', 'object_str', 'b a'), tuples)
-        self.assertIn(('12', 'sentence_id', 'sentence_id_1'), tuples)
-        self.assertIn(('12', 'extraction_type', 'PathIE'), tuples)
+        self.assertIn(('statement_12', 'document_id', '1'), tuples)
+        self.assertIn(('statement_12', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('statement_12', 'subject_id', 'C'), tuples)
+        self.assertIn(('statement_12', 'subject_type', 'Disease'), tuples)
+        self.assertIn(('statement_12', 'subject_str', 'c a'), tuples)
+        self.assertIn(('statement_12', 'predicate', 'treat'), tuples)
+        self.assertIn(('statement_12', 'relation', 'treats'), tuples)
+        self.assertIn(('statement_12', 'object_id', 'B'), tuples)
+        self.assertIn(('statement_12', 'object_type', 'Disease'), tuples)
+        self.assertIn(('statement_12', 'object_str', 'b a'), tuples)
+        self.assertIn(('statement_12', 'sentence_id', 'sentence_id_11'), tuples)
+        self.assertIn(('statement_12', 'extraction_type', 'PathIE'), tuples)
 
-        self.assertIn(('13', 'document_id', '2'), tuples)
-        self.assertIn(('13', 'document_collection', 'Test_Export'), tuples)
-        self.assertIn(('13', 'subject_id', 'A'), tuples)
-        self.assertIn(('13', 'subject_type', 'Disease'), tuples)
-        self.assertIn(('13', 'subject_str', 'a'), tuples)
-        self.assertIn(('13', 'predicate', 'induce'), tuples)
-        self.assertIn(('13', 'relation', 'induces'), tuples)
-        self.assertIn(('13', 'object_id', 'B'), tuples)
-        self.assertIn(('13', 'object_type', 'Disease'), tuples)
-        self.assertIn(('13', 'object_str', 'b'), tuples)
-        self.assertIn(('13', 'sentence_id', 'sentence_id_2'), tuples)
-        self.assertIn(('13', 'extraction_type', 'PathIE'), tuples)
+        self.assertIn(('statement_13', 'document_id', '2'), tuples)
+        self.assertIn(('statement_13', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('statement_13', 'subject_id', 'A'), tuples)
+        self.assertIn(('statement_13', 'subject_type', 'Disease'), tuples)
+        self.assertIn(('statement_13', 'subject_str', 'a'), tuples)
+        self.assertIn(('statement_13', 'predicate', 'induce'), tuples)
+        self.assertIn(('statement_13', 'relation', 'induces'), tuples)
+        self.assertIn(('statement_13', 'object_id', 'B'), tuples)
+        self.assertIn(('statement_13', 'object_type', 'Disease'), tuples)
+        self.assertIn(('statement_13', 'object_str', 'b'), tuples)
+        self.assertIn(('statement_13', 'sentence_id', 'sentence_id_12'), tuples)
+        self.assertIn(('statement_13', 'extraction_type', 'PathIE'), tuples)
 
-        self.assertIn(('14', 'document_id', '2'), tuples)
-        self.assertIn(('14', 'document_collection', 'Test_Export'), tuples)
-        self.assertIn(('14', 'subject_id', 'C'), tuples)
-        self.assertIn(('14', 'subject_type', 'Gene'), tuples)
-        self.assertIn(('14', 'subject_str', rdflib.term.Literal('')), tuples)
-        self.assertIn(('14', 'predicate', 'induce'), tuples)
-        self.assertIn(('14', 'relation', 'induces'), tuples)
-        self.assertIn(('14', 'object_id', 'D'), tuples)
-        self.assertIn(('14', 'object_type', 'Gene'), tuples)
-        self.assertIn(('14', 'object_str', rdflib.term.Literal('')), tuples)
-        self.assertIn(('14', 'sentence_id', 'sentence_id_2'), tuples)
-        self.assertIn(('14', 'extraction_type', 'PathIE'), tuples)
+        self.assertIn(('statement_14', 'document_id', '2'), tuples)
+        self.assertIn(('statement_14', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('statement_14', 'subject_id', 'C'), tuples)
+        self.assertIn(('statement_14', 'subject_type', 'Gene'), tuples)
+        self.assertIn(('statement_14', 'subject_str', rdflib.term.Literal('')), tuples)
+        self.assertIn(('statement_14', 'predicate', 'induce'), tuples)
+        self.assertIn(('statement_14', 'relation', 'induces'), tuples)
+        self.assertIn(('statement_14', 'object_id', 'D'), tuples)
+        self.assertIn(('statement_14', 'object_type', 'Gene'), tuples)
+        self.assertIn(('statement_14', 'object_str', rdflib.term.Literal('')), tuples)
+        self.assertIn(('statement_14', 'sentence_id', 'sentence_id_12'), tuples)
+        self.assertIn(('statement_14', 'extraction_type', 'PathIE'), tuples)
 

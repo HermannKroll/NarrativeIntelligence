@@ -79,10 +79,10 @@ CANONICALIZE_OUTPUT = False
 
 def perform_chemprot_evaluation(correct_relations, extraction_type, relations):
     session = SessionExtended.get()
-    q = session.query(Predication.document_id, Predication.predicate_canonicalized,
+    q = session.query(Predication.document_id, Predication.relation,
                       Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CHEMPROT_COLLECTION) \
-        .filter(Predication.predicate_canonicalized.in_(relations)) \
+        .filter(Predication.relation.in_(relations)) \
         .filter(Predication.subject_type == CHEMICAL) \
         .filter(Predication.object_type == GENE) \
         .filter(Predication.extraction_type == extraction_type)

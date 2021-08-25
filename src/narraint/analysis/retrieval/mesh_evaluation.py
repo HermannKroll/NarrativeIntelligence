@@ -174,7 +174,7 @@ def get_subject_object_for_predicate(predicate, extraction_type, subject_types=N
     """
     query = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
                           Predication.object_id, Predication.object_type)\
-        .filter_by(predicate_canonicalized=predicate)\
+        .filter_by(relation=predicate)\
         .filter_by(document_collection='PubMed')\
         .filter_by(extraction_type=extraction_type)
     if subject_types:

@@ -94,9 +94,9 @@ def main():
     session = SessionExtended.get()
     q = session.query(Predication.document_id,
                       Predication.subject_id, Predication.subject_type,
-                      Predication.predicate_canonicalized,
+                      Predication.relation,
                       Predication.object_id, Predication.object_type) \
-        .filter(Predication.predicate_canonicalized != None) \
+        .filter(Predication.relation != None) \
         .filter(Predication.extraction_type == PATHIE_EXTRACTION) \
         .filter(Predication.document_collection == 'PubMed') \
         .order_by(func.random()).limit(RANDOM_FACTS)
@@ -121,7 +121,7 @@ def main():
     logging.info('{} unique 2-facts retrieved'.format(len(doc2facts_2)))
     logging.info('{} unique 3-facts retrieved'.format(len(doc2facts_3)))
     with open('performance_selected_facts.tsv', 'wt') as f:
-        f.write('subject\tsubject_type\tpredicate_canonicalized\tobject\tobject_type')
+        f.write('subject\tsubject_type\trelation\tobject\tobject_type')
         for s, s_t, p, o, o_t in facts:
             f.write('\n{}\t{}\t{}\t{}\t'.format(s, s_t, p, o, o_t))
 

@@ -48,18 +48,18 @@ def delete_predications_hurting_type_constraints(relation_type_constraints: Rela
     logging.info('Querying predications...')
     if document_collection:
         pred_query = session.query(Predication)\
-            .filter(Predication.predicate_canonicalized != None)\
+            .filter(Predication.relation != None)\
             .filter(Predication.document_collection == document_collection)\
             .yield_per(BULK_QUERY_CURSOR_COUNT)
     else:
-        pred_query = session.query(Predication).filter(Predication.predicate_canonicalized != None)\
+        pred_query = session.query(Predication).filter(Predication.relation != None)\
             .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
     for idx, pred in enumerate(pred_query):
         print_progress_with_eta("checking type constraints", idx, pred_count, start_time)
-        if pred.predicate_canonicalized in relation_type_constraints.constraints:
-            s_types = relation_type_constraints.get_subject_constraints(pred.predicate_canonicalized)
-            o_types = relation_type_constraints.get_object_constraints(pred.predicate_canonicalized)
+        if pred.relation in relation_type_constraints.constraints:
+            s_types = relation_type_constraints.get_subject_constraints(pred.relation)
+            o_types = relation_type_constraints.get_object_constraints(pred.relation)
             if pred.subject_type not in s_types or pred.object_type not in o_types:
                 # arguments hurt type constraints
                 preds_to_delete.add(pred.id)

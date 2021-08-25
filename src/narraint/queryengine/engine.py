@@ -31,7 +31,7 @@ class QueryEngine:
 
         session = SessionExtended.get()
         query = session.query(Predication.id,
-                              Predication.sentence_id, Predication.predicate, Predication.predicate_canonicalized,
+                              Predication.sentence_id, Predication.predicate, Predication.relation,
                               Predication.subject_str, Predication.object_str, Predication.confidence) \
             .filter(Predication.id.in_(predication_ids))
 
@@ -109,7 +109,7 @@ class QueryEngine:
         query = session.query(PredicationDenorm)
         # directly check predicate
         if fact_pattern.predicate != DO_NOT_CARE_PREDICATE:
-            query = query.filter(PredicationDenorm.predicate_canonicalized == fact_pattern.predicate)
+            query = query.filter(PredicationDenorm.relation == fact_pattern.predicate)
 
         var_names_in_query = []
         subject_types, object_types = [], []
@@ -383,9 +383,9 @@ class QueryEngine:
         session = SessionExtended.get()
         query_subjects = session.query(Predication.subject_id, Predication.subject_str,
                                        Predication.subject_type).distinct()
-        query_subjects = query_subjects.filter(Predication.predicate_canonicalized.isnot(None))
+        query_subjects = query_subjects.filter(Predication.relation.isnot(None))
         query_objects = session.query(Predication.object_id, Predication.object_str, Predication.object_type).distinct()
-        query_objects = query_objects.filter(Predication.predicate_canonicalized.isnot(None))
+        query_objects = query_objects.filter(Predication.relation.isnot(None))
         query = query_subjects.union(query_objects).distinct()
 
         entities = set()

@@ -209,10 +209,10 @@ def canonicalize_predicates(best_matches: {str: (str, float)}, min_distance_thre
         if document_collection:
             stmt = update(Predication).where(and_(Predication.predicate.in_(preds),
                                                   Predication.document_collection == document_collection)). \
-                values(predicate_canonicalized=pred_canonicalized)
+                values(relation=pred_canonicalized)
         else:
             stmt = update(Predication).where(Predication.predicate.in_(preds)). \
-                values(predicate_canonicalized=pred_canonicalized)
+                values(relation=pred_canonicalized)
         session.execute(stmt)
         print_progress_with_eta('updating...', i, task_size, start_time, print_every_k=1)
         i += 1

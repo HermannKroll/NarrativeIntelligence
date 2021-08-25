@@ -30,21 +30,21 @@ def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_col
     for n, row in enumerate(Predication.iterate_predications(session, document_collection=document_collection)):
         prog.print_progress(n + 1)
         if export_metadata:
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("document_id"), rdflib.URIRef(str(row.document_id))))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("document_collection"), rdflib.URIRef(row.document_collection)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_id"), rdflib.URIRef(row.subject_id)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_type"), rdflib.URIRef(row.subject_type)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_str"), rdflib.Literal(row.subject_str)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("predicate"), rdflib.Literal(row.predicate)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("relation"), rdflib.Literal(row.predicate_canonicalized)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_id"), rdflib.URIRef(row.object_id)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_type"), rdflib.URIRef(row.object_type)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_str"), rdflib.Literal(row.object_str)))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("sentence_id"), rdflib.Literal(f'sentence_id_{row.sentence_id}')))
-            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("extraction_type"), rdflib.Literal(row.extraction_type)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_id"), rdflib.URIRef(str(row.document_id))))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("document_collection"), rdflib.URIRef(row.document_collection)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_id"), rdflib.URIRef(row.subject_id)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_type"), rdflib.URIRef(row.subject_type)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("subject_str"), rdflib.Literal(row.subject_str)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("predicate"), rdflib.Literal(row.predicate)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("relation"), rdflib.Literal(row.relation)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_id"), rdflib.URIRef(row.object_id)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_type"), rdflib.URIRef(row.object_type)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("object_str"), rdflib.Literal(row.object_str)))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("sentence_id"), rdflib.Literal(f'sentence_id_{row.sentence_id}')))
+            output_graph.add((rdflib.URIRef(f'statement_{row.id}'), rdflib.URIRef("extraction_type"), rdflib.Literal(row.extraction_type)))
         else:
             output_graph.add((rdflib.URIRef(row.subject_id),
-                              rdflib.URIRef(row.predicate_canonicalized),
+                              rdflib.URIRef(row.relation),
                               rdflib.URIRef(row.object_id)))
     if export_metadata:
         logging.info('Exporting sentences...')
@@ -68,7 +68,7 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
     """
     session = SessionExtended.get()
     logging.info('Counting predications...')
-    count = Predication.query_predication_count(session, predicate_canonicalized=None,
+    count = Predication.query_predication_count(session, relation=None,
                                                 document_collection=document_collection)
 
     start_time = datetime.now()
@@ -85,7 +85,7 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
                                                                         document_collection=document_collection)):
                 writer.writerow([pred.Predication.document_id, pred.Predication.document_collection,
                                  pred.Predication.subject_id, pred.Predication.subject_type, pred.Predication.subject_str,
-                                 pred.Predication.predicate, pred.Predication.predicate_canonicalized,
+                                 pred.Predication.predicate, pred.Predication.relation,
                                  pred.Predication.object_id, pred.Predication.object_type, pred.Predication.object_str,
                                  pred.Sentence.text, pred.Predication.extraction_type])
                 print_progress_with_eta("exporting", idx, count, start_time)
@@ -94,7 +94,7 @@ def export_predications_as_tsv(output_file:str, document_collection=None, export
             logging.info(f'exporting {count} entries without metadata in TSV format to {output_file}...')
             for idx, pred in enumerate(Predication.iterate_predications(session,
                                                                         document_collection=document_collection)):
-                writer.writerow([pred.subject_id, pred.predicate_canonicalized, pred.object_id])
+                writer.writerow([pred.subject_id, pred.relation, pred.object_id])
                 print_progress_with_eta("exporting", idx, count, start_time)
 
     logging.info('Export finished')

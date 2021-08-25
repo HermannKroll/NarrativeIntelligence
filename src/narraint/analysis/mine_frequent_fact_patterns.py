@@ -23,11 +23,11 @@ def get_facts_for_document_collection(document_collection):
     logging.info('Retrieving facts for collection: {}'.format(document_collection))
     session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.subject_id, Predication.subject_type,
-                      Predication.predicate_canonicalized,
+                      Predication.relation,
                       Predication.object_id, Predication.object_type).yield_per(100000)\
-        .filter_by(document_collection=document_collection).filter(Predication.predicate_canonicalized.isnot(None))\
-        .filter(Predication.predicate_canonicalized != 'associated')\
-        .filter(Predication.predicate_canonicalized != 'PRED_TO_REMOVE')\
+        .filter_by(document_collection=document_collection).filter(Predication.relation.isnot(None))\
+        .filter(Predication.relation != 'associated')\
+        .filter(Predication.relation != 'PRED_TO_REMOVE')\
         .filter(and_(Predication.subject_type != "Species", Predication.object_type != "Species"))\
         .filter(Predication.subject_id != Predication.object_id)
 

@@ -27,7 +27,7 @@ def export_document_graph_as_dot(output_dot, document_id, document_collection):
                 translation[pred.subject_id] = pred.subject_str
            # subject_id = entity_resolver.get_name_for_var_ent_id(pred.subject_id, pred.subject_type,
                                         #                         resolve_gene_by_id=False)
-            predicate = pred.predicate_canonicalized
+            predicate = pred.relation
             #object_id = entity_resolver.get_name_for_var_ent_id(pred.object_id, pred.object_type,
              #                                                   resolve_gene_by_id=False)
             object_id = pred.object_id

@@ -102,59 +102,59 @@ class CanonicalizePredicateTestCase(unittest.TestCase):
 
         session = SessionExtended.get()
         self.assertEqual("treats",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 1).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 1).first()[0])
         self.assertEqual("treats",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 2).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 2).first()[0])
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 3).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 3).first()[0])
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 4).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 4).first()[0])
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 5).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 6).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 7).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 5).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 6).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 7).first()[0])
 
     def test_canonicalize_without_word2vec_model_threshold_too_high(self):
         vocab = RelationVocabulary()
         vocab.load_from_json(util.get_test_resource_filepath('cleaning/pharm_relation_vocab.json'))
         session = SessionExtended.get()
-        session.execute(update(Predication).values(predicate_canonicalized=None)
+        session.execute(update(Predication).values(relation=None)
                         .where(Predication.document_collection == "Test_Canonicalize"))
         session.commit()
 
         canonicalize_predication_table(relation_vocabulary=vocab, document_collection="Test_Canonicalize",
                                        min_predicate_threshold=1)
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 1).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 2).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 3).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 4).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 5).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 6).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 7).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 1).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 2).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 3).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 4).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 5).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 6).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 7).first()[0])
 
     def test_canonicalize_without_word2vec_model_threshold(self):
         vocab = RelationVocabulary()
         vocab.load_from_json(util.get_test_resource_filepath('cleaning/pharm_relation_vocab.json'))
         session = SessionExtended.get()
-        session.execute(update(Predication).values(predicate_canonicalized=None)
+        session.execute(update(Predication).values(relation=None)
                         .where(Predication.document_collection == "Test_Canonicalize"))
         session.commit()
 
         canonicalize_predication_table(relation_vocabulary=vocab, document_collection="Test_Canonicalize",
                                        min_predicate_threshold=0.3)
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 1).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 2).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 3).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 4).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 6).first()[0])
-        self.assertIsNone(session.query(Predication.predicate_canonicalized).filter(Predication.id == 7).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 1).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 2).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 3).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 4).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 6).first()[0])
+        self.assertIsNone(session.query(Predication.relation).filter(Predication.id == 7).first()[0])
 
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 5).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 5).first()[0])
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 8).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 8).first()[0])
         self.assertEqual("induces",
-                         session.query(Predication.predicate_canonicalized).filter(Predication.id == 9).first()[0])
+                         session.query(Predication.relation).filter(Predication.id == 9).first()[0])
 
     def test_canonicalize_without_word2vec_model_output_file(self):
         vocab = RelationVocabulary()

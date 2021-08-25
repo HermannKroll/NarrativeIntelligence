@@ -21,7 +21,7 @@ def compute_document_metadata_service_table():
 
     logging.info('Querying document collections the predication table...')
     q_p_ids = session.query(Predication.document_collection.distinct()) \
-        .filter(Predication.predicate_canonicalized.isnot(None))
+        .filter(Predication.relation.isnot(None))
     document_collections = set()
     for r in q_p_ids:
         document_collections.add(r[0])
@@ -29,7 +29,7 @@ def compute_document_metadata_service_table():
     logging.info(f'Found {len(document_collections)} document collections...')
     for d_col in document_collections:
         sub_query = session.query(Predication.document_id) \
-            .filter(Predication.predicate_canonicalized.isnot(None)) \
+            .filter(Predication.relation.isnot(None)) \
             .filter(Predication.document_collection == d_col)
 
         logging.info(f'Querying titles for collection: {d_col}')

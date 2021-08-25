@@ -12,7 +12,7 @@ from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 def export_predication_core_as_tsv(output_file, document_collection, extraction_type):
     """
     Exports the predication as a tsv file with
-    (doc_id, subject_id, predicate_canonicalized, object_id)
+    (doc_id, subject_id, relation, object_id)
     Converts MeSH Tree Numbers back to descriptors
     :param output_file: the output filename
     :param document_collection: the document collection
@@ -33,7 +33,7 @@ def export_predication_core_as_tsv(output_file, document_collection, extraction_
             try:
                 subject_desc = mesh_ontology.get_descriptor_for_tree_no(p.subject_id)[0]
                 object_desc = mesh_ontology.get_descriptor_for_tree_no(p.object_id)[0]
-                fields = (str(p.document_id), subject_desc, p.predicate_canonicalized, object_desc)
+                fields = (str(p.document_id), subject_desc, p.relation, object_desc)
                 if fields not in exported:
                     f.write('\n' + '\t'.join(fields))
                     exported.add(fields)

@@ -58,7 +58,7 @@ def perform_cdr_evaluation(correct_relations, extraction_type):
     session = SessionExtended.get()
     q = session.query(Predication.document_id, Predication.subject_id, Predication.object_id) \
         .filter(Predication.document_collection == CDR2015_COLLECTION) \
-        .filter(Predication.predicate_canonicalized == 'induces') \
+        .filter(Predication.relation == 'induces') \
         .filter(Predication.subject_type == CHEMICAL).filter(Predication.object_type == DISEASE) \
         .filter(Predication.extraction_type == extraction_type)
 

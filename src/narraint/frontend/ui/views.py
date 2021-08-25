@@ -72,7 +72,7 @@ def get_document_graph(request):
             session = SessionExtended.get()
             query = session.query(Predication).filter(Predication.document_collection == 'PubMed')
             query = query.filter(Predication.document_id == document_id)
-            query = query.filter(Predication.predicate_canonicalized.isnot(None))
+            query = query.filter(Predication.relation.isnot(None))
             facts = set()
             nodes = set()
             for r in query:
@@ -80,7 +80,7 @@ def get_document_graph(request):
                 object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type, resolve_gene_by_id=False)
                 subject_name = f'{subject_name} ({r.subject_type})'
                 object_name = f'{object_name} ({r.object_type})'
-                key = subject_name, r.predicate_canonicalized, object_name
+                key = subject_name, r.relation, object_name
                 facts.add(key)
                 nodes.add(subject_name)
                 nodes.add(object_name)
@@ -287,10 +287,10 @@ class StatsView(TemplateView):
                     session = SessionExtended.get()
                     try:
                         logging.info('Processing database statistics...')
-                        StatsView.stats_query_results = session.query(Predication.predicate_canonicalized,
+                        StatsView.stats_query_results = session.query(Predication.relation,
                                                                       Predication.extraction_type,
-                                                                      func.count(Predication.predicate_canonicalized)). \
-                            group_by(Predication.predicate_canonicalized).group_by(Predication.extraction_type).all()
+                                                                      func.count(Predication.relation)). \
+                            group_by(Predication.relation).group_by(Predication.extraction_type).all()
                     except:
                         traceback.print_exc(file=sys.stdout)
                     session.close()

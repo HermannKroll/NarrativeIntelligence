@@ -16,7 +16,7 @@ Extended = Base
 
 PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "document_collection",
                                                      "subject_id", "subject_str", "subject_type",
-                                                     "predicate", "predicate_canonicalized",
+                                                     "predicate", "relation",
                                                      "object_id", "object_str", "object_type",
                                                      "confidence", "sentence_id", "extraction_type"])
 
@@ -89,7 +89,7 @@ class Predication(Extended, DatabaseTable):
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
     predicate = Column(String, nullable=False, index=True)
-    predicate_canonicalized = Column(String, nullable=True)
+    relation = Column(String, nullable=True)
     object_id = Column(String, nullable=False)
     object_str = Column(String, nullable=False)
     object_type = Column(String, nullable=False)
@@ -99,7 +99,7 @@ class Predication(Extended, DatabaseTable):
 
     def __str__(self):
         return "<{} ({})>\t<{}>\t<{} ({})>".format(self.subject_id, self.subject_type,
-                                                   self.predicate_canonicalized,
+                                                   self.relation,
                                                    self.object_id, self.object_type)
 
     def __repr__(self):
@@ -107,7 +107,7 @@ class Predication(Extended, DatabaseTable):
 
     @staticmethod
     def iterate_predications(session, document_collection=None, bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
-        pred_query = session.query(Predication).filter(Predication.predicate_canonicalized != None)
+        pred_query = session.query(Predication).filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
         pred_query = pred_query.yield_per(bulk_query_cursor_count)
@@ -118,7 +118,7 @@ class Predication(Extended, DatabaseTable):
     def iterate_predications_joined_sentences(session, document_collection=None,
                              bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
         pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id)\
-            .filter(Predication.predicate_canonicalized != None)
+            .filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
         pred_query = pred_query.yield_per(bulk_query_cursor_count)
@@ -126,19 +126,19 @@ class Predication(Extended, DatabaseTable):
             yield res
 
     @staticmethod
-    def query_predication_count(session, document_collection=None, predicate_canonicalized=None):
+    def query_predication_count(session, document_collection=None, relation=None):
         """
         Counts the number of rows in Predicate
         :param session: session handle
         :param document_collection: count only in document collection
-        :param predicate_canonicalized: if given the predication is filtered by this predicate_canonicalized
+        :param relation: if given the predication is filtered by this relation
         :return: the number of rows
         """
         query = session.query(Predication)
         if document_collection:
             query = query.filter(Predication.document_collection == document_collection)
-        if predicate_canonicalized:
-            query = query.filter(Predication.predicate_canonicalized == predicate_canonicalized)
+        if relation:
+            query = query.filter(Predication.relation == relation)
         return query.count()
 
     @staticmethod
@@ -170,17 +170,17 @@ class Predication(Extended, DatabaseTable):
         Queries predicates with the corresponding relation mapping and count of tuples
         :param session: session handle
         :param document_collection: document collection
-        :return: a list of tuples (predicate, predicate_canonicalized, count of entries)
+        :return: a list of tuples (predicate, relation, count of entries)
         """
         if not document_collection:
-            query = session.query(Predication.predicate, Predication.predicate_canonicalized,
+            query = session.query(Predication.predicate, Predication.relation,
                                   func.count(Predication.predicate)) \
-                .group_by(Predication.predicate, Predication.predicate_canonicalized)
+                .group_by(Predication.predicate, Predication.relation)
         else:
-            query = session.query(Predication.predicate, Predication.predicate_canonicalized,
+            query = session.query(Predication.predicate, Predication.relation,
                                   func.count(Predication.predicate)) \
                 .filter(Predication.document_collection == document_collection) \
-                .group_by(Predication.predicate, Predication.predicate_canonicalized)
+                .group_by(Predication.predicate, Predication.relation)
 
         predicates_with_count = []
         start_time = datetime.now()
@@ -198,7 +198,7 @@ class PredicationDenorm(Extended, DatabaseTable):
     id = Column(BigInteger, nullable=False, autoincrement=True)
     subject_id = Column(String, nullable=False, index=True)
     subject_type = Column(String, nullable=False, index=True)
-    predicate_canonicalized = Column(String, nullable=False, index=True)
+    relation = Column(String, nullable=False, index=True)
     object_id = Column(String, nullable=False, index=True)
     object_type = Column(String, nullable=False, index=True)
     provenance_mapping = Column(String, nullable=False)
@@ -246,11 +246,11 @@ class Sentence(Extended, DatabaseTable):
 
     @staticmethod
     def iterate_sentences(session, document_collection=None, bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
-        pred_query = session.query(Sentence)
+        sent_query = session.query(Sentence)
         if document_collection:
-            pred_query = pred_query.filter(Predication.document_collection == document_collection)
-        pred_query = pred_query.yield_per(bulk_query_cursor_count)
-        for res in pred_query:
+            sent_query = sent_query.filter(Sentence.document_collection == document_collection)
+        sent_query = sent_query.yield_per(bulk_query_cursor_count)
+        for res in sent_query:
             yield res
 
 
