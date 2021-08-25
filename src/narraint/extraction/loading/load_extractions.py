@@ -2,12 +2,10 @@ import hashlib
 import logging
 from collections import namedtuple
 from datetime import datetime
-from io import StringIO
 from typing import List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence
-from narraint.config import BULK_INSERT_AFTER_K
 from narraint.extraction.loading.clean_load_genes import clean_and_translate_gene_ids
 from narrant.progress import print_progress_with_eta
 
