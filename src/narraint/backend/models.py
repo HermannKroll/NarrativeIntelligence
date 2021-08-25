@@ -10,6 +10,8 @@ from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, Pr
 import narrant
 from narrant.backend.models import Base, DatabaseTable
 
+BULK_QUERY_CURSOR_COUNT_DEFAULT = 10000
+
 Extended = Base
 
 PredicationResult = namedtuple('PredicationResult', ["id", "document_id", "document_collection",
@@ -104,7 +106,7 @@ class Predication(Extended, DatabaseTable):
         return "<Predication {}>".format(self.id)
 
     @staticmethod
-    def iterate_predications(session, document_collection=None, bulk_query_cursor_count = 100000):
+    def iterate_predications(session, document_collection=None, bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
         pred_query = session.query(Predication).filter(Predication.predicate_canonicalized != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
@@ -230,6 +232,15 @@ class Sentence(Extended, DatabaseTable):
     document_collection = Column(String, nullable=False, index=True)
     text = Column(String, nullable=False)
     md5hash = Column(String, nullable=False)
+
+    @staticmethod
+    def iterate_sentences(session, document_collection=None, bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
+        pred_query = session.query(Sentence)
+        if document_collection:
+            pred_query = pred_query.filter(Predication.document_collection == document_collection)
+        pred_query = pred_query.yield_per(bulk_query_cursor_count)
+        for res in pred_query:
+            yield res
 
 
 class DocProcessedByIE(Extended, DatabaseTable):

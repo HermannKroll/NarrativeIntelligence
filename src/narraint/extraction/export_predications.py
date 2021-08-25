@@ -9,15 +9,16 @@ import csv
 import rdflib
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication
+from narraint.backend.models import Predication, Sentence
 from narrant.progress import print_progress_with_eta, Progress
 
 
-def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_collection=None):
+def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_collection=None, export_metadata=False):
     """
     Exports predications in a turtle rdf serialization format
     :param output_file: the path to the output file
     :param document_collection: export statements for this document collection only (optional)
+    :param export_metadata: if true metadata will also be extracted
     :return: None
     """
     session = SessionExtended.get()
@@ -27,10 +28,30 @@ def export_predications_as_rdf(output_file: tp.Union[pl.Path, str], document_col
     output_graph = rdflib.Graph()
     prog.start_time()
     for n, row in enumerate(Predication.iterate_predications(session, document_collection=document_collection)):
-        output_graph.add((rdflib.URIRef(row.subject_id),
-                          rdflib.URIRef(row.predicate_canonicalized),
-                          rdflib.URIRef(row.object_id)))
-        prog.print_progress(n+1)
+        prog.print_progress(n + 1)
+        if export_metadata:
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("document_id"), rdflib.URIRef(str(row.document_id))))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("document_collection"), rdflib.URIRef(row.document_collection)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_id"), rdflib.URIRef(row.subject_id)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_type"), rdflib.URIRef(row.subject_type)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("subject_str"), rdflib.Literal(row.subject_str)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("predicate"), rdflib.Literal(row.predicate)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("relation"), rdflib.Literal(row.predicate_canonicalized)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_id"), rdflib.URIRef(row.object_id)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_type"), rdflib.URIRef(row.object_type)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("object_str"), rdflib.Literal(row.object_str)))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("sentence_id"), rdflib.Literal(f'sentence_id_{row.sentence_id}')))
+            output_graph.add((rdflib.URIRef(str(row.id)), rdflib.URIRef("extraction_type"), rdflib.Literal(row.extraction_type)))
+        else:
+            output_graph.add((rdflib.URIRef(row.subject_id),
+                              rdflib.URIRef(row.predicate_canonicalized),
+                              rdflib.URIRef(row.object_id)))
+    if export_metadata:
+        logging.info('Exporting sentences...')
+        # export sentences also
+        for n, row in enumerate(Sentence.iterate_sentences(session, document_collection=document_collection)):
+            output_graph.add((rdflib.URIRef(f'sentence_id_{row.id}'), rdflib.URIRef('text'), rdflib.Literal(row.text)))
+
     prog.done()
     logging.info(f"Writing graph to {output_file}...")
     output_graph.serialize(destination=output_file, format="turtle")

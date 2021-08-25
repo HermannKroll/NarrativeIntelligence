@@ -17,7 +17,7 @@ class ExportPredicationsTest(unittest.TestCase):
         Document.bulk_insert_values_into_table(session, documents)
 
         sentences = [dict(id=1, document_id=1, document_collection="Test_Export", text="Hello", md5hash="1"),
-                     dict(id=2, document_id=1, document_collection="Test_Export", text="World", md5hash="2")]
+                     dict(id=2, document_id=1, document_collection="Test_Export", text="World. Nice", md5hash="2")]
         Sentence.bulk_insert_values_into_table(session, sentences)
 
         predications = [dict(id=11,
@@ -94,7 +94,7 @@ class ExportPredicationsTest(unittest.TestCase):
                       tuples)
 
     def test_export_predications_as_rdf(self):
-        output_file = util.tmp_rel_path("export_predications.rdf")
+        output_file = util.tmp_rel_path("export_predications.ttl")
         export_predications_as_rdf(output_file, document_collection="Test_Export")
 
         g = rdflib.Graph()
@@ -105,3 +105,67 @@ class ExportPredicationsTest(unittest.TestCase):
         self.assertIn(('C', 'treats', 'B'), tuples)
         self.assertIn(('A', 'induces', 'B'), tuples)
         self.assertIn(('C', 'induces', 'D'), tuples)
+
+    def test_export_predications_as_rdf_with_metadata(self):
+        output_file = util.tmp_rel_path("export_predications_with_metadata.ttl")
+        export_predications_as_rdf(output_file, document_collection="Test_Export", export_metadata=True)
+
+        g = rdflib.Graph()
+        g.parse(output_file, format="turtle")
+        tuples = set([(s.split('/')[-1], p.split('/')[-1], o.split('/')[-1]) for s, p, o in g])
+        self.assertEqual(4*12+2, len(tuples))
+
+        self.assertIn(('sentence_id_1', 'text', 'Hello'), tuples)
+        self.assertIn(('sentence_id_2', 'text', 'World. Nice'), tuples)
+        self.assertIn(('11', 'document_id', '1'), tuples)
+        self.assertIn(('11', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('11', 'subject_id', 'A'), tuples)
+        self.assertIn(('11', 'subject_type', 'Drug'), tuples)
+        self.assertIn(('11', 'subject_str', 'ab'), tuples)
+        self.assertIn(('11', 'predicate', 'treat'), tuples)
+        self.assertIn(('11', 'relation', 'treats'), tuples)
+        self.assertIn(('11', 'object_id', 'B'), tuples)
+        self.assertIn(('11', 'object_type', 'Disease'), tuples)
+        self.assertIn(('11', 'object_str', 'bc'), tuples)
+        self.assertIn(('11', 'sentence_id', 'sentence_id_1'), tuples)
+        self.assertIn(('11', 'extraction_type', 'PathIE'), tuples)
+
+        self.assertIn(('12', 'document_id', '1'), tuples)
+        self.assertIn(('12', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('12', 'subject_id', 'C'), tuples)
+        self.assertIn(('12', 'subject_type', 'Disease'), tuples)
+        self.assertIn(('12', 'subject_str', 'c a'), tuples)
+        self.assertIn(('12', 'predicate', 'treat'), tuples)
+        self.assertIn(('12', 'relation', 'treats'), tuples)
+        self.assertIn(('12', 'object_id', 'B'), tuples)
+        self.assertIn(('12', 'object_type', 'Disease'), tuples)
+        self.assertIn(('12', 'object_str', 'b a'), tuples)
+        self.assertIn(('12', 'sentence_id', 'sentence_id_1'), tuples)
+        self.assertIn(('12', 'extraction_type', 'PathIE'), tuples)
+
+        self.assertIn(('13', 'document_id', '2'), tuples)
+        self.assertIn(('13', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('13', 'subject_id', 'A'), tuples)
+        self.assertIn(('13', 'subject_type', 'Disease'), tuples)
+        self.assertIn(('13', 'subject_str', 'a'), tuples)
+        self.assertIn(('13', 'predicate', 'induce'), tuples)
+        self.assertIn(('13', 'relation', 'induces'), tuples)
+        self.assertIn(('13', 'object_id', 'B'), tuples)
+        self.assertIn(('13', 'object_type', 'Disease'), tuples)
+        self.assertIn(('13', 'object_str', 'b'), tuples)
+        self.assertIn(('13', 'sentence_id', 'sentence_id_2'), tuples)
+        self.assertIn(('13', 'extraction_type', 'PathIE'), tuples)
+
+        self.assertIn(('14', 'document_id', '2'), tuples)
+        self.assertIn(('14', 'document_collection', 'Test_Export'), tuples)
+        self.assertIn(('14', 'subject_id', 'C'), tuples)
+        self.assertIn(('14', 'subject_type', 'Gene'), tuples)
+        self.assertIn(('14', 'subject_str', rdflib.term.Literal('')), tuples)
+        self.assertIn(('14', 'predicate', 'induce'), tuples)
+        self.assertIn(('14', 'relation', 'induces'), tuples)
+        self.assertIn(('14', 'object_id', 'D'), tuples)
+        self.assertIn(('14', 'object_type', 'Gene'), tuples)
+        self.assertIn(('14', 'object_str', rdflib.term.Literal('')), tuples)
+        self.assertIn(('14', 'sentence_id', 'sentence_id_2'), tuples)
+        self.assertIn(('14', 'extraction_type', 'PathIE'), tuples)
+
