@@ -260,7 +260,7 @@ def check_type_constraints():
             object_str=pred.subject_str,
             object_type=pred.subject_type,
             predicate=pred.predicate,
-            predicate_canonucalized=pred.relation,
+            relation=pred.relation,
             subject_id=pred.object_id,
             subject_str=pred.object_str,
             subject_type=pred.object_type,
