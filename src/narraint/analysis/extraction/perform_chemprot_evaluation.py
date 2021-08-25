@@ -16,7 +16,7 @@ from narraint.cleaning.canonicalize_predicates import canonicalize_predication_t
 from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from narraint.extraction.openie.main import run_corenlp_openie
 from narraint.extraction.openie6.main import openie6_run
-from narraint.extraction.pathie.load_pathie_extractions import read_pathie_extractions_tsv
+from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from narraint.extraction.pathie.main import run_pathie
 from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
