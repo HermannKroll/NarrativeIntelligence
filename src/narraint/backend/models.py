@@ -102,8 +102,11 @@ class Predication(Extended, DatabaseTable):
 
     @staticmethod
     def iterate_predications(session, document_collection=None,
-                             bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
-        pred_query = session.query(Predication).filter(Predication.relation != None)
+                             bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT,
+                             check_relation_not_null=False):
+        pred_query = session.query(Predication)
+        if check_relation_not_null:
+            pred_query = pred_query.filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
         pred_query = pred_query.yield_per(bulk_query_cursor_count)
@@ -112,9 +115,11 @@ class Predication(Extended, DatabaseTable):
 
     @staticmethod
     def iterate_predications_joined_sentences(session, document_collection=None,
-                                              bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT):
-        pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id) \
-            .filter(Predication.relation != None)
+                                              bulk_query_cursor_count=BULK_QUERY_CURSOR_COUNT_DEFAULT,
+                                              check_relation_not_null=False):
+        pred_query = session.query(Predication, Sentence).join(Sentence, Predication.sentence_id == Sentence.id)
+        if check_relation_not_null:
+            pred_query = pred_query.filter(Predication.relation != None)
         if document_collection:
             pred_query = pred_query.filter(Predication.document_collection == document_collection)
         pred_query = pred_query.yield_per(bulk_query_cursor_count)
