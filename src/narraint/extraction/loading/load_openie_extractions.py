@@ -72,7 +72,7 @@ def get_subject_and_object_entities(doc_tags, ie_sub: str, ie_obj: str, entity_f
     :return: a list of entities (ent_str, ent_id, ent_type) included in subj, list of entities in obj
     """
     if entity_filter == OpenIEEntityFilterMode.NO_ENTITY_FILTER:
-        return [(ie_sub, None, None), (ie_obj, None, None)]
+        return [(ie_sub, ie_sub, "Unknown")], [(ie_obj, ie_obj, "Unknown")]
 
     # default not hit
     subs_included = []
@@ -128,7 +128,7 @@ def load_tags_for_doc_ids(doc_ids: List[int], collection: str) -> {str: List[Tup
     results = session.execute(query)
     counter = 0
     for row in results:
-        ent_str = ' {} '.format(row[2]).lower()
+        ent_str = ' {} '.format(row[2]).strip().lower()
         t = (row[1], ent_str, row[3])
         doc2tags[int(row[0])].append(t)
         counter += 1
@@ -234,9 +234,12 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
     # go trough all cached triples
     start_time = datetime.now()
     for openie_t in tuples_cached:
-        if openie_t.doc_id not in doc2tags:
-            continue
-        doc_tags = doc2tags[openie_t.doc_id]
+        if entity_filter != OpenIEEntityFilterMode.NO_ENTITY_FILTER:
+            if openie_t.doc_id not in doc2tags:
+                continue
+            doc_tags = doc2tags[openie_t.doc_id]
+        else:
+            doc_tags = []
         # go trough all detected entities in the subject and object part of the open ie triple
         sub_ents, obj_ents = get_subject_and_object_entities(doc_tags, openie_t.subj, openie_t.obj, entity_filter)
         for s_txt, s_id, s_type in sub_ents:
@@ -281,6 +284,18 @@ def clean_open_ie(doc_ids, openie_tuples: [OPENIE_TUPLE], collection,
                                         clean_genes=clean_genes)
 
 
+def load_openie_tuples(input_file: str, document_collection: str, entity_filter: OpenIEEntityFilterMode):
+    """
+    Load OpenIE tuples from a TSV file
+    :param input_file: the path to the tsv file
+    :param document_collection: the document collection
+    :param entity_filter: the entity filter mode
+    :return: None
+    """
+    doc_ids, openie_tuples = read_stanford_openie_input(input_file)
+    clean_open_ie(doc_ids, openie_tuples, document_collection, entity_filter)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help='OpenIE export file (exported by main.py / pipeline.py')
@@ -294,9 +309,7 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-
-    doc_ids, openie_tuples = read_stanford_openie_input(args.input)
-    clean_open_ie(doc_ids, openie_tuples, args.collection, args.entity_filter)
+    load_openie_tuples(args.input, args.collection, args.entity_filter)
     logging.info('finished')
 
 

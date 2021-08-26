@@ -39,3 +39,25 @@
 23952588	1523	1531	levodopa	Chemical	D007980
 23952588	1553	1561	levodopa	Chemical	D007980
 
+22836123|t| Late-onset scleroderma renal crisis induced by tacrolimus and prednisolone: a case report.
+22836123|a| Scleroderma renal crisis (SRC) is a rare complication of systemic sclerosis (SSc) but can be severe enough to require temporary or permanent renal replacement therapy. Moderate to high dose corticosteroid use is recognized as a major risk factor for SRC. Furthermore, there have been reports of thrombotic microangiopathy precipitated by cyclosporine in patients with SSc. In this article, we report a patient with SRC induced by tacrolimus and corticosteroids. The aim of this work is to call attention to the risk of tacrolimus use in patients with SSc.
+22836123	11	35	scleroderma renal crisis	Disease	D007674
+22836123	47	57	tacrolimus	Chemical	D016559
+22836123	62	74	prednisolone	Chemical	D011239
+22836123	91	115	Scleroderma renal crisis	Disease	D007674
+22836123	117	120	SRC	Disease	D007674
+22836123	148	166	systemic sclerosis	Disease	D012595
+22836123	168	171	SSc	Disease	D012595
+22836123	281	295	corticosteroid	Chemical	D000305
+22836123	341	344	SRC	Disease	D007674
+22836123	386	412	thrombotic microangiopathy	Disease	D057049
+22836123	429	441	cyclosporine	Chemical	D016572
+22836123	459	462	SSc	Disease	D012595
+22836123	506	509	SRC	Disease	D007674
+22836123	521	531	tacrolimus	Chemical	D016559
+22836123	536	551	corticosteroids	Chemical	D000305
+22836123	610	620	tacrolimus	Chemical	D016559
+22836123	642	645	SSc	Disease	D012595
+
+
+
