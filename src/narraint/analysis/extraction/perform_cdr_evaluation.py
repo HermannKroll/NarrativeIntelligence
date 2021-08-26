@@ -40,20 +40,20 @@ CDR2015_canonicalizing_distances = os.path.join(CDR2015_DIR_OUTPUT, 'canonicaliz
 WORD2VEC_MODEL = '/home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin'
 
 CDR2015_COLLECTION = 'CDR2015'
-EXTRACT_PUBTATOR_DOCUMENTS = True
-LOAD_PUBTATOR_DOCUMENT = True
+EXTRACT_PUBTATOR_DOCUMENTS = False
+LOAD_PUBTATOR_DOCUMENT = False
 
 RUN_CORENLP_OPENIE = False
-RUN_PATHIE = True
+RUN_PATHIE = False
 RUN_STANZA_PATHIE = False
 RUN_OPENIE6 = False
 
 LOAD_STANZA_PATHIE = False
 LOAD_CORENLP_OPENIE = False
-LOAD_PATHIE = True
+LOAD_PATHIE = False
 LOAD_OPENIE6 = False
 
-CANONICALIZE_OUTPUT = True
+CANONICALIZE_OUTPUT = False
 
 
 def perform_cdr_evaluation(correct_relations, extraction_type):
@@ -184,7 +184,7 @@ def main():
                                        output_distances=CDR2015_canonicalizing_distances,
                                        document_collection=CDR2015_COLLECTION,
                                        relation_vocabulary=relation_vocab)
-        check_type_constraints()
+        check_type_constraints(reorder_tuples=False)
 
     logging.info('=' * 60)
     logging.info(f'Begin evaluation for {PATHIE_EXTRACTION}...')

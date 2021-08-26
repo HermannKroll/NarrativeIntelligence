@@ -198,7 +198,7 @@ def method_rule():
     session.commit()
 
 
-def check_type_constraints():
+def check_type_constraints(reorder_tuples=True):
     """
     Checks the type constraints
     If subject and object could be swapped to meet the constraint - they will be swapped
@@ -244,40 +244,41 @@ def check_type_constraints():
     session.commit()
     clean_predication_to_delete_table(session)
 
-    logging.info(f'Reordering {len(preds_to_reorder)} predication subject and objects...')
-    insert_predication_ids_to_delete(preds_to_reorder)
-    subquery = session.query(PredicationToDelete.predication_id).subquery()
-    pred_query = session.query(Predication).filter(Predication.id.in_(subquery)) \
-        .yield_per(BULK_QUERY_CURSOR_COUNT)
-    predication_values = []
-    start_time = datetime.now()
-    for idx, pred in enumerate(pred_query):
-        print_progress_with_eta("reorder subject and objects...", idx, pred_count, start_time)
-        predication_values.append(dict(
-            document_id=pred.document_id,
-            document_collection=pred.document_collection,
-            object_id=pred.subject_id,
-            object_str=pred.subject_str,
-            object_type=pred.subject_type,
-            predicate=pred.predicate,
-            relation=pred.relation,
-            subject_id=pred.object_id,
-            subject_str=pred.object_str,
-            subject_type=pred.object_type,
-            confidence=pred.confidence,
-            sentence_id=pred.sentence_id,
-            extraction_type=pred.extraction_type
-        ))
+    if reorder_tuples:
+        logging.info(f'Reordering {len(preds_to_reorder)} predication subject and objects...')
+        insert_predication_ids_to_delete(preds_to_reorder)
+        subquery = session.query(PredicationToDelete.predication_id).subquery()
+        pred_query = session.query(Predication).filter(Predication.id.in_(subquery)) \
+            .yield_per(BULK_QUERY_CURSOR_COUNT)
+        predication_values = []
+        start_time = datetime.now()
+        for idx, pred in enumerate(pred_query):
+            print_progress_with_eta("reorder subject and objects...", idx, pred_count, start_time)
+            predication_values.append(dict(
+                document_id=pred.document_id,
+                document_collection=pred.document_collection,
+                object_id=pred.subject_id,
+                object_str=pred.subject_str,
+                object_type=pred.subject_type,
+                predicate=pred.predicate,
+                relation=pred.relation,
+                subject_id=pred.object_id,
+                subject_str=pred.object_str,
+                subject_type=pred.object_type,
+                confidence=pred.confidence,
+                sentence_id=pred.sentence_id,
+                extraction_type=pred.extraction_type
+            ))
 
-    logging.info(f'Insert {len(predication_values)} reordered predications to database')
-    Predication.bulk_insert_values_into_table(session, predication_values)
-    logging.info(f'Deleting {len(preds_to_reorder)} old and wrongly ordered predications')
-    subquery = session.query(PredicationToDelete.predication_id).subquery()
-    stmt = delete(Predication).where(Predication.id.in_(subquery))
-    session.execute(stmt)
-    logging.debug('Committing...')
-    session.commit()
-    clean_predication_to_delete_table(session)
+        logging.info(f'Insert {len(predication_values)} reordered predications to database')
+        Predication.bulk_insert_values_into_table(session, predication_values)
+        logging.info(f'Deleting {len(preds_to_reorder)} old and wrongly ordered predications')
+        subquery = session.query(PredicationToDelete.predication_id).subquery()
+        stmt = delete(Predication).where(Predication.id.in_(subquery))
+        session.execute(stmt)
+        logging.debug('Committing...')
+        session.commit()
+        clean_predication_to_delete_table(session)
 
 
 def main():
