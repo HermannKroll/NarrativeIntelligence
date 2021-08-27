@@ -13,9 +13,10 @@ class LoadExtractionsTestCase(TestCase):
 
     def setUp(self) -> None:
         documents_file = util.get_test_resource_filepath("extraction/documents_1.pubtator")
-        document_bulk_load(documents_file, "Test_Load_OpenIE_1")
+        test_mapping = {"Chemical": ("Chemical", "1.0"), "Disease": ("Diseasetagger", "1.0")}
+        document_bulk_load(documents_file, "Test_Load_OpenIE_1", tagger_mapping=test_mapping)
 
-    def test_load_openie_extrations(self):
+    def test_load_openie_extrations_no_entity_filter(self):
         session = SessionExtended.get()
         session.execute(delete(Predication).where(Predication.document_collection == 'Test_Load_OpenIE_1'))
         session.commit()
@@ -82,4 +83,42 @@ class LoadExtractionsTestCase(TestCase):
                        'have reports', 'Unknown', 'have reports', 'OpenIE',
                        'Furthermore , there have been reports of thrombotic microangiopathy precipitated by cyclosporine in patients with SSc .'),
                       tuples)
+
+    def test_load_openie_extrations_partial_entity_filter(self):
+        session = SessionExtended.get()
+        session.execute(delete(Predication).where(Predication.document_collection == 'Test_Load_OpenIE_1'))
+        session.commit()
+
+        openie_file = util.get_test_resource_filepath("extraction/openie_extractions_1.tsv")
+        load_openie_tuples(openie_file, document_collection="Test_Load_OpenIE_1",
+                           entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
+
+        self.assertEqual(1, session.query(Predication).filter(
+            Predication.document_collection == "Test_Load_OpenIE_1").count())
+        tuples = set()
+        for q in Predication.iterate_predications_joined_sentences(session, document_collection="Test_Load_OpenIE_1"):
+            tuples.add((q.Predication.document_id, q.Predication.document_collection,
+                        q.Predication.subject_id, q.Predication.subject_type, q.Predication.subject_str,
+                        q.Predication.predicate, q.Predication.relation,
+                        q.Predication.object_id, q.Predication.object_type, q.Predication.object_str,
+                        q.Predication.extraction_type, q.Sentence.text))
+
+        self.assertIn((22836123, 'Test_Load_OpenIE_1',
+                       'D016559', 'Chemical', 'tacrolimus',
+                       'induce', None,
+                       'D007674', 'Disease', 'scleroderma renal crisis', 'OpenIE',
+                       'Late - onset scleroderma renal crisis induced by tacrolimus and prednisolone : a case report .'),
+                      tuples)
+
+    def test_load_openie_extrations_exact_entity_filter(self):
+        session = SessionExtended.get()
+        session.execute(delete(Predication).where(Predication.document_collection == 'Test_Load_OpenIE_1'))
+        session.commit()
+
+        openie_file = util.get_test_resource_filepath("extraction/openie_extractions_1.tsv")
+        load_openie_tuples(openie_file, document_collection="Test_Load_OpenIE_1",
+                           entity_filter=OpenIEEntityFilterMode.EXACT_ENTITY_FILTER)
+
+        self.assertEqual(0, session.query(Predication).filter(
+            Predication.document_collection == "Test_Load_OpenIE_1").count())
 
