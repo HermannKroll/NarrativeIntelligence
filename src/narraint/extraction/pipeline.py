@@ -15,10 +15,12 @@ from narraint.config import NLP_CONFIG
 from narraint.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from narraint.extraction.loading.load_pathie_extractions import load_pathie_extractions
 from narraint.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
+from narraint.extraction.pathie_stanza.main import run_stanza_pathie
 from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
 from narrant.backend.export import export
 from narrant.preprocessing import enttypes
+from narrant.pubtator.count import count_documents
 from narrant.util.helpers import chunks
 
 DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
@@ -119,21 +121,25 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
     export(document_export_file, enttypes.ALL, document_ids=ids_to_process, collection=document_collection,
            content=True)
     time_exported = datetime.now()
-    logging.info('Init spacy nlp...')
-    spacy_nlp = English()  # just the language with no model
-    sentencizer = spacy_nlp.create_pipe("sentencizer")
-    spacy_nlp.add_pipe(sentencizer)
 
-    logging.info('Filtering documents...')
-    count_ie_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
-                                                                     ie_input_dir, ie_filelist_file, spacy_nlp,
-                                                                     workers)
+    logging.info('Counting documents...')
+    count_ie_files = count_documents(document_export_file)
     time_filtered = datetime.now()
     time_load = datetime.now()
     if count_ie_files == 0:
         logging.info('No files to process for IE - stopping')
     else:
         if extraction_type == PATHIE_EXTRACTION:
+            logging.info('Init spacy nlp...')
+            spacy_nlp = English()  # just the language with no model
+            sentencizer = spacy_nlp.create_pipe("sentencizer")
+            spacy_nlp.add_pipe(sentencizer)
+
+            logging.info('Filtering documents...')
+            count_ie_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
+                                                                             ie_input_dir, ie_filelist_file, spacy_nlp,
+                                                                             workers)
+
             corenlp_output_dir = os.path.join(working_dir, 'corenlp_output')
             if not os.path.exists(corenlp_output_dir):
                 os.mkdir(corenlp_output_dir)
@@ -151,10 +157,14 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 
             logging.info('Loading extractions into database...')
             time_load = datetime.now()
-            load_pathie_extractions(ie_output_file, document_collection, extraction_type)
+            load_pathie_extractions(ie_output_file, document_collection, PATHIE_EXTRACTION)
         elif extraction_type == PATHIE_STANZA_EXTRACTION:
-            # Todo: Implement
-            raise NotImplementedError
+            pred_vocab = relation_vocab.relation_dict if relation_vocab else None
+            logging.info('Starting PathIE Stanza...')
+            start = datetime.now()
+            run_stanza_pathie(document_export_file, ie_output_file, predicate_vocabulary=pred_vocab)
+            logging.info((" done in {}".format(datetime.now() - start)))
+            load_pathie_extractions(ie_output_file, document_collection, PATHIE_STANZA_EXTRACTION)
         elif extraction_type == OPENIE_EXTRACTION:
             # Todo: Implement
             raise NotImplementedError
@@ -176,7 +186,8 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("idfile", help="Document ID file (documents must be in database)")
-    parser.add_argument("-et", "--extraction_type", required=True, help="OpenIE|PathIE|PathIEStanza")
+    parser.add_argument("-et", "--extraction_type", required=True, help="the extraction method",
+                        choices=list([OPENIE_EXTRACTION,OPENIE6_EXTRACTION,PATHIE_EXTRACTION,PATHIE_STANZA_EXTRACTION]))
     parser.add_argument("-c", "--collection", required=True, help="Name of the given document collection")
     parser.add_argument("--config", help="OpenIE / PathIE Configuration file", default=NLP_CONFIG)
     parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
