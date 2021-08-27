@@ -4,7 +4,8 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode
+from narraint.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode, \
+    get_subject_and_object_entities
 from narrant.backend.load_document import document_bulk_load
 from nitests import util
 
@@ -15,6 +16,45 @@ class LoadExtractionsTestCase(TestCase):
         documents_file = util.get_test_resource_filepath("extraction/documents_1.pubtator")
         test_mapping = {"Chemical": ("Chemical", "1.0"), "Disease": ("Diseasetagger", "1.0")}
         document_bulk_load(documents_file, "Test_Load_OpenIE_1", tagger_mapping=test_mapping)
+
+    def test_detect_subjects_and_objects(self):
+        doc_tags = [("E1", "this", "ThisType"),
+                    ("E1", "test", "TestType")]
+
+        s, o = get_subject_and_object_entities(doc_tags, "this", "test",
+                                               entity_filter=OpenIEEntityFilterMode.EXACT_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "This", "Test",
+                                               entity_filter=OpenIEEntityFilterMode.EXACT_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "this", "test",
+                                               entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "This", "Test",
+                                               entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "this is", "a test",
+                                               entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "This is", "A Test",
+                                               entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
+        self.assertEqual(('this', 'E1', 'ThisType'), s[0])
+        self.assertEqual(('test', 'E1', 'TestType'), o[0])
+
+        s, o = get_subject_and_object_entities(doc_tags, "this is", "a test",
+                                               entity_filter=OpenIEEntityFilterMode.NO_ENTITY_FILTER)
+        self.assertEqual(('this is', 'this is', 'Unknown'), s[0])
+        self.assertEqual(('a test', 'a test', 'Unknown'), o[0])
 
     def test_load_openie_extrations_no_entity_filter(self):
         session = SessionExtended.get()
@@ -121,4 +161,3 @@ class LoadExtractionsTestCase(TestCase):
 
         self.assertEqual(0, session.query(Predication).filter(
             Predication.document_collection == "Test_Load_OpenIE_1").count())
-
