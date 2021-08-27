@@ -72,8 +72,7 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
                                 document_collection=document_collection,
                                 extraction_type=extraction_type))
     session = SessionExtended.get()
-    session.bulk_insert_mappings(DocProcessedByIE, doc_inserts)
-    session.commit()
+    DocProcessedByIE.bulk_insert_values_into_table(session, doc_inserts)
     logging.info(f'{len(doc_inserts)} document ids have been inserted')
 
 
@@ -126,12 +125,12 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
     spacy_nlp.add_pipe(sentencizer)
 
     logging.info('Filtering documents...')
-    amount_ie_docs, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
+    count_ie_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
                                                                      ie_input_dir, ie_filelist_file, spacy_nlp,
                                                                      workers)
     time_filtered = datetime.now()
     time_load = datetime.now()
-    if amount_ie_docs == 0:
+    if count_ie_files == 0:
         logging.info('No files to process for IE - stopping')
     else:
         if extraction_type == PATHIE_EXTRACTION:
@@ -146,7 +145,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 
             pred_vocab = relation_vocab.relation_dict if relation_vocab else None
             # Process output
-            pathie_process_corenlp_output_parallelized(corenlp_output_dir, amount_ie_docs, ie_output_file, doc2tags,
+            pathie_process_corenlp_output_parallelized(corenlp_output_dir, count_ie_files, ie_output_file, doc2tags,
                                                        workers=workers, predicate_vocabulary=pred_vocab)
             logging.info((" done in {}".format(datetime.now() - start)))
 
