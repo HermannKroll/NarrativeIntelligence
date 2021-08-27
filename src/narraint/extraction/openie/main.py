@@ -8,18 +8,23 @@ import tempfile
 from datetime import datetime
 from time import sleep
 
+from spacy.lang.en import English
+
 from narraint.config import NLP_CONFIG
+from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
 from narrant.progress import print_progress_with_eta
+from narrant.pubtator.count import count_documents
 from narrant.pubtator.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 
 
-def openie_prepare_files(input):
+def openie_prepare_files(document_file, no_entity_filter=False):
     """
     Converts a PubTator file into plain texts files which can be processed by OpenIE
     Easily speaking, writes title and abstract of a PubTator file to a plain text file
     Creates a new temporary directory as a workign dir
-    :param input: a PubTator file / a directory of PubTator files
+    :param document_file: a PubTator file / a directory of PubTator files
+    :param no_entity_filter: if true only sentences with two tags will be processed by OpenIE
     :return: a filelist for OpenIE, the location where the OpenIE output should be stored, the amount of files
     """
     temp_dir = tempfile.mkdtemp()
@@ -30,24 +35,38 @@ def openie_prepare_files(input):
     input_files = []
 
     amount_skipped_files = 0
-    amount_files = 0
+    doc_count = count_documents(document_file)
     logging.info('counting files to process....')
-    for document_content in read_pubtator_documents(input):
-        doc = TaggedDocument(from_str=document_content)
-        if not doc or not doc.title or not doc.abstract:
-            amount_skipped_files += 1
-        else:
-            amount_files += 1
-            content = f"{doc.title}. {doc.abstract}"
-            input_file = os.path.join(temp_in_dir, "{}.txt".format(doc.id))
-            input_files.append(input_file)
-            with open(input_file, "w") as f:
-                f.write(content)
+    if no_entity_filter:
+        for document_content in read_pubtator_documents(document_file):
+            doc = TaggedDocument(from_str=document_content)
+            if not doc or not doc.title or not doc.abstract:
+                amount_skipped_files += 1
+            else:
+                doc_count += 1
+                content = f"{doc.title}. {doc.abstract}"
+                input_file = os.path.join(temp_in_dir, "{}.txt".format(doc.id))
+                input_files.append(input_file)
+                with open(input_file, "w") as f:
+                    f.write(content)
+    else:
+        logging.info('Init spacy nlp...')
+        spacy_nlp = English()  # just the language with no model
+        sentencizer = spacy_nlp.create_pipe("sentencizer")
+        spacy_nlp.add_pipe(sentencizer)
 
-    logging.info('{} files need to be processed. {} files skipped.'.format(amount_files, amount_skipped_files))
+        doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, document_file, spacy_nlp)
+        doc_count = len(doc2tags)
+        for doc_id, sentences in doc2sentences:
+            if sentences:
+                input_file = os.path.join(temp_in_dir, "{}.txt".format(doc_id))
+                with open(input_file, 'wt') as f:
+                    f.write(' '.join(sentences))
+
+    logging.info('{} files need to be processed. {} files skipped.'.format(doc_count, amount_skipped_files))
     with open(filelist_fn, "w") as f:
         f.write("\n".join(input_files))
-    return filelist_fn, out_fn, amount_files
+    return filelist_fn, out_fn, doc_count
 
 
 def openie_get_progress(out_fn):
@@ -157,12 +176,13 @@ def openie_process_output(openie_out: str, outfile: str):
     logging.info('{} lines written'.format(tuples))
 
 
-def run_corenlp_openie(input_file, output, config=NLP_CONFIG):
+def run_corenlp_openie(input_file, output, config=NLP_CONFIG, no_entity_filter=False):
     """
     Executes the Stanford CoreNLP OpenIE extraction
     :param input_file: pubtator input file
     :param output: file to write the extractions to
     :param config: NLP configuration
+     :param no_entity_filter: if true only sentences with two tags will be processed by OpenIE
     :return: None
     """
     # Read config
@@ -171,7 +191,7 @@ def run_corenlp_openie(input_file, output, config=NLP_CONFIG):
         core_nlp_dir = conf["corenlp"]
 
     # Prepare files
-    filelist_fn, out_fn, amount_files = openie_prepare_files(input_file)
+    filelist_fn, out_fn, amount_files = openie_prepare_files(input_file, no_entity_filter=no_entity_filter)
 
     if amount_files == 0:
         print('no files to process - stopping')
@@ -186,15 +206,17 @@ def run_corenlp_openie(input_file, output, config=NLP_CONFIG):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="Path to input document/documents")
+    parser.add_argument("input", help="Document file with tags")
     parser.add_argument("output", help="OpenIE filtered output results")
     parser.add_argument("--config", default=NLP_CONFIG)
+    parser.add_argument("--no_entity_filter", action="store_true",
+                        default=False, required=False, help="Does not filter sentences by tags")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
-    run_corenlp_openie(args.input, args.output, args.config)
+                        level=logging.INFO)
+    run_corenlp_openie(args.input, args.output, args.config, args.no_entity_filter)
 
 
 if __name__ == "__main__":

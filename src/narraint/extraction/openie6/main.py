@@ -15,6 +15,8 @@ from narraint.extraction.extraction_utils import filter_document_sentences_witho
 from narraint.extraction.loading.load_openie_extractions import OPENIE_TUPLE
 from narrant.progress import print_progress_with_eta
 from narrant.pubtator.count import count_documents
+from narrant.pubtator.document import TaggedDocument
+from narrant.pubtator.extract import read_pubtator_documents
 
 
 def openie6_read_extractions(openie6_output: str) -> List[OPENIE_TUPLE]:
@@ -106,34 +108,42 @@ def openie6_invoke_toolkit(openie6_dir: str, input_file: str, output_file: str):
     logging.info(f'Process finished in {datetime.now() - start}s')
 
 
-def openie6_run(document_file, output, config=NLP_CONFIG):
+def openie6_run(document_file, output, config=NLP_CONFIG, no_entity_filter=False):
     """
     Initializes OpenIE6. Will generate the corresponding input file, reads the output and converts it to our
     internal OpenIE format
     :param document_file: input file with documents to generate
     :param output: the output file
     :param config: the nlp config
+    :param no_entity_filter: if true only sentences with two tags will be processed by OpenIE
     :return: None
     """
     # Read config
     with open(config) as f:
         conf = json.load(f)
         openie6_dir = conf["openie6"]
-    logging.info('Init spacy nlp...')
-    spacy_nlp = English()  # just the language with no model
-    sentencizer = spacy_nlp.create_pipe("sentencizer")
-    spacy_nlp.add_pipe(sentencizer)
 
     # Prepare files
     doc_count = count_documents(document_file)
     logging.info('{} documents counted'.format(doc_count))
 
-    doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, document_file, spacy_nlp)
-    amount_files = len(doc2tags)
+    logging.info('Init spacy nlp...')
+    spacy_nlp = English()  # just the language with no model
+    sentencizer = spacy_nlp.create_pipe("sentencizer")
+    spacy_nlp.add_pipe(sentencizer)
+    doc2sentences = {}
+    if no_entity_filter:
+        for document_content in read_pubtator_documents(document_file):
+            doc = TaggedDocument(from_str=document_content, spacy_nlp=spacy_nlp)
+            if doc:
+                doc2sentences[doc.id] = [s.text for s in doc.sentence_by_id.values()]
+    else:
+        doc2sentences, doc2tags = filter_document_sentences_without_tags(doc_count, document_file, spacy_nlp)
+        doc_count = len(doc2tags)
 
     openie6_input_file = f'{output}_pubtator'
     openie6_raw_extractions = f'{output}_extractions'
-    if amount_files == 0:
+    if doc_count == 0:
         print('no files to process - stopping')
     else:
         start = datetime.now()
@@ -152,16 +162,18 @@ def openie6_run(document_file, output, config=NLP_CONFIG):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="PubTator input file (with tags)")
+    parser.add_argument("input", help="Document file with tags")
     parser.add_argument("output", help="OpenIE results will be stored here")
+    parser.add_argument("--no_entity_filter", action="store_true",
+                        default=False, required=False, help="Does not filter sentences by tags")
     parser.add_argument("--config", default=NLP_CONFIG)
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 
-    openie6_run(args.input, args.output, args.config)
+    openie6_run(args.input, args.output, args.config, args.no_entity_filter)
 
 
 if __name__ == "__main__":
