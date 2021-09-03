@@ -176,6 +176,15 @@ class QueryEngine:
         else:
             pass
 
+        # if the query asks for a class as subject or object
+        # then use the class name as a variable name for the results
+        subject_class = fact_pattern.get_subject_class()
+        if subject_class:
+            var_names_in_query.append((subject_class, "subject"))
+        object_class = fact_pattern.get_object_class()
+        if object_class:
+            var_names_in_query.append((object_class, "object"))
+
         # execute the query
         provenance_mappings = []
         # compute the list of substitutions for the variables

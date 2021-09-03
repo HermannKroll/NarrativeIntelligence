@@ -18,6 +18,18 @@ class FactPattern:
                 return True
         return False
 
+    def get_subject_class(self):
+        for s in self.subjects:
+            if s.entity_class:
+                return s.entity_class
+        return None
+
+    def get_object_class(self):
+        for o in self.objects:
+            if o.entity_class:
+                return o.entity_class
+        return None
+
     def has_entity(self):
         for s in self.subjects:
             if s.entity_type != ENTITY_TYPE_VARIABLE:
