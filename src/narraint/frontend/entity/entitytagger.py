@@ -241,7 +241,8 @@ class EntityTagger:
         for level4, chemblids in level4_to_chemlbids.items():
             level4_name = level4_to_name[level4]
             for chid in chemblids:
-                self.term2entity[level4_name.strip().lower()].add(Entity(chid, DRUG))
+                class_name = level4_name.strip().lower()
+                self.term2entity[class_name].add(Entity(chid, DRUG, entity_class=class_name))
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
