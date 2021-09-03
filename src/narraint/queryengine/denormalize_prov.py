@@ -3,8 +3,10 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
+from sqlalchemy import and_
+
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication
+from narraint.backend.models import Predication, DocumentMetadataService
 from narraint.backend.models import PredicationDenorm
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narrant.progress import print_progress_with_eta
@@ -17,7 +19,9 @@ def denormalize_predication_table():
 
     start_time = datetime.now()
     # "is not None" instead of "!=" None" DOES NOT WORK!
-    prov_query = session.query(Predication).filter(Predication.relation != None) \
+    prov_query = session.query(Predication).filter(Predication.relation != None)\
+        .join(DocumentMetadataService, and_(Predication.document_id == DocumentMetadataService.document_id,
+                                            Predication.document_collection == DocumentMetadataService.document_collection)) \
         .yield_per(QUERY_YIELD_PER_K)
 
     insert_list = []
