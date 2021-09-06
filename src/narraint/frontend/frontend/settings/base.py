@@ -18,10 +18,7 @@ from narraint.config import DATA_DIR, SEMMEDDB_CONFIG, LOG_DIR
 
 DJANGO_PROJ_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Directories
-DESCRIPTOR_FILE = os.path.join(DATA_DIR, 'desc2021.xml')
-MESHDB_INDEX = os.path.join(DATA_DIR, 'meshdb.index.desc2021.bin')
-SEMMEDDB_LOG_DIR = LOG_DIR
+ADMIN_ENABLED = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -29,7 +26,6 @@ SEMMEDDB_LOG_DIR = LOG_DIR
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

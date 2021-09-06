@@ -17,12 +17,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
 
+from narraint.frontend.frontend.settings.base import INSTALLED_APPS, ADMIN_ENABLED
 from narraint.frontend.ui.views import StatsView, HelpView, DocumentView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path(r'', include('ui.urls')),
     path("stats/", never_cache(StatsView.as_view()), name="stats"),
     path("help/", never_cache(HelpView.as_view()), name="help"),
     path("document/", never_cache(DocumentView.as_view()), name="document"),
 ]
+
+if ADMIN_ENABLED is True:
+    urlpatterns.append(path('admin/', admin.site.urls))
+    INSTALLED_APPS.append('django.contrib.admin')
