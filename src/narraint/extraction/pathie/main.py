@@ -129,7 +129,6 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
         writer.writerow(['document id', 'subject id', 'subject str', 'subject type', 'predicate',
                          'predicate lemmatized', 'object id', 'object str', 'object type',
                          'confidence', 'sentence'])
-        first_line = True
         for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
             if filename.endswith('.json'):
                 doc_id = int(filename.split('.')[0])
