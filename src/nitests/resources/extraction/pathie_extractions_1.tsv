@@ -1,3 +1,4 @@
+document id	subject id	 subject str	subject type	predicate	predicate lemmatized	object id	object str	object type	confidence	sentence
 7121659	D058186	acute renal failure	Disease	induced	induce	D012293	rifampicin	Chemical	0.3999999999999999	5 patients with acute renal failure (3 with thrombopenia and hemolysis) induced by the reintroduction of rifampicin are described.
 7121659	D012293	rifampicin	Chemical	induced	induce	D013921	thrombopenia	Disease	0.3999999999999999	5 patients with acute renal failure (3 with thrombopenia and hemolysis) induced by the reintroduction of rifampicin are described.
 7121659	D012293	rifampicin	Chemical	induced	induce	D006461	hemolysis	Disease	0.3999999999999999	5 patients with acute renal failure (3 with thrombopenia and hemolysis) induced by the reintroduction of rifampicin are described.

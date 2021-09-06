@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import logging
 import os
@@ -155,6 +156,14 @@ def openie_process_output(openie_out: str, outfile: str):
     """
     tuples = 0
     with open(openie_out, 'r') as f_out, open(outfile, 'w') as f_conv:
+        writer = csv.writer(f_conv, delimiter='\t')
+        writer.writerow(['document id',
+                         'subject',
+                         'predicate',
+                         'predicate lemmatized',
+                         'object'
+                         'confidence',
+                         'sentence'])
         for idx, line in enumerate(f_out):
             tuples += 1
             components = line.strip().split("\t")
@@ -168,10 +177,7 @@ def openie_process_output(openie_out: str, outfile: str):
             pred_lemma = components[-2]
 
             res = [doc_id, subj, pred, pred_lemma, obj, conf, sent]
-            if idx == 0:
-                f_conv.write('\t'.join(t for t in res))
-            else:
-                f_conv.write('\n' + '\t'.join(t for t in res))
+            writer.writerow([str(t) for t in res])
 
     logging.info('{} lines written'.format(tuples))
 

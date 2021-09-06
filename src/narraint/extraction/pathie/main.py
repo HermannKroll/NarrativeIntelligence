@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import logging
 import multiprocessing
@@ -124,6 +125,10 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
     tuples = 0
     start_time = datetime.now()
     with open(outfile, 'wt') as f_out:
+        writer = csv.writer(f_out, delimiter='\t')
+        writer.writerow(['document id', 'subject id', 'subject str', 'subject type', 'predicate',
+                         'predicate lemmatized', 'object id', 'object str', 'object type',
+                         'confidence', 'sentence'])
         first_line = True
         for idx, filename in enumerate(os.listdir(out_corenlp_dir)):
             if filename.endswith('.json'):
@@ -132,12 +137,7 @@ def pathie_process_corenlp_output(out_corenlp_dir, amount_files, outfile, doc2ta
                                                      doc2tags[doc_id], predicate_vocabulary=predicate_vocabulary)
                 tuples += len(extracted_tuples)
                 for e_tuple in extracted_tuples:
-                    line = '\t'.join([str(t) for t in e_tuple])
-                    if first_line:
-                        first_line = False
-                        f_out.write(line)
-                    else:
-                        f_out.write('\n' + line)
+                    writer.writerow([str(t) for t in e_tuple])
             print_progress_with_eta("extracting triples", idx, amount_files, start_time, print_every_k=1)
     logging.info('{} lines written'.format(tuples))
 
@@ -210,17 +210,15 @@ def pathie_process_corenlp_output_parallelized(out_corenlp_dir, amount_files, ou
             p.start()
 
         logging.info('Collecting results...')
-        first_line = True
         with open(outfile, 'wt') as f_out:
+            writer = csv.writer(f_out, delimiter='\t')
+            writer.writerow(['document id', 'subject id', 'subject str', 'subject type', 'predicate',
+                             'predicate lemmatized', 'object id', 'object str', 'object type',
+                             'confidence', 'sentence'])
             for p in processes:
                 extracted_tuples = result_queue.get()
                 for e_tuple in extracted_tuples:
-                    line = '\t'.join([str(t) for t in e_tuple])
-                    if first_line:
-                        first_line = False
-                        f_out.write(line)
-                    else:
-                        f_out.write('\n' + line)
+                    writer.writerow([str(t) for t in e_tuple])
 
         logging.info('Waiting for workers to terminate...')
         for p in processes:

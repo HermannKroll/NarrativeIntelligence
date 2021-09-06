@@ -7,6 +7,7 @@ from datetime import datetime
 from time import sleep
 from typing import List
 
+import csv
 import spacy
 from spacy.lang.en import English
 
@@ -69,7 +70,16 @@ def openie6_extract_tuples(openie6_output_file: str, extraction_output: str):
     tuples = openie6_read_extractions(openie6_output_file)
 
     with open(extraction_output, 'wt') as f:
-        f.write('\n'.join(['\t'.join([str(x) for x in t]) for t in tuples]))
+        writer = csv.writer(f, delimiter='\t')
+        writer.writerow(['document id',
+                         'subject',
+                         'predicate',
+                         'predicate lemmatized',
+                         'object'
+                         'confidence',
+                         'sentence'])
+        for t in tuples:
+            writer.writerow([str(x) for x in t])
 
 
 def openie6_generate_openie6_input(doc2sentences: {int: List[str]}, openie6_input: str):

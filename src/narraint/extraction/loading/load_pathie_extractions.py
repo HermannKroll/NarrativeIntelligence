@@ -1,5 +1,7 @@
 import argparse
+import csv
 import logging
+from itertools import islice
 
 from narraint.extraction.loading.load_extractions import PRED, clean_and_load_predications_into_db
 from narraint.extraction.versions import PATHIE_EXTRACTION
@@ -14,10 +16,10 @@ def read_pathie_extractions_tsv(pathie_tsv_file: str, load_symmetric=True):
     """
     extractions = []
     with open(pathie_tsv_file, 'rt') as f:
-        for line in f:
+        reader = csv.reader(f, delimiter='\t')
+        for row in islice(reader, 1, None):
             try:
-                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, conf, sentence = line.strip().split(
-                    '\t')
+                doc_id, e1_id, e1_str, e1_type, pred, pred_lemma, e2_id, e2_str, e2_type, conf, sentence = row
                 p = PRED(doc_id, "", pred, pred_lemma, "", conf, sentence, e1_id, e1_str, e1_type, e2_id, e2_str,
                          e2_type)
                 extractions.append(p)
@@ -28,8 +30,7 @@ def read_pathie_extractions_tsv(pathie_tsv_file: str, load_symmetric=True):
                     extractions.append(p)
 
             except ValueError:
-                tup = line.split('\t')
-                logging.warning(f'skipping tuple: {tup}')
+                logging.warning(f'skipping tuple: {row}')
     return extractions
 
 

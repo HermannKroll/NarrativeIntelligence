@@ -1,8 +1,10 @@
 import argparse
+import csv
 import logging
 from collections import namedtuple, defaultdict
 from datetime import datetime
 from enum import Enum
+from itertools import islice
 from typing import List, Tuple
 
 import nltk
@@ -39,9 +41,10 @@ def read_stanford_openie_input(openie_file: str):
     logging.info('Reading OpenIE input...')
     # open the input open ie file
     with open(openie_file, 'r') as f:
+        reader = csv.reader(f, delimiter='\t')
         # read all lines for a single doc
-        for line in f:
-            c = line.strip().split("\t")
+        for row in islice(reader, 1, None):
+            c = row
             o_t = OPENIE_TUPLE(int(c[0]), c[1], c[2], c[3], c[4], c[5], c[6])
             doc_ids.add(o_t.doc_id)
             tuples_cached.append(o_t)
