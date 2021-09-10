@@ -15,6 +15,8 @@ DELETE FROM Predication WHERE predicate_canonicalized = 'method' and (subject_id
 -- Delete Sprains and Strains
 DELETE FROM Predication WHERE (subject_type = 'Disease' and subject_id = 'C26.844') or (object_type = 'Disease' and object_id = 'C26.844');
 
+DELETE FROM PREDICATION WHERE document_id NOT IN (SELECT distinct document_id FROM Document_Metadata_Service);
+
 -- Rewrites the Predication table and deletes removed tuples
 VACUUM FULL PREDICATION;
 REINDEX TABLE PREDICATION;
