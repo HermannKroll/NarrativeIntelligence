@@ -1,0 +1,34 @@
+#!/bin/bash
+
+MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2021_09_16_updates/"
+UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_09_16_updates.pubtator"
+UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
+
+# Convert the update files to a pubtator file
+python3 ~/NarrativeAnnotation/src/narrant/pubtator/translation/pubmed_medline2pubtator.py $MEDLINE_UPDATES $UPDATES_PUBTATOR
+
+# Next load the documents into the database
+python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed
+
+# Next, tag the documents
+python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+
+# Next GNormPlus Tagging
+python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $UPDATES_PUBTATOR -c PubMed --gnormplus --skip-load --workers 3
+
+# Finally, all files have been tagged
+python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed --et PathIE --workers 15
+
+# Do the canonicalizing step
+# ..
+
+# Apply the rules
+
+#
+
+# Load the Metadata
+#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+
+# Finally compute the new metadata service table2
+#python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
