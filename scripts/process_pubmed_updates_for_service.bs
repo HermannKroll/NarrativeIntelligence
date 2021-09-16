@@ -21,14 +21,16 @@ python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmace
 # python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed --et PathIE --workers 15
 
 # Do the canonicalizing step
-# ..
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/canonicalize_predicates.py /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Apply the rules
-
-#
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/apply_rules.py
 
 # Load the Metadata
 #python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
 
 # Finally compute the new metadata service table2
 #python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+
+# Compute new query table
+# python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
