@@ -56,7 +56,8 @@ def compute_document_metadata_service_table():
             if d_id in doc2metadata:
                 authors, journals, publication_year = doc2metadata[d_id]
             else:
-                authors, journals, publication_year = None, None, None
+                # skip documents that does not have this information avialbe
+                continue
 
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
                                       authors=authors, journals=journals, publication_year=publication_year))
