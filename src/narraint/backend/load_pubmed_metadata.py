@@ -49,10 +49,10 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
                 continue
             authors_list.append(f'{lastname[0].text}, {forename[0].text[0]}')
 
-        if len(authors_list) < 3:
+        if len(authors_list) < 5:
             authors = ' | '.join(authors_list)
         else:
-            authors = ' | '.join(authors_list[0:3]) + ' | et al.'
+            authors = ' | '.join(authors_list[0:5]) + ' | et al.'
 
         journal_list = []
         publication_year = None
@@ -130,6 +130,7 @@ def pubmed_medline_load_metadata_from_dictionary(directory, document_collection=
 def main():
     parser = ArgumentParser()
     parser.add_argument("input", help="PubMed Medline Directory containing all xml files")
+    parser.add_argument("-c", "--collection", required=True, help="Name of the document collection")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -137,7 +138,7 @@ def main():
                         level=logging.INFO)
 
     logging.info(f'Loading PubMed Medline metadata from {args.input}...')
-    pubmed_medline_load_metadata_from_dictionary(args.input)
+    pubmed_medline_load_metadata_from_dictionary(args.input, document_collection=args.collection)
 
 
 if __name__ == "__main__":
