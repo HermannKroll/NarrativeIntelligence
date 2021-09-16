@@ -19,6 +19,8 @@ DELETE FROM TAG WHERE document_collection = 'NCBI_DISEASE';
 DELETE FROM DOC_TAGGED_BY  WHERE document_collection = 'NCBI_DISEASE';
 
 
+SELECT * FROM PREDICATION_RATING;
+DELETE FROM PREDICATION_RATING;
 
 
 DELETE FROM PREDICATION WHERE document_collection = 'ChemProt' AND predicate_canonicalized = 'upregulates' and
@@ -26,6 +28,8 @@ DELETE FROM PREDICATION WHERE document_collection = 'ChemProt' AND predicate_can
 
 SELECT * FROM Predication WHERE document_collection = 'ChemProt' and extraction_type = 'PathIE' and predicate_canonicalized = 'agonist';
 
+
+SELECT * FROM TAG WHERE document_collection = 'Test123' and ent_type = 'Excipient';
 
 
 DELETE
@@ -82,12 +86,24 @@ DELETE FROM PREDICATION WHERE extraction_type = 'PathIEStanza' and  document_col
 
 SELECT  count (distinct ent_id) FROM TAG WHERE ent_type = 'Method';
 
-SELECT ent_str,ent_id, COUNT(*)
+SELECT ent_str,ent_id, ent_type, COUNT(*)
 FROM Tag
-WHERE ent_type = 'Method'
-GROUP BY ent_str, ent_id
+WHERE  document_collection = 'PubMedChembl'
+GROUP BY ent_str, ent_id, ent_type
 ORDER BY COUNT(*) DESC
 LIMIT 200;
+
+
+DELETE FROM Tag WHERE document_collection = 'PubMedChembl';
+DELETE FROM Doc_Tagged_By WHERE document_collection = 'PubMedChembl';
+
+SELECT ent_str,ent_id, ent_type, COUNT(*)
+FROM Tag
+WHERE (ent_type = 'Method' or ent_type = 'LabMethod') and document_collection = 'Test132'
+GROUP BY ent_str, ent_id, ent_type
+ORDER BY COUNT(*) DESC
+LIMIT 200;
+
 
 SELECT *
 FROM TAG
