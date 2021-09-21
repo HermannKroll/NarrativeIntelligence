@@ -507,6 +507,18 @@ const search = (event) => {
             let query_len = 0;
             latest_valid_query = query
 
+            // Hide sort buttons depending on the result
+            let is_aggregate = response["is_aggregate"]
+            document.getElementById("select_sorting_year").style.display = "block"
+            console.log
+            if (is_aggregate === true) {
+                console.log("Hi");
+                document.getElementById("select_sorting_freq").style.display = "block"
+            } else {
+                console.log("Ni");
+                document.getElementById("select_sorting_freq").style.display = "none"
+            }
+
             // Print query translation
             let query_translation = $("#query_translation");
             let query_trans_string = response["query_translation"];
@@ -533,6 +545,8 @@ const search = (event) => {
             // scroll to results
             document.getElementById("resultdiv").scrollIntoView();
         } else {
+            document.getElementById("select_sorting_year").style.display = "none"
+            document.getElementById("select_sorting_freq").style.display = "none"
             let query_trans_string = response["query_translation"];
             console.log('translation error:' + query_trans_string)
             $('#alert_translation').text(query_trans_string);
@@ -541,9 +555,6 @@ const search = (event) => {
 
         // Disable button
         setButtonSearching(false);
-
-        document.getElementById("select_sorting_year").removeAttribute("hidden");
-        document.getElementById("select_sorting_freq").removeAttribute("hidden");
 
     });
 

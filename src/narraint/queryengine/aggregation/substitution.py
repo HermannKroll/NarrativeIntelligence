@@ -26,11 +26,13 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
 
     def rank_results(self, results: [QueryDocumentResult], freq_sort_desc=True, year_sort_desc=True, end_pos=None):
         self._clear_state()
+        is_aggregate = False
         for r in results:
             self._add_query_result(r)
 
         # variable is used
         if self.var_names:
+            is_aggregate = True
             unsorted_list = []
             for _, (results, var2subs) in self.aggregation.items():
                 query_aggregate = QueryResultAggregate(var2subs)
@@ -46,7 +48,8 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             for _, res in unsorted_list:
                 query_result.add_query_result(res)
             query_result.set_slice(end_pos)
-            return query_result
+            return query_result, is_aggregate
+
         else:
             # no variable is used
             query_result = QueryDocumentResultList()
@@ -54,7 +57,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
                 for res in results:
                     query_result.add_query_result(res)
             self.sort_docs_by_year(query_result, year_sort_desc)
-            return query_result
+            return query_result, is_aggregate
 
     def sort_docs_by_year(self, docs, year_sort_desc):
         return docs.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=year_sort_desc)

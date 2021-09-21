@@ -126,6 +126,7 @@ def get_check_query(request):
 @gzip_page
 def get_query(request):
     results_converted = []
+    is_aggregate = False
     valid_query = False
     query_limit_hit = False
     query_trans_string = ""
@@ -207,14 +208,17 @@ def get_query(request):
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
-                results_converted = substitution_aggregation.rank_results(results, freq_sort_desc, year_sort_desc,
-                                                                          end_pos).to_dict()
+                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc,
+                                                                                        year_sort_desc, end_pos)
+                results_converted = results_ranked.to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
-                results_converted = substitution_ontology.rank_results(results, freq_sort_desc,
-                                                                       year_sort_desc).to_dict()
+                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                                     year_sort_desc)
+                results_converted = results_ranked.to_dict()
         return JsonResponse(
-            dict(valid_query=valid_query, results=results_converted, query_translation=query_trans_string,
+            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
+                 query_translation=query_trans_string,
                  query_limit_hit="False"))
     except Exception:
         query_trans_string = "keyword query cannot be converted (syntax error)"

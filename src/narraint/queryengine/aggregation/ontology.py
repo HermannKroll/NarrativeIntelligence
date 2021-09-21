@@ -41,10 +41,12 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self._clear_state()
         self.freq_sort_desc = freq_sort_desc
         self.year_sort_desc = year_sort_desc
+        is_aggregate = False
 
         if results:
             self.var_names = sorted(list(results[0].var2substitution.keys()))
             if self.var_names:
+                is_aggregate = True
                 misc_document_results = defaultdict(list)
                 var2prefix_substitution_list = {}
                 var2prefix_document_result_list = {}
@@ -104,7 +106,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     for ent_type, document_results in misc_document_results.items():
                         document_results = misc_document_results[ent_type]
                         misc_aggregation_list = self.substitution_based_strategy.rank_results(document_results,
-                                                                                              freq_sort_desc)
+                                                                                              freq_sort_desc)[0]
                         misc_aggregation = self._create_query_aggregate("", "", f'{ent_type} (No MeSH Taxonomy)',
                                                                         f'{ent_type} (No MeSH Taxonomy)')
                         misc_aggregation.add_query_result(misc_aggregation_list)
@@ -115,7 +117,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                                              reverse=self.freq_sort_desc):
                     self._sort_node_result_list(aggregation)
                     resulting_tree.add_query_result(aggregation)
-                return resulting_tree
+                return resulting_tree, is_aggregate
             else:
                 # no variable is used
                 query_result = QueryDocumentResultList()
@@ -123,9 +125,9 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                     query_result.add_query_result(res)
                     query_result.results.sort(key=lambda x: (x.publication_year_int, int(x.month)),
                                               reverse=self.year_sort_desc)
-                return query_result
+                return query_result, is_aggregate
         else:
-            return QueryDocumentResultList()
+            return QueryDocumentResultList(), is_aggregate
 
     def _create_query_aggregate(self, ent_str, ent_id, ent_type, ent_name):
         var2sub = dict()
