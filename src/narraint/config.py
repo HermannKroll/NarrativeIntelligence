@@ -37,6 +37,9 @@ BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
 # CHEMBL ATC Classification
 CHEMBL_ATC_CLASSIFICATION_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_classification.csv")
 
+# CHEMBL ATC Tree
+CHEMBL_ATC_TREE_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_tree.json")
+
 # Entity Tagging index
 ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 

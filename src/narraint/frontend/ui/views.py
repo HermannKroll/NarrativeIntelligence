@@ -16,7 +16,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
-from narraint.config import REPORT_DIR
+from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -104,6 +104,13 @@ def get_autocompletion(request):
         completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
     return JsonResponse(dict(terms=completion_terms))
+
+
+# on a better generation of this json: https://stackoverflow.com/questions/44478515/add-size-x-to-json?noredirect=1&lq=1
+def get_chembl_atc_tree(request):
+    with open(CHEMBL_ATC_TREE_FILE, 'r') as inp:
+        chembl_atc_tree = json.load(inp)
+        return JsonResponse(dict(chembl_atc_tree=chembl_atc_tree))
 
 
 def get_check_query(request):
@@ -209,12 +216,12 @@ def get_query(request):
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
                 results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc,
-                                                                                        year_sort_desc, end_pos)
+                                                                                     year_sort_desc, end_pos)
                 results_converted = results_ranked.to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
                 results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
-                                                                                     year_sort_desc)
+                                                                                  year_sort_desc)
                 results_converted = results_ranked.to_dict()
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,

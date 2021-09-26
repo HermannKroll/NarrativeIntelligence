@@ -116,7 +116,10 @@
     display: inline-block !important;
 }
 
-#document_header {
-    margin: 0;
-    display: inline-block;
+#atcButton_o {
+    background-color: #F77B08 !important;
+}
+
+#atcButton_o:hover {
+    background-color: #DE7B08 !important;
 }

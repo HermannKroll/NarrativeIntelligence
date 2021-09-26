@@ -375,6 +375,9 @@ $(document).on('keydown', function (e) {
 })
 
 $(document).ready(function () {
+
+    get_atc_tree();
+
     $("#search_form").submit(search);
 
     $('#input_subject').autocomplete({
@@ -439,6 +442,7 @@ $(document).ready(function () {
             this.value = ui.item.value.trim();
             return false;
         }
+
     }).on("keydown", function (event) {
         // don't navigate away from the field on tab when selecting an item
         if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
@@ -916,7 +920,7 @@ const createDivListForResultElement = (result, query_len, accordionID, headingID
     }
     console.log("ERROR - does not recognize result type: " + typeOfRes);
     return null;
-}
+};
 
 
 const createResultList = (results, query_len) => {
@@ -925,3 +929,104 @@ const createResultList = (results, query_len) => {
     return divList;
 };
 
+
+function build_atc_lvl5_card(data_parent, atc_class) {
+    let atc_info = atc_class.split(' - ')[0];
+    let atc_label = atc_class.split(' - ')[1];
+    let s_btn_id = "s_btn" + atc_info;
+    let o_btn_id = "o_btn" + atc_info;
+    document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
+        '                        <div class="card-header">' + atc_class + '\n' +
+        '                           <button class="btn btn-sm btn-outline-dark float-right" id="' + o_btn_id + '">O</button>\n' +
+        '                           <button class="btn btn-sm btn-outline-dark float-right" id="' + s_btn_id + '">S</button>\n' +
+        '                        </div>\n' +
+        '                    </div>');
+
+    document.getElementById(s_btn_id).addEventListener("click", function () {
+        copy_atc_label("input_subject", atc_label);
+    });
+    document.getElementById(o_btn_id).addEventListener("click", function () {
+        copy_atc_label("input_object", atc_label);
+    });
+}
+
+function copy_atc_label(target, atc_label) {
+    console.log("Hi.");
+    if (target) {
+        let target_element = document.getElementById(target);
+        target_element.value = atc_label;
+    }
+}
+
+function build_atc_card_header(data_parent, atc_class) {
+    // atc_class: e.g. "A01AA03 - olaflur" -> atc_info: "A01AA03"
+    let atc_info = atc_class.split(' - ')[0];
+    let heading_id = "heading" + atc_info;
+    let collapse_id = "collapse" + atc_info;
+    let child_id = "child" + atc_info;
+    let atc_label = atc_class.split(' - ')[1];
+    let s_btn_id = "s_btn" + atc_info;
+    let o_btn_id = "o_btn" + atc_info;
+
+    document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
+        '            <div class="card-header" id="' + heading_id + '">\n' +
+        '                <h5 class="mb-0 d-inline">\n' +
+        '                    <button class="btn btn-link text-start" data-toggle="collapse" data-target="#' + collapse_id + '" aria-expanded="true" aria-controls="' + collapse_id + '">\n' +
+        '                      ' + atc_class + '\n' +
+        '                    </button>\n' +
+        '                    <button class="btn btn-sm btn-outline-dark float-right" id="' + o_btn_id + '">O</button>\n' +
+        '                    <button class="btn btn-sm btn-outline-dark float-right" id="' + s_btn_id + '">S</button>\n' +
+        '                 </h5>\n' +
+        '            </div>' +
+        '            <div id="' + collapse_id + '" class="collapse" aria-labelledby="' + heading_id + '" data-parent="#' + data_parent + '">\n' +
+        '                <div class="card-body" id="' + child_id + '">\n' +
+        '                </div>\n' +
+        '            </div>' +
+        '</div>'
+    );
+
+    document.getElementById(s_btn_id).addEventListener("click", function () {
+        copy_atc_label("input_subject", atc_label);
+    });
+    document.getElementById(o_btn_id).addEventListener("click", function () {
+        copy_atc_label("input_object", atc_label);
+    });
+}
+
+function build_atc_tree(data_parent, tree, atc_depth) {
+    for (var k in tree) {
+        let atc_class = tree[k]["name"];
+        let atc_info = atc_class.split(' - ')[0];
+        let subtree = tree[k]["children"];
+        let child_id = "child" + atc_info;
+        //console.log(atc_class, atc_info, child_id, subtree);
+        if (atc_depth < 5) {
+            build_atc_card_header(data_parent, atc_class);
+            build_atc_tree(child_id, subtree, atc_depth + 1);
+        } else {
+            let lvl5_name_and_desc = atc_class + ' - ' + subtree[0]["name"];
+            build_atc_lvl5_card(data_parent, lvl5_name_and_desc);
+        }
+    }
+
+}
+
+// build atc tree for modal
+function get_atc_tree() {
+    let request = $.ajax({
+        url: atc_tree_url
+    });
+
+    request.done(function (response) {
+        let result = response;
+        for (var k in result) {
+            build_atc_tree("atc_accordion", result[k], 1);
+        }
+        document.getElementById("atcButton").style.display = "block";
+    });
+
+    request.fail(function (result) {
+        $('#alert_translation').text('Failed to get atc tree.');
+        $('#alert_translation').fadeIn();
+    });
+}
