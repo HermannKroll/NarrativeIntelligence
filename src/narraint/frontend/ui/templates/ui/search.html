@@ -25,13 +25,10 @@
                     <div class="form-group">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
-                            <!-- experimental ATC button:
                             <div class="input-group-append">
-                                <button class="btn btn-primary" id="atcButton_s" type="button" data-toggle="modal"
-                                        data-target="#atcModal">ATC
-                                </button>
+                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal" onclick="setConceptInputFieldSubject();" type="button">Browse</button>
                             </div>
-                            -->
+
                             <select class="custom-select" id="input_predicate">
                                 <option value="associated">associated</option>
                                 <option value="administered">administered</option>
@@ -45,12 +42,12 @@
                                 <option value="treats">treats</option>
 
                             </select>
+
                             <input type="text" class="form-control" placeholder="enter object" id="input_object">
                             <div class="input-group-append">
-                                <button class="btn btn-secondary btn_sm" id="atcButton" type="button"
-                                        data-toggle="modal" data-target="#atcModal" style="display:none">...
-                                </button>
+                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal" onclick="setConceptInputFieldObject();" type="button">Browse</button>
                             </div>
+
                             <div class="input-group-append">
                                 <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
                                 <button class="btn btn-primary" type="submit" id="btn_search">Search</button>
@@ -347,22 +344,22 @@
 
             <div class="row">
                 <div class="col">
-                     <h2 id="document_header">Results:</h2>
+                    <h2 id="document_header">Results:</h2>
                 </div>
-                   <div class="col-md-auto">
-                      <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
-                    <option selected value="True">Latest Publications First</option>
-                    <option value="False">Oldest Publications First</option>
-                </select>
+                <div class="col-md-auto">
+                    <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
+                        <option selected value="True">Latest Publications First</option>
+                        <option value="False">Oldest Publications First</option>
+                    </select>
                 </div>
-                   <div class="col-md-auto">
-                         <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
-                    <option selected value="True">Most Frequent Substitutions First</option>
-                    <option value="False">Unusual Substitutions First</option>
-                </select>
+                <div class="col-md-auto">
+                    <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
+                        <option selected value="True">Most Frequent Substitutions First</option>
+                        <option value="False">Unusual Substitutions First</option>
+                    </select>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="row margin-top" id="div_wrapper_documents">
                     <div id="div_documents"></div>

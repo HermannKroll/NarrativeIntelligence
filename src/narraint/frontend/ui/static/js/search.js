@@ -932,29 +932,34 @@ function buildATCLevel5Element(data_parent, atc_class) {
     let atc_info = atc_class.split(' - ')[0];
     let atc_label = atc_class.split(' - ')[1];
     atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
-    let s_btn_id = "s_btn" + atc_info;
-    let o_btn_id = "o_btn" + atc_info;
+    let apply_btn_id = "apply_btn" + atc_info;
     document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
         '                        <div class="card-header">' + atc_info + ' - ' + atc_label + '\n' +
-        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button>\n' +
-        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button>\n' +
+        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + apply_btn_id + '">Apply</button>\n' +
         '                        </div>\n' +
         '                    </div>');
 
-    document.getElementById(s_btn_id).addEventListener("click", function () {
-        copyATCLabel("input_subject", atc_label);
-    });
-    document.getElementById(o_btn_id).addEventListener("click", function () {
-        copyATCLabel("input_object", atc_label);
+    document.getElementById(apply_btn_id).addEventListener("click", function () {
+        copySelectedConcept(atc_label);
     });
 }
 
-function copyATCLabel(target, atc_label) {
-    if (target) {
-        let target_element = document.getElementById(target);
-        target_element.value = atc_label;
+let LAST_INPUT_FIELD = null;
+
+function setConceptInputFieldSubject(){
+    LAST_INPUT_FIELD = "input_subject";
+}
+function setConceptInputFieldObject(){
+    LAST_INPUT_FIELD = "input_object";
+}
+
+function copySelectedConcept(concept) {
+    if (LAST_INPUT_FIELD !== null) {
+        let target_element = document.getElementById(LAST_INPUT_FIELD);
+        target_element.value = concept;
     }
 }
+
 
 function buildATCHeaderCard(data_parent, atc_class) {
     // atc_class: e.g. "A01AA03 - olaflur" -> atc_info: "A01AA03"
@@ -964,8 +969,7 @@ function buildATCHeaderCard(data_parent, atc_class) {
     let child_id = "child" + atc_info;
     let atc_label = atc_class.split(' - ')[1].trim().toLowerCase();
     atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
-    let s_btn_id = "s_btn" + atc_info;
-    let o_btn_id = "o_btn" + atc_info;
+    let apply_btn_id = "apply_btn" + atc_info;
 
     document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
         '            <div class="card-header" id="' + heading_id + '">\n' +
@@ -973,8 +977,7 @@ function buildATCHeaderCard(data_parent, atc_class) {
         '                    <button class="btn btn-link text-start" data-toggle="collapse" data-target="#' + collapse_id + '" aria-expanded="true" aria-controls="' + collapse_id + '">\n' +
         '                      ' + atc_info + ' - ' + atc_label + '\n' +
         '                    </button>\n' +
-        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button>\n' +
-        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button>\n' +
+        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + apply_btn_id + '">Apply</button>\n' +
         '                 </h5>\n' +
         '            </div>' +
         '            <div id="' + collapse_id + '" class="collapse" aria-labelledby="' + heading_id + '" data-parent="#' + data_parent + '">\n' +
@@ -984,11 +987,8 @@ function buildATCHeaderCard(data_parent, atc_class) {
         '</div>'
     );
 
-    document.getElementById(s_btn_id).addEventListener("click", function () {
-        copyATCLabel("input_subject", atc_label);
-    });
-    document.getElementById(o_btn_id).addEventListener("click", function () {
-        copyATCLabel("input_object", atc_label);
+    document.getElementById(apply_btn_id).addEventListener("click", function () {
+        copySelectedConcept( atc_label);
     });
 }
 
@@ -1021,7 +1021,7 @@ function queryAndBuildATCTree() {
         for (var k in result) {
             buildATCTree("atc_accordion", result[k], 1);
         }
-        document.getElementById("atcButton").style.display = "block";
+     //   document.getElementById("atcButton").style.display = "block";
     });
 
     request.fail(function (result) {
@@ -1030,24 +1030,20 @@ function queryAndBuildATCTree() {
     });
 }
 
+
+
 function buildVariableTreeButton(dataParent, variableName, variableText) {
-    let s_btn_id = "s_btn" + variableName;
-    let o_btn_id = "o_btn" + variableName;
+    let btn_id = "apply_btn" + variableName;
 
     let rowDiv = $('<div class="row py-1 border"/>');
     let rowText = $('<div class="col"><p class="text-left">'+ variableName + ' (' + variableText+')</p></div>');
-    let sBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button></div>');
-    let oBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button></div>');
+    let applyBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + btn_id + '">Apply</button></div>');
     rowDiv.append(rowText);
-    rowDiv.append(sBtn);
-    rowDiv.append(oBtn);
+    rowDiv.append(applyBtn);
     dataParent.append(rowDiv);
 
-    sBtn.click(function () {
-        copyATCLabel("input_subject", variableName);
-    });
-    oBtn.click(function () {
-        copyATCLabel("input_object", variableName);
+    applyBtn.click(function () {
+        copySelectedConcept(variableName);
     });
 }
 
