@@ -199,13 +199,13 @@ class EntityTagger:
                 for tn in tree_nos:
                     # find the given entity type for the tree number
                     try:
-                        ent_type = MeSHOntology.tree_number_to_entity_type(tn)
-                        sub_descs = mesh_trie.keys(tn.lower())
-                        for mesh_term in mesh_terms:
-                            term = mesh_term.lower()
-                            self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
-                            self.term2entity[term].update([Entity(f'MESH:{s.split(":")[1]}', ent_type)
-                                                           for s in sub_descs if s != mesh_id])
+                        for ent_type in MeSHOntology.tree_number_to_entity_type(tn):
+                            sub_descs = mesh_trie.keys(tn.lower())
+                            for mesh_term in mesh_terms:
+                                term = mesh_term.lower()
+                                self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
+                                self.term2entity[term].update([Entity(f'MESH:{s.split(":")[1]}', ent_type)
+                                                               for s in sub_descs if s != mesh_id])
 
                     except KeyError:
                         continue
