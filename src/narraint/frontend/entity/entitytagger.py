@@ -9,6 +9,7 @@ from itertools import islice
 
 import datrie
 
+from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
 from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
@@ -226,23 +227,10 @@ class EntityTagger:
         :return: None
         """
         # read also atc classes
-        logging.info('Adding ATC Chembl information...')
-        level4_to_chemlbids = defaultdict(set)
-        level4_to_name = {}
-        chemblid_to_level4 = defaultdict(set)
-        with open(CHEMBL_ATC_CLASSIFICATION_FILE, 'rt') as f:
-            reader = csv.reader(f, delimiter=',')
-            for row in islice(reader, 1, None):
-                c_id, level4, level4_name = row[0], row[1], row[2]
-                level4_to_chemlbids[level4].add(c_id)
-                chemblid_to_level4[c_id].add(level4)
-                level4_to_name[level4] = level4_name
-
-        for level4, chemblids in level4_to_chemlbids.items():
-            level4_name = level4_to_name[level4]
-            for chid in chemblids:
-                class_name = level4_name.strip().lower()
-                self.term2entity[class_name].add(Entity(chid, DRUG, entity_class=class_name))
+        atc_tree: ATCTree = ATCTree.instance()
+        for atc_class_name, chembl_ids in atc_tree.atcclassname2chembl.items():
+            for chid in chembl_ids:
+                self.term2entity[atc_class_name].add(Entity(chid, DRUG, entity_class=atc_class_name))
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
