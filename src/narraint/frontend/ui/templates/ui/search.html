@@ -104,286 +104,312 @@
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">ATC Classes</h5>
+                                <h5 class="modal-title">Concept Selection:</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
 
                             <div class="container-fluid">
-                                <div id="atc_accordion">
-                                    <!-- this accordion is filled in search.js, starting at "get_atc_tree()" -->
-                                </div>
-                            </div>
+                                <div id="accordion">
+                                    <div class="card">
+                                        <div class="card-header" id="headingConceptSelection">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link" data-toggle="collapse"
+                                                        data-target="#collapseOne" aria-expanded="true"
+                                                        aria-controls="collapseOne">
+                                                    Variables / Placeholders
+                                                </button>
+                                            </h5>
+                                        </div>
 
+                                        <div id="collapseOne" class="collapse" aria-labelledby="headingConceptSelection"
+                                             data-parent="#accordion">
+                                            <div class="card-body" id="variable_card_body">
 
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-    </div>
-
-    <div class="accordion" id="accordionExample">
-        <div class="card mb-3">
-            <div class="card-header text-center" id="headingOne">
-                <h2 class="mb-0">
-                    <button class="btn btn-primary" type="button" data-toggle="collapse"
-                            data-target="#collapseExamples"
-                            aria-expanded="false" aria-controls="collapseExamples">
-                        Example Queries
-                    </button>
-                </h2>
-            </div>
-            <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
-                 data-parent="#accordionExample">
-                <div class="card-body">
-                    <div class="alert alert-info" role="alert">
-                        Methods
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
-                        Spectrometry method Simvastatin
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
-                        Simvastatin
-                    </button>
-                    <div class="alert alert-info" role="alert">
-                        Treatment
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
-                        treats
-                        "Diabetes Mellitus"
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Simvastatin treats Hypercholesterolemia')">Simvastatin treats
-                        Hypercholesterolemia
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats ?X(Disease)')">Metformin treats ?X(Disease)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Plant Family Associations
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated
-                        ?Y(Disease)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
-                        associated ?Y(Disease)
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Administered
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin administered ?X(DosageForm)')">Metformin administered
-                        ?X(DosageForm)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin administered Injections')">Metformin administered
-                        Injections
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Lidocaine administered ?X(DosageForm)')">Lidocaine administered
-                        ?X(DosageForm)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(Drug) administered liposomes')">?X(Drug)
-                        administered liposomes
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;')">
-                        ?X(Drug) administered "Nebulizers and Vaporizers"
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Gene Interactions
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin inhibits mtor')">Metformin inhibits mtor
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin inhibits ?X(Target)')">Metformin inhibits ?X(Target)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits cyp3a4
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
-                        Simvastatin
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Adverse Effects
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
-                        Rhabdomyolysis
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">
-                        Simvastatin induces
-                        Muscular Diseases
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Complex Queries
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human')">
-                        Metformin treats Diabetes Mellitus AND Metformin associated human
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)')">
-                        Metformin treats Diabetes Mellitus AND Metformin associated ?X(Drug)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)')">
-                        Metformin treats Diabetes Mellitus AND Metformin administered ?X(DosageForm)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4')">
-                        Simvastatin induces "Muscular Diseases" AND ?X(Drug) inhibits cyp3a4
-                    </button>
-
-                    <br><br>
-                    <div class="alert alert-info" role="alert">
-                        Large Queries
-                    </div>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug) treats
-                        ?Dis(Disease)
-                    </button>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="example_search('?Drug(Drug) administered ?Form(DosageForm)')">
-                        ?Drug(Drug) administered ?Form(DosageForm)
-                    </button>
-
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--
-<div class="accordion" id="accordionQueryTranslation">
-<div class="card mb-3">
-    <div class="card-header text-center" id="headingOne">
-        <h2 class="mb-0">
-            <button class="btn btn-primary" type="button" data-toggle="collapse"
-                    data-target="#collapseTutorial"
-                    aria-expanded="false" aria-controls="collapseOne">
-                Tutorials / Getting Started
-            </button>
-        </h2>
-    </div>
-
-
-    <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
-         data-parent="#accordionQueryTranslation">
-        <div class="card-body">
-            <div>
-                In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
-            </div>
-        </div>
-    </div>
-
-</div>
-</div>
--->
-    <div class="container" id="resultdiv">
-        <br>
-        <div class="row">
-            <h2 id="document_header">Documents</h2>
-            <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
-                <option selected value="True">Year (desc)</option>
-                <option value="False">Year (asc)</option>
-            </select>
-            <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
-                <option selected value="True">Frequence (desc)</option>
-                <option value="False">Frequence (asc)</option>
-            </select>
-        </div>
-    </div>
-    <div class="row margin-top" id="div_wrapper_documents">
-        <div id="div_documents"></div>
-    </div>
-
-    </div>
-    <!-- Feedback stuff-->
-
-    <button type="button" class="btn btn-primary feedbackbtn"
-            onclick="openFeedback()">
-        Report bug
-        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
-    </button>
-    <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Send feedback with screenshot</h5>
-                    <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row mt-2">
-                            <div class="outsideWrapper">
-                                <div class="insideWrapper" id="screenshotContainer">
-                                    <img src="null" id="screenshot"
-                                         class="img-fluid coveredImage border border-primary">
-                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-header" id="headingThree">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link collapsed" data-toggle="collapse"
+                                                        data-target="#collapseThree" aria-expanded="false"
+                                                        aria-controls="collapseThree">
+                                                    ATC Classes
+                                                </button>
+                                            </h5>
+                                        </div>
+                                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                                             data-parent="#accordion">
+                                            <div class="card-body">
+                                                <div id="atc_accordion">
+                                                    <!-- this accordion is filled in search.js, starting at "get_atc_tree()" -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col text-center">
-                                <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="accordion" id="accordionExample">
+            <div class="card mb-3">
+                <div class="card-header text-center" id="headingOne">
+                    <h2 class="mb-0">
+                        <button class="btn btn-primary" type="button" data-toggle="collapse"
+                                data-target="#collapseExamples"
+                                aria-expanded="false" aria-controls="collapseExamples">
+                            Example Queries
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    <div class="card-body">
+                        <div class="alert alert-info" role="alert">
+                            Methods
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
+                            Spectrometry method Simvastatin
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
+                            Simvastatin
+                        </button>
+                        <div class="alert alert-info" role="alert">
+                            Treatment
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
+                            treats
+                            "Diabetes Mellitus"
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin treats Hypercholesterolemia')">Simvastatin treats
+                            Hypercholesterolemia
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats ?X(Disease)')">Metformin treats ?X(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Plant Family Associations
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated
+                            ?Y(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
+                            associated ?Y(Disease)
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Administered
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin administered ?X(DosageForm)')">Metformin administered
+                            ?X(DosageForm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin administered Injections')">Metformin administered
+                            Injections
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Lidocaine administered ?X(DosageForm)')">Lidocaine administered
+                            ?X(DosageForm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Drug) administered liposomes')">?X(Drug)
+                            administered liposomes
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;')">
+                            ?X(Drug) administered "Nebulizers and Vaporizers"
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Gene Interactions
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin inhibits mtor')">Metformin inhibits mtor
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin inhibits ?X(Target)')">Metformin inhibits ?X(Target)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits cyp3a4
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
+                            Simvastatin
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Adverse Effects
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
+                            Rhabdomyolysis
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">
+                            Simvastatin induces
+                            Muscular Diseases
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Complex Queries
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human')">
+                            Metformin treats Diabetes Mellitus AND Metformin associated human
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)')">
+                            Metformin treats Diabetes Mellitus AND Metformin associated ?X(Drug)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)')">
+                            Metformin treats Diabetes Mellitus AND Metformin administered ?X(DosageForm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4')">
+                            Simvastatin induces "Muscular Diseases" AND ?X(Drug) inhibits cyp3a4
+                        </button>
+
+                        <br><br>
+                        <div class="alert alert-info" role="alert">
+                            Large Queries
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug) treats
+                            ?Dis(Disease)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('?Drug(Drug) administered ?Form(DosageForm)')">
+                            ?Drug(Drug) administered ?Form(DosageForm)
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--
+    <div class="accordion" id="accordionQueryTranslation">
+    <div class="card mb-3">
+        <div class="card-header text-center" id="headingOne">
+            <h2 class="mb-0">
+                <button class="btn btn-primary" type="button" data-toggle="collapse"
+                        data-target="#collapseTutorial"
+                        aria-expanded="false" aria-controls="collapseOne">
+                    Tutorials / Getting Started
+                </button>
+            </h2>
+        </div>
+
+
+        <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
+             data-parent="#accordionQueryTranslation">
+            <div class="card-body">
+                <div>
+                    In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+    -->
+        <div class="container" id="resultdiv">
+            <h2 id="document_header">Documents:</h2>
+            <div class="row justify-content-end">
+                <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
+                    <option selected value="True">Latest Publications First</option>
+                    <option value="False">Oldest Publications First</option>
+                </select>
+                <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
+                    <option selected value="True">Most Frequent Substitutions First</option>
+                    <option value="False">Unusual Substitutions First</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="row margin-top" id="div_wrapper_documents">
+                    <div id="div_documents"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Feedback stuff-->
+
+        <button type="button" class="btn btn-primary feedbackbtn"
+                onclick="openFeedback()">
+            Report bug
+            <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+        </button>
+        <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send feedback with screenshot</h5>
+                        <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row mt-2">
+                                <div class="outsideWrapper">
+                                    <div class="insideWrapper" id="screenshotContainer">
+                                        <img src="null" id="screenshot"
+                                             class="img-fluid coveredImage border border-primary">
+                                        <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col text-center">
+                                    <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <p>Please mark the problematic section on the image above and/or describe the problem you have
-                        encountered:</p>
-                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
-                        Report
-                    </button>
+                        <p>Please mark the problematic section on the image above and/or describe the problem you have
+                            encountered:</p>
+                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                            Report
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block javascript %}

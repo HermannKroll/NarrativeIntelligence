@@ -376,7 +376,7 @@ $(document).on('keydown', function (e) {
 
 $(document).ready(function () {
 
-    get_atc_tree();
+    buildSelectionTrees();
 
     $("#search_form").submit(search);
 
@@ -516,10 +516,8 @@ const search = (event) => {
             document.getElementById("select_sorting_year").style.display = "block"
             console.log
             if (is_aggregate === true) {
-                console.log("Hi");
                 document.getElementById("select_sorting_freq").style.display = "block"
             } else {
-                console.log("Ni");
                 document.getElementById("select_sorting_freq").style.display = "none"
             }
 
@@ -930,41 +928,42 @@ const createResultList = (results, query_len) => {
 };
 
 
-function build_atc_lvl5_card(data_parent, atc_class) {
+function buildATCLevel5Element(data_parent, atc_class) {
     let atc_info = atc_class.split(' - ')[0];
     let atc_label = atc_class.split(' - ')[1];
+    atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
     let s_btn_id = "s_btn" + atc_info;
     let o_btn_id = "o_btn" + atc_info;
     document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
-        '                        <div class="card-header">' + atc_class + '\n' +
-        '                           <button class="btn btn-sm btn-outline-dark float-right" id="' + o_btn_id + '">O</button>\n' +
-        '                           <button class="btn btn-sm btn-outline-dark float-right" id="' + s_btn_id + '">S</button>\n' +
+        '                        <div class="card-header">' + atc_info + ' - ' + atc_label + '\n' +
+        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button>\n' +
+        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button>\n' +
         '                        </div>\n' +
         '                    </div>');
 
     document.getElementById(s_btn_id).addEventListener("click", function () {
-        copy_atc_label("input_subject", atc_label);
+        copyATCLabel("input_subject", atc_label);
     });
     document.getElementById(o_btn_id).addEventListener("click", function () {
-        copy_atc_label("input_object", atc_label);
+        copyATCLabel("input_object", atc_label);
     });
 }
 
-function copy_atc_label(target, atc_label) {
-    console.log("Hi.");
+function copyATCLabel(target, atc_label) {
     if (target) {
         let target_element = document.getElementById(target);
         target_element.value = atc_label;
     }
 }
 
-function build_atc_card_header(data_parent, atc_class) {
+function buildATCHeaderCard(data_parent, atc_class) {
     // atc_class: e.g. "A01AA03 - olaflur" -> atc_info: "A01AA03"
     let atc_info = atc_class.split(' - ')[0];
     let heading_id = "heading" + atc_info;
     let collapse_id = "collapse" + atc_info;
     let child_id = "child" + atc_info;
-    let atc_label = atc_class.split(' - ')[1];
+    let atc_label = atc_class.split(' - ')[1].trim().toLowerCase();
+    atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
     let s_btn_id = "s_btn" + atc_info;
     let o_btn_id = "o_btn" + atc_info;
 
@@ -972,10 +971,10 @@ function build_atc_card_header(data_parent, atc_class) {
         '            <div class="card-header" id="' + heading_id + '">\n' +
         '                <h5 class="mb-0 d-inline">\n' +
         '                    <button class="btn btn-link text-start" data-toggle="collapse" data-target="#' + collapse_id + '" aria-expanded="true" aria-controls="' + collapse_id + '">\n' +
-        '                      ' + atc_class + '\n' +
+        '                      ' + atc_info + ' - ' + atc_label + '\n' +
         '                    </button>\n' +
-        '                    <button class="btn btn-sm btn-outline-dark float-right" id="' + o_btn_id + '">O</button>\n' +
-        '                    <button class="btn btn-sm btn-outline-dark float-right" id="' + s_btn_id + '">S</button>\n' +
+        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button>\n' +
+        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button>\n' +
         '                 </h5>\n' +
         '            </div>' +
         '            <div id="' + collapse_id + '" class="collapse" aria-labelledby="' + heading_id + '" data-parent="#' + data_parent + '">\n' +
@@ -986,14 +985,14 @@ function build_atc_card_header(data_parent, atc_class) {
     );
 
     document.getElementById(s_btn_id).addEventListener("click", function () {
-        copy_atc_label("input_subject", atc_label);
+        copyATCLabel("input_subject", atc_label);
     });
     document.getElementById(o_btn_id).addEventListener("click", function () {
-        copy_atc_label("input_object", atc_label);
+        copyATCLabel("input_object", atc_label);
     });
 }
 
-function build_atc_tree(data_parent, tree, atc_depth) {
+function buildATCTree(data_parent, tree, atc_depth) {
     for (var k in tree) {
         let atc_class = tree[k]["name"];
         let atc_info = atc_class.split(' - ')[0];
@@ -1001,18 +1000,18 @@ function build_atc_tree(data_parent, tree, atc_depth) {
         let child_id = "child" + atc_info;
         //console.log(atc_class, atc_info, child_id, subtree);
         if (atc_depth < 5) {
-            build_atc_card_header(data_parent, atc_class);
-            build_atc_tree(child_id, subtree, atc_depth + 1);
+            buildATCHeaderCard(data_parent, atc_class);
+            buildATCTree(child_id, subtree, atc_depth + 1);
         } else {
             let lvl5_name_and_desc = atc_class + ' - ' + subtree[0]["name"];
-            build_atc_lvl5_card(data_parent, lvl5_name_and_desc);
+            buildATCLevel5Element(data_parent, lvl5_name_and_desc);
         }
     }
 
 }
 
 // build atc tree for modal
-function get_atc_tree() {
+function queryAndBuildATCTree() {
     let request = $.ajax({
         url: atc_tree_url
     });
@@ -1020,7 +1019,7 @@ function get_atc_tree() {
     request.done(function (response) {
         let result = response;
         for (var k in result) {
-            build_atc_tree("atc_accordion", result[k], 1);
+            buildATCTree("atc_accordion", result[k], 1);
         }
         document.getElementById("atcButton").style.display = "block";
     });
@@ -1029,4 +1028,51 @@ function get_atc_tree() {
         $('#alert_translation').text('Failed to get atc tree.');
         $('#alert_translation').fadeIn();
     });
+}
+
+function buildVariableTreeButton(dataParent, variableName, variableText) {
+    let s_btn_id = "s_btn" + variableName;
+    let o_btn_id = "o_btn" + variableName;
+
+    let rowDiv = $('<div class="row py-1 border"/>');
+    let rowText = $('<div class="col"><p class="text-left">'+ variableName + ' (' + variableText+')</p></div>');
+    let sBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + s_btn_id + '">S</button></div>');
+    let oBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + o_btn_id + '">O</button></div>');
+    rowDiv.append(rowText);
+    rowDiv.append(sBtn);
+    rowDiv.append(oBtn);
+    dataParent.append(rowDiv);
+
+    sBtn.click(function () {
+        copyATCLabel("input_subject", variableName);
+    });
+    oBtn.click(function () {
+        copyATCLabel("input_object", variableName);
+    });
+}
+
+function buildVariableTree() {
+    let variables = [
+            ['Chemical', "substance/molecule/element"],
+            ['Disease', "disease/illness/side effect, e.g. Diabetes Mellitus"],
+            ['DosageForm', "dosage form/delivery form, e.g. tablet or injection"],
+            ['Drug', "active ingredients, e.g. Metformin or Simvastatin"],
+            ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
+            ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
+            ['Method', "common applied methods"],
+            ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
+            ['Species', "target groups, e.g. human, rats, etc."],
+            ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
+            ];
+    let divVariables = $('<div class="grid"/>');
+    variables.forEach(variable => {
+        buildVariableTreeButton(divVariables, variable[0], variable[1])
+    });
+    $('#variable_card_body').append(divVariables);
+
+}
+
+function buildSelectionTrees() {
+    queryAndBuildATCTree();
+    buildVariableTree();
 }
