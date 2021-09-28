@@ -11,9 +11,9 @@
 
 
     <div class="container margin-top">
-        <a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
+        <!--<a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
         <br>
-        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a>
+        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a> -->
         <div class="row">
             <div class="col">
                 <table id="help_table" class="table table-bordered">
@@ -26,19 +26,19 @@
                     <tbody id="help_table_body">
                     <tr>
                         <td>associated</td>
-                        <td>A general relation: Associated describes that two entities are mentioned within the same
-                            sentence and connected via a predicate.
+                        <td>The general relation associated describes that two concepts are mentioned within the same
+                            sentence and connected via a verb/keyword.
                         </td>
                     </tr>
                     <tr>
                         <td>administered</td>
                         <td>Administered describes that some substance (Chemical, Drug, Excipient or Plant Family) is
-                            given in a Dosage Form.
+                            given in a dosage dorm (tablet, injection, etc.).
                         </td>
                     </tr>
                     <tr>
                         <td>compares</td>
-                        <td>Compares describes that some entities are compared.</td>
+                        <td>Compares describes that some concepts are compared.</td>
                     </tr>
                     <tr>
                         <td>decreases</td>
@@ -49,12 +49,12 @@
                     <tr>
                         <td>induces</td>
                         <td>Induces describes that some effect / expression is increased, e.g., a drug might increase
-                            the expression of a disease.
+                            the expression of a disease. Induces may be used to search for side effects.
                         </td>
                     </tr>
                     <tr>
                         <td>interacts</td>
-                        <td>Interacts describe an interaction between substances and targets. A search for interacts
+                        <td>Interacts describe an interaction between concepts (drugs, targets, etc.). A search for interacts
                             also includes searches for metabolises and inhibits.
                         </td>
                     </tr>
