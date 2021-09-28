@@ -6,8 +6,10 @@ $(document).ready(function () {
     let table = $('#stats_table').DataTable({
         "pageLength": 25,
         "language": {
-            "emptyTable": '<div class="spinner-border"></div>'
-        },
+            "emptyTable": '<div class="spinner-border"></div>',
+             "decimal": ",",
+            "thousands": "."
+        }
     });
 
     $.ajax({
