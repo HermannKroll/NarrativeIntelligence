@@ -76,16 +76,22 @@ def get_document_graph(request):
             facts = set()
             nodes = set()
             for r in query:
-                subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
-                                                                                resolve_gene_by_id=False)
-                object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
-                                                                               resolve_gene_by_id=False)
-                subject_name = f'{subject_name} ({r.subject_type})'
-                object_name = f'{object_name} ({r.object_type})'
-                key = subject_name, r.relation, object_name
-                facts.add(key)
-                nodes.add(subject_name)
-                nodes.add(object_name)
+                try:
+                    subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
+                                                                                    resolve_gene_by_id=False)
+                    object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
+                                                                                   resolve_gene_by_id=False)
+                    subject_name = f'{subject_name} ({r.subject_type})'
+                    object_name = f'{object_name} ({r.object_type})'
+
+                    key = subject_name, r.relation, object_name
+                    key_flipped = object_name, r.relation, subject_name
+                    if key not in facts and key_flipped not in facts:
+                        facts.add(key)
+                        nodes.add(subject_name)
+                        nodes.add(object_name)
+                except:
+                    pass
 
             result = []
             for s, p, o in facts:
@@ -303,10 +309,13 @@ class StatsView(TemplateView):
                     session = SessionExtended.get()
                     try:
                         logging.info('Processing database statistics...')
-                        StatsView.stats_query_results = session.query(Predication.relation,
-                                                                      Predication.extraction_type,
-                                                                      func.count(Predication.relation)). \
+                        query = session.query(Predication.relation, Predication.extraction_type,
+                                              func.count(Predication.relation)). \
                             group_by(Predication.relation).group_by(Predication.extraction_type).all()
+                        results = list()
+                        for r in query:
+                            results.append((r[0], r[1], r[2]))
+                        StatsView.stats_query_results = results
                     except:
                         traceback.print_exc(file=sys.stdout)
                     session.close()
