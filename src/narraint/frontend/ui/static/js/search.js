@@ -769,7 +769,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         '<img src="' + pubpharm_image_url + '" height="25px">' +
         document_id +  '</a>' +
 
-        '<a class="btn-link float-right" href="http://www.pubpharm.de/services/prototypes/narratives/document?id=' + document_id + '" target="_blank">'+
+        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + document_id + '" target="_blank">'+
         'Document Graph</a>' +
 
         '<br><b>' + title + '</b><br>' +
