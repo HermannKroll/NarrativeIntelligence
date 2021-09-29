@@ -26,7 +26,7 @@ COMMON_QUERIES = [
     'Metformin treats Diabetes Mellitus _AND_ Metformin administered ?X(DosageForm)',
     'Simvastatin induces "Muscular Diseases" _AND_ ?X(Drug) inhibits cyp3a4',
     '?Drug(Drug) treats ?Dis(Disease)',
-    '?Drug(Drug) administered ?Form(DosageForm)'
+    '?Drug(Drug) administered ?Form(DosageForm)',
     'Lidocaine administered ?X(DosageForm)',
     '?X(Drug) administered liposomes',
     '?X(Drug) administered "Nebulizers and Vaporizers"',
