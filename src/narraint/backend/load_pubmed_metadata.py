@@ -75,17 +75,34 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
                     art_date = journal_elem_year[0].text
                     if ' ' in art_date:
                         journal_year, journal_month = art_date.split(' ', maxsplit=1)
+                        # some times year and month are swapped - swap them here
+                        if not journal_year.isdigit() and journal_month.isdigit():
+                            tmp = journal_year
+                            journal_year = int(journal_month)
+                            journal_month = tmp
+                        elif journal_year.isdigit():
+                            journal_year = int(journal_year)
+                        elif '-' in journal_year:
+                            journal_year = journal_year.split('-')[0]
+                            if journal_year.isdigit():
+                                journal_year = int(journal_year)
+                        elif journal_year.strip()[0:4].isdigit():
+                            journal_year = int(journal_year.strip()[0:4])
+                        else:
+                            raise ValueError(f'Unknown publication year format: {art_date}')
                     else:
-                        journal_year = art_date
-                        journal_month = None
+                        if art_date.strip().isdigit():
+                            journal_year = int(art_date.strip())
+                            journal_month = None
             journal_volume = journal_elem_volume[0].text if len(journal_elem_volume) else ""
             journal_issue = journal_elem_issue[0].text if len(journal_elem_issue) else ""
             datestring = f'{journal_month} ' if journal_month else ""
-            datestring += journal_year if journal_year else ""
+            datestring += str(journal_year) if journal_year else ""
             journal_list.append(
                 f'{journal_title}, Vol. {journal_volume} No. {journal_issue} ({datestring})')
+
             if journal_year and (not publication_year or publication_year < journal_year):
-                publication_year = journal_year
+                publication_year = int(journal_year)
 
         journals = ' | '.join(journal_list).replace('\\', ' ')
 
