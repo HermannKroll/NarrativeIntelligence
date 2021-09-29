@@ -6,7 +6,7 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES
+from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY
 
 
 class QueryTranslation:
@@ -19,6 +19,8 @@ class QueryTranslation:
         # support entry of targets
         self.variable_type_mappings["dosage form"] = DOSAGE_FORM
         self.variable_type_mappings["dosage forms"] = DOSAGE_FORM
+        self.variable_type_mappings["plant familiy"] = PLANT_FAMILY
+        self.variable_type_mappings["lab method"] = LAB_METHOD
         self.variable_type_mappings["target"] = GENE
         self.variable_type_mappings["targets"] = GENE
         self.entity_tagger = EntityTagger.instance()
@@ -41,7 +43,7 @@ class QueryTranslation:
                 return var_name, None
         except AttributeError:
             if not VAR_NAME.search(text):
-                raise ValueError('variable "{}" has no name (e.g. ?X(Chemical))'.format(text))
+                raise ValueError('Variable "{}" has no name (e.g. ?X(Chemical))'.format(text))
 
     def check_wrong_variable_entry(self, text_low):
         if text_low in self.variable_type_mappings:
@@ -100,7 +102,7 @@ class QueryTranslation:
 
     def convert_query_text_to_fact_patterns(self, query_txt) -> (GraphQuery, str):
         if not query_txt.strip():
-            return None, "subject or object is missing"
+            return None, "Subject or object is missing"
         # remove too many spaces
         fact_txt = re.sub('\s+', ' ', query_txt).strip()
         # split query into facts by '.'
@@ -116,26 +118,26 @@ class QueryTranslation:
                 # check whether the text forms a triple
                 s_t, p_t, o_t = self.align_triple(fact_txt)
             except ValueError:
-                explanation_str += 'Cannot find a predicate in: {}'.format(fact_txt)
-                self.logger.error('Cannot find a predicate in: {}'.format(fact_txt))
+                explanation_str += 'Cannot find a relation in: {}'.format(fact_txt)
+                self.logger.error('Cannot find a relation in: {}'.format(fact_txt))
                 return None, explanation_str
 
             try:
                 s = self.convert_text_to_entity(s_t)
             except ValueError as e:
-                self.logger.error('error unknown subject: {}'.format(e))
-                return None, '{} (subject error)\n'.format(e)
+                self.logger.error('Error subject unknown: {}'.format(e))
+                return None, '{} (subject unknown)\n'.format(e)
 
             try:
                 o = self.convert_text_to_entity(o_t)
             except ValueError as e:
-                self.logger.error('error unknown object: {}'.format(e))
-                return None, '{} (object error)\n'.format(e)
+                self.logger.error('Error object unknown: {}'.format(e))
+                return None, '{} (object unknown)\n'.format(e)
 
             p = p_t.lower()
             if p not in self.allowed_predicates:
-                self.logger.error("error unknown predicate: {}".format(p_t))
-                return None, "{} (predicate error)\n".format(p_t)
+                self.logger.error("Error predicate unknown: {}".format(p_t))
+                return None, "{} (relation unknown)\n".format(p_t)
 
             explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt.strip(), s, p, o)
             graph_query.add_fact_pattern(FactPattern(s, p, o))
