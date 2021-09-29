@@ -9,7 +9,7 @@
 
 {% endblock %}
 
-{% block title %}Narrative Information Prototype{% endblock %}
+{% block title %}Narrative Prototype{% endblock %}
 
 {% block content %}
 
@@ -19,14 +19,15 @@
         <div class="row">
             <div class="col">
 
-
                 <form action="{% url 'search' %}" id="search_form">
                     {% csrf_token %}
                     <div class="form-group">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal" onclick="setConceptInputFieldSubject();" type="button">Browse</button>
+                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
+                                        onclick="setConceptInputFieldSubject();" type="button">Browse
+                                </button>
                             </div>
 
                             <select class="custom-select" id="input_predicate">
@@ -45,7 +46,9 @@
 
                             <input type="text" class="form-control" placeholder="enter object" id="input_object">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal" onclick="setConceptInputFieldObject();" type="button">Browse</button>
+                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
+                                        onclick="setConceptInputFieldObject();" type="button">Browse
+                                </button>
                             </div>
 
                             <div class="input-group-append">
@@ -57,11 +60,20 @@
                             Please be patient. This process can take up to one minute.
                         </p>
 
+
                         <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
                             This is a danger alert—check it out!
                         </div>
                         <ul class="list-group" id="query_builder_list">
                         </ul>
+
+                        <div class="d-flex justify-content-center">
+                            <h6>How to Search:
+                                <a href="https://youtu.be/iagphBPLokM" target="_blank">
+                                    <img src="{% static 'icons/help.png' %}" height="40px">
+                                </a>
+                            </h6>
+                        </div>
 
                         <!--
                         <label><strong>Data Source:</strong></label><br>
@@ -344,7 +356,13 @@
 
             <div class="row">
                 <div class="col">
-                    <h2 id="document_header">Results:</h2>
+                    <h2 id="document_header">Results:
+
+                        <a href="https://youtu.be/DrG1u8497g0" target="_blank">
+                            <img src="{% static 'icons/help.png' %}" height="40px">
+                        </a>
+                    </h2>
+
                 </div>
                 <div class="col-md-auto">
                     <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
@@ -361,7 +379,7 @@
             </div>
 
             <div class="row">
-                <div class="row margin-top" id="div_wrapper_documents">
+                <div class="row" id="div_wrapper_documents">
                     <div id="div_documents"></div>
                 </div>
             </div>

@@ -1,20 +1,4 @@
-const setButtonSearching = isSearching => {
-    let btn = $('#btn_search_doc');
-    let help = $('#help_search');
-    btn.empty();
 
-    if (isSearching) {
-        let span = $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-        btn.append(span)
-            .append(" Searching ...")
-            .prop("disabled", true);
-        help.fadeIn();
-    } else {
-        btn.append("Search")
-            .prop("disabled", false);
-        help.fadeOut();
-    }
-};
 
 function visualize_document_graph(document_graph) {
     let nodes = document_graph["nodes"];
@@ -78,10 +62,12 @@ function visualize_document_graph(document_graph) {
 }
 
 
-const search_document = (event) => {
-    event.preventDefault();
-    setButtonSearching(true);
-    let document_id = document.getElementById("input_document").value
+
+$(document).ready(function () {
+    const queryString = window.location.search;
+    console.log(queryString);
+    const urlParams = new URLSearchParams(queryString);
+    let document_id = urlParams.get('id');
     let request = $.ajax({
         url: document_graph_url,
         data: {
@@ -101,10 +87,5 @@ const search_document = (event) => {
         setButtonSearching(false);
 
     });
-};
-
-
-$(document).ready(function () {
-    $("#search_form").submit(search_document);
 });
 

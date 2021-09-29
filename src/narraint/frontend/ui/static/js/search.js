@@ -764,9 +764,15 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let prov_ids = queryResult["prov"];
 
 
-    let divDoc = $('<div class="card"><div class="card-body"><a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
+    let divDoc = $('<div class="card"><div class="card-body">' +
+        '<a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">'+
         '<img src="' + pubpharm_image_url + '" height="25px">' +
-        document_id + '</a>' + '<br><b>' + title + '</b><br>' +
+        document_id +  '</a>' +
+
+        '<a class="btn-link float-right" href="http://www.pubpharm.de/services/prototypes/narratives/document?id=' + document_id + '" target="_blank">'+
+        'Document Graph</a>' +
+
+        '<br><b>' + title + '</b><br>' +
         "in: " + journals + " | " + year + '<br>' +
         "by: " + authors + '<br>' +
         '</div></div><br>');
