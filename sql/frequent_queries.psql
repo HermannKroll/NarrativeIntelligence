@@ -1,3 +1,26 @@
+
+INSERT INTO doc_tagged_by
+(SELECT id, collection, 'GNormPlus', 'unknown', 'Gene', current_timestamp
+ FROM document
+ WHERE id not IN (SELECT distinct document_id from doc_tagged_by
+				  WHERE tagger_name = 'GNormPlus' and ent_type = 'Gene'));
+
+
+INSERT INTO doc_tagged_by
+(SELECT id, collection, 'GNormPlus', 'unknown', 'Species', current_timestamp
+ FROM document
+ WHERE id not IN (SELECT distinct document_id from doc_tagged_by
+				  WHERE tagger_name = 'GNormPlus' and ent_type = 'Species'));
+
+SELECT COUNT(*)
+FROM DOC_PROCESSED_BY_IE
+WHERE date_inserted > '2021-09-21'
+
+DELETE FROM Predication WHERE document_id IN
+(SELECT document_id
+FROM DOC_PROCESSED_BY_IE
+WHERE date_inserted > '2021-09-21');
+
 SELECT *
 FROM Predication
 WHERE document_collection = 'PubMed'
