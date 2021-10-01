@@ -163,14 +163,14 @@ class QueryOptimizer:
             variable_count = 0
             subject_ids = set()
             for sub in fp.subjects:
-                if sub.entity_id not in subject_ids:
+                if (sub.entity_id, sub.entity_type) not in subject_ids:
                     subject_ids.add((sub.entity_id, sub.entity_type))
                     new_fp.subjects.append(sub)
                     if sub.entity_type == ENTITY_TYPE_VARIABLE:
                         variable_count += 1
             object_ids = set()
             for obj in fp.objects:
-                if obj.entity_id not in object_ids:
+                if (obj.entity_id, obj.entity_type) not in object_ids:
                     object_ids.add((obj.entity_id, obj.entity_type))
                     new_fp.objects.append(obj)
                     if obj.entity_type == ENTITY_TYPE_VARIABLE:
