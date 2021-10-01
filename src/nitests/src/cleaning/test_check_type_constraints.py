@@ -2,8 +2,8 @@ import unittest
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Sentence, Predication
-from narraint.cleaning.check_type_constraints import delete_predications_hurting_type_constraints
-from narraint.cleaning.relation_type_constraints import RelationTypeConstraintStore
+from kgextractiontoolbox.cleaning.check_type_constraints import delete_predications_hurting_type_constraints
+from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from nitests import util
 
 

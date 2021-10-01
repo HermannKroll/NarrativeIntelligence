@@ -12,8 +12,7 @@ class TestDocument(unittest.TestCase):
 
     def setUp(self) -> None:
         nlp = English()  # just the language with no model
-        sentencizer = nlp.create_pipe("sentencizer")
-        nlp.add_pipe(sentencizer)
+        nlp.add_pipe("sentencizer")
         self.nlp = nlp
 
     def test_parse_tag_list(self):

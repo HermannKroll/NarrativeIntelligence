@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from spacy.lang.en import English
 
-from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
+from kgextractiontoolbox.extraction.extraction_utils import filter_document_sentences_without_tags
 from nitests.util import get_test_resource_filepath
 
 
@@ -10,8 +10,7 @@ class ExtractionUtilsTestCase(TestCase):
 
     def test_filter_sentences_by_remaining_sentences(self):
         nlp = English()  # just the language with no model
-        sentencizer = nlp.create_pipe("sentencizer")
-        nlp.add_pipe(sentencizer)
+        nlp.add_pipe("sentencizer")
 
         test26 = get_test_resource_filepath("PubMed26.txt")
         doc_id = 26
@@ -75,8 +74,7 @@ class ExtractionUtilsTestCase(TestCase):
 
     def test_filter_sentences_by_remaining_new_tag_positions(self):
         nlp = English()  # just the language with no model
-        sentencizer = nlp.create_pipe("sentencizer")
-        nlp.add_pipe(sentencizer)
+        nlp.add_pipe("sentencizer")
 
         test26 = get_test_resource_filepath("PubMed26.txt")
         doc_id = 26

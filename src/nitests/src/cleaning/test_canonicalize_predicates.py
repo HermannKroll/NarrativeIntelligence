@@ -4,9 +4,9 @@ from sqlalchemy import update
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Sentence, Predication
-from narraint.cleaning.canonicalize_predicates import is_predicate_equal_to_vocab, transform_predicate, \
+from kgextractiontoolbox.cleaning.canonicalize_predicates import is_predicate_equal_to_vocab, transform_predicate, \
     canonicalize_predication_table
-from narraint.cleaning.relation_vocabulary import RelationVocabulary
+from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from nitests import util
 
 

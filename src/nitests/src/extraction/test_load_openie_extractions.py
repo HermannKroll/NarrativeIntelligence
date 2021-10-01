@@ -4,7 +4,7 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode, \
+from kgextractiontoolbox.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode, \
     get_subject_and_object_entities
 from narrant.backend.load_document import document_bulk_load
 from nitests import util

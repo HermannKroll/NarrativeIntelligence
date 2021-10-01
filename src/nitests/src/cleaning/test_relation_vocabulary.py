@@ -1,6 +1,6 @@
 import unittest
 
-from narraint.cleaning.relation_vocabulary import RelationVocabulary
+from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from nitests import util
 
 

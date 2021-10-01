@@ -1,8 +1,9 @@
+import csv
 import unittest
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Sentence, Predication
-from narraint.cleaning.export_predicate_mappings import export_predicate_mapping
+from kgextractiontoolbox.cleaning.export_predicate_mappings import export_predicate_mapping
 from nitests import util
 
 
@@ -62,11 +63,12 @@ class PredicateMappingExportTest(unittest.TestCase):
         export_predicate_mapping(output_file, "Test_Export_Mappings")
         output_results = set()
         with open(output_file, 'rt') as f:
-            for line in f:
-                output_results.add(tuple(line.strip().split('\t')))
+            reader = csv.reader(f, delimiter='\t')
+            for t in reader:
+                output_results.add(tuple(t))
 
         self.assertIn(('predicate', 'count', 'relation'), output_results)
         self.assertIn(("treats", "2", "treats"), output_results)
         self.assertIn(("induces", "2", "induces"), output_results)
         self.assertIn(("therapy", "1", "therapy"), output_results)
-        self.assertIn(("test", "1", "None"), output_results)
+        self.assertIn(("test", "1", ""), output_results)

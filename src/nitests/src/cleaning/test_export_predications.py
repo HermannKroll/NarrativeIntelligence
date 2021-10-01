@@ -4,7 +4,7 @@ import rdflib
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Sentence, Predication
-from narraint.extraction.export_predications import export_predications_as_tsv, export_predications_as_rdf
+from kgextractiontoolbox.extraction.export_predications import export_predications_as_tsv, export_predications_as_rdf
 from nitests import util
 
 
@@ -138,12 +138,12 @@ class ExportPredicationsTest(unittest.TestCase):
         self.assertIn(('statement_12', 'document_collection', 'Test_Export'), tuples)
         self.assertIn(('statement_12', 'subject_id', 'C'), tuples)
         self.assertIn(('statement_12', 'subject_type', 'Disease'), tuples)
-        self.assertIn(('statement_12', 'subject_str', 'c a'), tuples)
+        self.assertIn(('statement_12', 'subject_str', 'c%20a'), tuples)
         self.assertIn(('statement_12', 'predicate', 'treat'), tuples)
         self.assertIn(('statement_12', 'relation', 'treats'), tuples)
         self.assertIn(('statement_12', 'object_id', 'B'), tuples)
         self.assertIn(('statement_12', 'object_type', 'Disease'), tuples)
-        self.assertIn(('statement_12', 'object_str', 'b a'), tuples)
+        self.assertIn(('statement_12', 'object_str', 'b%20a'), tuples)
         self.assertIn(('statement_12', 'sentence_id', 'sentence_id_11'), tuples)
         self.assertIn(('statement_12', 'extraction_type', 'PathIE'), tuples)
 
