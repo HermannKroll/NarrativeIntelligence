@@ -2,35 +2,46 @@
 
 MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2021_09_16_updates/"
 UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_09_16_updates.pubtator"
+PUBTATOR_FOR_GNORM="/hdd2/datasets/pubmed_medline/2021_09_16_updates_gnormplus.pubtator"
+MISSING_GNORMPLUS_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant_genormplus.ids"
 UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 
 # Convert the update files to a pubtator file
-python3 ~/NarrativeAnnotation/src/narrant/pubtator/translation/pubmed_medline2pubtator.py $MEDLINE_UPDATES $UPDATES_PUBTATOR
+# python3 ~/NarrativeAnnotation/src/narrant/pubtator/translation/pubmed_medline2pubtator.py $MEDLINE_UPDATES $UPDATES_PUBTATOR
 
 # Next load the documents into the database
-python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed
+# python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed
 
 # Next, tag the documents
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+
+# Export files for GNormPlus which are missing
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents_for_gnormplus.py $MISSING_GNORMPLUS_IDS -c PubMed
+
+# Export Document content
+# python3 ~/NarrativeAnnotation/src/narrant/backend/export.py -d $PUBTATOR_FOR_GNORM --collection PubMed --idfile $MISSING_GNORMPLUS_IDS
 
 # Next GNormPlus Tagging
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $UPDATES_PUBTATOR -c PubMed --gnormplus --skip-load --workers 3
+# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $PUBTATOR_FOR_GNORM -c PubMed --gnormplus --skip-load --workers 8
+
 
 # Finally, all files have been tagged
-python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
-# python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed --et PathIE --workers 15
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
-# python3 ~/NarrativeIntelligence/src/narraint/cleaning/canonicalize_predicates.py /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Apply the rules
 # python3 ~/NarrativeIntelligence/src/narraint/cleaning/apply_rules.py
 
 # Load the Metadata
-#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
 
 # Finally compute the new metadata service table2
-#python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
 # Compute new query table
-# python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
