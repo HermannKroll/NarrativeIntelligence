@@ -16,7 +16,7 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 # python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
 
 # Export files for GNormPlus which are missing
-# python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents_for_gnormplus.py $MISSING_GNORMPLUS_IDS -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents_for_gnormplus.py $MISSING_GNORMPLUS_IDS -c PubMed
 
 # Export Document content
 # python3 ~/NarrativeAnnotation/src/narrant/backend/export.py -d $PUBTATOR_FOR_GNORM --collection PubMed --idfile $MISSING_GNORMPLUS_IDS
@@ -26,7 +26,7 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 
 
 # Finally, all files have been tagged
-# python3 ~/NarrativeIntelligence/src/narraint/extraction/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
