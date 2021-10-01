@@ -4,6 +4,7 @@ from datetime import datetime
 from io import StringIO
 
 from sqlalchemy import update, or_, delete
+from sqlalchemy.cimmutabledict import immutabledict
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete, Sentence
@@ -239,7 +240,7 @@ def check_type_constraints(reorder_tuples=True):
     insert_predication_ids_to_delete(preds_to_associate)
     subquery = session.query(PredicationToDelete.predication_id).subquery()
     stmt = update(Predication).where(Predication.id.in_(subquery)).values(relation=ASSOCIATED_PREDICATE_UNSURE)
-    session.execute(stmt)
+    session.execute(stmt, execution_options=immutabledict({"synchronize_session": 'fetch'}))
     logging.debug('Committing...')
     session.commit()
     clean_predication_to_delete_table(session)
@@ -275,7 +276,7 @@ def check_type_constraints(reorder_tuples=True):
         logging.info(f'Deleting {len(preds_to_reorder)} old and wrongly ordered predications')
         subquery = session.query(PredicationToDelete.predication_id).subquery()
         stmt = delete(Predication).where(Predication.id.in_(subquery))
-        session.execute(stmt)
+        session.execute(stmt, execution_options=immutabledict({"synchronize_session": 'fetch'}))
         logging.debug('Committing...')
         session.commit()
         clean_predication_to_delete_table(session)
@@ -289,6 +290,8 @@ def main():
     logging.info('Applying rules...')
     dosage_form_rule()
     method_rule()
+    session = SessionExtended.get()
+    clean_predication_to_delete_table(session)
     check_type_constraints()
     #  clean_redundant_symmetric_predicates()
     #   clean_unreferenced_sentences()
