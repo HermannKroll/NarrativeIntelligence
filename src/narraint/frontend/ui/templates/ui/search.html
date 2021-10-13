@@ -15,21 +15,23 @@
 
     <!-- own development starts here:  -->
     <div class="container margin-top">
-
-        <div class="row">
-            <div class="col">
-
-                <form action="{% url 'search' %}" id="search_form">
-                    {% csrf_token %}
-                    <div class="form-group">
+        <form action="{% url 'search' %}" id="search_form">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="row no-gutters">
+                    <div class="col-md-12 col-lg-3">
                         <div class="input-group">
+
                             <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
                                         onclick="setConceptInputFieldSubject();" type="button">Browse
                                 </button>
                             </div>
-
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-3">
+                        <div class="input-group">
                             <select class="custom-select" id="input_predicate">
                                 <option value="associated">associated</option>
                                 <option value="administered">administered</option>
@@ -43,30 +45,42 @@
                                 <option value="treats">treats</option>
 
                             </select>
-
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-3">
+                        <div class="input-group">
                             <input type="text" class="form-control" placeholder="enter object" id="input_object">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
                                         onclick="setConceptInputFieldObject();" type="button">Browse
                                 </button>
                             </div>
-
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-2">
+                        <div class="input-group">
+                            <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
                             <div class="input-group-append">
-                                <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
                                 <button class="btn btn-primary" type="submit" id="btn_search">Search</button>
                             </div>
                         </div>
-                        <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
-                            Please be patient. This process can take up to one minute.
-                        </p>
+                    </div>
+                </div>
+                <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                    Please be patient. This process can take up to one minute.
+                </p>
 
 
-                        <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
-                            This is a danger alert—check it out!
-                        </div>
-                        <ul class="list-group" id="query_builder_list">
-                        </ul>
+                <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
+                    This is a danger alert—check it out!
+                </div>
+                <ul class="list-group" id="query_builder_list">
+                </ul>
+            </div>
+        </form>
 
+        <div class="row">
+            <div class="col-12">
                         <div class="d-flex justify-content-center">
                             <h6>How to Search:
                                 <a href="https://youtu.be/iagphBPLokM" target="_blank">
@@ -74,7 +88,8 @@
                                 </a>
                             </h6>
                         </div>
-
+            </div>
+        </div>
                         <!--
                         <label><strong>Data Source:</strong></label><br>
 
@@ -89,25 +104,24 @@
                                     Simvastatin)</label><br>
                             </div>
                         </div> -->
-
-                        <label><strong>Visualization:</strong></label><br>
-                        <div class="wrapper-div">
-                            <div class="inner-div-left-mid">
-                                <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                                       value="outer_ranking_substitution"
-                                       checked="checked">
-                                <label for="radio_outer_ranking_a">Substitution-based Visualization</label><br>
-                            </div>
-                            <div class="inner-div-right-most">
-                                <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
-                                       value="outer_ranking_ontology">
-                                <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualization</label><br>
-                            </div>
-                        </div>
+        <div class="row">
+            <div class="col-12">
+                <label><strong>Visualization:</strong></label><br>
+                <div class="wrapper-div">
+                    <div class="inner-div-left-mid">
+                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                               value="outer_ranking_substitution"
+                               checked="checked">
+                        <label for="radio_outer_ranking_a">Substitution-based Visualization</label><br>
                     </div>
-
-                </form>
-
+                    <div class="inner-div-right-most">
+                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
+                               value="outer_ranking_ontology">
+                        <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualization</label><br>
+                    </div>
+                </div>
+            </div>
+        </div>
                 <!-- "Bootstrap Modal" (popup window) for ATC classes -->
                 <div class="modal modal-lg" id="atcModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
@@ -164,7 +178,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
 
         <div class="accordion" id="accordionExample">
