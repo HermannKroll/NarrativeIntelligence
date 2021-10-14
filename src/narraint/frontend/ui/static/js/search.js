@@ -1018,25 +1018,61 @@ function buildATCTree(data_parent, tree, atc_depth) {
 
 // build atc tree for modal
 function queryAndBuildATCTree() {
+    fetch(atc_tree_url)
+        .then(response => response.json())
+        .then(result => {
+            let tree_data = createTreeDataFromQueryResult(result["chembl_atc_tree"])
+            let options = {
+                searchBox: $('#browseSearch'),
+                searchMinInputLength: 3
+            }
+            $('#browseTree').simpleTree(options, tree_data)
+
+            /*for (let k in result)
+            {
+                buildATCTree("atc_accordion", result[k], 1);
+            }*/
+        })
+        .catch((error) => {
+            $('#alert_translation').text('Failed to get atc tree.');
+            $('#alert_translation').fadeIn();
+            console.log("Failed to get atc tree")
+            console.log(error)
+        })
     let request = $.ajax({
         url: atc_tree_url
     });
 
     request.done(function (response) {
         let result = response;
-        for (var k in result) {
-            buildATCTree("atc_accordion", result[k], 1);
-        }
-     //   document.getElementById("atcButton").style.display = "block";
-    });
 
-    request.fail(function (result) {
-        $('#alert_translation').text('Failed to get atc tree.');
-        $('#alert_translation').fadeIn();
+     //   document.getElementById("atcButton").style.display = "block";
     });
 }
 
+function createTreeDataFromQueryResult(inputTree) {
+    let outputTree= []
+    //console.log(inputTree)
+    for (let node of inputTree) {
+        //console.log(node)
+        let out_node = [];
+        let name = node["name"]
+        if ("children" in node) {
+            //console.log(node["children"])
+            if ("children" in node["children"][0]) {
+                out_node["children"] = createTreeDataFromQueryResult(node["children"])
+            }
+            else {
+                name = node["name"] + " - " +  node["children"][0]["name"]
+            }
+        }
+        out_node["label"] = name
+        out_node["value"] = name
 
+        outputTree.push(out_node)
+    }
+    return outputTree
+}
 
 function buildVariableTreeButton(dataParent, variableName, variableText) {
     let btn_id = "apply_btn" + variableName;

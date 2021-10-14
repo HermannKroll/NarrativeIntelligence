@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/simpleTree.css' %}" type="text/css"/>
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/ui.css' %}" type="text/css"/>
 
 
@@ -134,7 +135,16 @@
                             </div>
 
                             <div class="container-fluid">
-                                <div id="accordion">
+                                <div class="input-group rounded mb-1 mt-1">
+                                    <input id="browseSearch" type="search" class="form-control rounded" placeholder="Search"
+                                           aria-label="Search"
+                                           aria-describedby="search-addon"/>
+                                    <span class="input-group-text border-0" id="search-addon">
+                                    <i class="fa fa-search"></i>
+                                  </span>
+                                </div>
+                                <div id="browseTree"></div>
+                                <!-- <div id="accordion">
                                     <div class="card">
                                         <div class="card-header" id="headingConceptSelection">
                                             <h5 class="mb-0">
@@ -167,12 +177,12 @@
                                              data-parent="#accordion">
                                             <div class="card-body">
                                                 <div id="atc_accordion">
-                                                    <!-- this accordion is filled in search.js, starting at "get_atc_tree()" -->
+                                                     this accordion is filled in search.js, starting at "buildATCTree()"
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
