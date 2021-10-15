@@ -1018,16 +1018,37 @@ function buildATCTree(data_parent, tree, atc_depth) {
 
 // build atc tree for modal
 function queryAndBuildATCTree() {
+    $('#browseSearch').on('keydown', (e)=>{
+        $('#atcModal').modal('handleUpdate')
+    })
+
+    let tree = null;
+
     fetch(atc_tree_url)
         .then(response => response.json())
         .then(result => {
-            let tree_data = createTreeDataFromQueryResult(result["chembl_atc_tree"])
+            let atc_tree_data = createTreeDataFromQueryResult(result["chembl_atc_tree"])
             let options = {
                 searchBox: $('#browseSearch'),
                 searchMinInputLength: 3
             }
-            $('#browseTree').simpleTree(options, tree_data)
-
+            let tree_data = [getVariableData(), {
+                label: "ATC Classes",
+                value: "",
+                children: atc_tree_data
+            }]
+            tree = $('#browseTree').simpleTree(options, tree_data)
+            $('#atcModal').on('show.bs.modal', (e) => {
+                tree.clearSelection(false)
+                $("#atcTreeOK").addClass("disabled")
+            })
+            tree.on('simpleTree:change', (node) =>{
+                $("#atcTreeOK").removeClass("disabled")
+            })
+            $("#atcTreeOK").on('click', (e) =>{
+                copySelectedConcept(tree.getSelectedNode()["value"])
+                $("#atcModal").modal('hide')
+            })
             /*for (let k in result)
             {
                 buildATCTree("atc_accordion", result[k], 1);
@@ -1067,11 +1088,41 @@ function createTreeDataFromQueryResult(inputTree) {
             }
         }
         out_node["label"] = name
-        out_node["value"] = name
+        out_node["value"] = name.split("-")[1]
 
         outputTree.push(out_node)
     }
     return outputTree
+}
+
+function getVariableData() {
+    let variables = [
+        ['Chemical', "substance/molecule/element"],
+        ['Disease', "disease/illness/side effect, e.g. Diabetes Mellitus"],
+        ['DosageForm', "dosage form/delivery form, e.g. tablet or injection"],
+        ['Drug', "active ingredients, e.g. Metformin or Simvastatin"],
+        ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
+        ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
+        ['Method', "common applied methods"],
+        ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
+        ['Species', "target groups, e.g. human, rats, etc."],
+        ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
+    ];
+
+    let out_tree = []
+
+    for(let v of variables) {
+        let node = {}
+        node["label"] = v[0] + " ("+ v[1] + ")"
+        node["value"] = "?" + v[0]
+        out_tree.push(node)
+    }
+    out_tree = {
+        label: "Variables",
+        value: "",
+        children: out_tree
+    }
+    return out_tree
 }
 
 function buildVariableTreeButton(dataParent, variableName, variableText) {

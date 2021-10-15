@@ -125,7 +125,7 @@
         </div>
                 <!-- "Bootstrap Modal" (popup window) for ATC classes -->
                 <div class="modal modal-lg" id="atcModal" tabindex="-1" role="dialog">
-                    <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Concept Selection:</h5>
@@ -133,17 +133,22 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-
-                            <div class="container-fluid">
+                            <div class="modal-header">
                                 <div class="input-group rounded mb-1 mt-1">
-                                    <input id="browseSearch" type="search" class="form-control rounded" placeholder="Search"
+                                    <input id="browseSearch" type="search" class="form-control rounded"
+                                           placeholder="Search"
                                            aria-label="Search"
                                            aria-describedby="search-addon"/>
                                     <span class="input-group-text border-0" id="search-addon">
                                     <i class="fa fa-search"></i>
                                   </span>
                                 </div>
+                            </div>
+
+                            <div class="modal-body">
+
                                 <div id="browseTree"></div>
+
                                 <!-- <div id="accordion">
                                     <div class="card">
                                         <div class="card-header" id="headingConceptSelection">
@@ -183,6 +188,13 @@
                                         </div>
                                     </div>
                                 </div> -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
+                                    Cancel
+                                </button>
+                                <button id="atcTreeOK" class="btn btn-success" data-dismiss="modal" type="button" onclick="">OK</button>
+
                             </div>
                         </div>
                     </div>
