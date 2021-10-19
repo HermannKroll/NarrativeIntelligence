@@ -109,15 +109,15 @@
             <div class="col-12">
                 <label><strong>Visualization:</strong></label><br>
                 <div class="wrapper-div">
-                    <div class="inner-div-left-mid">
+                    <div class="inner-div-left-mid" >
                         <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
                                value="outer_ranking_substitution"
-                               checked="checked">
-                        <label for="radio_outer_ranking_a">Substitution-based Visualization</label><br>
+                               checked="checked" onclick="refreshSearch()">
+                        <label for="radio_outer_ranking_a" >Substitution-based Visualization</label><br>
                     </div>
-                    <div class="inner-div-right-most">
+                    <div class="inner-div-right-most" >
                         <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
-                               value="outer_ranking_ontology">
+                               value="outer_ranking_ontology" onclick="refreshSearch()">
                         <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualization</label><br>
                     </div>
                 </div>
@@ -421,9 +421,9 @@
         </div>
         <!-- Feedback stuff-->
 
-        <button type="button" class="btn btn-primary feedbackbtn"
+        <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
                 onclick="openFeedback()">
-            Report bug
+            <span id="feedbackbtn_text">Report bug</span>
             <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
         </button>
         <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">

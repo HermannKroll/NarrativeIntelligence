@@ -243,6 +243,16 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
+function refreshSearch() {
+    if(result_present()) {
+        document.getElementById("btn_search").click();
+    }
+}
+
+function result_present() {
+    return $("#div_documents")[0].hasChildNodes()
+}
+
 document.getElementById("select_sorting_year").addEventListener("change", function () {
     document.getElementById("btn_search").click()
 });
@@ -255,8 +265,13 @@ document.getElementById("screenshot").addEventListener('load', (e) => {
     imgrect = e.target.getBoundingClientRect();
 });
 
+
+
 async function openFeedback() {
+    $("#feedbackbtn_text").html("Generating Screenshot (may take a while)");
     $("#reportSpinner").addClass("busy");
+    $("#feedback_button").addClass("disabled")
+    await new Promise(r => setTimeout(r, 10));
     const screenshotTarget = document.body;
     let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0})
 
@@ -265,6 +280,8 @@ async function openFeedback() {
     await screenshot.attr("src", base64image);
     $("#feedbackModal").modal("toggle");
     $("#reportSpinner").removeClass("busy");
+    $("#feedback_button").removeClass("disabled")
+    $("#feedbackbtn_text").html("Report bug");
 
 
     $("#screenshotCanvas").remove();
