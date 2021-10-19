@@ -1114,7 +1114,7 @@ function getVariableData() {
     for(let v of variables) {
         let node = {}
         node["label"] = v[0] + " ("+ v[1] + ")"
-        node["value"] = "?" + v[0]
+        node["value"] = v[0]
         out_tree.push(node)
     }
     out_tree = {
@@ -1163,5 +1163,5 @@ function buildVariableTree() {
 
 function buildSelectionTrees() {
     queryAndBuildATCTree();
-    buildVariableTree();
+    //buildVariableTree();
 }
