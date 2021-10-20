@@ -2,10 +2,11 @@ import argparse
 
 import logging
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, DocTaggedBy
+from narrant.backend.models import DocumentClassification
 from narrant.preprocessing.enttypes import PLANT_FAMILY, DRUG
 
 
@@ -23,9 +24,17 @@ def main():
 
     logging.info('Querying relevant document ids...')
     session = SessionExtended.get()
-    subquery = session.query(DocTaggedBy.document_id).filter(and_(DocTaggedBy.document_collection == collection,
-                                                                  DocTaggedBy.ent_type.in_([DRUG, PLANT_FAMILY]))).distinct()
-    query = session.query(Document.id).filter(Document.collection == collection).filter(Document.id.in_(subquery))
+    subquery_drug = session.query(DocTaggedBy.document_id).filter(and_(DocTaggedBy.document_collection == collection,
+                                                                       DocTaggedBy.ent_type.in_(
+                                                                           [DRUG, PLANT_FAMILY]))).distinct()
+
+    subquery_pharm = session.query(DocumentClassification.document_id).filter(
+        and_(DocumentClassification.document_collection == collection,
+             DocumentClassification.classification == 'Pharmaceutical')).distinct()
+
+    query = session.query(Document.id).filter(Document.collection == collection).filter(
+        or_(Document.id.in_(subquery_drug),
+            Document.id.in_(subquery_pharm)))
 
     logging.info('Collecting document ids...')
     document_ids = set()
