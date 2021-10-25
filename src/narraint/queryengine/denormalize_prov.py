@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import and_
+from sqlalchemy import and_, delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadataService
@@ -14,6 +14,10 @@ from narrant.progress import print_progress_with_eta
 
 def denormalize_predication_table():
     session = SessionExtended.get()
+    logging.info('Deleting old denormalized predication...')
+    stmt = delete(PredicationDenorm)
+    session.execute(stmt)
+
     logging.info('Counting the number of predications...')
     pred_count = session.query(Predication).filter(Predication.relation != None).count()
 
