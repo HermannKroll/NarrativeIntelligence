@@ -75,7 +75,8 @@ def mark_document_as_processed_by_ie(document_ids: [int], document_collection: s
     for doc_id in document_ids:
         doc_inserts.append(dict(document_id=doc_id,
                                 document_collection=document_collection,
-                                extraction_type=extraction_type))
+                                extraction_type=extraction_type,
+                                date_inserted=datetime.now()))
     session = SessionExtended.get()
     DocProcessedByIE.bulk_insert_values_into_table(session, doc_inserts)
     logging.info(f'{len(doc_inserts)} document ids have been inserted')
@@ -137,8 +138,7 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
         if extraction_type == PATHIE_EXTRACTION:
             logging.info('Init spacy nlp...')
             spacy_nlp = English()  # just the language with no model
-            sentencizer = spacy_nlp.create_pipe("sentencizer")
-            spacy_nlp.add_pipe(sentencizer)
+            spacy_nlp.add_pipe("sentencizer")
 
             logging.info('Filtering documents...')
             count_ie_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
@@ -162,14 +162,14 @@ def process_documents_ids_in_pipeline(document_ids: [int], document_collection, 
 
             logging.info('Loading extractions into database...')
             time_load = datetime.now()
-            load_pathie_extractions(ie_output_file, document_collection, PATHIE_EXTRACTION)
+            load_pathie_extractions(ie_output_file, document_collection, PATHIE_EXTRACTION,  load_symmetric=False)
         elif extraction_type == PATHIE_STANZA_EXTRACTION:
             pred_vocab = relation_vocab.relation_dict if relation_vocab else None
             logging.info('Starting PathIE Stanza...')
             start = datetime.now()
             run_stanza_pathie(document_export_file, ie_output_file, predicate_vocabulary=pred_vocab)
             logging.info((" done in {}".format(datetime.now() - start)))
-            load_pathie_extractions(ie_output_file, document_collection, PATHIE_STANZA_EXTRACTION)
+            load_pathie_extractions(ie_output_file, document_collection, PATHIE_STANZA_EXTRACTION, load_symmetric=False)
         elif extraction_type == OPENIE_EXTRACTION:
             no_entity_filter = False
             if entity_filter == OpenIEEntityFilterMode.NO_ENTITY_FILTER:
@@ -214,7 +214,7 @@ def main():
                         default=DOCUMENTS_TO_PROCESS_IN_ONE_BATCH, type=int)
     parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (json file)')
     parser.add_argument("--entity_filter", default=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER,
-                        help="the entity filter mode", choices=list(OpenIEEntityFilterMode))
+                        help="the entity filter mode")#choices=list(OpenIEEntityFilterMode))
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
