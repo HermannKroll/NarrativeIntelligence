@@ -85,8 +85,7 @@ def filter_document_sentences_without_tags_parallelized_worker(tasks: multiproce
     doc2tags = dict()
     doc2sentences = dict()
     spacy_nlp = English()  # just the language with no model
-    sentencizer = spacy_nlp.create_pipe("sentencizer")
-    spacy_nlp.add_pipe(sentencizer)
+    spacy_nlp.add_pipe("sentencizer")
     while tasks.qsize() > 0:
         try:
             pubtator_content = tasks.get(timeout=1)
