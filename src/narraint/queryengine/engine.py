@@ -339,11 +339,10 @@ class QueryEngine:
                     for var_name in var_names:
                         list_of_substitutions.append(list(doc2substitution[d_id][var_name]))
 
-                    if len(list_of_substitutions) > 1:
-                        shared_substitutions = itertools.product(*list_of_substitutions)
-                    else:
-                        shared_substitutions = list_of_substitutions
-
+                    # There might be a document d1 which has ?X = 1 and ?X = 2 as well as ?Y = a
+                    # then we must sort the document into the following groups (?X1 = 1, ?Y= a) and (?X = 2, ?Y = a)
+                    shared_substitutions = itertools.product(*list_of_substitutions)
+                    # Easy situation: List of substitutions for a single variable
                     for shared_sub in shared_substitutions:
                         var2sub_for_doc = {}
                         for idx, var_name in enumerate(var_names):
