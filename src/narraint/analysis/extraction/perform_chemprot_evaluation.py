@@ -10,7 +10,7 @@ from kgextractiontoolbox.extraction.loading.load_openie_extractions import clean
     OpenIEEntityFilterMode
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Tag, Predication
-from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
+from kgextractiontoolbox.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.config import DATA_DIR
 from kgextractiontoolbox.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from kgextractiontoolbox.extraction.openie.main import run_corenlp_openie

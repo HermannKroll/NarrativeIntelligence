@@ -4,9 +4,9 @@ from collections import defaultdict
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.cleaning.apply_rules import check_type_constraints
-from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
-from narraint.cleaning.relation_vocabulary import create_predicate_vocab, RelationVocabulary
+from narraint.cleaning.pharmaceutical_rules import check_type_constraints
+from kgextractiontoolbox.cleaning.canonicalize_predicates import canonicalize_predication_table
+from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from narraint.config import DATA_DIR, RESOURCE_DIR
 from kgextractiontoolbox.extraction.loading.load_extractions import clean_and_load_predications_into_db
 from kgextractiontoolbox.extraction.loading.load_openie_extractions import read_stanford_openie_input, clean_open_ie, \

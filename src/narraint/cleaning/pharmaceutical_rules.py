@@ -8,8 +8,8 @@ from sqlalchemy.cimmutabledict import immutabledict
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete, Sentence
-from narraint.cleaning.relation_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
-    ASSOCIATED_PREDICATE_UNSURE
+from narraint.cleaning.pharmaceutical_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
+    ASSOCIATED_PREDICATE_UNSURE, ASSOCIATED_PREDICATE
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     are_subject_and_object_correctly_ordered
 from narrant.backend.database import Session
@@ -282,17 +282,25 @@ def check_type_constraints(reorder_tuples=True):
         clean_predication_to_delete_table(session)
 
 
+def update_none_relation_to_associate():
+    logging.info('Updating every relation NULL to associated...')
+    session = SessionExtended.get()
+    upt = update(Predication).where(Predication.relation.is_(None)).values(relation=ASSOCIATED_PREDICATE)
+    session.execute(upt)
+
+
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    logging.info('Applying rules...')
+    logging.info('Applying pharmaceutical rules...')
     dosage_form_rule()
     method_rule()
     session = SessionExtended.get()
     clean_predication_to_delete_table(session)
     check_type_constraints()
+    update_none_relation_to_associate()
     #  clean_redundant_symmetric_predicates()
     #   clean_unreferenced_sentences()
     logging.info('Finished...')
