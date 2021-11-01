@@ -4,19 +4,20 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 
-from narraint.extraction.openie.cleanload import insert_predications_into_db, read_stanford_openie_input, clean_open_ie
 from sqlalchemy import insert
 
+from kgextractiontoolbox.extraction.loading.load_openie_extractions import clean_open_ie, read_stanford_openie_input, \
+    OpenIEEntityFilterMode
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, Tag, Predication
 from narraint.cleaning.canonicalize_predicates import canonicalize_predication_table
 from narraint.config import DATA_DIR
-from narraint.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
-from narraint.extraction.openie.main import run_corenlp_openie
-from narraint.extraction.openie6.main import openie6_run
-from narraint.extraction.pathie.main import run_pathie
-from narraint.extraction.pathie_stanza.main import run_stanza_pathie
-from narraint.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
+from kgextractiontoolbox.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
+from kgextractiontoolbox.extraction.openie.main import run_corenlp_openie
+from kgextractiontoolbox.extraction.openie6.main import openie6_run
+from kgextractiontoolbox.extraction.pathie.main import run_pathie
+from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
+from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
 from narrant.backend.export import export
 from narrant.preprocessing.enttypes import CHEMICAL, GENE
@@ -230,7 +231,7 @@ def main():
     if LOAD_CORENLP_OPENIE:
         logging.info('Loading CoreNLP OpenIE extractions...')
         doc_ids, openie_tuples = read_stanford_openie_input(CHEMPROT_OPENIE_OUTPUT)
-        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, clean_genes=False)
+        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
         logging.info('finished')
 
     if RUN_OPENIE6:
@@ -240,8 +241,7 @@ def main():
     if LOAD_OPENIE6:
         logging.info('Loading OpenIE 6.0 extractions...')
         doc_ids, openie_tuples = read_stanford_openie_input(CHEMPROT_OPENIE6_OUTPUT)
-        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, extraction_type=OPENIE6_EXTRACTION,
-                      clean_genes=False)
+        clean_open_ie(doc_ids, openie_tuples, CHEMPROT_COLLECTION, extraction_type=OPENIE6_EXTRACTION, entity_filter=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER)
         logging.info('finished')
 
     if CANONICALIZE_OUTPUT:
