@@ -5,11 +5,11 @@ from datetime import datetime
 from spacy.lang.en import English
 
 from narraint.config import DATA_DIR
-from narraint.extraction.extraction_utils import filter_document_sentences_without_tags
-from narraint.extraction.openie.main import run_corenlp_openie
-from narraint.extraction.openie6.main import openie6_run
-from narraint.extraction.pathie.main import run_pathie
-from narraint.extraction.pathie_stanza.main import run_stanza_pathie
+from kgextractiontoolbox.extraction.extraction_utils import filter_document_sentences_without_tags
+from kgextractiontoolbox.extraction.openie.main import run_corenlp_openie
+from kgextractiontoolbox.extraction.openie6.main import openie6_run
+from kgextractiontoolbox.extraction.pathie.main import run_pathie
+from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
 from narrant.pubtator.count import count_documents
 
 PERFORMANCE_TEST_DIR = os.path.join(DATA_DIR, 'performance/')
