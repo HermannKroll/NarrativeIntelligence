@@ -8,7 +8,7 @@ class SessionExtended(Session):
     is_postgres = False
 
     @classmethod
-    def get(cls, connection_config: str = BACKEND_CONFIG, declarative_base=Extended):
+    def get(cls, connection_config: str = BACKEND_CONFIG, declarative_base=Extended) -> 'SessionExtended':
         if not cls._instance:
             cls._instance = Session.get(connection_config, declarative_base)
             SessionExtended.is_postgres = cls._instance.is_postgres
