@@ -46,5 +46,10 @@ ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 # Autocompletion Index
 AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
 
+# Relation Vocabulary File
+PHARM_RELATION_VOCABULARY = os.path.join(RESOURCE_DIR, "pharm_relation_vocab.json")
+# Constraint file
+PHARM_RELATION_CONSTRAINTS = os.path.join(RESOURCE_DIR, "pharm_relation_type_constraints.json")
+
 # NLP Config
 NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')

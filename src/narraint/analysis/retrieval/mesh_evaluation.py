@@ -5,7 +5,7 @@ from datetime import datetime
 from narraint.analysis.retrieval.helper import perform_evaluation
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
+from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION
 from narraint.queryengine.engine import QueryEngine
 from narrant.entity.meshontology import MeSHOntology
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, GENE

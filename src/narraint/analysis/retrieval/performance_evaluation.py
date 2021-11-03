@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from narraint.extraction.versions import PATHIE_EXTRACTION
+from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern

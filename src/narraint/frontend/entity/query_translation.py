@@ -1,7 +1,8 @@
 import logging
 import re
 
-from narraint.cleaning.relation_vocabulary import create_predicate_vocab
+from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
+from narraint.config import PHARM_RELATION_VOCABULARY
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
@@ -25,7 +26,9 @@ class QueryTranslation:
         self.variable_type_mappings["targets"] = GENE
         self.entity_tagger = EntityTagger.instance()
 
-        self.allowed_predicates = set(create_predicate_vocab().keys())
+        relation_vocab = RelationVocabulary()
+        relation_vocab.load_from_json(PHARM_RELATION_VOCABULARY)
+        self.allowed_predicates = set(relation_vocab.relation_dict.keys())
         self.logger = logger
         self.logger.info('allowed predicates are: {}'.format(self.allowed_predicates))
 

@@ -15,6 +15,9 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 # Next, tag the documents
 # python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
 
+# Perform pharmaceutical classification
+# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+
 # Export files for GNormPlus which are missing
 # python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents_for_gnormplus.py $MISSING_GNORMPLUS_IDS -c PubMed
 
@@ -28,13 +31,13 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 # Finally, all files have been tagged
 # python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
-# python3 ~/NarrativeIntelligence/src/narraint/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Apply the rules
-# python3 ~/NarrativeIntelligence/src/narraint/cleaning/apply_rules.py
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
 
 # Load the Metadata
 # python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed

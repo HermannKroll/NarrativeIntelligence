@@ -5,7 +5,7 @@ from itertools import product
 from nltk.stem.porter import *
 
 from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
-from narraint.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
+from kgextractiontoolbox.extraction.versions import OPENIE_EXTRACTION, PATHIE_EXTRACTION
 from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
