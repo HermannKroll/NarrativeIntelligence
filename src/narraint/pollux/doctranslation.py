@@ -35,6 +35,7 @@ class DocumentTranslationLoader:
     When creating a new Translation subclass, the abstract methods read_sourced_docuemnts and count_documents need to be
     overwritten.
     """
+
     def __init__(self, collection: str):
         """
         superconstructor to be called by subclass. The class instance is bound to a single document collection value for
@@ -47,7 +48,7 @@ class DocumentTranslationLoader:
         self.current_art_id = self.poll_hightest_art_id() + 1
         self.insertion_time = datetime.datetime.now()
 
-    def poll_hightest_art_id(self)->int:
+    def poll_hightest_art_id(self) -> int:
         """
         retrieve the highest present document_id present in the document_translation_table
         :return: The lowest document_id in the document_id_collumn of the document_translation_table. 0 if empty.
@@ -60,7 +61,7 @@ class DocumentTranslationLoader:
         )
         return [r for r in result][0][0] or 0
 
-    def check_md5_changed(self, doc: SourcedDocument)->str:
+    def check_md5_changed(self, doc: SourcedDocument) -> str:
         """
         calculate the hexadecimal representation of md5 sum of a sourced document using its title and abstract
         :param doc: the document to calculate the md5 sum for
@@ -101,7 +102,8 @@ class DocumentTranslationLoader:
             "date_inserted": self.insertion_time
         }
 
-    def translate(self, infile: Union[Path, str], outfile: Union[Path, str], insert_every: int=100, diff: bool=False, prog_logger: Progress=None) -> int:
+    def translate(self, infile: Union[Path, str], outfile: Union[Path, str], insert_every: int = 100,
+                  diff: bool = False, prog_logger: Progress = None) -> int:
         """
         Iteratively poll SourcedDocuments from read_sourced_documents and translate them. If diff is set to true, the
         documents will be checked against the md5 sums present in the database and will only be processed if new or changed.
@@ -126,9 +128,9 @@ class DocumentTranslationLoader:
                     if not first:
                         outf.write(",\n")
                     else:
-                        first=False
+                        first = False
                     outf.write(json.dumps(sdoc.doc.to_dict()))
-                    processed_docs +=1
+                    processed_docs += 1
                     if len(translations) > 100:
                         self.flush(translations)
                         translations = []
@@ -148,13 +150,13 @@ class DocumentTranslationLoader:
         self.session.commit()
 
     @staticmethod
-    def get_md5(sdoc: SourcedDocument)->str:
+    def get_md5(sdoc: SourcedDocument) -> str:
         """
         Calculate the md5 sum of a SourcedDocument over its title and abstract
         :param sdoc: the document to hash
         :return: the hexadecimal representation of the md5 sum
         """
-        return hashlib.md5((sdoc.doc.title+sdoc.doc.abstract).encode('unicode_escape')).hexdigest()
+        return hashlib.md5((sdoc.doc.title + sdoc.doc.abstract).encode('unicode_escape')).hexdigest()
 
     def read_sourced_documents(self, file: Union[Path, str]) -> Iterator[SourcedDocument]:
         """
@@ -175,7 +177,7 @@ class DocumentTranslationLoader:
         raise NotImplementedError()
 
 
-def main(doctranslation_subclass: Type[DocumentTranslationLoader], args: List[str]=None):
+def main(doctranslation_subclass: Type[DocumentTranslationLoader], args: List[str] = None):
     """
     Run the document translation, insert translation entries into the document_translation table,
     export documents to a json file and load them into the database if -l flag is set.
