@@ -3,12 +3,28 @@ from typing import List, Iterator, Optional
 from sqlalchemy.engine import Row, ChunkedIteratorResult
 
 from kgextractiontoolbox.backend.models import Predication
+from kgextractiontoolbox.document.document import TaggedDocument, TaggedEntity
 from narraint.backend.database import Session
 
 #TODO: Implement if needed
 def tagged_documents_from_database(session: Session, collection: str=None, doc_ids: List[int]=None):
     pass
 
+
+def tagged_document_from_iterjoin(joined_row:List[List[Row]]) -> TaggedDocument:
+    doc = joined_row[0][0][0]
+    output = TaggedDocument(id=doc.id, title=doc.title, abstract=doc.abstract)
+    for t in joined_row[1]:
+        pass
+        output.tags.append(TaggedEntity(
+            document=t[0].id,
+            start=t[0].start,
+            end=t[0].end,
+            text=t[0].ent_str,
+            ent_type=t[0].ent_type,
+            ent_id=t[0].ent_id
+        ))
+    return output
 
 #TODO: Unittest
 def iter_join(pk_query: ChunkedIteratorResult, primary_keys: List[str], fk_queries: List[Iterator[ChunkedIteratorResult]], foreign_keys:List[List[str]]) -> List[List[List[Row]]]:
