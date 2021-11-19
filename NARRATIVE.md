@@ -20,7 +20,7 @@
        {
           "id":2456018,
           "text":"A new case of simvastatin-induced acute rhabdomyolysis with heart failure after initiation of treatment with fusidic acid is reported."
-       }
+       }, ...
     ],
     "statements":[
        {
