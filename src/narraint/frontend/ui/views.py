@@ -242,8 +242,18 @@ def get_query(request):
 
 def get_provenance(request):
     try:
+        start = datetime.now()
         fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
         result = QueryEngine.query_provenance_information(fp2prov_ids)
+
+        time_needed = datetime.now() - start
+        predication_ids = set()
+        for _, pred_ids in fp2prov_ids.items():
+            predication_ids.update(pred_ids)
+        try:
+            View.instance().query_logger.write_provenance_log(time_needed, predication_ids)
+        except IOError:
+            logging.debug('Could not write provenance log file')
         return JsonResponse(dict(result=result.to_dict()))
     except:
         traceback.print_exc(file=sys.stdout)
