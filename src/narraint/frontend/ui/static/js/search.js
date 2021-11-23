@@ -222,7 +222,6 @@ function example_search(search_str) {
     $('#collapseExamples').collapse('hide');
     clearQueryBuilder();
     console.log(search_str);
-    //document.getElementById('id_keywords').value = search_str;
     let first = true;
     search_str.split('_AND_').forEach(comp => {
         let triple = split(comp.trim());
@@ -466,7 +465,44 @@ $(document).ready(function () {
         }
     });
 
+    // Try to initialize from search url parameters if possible
+    initFromURLQueryParams();
 });
+
+
+function initFromURLQueryParams() {
+    const url = new URL(window.location.href);
+    let params = new URLSearchParams(url.search);
+
+    if (params.has("visualization")) {
+        let visualization = params.get("visualization");
+        if (visualization === "outer_ranking_substitution"){
+            document.getElementById('radio_outer_ranking_a').checked = true;
+            document.getElementById('radio_outer_ranking_b').checked = false;
+        } else {
+            document.getElementById('radio_outer_ranking_a').checked = false;
+            document.getElementById('radio_outer_ranking_b').checked = true;
+        }
+    }
+    if (params.has("sort_frequency_desc")) {
+        let sort_frequency = params.get("sort_frequency_desc");
+        document.getElementById('select_sorting_freq').value = sort_frequency;
+    }
+
+    if (params.has("sort_year_desc")) {
+        let sort_year = params.get("sort_year_desc");
+        document.getElementById('select_sorting_year').value = sort_year;
+    }
+
+    // Not used yet
+    // let data_source = url.get("data_source");
+    // let size = url.get("size");
+
+    if (params.has("query")) {
+        let query = params.get("query");
+        example_search(query);
+    }
+}
 
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
@@ -498,6 +534,16 @@ const search = (event) => {
     console.log("Sorting by year (desc): " + year_sort_desc)
     console.log("Result Divs Limit: " + DEFAULT_RESULT_DIVS_LIMIT)
     setButtonSearching(true);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('query', query);
+    url.searchParams.set("data_source", data_source);
+    url.searchParams.set("visualization", outer_ranking);
+    url.searchParams.set("sort_frequency_desc", freq_sort_desc);
+    url.searchParams.set("sort_year_desc", year_sort_desc);
+    url.searchParams.set("size", DEFAULT_RESULT_DIVS_LIMIT);
+    window.history.pushState("Query", "Title", "/"+ url.search.toString());
+  //  window.location.href = url.search.toString(); // <== '?key=value'
 
     let request = $.ajax({
         url: search_url,
