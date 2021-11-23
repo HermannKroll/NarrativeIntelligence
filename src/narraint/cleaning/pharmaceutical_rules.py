@@ -280,6 +280,7 @@ def check_type_constraints(reorder_tuples=True):
         logging.debug('Committing...')
         session.commit()
         clean_predication_to_delete_table(session)
+        logging.info('Finished')
 
 
 def update_none_relation_to_associate():
