@@ -543,8 +543,7 @@ const search = (event) => {
     url.searchParams.set("sort_year_desc", year_sort_desc);
     url.searchParams.set("size", DEFAULT_RESULT_DIVS_LIMIT);
     window.history.pushState("Query", "Title", "/"+ url.search.toString());
-  //  window.location.href = url.search.toString(); // <== '?key=value'
-
+  
     let request = $.ajax({
         url: search_url,
         data: {
