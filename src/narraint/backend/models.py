@@ -218,6 +218,34 @@ class PredicationRating(Extended, DatabaseTable):
     date_inserted = Column(DateTime, nullable=False, default=datetime.now)
 
     @staticmethod
+    def query_predication_ratings(session):
+        query = session.query(PredicationRating, Predication, Sentence)\
+            .filter(PredicationRating.predication_id == Predication.id)\
+            .filter(Sentence.id == Predication.sentence_id)
+        for res in query:
+            yield res
+
+    @staticmethod
+    def query_predication_ratings_as_dicts(session):
+        query = session.query(PredicationRating, Predication, Sentence) \
+            .filter(PredicationRating.predication_id == Predication.id) \
+            .filter(Sentence.id == Predication.sentence_id)
+        for res in query:
+            yield dict(document_id=res.Predication.document_id,
+                       document_collection=res.Predication.document_collection,
+                       rating=res.PredicationRating.rating,
+                       query=res.PredicationRating.query,
+                       subject_id=res.Predication.subject_id,
+                       subject_type=res.Predication.subject_type,
+                       subject_str=res.Predication.subject_str,
+                       predicate=res.Predication.predicate,
+                       relation=res.Predication.relation,
+                       object_id=res.Predication.object_id,
+                       object_type=res.Predication.object_type,
+                       object_str=res.Predication.object_str,
+                       sentence=res.Sentence.text)
+
+    @staticmethod
     def insert_user_rating(session, user_id: str, query: str, predication_id: int, rating: str):
         insert_stmt = insert(PredicationRating).values(user_id=user_id, query=query, predication_id=predication_id,
                                                        rating=rating)
