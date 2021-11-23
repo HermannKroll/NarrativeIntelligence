@@ -24,7 +24,8 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
         self.results.clear()
         self.doc_ids.clear()
 
-    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc=True, year_sort_desc=True, end_pos=None):
+    def rank_results(self, results: [QueryDocumentResult], freq_sort_desc=True, year_sort_desc=True, start_pos=None,
+                     end_pos=None):
         self._clear_state()
         is_aggregate = False
         for r in results:
@@ -47,7 +48,9 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             unsorted_list.sort(key=lambda x: x[0], reverse=freq_sort_desc)
             for _, res in unsorted_list:
                 query_result.add_query_result(res)
-            query_result.set_slice(end_pos)
+
+            if start_pos and end_pos:
+                query_result.set_slice(start_pos, end_pos)
             return query_result, is_aggregate
 
         else:

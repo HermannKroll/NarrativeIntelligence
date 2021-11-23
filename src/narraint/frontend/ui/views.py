@@ -149,7 +149,9 @@ def get_query(request):
         outer_ranking = str(request.GET.get("outer_ranking", "").strip())
         freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
         year_sort_desc = str(request.GET.get("year_sort", "").strip())
+        start_pos = request.GET.get("start_pos").strip()
         end_pos = request.GET.get("end_pos").strip()
+
         if freq_sort_desc == 'False':
             freq_sort_desc = False
         else:
@@ -159,9 +161,12 @@ def get_query(request):
         else:
             year_sort_desc = True
         try:
+            start_pos = int(start_pos)
             end_pos = int(end_pos)
         except:
+            start_pos = None
             end_pos = None
+
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
         logging.info("Selected data source is {}".format(data_source))
@@ -223,7 +228,7 @@ def get_query(request):
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
                 results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc,
-                                                                                     year_sort_desc, end_pos)
+                                                                                     year_sort_desc, start_pos, end_pos)
                 results_converted = results_ranked.to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()

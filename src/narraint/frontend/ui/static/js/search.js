@@ -1,6 +1,7 @@
-let MAX_SHOWN_ELEMENTS = 10;
 let latest_valid_query = '';
 let DEFAULT_RESULT_DIVS_LIMIT = 500;
+let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
+let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 
 let CYTOSCAPE_STYLE = [
     {
@@ -242,8 +243,13 @@ function example_search(search_str) {
     $('html,body').scrollTop(0);
 }
 
-function refreshSearch() {
+function refreshSearch(fromUrl = false) {
     if (result_present()) {
+        let divDocuments = $('#div_documents');
+        divDocuments.empty();
+        if (fromUrl === false) {
+            setCurrentPage(0);
+        }
         document.getElementById("btn_search").click();
     }
 }
@@ -465,6 +471,10 @@ $(document).ready(function () {
         }
     });
 
+    document.getElementById("input_page_no").addEventListener('change', (event) => {
+        pageUpdated();
+    });
+
     // Try to initialize from search url parameters if possible
     initFromURLQueryParams();
 });
@@ -505,22 +515,71 @@ function initFromURLQueryParams() {
         }
 
     }
-    // Not used yet
-    //
-    // let size = url.get("size");
+
+    if (params.has("start_pos")) {
+        setCurrentPage(parseInt(params.get("start_pos")))
+    }
 
     if (params.has("query")) {
         let query = params.get("query");
+        lastQuery = query;
         example_search(query);
     }
 }
+
+let currentMaxPage = 0;
+let lastCurrentPage = 0;
+
+function setCurrentPage(start_pos) {
+    let currentPage = 1 + Math.ceil(start_pos / DEFAULT_AGGREGATED_RESULTS_PER_PAGE);
+    document.getElementById("input_page_no").value = currentPage.toString();
+}
+
+function pageUpdated() {
+    let currentPage = parseInt(document.getElementById("input_page_no").value);
+    if (currentPage === lastCurrentPage) {
+        return;
+    }
+    if (currentPage < 0) {
+        currentPage = 0;
+        document.getElementById("input_page_no").value = currentPage.toString();
+    } else if (currentPage > currentMaxPage) {
+        currentPage = currentMaxPage;
+        document.getElementById("input_page_no").value = currentPage.toString();
+    }
+    lastCurrentPage = currentPage;
+    // Trigger the search
+    refreshSearch(true);
+}
+
+function computePageInfo(result_size) {
+    let pageCount = Math.ceil(parseInt(result_size) / DEFAULT_AGGREGATED_RESULTS_PER_PAGE);
+    currentMaxPage = pageCount;
+    document.getElementById("label_max_page").textContent = pageCount.toString();
+    document.getElementById("div_input_page").style.display = "block";
+}
+
+function getStartPositionBasedOnCurrentPage() {
+    return DEFAULT_AGGREGATED_RESULTS_PER_PAGE * (document.getElementById("input_page_no").value - 1);
+}
+
+let lastQuery = "";
 
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
-    let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
+
+    let start_pos = getStartPositionBasedOnCurrentPage();
+    // consider start pos only if query isn't changed
+    if (lastQuery !== query) {
+        start_pos = 0;
+        setCurrentPage(0);
+        lastQuery = query;
+    }
+    let end_pos = start_pos + DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
+
     let freq_element = document.getElementById("select_sorting_freq");
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
@@ -537,7 +596,8 @@ const search = (event) => {
     console.log("Inner Ranking: " + inner_ranking)
     console.log("Sorting by frequency (desc): " + freq_sort_desc)
     console.log("Sorting by year (desc): " + year_sort_desc)
-    console.log("Result Divs Limit: " + DEFAULT_RESULT_DIVS_LIMIT)
+    console.log("Start position: " + start_pos)
+    console.log("End position: " + end_pos)
     setButtonSearching(true);
 
     const url = new URL(window.location.href);
@@ -546,7 +606,8 @@ const search = (event) => {
     url.searchParams.set("visualization", outer_ranking);
     url.searchParams.set("sort_frequency_desc", freq_sort_desc);
     url.searchParams.set("sort_year_desc", year_sort_desc);
-    url.searchParams.set("size", DEFAULT_RESULT_DIVS_LIMIT);
+    url.searchParams.set("start_pos", start_pos);
+    //   url.searchParams.set("end_pos", end_pos);
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
     let request = $.ajax({
@@ -557,6 +618,7 @@ const search = (event) => {
             outer_ranking: outer_ranking,
             freq_sort: freq_sort_desc,
             year_sort: year_sort_desc,
+            start_pos: start_pos,
             end_pos: end_pos,
             /*,
             inner_ranking: inner_ranking*/
@@ -575,16 +637,15 @@ const search = (event) => {
         let valid_query = response["valid_query"];
         if (valid_query === true) {
             let query_len = 0;
-            latest_valid_query = query
+            latest_valid_query = query;
 
             // Hide sort buttons depending on the result
-            let is_aggregate = response["is_aggregate"]
-            document.getElementById("select_sorting_year").style.display = "block"
-            console.log
+            let is_aggregate = response["is_aggregate"];
+            document.getElementById("select_sorting_year").style.display = "block";
             if (is_aggregate === true) {
-                document.getElementById("select_sorting_freq").style.display = "block"
+                document.getElementById("select_sorting_freq").style.display = "block";
             } else {
-                document.getElementById("select_sorting_freq").style.display = "none"
+                document.getElementById("select_sorting_freq").style.display = "none";
             }
 
             // Print query translation
@@ -594,10 +655,17 @@ const search = (event) => {
             query_translation.text(query_trans_string);
             let results = response["results"];
             let result_size = results["s"];
+
+            // Show Page only if the result is a aggregated list of variable substitutions
+            if (outer_ranking !== "outer_ranking_ontology" && results["t"] === "agg_l") {
+                computePageInfo(results["no_subs"]);
+            } else {
+                document.getElementById("div_input_page").style.display = "none";
+            }
+
             // Create documents DIV
             let divList = createResultList(results, query_len);
             divDocuments.append(divList);
-            // add_collapsable_events();
 
             let documents_header = $("#header_documents");
             let document_header_appendix = "";
@@ -613,8 +681,9 @@ const search = (event) => {
             // scroll to results
             document.getElementById("resultdiv").scrollIntoView();
         } else {
-            document.getElementById("select_sorting_year").style.display = "none"
-            document.getElementById("select_sorting_freq").style.display = "none"
+            document.getElementById("select_sorting_year").style.display = "none";
+            document.getElementById("select_sorting_freq").style.display = "none";
+            document.getElementById("div_input_page").style.display = "none";
             let query_trans_string = response["query_translation"];
             console.log('translation error:' + query_trans_string)
             $('#alert_translation').text(query_trans_string);

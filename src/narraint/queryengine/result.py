@@ -233,19 +233,25 @@ class QueryResultAggregateList(QueryResultBase):
 
     def __init__(self):
         self.results = []
+        self.count_substitutions = 0
 
     def add_query_result(self, result: QueryResultAggregate):
         self.results.append(result)
+        self.count_substitutions += 1
 
     def to_dict(self):
         result_dict = [r.to_dict() for r in self.results]
-        return dict(t="agg_l", r=result_dict, s=self.get_result_size())
+        return dict(t="agg_l", r=result_dict, s=self.get_result_size(), no_subs=self.count_substitutions)
 
     def get_result_size(self):
         return sum([r.get_result_size() for r in self.results])
 
-    def set_slice(self, end_pos):
-        self.results = self.results[:end_pos]
+    def set_slice(self, start_pos, end_pos):
+        if start_pos < len(self.results):
+            if end_pos <= len(self.results):
+                self.results = self.results[start_pos:end_pos]
+            else:
+                self.results = self.results[start_pos:end_pos]
 
 
 month_dict = {
