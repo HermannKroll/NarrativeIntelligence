@@ -1,22 +1,71 @@
 #!/bin/bash
 
-MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2021_09_16_updates/"
-UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_09_16_updates.pubtator"
+
+ALL_PUBTATOR_PMIDS="/hdd2/datasets/pubmed_medline/pubtator_pmids_all.txt"
+PMIDS_IN_DB="/hdd2/datasets/pubmed_medline/pmids_in_db.txt"
+IDS_TO_DOWNLOAD="/hdd2/datasets/pubmed_medline/pubtator_pmids_to_download.txt"
+
+MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2021_11_23_updates/"
+UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_11_23_pubtator_updates.pubtator"
+UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_11_23_updates.ids"
+
+# First get all PubMed Pubtator PMIDs
+# wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
+
+# Export all known document ids from the database
+# python3 ~/NarrativeAnnotation/src/narrant/backend/export_document_ids.py $PMIDS_IN_DB -c PubMed
+
+# Compute the open ids (known PubTator ids but NOT in database)
+# python3 ~/NarrativeAnnotation/src/narrant/util/compute_id_file_diff.py $ALL_PUBTATOR_PMIDS $PMIDS_IN_DB $IDS_TO_DOWNLOAD
+
+# Download all PubTator files + their annotations
+# python3 ~/NarrativeAnnotation/src/narrant/pubtator/service/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
+
+# Load all PubTator files to database
+python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
+
+# Next, tag the documents with our PharmDictTagger
+python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+
+# Perform pharmaceutical classification
+python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+
+# Finally, all files have been tagged
+# python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+
+# Do the statement extraction via our Pipeline
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+
+# Do the canonicalizing step
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+
+# Apply the rules
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
+
+# Load the Metadata
+# Download the latest updates via wget -r ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles
+# Unzip everything
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+
+# Finally compute the new metadata service table2
+# python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+
+# Compute new query table
+# python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
+
+
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
+
+
+
 PUBTATOR_FOR_GNORM="/hdd2/datasets/pubmed_medline/2021_09_16_updates_gnormplus.pubtator"
 MISSING_GNORMPLUS_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant_genormplus.ids"
-UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 
 # Convert the update files to a pubtator file
 # python3 ~/NarrativeAnnotation/src/narrant/pubtator/translation/pubmed_medline2pubtator.py $MEDLINE_UPDATES $UPDATES_PUBTATOR
 
 # Next load the documents into the database
 # python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed
-
-# Next, tag the documents
-# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
-
-# Perform pharmaceutical classification
-# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
 
 # Export files for GNormPlus which are missing
 # python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents_for_gnormplus.py $MISSING_GNORMPLUS_IDS -c PubMed
@@ -27,24 +76,3 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_09_16_updates_relevant.ids"
 # Next GNormPlus Tagging
 # python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $PUBTATOR_FOR_GNORM -c PubMed --gnormplus --skip-load --workers 8
 
-
-# Finally, all files have been tagged
-# python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
-
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
-
-# Do the canonicalizing step
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
-
-# Apply the rules
-# python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
-
-# Load the Metadata
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
-
-# Finally compute the new metadata service table2
-#python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
-
-# Compute new query table
-#python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
