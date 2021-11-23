@@ -476,7 +476,7 @@ function initFromURLQueryParams() {
 
     if (params.has("visualization")) {
         let visualization = params.get("visualization");
-        if (visualization === "outer_ranking_substitution"){
+        if (visualization === "outer_ranking_substitution") {
             document.getElementById('radio_outer_ranking_a').checked = true;
             document.getElementById('radio_outer_ranking_b').checked = false;
         } else {
@@ -542,8 +542,8 @@ const search = (event) => {
     url.searchParams.set("sort_frequency_desc", freq_sort_desc);
     url.searchParams.set("sort_year_desc", year_sort_desc);
     url.searchParams.set("size", DEFAULT_RESULT_DIVS_LIMIT);
-    window.history.pushState("Query", "Title", "/"+ url.search.toString());
-  
+    window.history.pushState("Query", "Title", "/" + url.search.toString());
+
     let request = $.ajax({
         url: search_url,
         data: {
@@ -889,6 +889,16 @@ const createDocumentList = (results, query_len) => {
 };
 
 
+let globalDocumentAggregateLazyCreated = {};
+
+const createDocumentAggregateLazy = (divCardBodyID) => {
+    if (!globalDocumentAggregateLazyCreated[divCardBodyID]) {
+        createExpandableAccordion(true, divCardBodyID);
+        globalDocumentAggregateLazyCreated[divCardBodyID] = true;
+    }
+};
+
+
 const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
     let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" id="' + headingID + '"></div>');
@@ -953,7 +963,11 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
 
 
     globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
-    createExpandableAccordion(true, divCardBodyID);
+
+    // generate the content lazy
+    divH2.click(function () {
+        createDocumentAggregateLazy(divCardBodyID);
+    });
 
     return divCard;
 };
