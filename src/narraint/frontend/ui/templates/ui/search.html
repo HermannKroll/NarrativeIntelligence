@@ -82,40 +82,40 @@
 
         <div class="row">
             <div class="col-12">
-                        <div class="d-flex justify-content-center">
-                            <h6>How to Search:
-                                <a href="https://youtu.be/iagphBPLokM" target="_blank">
-                                    <img src="{% static 'icons/help.png' %}" height="40px">
-                                </a>
-                            </h6>
-                        </div>
+                <div class="d-flex justify-content-center">
+                    <h6>How to Search:
+                        <a href="https://youtu.be/iagphBPLokM" target="_blank">
+                            <img src="{% static 'icons/help.png' %}" height="40px">
+                        </a>
+                    </h6>
+                </div>
             </div>
         </div>
-                        <!--
-                        <label><strong>Data Source:</strong></label><br>
+        <!--
+        <label><strong>Data Source:</strong></label><br>
 
-                        <div class="wrapper-div">
-                            <div class="inner-div-left-mid">
-                                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
-                                       checked="checked">
-                                <label for="radio_pubmed_path">PubMed Sample (2M Document Titles and
-                                    Abstracts)</label><br>
-                                <input type="radio" id="radio_pmc" name="data_source" value="PMC_PATH">
-                                <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
-                                    Simvastatin)</label><br>
-                            </div>
-                        </div> -->
+        <div class="wrapper-div">
+            <div class="inner-div-left-mid">
+                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                       checked="checked">
+                <label for="radio_pubmed_path">PubMed Sample (2M Document Titles and
+                    Abstracts)</label><br>
+                <input type="radio" id="radio_pmc" name="data_source" value="PMC_PATH">
+                <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
+                    Simvastatin)</label><br>
+            </div>
+        </div> -->
         <div class="row">
             <div class="col-12">
                 <label><strong>Visualization:</strong></label><br>
                 <div class="wrapper-div">
-                    <div class="inner-div-left-mid" >
+                    <div class="inner-div-left-mid">
                         <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
                                value="outer_ranking_substitution"
                                checked="checked" onclick="refreshSearch()">
-                        <label for="radio_outer_ranking_a" >Substitution-based Visualization</label><br>
+                        <label for="radio_outer_ranking_a">Substitution-based Visualization</label><br>
                     </div>
-                    <div class="inner-div-right-most" >
+                    <div class="inner-div-right-most">
                         <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
                                value="outer_ranking_ontology" onclick="refreshSearch()">
                         <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualization</label><br>
@@ -123,85 +123,48 @@
                 </div>
             </div>
         </div>
-                <!-- "Bootstrap Modal" (popup window) for ATC classes -->
-                <div class="modal modal-lg" id="atcModal" tabindex="-1" role="dialog">
-                    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Concept Selection:</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-header">
-                                <div class="input-group rounded mb-1 mt-1">
-                                    <input id="browseSearch" type="search" class="form-control rounded"
-                                           placeholder="Search"
-                                           aria-label="Search"
-                                           aria-describedby="search-addon"/>
-                                    <span class="input-group-text border-0" id="search-addon">
+        <!-- "Bootstrap Modal" (popup window) for ATC classes -->
+        <div class="modal modal-lg" id="atcModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Concept Selection:</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-header">
+                        <div class="input-group rounded mb-1 mt-1">
+                            <input id="browseSearch" type="search" class="form-control rounded"
+                                   placeholder="Search"
+                                   aria-label="Search"
+                                   aria-describedby="search-addon"/>
+                            <span class="input-group-text border-0" id="search-addon">
                                     <i class="fa fa-search"></i>
                                   </span>
-                                </div>
-                            </div>
-
-                            <div class="modal-body">
-
-                                <div id="browseTree"></div>
-
-                                <!-- <div id="accordion">
-                                    <div class="card">
-                                        <div class="card-header" id="headingConceptSelection">
-                                            <h5 class="mb-0">
-                                                <button class="btn btn-link" data-toggle="collapse"
-                                                        data-target="#collapseOne" aria-expanded="true"
-                                                        aria-controls="collapseOne">
-                                                    Variables / Placeholders
-                                                </button>
-                                            </h5>
-                                        </div>
-
-                                        <div id="collapseOne" class="collapse" aria-labelledby="headingConceptSelection"
-                                             data-parent="#accordion">
-                                            <div class="card-body" id="variable_card_body">
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card">
-                                        <div class="card-header" id="headingThree">
-                                            <h5 class="mb-0">
-                                                <button class="btn btn-link collapsed" data-toggle="collapse"
-                                                        data-target="#collapseThree" aria-expanded="false"
-                                                        aria-controls="collapseThree">
-                                                    ATC Classes
-                                                </button>
-                                            </h5>
-                                        </div>
-                                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-                                             data-parent="#accordion">
-                                            <div class="card-body">
-                                                <div id="atc_accordion">
-                                                     this accordion is filled in search.js, starting at "buildATCTree()"
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
-                                    Cancel
-                                </button>
-                                <button id="atcTreeOK" class="btn btn-success" data-dismiss="modal" type="button" onclick="">OK</button>
-
-                            </div>
                         </div>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div id="browseTree"></div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                        <button id="atcTreeOK" class="btn btn-success" data-dismiss="modal" type="button" onclick="">
+                            OK
+                        </button>
+
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-
+    <div class="container">
         <div class="accordion" id="accordionExample">
             <div class="card mb-3">
                 <div class="card-header text-center" id="headingOne">
@@ -361,112 +324,113 @@
                 </div>
             </div>
         </div>
-        <!--
-    <div class="accordion" id="accordionQueryTranslation">
-    <div class="card mb-3">
-        <div class="card-header text-center" id="headingOne">
-            <h2 class="mb-0">
-                <button class="btn btn-primary" type="button" data-toggle="collapse"
-                        data-target="#collapseTutorial"
-                        aria-expanded="false" aria-controls="collapseOne">
-                    Tutorials / Getting Started
-                </button>
-            </h2>
-        </div>
-
-
-        <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
-             data-parent="#accordionQueryTranslation">
-            <div class="card-body">
-                <div>
-                    In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
-                </div>
-            </div>
-        </div>
-
     </div>
+    <!--
+<div class="accordion" id="accordionQueryTranslation">
+<div class="card mb-3">
+    <div class="card-header text-center" id="headingOne">
+        <h2 class="mb-0">
+            <button class="btn btn-primary" type="button" data-toggle="collapse"
+                    data-target="#collapseTutorial"
+                    aria-expanded="false" aria-controls="collapseOne">
+                Tutorials / Getting Started
+            </button>
+        </h2>
     </div>
-    -->
-        <div class="container" id="resultdiv">
 
-            <div class="row">
-                <div class="col">
-                    <h2 id="document_header">Results:
 
-                        <a href="https://youtu.be/DrG1u8497g0" target="_blank">
-                            <img src="{% static 'icons/help.png' %}" height="40px">
-                        </a>
-                    </h2>
-
-                </div>
-                <div class="col-md-auto">
-                    <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
-                        <option selected value="True">Latest Publications First</option>
-                        <option value="False">Oldest Publications First</option>
-                    </select>
-                </div>
-                <div class="col-md-auto">
-                    <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
-                        <option selected value="True">Most Frequent Substitutions First</option>
-                        <option value="False">Unusual Substitutions First</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="row" id="div_wrapper_documents">
-                    <div id="div_documents"></div>
-                </div>
+    <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
+         data-parent="#accordionQueryTranslation">
+        <div class="card-body">
+            <div>
+                In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
             </div>
         </div>
-        <!-- Feedback stuff-->
+    </div>
 
-        <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
-                onclick="openFeedback()">
-            <span id="feedbackbtn_text">Report bug</span>
-            <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
-        </button>
-        <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Send feedback with screenshot</h5>
-                        <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container">
-                            <div class="row mt-2">
-                                <div class="outsideWrapper">
-                                    <div class="insideWrapper" id="screenshotContainer">
-                                        <img src="null" id="screenshot"
-                                             class="img-fluid coveredImage border border-primary">
-                                        <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col text-center">
-                                    <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
-                                    </button>
+</div>
+</div>
+-->
+    <div class="container" id="resultdiv">
+
+        <div class="row">
+            <div class="col">
+                <h2 id="document_header">Results:
+
+                    <a href="https://youtu.be/DrG1u8497g0" target="_blank">
+                        <img src="{% static 'icons/help.png' %}" height="40px">
+                    </a>
+                </h2>
+
+            </div>
+            <div class="col-md-auto">
+                <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
+                    <option selected value="True">Latest Publications First</option>
+                    <option value="False">Oldest Publications First</option>
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
+                    <option selected value="True">Most Frequent Substitutions First</option>
+                    <option value="False">Unusual Substitutions First</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="row" id="div_wrapper_documents">
+                <div id="div_documents"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Feedback stuff-->
+
+    <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
+            onclick="openFeedback()">
+        <span id="feedbackbtn_text">Report bug</span>
+        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+    </button>
+    <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send feedback with screenshot</h5>
+                    <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <div class="outsideWrapper">
+                                <div class="insideWrapper" id="screenshotContainer">
+                                    <img src="null" id="screenshot"
+                                         class="img-fluid coveredImage border border-primary">
+                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
                                 </div>
                             </div>
                         </div>
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                        <p>Please mark the problematic section on the image above and/or describe the problem you have
-                            encountered:</p>
-                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
-                            Report
-                        </button>
-                    </div>
+                    <p>Please mark the problematic section on the image above and/or describe the problem you have
+                        encountered:</p>
+                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                        Report
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 {% endblock %}
 
