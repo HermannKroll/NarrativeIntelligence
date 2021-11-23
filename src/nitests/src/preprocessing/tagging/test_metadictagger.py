@@ -3,7 +3,7 @@ import unittest
 
 import narrant.preprocessing.enttypes as et
 import nitests.util as util
-from narrant.preprocessing.tagging.metadictagger import MetaDicTaggerFactory
+from narrant.preprocessing.tagging.metadictagger import PharmDictTagger
 from narrant.pubtator.document import parse_tag_list, TaggedEntity
 from narrant.pubtator.extract import read_tagged_documents
 
@@ -62,8 +62,8 @@ class TestMetadictagger(unittest.TestCase):
 
     @staticmethod
     def make_metatag():
-        factory = MetaDicTaggerFactory(TestMetadictagger.ent_type_set,
-                                       util.create_test_kwargs(
+        factory = PharmDictTagger(TestMetadictagger.ent_type_set,
+                                  util.create_test_kwargs(
                                            util.get_test_resource_filepath("infiles/test_metadictagger/")))
         metatag = factory.create_MetaDicTagger()
         metatag.prepare()
