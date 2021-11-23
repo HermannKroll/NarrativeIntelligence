@@ -249,3 +249,10 @@ class TestDocument(unittest.TestCase):
                       doc.tags)
         self.assertIn(TaggedEntity(None, 24729111, 973, 977, "coma", "Disease", "D003128"),
                       doc.tags)
+
+    def test_parse_pubtator_documents(self):
+        count = 0
+        for doc in read_tagged_documents(get_test_resource_filepath("pubmed_sample.pubtator")):
+            self.assertEqual(True, doc.has_content())
+            count += 1
+        self.assertEqual(10, count)
