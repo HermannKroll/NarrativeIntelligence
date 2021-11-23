@@ -984,7 +984,7 @@ function copySelectedConcept(concept) {
 }
 
 // build atc tree for modal
-function queryAndBuildATCTree() {
+function queryAndBuildConceptTree() {
     $('#browseSearch').on('keydown', (e)=>{
         $('#atcModal').modal('handleUpdate')
     })
@@ -1092,43 +1092,7 @@ function getVariableData() {
     return out_tree
 }
 
-function buildVariableTreeButton(dataParent, variableName, variableText) {
-    let btn_id = "apply_btn" + variableName;
-
-    let rowDiv = $('<div class="row py-1 border"/>');
-    let rowText = $('<div class="col"><p class="text-left">'+ variableName + ' (' + variableText+')</p></div>');
-    let applyBtn = $('<div class="col-1"><button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + btn_id + '">Apply</button></div>');
-    rowDiv.append(rowText);
-    rowDiv.append(applyBtn);
-    dataParent.append(rowDiv);
-
-    applyBtn.click(function () {
-        copySelectedConcept(variableName);
-    });
-}
-
-function buildVariableTree() {
-    let variables = [
-            ['Chemical', "substance/molecule/element"],
-            ['Disease', "disease/illness/side effect, e.g. Diabetes Mellitus"],
-            ['DosageForm', "dosage form/delivery form, e.g. tablet or injection"],
-            ['Drug', "active ingredients, e.g. Metformin or Simvastatin"],
-            ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
-            ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
-            ['Method', "common applied methods"],
-            ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
-            ['Species', "target groups, e.g. human, rats, etc."],
-            ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
-            ];
-    let divVariables = $('<div class="grid"/>');
-    variables.forEach(variable => {
-        buildVariableTreeButton(divVariables, variable[0], variable[1])
-    });
-    $('#variable_card_body').append(divVariables);
-
-}
 
 function buildSelectionTrees() {
-    queryAndBuildATCTree();
-    //buildVariableTree();
+    queryAndBuildConceptTree();
 }
