@@ -821,6 +821,8 @@ function queryAndVisualizeProvenanceInformation(provenance, unique_div_id) {
     });
 }
 
+let uniqueProvenanceID = 1;
+
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
     let document_id = queryResult["docid"];
     let title = queryResult["title"];
@@ -843,7 +845,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         "by: " + authors + '<br>' +
         '</div></div><br>');
 
-    let unique_div_id = "prov_" + document_id;
+    let unique_div_id = "prov_" + uniqueProvenanceID;
+    uniqueProvenanceID = uniqueProvenanceID + 1;
     let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#' + unique_div_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
     div_provenance_button.click(function () {
