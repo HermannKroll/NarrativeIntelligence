@@ -995,23 +995,6 @@ const createResultList = (results, query_len) => {
     return divList;
 };
 
-
-function buildATCLevel5Element(data_parent, atc_class) {
-    let atc_info = atc_class.split(' - ')[0];
-    let atc_label = atc_class.split(' - ')[1];
-    atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
-    let apply_btn_id = "apply_btn" + atc_info;
-    document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
-        '                        <div class="card-header">' + atc_info + ' - ' + atc_label + '\n' +
-        '                           <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + apply_btn_id + '">Apply</button>\n' +
-        '                        </div>\n' +
-        '                    </div>');
-
-    document.getElementById(apply_btn_id).addEventListener("click", function () {
-        copySelectedConcept(atc_label);
-    });
-}
-
 let LAST_INPUT_FIELD = null;
 
 function setConceptInputFieldSubject() {
