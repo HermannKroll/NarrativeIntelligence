@@ -206,7 +206,8 @@ def get_query(request):
                 results = cached_results
             else:
                 # run query
-                results = QueryEngine.process_query_with_expansion(graph_query)
+                results = QueryEngine.process_query_with_expansion(graph_query,
+                                                                   document_collection_filter={document_collection})
                 cache_hit = False
                 if DO_CACHING:
                     try:

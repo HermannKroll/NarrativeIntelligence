@@ -46,7 +46,8 @@ def execute_common_queries():
         graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
         for collection in DOCUMENT_COLLECTIONS:
 
-            results = QueryEngine.process_query_with_expansion(graph_query)
+            results = QueryEngine.process_query_with_expansion(graph_query,
+                                                               document_collection_filter=set(DOCUMENT_COLLECTIONS))
             logging.info('Write results to cache...')
             try:
                 cache.add_result_to_cache(collection, graph_query, results)

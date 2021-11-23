@@ -98,10 +98,11 @@ class QueryEngine:
         return id2sentences
 
     @staticmethod
-    def query_inverted_index_for_fact_pattern(fact_pattern: FactPattern):
+    def query_inverted_index_for_fact_pattern(fact_pattern: FactPattern, document_collection_filter: Set[str] = None):
         """
         Queries the Predication_Denorm Table for a specific fact pattern
         :param fact_pattern: a fact pattern
+        :param document_collection_filter: only keep extraction from these document collections
         :return: provenance mapping, var2subs
         """
         session = SessionExtended.get()
@@ -192,6 +193,13 @@ class QueryEngine:
         var2subs_to_prove = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         for result in query:
             prov_mapping = json.loads(result.provenance_mapping)
+
+            # Apply document collection filter
+            if document_collection_filter and len(document_collection_filter) > 0:
+                # keep only relevant document collection
+                prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
+
+            # Compute the hash dictionaries and indexes to the data
             provenance_mappings.append(prov_mapping)
             for doc_col, docids2prov in prov_mapping.items():
                 doc_ids = docids2prov.keys()
@@ -215,11 +223,13 @@ class QueryEngine:
                     var2subs[var_name][doc_col][sub_key].update(doc_ids)
 
     @staticmethod
-    def process_query_with_expansion(graph_query: GraphQuery) -> List[QueryDocumentResult]:
+    def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
+            -> List[QueryDocumentResult]:
         """
         Computes a GraphQuery
         The query will automatically be expanded and optimized
         :param graph_query: a graph query object
+        :param document_collection_filter: only keep extraction from these document collections
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
@@ -234,11 +244,13 @@ class QueryEngine:
         fp2var_prov_mappings = {}
         logging.debug(f'Executing query {graph_query}...')
         for idx, fact_pattern in enumerate(graph_query):
-            prov_mappings, var2subs, v2prov = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern)
+            prov_mappings, var2subs, v2prov = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern,
+                                                                                                document_collection_filter=document_collection_filter)
             # must the fact pattern be expanded?
             for e_fp in QueryExpander.expand_fact_pattern(fact_pattern):
                 logging.debug(f'Expand {fact_pattern} to {e_fp}')
-                pm_ex, var2subs_ex, v2prov_ex = QueryEngine.query_inverted_index_for_fact_pattern(e_fp)
+                pm_ex, var2subs_ex, v2prov_ex = QueryEngine.query_inverted_index_for_fact_pattern(e_fp,
+                                                                                                  document_collection_filter=document_collection_filter)
                 QueryEngine.merge_var2subs(var2subs, var2subs_ex)
                 QueryEngine.merge_var2subs(v2prov, v2prov_ex)
                 prov_mappings.extend(pm_ex)
