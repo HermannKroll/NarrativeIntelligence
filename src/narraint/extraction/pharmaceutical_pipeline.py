@@ -100,10 +100,6 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
             pathie_process_corenlp_output_parallelized(corenlp_output_dir, count_ie_files, ie_output_file, doc2tags,
                                                        workers=workers, predicate_vocabulary=pred_vocab)
             logging.info((" done in {}".format(datetime.now() - start)))
-
-            logging.info('Loading extractions into database...')
-            time_load = datetime.now()
-            load_pathie_extractions(ie_output_file, document_collection, PATHIE_EXTRACTION)
         elif extraction_type == PATHIE_STANZA_EXTRACTION:
             pred_vocab = relation_vocab.relation_dict if relation_vocab else None
             logging.info('Starting PathIE Stanza...')
