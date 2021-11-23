@@ -170,7 +170,7 @@ def get_query(request):
 
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
-        if data_source not in ["PMC", "PubMed"]:
+        if data_source not in ["LitCovid", "LongCovid", "PubMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')

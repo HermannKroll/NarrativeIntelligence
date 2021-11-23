@@ -494,8 +494,19 @@ function initFromURLQueryParams() {
         document.getElementById('select_sorting_year').value = sort_year;
     }
 
+    if (params.has("data_source")){
+        let data_source = params.get("data_source");
+        if (data_source === "LongCovid"){
+             document.getElementById("radio_long_covid").checked = true;
+        } else if (data_source === "LitCovid") {
+            document.getElementById("radio_litcovid").checked = true;
+        } else {
+            document.getElementById("radio_pubmed").checked = true;
+        }
+
+    }
     // Not used yet
-    // let data_source = url.get("data_source");
+    //
     // let size = url.get("size");
 
     if (params.has("query")) {
@@ -509,19 +520,13 @@ const search = (event) => {
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
-    let data_source = "PubMed"
     let end_pos = DEFAULT_RESULT_DIVS_LIMIT;
     let freq_element = document.getElementById("select_sorting_freq");
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
-    /*
-    if (document.getElementById('radio_pmc').checked) {
-        data_source = "PMC"
-    } else if(document.getElementById('radio_pubmed').checked) {
-        data_source = "PubMed"
-    } */
 
+    let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";

@@ -20,7 +20,7 @@
             {% csrf_token %}
             <div class="form-group">
                 <div class="row no-gutters">
-                    <div class="col-md-12 col-lg-3">
+                    <div class="col-md-12 col-lg-4">
                         <div class="input-group">
 
                             <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
@@ -31,7 +31,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12 col-lg-3">
+                    <div class="col-md-6 col-lg-2">
                         <div class="input-group">
                             <select class="custom-select" id="input_predicate">
                                 <option value="associated">associated</option>
@@ -48,7 +48,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-12 col-lg-3">
+                    <div class="col-md-12 col-lg-4">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="enter object" id="input_object">
                             <div class="input-group-append">
@@ -91,23 +91,31 @@
                 </div>
             </div>
         </div>
-        <!--
-        <label><strong>Data Source:</strong></label><br>
 
-        <div class="wrapper-div">
-            <div class="inner-div-left-mid">
-                <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
-                       checked="checked">
-                <label for="radio_pubmed_path">PubMed Sample (2M Document Titles and
-                    Abstracts)</label><br>
-                <input type="radio" id="radio_pmc" name="data_source" value="PMC_PATH">
-                <label for="radio_pmc_path">PubMedCentral Sample (12k Fulltext Documents incl.
-                    Simvastatin)</label><br>
-            </div>
-        </div> -->
         <div class="row">
             <div class="col-12">
-                <label><strong>Visualization:</strong></label><br>
+                <label><strong>Data Source:</strong></label>
+                <div class="wrapper-div">
+                    <div class="inner-div-left-mid">
+                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
+                               checked="checked">
+                        <label for="radio_pubmed">PubMed</label>
+                    </div>
+                    <div class="inner-div-left-mid">
+                        <input type="radio" id="radio_litcovid" name="data_source" value="LitCovid">
+                        <label for="radio_litcovid">LitCovid</label>
+                    </div>
+                    <div class="inner-div-left-mid">
+                        <input type="radio" id="radio_long_covid" name="data_source" value="LongCovid">
+                        <label for="radio_long_covid">Long Covid</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <label><strong>Visualization:</strong></label>
                 <div class="wrapper-div">
                     <div class="inner-div-left-mid">
                         <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
