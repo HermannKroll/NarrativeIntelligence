@@ -5,7 +5,7 @@ import logging
 from sqlalchemy import and_
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Document, DocTaggedBy
+from narraint.backend.models import Document, DocTaggedBy, Tag
 from narrant.preprocessing.enttypes import PLANT_FAMILY, DRUG, SPECIES, GENE
 
 
@@ -23,12 +23,13 @@ def main():
 
     logging.info('Querying relevant document ids...')
     session = SessionExtended.get()
-    subquery = session.query(DocTaggedBy.document_id).filter(and_(DocTaggedBy.document_collection == collection,
-                                                                  DocTaggedBy.ent_type.in_([DRUG, PLANT_FAMILY]))).distinct()
-    subquery2 = session.query(DocTaggedBy.document_id).filter(and_(DocTaggedBy.document_collection == collection,
-                                                                  DocTaggedBy.ent_type.in_([GENE, SPECIES]))).distinct()
+    subquery = session.query(Tag.document_id).filter(and_(Tag.document_collection == collection,
+                                                          Tag.ent_type.in_([DRUG, PLANT_FAMILY]))).distinct()
+    subquery2 = session.query(Tag.document_id).filter(and_(Tag.document_collection == collection,
+                                                           Tag.ent_type.in_([GENE, SPECIES]))).distinct()
     query = session.query(Document.id).filter(Document.collection == collection).filter(and_(Document.id.in_(subquery),
-                                                                                             Document.id.notin_(subquery2)))
+                                                                                             Document.id.notin_(
+                                                                                                 subquery2)))
 
     logging.info('Collecting document ids...')
     document_ids = set()
