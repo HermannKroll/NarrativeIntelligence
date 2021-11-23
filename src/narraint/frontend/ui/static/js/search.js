@@ -494,10 +494,10 @@ function initFromURLQueryParams() {
         document.getElementById('select_sorting_year').value = sort_year;
     }
 
-    if (params.has("data_source")){
+    if (params.has("data_source")) {
         let data_source = params.get("data_source");
-        if (data_source === "LongCovid"){
-             document.getElementById("radio_long_covid").checked = true;
+        if (data_source === "LongCovid") {
+            document.getElementById("radio_long_covid").checked = true;
         } else if (data_source === "LitCovid") {
             document.getElementById("radio_litcovid").checked = true;
         } else {
