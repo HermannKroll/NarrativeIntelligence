@@ -244,7 +244,7 @@ function example_search(search_str) {
 }
 
 function refreshSearch() {
-    if(result_present()) {
+    if (result_present()) {
         document.getElementById("btn_search").click();
     }
 }
@@ -264,7 +264,6 @@ let imgrect = {width: 0, height: 0};
 document.getElementById("screenshot").addEventListener('load', (e) => {
     imgrect = e.target.getBoundingClientRect();
 });
-
 
 
 async function openFeedback() {
@@ -782,11 +781,11 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
 
     let divDoc = $('<div class="card"><div class="card-body">' +
-        '<a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">'+
+        '<a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
         '<img src="' + pubpharm_image_url + '" height="25px">' +
-        document_id +  '</a>' +
+        document_id + '</a>' +
 
-        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + document_id + '" target="_blank">'+
+        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + document_id + '" target="_blank">' +
         'Document Graph</a>' +
 
         '<br><b>' + title + '</b><br>' +
@@ -969,10 +968,11 @@ function buildATCLevel5Element(data_parent, atc_class) {
 
 let LAST_INPUT_FIELD = null;
 
-function setConceptInputFieldSubject(){
+function setConceptInputFieldSubject() {
     LAST_INPUT_FIELD = "input_subject";
 }
-function setConceptInputFieldObject(){
+
+function setConceptInputFieldObject() {
     LAST_INPUT_FIELD = "input_object";
 }
 
@@ -985,7 +985,7 @@ function copySelectedConcept(concept) {
 
 // build atc tree for modal
 function queryAndBuildConceptTree() {
-    $('#browseSearch').on('keydown', (e)=>{
+    $('#browseSearch').on('keydown', (e) => {
         $('#atcModal').modal('handleUpdate')
     })
 
@@ -1009,17 +1009,13 @@ function queryAndBuildConceptTree() {
                 tree.clearSelection(false)
                 $("#atcTreeOK").addClass("disabled")
             })
-            tree.on('simpleTree:change', (node) =>{
+            tree.on('simpleTree:change', (node) => {
                 $("#atcTreeOK").removeClass("disabled")
             })
-            $("#atcTreeOK").on('click', (e) =>{
+            $("#atcTreeOK").on('click', (e) => {
                 copySelectedConcept(tree.getSelectedNode()["value"])
                 $("#atcModal").modal('hide')
             })
-            /*for (let k in result)
-            {
-                buildATCTree("atc_accordion", result[k], 1);
-            }*/
         })
         .catch((error) => {
             $('#alert_translation').text('Failed to get atc tree.');
@@ -1033,13 +1029,11 @@ function queryAndBuildConceptTree() {
 
     request.done(function (response) {
         let result = response;
-
-     //   document.getElementById("atcButton").style.display = "block";
     });
 }
 
 function createTreeDataFromQueryResult(inputTree) {
-    let outputTree= []
+    let outputTree = []
     //console.log(inputTree)
     for (let node of inputTree) {
         //console.log(node)
@@ -1049,9 +1043,8 @@ function createTreeDataFromQueryResult(inputTree) {
             //console.log(node["children"])
             if ("children" in node["children"][0]) {
                 out_node["children"] = createTreeDataFromQueryResult(node["children"])
-            }
-            else {
-                name = node["name"] + " - " +  node["children"][0]["name"]
+            } else {
+                name = node["name"] + " - " + node["children"][0]["name"]
             }
         }
         out_node["label"] = name
@@ -1078,9 +1071,9 @@ function getVariableData() {
 
     let out_tree = []
 
-    for(let v of variables) {
+    for (let v of variables) {
         let node = {}
-        node["label"] = v[0] + " ("+ v[1] + ")"
+        node["label"] = v[0] + " (" + v[1] + ")"
         node["value"] = v[0]
         out_tree.push(node)
     }
