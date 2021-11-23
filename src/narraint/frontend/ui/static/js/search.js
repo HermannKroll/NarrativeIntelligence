@@ -983,56 +983,6 @@ function copySelectedConcept(concept) {
     }
 }
 
-
-function buildATCHeaderCard(data_parent, atc_class) {
-    // atc_class: e.g. "A01AA03 - olaflur" -> atc_info: "A01AA03"
-    let atc_info = atc_class.split(' - ')[0];
-    let heading_id = "heading" + atc_info;
-    let collapse_id = "collapse" + atc_info;
-    let child_id = "child" + atc_info;
-    let atc_label = atc_class.split(' - ')[1].trim().toLowerCase();
-    atc_label = atc_label.charAt(0).toUpperCase() + atc_label.slice(1);
-    let apply_btn_id = "apply_btn" + atc_info;
-
-    document.getElementById(data_parent).insertAdjacentHTML("beforeend", '<div class="card">\n' +
-        '            <div class="card-header" id="' + heading_id + '">\n' +
-        '                <h5 class="mb-0 d-inline">\n' +
-        '                    <button class="btn btn-link text-start" data-toggle="collapse" data-target="#' + collapse_id + '" aria-expanded="true" aria-controls="' + collapse_id + '">\n' +
-        '                      ' + atc_info + ' - ' + atc_label + '\n' +
-        '                    </button>\n' +
-        '                    <button class="btn btn-sm btn-outline-dark float-right" data-dismiss="modal" id="' + apply_btn_id + '">Apply</button>\n' +
-        '                 </h5>\n' +
-        '            </div>' +
-        '            <div id="' + collapse_id + '" class="collapse" aria-labelledby="' + heading_id + '" data-parent="#' + data_parent + '">\n' +
-        '                <div class="card-body" id="' + child_id + '">\n' +
-        '                </div>\n' +
-        '            </div>' +
-        '</div>'
-    );
-
-    document.getElementById(apply_btn_id).addEventListener("click", function () {
-        copySelectedConcept( atc_label);
-    });
-}
-
-function buildATCTree(data_parent, tree, atc_depth) {
-    for (var k in tree) {
-        let atc_class = tree[k]["name"];
-        let atc_info = atc_class.split(' - ')[0];
-        let subtree = tree[k]["children"];
-        let child_id = "child" + atc_info;
-        //console.log(atc_class, atc_info, child_id, subtree);
-        if (atc_depth < 5) {
-            buildATCHeaderCard(data_parent, atc_class);
-            buildATCTree(child_id, subtree, atc_depth + 1);
-        } else {
-            let lvl5_name_and_desc = atc_class + ' - ' + subtree[0]["name"];
-            buildATCLevel5Element(data_parent, lvl5_name_and_desc);
-        }
-    }
-
-}
-
 // build atc tree for modal
 function queryAndBuildATCTree() {
     $('#browseSearch').on('keydown', (e)=>{
