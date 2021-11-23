@@ -253,8 +253,9 @@ def check_type_constraints(reorder_tuples=True):
             .yield_per(BULK_QUERY_CURSOR_COUNT)
         predication_values = []
         start_time = datetime.now()
+        task_size = len(preds_to_reorder)
         for idx, pred in enumerate(pred_query):
-            print_progress_with_eta("reorder subject and objects...", idx, pred_count, start_time)
+            print_progress_with_eta("reorder subject and objects...", idx, task_size, start_time)
             predication_values.append(dict(
                 document_id=pred.document_id,
                 document_collection=pred.document_collection,
