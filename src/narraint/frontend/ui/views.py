@@ -99,7 +99,10 @@ def get_document_graph(request):
                 result.append(dict(s=s, p=p, o=o))
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
-            View.instance().query_logger.write_document_graph_log(time_needed, document_id, len(facts))
+            try:
+                View.instance().query_logger.write_document_graph_log(time_needed, document_id, len(facts))
+            except IOError:
+                logging.debug('Could not write document graph log file')
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
             return JsonResponse(dict(nodes=[], facts=[]))
@@ -289,6 +292,10 @@ def get_feedback(request):
             PredicationRating.insert_user_rating(session, userid, query, int(pred_id), rating)
 
         logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
+        try:
+            View.instance().query_logger.write_rating(userid, predication_ids)
+        except IOError:
+            logging.debug('Could not write rating log file')
         return HttpResponse(status=200)
     except:
         traceback.print_exc(file=sys.stdout)

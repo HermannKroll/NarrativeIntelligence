@@ -18,6 +18,7 @@ class QueryLogger:
         self.log_dir_prov = os.path.join(log_dir, 'provenance')
         self.log_dir_document_graph = os.path.join(log_dir, 'document_graphs')
         self.log_dir_views = os.path.join(log_dir, 'views')
+        self.log_rating = os.path.join(log_dir, 'ratings')
         if not os.path.isdir(log_dir):
             raise Exception('no provenance log dir available {}'.format(log_dir))
         if not os.path.isdir(self.log_dir_queries):
@@ -28,11 +29,14 @@ class QueryLogger:
             os.mkdir(self.log_dir_document_graph)
         if not os.path.isdir(self.log_dir_views):
             os.mkdir(self.log_dir_views)
+        if not os.path.isdir(self.log_rating):
+            os.mkdir(self.log_rating)
 
         self.log_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.prov_log_header = 'timestamp\ttime needed\tprovenance ids'
         self.document_graph_log_header = 'timestamp\ttime needed\tdocument_id\t#facts'
         self.page_view_header = 'timestamp\tpage'
+        self.rating_header = 'timestamp\tuser id\tprovenance ids'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -95,5 +99,20 @@ class QueryLogger:
                 f.write(log_entry)
         else:
             logging.debug('appending to page view log file: {}'.format(log_file_name))
+            with open(log_file_name, 'a') as f:
+                f.write(log_entry)
+
+    def write_rating(self, user_id, provenance_ids):
+        log_file_name = os.path.join(self.log_rating,
+                                     '{}-ratings.log'.format(time.strftime("%Y-%m-%d")))
+        timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
+        log_entry = f'\n{timestr}\t{user_id}\t{provenance_ids}'
+        if not os.path.isfile(log_file_name):
+            logging.debug('creating new rating log file: {}'.format(log_file_name))
+            with open(log_file_name, 'w') as f:
+                f.write(self.rating_header)
+                f.write(log_entry)
+        else:
+            logging.debug('appending to rating log file: {}'.format(log_file_name))
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
