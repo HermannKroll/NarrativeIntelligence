@@ -1181,7 +1181,14 @@ function createTreeDataFromQueryResult(inputTree) {
             }
         }
         out_node["label"] = name
-        out_node["value"] = name.split("-")[1]
+        // ATC Case
+        if (name.includes('-')){
+            out_node["value"] = name.split("-")[1]
+        } // MeSH Case
+        else {
+            out_node["value"] = name.split(' (MESH')[0];
+        }
+
 
         outputTree.push(out_node)
     }
