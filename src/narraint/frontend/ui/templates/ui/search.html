@@ -405,7 +405,7 @@
 
     <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
             onclick="openFeedback()">
-        <span id="feedbackbtn_text">Report bug</span>
+        <span id="feedbackbtn_text">Feedback</span>
         <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
     </button>
     <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
@@ -460,7 +460,7 @@
         const search_url = "{% url 'query' %}";
         const autocompletion_url = "{% url 'autocompletion' %}";
         const query_check_url = "{% url 'check' %}";
-        const atc_tree_url = "{% url 'atc_tree' %}"
+        const tree_info_url = "{% url 'tree_info' %}"
         const feedback_url = "{% url 'feedback' %}";
         const provenance_url = "{% url 'provenance' %}";
         const report_url = "{% url 'report' %}";

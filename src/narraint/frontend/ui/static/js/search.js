@@ -285,7 +285,7 @@ async function openFeedback() {
     $("#feedbackModal").modal("toggle");
     $("#reportSpinner").removeClass("busy");
     $("#feedback_button").removeClass("disabled")
-    $("#feedbackbtn_text").html("Report bug");
+    $("#feedbackbtn_text").html("Feedback");
 
 
     $("#screenshotCanvas").remove();
@@ -1102,39 +1102,58 @@ function copySelectedConcept(concept) {
     }
 }
 
+function addTreeData(atcTreeData, meshTreeData) {
+    let options = {
+        searchBox: $('#browseSearch'),
+        searchMinInputLength: 3
+    }
+    let tree_data = [getVariableData(), {
+        label: "ATC Classes",
+        value: "",
+        children: atcTreeData
+    }, {
+        label: "MeSH Diseases",
+        value: "",
+        children: meshTreeData
+
+    }]
+    let tree = $('#browseTree').simpleTree(options, tree_data)
+    $('#atcModal').on('show.bs.modal', (e) => {
+        tree.clearSelection(false)
+        $("#atcTreeOK").addClass("disabled")
+    })
+    tree.on('simpleTree:change', (node) => {
+        $("#atcTreeOK").removeClass("disabled")
+    })
+    $("#atcTreeOK").on('click', (e) => {
+        copySelectedConcept(tree.getSelectedNode()["value"])
+        $("#atcModal").modal('hide')
+    })
+}
+
 // build atc tree for modal
 function queryAndBuildConceptTree() {
     $('#browseSearch').on('keydown', (e) => {
         $('#atcModal').modal('handleUpdate')
     })
 
-    let tree = null;
-
-    fetch(atc_tree_url)
+    fetch(tree_info_url + '?tree=atc')
         .then(response => response.json())
         .then(result => {
-            let atc_tree_data = createTreeDataFromQueryResult(result["chembl_atc_tree"])
-            let options = {
-                searchBox: $('#browseSearch'),
-                searchMinInputLength: 3
-            }
-            let tree_data = [getVariableData(), {
-                label: "ATC Classes",
-                value: "",
-                children: atc_tree_data
-            }]
-            tree = $('#browseTree').simpleTree(options, tree_data)
-            $('#atcModal').on('show.bs.modal', (e) => {
-                tree.clearSelection(false)
-                $("#atcTreeOK").addClass("disabled")
-            })
-            tree.on('simpleTree:change', (node) => {
-                $("#atcTreeOK").removeClass("disabled")
-            })
-            $("#atcTreeOK").on('click', (e) => {
-                copySelectedConcept(tree.getSelectedNode()["value"])
-                $("#atcModal").modal('hide')
-            })
+            let atc_tree_data = createTreeDataFromQueryResult(result["tree"])
+            fetch(tree_info_url + '?tree=mesh_disease')
+                .then(response => response.json())
+                .then(result => {
+                    let mesh_tree_data = createTreeDataFromQueryResult(result["tree"])
+                    addTreeData(atc_tree_data, mesh_tree_data);
+                })
+                .catch((error) => {
+                    $('#alert_translation').text('Failed to get MeSH Disease tree.');
+                    $('#alert_translation').fadeIn();
+                    console.log("Failed to get MeSH Disease tree")
+                    console.log(error)
+                })
+
         })
         .catch((error) => {
             $('#alert_translation').text('Failed to get atc tree.');
@@ -1142,13 +1161,8 @@ function queryAndBuildConceptTree() {
             console.log("Failed to get atc tree")
             console.log(error)
         })
-    let request = $.ajax({
-        url: atc_tree_url
-    });
 
-    request.done(function (response) {
-        let result = response;
-    });
+
 }
 
 function createTreeDataFromQueryResult(inputTree) {

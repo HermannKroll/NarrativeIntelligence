@@ -16,7 +16,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE
+from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -113,10 +113,18 @@ def get_autocompletion(request):
 
 
 # on a better generation of this json: https://stackoverflow.com/questions/44478515/add-size-x-to-json?noredirect=1&lq=1
-def get_chembl_atc_tree(request):
-    with open(CHEMBL_ATC_TREE_FILE, 'r') as inp:
-        chembl_atc_tree = json.load(inp)
-        return JsonResponse(dict(chembl_atc_tree=chembl_atc_tree))
+def get_tree_info(request):
+    if "tree" in request.GET:
+        tree = str(request.GET.get("tree").strip()).lower()
+        if tree == 'atc':
+            with open(CHEMBL_ATC_TREE_FILE, 'r') as inp:
+                chembl_atc_tree = json.load(inp)
+                return JsonResponse(dict(tree=chembl_atc_tree))
+        elif tree == "mesh_disease":
+            with open(MESH_DISEASE_TREE_JSON, 'r') as f:
+                mesh_disease_tree = json.load(f)
+                return JsonResponse(dict(tree=mesh_disease_tree))
+    return HttpResponse(status=500)
 
 
 def get_check_query(request):

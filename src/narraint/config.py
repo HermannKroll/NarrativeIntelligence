@@ -40,6 +40,9 @@ CHEMBL_ATC_CLASSIFICATION_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_classifi
 # CHEMBL ATC Tree
 CHEMBL_ATC_TREE_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_tree.json")
 
+# MeSH Disease Tree
+MESH_DISEASE_TREE_JSON = os.path.join(RESOURCE_DIR, "mesh_disease_tree.json")
+
 # Entity Tagging index
 ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 

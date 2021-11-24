@@ -2,7 +2,7 @@ from django.urls import path
 from django.views.decorators.cache import never_cache
 
 from narraint.frontend.ui.views import SearchView, get_autocompletion, get_check_query, get_query, get_feedback, \
-    post_report, get_provenance, get_document_graph, get_chembl_atc_tree
+    post_report, get_provenance, get_document_graph, get_tree_info
 
 urlpatterns = [
     path("", never_cache(SearchView.as_view()), name="search"),
@@ -13,5 +13,5 @@ urlpatterns = [
     path("provenance", get_provenance, name="provenance"),
     path("report", post_report, name="report"),
     path("document_graph", get_document_graph, name="document_graph"),
-    path("atc_tree", get_chembl_atc_tree, name="atc_tree")
+    path("tree_info", get_tree_info, name="tree_info")
 ]
