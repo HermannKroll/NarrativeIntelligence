@@ -68,6 +68,7 @@ def get_document_graph(request):
     if "document" in request.GET:
         document_id = str(request.GET.get("document", "").strip())
         try:
+            start_time = datetime.now()
             document_id = int(document_id)
             session = SessionExtended.get()
             query = session.query(Predication).filter(Predication.document_collection == 'PubMed')
@@ -90,13 +91,15 @@ def get_document_graph(request):
                         facts.add(key)
                         nodes.add(subject_name)
                         nodes.add(object_name)
-                except:
+                except Exception:
                     pass
 
             result = []
             for s, p, o in facts:
                 result.append(dict(s=s, p=p, o=o))
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
+            time_needed = datetime.now() - start_time
+            View.instance().query_logger.write_document_graph_log(time_needed, document_id, len(facts))
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
             return JsonResponse(dict(nodes=[], facts=[]))
@@ -230,8 +233,8 @@ def get_query(request):
             time_needed = datetime.now() - start_time
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View.instance().query_logger.write_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                   query, opt_query)
+            View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+                                                         query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultAggregationBySubstitution()
@@ -319,6 +322,7 @@ class SearchView(TemplateView):
         super(SearchView, self).__init__()
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(SearchView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -327,6 +331,7 @@ class StatsView(TemplateView):
     stats_query_results = None
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(StatsView.template_name)
         if request.is_ajax():
             if "query" in request.GET:
                 if not StatsView.stats_query_results:
@@ -353,6 +358,7 @@ class HelpView(TemplateView):
     template_name = "ui/help.html"
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(HelpView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -360,4 +366,5 @@ class DocumentView(TemplateView):
     template_name = "ui/document.html"
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(DocumentView.template_name)
         return super().get(request, *args, **kwargs)
