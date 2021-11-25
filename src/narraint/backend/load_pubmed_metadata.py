@@ -140,7 +140,7 @@ def pubmed_medline_load_metadata_from_dictionary(directory, document_collection=
         print_progress_with_eta("Loading PubMed Medline metadata", idx, len(files), start, 1)
         metadata_to_insert, pmids_processed = pubmed_medline_load_document_metadata(fn, document_ids,
                                                                                     document_collection)
-        DocumentMetadata.bulk_insert_values_into_table(session, metadata_to_insert)
+        DocumentMetadata.bulk_insert_values_into_table(session, metadata_to_insert, check_constraints=False)
         document_ids = document_ids - pmids_processed
 
 

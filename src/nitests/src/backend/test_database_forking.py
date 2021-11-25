@@ -16,7 +16,7 @@ class TestDatabaseForking(unittest.TestCase):
 
         session = Session.get()
         values = [dict(name='Tagger1', version="1.0.0")]
-        Tagger.bulk_insert_values_into_table(session, values, check_constraints=True)
+        Tagger.bulk_insert_values_into_table(session, values)
 
         for r in session.query(Tagger):
             print(f'{r.name}')

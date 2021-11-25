@@ -60,7 +60,7 @@ def denormalize_predication_table():
     for idx, k in enumerate(fact_to_doc_ids):
         print_progress_with_eta("inserting values", idx, key_count, insert_time, print_every_k=100)
         if idx % BULK_INSERT_AFTER_K == 0:
-            PredicationDenorm.bulk_insert_values_into_table(session, insert_list)
+            PredicationDenorm.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
             insert_list.clear()
         insert_list.append(dict(
             subject_id=k[0],
@@ -72,7 +72,7 @@ def denormalize_predication_table():
             provenance_mapping=json.dumps(fact_to_prov_ids[k])
         ))
 
-    PredicationDenorm.bulk_insert_values_into_table(session, insert_list)
+    PredicationDenorm.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
     insert_list.clear()
 
     end_time = datetime.now()

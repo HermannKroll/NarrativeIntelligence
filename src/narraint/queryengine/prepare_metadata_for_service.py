@@ -63,7 +63,7 @@ def compute_document_metadata_service_table():
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
                                       authors=authors, journals=journals, publication_year=publication_year))
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
-        DocumentMetadataService.bulk_insert_values_into_table(session, insert_values)
+        DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=False)
         logging.info('Finished')
 
 
