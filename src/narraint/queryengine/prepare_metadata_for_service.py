@@ -4,6 +4,7 @@ from sqlalchemy import delete, and_
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document
+from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
 
 def compute_document_metadata_service_table():
@@ -49,6 +50,13 @@ def compute_document_metadata_service_table():
             doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year)
         logging.info(f'{len(doc2metadata)} document metadata were found')
 
+        # Expand ids to long covid and lit covid
+        # TODO: not very generic
+        doc_ids_litcovid = set()
+        doc_ids_longcovid = set()
+        if d_col == 'PubMed':
+            doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
+
         logging.info('Preparing insert....')
         # prepare insert
         insert_values = []
@@ -60,8 +68,18 @@ def compute_document_metadata_service_table():
                 continue
             if publication_year == 'None' or not publication_year:
                 continue
+
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
                                       authors=authors, journals=journals, publication_year=publication_year))
+
+            # TODO: not very generic
+            if d_col == "PubMed" and d_id in doc_ids_litcovid:
+                insert_values.append(dict(document_id=d_id, document_collection=LIT_COVID_COLLECTION, title=title,
+                                          authors=authors, journals=journals, publication_year=publication_year))
+            if d_col == "PubMed" and d_id in doc_ids_longcovid:
+                insert_values.append(dict(document_id=d_id, document_collection=LONG_COVID_COLLECTION, title=title,
+                                          authors=authors, journals=journals, publication_year=publication_year))
+
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
         DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=False)
         logging.info('Finished')

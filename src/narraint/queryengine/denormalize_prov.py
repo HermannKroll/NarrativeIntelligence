@@ -9,6 +9,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadataService
 from narraint.backend.models import PredicationDenorm
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
+from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 from narrant.progress import print_progress_with_eta
 
 
@@ -28,6 +29,10 @@ def denormalize_predication_table():
                                             Predication.document_collection == DocumentMetadataService.document_collection)) \
         .yield_per(QUERY_YIELD_PER_K)
 
+    # Hack to support also the Covid 19 collection
+    # TODO: not very generic
+    doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
+
     insert_list = []
     logging.info("Starting...")
     fact_to_doc_ids = defaultdict(lambda: defaultdict(list))
@@ -42,6 +47,15 @@ def denormalize_predication_table():
         seen_key = (s_id, s_t, p, o_id, o_t)
         fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
         fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].append(prov.id)
+
+        # Hack to support also the Covid 19 collection
+        # TODO: not very generic
+        if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
+            fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
+            fact_to_prov_ids[seen_key][LIT_COVID_COLLECTION][prov.document_id].append(prov.id)
+        if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
+            fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
+            fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].append(prov.id)
 
     # Restructure dictionaries
     for k in fact_to_doc_ids:
