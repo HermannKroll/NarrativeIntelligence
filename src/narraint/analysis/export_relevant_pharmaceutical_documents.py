@@ -30,7 +30,7 @@ def main():
 
     subquery_pharm = session.query(DocumentClassification.document_id).filter(
         and_(DocumentClassification.document_collection == collection,
-             DocumentClassification.classification == 'Pharmaceutical')).distinct()
+             DocumentClassification.classification.in_(['LitCovid', 'LongCovid', 'Pharmaceutical']))).distinct()
 
     query = session.query(Document.id).filter(Document.collection == collection).filter(
         or_(Document.id.in_(subquery_drug),
