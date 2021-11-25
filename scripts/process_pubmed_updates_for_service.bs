@@ -31,7 +31,11 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_11_23_updates.ids"
 #python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
 
 # Perform pharmaceutical classification
-#python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+
+# Perform the plant-based classification
+# python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/plant_family_classification_rules.txt --cls PlantSpecific -w 15 --skip-load
+
 
 
 # Load all LitCOVID + Long Covid classifications
