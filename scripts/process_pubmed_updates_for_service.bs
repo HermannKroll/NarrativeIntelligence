@@ -4,10 +4,13 @@
 ALL_PUBTATOR_PMIDS="/hdd2/datasets/pubmed_medline/pubtator_pmids_all.txt"
 PMIDS_IN_DB="/hdd2/datasets/pubmed_medline/pmids_in_db.txt"
 IDS_TO_DOWNLOAD="/hdd2/datasets/pubmed_medline/pubtator_pmids_to_download.txt"
+LITCOVID_ID_FILE="/hdd2/datasets/pubmed_medline/litcovid_ids.tsv"
+LONGCOVID_ID_FILE="/hdd2/datasets/pubmed_medline/long_covid_ids.tsv"
 
 MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2021_11_23_updates/"
 UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_11_23_pubtator_updates.pubtator"
 UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_11_23_updates.ids"
+
 
 # First get all PubMed Pubtator PMIDs
 # wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
@@ -22,39 +25,48 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_11_23_updates.ids"
 # python3 ~/NarrativeAnnotation/src/narrant/pubtator/service/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
 
 # Load all PubTator files to database
-python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
+#python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
 
 # Next, tag the documents with our PharmDictTagger
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+#python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
 
 # Perform pharmaceutical classification
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+#python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py $UPDATES_PUBTATOR  -c PubMed -r /home/kroll/NarrativeAnnotation/resources/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+
+
+# Load all LitCOVID + Long Covid classifications
+#wget https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export/all/tsv -O $LITCOVID_ID_FILE
+#wget 'https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export/tsv?text=e_condition%3ALongCovid&filters=%7B%7D' -O $LONGCOVID_ID_FILE
+
+#python3 ~/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py $LITCOVID_ID_FILE LitCovid -c PubMed
+#python3 ~/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py $LONGCOVID_ID_FILE LongCovid -c PubMed
 
 # Finally, all files have been tagged
-python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+#python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # Do the statement extraction via our Pipeline
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Apply the rules
-python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
+#python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
 
 # Load the Metadata
 # Download the latest updates via wget -r ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles
 # Unzip everything
-python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# Load Baseline
+#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
+
 
 # Finally compute the new metadata service table2
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+#python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
 # Compute new query table
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
+#python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
 
-
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
 
 
 
