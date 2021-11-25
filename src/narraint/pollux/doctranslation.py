@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass
 from operator import and_
 from pathlib import Path
-from typing import Union, Type, List, Iterator
+from typing import Union, Type, List, Iterator, Dict
 
 from sqlalchemy import select, func
 
@@ -103,7 +103,7 @@ class DocumentTranslationLoader:
         }
 
     def translate(self, infile: Union[Path, str], outfile: Union[Path, str], insert_every: int = 100,
-                  diff: bool = False, prog_logger: Progress = None) -> int:
+                  diff: bool = False, prog_logger: Progress = None, limit: int=None) -> int:
         """
         Iteratively poll SourcedDocuments from read_sourced_documents and translate them. If diff is set to true, the
         documents will be checked against the md5 sums present in the database and will only be processed if new or changed.
@@ -123,6 +123,8 @@ class DocumentTranslationLoader:
             outf.write("[")
             first = True
             for n, sdoc in enumerate(self.read_sourced_documents(infile)):
+                if limit and processed_docs > limit:
+                    break
                 if not diff or self.check_md5_changed(sdoc):
                     translations.append(self.create_translation_entry(sdoc))
                     if not first:
@@ -134,7 +136,7 @@ class DocumentTranslationLoader:
                     if len(translations) > 100:
                         self.flush(translations)
                         translations = []
-                prog_logger.print_progress(n)
+                prog_logger.print_progress(processed_docs)
             self.flush(translations)
             outf.write("]")
             prog_logger.done()
@@ -177,21 +179,25 @@ class DocumentTranslationLoader:
         raise NotImplementedError()
 
 
-def main(doctranslation_subclass: Type[DocumentTranslationLoader], args: List[str] = None):
+def main(doctranslation_subclass: Type[DocumentTranslationLoader], doctrans_args=None, args: List[str] = None, parser = None):
     """
     Run the document translation, insert translation entries into the document_translation table,
     export documents to a json file and load them into the database if -l flag is set.
+    :param doctrans_args: keyword arguments for doctranslation
     :param doctranslation_subclass: The subclass of the DocumentTranlationLoader capable of reading SourcedDocuments from
     the used third-party format
     :param args: command line arguments
     :return: None
     """
-    parser = argparse.ArgumentParser("load pollux documents")
+    if doctrans_args is None:
+        doctrans_args = {}
+    parser = parser or argparse.ArgumentParser("load pollux documents")
     parser.add_argument("input", help="ijson input file")
     parser.add_argument("output", help="output json file")
     parser.add_argument("-c", "--collection", required=True, help="document collection")
     parser.add_argument("-d", "--diff", action="store_true", help="only process documents with new/changed md5 hash")
     parser.add_argument("-l", "--load", action="store_true", help="load document contents into document table")
+    parser.add_argument("-n", "--limit", type=int, help="Only exctract that many documents from source doc")
     args = parser.parse_args(args)
 
     loader = doctranslation_subclass(args.collection)
@@ -201,8 +207,8 @@ def main(doctranslation_subclass: Type[DocumentTranslationLoader], args: List[st
     logging.info("Counting documents...")
     count = loader.count_documents(args.input)
     logging.info(f"Found {count} documents.")
-    prog = Progress(total=count, text="Translating")
-    proc_docs = loader.translate(args.input, args.output, diff=args.diff, prog_logger=prog)
+    prog = Progress(total=(args.limit or count), text="Translating")
+    proc_docs = loader.translate(args.input, args.output, diff=args.diff, prog_logger=prog, limit=args.limit)
     logging.info(f"Processed {proc_docs} new or changed documents.")
     if args.load:
         load_document.main([args.output, "-c", args.collection])

@@ -18,6 +18,8 @@ class PolluxLoader(DocumentTranslationLoader):
         with open(file) as f:
             for line in f:
                 content = json.loads(line)
+                if not content["languages"] or 'eng' not in content["languages"]:
+                    continue
                 source_id = content["id"]
                 source = file.name
                 title = content["title"].encode('unicode_escape').decode('unicode_escape')
