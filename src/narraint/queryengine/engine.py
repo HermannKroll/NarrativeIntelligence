@@ -7,6 +7,7 @@ from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
+from narraint.queryengine.covid19 import LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
@@ -63,6 +64,9 @@ class QueryEngine:
         :return: dict mapping docids to titles, dict mapping sentence ids to sentence texts
         """
         session = SessionExtended.get()
+        # Todo: Hacky solution - overvwrite collection
+        if document_collection == LIT_COVID_COLLECTION or document_collection == LONG_COVID_COLLECTION:
+            document_collection = "PubMed"
         # Query the document titles
         q_titles = session.query(DocumentMetadataService) \
             .filter(DocumentMetadataService.document_collection == document_collection) \
