@@ -12,4 +12,4 @@ class TestSplit(unittest.TestCase):
         out_file = util.tmp_rel_path("out/splitout.pubtator")
         sanitize.filter_and_sanitize(in_file, out_file, target_ids)
         out_ids = [td.id for td in read_tagged_documents(out_file)]
-        self.assertSetEqual({33, 73, 75}, set(out_ids))
+        self.assertSetEqual({33, 73, 75, 54}, set(out_ids))

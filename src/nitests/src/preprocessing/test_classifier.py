@@ -11,10 +11,10 @@ class TestClassfier(unittest.TestCase):
 
     def test_read_ruleset(self):
         rules = Classifyer.read_ruleset(TestClassfier.pet_rules)
-        self.assertIn([re.compile(r"kitten\w+\b")], rules)
-        self.assertIn([re.compile(r"dog\w+\b")], rules)
-        self.assertIn([re.compile(r"hamster\b")], rules)
-        self.assertIn([re.compile(r"animal\b"), re.compile(r"house\b")], rules)
+        self.assertIn([re.compile(r"kitten\w+\b", re.IGNORECASE)], rules)
+        self.assertIn([re.compile(r"dog\w+\b", re.IGNORECASE)], rules)
+        self.assertIn([re.compile(r"hamster\b", re.IGNORECASE)], rules)
+        self.assertIn([re.compile(r"animal\b", re.IGNORECASE), re.compile(r"house\b", re.IGNORECASE)], rules)
 
     def test_classify(self):
         classfier = Classifyer("pet", rule_path=TestClassfier.pet_rules)
