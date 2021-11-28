@@ -7,7 +7,6 @@ from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
-from narraint.queryengine.covid19 import LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
@@ -64,9 +63,6 @@ class QueryEngine:
         :return: dict mapping docids to titles, dict mapping sentence ids to sentence texts
         """
         session = SessionExtended.get()
-        # Todo: Hacky solution - overvwrite collection
-        if document_collection == LIT_COVID_COLLECTION or document_collection == LONG_COVID_COLLECTION:
-            document_collection = "PubMed"
         # Query the document titles
         q_titles = session.query(DocumentMetadataService) \
             .filter(DocumentMetadataService.document_collection == document_collection) \
@@ -201,8 +197,11 @@ class QueryEngine:
             # Apply document collection filter
             if document_collection_filter and len(document_collection_filter) > 0:
                 # keep only relevant document collection
-                prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
-
+                # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
+                prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
+                # only continue with prov mappings that are not empty
+                if not prov_mapping or len(prov_mapping) == 0:
+                    continue
             # Compute the hash dictionaries and indexes to the data
             provenance_mappings.append(prov_mapping)
             for doc_col, docids2prov in prov_mapping.items():
