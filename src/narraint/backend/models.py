@@ -234,6 +234,7 @@ class PredicationRating(Extended, DatabaseTable):
             yield dict(document_id=res.Predication.document_id,
                        document_collection=res.Predication.document_collection,
                        rating=res.PredicationRating.rating,
+                       user_id=res.PredicationRating.user_id,
                        query=res.PredicationRating.query,
                        subject_id=res.Predication.subject_id,
                        subject_type=res.Predication.subject_type,
