@@ -35,7 +35,7 @@ COMMON_QUERIES = [
     '?X(PlantFamily) associated ?Y(Disease)'
 ]
 
-DOCUMENT_COLLECTIONS = ['PubMed']  # , 'PMC']
+DOCUMENT_COLLECTIONS = ['PubMed', 'LitCovid', "LongCovid"]
 
 
 def execute_common_queries():
@@ -47,7 +47,7 @@ def execute_common_queries():
         for collection in DOCUMENT_COLLECTIONS:
 
             results = QueryEngine.process_query_with_expansion(graph_query,
-                                                               document_collection_filter=set(DOCUMENT_COLLECTIONS))
+                                                               document_collection_filter={collection})
             logging.info('Write results to cache...')
             try:
                 cache.add_result_to_cache(collection, graph_query, results)
