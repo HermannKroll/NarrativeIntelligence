@@ -1,7 +1,5 @@
 CREATE INDEX pred_predicate_idx ON PREDICATION(predicate);
-CREATE INDEX pred_predicate_canonicalized ON PREDICATION(predicate_canonicalized);
-
-
+CREATE INDEX pred_relation ON PREDICATION(relation);
 
 CREATE INDEX pred_document_id_idx ON PREDICATION(document_id);
 CREATE INDEX pred_document_col_idx ON PREDICATION(document_collection);
