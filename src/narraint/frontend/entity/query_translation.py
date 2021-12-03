@@ -21,6 +21,12 @@ class QueryTranslation:
         self.variable_type_mappings["dosage form"] = DOSAGE_FORM
         self.variable_type_mappings["dosage forms"] = DOSAGE_FORM
         self.variable_type_mappings["plant familiy"] = PLANT_FAMILY
+        self.variable_type_mappings["plant families"] = PLANT_FAMILY
+        self.variable_type_mappings["plantfamilies"] = PLANT_FAMILY
+        self.variable_type_mappings["plantgenus"] = PLANT_FAMILY
+        self.variable_type_mappings["plantgenera"] = PLANT_FAMILY
+        self.variable_type_mappings["plant genus"] = PLANT_FAMILY
+        self.variable_type_mappings["plant genera"] = PLANT_FAMILY
         self.variable_type_mappings["lab method"] = LAB_METHOD
         self.variable_type_mappings["target"] = GENE
         self.variable_type_mappings["targets"] = GENE
