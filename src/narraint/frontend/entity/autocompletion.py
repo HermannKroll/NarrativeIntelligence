@@ -29,40 +29,46 @@ class AutocompletionUtil:
                                    CHEMBL_CHEMICAL, METHOD, LAB_METHOD}
             self.logger = logger
             self.known_terms = set()
+            self.known_drug_terms = set()
             self.trie = None
+            self.drug_trie = None
             if load_index:
                 self.load_autocompletion_index()
             AutocompletionUtil.__instance = self
+
+    def __build_trie_structure(self, known_terms):
+        self.logger.info(f'Building Trie structure with {len(known_terms)} terms...')
+        alphabet = {c for t in known_terms for c in t}
+        self.logger.info(f'{len(alphabet)} different characters are in the alphabet')
+        start_time = datetime.now()
+        trie = datrie.Trie(alphabet)
+        for idx, t in enumerate(known_terms):
+            trie[t.lower()] = t
+            print_progress_with_eta("computing trie", idx, len(known_terms), start_time)
+        self.logger.info('Finished')
+        return trie
 
     def build_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
         self.known_terms.clear()
         self.trie = None
         self.compute_known_entities_in_db()
-        self.logger.info(f'Building Trie structure with {len(self.known_terms)} terms...')
-        alphabet = {c for t in self.known_terms for c in t}
-        self.logger.info(f'{len(alphabet)} different characters are in the alphabet')
 
         # allow entity types as strings
         self.known_terms.add("target")
         self.known_terms.update([t for t in ENT_TYPES_SUPPORTED_BY_TAGGERS])
 
-        # self.trie = SortedStringTrie(zip(self.known_terms, range(len(self.known_terms))))
-        start_time = datetime.now()
-        self.trie = datrie.Trie(alphabet)
-        for idx, t in enumerate(self.known_terms):
-            self.trie[t.lower()] = t
-            print_progress_with_eta("computing trie", idx, len(self.known_terms), start_time)
-        self.logger.info('Finished')
+        self.trie = self.__build_trie_structure(known_terms=self.known_terms)
+        self.drug_trie = self.__build_trie_structure(known_terms=self.known_drug_terms)
 
         self.logger.info(f'Storing index structure to: {index_path}')
         with open(index_path, 'wb') as f:
-            pickle.dump((self.trie, self.known_terms), f)
+            pickle.dump((self.trie, self.drug_trie), f)
 
     def load_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
         if os.path.isfile(index_path):
             self.logger.info('Loading autocompletion index...')
             with open(index_path, 'rb') as f:
-                self.trie, self.known_terms = pickle.load(f)
+                self.trie, self.drug_trie = pickle.load(f)
         else:
             self.logger.info(f'Autocompletion index does not exists: {index_path}')
 
@@ -73,6 +79,8 @@ class AutocompletionUtil:
     def add_entity_to_dict(self, entity_type, entity_str):
         str_formated = AutocompletionUtil.capitalize_entity(entity_str)
         self.known_terms.add(str_formated)
+        if entity_type == DRUG:
+            self.known_drug_terms.add(str_formated)
 
     def compute_known_entities_in_db(self):
         # Write dosage form terms + synonyms
@@ -111,18 +119,22 @@ class AutocompletionUtil:
 
         return search_str_lower
 
-    def autocomplete(self, start_str: str):
-        return self.trie.keys(start_str.lower())
+    def autocomplete(self, start_str: str, entity_type: str = None):
+        start_str = start_str.lower()
+        if entity_type == DRUG:
+            return self.drug_trie.keys(start_str)
+        else:
+            return self.trie.keys(start_str)
 
-    def find_entities_starting_with(self, start_str: str, retrieve_k=10):
-        hits = self.autocomplete(start_str)
+    def find_entities_starting_with(self, start_str: str, retrieve_k=10, entity_type: str = None):
+        hits = self.autocomplete(start_str, entity_type=entity_type)
         hits.sort()
         formatted_hits = []
         for h in hits[0:retrieve_k]:
             formatted_hits.append(AutocompletionUtil.capitalize_entity(h))
         return formatted_hits
 
-    def compute_autocompletion_list(self, search_str: str):
+    def compute_autocompletion_list(self, search_str: str, entity_type: str = None):
         if len(search_str) < 2:
             return []
         relevant_term = AutocompletionUtil.prepare_search_str(search_str)
@@ -138,7 +150,7 @@ class AutocompletionUtil:
         # search for entity
         else:
             try:
-                completions.extend(self.find_entities_starting_with(relevant_term))
+                completions.extend(self.find_entities_starting_with(relevant_term, entity_type=entity_type))
             except AttributeError:
                 pass
 
