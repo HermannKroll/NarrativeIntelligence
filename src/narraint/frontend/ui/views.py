@@ -26,6 +26,7 @@ from narraint.queryengine.aggregation.substitution import ResultAggregationBySub
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
+from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -106,16 +107,24 @@ def get_document_graph(request):
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
             return JsonResponse(dict(nodes=[], facts=[]))
-    return JsonResponse(dict(nodes=[], facts=[]))
+    else:
+        return HttpResponse(status=500)
 
 
 def get_autocompletion(request):
-    completion_terms = []
     if "term" in request.GET:
         search_string = str(request.GET.get("term", "").strip())
-        completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
+        completion_terms = []
+        if "entity_type" in request.GET:
+            entity_type = str(request.GET.get("entity_type", "").strip())
+            completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string,
+                                                                                          entity_type=entity_type)
+        else:
+            completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
-    return JsonResponse(dict(terms=completion_terms))
+        return JsonResponse(dict(terms=completion_terms))
+    else:
+        return HttpResponse(status=500)
 
 
 # on a better generation of this json: https://stackoverflow.com/questions/44478515/add-size-x-to-json?noredirect=1&lq=1
@@ -147,6 +156,74 @@ def get_check_query(request):
             return JsonResponse(dict(valid=query_trans_string))
     except:
         return JsonResponse(dict(valid="False"))
+
+
+def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: str):
+    cache_hit = False
+    cached_results = None
+    start_time = datetime.now()
+    if DO_CACHING:
+        try:
+            cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
+            cache_hit = True
+        except Exception:
+            logging.error('Cannot load query result from cache...')
+            cached_results = None
+            cache_hit = False
+    if DO_CACHING and cached_results:
+        logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
+        results = cached_results
+    else:
+        # run query
+        results = QueryEngine.process_query_with_expansion(graph_query,
+                                                           document_collection_filter={document_collection})
+        cache_hit = False
+        if DO_CACHING:
+            try:
+                View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
+            except Exception:
+                logging.error('Cannot store query result to cache...')
+    time_needed = datetime.now() - start_time
+    return results, cache_hit, time_needed
+
+
+@gzip_page
+def get_query_sub_count(request):
+    if "query" in request.GET and "data_source" in request.GET:
+        query = str(request.GET["query"]).strip()
+        document_collection = str(request.GET["data_source"]).strip()
+        if document_collection not in ["LitCovid", "LongCovid", "PubMed"]:
+            return JsonResponse(status=500,
+                                data=dict(answer="data source not valid", reason="Data sources supported: PubMed,"
+                                                                                 " LitCovid and LongCovid"))
+
+        graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+        if not graph_query or len(graph_query.fact_patterns) == 0:
+            return JsonResponse(status=500, data=dict(answer="query not valid", reason=query_trans_string))
+
+        if QueryTranslation.count_variables_in_query(graph_query) != 1:
+            return JsonResponse(status=500, data=dict(answer="query must have one variable"))
+
+        # compute the query
+        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+
+        # next get the aggregation by var names
+        substitution_aggregation = ResultAggregationBySubstitution()
+        results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
+
+        # generate a list of [(ent_id, ent_name, doc_count), ...]
+        sub_count_list = list()
+        # go through all aggregated results
+        for aggregate in results_ranked.results:
+            var2sub = aggregate.var2substitution
+            # get the first substitution
+            var_name, sub = next(iter(var2sub.items()))
+            sub_count_list.append((sub.entity_id, sub.entity_name, aggregate.get_result_size()))
+
+        # send results back
+        return JsonResponse(dict(sub_count_list=str(sub_count_list)))
+    else:
+        return HttpResponse(status=500)
 
 
 # invokes Django to compress the results
@@ -209,31 +286,8 @@ def get_query(request):
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
             document_collection = data_source
-            start_time = datetime.now()
-            cached_results = None
-            cache_hit = False
-            if DO_CACHING:
-                try:
-                    cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
-                    cache_hit = True
-                except Exception:
-                    logging.error('Cannot load query result from cache...')
-                    cached_results = None
-                    cache_hit = False
-            if DO_CACHING and cached_results:
-                logging.info('Cache hit - {} results loaded'.format(len(cached_results)))
-                results = cached_results
-            else:
-                # run query
-                results = QueryEngine.process_query_with_expansion(graph_query,
-                                                                   document_collection_filter={document_collection})
-                cache_hit = False
-                if DO_CACHING:
-                    try:
-                        View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
-                    except Exception:
-                        logging.error('Cannot store query result to cache...')
-            time_needed = datetime.now() - start_time
+
+            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
             View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
@@ -261,44 +315,51 @@ def get_query(request):
 
 
 def get_provenance(request):
-    try:
-        start = datetime.now()
-        fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
-        result = QueryEngine.query_provenance_information(fp2prov_ids)
-
-        time_needed = datetime.now() - start
-        predication_ids = set()
-        for _, pred_ids in fp2prov_ids.items():
-            predication_ids.update(pred_ids)
+    if "prov" in request.GET:
         try:
-            View.instance().query_logger.write_provenance_log(time_needed, predication_ids)
-        except IOError:
-            logging.debug('Could not write provenance log file')
-        return JsonResponse(dict(result=result.to_dict()))
-    except:
-        traceback.print_exc(file=sys.stdout)
+            start = datetime.now()
+            fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
+            result = QueryEngine.query_provenance_information(fp2prov_ids)
+
+            time_needed = datetime.now() - start
+            predication_ids = set()
+            for _, pred_ids in fp2prov_ids.items():
+                predication_ids.update(pred_ids)
+            try:
+                View.instance().query_logger.write_provenance_log(time_needed, predication_ids)
+            except IOError:
+                logging.debug('Could not write provenance log file')
+            return JsonResponse(dict(result=result.to_dict()))
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    else:
         return HttpResponse(status=500)
 
 
 def get_feedback(request):
-    try:
-        predication_ids = str(request.GET.get("predicationids", "").strip())
-        query = str(request.GET.get("query", "").strip())
-        rating = str(request.GET.get("rating", "").strip())
-        userid = str(request.GET.get("userid", "").strip())
-
-        session = SessionExtended.get()
-        for pred_id in predication_ids.split(','):
-            PredicationRating.insert_user_rating(session, userid, query, int(pred_id), rating)
-
-        logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
+    if "predicationids" in request.GET and "query" in request.GET and "rating" in request.GET and\
+            "userid" in request.GET:
         try:
-            View.instance().query_logger.write_rating(userid, predication_ids)
-        except IOError:
-            logging.debug('Could not write rating log file')
-        return HttpResponse(status=200)
-    except:
-        traceback.print_exc(file=sys.stdout)
+            predication_ids = str(request.GET.get("predicationids", "").strip())
+            query = str(request.GET.get("query", "").strip())
+            rating = str(request.GET.get("rating", "").strip())
+            userid = str(request.GET.get("userid", "").strip())
+
+            session = SessionExtended.get()
+            for pred_id in predication_ids.split(','):
+                PredicationRating.insert_user_rating(session, userid, query, int(pred_id), rating)
+
+            logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
+            try:
+                View.instance().query_logger.write_rating(userid, predication_ids)
+            except IOError:
+                logging.debug('Could not write rating log file')
+            return HttpResponse(status=200)
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    else:
         return HttpResponse(status=500)
 
 
