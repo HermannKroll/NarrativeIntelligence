@@ -52,7 +52,6 @@ class DocumentMetadata(Extended, DatabaseTable):
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
     document_id_original = Column(String, nullable=True)
-    title = Column(String, nullable=True)
     authors = Column(String, nullable=True)
     journals = Column(String, nullable=True)
     publication_year = Column(Integer, nullable=True)
