@@ -1,9 +1,10 @@
+import argparse
 import logging
 from collections import defaultdict
 from datetime import datetime
 from io import StringIO
 
-from sqlalchemy import update, or_, delete
+from sqlalchemy import update, or_, delete, and_
 from sqlalchemy.cimmutabledict import immutabledict
 
 from narraint.backend.database import SessionExtended
@@ -17,7 +18,7 @@ from narrant.preprocessing.enttypes import DOSAGE_FORM, LAB_METHOD, METHOD
 from narrant.progress import print_progress_with_eta
 
 BULK_INSERT_PRED_TO_DELETE_AFTER_K = 1000000
-BULK_QUERY_CURSOR_COUNT = 100000
+BULK_QUERY_CURSOR_COUNT = 500000
 
 
 def clean_predication_to_delete_table(session):
@@ -166,7 +167,7 @@ def clean_unreferenced_sentences():
     clean_predication_to_delete_table(session)
 
 
-def dosage_form_rule():
+def dosage_form_rule(document_collection=None):
     """
     Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
     :return: None
@@ -174,49 +175,74 @@ def dosage_form_rule():
     logging.info('Applying DosageForm rule...')
     session = SessionExtended.get()
 
-    logging.info(
-        'Updating predicate to "{}" for (DosageForm, *) pairs'.format(DOSAGE_FORM_PREDICATE))
-    stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
-                                           Predication.object_type == DOSAGE_FORM)). \
-        values(relation=DOSAGE_FORM_PREDICATE)
+    if document_collection:
+        logging.info(
+            f'{document_collection}: updating predicate to "{DOSAGE_FORM_PREDICATE}" for (DosageForm, *) pairs')
+        stmt_1 = update(Predication).where(and_(Predication.document_collection == document_collection,
+                                                or_(Predication.subject_type == DOSAGE_FORM,
+                                                    Predication.object_type == DOSAGE_FORM))). \
+            values(relation=DOSAGE_FORM_PREDICATE)
+    else:
+        logging.info('Updating predicate to "{}" for (DosageForm, *) pairs'.format(DOSAGE_FORM_PREDICATE))
+        stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
+                                               Predication.object_type == DOSAGE_FORM)). \
+            values(relation=DOSAGE_FORM_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
 
-def method_rule():
+def method_rule(document_collection=None):
     """
     Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
     :return: None
     """
-    logging.info('Applying DosageForm rule...')
+    logging.info('Applying Method rule...')
     session = SessionExtended.get()
 
-    logging.info('Updating predicate to "{}" for (Method, *) pairs'.format(METHOD_PREDICATE))
-    stmt_1 = update(Predication).where(or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
-                                           Predication.object_type.in_([METHOD, LAB_METHOD]))). \
-        values(relation=METHOD_PREDICATE)
+    if document_collection:
+        logging.info(f'{document_collection}: updating predicate to "{METHOD_PREDICATE}" for (Method, *) pairs')
+        stmt_1 = update(Predication).where(and_(Predication.document_collection == document_collection,
+                                                or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
+                                                    Predication.object_type.in_([METHOD, LAB_METHOD])))). \
+            values(relation=METHOD_PREDICATE)
+    else:
+        logging.info(f'Updating predicate to "{METHOD_PREDICATE}" for (Method, *) pairs')
+        stmt_1 = update(Predication).where(or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
+                                               Predication.object_type.in_([METHOD, LAB_METHOD]))). \
+            values(relation=METHOD_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
 
-def check_type_constraints(reorder_tuples=True):
+def check_type_constraints(reorder_tuples=True, document_collection: str = None):
     """
     Checks the type constraints
     If subject and object could be swapped to meet the constraint - they will be swapped
     Otherwise the extraction will be mapped to associate
     :return: None
     """
-
     preds_to_associate = set()
     preds_to_reorder = set()
     session = SessionExtended.get()
 
-    logging.info('Counting the number of predications...')
-    pred_count = session.query(Predication).count()
+    if document_collection:
+        logging.info(f'{document_collection}: counting the number of predications...')
+
+        pred_count = session.query(Predication).filter(and_(Predication.document_collection == document_collection,
+                                                            Predication.relation != None)).count()
+    else:
+        logging.info('Counting the number of predications...')
+        pred_count = session.query(Predication).filter(Predication.relation != None).count()
     logging.info(f'{pred_count} predications were found')
-    logging.info('Querying predications...')
-    pred_query = session.query(Predication).filter(Predication.relation != None) \
-        .yield_per(BULK_QUERY_CURSOR_COUNT)
+    if document_collection:
+        logging.info(f'{document_collection}: Querying predications...')
+        pred_query = session.query(Predication).filter(and_(Predication.document_collection == document_collection,
+                                                            Predication.relation != None)) \
+            .yield_per(BULK_QUERY_CURSOR_COUNT)
+    else:
+        logging.info('Querying predications...')
+        pred_query = session.query(Predication).filter(Predication.relation != None) \
+            .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
     for idx, pred in enumerate(pred_query):
         print_progress_with_eta("checking type constraints", idx, pred_count, start_time)
@@ -248,8 +274,8 @@ def check_type_constraints(reorder_tuples=True):
     if reorder_tuples:
         logging.info(f'Reordering {len(preds_to_reorder)} predication subject and objects...')
         insert_predication_ids_to_delete(preds_to_reorder)
-        subquery = session.query(PredicationToDelete.predication_id).subquery()
-        pred_query = session.query(Predication).filter(Predication.id.in_(subquery)) \
+        pred_query = session.query(Predication).join(PredicationToDelete,
+                                                     Predication.id == PredicationToDelete.predication_id)\
             .yield_per(BULK_QUERY_CURSOR_COUNT)
         predication_values = []
         start_time = datetime.now()
@@ -284,25 +310,47 @@ def check_type_constraints(reorder_tuples=True):
         logging.info('Finished')
 
 
-def update_none_relation_to_associate():
-    logging.info('Updating every relation NULL to associated...')
+def update_none_relation_to_associate(document_collection: str = None):
     session = SessionExtended.get()
-    upt = update(Predication).where(Predication.relation.is_(None)).values(relation=ASSOCIATED_PREDICATE)
+    if document_collection:
+        logging.info(f'{document_collection}: updating every relation NULL to associated...')
+        upt = update(Predication).where(and_(Predication.document_collection == document_collection,
+                                             Predication.relation.is_(None))).values(relation=ASSOCIATED_PREDICATE)
+    else:
+        logging.info('Updating every relation NULL to associated...')
+        upt = update(Predication).where(Predication.relation.is_(None)).values(relation=ASSOCIATED_PREDICATE)
     session.execute(upt)
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--collection", default=None, help="The document collection of interest")
+    args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
+    document_collection = args.collection
+    if document_collection:
+        logging.info('=' * 60)
+        logging.info(f'Working only in document collection: {document_collection}')
+        logging.info('=' * 60)
+
+    logging.info('=' * 60)
     logging.info('Applying pharmaceutical rules...')
-    dosage_form_rule()
-    method_rule()
+    logging.info('=' * 60)
+    dosage_form_rule(document_collection=document_collection)
+    method_rule(document_collection=document_collection)
+    logging.info('=' * 60)
     session = SessionExtended.get()
     clean_predication_to_delete_table(session)
-    check_type_constraints()
-    update_none_relation_to_associate()
+    logging.info('=' * 60)
+    check_type_constraints(document_collection=document_collection)
+    logging.info('=' * 60)
+    update_none_relation_to_associate(document_collection=document_collection)
+    logging.info('=' * 60)
+
+    #
     #  clean_redundant_symmetric_predicates()
     #   clean_unreferenced_sentences()
     logging.info('Finished...')
