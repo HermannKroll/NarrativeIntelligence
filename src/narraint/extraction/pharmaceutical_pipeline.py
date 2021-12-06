@@ -65,13 +65,9 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
         os.mkdir(ie_input_dir)
 
     logging.info('Process will work in: {}'.format(working_dir))
-    if not ids_to_process:
-        # export them with their tags
-        export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
-               content=True)
-    else:
-        # export the whole collection
-        export(document_export_file, export_tags=True, collection=document_collection, content=True)
+    # export them with their tags
+    export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
+           content=True)
     time_exported = datetime.now()
 
     logging.info('Counting documents...')
@@ -162,7 +158,7 @@ def main():
         relation_vocab.load_from_json(args.relation_vocab)
     else:
         relation_vocab = None
-    document_ids = None
+    document_ids = set()
     if args.idfile:
         logging.info('Reading id file: {}'.format(args.idfile))
         with open(args.idfile, 'r') as f:
@@ -171,18 +167,18 @@ def main():
     else:
         logging.info(f'No id file given - query all known ids for document collection: {args.collection}')
         session = SessionExtended.get()
-        document_ids = set()
         for r in session.query(Document.id).filter(Document.collection == args.collection).distinct():
             document_ids.add(r[0])
         logging.info(f'{len(document_ids)} were found in db')
     document_ids_to_process = retrieve_document_ids_to_process(args.collection, args.extraction_type,
                                                                document_id_filter=document_ids)
-    num_of_chunks = int(len(document_ids_to_process) / args.batch_size)
+    num_of_chunks = int(len(document_ids_to_process) / args.batch_size) + 1
     logging.info(f'Splitting task into {num_of_chunks} chunks...')
     for idx, batch_ids in enumerate(chunks(list(document_ids_to_process), args.batch_size)):
         logging.info('=' * 60)
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
+        logging.info(batch_ids)
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
                                           workers=args.workers, relation_vocab=relation_vocab,
                                           entity_filter=args.entity_filter)
