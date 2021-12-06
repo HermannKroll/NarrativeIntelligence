@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import delete, and_
+from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document
@@ -40,7 +40,9 @@ def compute_document_metadata_service_table():
         title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col)
         doc2titles = {}
         for r in title_query:
-            doc2titles[int(r[0])] = r[1]
+            doc_id = int(r[0])
+            if doc_id in relevant_doc_ids:
+                doc2titles[doc_id] = r[1]
         logging.info(f'{len(doc2titles)} document titles were found')
 
         logging.info(f'Querying metadata for collection: {d_col}')
@@ -48,8 +50,10 @@ def compute_document_metadata_service_table():
 
         doc2metadata = {}
         for r in meta_query:
-            doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year, r.publication_month,
-                                           r.document_id_original, r.publication_doi)
+            doc_id = int(r[0])
+            if doc_id in relevant_doc_ids:
+                doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year, r.publication_month,
+                                               r.document_id_original, r.publication_doi)
         logging.info(f'{len(doc2metadata)} document metadata were found')
 
         logging.info('Preparing insert....')
@@ -63,7 +67,7 @@ def compute_document_metadata_service_table():
                 # test how many authors are there
                 authors_comps = authors.split(' | ')
                 if len(authors_comps) > 5:
-                    authors = ' | '.join(authors_comps[:5]) + f' | {len(authors_comps)-5}+'
+                    authors = ' | '.join(authors_comps[:5]) + f' | {len(authors_comps) - 5}+'
 
             else:
                 # skip documents that does not have this information avialbe
