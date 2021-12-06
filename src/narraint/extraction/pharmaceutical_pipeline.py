@@ -5,9 +5,9 @@ import os
 import shutil
 import tempfile
 from datetime import datetime
-from spacy.lang.en import English
 from typing import Set
 
+from spacy.lang.en import English
 
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.config import NLP_CONFIG
@@ -16,14 +16,15 @@ from kgextractiontoolbox.entitylinking.export_annotations import export
 from kgextractiontoolbox.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from kgextractiontoolbox.extraction.loading.load_extractions import clean_and_load_predications_into_db
 from kgextractiontoolbox.extraction.loading.load_openie_extractions import OpenIEEntityFilterMode
-from kgextractiontoolbox.extraction.loading.load_pathie_extractions import load_pathie_extractions, \
-    read_pathie_extractions_tsv
+from kgextractiontoolbox.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from kgextractiontoolbox.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
 from kgextractiontoolbox.extraction.pipeline import mark_document_as_processed_by_ie, retrieve_document_ids_to_process
 from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION, OPENIE51_EXTRACTION
 from kgextractiontoolbox.util.helpers import chunks
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import Document
 from narraint.extraction.loading.clean_load_genes import clean_and_translate_gene_ids
 
 DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
@@ -64,9 +65,13 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
         os.mkdir(ie_input_dir)
 
     logging.info('Process will work in: {}'.format(working_dir))
-    # export them with their tags
-    export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
-           content=True)
+    if not ids_to_process:
+        # export them with their tags
+        export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
+               content=True)
+    else:
+        # export the whole collection
+        export(document_export_file, export_tags=True, collection=document_collection, content=True)
     time_exported = datetime.now()
 
     logging.info('Counting documents...')
@@ -135,7 +140,8 @@ def main():
     parser.add_argument("-i", "--idfile", help="Document ID file (documents must be in database)")
     parser.add_argument("-et", "--extraction_type", required=True, help="the extraction method",
                         choices=list(
-                            [OPENIE_EXTRACTION, OPENIE51_EXTRACTION, OPENIE6_EXTRACTION, PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION]))
+                            [OPENIE_EXTRACTION, OPENIE51_EXTRACTION, OPENIE6_EXTRACTION, PATHIE_EXTRACTION,
+                             PATHIE_STANZA_EXTRACTION]))
     parser.add_argument("-c", "--collection", required=True, help="Name of the given document collection")
     parser.add_argument("--config", help="OpenIE / PathIE Configuration file", default=NLP_CONFIG)
     parser.add_argument("-w", "--workers", help="number of parallel workers", default=1, type=int)
@@ -162,6 +168,13 @@ def main():
         with open(args.idfile, 'r') as f:
             document_ids = set([int(line.strip()) for line in f])
         logging.info(f'{len(document_ids)} documents in id file')
+    else:
+        logging.info(f'No id file given - query all known ids for document collection: {args.collection}')
+        session = SessionExtended.get()
+        document_ids = set()
+        for r in session.query(Document.id).filter(Document.collection == args.collection).distinct():
+            document_ids.add(r[0])
+        logging.info(f'{len(document_ids)} were found in db')
     document_ids_to_process = retrieve_document_ids_to_process(args.collection, args.extraction_type,
                                                                document_id_filter=document_ids)
     num_of_chunks = int(len(document_ids_to_process) / args.batch_size)
