@@ -28,21 +28,23 @@ def compute_document_metadata_service_table():
 
     logging.info(f'Found {len(document_collections)} document collections...')
     for d_col in document_collections:
-        sub_query = session.query(Predication.document_id) \
+        logging.info(f'Querying relevant document ids from Predication table for collection: {d_col}')
+        pred_query = session.query(Predication.document_id) \
             .filter(Predication.relation.isnot(None)) \
-            .filter(Predication.document_collection == d_col)
+            .filter(Predication.document_collection == d_col).distinct()
+        relevant_doc_ids = set()
+        for row in pred_query:
+            relevant_doc_ids.add(row[0])
 
         logging.info(f'Querying titles for collection: {d_col}')
-        title_query = session.query(Document.id, Document.title).filter(and_(Document.collection == d_col,
-                                                                             Document.id.in_(sub_query)))
+        title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col)
         doc2titles = {}
         for r in title_query:
             doc2titles[int(r[0])] = r[1]
         logging.info(f'{len(doc2titles)} document titles were found')
 
         logging.info(f'Querying metadata for collection: {d_col}')
-        meta_query = session.query(DocumentMetadata).filter(and_(DocumentMetadata.document_id.in_(sub_query),
-                                                                 DocumentMetadata.document_collection == d_col))
+        meta_query = session.query(DocumentMetadata).filter(DocumentMetadata.document_collection == d_col)
 
         doc2metadata = {}
         for r in meta_query:
@@ -53,14 +55,15 @@ def compute_document_metadata_service_table():
         logging.info('Preparing insert....')
         # prepare insert
         insert_values = []
-        for d_id, title in doc2titles.items():
+        for d_id in relevant_doc_ids:
+            title = doc2titles[d_id]
             if d_id in doc2metadata:
                 authors, journals, publication_year, publication_month, document_id_original, doi = doc2metadata[d_id]
 
                 # test how many authors are there
                 authors_comps = authors.split(' | ')
                 if len(authors_comps) > 5:
-                    authors = ' | '.join(authors_comps[:5])
+                    authors = ' | '.join(authors_comps[:5]) + f' | {len(authors_comps)-5}+'
 
             else:
                 # skip documents that does not have this information avialbe
@@ -70,10 +73,10 @@ def compute_document_metadata_service_table():
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
                                       authors=authors, journals=journals, publication_year=publication_year,
                                       publication_month=publication_month, document_id_original=document_id_original,
-                                      publication_doi=document_id_original))
+                                      publication_doi=doi))
 
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
-        DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=False)
+        DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=True)
         logging.info('Finished')
 
 
