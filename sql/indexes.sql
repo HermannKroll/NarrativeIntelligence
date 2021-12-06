@@ -14,6 +14,12 @@ CREATE INDEX trgm_idx_predication_subject_id ON Predication USING gin (subject_i
 CREATE INDEX trgm_idx_predication_object_id ON Predication USING gin (object_id gin_trgm_ops);
 
 
+CREATE INDEX document_id_idx ON Document(id);
+CREATE INDEX document_collection_idx ON Document(collection);
+
+CREATE INDEX document_metadata_id_idx ON Document_Metadata(document_id);
+CREATE INDEX document_metadata_collection_idx ON Document_Metadata(document_collection);
+
 CREATE INDEX tag_document_id_idx ON TAG(document_id);
 CREATE INDEX tag_document_collection_idx ON TAG(document_collection);
 
