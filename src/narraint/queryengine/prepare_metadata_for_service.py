@@ -46,7 +46,8 @@ def compute_document_metadata_service_table():
 
         doc2metadata = {}
         for r in meta_query:
-            doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year)
+            doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year, r.publication_month,
+                                           r.document_id_original, r.publication_doi)
         logging.info(f'{len(doc2metadata)} document metadata were found')
 
         logging.info('Preparing insert....')
@@ -54,15 +55,16 @@ def compute_document_metadata_service_table():
         insert_values = []
         for d_id, title in doc2titles.items():
             if d_id in doc2metadata:
-                authors, journals, publication_year = doc2metadata[d_id]
+                authors, journals, publication_year, publication_month, document_id_original, doi = doc2metadata[d_id]
             else:
                 # skip documents that does not have this information avialbe
                 continue
-            if publication_year == 'None' or not publication_year:
+            if publication_year == 0 or not publication_year:
                 continue
-
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
-                                      authors=authors, journals=journals, publication_year=publication_year))
+                                      authors=authors, journals=journals, publication_year=publication_year,
+                                      publication_month=publication_month, document_id_original=document_id_original,
+                                      publication_doi=document_id_original))
 
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
         DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=False)
