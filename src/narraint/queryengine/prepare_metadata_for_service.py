@@ -56,6 +56,12 @@ def compute_document_metadata_service_table():
         for d_id, title in doc2titles.items():
             if d_id in doc2metadata:
                 authors, journals, publication_year, publication_month, document_id_original, doi = doc2metadata[d_id]
+
+                # test how many authors are there
+                authors_comps = authors.split(' | ')
+                if len(authors_comps) > 5:
+                    authors = ' | '.join(authors_comps[:5])
+
             else:
                 # skip documents that does not have this information avialbe
                 continue
