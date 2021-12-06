@@ -11,6 +11,21 @@ from narraint.backend.models import DocumentMetadata
 from narrant.backend.models import Document
 from narrant.progress import print_progress_with_eta
 
+month_dict = {
+    "1": "1", "01": "1", "Jan": "1", "January": "1",
+    "2": "2", "02": "2", "Feb": "2", "February": "2",
+    "3": "3", "03": "3", "Mar": "3", "March": "3",
+    "4": "4", "04": "4", "Apr": "4", "April": "4",
+    "5": "5", "05": "5", "May": "5",
+    "6": "6", "06": "6", "Jun": "6", "June": "6",
+    "7": "7", "07": "7", "Jul": "7", "July": "7",
+    "8": "8", "08": "8", "Aug": "8", "August": "8",
+    "9": "9", "09": "9", "Sep": "9", "September": "9",
+    "10": "10", "Oct": "10", "October": "10",
+    "11": "11", "Nov": "11", "November": "11",
+    "12": "12", "Dec": "12", "December": "12"
+}
+
 
 def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int], document_collection: str) \
         -> (List[Dict], Set[int]):
@@ -49,13 +64,10 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
                 continue
             authors_list.append(f'{lastname[0].text}, {forename[0].text[0]}')
 
-        if len(authors_list) < 5:
-            authors = ' | '.join(authors_list)
-        else:
-            authors = ' | '.join(authors_list[0:5]) + ' | et al.'
-
+        authors = ' | '.join(authors_list)
         journal_list = []
         publication_year = None
+        publication_month = None
         for journal in article.findall('./MedlineCitation/Article/Journal'):
             journal_elem_title = journal.findall('./Title')
             journal_elem_year = journal.findall('./JournalIssue/PubDate/Year')
@@ -103,12 +115,24 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
 
             if journal_year and (not publication_year or publication_year < journal_year):
                 publication_year = int(journal_year)
-
+            if journal_month and journal_month.isdigit():
+                publication_month = int(journal_month)
+            elif journal_month and journal_month in month_dict:
+                publication_month = int(month_dict[journal_month])
+            else:
+                publication_month = None
         journals = ' | '.join(journal_list).replace('\\', ' ')
 
+        if not publication_year:
+            publication_year = 0
+        if not publication_month:
+            publication_month = 0
         if authors or journals or publication_year:
+            doi_link = f'https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM{pmid}'
             metadata_to_insert.append(dict(document_id=pmid, document_collection=document_collection,
-                                           authors=authors, journals=journals, publication_year=publication_year))
+                                           authors=authors, journals=journals, publication_year=publication_year,
+                                           publication_month=publication_month,
+                                           publication_doi=doi_link))
     return metadata_to_insert, pmids_processed
 
 

@@ -51,9 +51,13 @@ class DocumentMetadata(Extended, DatabaseTable):
 
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
+    document_id_original = Column(String, nullable=True)
+    title = Column(String, nullable=True)
     authors = Column(String, nullable=True)
     journals = Column(String, nullable=True)
-    publication_year = Column(String, nullable=True)
+    publication_year = Column(Integer, nullable=True)
+    publication_month = Column(Integer, nullable=True)
+    publication_doi = Column(String, nullable=True)
 
 
 class DocumentMetadataService(Extended, DatabaseTable):
@@ -65,10 +69,13 @@ class DocumentMetadataService(Extended, DatabaseTable):
 
     document_id = Column(BigInteger, nullable=False)
     document_collection = Column(String, nullable=False)
+    document_id_original = Column(String, nullable=True)
     title = Column(String, nullable=True)
     authors = Column(String, nullable=True)
     journals = Column(String, nullable=True)
-    publication_year = Column(String, nullable=True)
+    publication_year = Column(Integer, nullable=True)
+    publication_month = Column(Integer, nullable=True)
+    publication_doi = Column(String, nullable=True)
 
 
 class Predication(Extended, DatabaseTable):
@@ -219,8 +226,8 @@ class PredicationRating(Extended, DatabaseTable):
 
     @staticmethod
     def query_predication_ratings(session):
-        query = session.query(PredicationRating, Predication, Sentence)\
-            .filter(PredicationRating.predication_id == Predication.id)\
+        query = session.query(PredicationRating, Predication, Sentence) \
+            .filter(PredicationRating.predication_id == Predication.id) \
             .filter(Sentence.id == Predication.sentence_id)
         for res in query:
             yield res
