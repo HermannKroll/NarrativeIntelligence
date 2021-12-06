@@ -49,24 +49,24 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/2021_11_23_updates.ids"
 #python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # Do the statement extraction via our Pipeline
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+# python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
-#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c PubMed --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Apply the rules
-#python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
+#python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c PubMed
 
 # Load the Metadata
 # Download the latest updates via wget -r ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles
 # Unzip everything
-#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
 # Load Baseline
-#python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py /hdd2/datasets/pubmed_medline/2020_12/ -c PubMed
 
 
 # Finally compute the new metadata service table2
-#python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
 # Compute new query table
 #python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
