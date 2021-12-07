@@ -68,10 +68,12 @@ $(document).ready(function () {
     console.log(queryString);
     const urlParams = new URLSearchParams(queryString);
     let document_id = urlParams.get('id');
+    let data_source = urlParams.get("data_source");
     let request = $.ajax({
         url: document_graph_url,
         data: {
-            document: document_id
+            document: document_id,
+            data_source: data_source
         }
     });
 

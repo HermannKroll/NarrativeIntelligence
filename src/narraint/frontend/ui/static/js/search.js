@@ -510,6 +510,8 @@ function initFromURLQueryParams() {
             document.getElementById("radio_long_covid").checked = true;
         } else if (data_source === "LitCovid") {
             document.getElementById("radio_litcovid").checked = true;
+        } else if (data_source === "ZBMed"){
+            document.getElementById("radio_zbmed").checked = true;
         } else {
             document.getElementById("radio_pubmed").checked = true;
         }
@@ -894,23 +896,36 @@ let uniqueProvenanceID = 1;
 
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
     let document_id = queryResult["docid"];
+    let art_doc_id = document_id;
     let title = queryResult["title"];
     let authors = queryResult["authors"];
     let journals = queryResult["journals"];
     let year = queryResult["year"];
-    let prov_ids = queryResult["prov"];
+    let month = queryResult["month"];
+    let collection = queryResult["collection"];
+    if (month === 0){
+        month = "";
+    } else {
+        month = month + "/";
+    }
+    // use the original document id if available
+    if (queryResult["org_document_id"] !== null && queryResult["org_document_id"].length > 0){
+        document_id = queryResult["org_document_id"];
+    }
 
+    let prov_ids = queryResult["prov"];
+    let doi = queryResult["doi"];
 
     let divDoc = $('<div class="card"><div class="card-body">' +
-        '<a class="btn-link" href="https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM' + document_id + '" target="_blank">' +
+        '<a class="btn-link" href="'+ doi + '" target="_blank">' +
         '<img src="' + pubpharm_image_url + '" height="25px">' +
         document_id + '</a>' +
 
-        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + document_id + '" target="_blank">' +
+        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source='+collection+'" target="_blank">' +
         'Document Graph</a>' +
 
         '<br><b>' + title + '</b><br>' +
-        "in: " + journals + " | " + year + '<br>' +
+        "in: " + journals + " | " + month + year + '<br>' +
         "by: " + authors + '<br>' +
         '</div></div><br>');
 
