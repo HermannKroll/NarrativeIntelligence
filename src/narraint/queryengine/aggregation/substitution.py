@@ -63,7 +63,7 @@ class ResultAggregationBySubstitution(QueryResultAggregationStrategy):
             return query_result, is_aggregate
 
     def sort_docs_by_year(self, docs, year_sort_desc):
-        return docs.results.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=year_sort_desc)
+        return docs.results.sort(key=lambda x: (x.publication_year, x.publication_month), reverse=year_sort_desc)
 
     def _add_query_result(self, result: QueryDocumentResult):
         if not self.var_names:
