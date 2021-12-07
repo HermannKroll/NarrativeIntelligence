@@ -66,13 +66,14 @@ class View:
 
 
 def get_document_graph(request):
-    if "document" in request.GET:
+    if "document" in request.GET and "data_source" in request.GET:
         document_id = str(request.GET.get("document", "").strip())
+        document_collection = str(request.GET.get("data_source", "").strip())
         try:
             start_time = datetime.now()
             document_id = int(document_id)
             session = SessionExtended.get()
-            query = session.query(Predication).filter(Predication.document_collection == 'PubMed')
+            query = session.query(Predication).filter(Predication.document_collection == document_collection)
             query = query.filter(Predication.document_id == document_id)
             query = query.filter(Predication.relation.isnot(None))
             facts = set()
@@ -266,7 +267,7 @@ def get_query(request):
 
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
-        if data_source not in ["LitCovid", "LongCovid", "PubMed"]:
+        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
