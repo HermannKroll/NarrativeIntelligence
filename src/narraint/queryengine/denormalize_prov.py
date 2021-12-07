@@ -18,6 +18,7 @@ def denormalize_predication_table():
     logging.info('Deleting old denormalized predication...')
     stmt = delete(PredicationDenorm)
     session.execute(stmt)
+    session.commit()
 
     logging.info('Counting the number of predications...')
     pred_count = session.query(Predication).filter(Predication.relation != None).count()
