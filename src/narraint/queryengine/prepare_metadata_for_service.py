@@ -5,6 +5,8 @@ from sqlalchemy import delete
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document
 
+BULK_QUERY_CURSOR_COUNT = 500000
+
 
 def compute_document_metadata_service_table():
     """
@@ -18,6 +20,7 @@ def compute_document_metadata_service_table():
     logging.info('Deleting old service metadata...')
     stmt = delete(DocumentMetadataService)
     session.execute(stmt)
+    session.commit()
 
     logging.info('Querying document collections the predication table...')
     q_p_ids = session.query(Predication.document_collection.distinct()) \
@@ -37,7 +40,8 @@ def compute_document_metadata_service_table():
             relevant_doc_ids.add(row[0])
 
         logging.info(f'Querying titles for collection: {d_col}')
-        title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col)
+        title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col).yield_per(
+            BULK_QUERY_CURSOR_COUNT)
         doc2titles = {}
         for r in title_query:
             doc_id = int(r[0])
@@ -46,12 +50,12 @@ def compute_document_metadata_service_table():
         logging.info(f'{len(doc2titles)} document titles were found')
 
         logging.info(f'Querying metadata for collection: {d_col}')
-        meta_query = session.query(DocumentMetadata).filter(DocumentMetadata.document_collection == d_col)
+        meta_query = session.query(DocumentMetadata).filter(DocumentMetadata.document_collection == d_col).yield_per(
+            BULK_QUERY_CURSOR_COUNT)
 
         doc2metadata = {}
         for r in meta_query:
-            doc_id = int(r[0])
-            if doc_id in relevant_doc_ids:
+            if r.document_id in relevant_doc_ids:
                 doc2metadata[r.document_id] = (r.authors, r.journals, r.publication_year, r.publication_month,
                                                r.document_id_original, r.publication_doi)
         logging.info(f'{len(doc2metadata)} document metadata were found')
