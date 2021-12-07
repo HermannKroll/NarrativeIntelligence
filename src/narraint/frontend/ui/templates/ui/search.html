@@ -113,7 +113,7 @@
                         <label for="radio_long_covid">Long Covid (<a
                                 href="https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1">Help</a>)</label>
                     </div>
-                       <div class="inner-div-left-mid">
+                    <div class="inner-div-left-mid">
                         <input type="radio" id="radio_zbmed" name="data_source" value="ZBMed"
                                onclick="refreshSearch()">
                         <label for="radio_zbmed">Covid 19 Pre-Prints via ZBMed (<a
@@ -197,6 +197,28 @@
                 <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
                      data-parent="#accordionExample">
                     <div class="card-body">
+                        <div class="alert alert-info" role="alert">
+                            Covid 19
+                        </div>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Drug treats Covid19')">Drug treats Covid19
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;')">
+                            Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Disease associated Covid19')">Disease associated Covid19
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Covid19 associated Target')">Covid19 associated Target
+                        </button>
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Covid19 associated Human AND Disease associated Human')">
+                            Covid19 associated Human AND Disease associated Human
+                        </button>
+
+
                         <div class="alert alert-info" role="alert">
                             Methods
                         </div>

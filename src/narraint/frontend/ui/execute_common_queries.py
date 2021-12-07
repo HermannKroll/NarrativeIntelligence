@@ -32,10 +32,18 @@ COMMON_QUERIES = [
     '?X(Drug) administered "Nebulizers and Vaporizers"',
     'Vinca associated ?Y(Disease)',
     'Digitalis associated ?Y(Disease)',
-    '?X(PlantFamily) associated ?Y(Disease)'
+    '?X(PlantFamily) associated ?Y(Disease)',
+    'Drug treats Covid19',
+    'Covid19 method Case Base Studies',
+    'Covid 19 method LabMethod',
+    'Disease associated Covid19',
+    'Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS',
+    'Covid19 associated Human AND Disease associated Human',
+    'Covid 19 associated Target',
+    'Drug treats Disease'
 ]
 
-DOCUMENT_COLLECTIONS = ['PubMed', 'LitCovid', "LongCovid"]
+DOCUMENT_COLLECTIONS = ['PubMed', 'LitCovid', "LongCovid", "ZBMed"]
 
 
 def execute_common_queries():
