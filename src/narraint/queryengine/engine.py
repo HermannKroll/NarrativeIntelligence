@@ -7,6 +7,7 @@ from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
+from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
@@ -69,11 +70,13 @@ class QueryEngine:
             .filter(DocumentMetadataService.document_id.in_(doc_ids))
         doc2metadata = {}
         for r in q_titles:
-            title, authors, journals, year = r.title, r.authors, r.journals, r.publication_year
+            title, authors, journals, year, month, doi, org_id = r.title, r.authors, r.journals, r.publication_year, \
+                                                                 r.publication_month, r.publication_doi, \
+                                                                 r.document_id_original
             if len(title) > 500:
                 logging.debug('Large title detected: {}'.format(r.title))
                 title = title[0:500]
-            doc2metadata[int(r.document_id)] = (title, authors, journals, year)
+            doc2metadata[int(r.document_id)] = (title, authors, journals, year, month, doi, org_id)
 
         return doc2metadata
 
@@ -195,10 +198,15 @@ class QueryEngine:
             prov_mapping = json.loads(result.provenance_mapping)
 
             # Apply document collection filter
-            if document_collection_filter and len(document_collection_filter) > 0:
-                # keep only relevant document collection
-                # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
-                prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
+            if document_collection_filter and len(document_collection_filter) >= 1:
+                if len(document_collection_filter) > 1:
+                    raise ValueError("Do not support filtering multiple collections right now")
+                if LIT_COVID_COLLECTION in document_collection_filter or LONG_COVID_COLLECTION in document_collection_filter:
+                    # keep only relevant document collection
+                    # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
+                    prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
+                else:
+                    prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if  d_col in document_collection_filter}
                 # only continue with prov mappings that are not empty
                 if not prov_mapping or len(prov_mapping) == 0:
                     continue
@@ -331,12 +339,13 @@ class QueryEngine:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    title, authors, journals, year = doc2metadata[int(d_id)]
+                    title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
-                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year,
-                                                             {}, 0.0, fp2prov))
+                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
+                                                             {}, 0.0, fp2prov, org_document_id=org_id, doi=doi,
+                                                             document_collection=d_col))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
@@ -364,7 +373,7 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        title, authors, journals, year = doc2metadata[int(d_id)]
+                        title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
@@ -376,8 +385,10 @@ class QueryEngine:
                             else:
                                 fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
 
-                        query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year,
-                                                                 var2sub_for_doc, 0.0, fp2prov))
+                        query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
+                                                                 var2sub_for_doc, 0.0, fp2prov,
+                                                                 org_document_id=org_id, doi=doi,
+                                                                 document_collection=d_col))
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
         return query_results
