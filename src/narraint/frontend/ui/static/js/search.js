@@ -515,7 +515,7 @@ function initFromURLQueryParams() {
         } else {
             document.getElementById("radio_pubmed").checked = true;
         }
-
+        lastDataSource = data_source;
     }
 
     if (params.has("start_pos")) {
@@ -566,6 +566,7 @@ function getStartPositionBasedOnCurrentPage() {
 }
 
 let lastQuery = "";
+let lastDataSource = "";
 
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
@@ -588,6 +589,7 @@ const search = (event) => {
     let year_sort_desc = year_element.value;
 
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
+    lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
@@ -873,10 +875,13 @@ const createProvenanceDivElement = (explanations) => {
     return div_provenance_all;
 }
 
-function queryAndVisualizeProvenanceInformation(provenance, unique_div_id) {
+function queryAndVisualizeProvenanceInformation(query, document_id, data_source, provenance, unique_div_id) {
     let request = $.ajax({
         url: provenance_url,
         data: {
+            query: query,
+            document_id: document_id,
+            data_source: data_source,
             prov: JSON.stringify(provenance)
         }
     });
@@ -894,12 +899,13 @@ function queryAndVisualizeProvenanceInformation(provenance, unique_div_id) {
 
 let uniqueProvenanceID = 1;
 
-function sendDocumentClicked(query, document_id, document_link) {
+function sendDocumentClicked(query, document_id, data_source, document_link) {
     let request = $.ajax({
         url: document_clicked_url,
         data: {
             query: query,
             document_id: document_id,
+            data_source: data_source,
             link: document_link
         }
     });
@@ -940,7 +946,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_Body_Link = $('<a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
 
     divDoc_Body_Link.click(function () {
-        sendDocumentClicked(lastQuery, document_id, doi);
+        sendDocumentClicked(lastQuery, document_id, collection, doi);
     });
     let divDoc_Image = $('<img src="' + pubpharm_image_url + '" height="25px"/>');
     let divDoc_DocumentGraph = $('<a class="btn-link float-right" ' +
@@ -960,7 +966,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     //let
     divDoc_Card.append(divDoc_Body);
 
-
+    /*
     let divDoc = $('<div class="card"><div class="card-body">' +
         '<a class="btn-link" href="' + doi + '" onclick="sendDocumentClicked("' + document_id + '","' + doi + '");" target="_blank">' +
         '<img src="' + pubpharm_image_url + '" height="25px">' +
@@ -972,7 +978,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         '<br><b>' + title + '</b><br>' +
         "in: " + journals + " | " + month + year + '<br>' +
         "by: " + authors + '<br>' +
-        '</div></div><br>');
+        '</div></div><br>'); */
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
     uniqueProvenanceID = uniqueProvenanceID + 1;
@@ -980,7 +986,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
     div_provenance_button.click(function () {
         if ($('#' + unique_div_id).html() === "") {
-            queryAndVisualizeProvenanceInformation(prov_ids, unique_div_id);
+            queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, prov_ids, unique_div_id);
         }
     });
 

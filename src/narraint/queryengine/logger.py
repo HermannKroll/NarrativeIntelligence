@@ -36,11 +36,11 @@ class QueryLogger:
             os.mkdir(self.log_dir_document_clicks)
 
         self.log_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
-        self.prov_log_header = 'timestamp\ttime needed\tprovenance ids'
-        self.document_graph_log_header = 'timestamp\ttime needed\tdocument_id\t#facts'
+        self.prov_log_header = 'timestamp\ttime needed\tdocument collection\tdocument id\tprovenance ids'
+        self.document_graph_log_header = 'timestamp\ttime needed\tdocument collection\tdocument id\t#facts'
         self.page_view_header = 'timestamp\tpage'
-        self.rating_header = 'timestamp\tuser id\tprovenance ids'
-        self.document_click_header = 'timestamp\tquery\tdocument id\tlink'
+        self.rating_header = 'timestamp\tquery\tuser id\tprovenance ids'
+        self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -59,11 +59,11 @@ class QueryLogger:
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
-    def write_provenance_log(self, time_needed, provenance_ids):
+    def write_provenance_log(self, time_needed, document_collection, document_id, provenance_ids):
         log_file_name = os.path.join(self.log_dir_prov, '{}-prov.log'.format(time.strftime("%Y-%m-%d")))
         timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
 
-        log_entry = f'\n{timestr}\t{time_needed}\t{provenance_ids}'
+        log_entry = f'\n{timestr}\t{time_needed}\t{document_collection}\t{document_id}\t{provenance_ids}'
         if not os.path.isfile(log_file_name):
             logging.debug('creating new provenance log file: {}'.format(log_file_name))
             with open(log_file_name, 'w') as f:
@@ -74,12 +74,12 @@ class QueryLogger:
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
-    def write_document_graph_log(self, time_needed, document_id: int, number_facts: int):
+    def write_document_graph_log(self, time_needed, document_collection: str, document_id: int, number_facts: int):
         log_file_name = os.path.join(self.log_dir_document_graph,
                                      '{}-document_graphs.log'.format(time.strftime("%Y-%m-%d")))
         timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
 
-        log_entry = f'\n{timestr}\t{time_needed}\t{document_id}\t{number_facts}'
+        log_entry = f'\n{timestr}\t{time_needed}\t{document_collection}\t{document_id}\t{number_facts}'
         if not os.path.isfile(log_file_name):
             logging.debug('creating new document graph log file: {}'.format(log_file_name))
             with open(log_file_name, 'w') as f:
@@ -106,11 +106,11 @@ class QueryLogger:
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
-    def write_rating(self, user_id, provenance_ids):
+    def write_rating(self, query, user_id, provenance_ids):
         log_file_name = os.path.join(self.log_rating,
                                      '{}-ratings.log'.format(time.strftime("%Y-%m-%d")))
         timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
-        log_entry = f'\n{timestr}\t{user_id}\t{provenance_ids}'
+        log_entry = f'\n{timestr}\t{query}\t{user_id}\t{provenance_ids}'
         if not os.path.isfile(log_file_name):
             logging.debug('creating new rating log file: {}'.format(log_file_name))
             with open(log_file_name, 'w') as f:
@@ -121,11 +121,11 @@ class QueryLogger:
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
-    def write_document_link_clicked(self, query: str, document_id: str, link: str):
+    def write_document_link_clicked(self, query: str, document_collection: str, document_id: str, link: str):
         log_file_name = os.path.join(self.log_dir_document_clicks,
                                      '{}-documents_clicked.log'.format(time.strftime("%Y-%m-%d")))
         timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
-        log_entry = f'\n{timestr}\t{query}\t{document_id}\t{link}'
+        log_entry = f'\n{timestr}\t{query}\t{document_collection}\t{document_id}\t{link}'
         if not os.path.isfile(log_file_name):
             logging.debug('creating new document click log file: {}'.format(log_file_name))
             with open(log_file_name, 'w') as f:

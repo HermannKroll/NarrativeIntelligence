@@ -103,7 +103,7 @@ def get_document_graph(request):
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
             try:
-                View.instance().query_logger.write_document_graph_log(time_needed, document_id, len(facts))
+                View.instance().query_logger.write_document_graph_log(time_needed, document_collection, document_id, len(facts))
             except IOError:
                 logging.debug('Could not write document graph log file')
             return JsonResponse(dict(nodes=list(nodes), facts=result))
@@ -317,8 +317,11 @@ def get_query(request):
 
 
 def get_provenance(request):
-    if "prov" in request.GET:
+    if "prov" in request.GET and "document_id" in request.GET and "data_source" in request.GET:
         try:
+            document_id = str(request.GET["document_id"]).strip()
+            document_collection = str(request.GET["data_source"]).strip()
+
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
             result = QueryEngine.query_provenance_information(fp2prov_ids)
@@ -328,7 +331,8 @@ def get_provenance(request):
             for _, pred_ids in fp2prov_ids.items():
                 predication_ids.update(pred_ids)
             try:
-                View.instance().query_logger.write_provenance_log(time_needed, predication_ids)
+                View.instance().query_logger.write_provenance_log(time_needed, document_collection, document_id,
+                                                                  predication_ids)
             except IOError:
                 logging.debug('Could not write provenance log file')
             return JsonResponse(dict(result=result.to_dict()))
@@ -340,7 +344,7 @@ def get_provenance(request):
 
 
 def get_feedback(request):
-    if "predicationids" in request.GET and "query" in request.GET and "rating" in request.GET and\
+    if "predicationids" in request.GET and "query" in request.GET and "rating" in request.GET and \
             "userid" in request.GET:
         try:
             predication_ids = str(request.GET.get("predicationids", "").strip())
@@ -354,7 +358,7 @@ def get_feedback(request):
 
             logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
             try:
-                View.instance().query_logger.write_rating(userid, predication_ids)
+                View.instance().query_logger.write_rating(query, userid, predication_ids)
             except IOError:
                 logging.debug('Could not write rating log file')
             return HttpResponse(status=200)
@@ -366,12 +370,13 @@ def get_feedback(request):
 
 
 def get_document_link_clicked(request):
-    if "query" in request.GET and "document_id" in request.GET and "link" in request.GET:
+    if "query" in request.GET and "document_id" in request.GET and "link" in request.GET and "data_source" in request.GET:
         query = str(request.GET["query"]).strip()
         document_id = str(request.GET["document_id"]).strip()
+        document_collection = str(request.GET["data_source"]).strip()
         link = str(request.GET["link"]).strip()
         try:
-            View.instance().query_logger.write_document_link_clicked(query, document_id, link)
+            View.instance().query_logger.write_document_link_clicked(query, document_collection, document_id, link)
         except IOError:
             logging.debug('Could not write document clicked log file')
         return HttpResponse(status=200)
