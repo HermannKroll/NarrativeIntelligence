@@ -123,7 +123,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
                 query_result = QueryDocumentResultList()
                 for res in results:
                     query_result.add_query_result(res)
-                    query_result.results.sort(key=lambda x: (x.publication_year_int, int(x.month)),
+                    query_result.results.sort(key=lambda x: (x.publication_year, x.publication_month),
                                               reverse=self.year_sort_desc)
                 return query_result, is_aggregate
         else:
@@ -151,7 +151,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
             if result_docs:
                 for res in result_docs:
                     node.results.remove(res)
-                result_docs.sort(key=lambda x: (x.publication_year_int, int(x.month)), reverse=self.year_sort_desc)
+                result_docs.sort(key=lambda x: (x.publication_year, x.publication_month), reverse=self.year_sort_desc)
                 node.results.extend(result_docs)
 
     def _populate_tree_structure(self, var2prefix_document_result_list):
