@@ -38,7 +38,7 @@ COMMON_QUERIES = [
     'Covid 19 method LabMethod',
     'Disease associated Covid19',
     'Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS',
-    'Covid19 associated Human AND Disease associated Human',
+    'Covid19 associated Human _AND_ Disease associated Human',
     'Covid 19 associated Target',
     'Drug treats Disease'
 ]
