@@ -104,3 +104,11 @@ class GraphQuery:
             parts.append(fp.predicate)
             parts.extend(sorted([o.entity_id for o in fp.objects]))
         return '_'.join(parts)
+
+    def get_var_names_in_order(self):
+        var_names = []
+        for fp in self.fact_patterns:
+            for var_name in fp.get_variable_names():
+                if var_name not in var_names:
+                    var_names.append(var_name)
+        return var_names

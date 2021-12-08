@@ -23,6 +23,7 @@ from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
+from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
@@ -296,9 +297,11 @@ def get_query(request):
                                                          query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
-                substitution_aggregation = ResultAggregationBySubstitution()
-                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc,
-                                                                                     year_sort_desc, start_pos, end_pos)
+                substitution_aggregation = ResultTreeAggregationBySubstitution()
+                sorted_var_names = graph_query.get_var_names_in_order()
+                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
+                                                                                     freq_sort_desc, year_sort_desc,
+                                                                                     start_pos, end_pos)
                 results_converted = results_ranked.to_dict()
             elif outer_ranking == 'outer_ranking_ontology':
                 substitution_ontology = ResultAggregationByOntology()
