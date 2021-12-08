@@ -56,12 +56,13 @@ class View:
             cls.initialized = True
             cls._instance = cls.__new__(cls)
             # init resolver here
+            cls.query_logger = QueryLogger()
             cls.resolver = EntityResolver.instance()
             cls.entity_tagger = EntityTagger.instance()
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil.instance()
             cls.translation = QueryTranslation()
-            cls.query_logger = QueryLogger()
+
         return cls._instance
 
 
@@ -360,6 +361,20 @@ def get_feedback(request):
         except Exception:
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=500)
+
+
+def get_document_link_clicked(request):
+    if "query" in request.GET and "document_id" in request.GET and "link" in request.GET:
+        query = str(request.GET["query"]).strip()
+        document_id = str(request.GET["document_id"]).strip()
+        link = str(request.GET["link"]).strip()
+        try:
+            View.instance().query_logger.write_document_link_clicked(query, document_id, link)
+        except IOError:
+            logging.debug('Could not write document clicked log file')
+        return HttpResponse(status=200)
     else:
         return HttpResponse(status=500)
 

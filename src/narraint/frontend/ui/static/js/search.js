@@ -59,9 +59,9 @@ function getUserIDFromLocalStorage() {
 
 function escapeString(input_string) {
     if (input_string.includes(' ')) {
-        return '"' + input_string + '"';
+        return '"' + input_string + '"'.trim();
     }
-    return input_string;
+    return input_string.trim();
 }
 
 function getTextOrPlaceholderFromElement(element_id) {
@@ -510,7 +510,7 @@ function initFromURLQueryParams() {
             document.getElementById("radio_long_covid").checked = true;
         } else if (data_source === "LitCovid") {
             document.getElementById("radio_litcovid").checked = true;
-        } else if (data_source === "ZBMed"){
+        } else if (data_source === "ZBMed") {
             document.getElementById("radio_zbmed").checked = true;
         } else {
             document.getElementById("radio_pubmed").checked = true;
@@ -894,6 +894,25 @@ function queryAndVisualizeProvenanceInformation(provenance, unique_div_id) {
 
 let uniqueProvenanceID = 1;
 
+function sendDocumentClicked(query, document_id, document_link) {
+    let request = $.ajax({
+        url: document_clicked_url,
+        data: {
+            query: query,
+            document_id: document_id,
+            link: document_link
+        }
+    });
+
+    request.done(function (response) {
+        console.log("Sent document clicked info")
+    });
+
+    request.fail(function (result) {
+        showInfoAtBottom("Query for provenance failed - please try again")
+    });
+}
+
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
     let document_id = queryResult["docid"];
     let art_doc_id = document_id;
@@ -903,25 +922,51 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let year = queryResult["year"];
     let month = queryResult["month"];
     let collection = queryResult["collection"];
-    if (month === 0){
+    if (month === 0) {
         month = "";
     } else {
         month = month + "/";
     }
     // use the original document id if available
-    if (queryResult["org_document_id"] !== null && queryResult["org_document_id"].length > 0){
+    if (queryResult["org_document_id"] !== null && queryResult["org_document_id"].length > 0) {
         document_id = queryResult["org_document_id"];
     }
 
     let prov_ids = queryResult["prov"];
     let doi = queryResult["doi"];
 
+    let divDoc_Card = $('<div class="card"/>');
+    let divDoc_Body = $('<div class="card-body"/>');
+    let divDoc_Body_Link = $('<a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
+
+    divDoc_Body_Link.click(function () {
+        sendDocumentClicked(lastQuery, document_id, doi);
+    });
+    let divDoc_Image = $('<img src="' + pubpharm_image_url + '" height="25px"/>');
+    let divDoc_DocumentGraph = $('<a class="btn-link float-right" ' +
+        'href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source=' + collection + '"  target="_blank">' +
+        'Document Graph</a>');
+
+    divDoc_Body.append(divDoc_Image);
+    divDoc_Body.append(divDoc_Body_Link);
+    divDoc_Body.append(divDoc_DocumentGraph);
+
+    let divDoc_Content = $('<br><b>' + title + '</b><br>' +
+        "in: " + journals + " | " + month + year + '<br>' +
+        "by: " + authors + '<br>');
+
+    divDoc_Body.append(divDoc_Content);
+
+    //let
+    divDoc_Card.append(divDoc_Body);
+
+
     let divDoc = $('<div class="card"><div class="card-body">' +
-        '<a class="btn-link" href="'+ doi + '" target="_blank">' +
+        '<a class="btn-link" href="' + doi + '" onclick="sendDocumentClicked("' + document_id + '","' + doi + '");" target="_blank">' +
         '<img src="' + pubpharm_image_url + '" height="25px">' +
         document_id + '</a>' +
 
-        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source='+collection+'" target="_blank">' +
+        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source=' + collection + '" target="_blank">' +
         'Document Graph</a>' +
 
         '<br><b>' + title + '</b><br>' +
@@ -939,9 +984,13 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         }
     });
 
-    divDoc.append(div_provenance_button);
-    divDoc.append(div_provenance_collapsable_block);
-    return divDoc;
+    divDoc_Card.append(div_provenance_button);
+    divDoc_Card.append(div_provenance_collapsable_block);
+
+    let divFinal = $('<div/>');
+    divFinal.append(divDoc_Card);
+    divFinal.append($('<br>'));
+    return divFinal;
 };
 
 
@@ -1199,7 +1248,7 @@ function createTreeDataFromQueryResult(inputTree) {
 
         if (name.includes('MESH')) {
             // MeSH Case
-            if (name.includes('- (MESH')){
+            if (name.includes('- (MESH')) {
                 out_node["value"] = name.split(' - (MESH')[0];
             } else {
                 out_node["value"] = name.split(' (MESH')[0];

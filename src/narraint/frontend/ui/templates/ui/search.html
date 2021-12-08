@@ -214,7 +214,7 @@
                                 onclick="example_search('Covid19 associated Target')">Covid19 associated Target
                         </button>
                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated Human AND Disease associated Human')">
+                                onclick="example_search('Covid19 associated Human _AND_ Disease associated Human')">
                             Covid19 associated Human AND Disease associated Human
                         </button>
 
@@ -492,6 +492,7 @@
         const feedback_url = "{% url 'feedback' %}";
         const provenance_url = "{% url 'provenance' %}";
         const report_url = "{% url 'report' %}";
+        const document_clicked_url = "{% url 'document_clicked' %}";
         const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png'  %}";
         const ok_symbol_url = "{% static 'ok.png' %}";
         const cancel_symbol_url = "{% static 'cancel.png' %}";
@@ -500,5 +501,5 @@
         $("#nav_item_help").removeClass("active");
         $("#nav_item_stats").removeClass("active");
     </script>
-    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=7" type="text/javascript"></script>
 {% endblock %}

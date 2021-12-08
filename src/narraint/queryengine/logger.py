@@ -19,6 +19,7 @@ class QueryLogger:
         self.log_dir_document_graph = os.path.join(log_dir, 'document_graphs')
         self.log_dir_views = os.path.join(log_dir, 'views')
         self.log_rating = os.path.join(log_dir, 'ratings')
+        self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
         if not os.path.isdir(log_dir):
             raise Exception('no provenance log dir available {}'.format(log_dir))
         if not os.path.isdir(self.log_dir_queries):
@@ -31,12 +32,15 @@ class QueryLogger:
             os.mkdir(self.log_dir_views)
         if not os.path.isdir(self.log_rating):
             os.mkdir(self.log_rating)
+        if not os.path.isdir(self.log_dir_document_clicks):
+            os.mkdir(self.log_dir_document_clicks)
 
         self.log_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.prov_log_header = 'timestamp\ttime needed\tprovenance ids'
         self.document_graph_log_header = 'timestamp\ttime needed\tdocument_id\t#facts'
         self.page_view_header = 'timestamp\tpage'
         self.rating_header = 'timestamp\tuser id\tprovenance ids'
+        self.document_click_header = 'timestamp\tquery\tdocument id\tlink'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -114,5 +118,20 @@ class QueryLogger:
                 f.write(log_entry)
         else:
             logging.debug('appending to rating log file: {}'.format(log_file_name))
+            with open(log_file_name, 'a') as f:
+                f.write(log_entry)
+
+    def write_document_link_clicked(self, query: str, document_id: str, link: str):
+        log_file_name = os.path.join(self.log_dir_document_clicks,
+                                     '{}-documents_clicked.log'.format(time.strftime("%Y-%m-%d")))
+        timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
+        log_entry = f'\n{timestr}\t{query}\t{document_id}\t{link}'
+        if not os.path.isfile(log_file_name):
+            logging.debug('creating new document click log file: {}'.format(log_file_name))
+            with open(log_file_name, 'w') as f:
+                f.write(self.document_click_header)
+                f.write(log_entry)
+        else:
+            logging.debug('appending to document click log file: {}'.format(log_file_name))
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
