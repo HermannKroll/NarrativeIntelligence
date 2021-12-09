@@ -53,13 +53,22 @@ subject_id string
 subject_str string
 subject_type string
 predicate string
-predicate_canonicalized string NULLABLE
+relation string NULLABLE
 object_id string
 object_str string
 object_type string
 confidence float NULLABLE
 sentence_id bigint FK >- Sentence.id
 extraction_type string
+
+PredicationRating
+-
+user_id string PK
+query string
+predication_id bigint FK >- Predication.id
+rating string
+date_inserted datetime
+
 
 Sentence
 -
@@ -76,4 +85,14 @@ document_collection string FK >- Document.collection
 extraction_type string
 date_inserted DateTime
 
+DocumentMetadata:
+-
+document_id bigint FK >- Document.id
+document_collection string FK >- Document.collection
+document_id_original string
+authors string
+journals string
+publication_year int
+publication_month int
+publication_doi string
 

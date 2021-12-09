@@ -98,6 +98,11 @@ The package provides APIs for several third-party taggers:
 ## Database scheme
 
 ![DB Scheme](./docs/dbdiagram.png)
+
+
+![DB Scheme](./docs/dbdiagram_service.png)
+
+
 created with app.quickdatabasediagrams.com
 
 
