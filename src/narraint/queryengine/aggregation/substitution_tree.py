@@ -20,6 +20,8 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
         self.root = QueryResultAggregateList()
         self.generated_tree_aggregates = {}
         self.varsubs2documents = defaultdict(list)
+        self.level1_var_sub_count = defaultdict(int)
+        self.level1_key_contained_in = defaultdict(set)
 
     def _clear_state(self):
         self.var_names.clear()
@@ -30,6 +32,8 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
         self.root = QueryResultAggregateList()
         self.generated_tree_aggregates.clear()
         self.varsubs2documents.clear()
+        self.level1_var_sub_count.clear()
+        self.level1_key_contained_in.clear()
 
     def rank_results(self, results: List[QueryDocumentResult], ordered_var_names: List[str] = None, freq_sort_desc=True,
                      year_sort_desc=True, start_pos=None, end_pos=None) -> [QueryDocumentResultList, bool]:
@@ -43,7 +47,7 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
             for r in results:
                 self._add_query_result(r)
 
-            self._populate_tree_structure(freq_sort_desc)
+            self._populate_tree_structure(freq_sort_desc, start_pos, end_pos)
 
            # self.root.sort_results_by_substitutions(freq_sort_desc)
             if start_pos and end_pos:
@@ -82,20 +86,56 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
             node.add_query_result(next_aggregated_list)
             self._add_query_result_in_tree(results, next_aggregated_list, level + 1)
 
-    def _populate_tree_structure(self, freq_sort_desc):
+    def _populate_tree_structure(self, freq_sort_desc, start_pos, end_pos):
         all_result_lists = []
 
-        for _, results in self.varsubs2documents.items():
+        # compute the most frequent substitutions for level 1 var
+      #  level1_var_count = [(key, count) for key, count in self.level1_var_sub_count.items()]
+      #  level1_var_count.sort(key=lambda x: x[1], reverse=freq_sort_desc)
+     #   if start_pos < len(level1_var_count):
+      #      if end_pos <= len(level1_var_count):
+       #         level1_frequent_keys = {key for key, _ in level1_var_count[start_pos:end_pos]}
+        #    else:
+         #       level1_frequent_keys = {key for key, _ in level1_var_count[start_pos:end_pos]}
+        #else:
+         #   level1_frequent_keys = {key for key, _ in level1_var_count}
+
+        # only keep the relevant level 1 keys here
+        #self.level1_key_contained_in = {key for k, subkey in self.level1_key_contained_in.items()
+         #                               if k in level1_frequent_keys
+          #                              for key in subkey}
+
+        # consider only substitutions that are on level 1 between start pos and end pos
+        for key, results in self.varsubs2documents.items():
+      #      if key in self.level1_key_contained_in:
             all_result_lists.append((results, len(results)))
         all_result_lists.sort(key=lambda x: x[1], reverse=freq_sort_desc)
 
         for results, _ in all_result_lists:
             self._add_query_result_in_tree(results, self.root, 0)
 
+        #self.root.results.sort(key=lambda x: x.get_result_size(), reverse=freq_sort_desc)
+        #for var_name in self.var_names[1:]:
+        # sort also all subtrees
+        todo = [self.root]
+        while todo:
+            current_tree_node = todo.pop()
+            current_tree_node.results.sort(key=lambda x: x.get_result_size(), reverse=freq_sort_desc)
+            for res in current_tree_node.results:
+                if isinstance(res, QueryResultAggregateList) or isinstance(res, QueryResultAggregate):
+                    todo.append(res)
+
+
     def _add_query_result(self, result: QueryDocumentResult):
+      #  level1_var_sub = result.var2substitution[self.var_names[0]]
+      #  leve1_var_sub_key = (self.var_names[0], level1_var_sub.entity_id, level1_var_sub.entity_type)
+      #  self.level1_var_sub_count[leve1_var_sub_key] += 1
+
         var_subs = set()
         for var_name in self.var_names:
             sub = result.var2substitution[var_name]
             var_subs.add((var_name, sub.entity_id, sub.entity_type))
         key = frozenset(var_subs)
+
+     #   self.level1_key_contained_in[leve1_var_sub_key].add(key)
         self.varsubs2documents[key].append(result)
