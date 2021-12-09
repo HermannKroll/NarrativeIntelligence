@@ -15,7 +15,15 @@
           "type":"Disease"
        }, ...
     ],
-    "published":"1992",
+    "metadata": {
+              "publication_year":1992,
+              "publication_month":4,
+              "authors":"Dromer, C | Vedrenne, C | Billey, T | Pages, M | Fourni\u00e9, B | Fourni\u00e9, A",
+              "journals":"Revue du rhumatisme et des maladies osteo-articulaires, Vol. 59 No. 4 (Apr 1992)",
+              "doi":"https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM1496277"
+    }
+    "authors": "",
+    "journals": "",
     "sentences":[
        {
           "id":2456018,
