@@ -7,7 +7,8 @@ from sqlalchemy import Column, String, Float, DateTime, ForeignKeyConstraint, Pr
     BigInteger, func, insert, Integer, and_
 
 import narrant
-from narraint.document.narrative_document import NarrativeDocument, StatementExtraction, DocumentSentence
+from narraint.document.narrative_document import NarrativeDocument, StatementExtraction, DocumentSentence, \
+    NarrativeDocumentMetadata
 from narrant.backend.models import Base, DatabaseTable
 from narrant.pubtator.document import TaggedEntity
 
@@ -326,9 +327,14 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     # Next query the publication information
     metadata_query = session.query(DocumentMetadata).filter(and_(DocumentMetadata.document_id.in_(document_ids),
                                                                  DocumentMetadata.document_collection == document_collection))
+    doc2metadata = {}
     for res in metadata_query:
-        if res.publication_year and res.publication_year.isdigit():
-            doc_results[res.document_id].publication_year = res.publication_year
+        metadata = NarrativeDocumentMetadata(publication_year=res.publication_year,
+                                             publication_month=res.publication_month,
+                                             authors=res.authors,
+                                             journals=res.journals,
+                                             publication_doi=res.publication_doi)
+        doc2metadata[res.document_id] = metadata
 
     logging.info('Querying for tags...')
     # Next query for all tagged entities in that document
@@ -375,5 +381,8 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
 
     for doc_id, sentences in doc2sentences.items():
         doc_results[doc_id].sentences = sentences
+
+    for doc_id, metadata in doc2metadata.items():
+        doc_results[doc_id].metadata = metadata
 
     return list(doc_results.values())

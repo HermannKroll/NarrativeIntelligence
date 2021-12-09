@@ -42,10 +42,38 @@ class StatementExtraction:
         }
 
 
+class NarrativeDocumentMetadata:
+
+    def __init__(self, publication_year: int, publication_month: int, authors: str, journals: str,
+                 publication_doi: str):
+        self.publication_year = publication_year
+        self.publication_month = publication_month
+        self.authors = authors
+        self.journals = journals
+        self.publication_doi = publication_doi
+
+    def to_dict(self):
+        """
+       {
+          "publication_year":1992,
+          "publication_month":4,
+          "authors":"Dromer, C | Vedrenne, C | Billey, T | Pages, M | Fourni\u00e9, B | Fourni\u00e9, A",
+          "journals":"Revue du rhumatisme et des maladies osteo-articulaires, Vol. 59 No. 4 (Apr 1992)",
+          "doi":"https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM1496277"
+       }
+        :return: a dict with metadata information
+        """
+        return dict(publication_year=self.publication_year,
+                    publication_month=self.publication_month,
+                    authors=self.authors,
+                    journals=self.journals,
+                    doi=self.publication_doi)
+
+
 class NarrativeDocument(TaggedDocument):
 
     def __init__(self, document_id, title: str, abstract: str,
-                 publication_year: int = None,
+                 metadata: NarrativeDocumentMetadata = None,
                  tags: List[TaggedEntity] = None,
                  sentences: List[DocumentSentence] = None,
                  extracted_statements: List[StatementExtraction] = None):
@@ -53,7 +81,7 @@ class NarrativeDocument(TaggedDocument):
         self.tags = tags
         if self.tags:
             self.sort_tags()
-        self.publication_year = publication_year
+        self.metadata = metadata
         self.sentences = sentences
         self.extracted_statements = extracted_statements
 
@@ -75,7 +103,13 @@ class NarrativeDocument(TaggedDocument):
                 "type":"Disease"
              }, ...
           ],
-          "published":"1992",
+         "metadata":{
+              "publication_year":1992,
+              "publication_month":4,
+              "authors":"Dromer, C | Vedrenne, C | Billey, T | Pages, M | Fourni\u00e9, B | Fourni\u00e9, A",
+              "journals":"Revue du rhumatisme et des maladies osteo-articulaires, Vol. 59 No. 4 (Apr 1992)",
+              "doi":"https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM1496277"
+           }
           "sentences":[
              {
                 "id":2456018,
@@ -100,12 +134,11 @@ class NarrativeDocument(TaggedDocument):
         :return:
         """
         tagged_dict = super().to_dict()
-        if self.publication_year:
-            tagged_dict["published"] = self.publication_year
+        if self.metadata:
+            tagged_dict["metadata"] = self.metadata.to_dict()
         if self.sentences:
             tagged_dict["sentences"] = list([s.to_dict() for s in self.sentences])
         if self.extracted_statements:
             tagged_dict["statements"] = list([es.to_dict() for es in self.extracted_statements])
 
         return tagged_dict
-
