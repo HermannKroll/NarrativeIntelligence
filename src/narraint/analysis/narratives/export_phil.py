@@ -28,7 +28,7 @@ def main():
     for query_name, query in queries:
         graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(query)
         # run query
-        results = QueryEngine.process_query_with_expansion(graph_query)
+        results = QueryEngine.process_query_with_expansion(graph_query, document_collection_filter={"PubMed"})
         result_ids = {r.document_id for r in results}
 
         narrative_documents = retrieve_narrative_documents_from_database(session=session, document_ids=result_ids,
