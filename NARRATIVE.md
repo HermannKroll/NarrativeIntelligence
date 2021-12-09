@@ -4,7 +4,7 @@
     "title":"[Rhabdomyolysis due to simvastin. Apropos of a case with review of the literature].",
     "abstract":"A new case of simvastatin-induced acute rhabdomyolysis with heart failure after initiation of treatment with fusidic acid is reported. In most reported instances, statin treatment was initially well tolerated with muscle toxicity developing only after addition of another drug. The mechanism of this muscle toxicity is unelucidated but involvement of a decrease in tissue Co enzyme Q is strongly suspected.",
     "classification":[
-       
+       "Pharmaceutical"
     ],
     "tags":[
        {
@@ -22,8 +22,6 @@
               "journals":"Revue du rhumatisme et des maladies osteo-articulaires, Vol. 59 No. 4 (Apr 1992)",
               "doi":"https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM1496277"
     }
-    "authors": "",
-    "journals": "",
     "sentences":[
        {
           "id":2456018,
