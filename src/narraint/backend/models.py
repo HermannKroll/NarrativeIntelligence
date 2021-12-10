@@ -27,6 +27,10 @@ class Document(narrant.backend.models.Document):
     pass
 
 
+class DocumentClassification(narrant.backend.models.DocumentClassification):
+    pass
+
+
 class Tag(narrant.backend.models.Tag):
     pass
 
@@ -323,6 +327,14 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     for res in doc_query:
         doc_results[res.id] = NarrativeDocument(document_id=res.id, title=res.title, abstract=res.abstract)
 
+    logging.info('Querying for document classification...')
+    # Next query the publication information
+    classification_query = session.query(DocumentClassification).filter(and_(DocumentClassification.document_id.in_(document_ids),
+                                                                       DocumentClassification.document_collection == document_collection))
+    doc2classification = defaultdict(set)
+    for res in classification_query:
+        doc2classification[res.document_id].add((res.classification, res.explanation))
+
     logging.info('Querying for metadata...')
     # Next query the publication information
     metadata_query = session.query(DocumentMetadata).filter(and_(DocumentMetadata.document_id.in_(document_ids),
@@ -384,5 +396,8 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
 
     for doc_id, metadata in doc2metadata.items():
         doc_results[doc_id].metadata = metadata
+
+    for doc_id, classification in doc2classification.items():
+        doc_results[doc_id].classification = {d_class: d_expl for d_class, d_expl in classification}
 
     return list(doc_results.values())
