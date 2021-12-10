@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from datetime import datetime
 
 from narraint.config import LOG_DIR
 from narraint.queryengine.query import GraphQuery
@@ -44,7 +45,7 @@ class QueryLogger:
         self.page_view_header = 'timestamp\tpage'
         self.rating_header = 'timestamp\tquery\tuser id\tprovenance ids'
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
-        self.api_call_header = 'timestamp\tsuccess\troute\tcall'
+        self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -140,12 +141,15 @@ class QueryLogger:
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
-    def write_api_call(self, success: bool, route: str, call: str):
+    def write_api_call(self, success: bool, route: str, call: str, time_needed=None):
         try:
             log_file_name = os.path.join(self.log_dir_api_calls,
                                          '{}-api_calls.log'.format(time.strftime("%Y-%m-%d")))
             timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
-            log_entry = f'\n{timestr}\t{success}\t{route}\t{call}'
+            if not time_needed:
+                time_needed = datetime.now() - datetime.now()
+
+            log_entry = f'\n{timestr}\t{time_needed}\t{success}\t{route}\t{call}'
             if not os.path.isfile(log_file_name):
                 logging.debug('creating new api call log file: {}'.format(log_file_name))
                 with open(log_file_name, 'w') as f:

@@ -35,7 +35,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-DO_CACHING = True
+DO_CACHING = False
 
 
 class View:
@@ -109,7 +109,7 @@ def get_document_graph(request):
             except IOError:
                 logging.debug('Could not write document graph log file')
 
-            View.instance().query_logger.write_api_call(True, "get_document_graph", str(request))
+            View.instance().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
             View.instance().query_logger.write_api_call(False, "get_document_graph", str(request))
@@ -217,6 +217,7 @@ def get_query_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Does not support queries with variables"))
 
     try:
+        time_start = datetime.now()
         # compute the query
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
         result_ids = {r.document_id for r in results}
@@ -225,7 +226,8 @@ def get_query_narrative_documents(request):
         narrative_documents = retrieve_narrative_documents_from_database(session, document_ids=result_ids,
                                                                          document_collection=document_collection)
 
-        View.instance().query_logger.write_api_call(True, "get_query_narrative_documents", str(request))
+        View.instance().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
+                                                    time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception:
         View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
@@ -251,6 +253,7 @@ def get_query_sub_count(request):
             View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
             return JsonResponse(status=500, data=dict(answer="query must have one variable"))
 
+        time_start = datetime.now()
         # compute the query
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
 
@@ -269,7 +272,8 @@ def get_query_sub_count(request):
                                        entity_name=sub.entity_name,
                                        doc_count=aggregate.get_result_size()))
 
-        View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request))
+        View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
+                                                    time_needed=datetime.now()-time_start)
         # send results back
         return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
@@ -340,7 +344,7 @@ def get_query(request):
         logging.info("Selected data source is {}".format(data_source))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
-
+        time_start = datetime.now()
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
@@ -383,7 +387,8 @@ def get_query(request):
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
 
-        View.instance().query_logger.write_api_call(True, "get_query", str(request))
+        View.instance().query_logger.write_api_call(True, "get_query", str(request),
+                                                    time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
@@ -401,6 +406,7 @@ def get_provenance(request):
         try:
             document_id = str(request.GET["document_id"]).strip()
             document_collection = str(request.GET["data_source"]).strip()
+            time_start = datetime.now()
 
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
@@ -416,7 +422,8 @@ def get_provenance(request):
             except IOError:
                 logging.debug('Could not write provenance log file')
 
-            View.instance().query_logger.write_api_call(True, "get_provenance", str(request))
+            View.instance().query_logger.write_api_call(True, "get_provenance", str(request),
+                                                        time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
@@ -431,6 +438,7 @@ def get_feedback(request):
     if "predicationids" in request.GET and "query" in request.GET and "rating" in request.GET and \
             "userid" in request.GET:
         try:
+            time_start = datetime.now()
             predication_ids = str(request.GET.get("predicationids", "").strip())
             query = str(request.GET.get("query", "").strip())
             rating = str(request.GET.get("rating", "").strip())
@@ -445,7 +453,8 @@ def get_feedback(request):
                 View.instance().query_logger.write_rating(query, userid, predication_ids)
             except IOError:
                 logging.debug('Could not write rating log file')
-            View.instance().query_logger.write_api_call(True, "get_feedback", str(request))
+            View.instance().query_logger.write_api_call(True, "get_feedback", str(request),
+                                                        time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
