@@ -20,6 +20,7 @@ class QueryLogger:
         self.log_dir_views = os.path.join(log_dir, 'views')
         self.log_rating = os.path.join(log_dir, 'ratings')
         self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
+        self.log_dir_api_calls = os.path.join(log_dir, "api_calls")
         if not os.path.isdir(log_dir):
             raise Exception('no provenance log dir available {}'.format(log_dir))
         if not os.path.isdir(self.log_dir_queries):
@@ -34,6 +35,8 @@ class QueryLogger:
             os.mkdir(self.log_rating)
         if not os.path.isdir(self.log_dir_document_clicks):
             os.mkdir(self.log_dir_document_clicks)
+        if not os.path.isdir(self.log_dir_api_calls):
+            os.mkdir(self.log_dir_api_calls)
 
         self.log_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.prov_log_header = 'timestamp\ttime needed\tdocument collection\tdocument id\tprovenance ids'
@@ -41,6 +44,7 @@ class QueryLogger:
         self.page_view_header = 'timestamp\tpage'
         self.rating_header = 'timestamp\tquery\tuser id\tprovenance ids'
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
+        self.api_call_header = 'timestamp\tsuccess\troute\tcall'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -135,3 +139,21 @@ class QueryLogger:
             logging.debug('appending to document click log file: {}'.format(log_file_name))
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
+
+    def write_api_call(self, success: bool, route: str, call: str):
+        try:
+            log_file_name = os.path.join(self.log_dir_api_calls,
+                                         '{}-api_calls.log'.format(time.strftime("%Y-%m-%d")))
+            timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
+            log_entry = f'\n{timestr}\t{success}\t{route}\t{call}'
+            if not os.path.isfile(log_file_name):
+                logging.debug('creating new api call log file: {}'.format(log_file_name))
+                with open(log_file_name, 'w') as f:
+                    f.write(self.api_call_header)
+                    f.write(log_entry)
+            else:
+                logging.debug('appending to api call log file: {}'.format(log_file_name))
+                with open(log_file_name, 'a') as f:
+                    f.write(log_entry)
+        except IOError:
+            logging.debug('Could not api call log file')

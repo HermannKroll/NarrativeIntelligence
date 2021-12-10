@@ -104,13 +104,18 @@ def get_document_graph(request):
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
             try:
-                View.instance().query_logger.write_document_graph_log(time_needed, document_collection, document_id, len(facts))
+                View.instance().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
+                                                                      len(facts))
             except IOError:
                 logging.debug('Could not write document graph log file')
+
+            View.instance().query_logger.write_api_call(True, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
+            View.instance().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
     else:
+        View.instance().query_logger.write_api_call(False, "get_document_graph", str(request))
         return HttpResponse(status=500)
 
 
@@ -221,11 +226,15 @@ def get_query_sub_count(request):
             var2sub = aggregate.var2substitution
             # get the first substitution
             var_name, sub = next(iter(var2sub.items()))
-            sub_count_list.append((sub.entity_id, sub.entity_name, aggregate.get_result_size()))
+            sub_count_list.append(dict(entity_id=sub.entity_id,
+                                       entity_name=sub.entity_name,
+                                       doc_count=aggregate.get_result_size()))
 
+        View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request))
         # send results back
-        return JsonResponse(dict(sub_count_list=str(sub_count_list)))
+        return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
+        View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
         return HttpResponse(status=500)
 
 
@@ -237,29 +246,55 @@ def get_query(request):
     valid_query = False
     query_limit_hit = False
     query_trans_string = ""
+    if "query" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
     try:
         query = str(request.GET.get("query", "").strip())
         data_source = str(request.GET.get("data_source", "").strip())
-        outer_ranking = str(request.GET.get("outer_ranking", "").strip())
-        freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
-        year_sort_desc = str(request.GET.get("year_sort", "").strip())
-        start_pos = request.GET.get("start_pos").strip()
-        end_pos = request.GET.get("end_pos").strip()
+        if "outer_ranking" in request.GET:
+            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        else:
+            outer_ranking = "outer_ranking_substitution"
 
-        if freq_sort_desc == 'False':
-            freq_sort_desc = False
+        if "start_pos" in request.GET:
+            start_pos = request.GET.get("start_pos").strip()
+            try:
+                start_pos = int(start_pos)
+            except ValueError:
+                start_pos = None
+        else:
+            start_pos = None
+        if "end_pos" in request.GET:
+            end_pos = request.GET.get("end_pos").strip()
+            try:
+                end_pos = int(end_pos)
+            except ValueError:
+                end_pos = None
+        else:
+            end_pos = None
+
+        if "freq_sort" in request.GET:
+            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
+            if freq_sort_desc == 'False':
+                freq_sort_desc = False
+            else:
+                freq_sort_desc = True
         else:
             freq_sort_desc = True
-        if year_sort_desc == 'False':
-            year_sort_desc = False
+
+        if "year_sort" in request.GET:
+            year_sort_desc = str(request.GET.get("year_sort", "").strip())
+            if year_sort_desc == 'False':
+                year_sort_desc = False
+            else:
+                year_sort_desc = True
         else:
             year_sort_desc = True
-        try:
-            start_pos = int(start_pos)
-            end_pos = int(end_pos)
-        except:
-            start_pos = None
-            end_pos = None
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
@@ -308,11 +343,14 @@ def get_query(request):
                 results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
+
+        View.instance().query_logger.write_api_call(True, "get_query", str(request))
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
                  query_limit_hit="False"))
     except Exception:
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
@@ -338,11 +376,15 @@ def get_provenance(request):
                                                                   predication_ids)
             except IOError:
                 logging.debug('Could not write provenance log file')
+
+            View.instance().query_logger.write_api_call(True, "get_provenance", str(request))
             return JsonResponse(dict(result=result.to_dict()))
         except Exception:
+            View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
     else:
+        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
         return HttpResponse(status=500)
 
 
@@ -364,11 +406,14 @@ def get_feedback(request):
                 View.instance().query_logger.write_rating(query, userid, predication_ids)
             except IOError:
                 logging.debug('Could not write rating log file')
+            View.instance().query_logger.write_api_call(True, "get_feedback", str(request))
             return HttpResponse(status=200)
         except Exception:
+            View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
     else:
+        View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
         return HttpResponse(status=500)
 
 
