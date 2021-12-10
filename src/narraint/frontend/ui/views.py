@@ -198,10 +198,10 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
 @gzip_page
 def get_query_narrative_documents(request):
     if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     query = str(request.GET["query"]).strip()
@@ -232,6 +232,47 @@ def get_query_narrative_documents(request):
     except Exception:
         View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
+
+
+@gzip_page
+def get_narrative_documents(request):
+    if "document" not in request.GET and "documents" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        return JsonResponse(status=500, data=dict(reason="document/documents parameter is missing"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    document_ids = set()
+    if "document" in request.GET:
+        try:
+            document_id = int(request.GET["document"].strip())
+            document_ids.add(document_id)
+        except ValueError:
+            View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+            return JsonResponse(status=500, data=dict(reason="document must be an integer"))
+    elif "documents" in request.GET:
+        try:
+            document_ids.update([int(did) for did in request.GET["documents"].strip().split(';')])
+        except ValueError:
+            View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+            return JsonResponse(status=500, data=dict(reason="documents must be a list of integer (separated by ;)"))
+
+    document_collection = str(request.GET["data_source"]).strip()
+    try:
+        time_start = datetime.now()
+        # get narrative documents
+        session = SessionExtended.get()
+        narrative_documents = retrieve_narrative_documents_from_database(session, document_ids=document_ids,
+                                                                         document_collection=document_collection)
+
+        View.instance().query_logger.write_api_call(True, "get_narrative_document", str(request),
+                                                    time_needed=datetime.now() - time_start)
+        return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except Exception:
+        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        return JsonResponse(status=500, data=dict(answer="Internal server error"))
+
 
 
 @gzip_page
@@ -268,9 +309,9 @@ def get_query_sub_count(request):
             var2sub = aggregate.var2substitution
             # get the first substitution
             var_name, sub = next(iter(var2sub.items()))
-            sub_count_list.append(dict(entity_id=sub.entity_id,
-                                       entity_name=sub.entity_name,
-                                       doc_count=aggregate.get_result_size()))
+            sub_count_list.append(dict(id=sub.entity_id,
+                                       name=sub.entity_name,
+                                       count=aggregate.get_result_size()))
 
         View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
                                                     time_needed=datetime.now()-time_start)

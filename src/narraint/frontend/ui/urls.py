@@ -3,7 +3,7 @@ from django.views.decorators.cache import never_cache
 
 from narraint.frontend.ui.views import SearchView, get_autocompletion, get_check_query, get_query, get_feedback, \
     post_report, get_provenance, get_document_graph, get_tree_info, get_query_sub_count, get_document_link_clicked, \
-    get_query_narrative_documents
+    get_query_narrative_documents, get_narrative_documents
 
 urlpatterns = [
     path("", never_cache(SearchView.as_view()), name="search"),
@@ -17,5 +17,6 @@ urlpatterns = [
     path("document_graph", get_document_graph, name="document_graph"),
     path("tree_info", get_tree_info, name="tree_info"),
     path("document_clicked", get_document_link_clicked, name="document_clicked"),
-    path("query_narrative_documents", get_query_narrative_documents, name="query_narrative_documents")
+    path("query_narrative_documents", get_query_narrative_documents, name="query_narrative_documents"),
+    path("narrative_documents", get_narrative_documents, name="narrative_documents")
 ]
