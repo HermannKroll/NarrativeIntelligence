@@ -15,7 +15,7 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating
+from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -35,7 +35,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-DO_CACHING = False
+DO_CACHING = True
 
 
 class View:
@@ -196,6 +196,43 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
 
 
 @gzip_page
+def get_query_narrative_documents(request):
+    if "query" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    query = str(request.GET["query"]).strip()
+    document_collection = str(request.GET["data_source"]).strip()
+
+    graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+    if not graph_query or len(graph_query.fact_patterns) == 0:
+        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
+
+    if QueryTranslation.count_variables_in_query(graph_query) != 0:
+        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        return JsonResponse(status=500, data=dict(answer="Does not support queries with variables"))
+
+    try:
+        # compute the query
+        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        result_ids = {r.document_id for r in results}
+        # get narrative documents
+        session = SessionExtended.get()
+        narrative_documents = retrieve_narrative_documents_from_database(session, document_ids=result_ids,
+                                                                         document_collection=document_collection)
+
+        View.instance().query_logger.write_api_call(True, "get_query_narrative_documents", str(request))
+        return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except Exception:
+        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        return JsonResponse(status=500, data=dict(answer="Internal server error"))
+
+
+@gzip_page
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
         query = str(request.GET["query"]).strip()
@@ -207,9 +244,11 @@ def get_query_sub_count(request):
 
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
         if not graph_query or len(graph_query.fact_patterns) == 0:
-            return JsonResponse(status=500, data=dict(answer="query not valid", reason=query_trans_string))
+            View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
+            return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
 
         if QueryTranslation.count_variables_in_query(graph_query) != 1:
+            View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
             return JsonResponse(status=500, data=dict(answer="query must have one variable"))
 
         # compute the query
@@ -247,10 +286,10 @@ def get_query(request):
     query_limit_hit = False
     query_trans_string = ""
     if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
