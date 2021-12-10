@@ -147,7 +147,8 @@ class QueryLogger:
                                          '{}-api_calls.log'.format(time.strftime("%Y-%m-%d")))
             timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
             if not time_needed:
-                time_needed = datetime.now() - datetime.now()
+                now = datetime.now()
+                time_needed = now - now
 
             log_entry = f'\n{timestr}\t{time_needed}\t{success}\t{route}\t{call}'
             if not os.path.isfile(log_file_name):
