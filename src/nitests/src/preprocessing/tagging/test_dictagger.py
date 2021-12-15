@@ -2,7 +2,7 @@ import os
 import unittest
 
 import narrant.pubtator.document as doc
-from narrant.preprocessing.tagging.dictagger import split_indexed_words
+from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTagger
 from narrant.preprocessing.tagging.dosage import DosageFormTagger
 from narrant.preprocessing.tagging.drug import DrugTagger
 from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
@@ -86,6 +86,20 @@ class TestDictagger(unittest.TestCase):
         self.assertIn(('water', 10), indexed)
         self.assertIn(('carbon-copper', 32), indexed)
         self.assertNotIn(('carbon', 32), indexed)
+
+    def test_clean_abbreviations(self):
+        ent1 = doc.TaggedEntity(document=1, start=0, end=1, text="AB", ent_type="Drug", ent_id="A")
+        not_ent1_full = doc.TaggedEntity(document=1, start=0, end=6, text="ABCDEF", ent_type="Drug", ent_id="B")
+
+        should_be_cleaned_1 = [ent1]
+        self.assertEqual(0, len(DictTagger.clean_abbreviation_tags(should_be_cleaned_1)))
+
+        should_be_cleaned_2 = [ent1, not_ent1_full]
+        self.assertEqual([not_ent1_full], DictTagger.clean_abbreviation_tags(should_be_cleaned_2))
+
+        ent1_full = doc.TaggedEntity(document=1, start=0, end=6, text="ABCDEF", ent_type="Drug", ent_id="A")
+        should_not_be_cleaned = [ent1, ent1_full]
+        self.assertEqual(should_not_be_cleaned, DictTagger.clean_abbreviation_tags(should_not_be_cleaned))
 
 
 if __name__ == '__main__':
