@@ -49,4 +49,5 @@ class SubstitutionTreeAggregationTest(TestCase):
         # 1 sub on level 1 of second sub
         self.assertEqual(1, len(ranked.results[1].results))
         self.assertEqual(var_sub_2, ranked.results[0].results[1].results[0].results[0].var2substitution)
+        # Todo: This test i broken - fix it
 
