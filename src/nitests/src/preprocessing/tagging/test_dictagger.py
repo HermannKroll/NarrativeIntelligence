@@ -2,6 +2,7 @@ import os
 import unittest
 
 import narrant.pubtator.document as doc
+from narrant.preprocessing.enttypes import DRUG
 from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTagger
 from narrant.preprocessing.tagging.dosage import DosageFormTagger
 from narrant.preprocessing.tagging.drug import DrugTagger
@@ -100,6 +101,29 @@ class TestDictagger(unittest.TestCase):
         ent1_full = doc.TaggedEntity(document=1, start=0, end=6, text="ABCDEF", ent_type="Drug", ent_id="A")
         should_not_be_cleaned = [ent1, ent1_full]
         self.assertEqual(should_not_be_cleaned, DictTagger.clean_abbreviation_tags(should_not_be_cleaned))
+
+    def test_text_tagging_simvastatin(self):
+        text = "Simvastatin (ST) is a drug. Simvastatin is cool. Cool is also simVAStatin. ST is simvastatine."
+        tagger = DrugTagger(**create_test_kwargs())
+        tagger.desc_by_term = {
+            "simvastatin": {"d1"},
+            "simvastatine":  {"d1"}
+        }
+
+        doc1 = doc.TaggedDocument(title=text, abstract="", id=1)
+        tagger.tag_doc(doc1)
+        doc1.sort_tags()
+
+        self.assertEqual(6, len(doc1.tags))
+        positions = [(0, 11), (13, 15), (28, 39), (62, 73), (75, 77), (81, 93)]
+
+        for idx, tag in enumerate(doc1.tags):
+            self.assertEqual(DRUG, tag.ent_type)
+            self.assertEqual("d1", tag.ent_id)
+            self.assertEqual(positions[idx][0], tag.start)
+            self.assertEqual(positions[idx][1], tag.end)
+
+
 
 
 if __name__ == '__main__':
