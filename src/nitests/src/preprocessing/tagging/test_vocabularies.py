@@ -2,7 +2,7 @@ import unittest
 
 from narrant.preprocessing.enttypes import LAB_METHOD, METHOD
 from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
-from narrant.vocabularies.plant_family import PlantFamilyVocabulary
+from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
 from narrant.vocabularies.method_vocabulary import MethodVocabulary
 
 
@@ -71,7 +71,7 @@ class VocabularyTest(unittest.TestCase):
         self.assertEqual(['D1'], enhanced_term2desc['stain and labeling'])
 
     def test_read_plant_families(self):
-        term2id = PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms=True)
+        term2id = PlantFamilyGenusVocabulary.read_plant_family_genus_vocabulary(expand_terms=True)
         self.assertIn("Anamirta", term2id['anamirta'])
         self.assertIn("Anamirta", term2id['anamirtas'])
         self.assertIn("Anamirta", term2id['anamirtae'])

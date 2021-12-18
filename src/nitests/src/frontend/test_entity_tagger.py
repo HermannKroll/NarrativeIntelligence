@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.config import PLANT_FAMILTY_DATABASE_FILE
+from narrant.config import PLANT_GENUS_DATABASE_FILE
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 
 
@@ -96,7 +96,7 @@ class EntityTaggerTestCase(TestCase):
         Tests whether plant family names can be tagged correctly
         """
         plant_families_in_db = []
-        with open(PLANT_FAMILTY_DATABASE_FILE, 'rt') as f:
+        with open(PLANT_GENUS_DATABASE_FILE, 'rt') as f:
             plant_families_in_db = [line.strip() for line in f]
 
         for pf in plant_families_in_db:

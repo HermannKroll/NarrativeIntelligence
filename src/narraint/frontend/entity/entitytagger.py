@@ -19,7 +19,7 @@ from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, CHEMICAL
-from narrant.vocabularies.plant_family import PlantFamilyVocabulary
+from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
@@ -163,7 +163,7 @@ class EntityTagger:
         Add all plant family names
         :return:
         """
-        for family_name in PlantFamilyVocabulary.read_plant_family_vocabulary(expand_terms=False):
+        for family_name in PlantFamilyGenusVocabulary.read_plant_family_genus_vocabulary(expand_terms=False):
             self.term2entity[family_name.strip().lower()].add(Entity(family_name.capitalize(), PLANT_FAMILY))
 
     def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE):
