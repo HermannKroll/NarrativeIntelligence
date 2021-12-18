@@ -123,7 +123,27 @@ class TestDictagger(unittest.TestCase):
             self.assertEqual(positions[idx][0], tag.start)
             self.assertEqual(positions[idx][1], tag.end)
 
+    def test_text_tagging_simvastatin_title_abstract(self):
+        title = "Simvastatin (ST) is a drug."
+        abstract = "Simvastatin is cool. Cool is also simVAStatin. ST is simvastatine."
+        tagger = DrugTagger(**create_test_kwargs())
+        tagger.desc_by_term = {
+            "simvastatin": {"d1"},
+            "simvastatine": {"d1"}
+        }
 
+        doc1 = doc.TaggedDocument(title=title, abstract=abstract, id=1)
+        tagger.tag_doc(doc1)
+        doc1.sort_tags()
+
+        self.assertEqual(6, len(doc1.tags))
+        positions = [(0, 11), (13, 15), (28, 39), (62, 73), (75, 77), (81, 93)]
+
+        for idx, tag in enumerate(doc1.tags):
+            self.assertEqual(DRUG, tag.ent_type)
+            self.assertEqual("d1", tag.ent_id)
+            self.assertEqual(positions[idx][0], tag.start)
+            self.assertEqual(positions[idx][1], tag.end)
 
 
 if __name__ == '__main__':
