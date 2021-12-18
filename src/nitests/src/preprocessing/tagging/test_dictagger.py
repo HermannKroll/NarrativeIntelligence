@@ -6,7 +6,7 @@ from narrant.preprocessing.enttypes import DRUG
 from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTagger
 from narrant.preprocessing.tagging.dosage import DosageFormTagger
 from narrant.preprocessing.tagging.drug import DrugTagger
-from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
+from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
 from nitests.util import create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
     resource_rel_path
 

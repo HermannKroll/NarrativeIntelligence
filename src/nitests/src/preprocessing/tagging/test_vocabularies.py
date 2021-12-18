@@ -1,7 +1,9 @@
 import unittest
 
 from narrant.preprocessing.enttypes import LAB_METHOD, METHOD
-from narrant.preprocessing.tagging.vocabularies import MethodVocabulary, PlantFamilyVocabulary, expand_vocabulary_term
+from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
+from narrant.vocabularies.plant_family import PlantFamilyVocabulary
+from narrant.vocabularies.method_vocabulary import MethodVocabulary
 
 
 class VocabularyTest(unittest.TestCase):

@@ -7,7 +7,7 @@ from narraint.config import PREPROCESS_CONFIG, DATA_DIR
 from narrant import tools
 from narrant.preprocessing.config import Config
 from narrant.preprocessing.tagging.disease import DiseaseTagger
-from narrant.preprocessing.tagging.vocabularies import expand_vocabulary_term
+from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
 
 STOPWORD_LIST = tools.proj_rel_path("data/bc2gn_stopwords.txt")
 BC2GN_DIR = os.path.join(DATA_DIR, "NER/biocreative2normalization/")

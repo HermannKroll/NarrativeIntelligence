@@ -19,8 +19,10 @@ from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY, CHEMICAL
-from narrant.preprocessing.tagging.vocabularies import ExcipientVocabulary, PlantFamilyVocabulary, DrugVocabulary, \
-    ChemicalVocabulary
+from narrant.vocabularies.plant_family import PlantFamilyVocabulary
+from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
+from narrant.vocabularies.drug_vocabulary import DrugVocabulary
+from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.progress import print_progress_with_eta
 
 
