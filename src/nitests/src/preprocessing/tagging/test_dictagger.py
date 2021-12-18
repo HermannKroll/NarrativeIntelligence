@@ -145,6 +145,29 @@ class TestDictagger(unittest.TestCase):
             self.assertEqual(positions[idx][0], tag.start)
             self.assertEqual(positions[idx][1], tag.end)
 
+    def test_text_tagging_long_entities(self):
+        title = "complex disease"
+        tagger = DrugTagger(**create_test_kwargs())
+        tagger.desc_by_term = {
+            "complex disease": {"d1"},
+            "disease": {"d2"}
+        }
+
+        doc1 = doc.TaggedDocument(title=title, abstract="", id=1)
+        tagger.tag_doc(doc1)
+        self.assertEqual(2, len(doc1.tags))
+
+        # now the smaller tag should be removed
+        doc1.clean_tags()
+        doc1.sort_tags()
+
+        self.assertEqual(1, len(doc1.tags))
+        tag = doc1.tags[0]
+        self.assertEqual(0, tag.start)
+        self.assertEqual(15, tag.end)
+        self.assertEqual("d1", tag.ent_id)
+        self.assertEqual(DRUG, tag.ent_type)
+
 
 if __name__ == '__main__':
     unittest.main()
