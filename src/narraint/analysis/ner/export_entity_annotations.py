@@ -5,7 +5,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, Document
-from narrant.preprocessing.enttypes import DRUG, PLANT_FAMILY, DOSAGE_FORM, EXCIPIENT
+from narrant.preprocessing.enttypes import DRUG, PLANT_FAMILY_GENUS, DOSAGE_FORM, EXCIPIENT
 
 ANNOTATIONS_TO_EXPORT = 50
 DOCUMENT_COLLECTION = 'PubMed'
@@ -65,7 +65,7 @@ def main():
 
     logging.info('exporting plant families...')
     rand_pf_query = session.query(Tag).filter(Tag.document_collection == DOCUMENT_COLLECTION) \
-        .filter(Tag.ent_type == PLANT_FAMILY).order_by(func.random()).limit(ANNOTATIONS_TO_EXPORT)
+        .filter(Tag.ent_type == PLANT_FAMILY_GENUS).order_by(func.random()).limit(ANNOTATIONS_TO_EXPORT)
     export_annotations(session, rand_pf_query, 'annotations_plant_family.tsv')
 
     logging.info('exporting dosage forms...')

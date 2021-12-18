@@ -7,7 +7,7 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY
+from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS
 
 
 class QueryTranslation:
@@ -20,13 +20,13 @@ class QueryTranslation:
         # support entry of targets
         self.variable_type_mappings["dosage form"] = DOSAGE_FORM
         self.variable_type_mappings["dosage forms"] = DOSAGE_FORM
-        self.variable_type_mappings["plant familiy"] = PLANT_FAMILY
-        self.variable_type_mappings["plant families"] = PLANT_FAMILY
-        self.variable_type_mappings["plantfamilies"] = PLANT_FAMILY
-        self.variable_type_mappings["plantgenus"] = PLANT_FAMILY
-        self.variable_type_mappings["plantgenera"] = PLANT_FAMILY
-        self.variable_type_mappings["plant genus"] = PLANT_FAMILY
-        self.variable_type_mappings["plant genera"] = PLANT_FAMILY
+        self.variable_type_mappings["plant familiy"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plant families"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plantfamilies"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plantgenus"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plantgenera"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plant genus"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plant genera"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["lab method"] = LAB_METHOD
         self.variable_type_mappings["target"] = GENE
         self.variable_type_mappings["targets"] = GENE

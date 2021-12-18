@@ -8,7 +8,7 @@ import datrie
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
+    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
 from narrant.progress import print_progress_with_eta
 
 
@@ -26,7 +26,7 @@ class AutocompletionUtil:
             raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
         else:
             self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target", "PlantGenus", "PlantGenera",
-                                   SPECIES, PLANT_FAMILY, EXCIPIENT, DRUG,
+                                   SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG,
                                    CHEMBL_CHEMICAL, METHOD, LAB_METHOD}
             self.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
 

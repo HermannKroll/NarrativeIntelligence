@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, DocTaggedBy, Tag
 from narrant.backend.models import DocumentClassification
-from narrant.preprocessing.enttypes import PLANT_FAMILY, DRUG
+from narrant.preprocessing.enttypes import PLANT_FAMILY_GENUS, DRUG
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
     session = SessionExtended.get()
     subquery_drug = session.query(Tag.document_id).filter(and_(Tag.document_collection == collection,
                                                                Tag.ent_type.in_(
-                                                                   [DRUG, PLANT_FAMILY]))).distinct()
+                                                                   [DRUG, PLANT_FAMILY_GENUS]))).distinct()
 
     subquery_pharm = session.query(DocumentClassification.document_id).filter(
         and_(DocumentClassification.document_collection == collection,

@@ -9,13 +9,13 @@ from narrant.pubtator.extract import read_tagged_documents
 
 
 class TestMetadictagger(unittest.TestCase):
-    ent_type_set = {et.DRUG, et.EXCIPIENT, et.DOSAGE_FORM, et.PLANT_FAMILY}
+    ent_type_set = {et.DRUG, et.EXCIPIENT, et.DOSAGE_FORM, et.PLANT_FAMILY_GENUS}
 
     def test_init(self):
         metatag = TestMetadictagger.make_metatag()
         self.assertSetEqual(set(metatag._vocabs.keys()), TestMetadictagger.ent_type_set)
         self.assertIn("MESH:D007267", metatag._vocabs[et.DOSAGE_FORM]["injection"])
-        self.assertIn("Agave", metatag._vocabs[et.PLANT_FAMILY]["agave"])
+        self.assertIn("Agave", metatag._vocabs[et.PLANT_FAMILY_GENUS]["agave"])
         self.assertIn("CHEMBL412873", metatag._vocabs[et.DRUG]["sparteine"])
 
     def test_tag(self):

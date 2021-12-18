@@ -3,22 +3,22 @@ import unittest
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, \
     SPECIES, \
-    PLANT_FAMILY, LAB_METHOD, METHOD
+    PLANT_FAMILY_GENUS, LAB_METHOD, METHOD
 from nitests import util
 
-PREDICATE_TYPING_TEST = {'treats': ({CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY},
+PREDICATE_TYPING_TEST = {'treats': ({CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS},
                                     {DISEASE, SPECIES}),
                          'administered': ({DOSAGE_FORM}, {"All"}),
                          'method': ({METHOD, LAB_METHOD}, {"All"}),
-                         'induces': ({CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY},
-                                     {CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY}),
-                         'decreases': ({CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY},
-                                       {CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY}),
-                         'interacts': ({CHEMICAL, DRUG, EXCIPIENT, GENE, PLANT_FAMILY},
-                                       {CHEMICAL, DRUG, EXCIPIENT, GENE, PLANT_FAMILY}),
+                         'induces': ({CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY_GENUS},
+                                     {CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY_GENUS}),
+                         'decreases': ({CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY_GENUS},
+                                       {CHEMICAL, DRUG, EXCIPIENT, DISEASE, PLANT_FAMILY_GENUS}),
+                         'interacts': ({CHEMICAL, DRUG, EXCIPIENT, GENE, PLANT_FAMILY_GENUS},
+                                       {CHEMICAL, DRUG, EXCIPIENT, GENE, PLANT_FAMILY_GENUS}),
                          'metabolises': ({GENE},
-                                         {CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY}),
-                         'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY},
+                                         {CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS}),
+                         'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS},
                                       {GENE}),
                          }
 
