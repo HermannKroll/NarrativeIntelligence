@@ -39,8 +39,6 @@ class TestMetadictagger(unittest.TestCase):
         out_file.clean_tags()
         self.assertIn(TaggedEntity(None, 32926486, 716, 718, "eo", "Excipient", "CHEMBL1743219"), out_file.tags)
         self.assertIn(TaggedEntity(None, 32926486, 1234, 1236, "eo", "Excipient", "CHEMBL1743219"), out_file.tags)
-        dftag = TaggedEntity(None, 32926486, 1366, 1369, "i-h", "DosageForm", "MESH:D000280")
-        self.assertIn(dftag, out_file.tags)
 
     def test_custom_abbreviation_with_closing_space(self):
         in_file = util.get_test_resource_filepath("infiles/test_metadictagger/h2o2space_test.txt")
