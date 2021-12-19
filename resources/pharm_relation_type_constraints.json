@@ -4,7 +4,7 @@
       "Chemical",
       "Drug",
       "Excipient",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ],
     "objects": [
       "Disease",
@@ -36,14 +36,14 @@
       "Drug",
       "Excipient",
       "Disease",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ],
     "objects": [
       "Chemical",
       "Drug",
       "Excipient",
       "Disease",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ]
   },
   "decreases": {
@@ -52,14 +52,14 @@
       "Drug",
       "Excipient",
       "Disease",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ],
     "objects": [
       "Chemical",
       "Drug",
       "Excipient",
       "Disease",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ]
   },
   "interacts": {
@@ -68,14 +68,14 @@
       "Drug",
       "Excipient",
       "Gene",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ],
     "objects": [
       "Chemical",
       "Drug",
       "Excipient",
       "Gene",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ]
   },
   "metabolises": {
@@ -86,7 +86,7 @@
       "Chemical",
       "Drug",
       "Excipient",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ]
   },
   "inhibits": {
@@ -94,7 +94,7 @@
       "Chemical",
       "Drug",
       "Excipient",
-      "PlantFamily"
+      "PlantFamily/Genus"
     ],
     "objects": [
       "Gene"
