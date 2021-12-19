@@ -28,20 +28,23 @@ def derive_ent_id_and_type_from_concept_str(concept_str: str, concept_class: str
         return None, None
 
     if concept_class == 'MESHD':
+        # ignore mesh supplements
+        if e_id.startswith('C'):
+            return None, None
+
         mesh_ontology = MeSHOntology.instance()
         # its a mesh class
         try:
             e_types = mesh_ontology.get_entity_types_for_descriptor(e_id)
-        except KeyError:
-            return None, None
-
-        e_id = f'MESH:{e_id}'
-        if len(e_types) == 0 or len(e_types) > 1:
             if "Disease" in e_types:
-                return e_id, DISEASE
+                return f'MESH:{e_id}', DISEASE
             else:
-                raise ValueError(f'Cannot find a unique entity type for MeSH descriptor: {e_id}')
-        return e_id, e_types[0]
+                logging.warning(
+                    f'Cannot decode unique entity type (found {e_types}) for MeSH descriptor: {e_id} ({concept_str})')
+                return None, None
+        except KeyError:
+            logging.warning(f'Cannot decode entity type for MeSH descriptor: {e_id} ({concept_str})')
+            return None, None
     elif concept_class == 'HGNC':
         # ids look like HGNC:6023
         e_id = e_id.split(':')[1]
@@ -72,6 +75,7 @@ def zbmed_load_json_file_to_database(json_file: str, document_collection: str) -
     q = session.query(DocumentTranslation.document_id, DocumentTranslation.source_doc_id) \
         .filter(DocumentTranslation.document_collection == document_collection).distinct()
     last_known_translated_id = 0
+
     for row in q:
         if row[0] > last_known_translated_id:
             last_known_translated_id = row[0]
@@ -116,7 +120,7 @@ def zbmed_load_json_file_to_database(json_file: str, document_collection: str) -
             e_id, e_type = derive_ent_id_and_type_from_concept_str(a_concept, a_class)
             if e_id and e_type:
                 entity_annotations.append(TaggedEntity(document=art_doc_id, start=a_start, end=a_end,
-                                                       ent_type=e_id, ent_id=e_type, text=a_text))
+                                                       ent_type=e_type, ent_id=e_id, text=a_text))
 
         title_offset = len(title)
         for anno in doc["abstract_annotations"]:
@@ -130,7 +134,7 @@ def zbmed_load_json_file_to_database(json_file: str, document_collection: str) -
             if e_id and e_type:
                 entity_annotations.append(TaggedEntity(document=art_doc_id, start=a_start + title_offset,
                                                        end=a_end + title_offset,
-                                                       ent_type=e_id, ent_id=e_type, text=a_text))
+                                                       ent_type=e_type, ent_id=e_id, text=a_text))
 
         tagged_doc = TaggedDocument(title=title, abstract=abstract, id=art_doc_id)
         tagged_doc.tags = entity_annotations
