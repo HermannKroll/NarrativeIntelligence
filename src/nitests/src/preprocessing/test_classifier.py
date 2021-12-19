@@ -6,11 +6,11 @@ from narrant.pubtator.document import TaggedDocument
 from nitests import util
 
 
-class TestClassfier(unittest.TestCase):
+class TestClassifier(unittest.TestCase):
     pet_rules = util.get_test_resource_filepath("classifier_rules/testrules.txt")
 
     def test_read_ruleset(self):
-        rules = Classifier.read_ruleset(TestClassfier.pet_rules)
+        rules = Classifier.read_ruleset(TestClassifier.pet_rules)
         self.assertIn([re.compile(r"kitten\w*\b", re.IGNORECASE)], rules)
         self.assertIn([re.compile(r"dog\w*\b", re.IGNORECASE)], rules)
         self.assertIn([re.compile(r"hamster\b", re.IGNORECASE)], rules)
@@ -18,7 +18,7 @@ class TestClassfier(unittest.TestCase):
 
     def test_translate_rule(self):
         rule1 = 'volatile w/1 compound*'
-        goal1 = r'volatile \w+ compound\w*\b'
+        goal1 = r'volatile \w* compound\w*\b'
         self.assertEqual(re.compile(goal1, re.IGNORECASE), Classifier.compile_entry_to_regex(rule1))
 
         # apply regex
@@ -31,7 +31,7 @@ class TestClassfier(unittest.TestCase):
         self.assertFalse(re.match(re1_compiled, test1_b))
 
         rule2 = 'Traditional w/1 Medicine'
-        goal2 = r'Traditional \w+ Medicine\b'
+        goal2 = r'Traditional \w* Medicine\b'
         self.assertEqual(re.compile(goal2, re.IGNORECASE), Classifier.compile_entry_to_regex(rule2))
 
         # apply regex
@@ -46,15 +46,15 @@ class TestClassfier(unittest.TestCase):
         self.assertIn(re.compile(goal2, re.IGNORECASE), Classifier.compile_line_to_regex(rule3))
 
         rule3 = 'Traditional w/2 Medicine'
-        goal3 = r'Traditional \w+ \w+ Medicine\b'
+        goal3 = r'Traditional \w* \w* Medicine\b'
         self.assertEqual(re.compile(goal3, re.IGNORECASE), Classifier.compile_entry_to_regex(rule3))
 
         rule4 = 'Traditional w/5 Medicine'
-        goal4 = r'Traditional \w+ \w+ \w+ \w+ \w+ Medicine\b'
+        goal4 = r'Traditional \w* \w* \w* \w* \w* Medicine\b'
         self.assertEqual(re.compile(goal4, re.IGNORECASE), Classifier.compile_entry_to_regex(rule4))
 
     def test_classify(self):
-        classfier = Classifier("pet", rule_path=TestClassfier.pet_rules)
+        classfier = Classifier("pet", rule_path=TestClassifier.pet_rules)
         positive_docs = [
             TaggedDocument(title="some animals", abstract="Some people keep an animal in their house."),
             TaggedDocument(title="a cute hamster", abstract=""),
