@@ -1,15 +1,13 @@
-import os
 import unittest
 
 import narrant.pubtator.document as doc
 from narrant.preprocessing.enttypes import DRUG
 from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTagger
-from narrant.preprocessing.tagging.dosage import DosageFormTagger
-from narrant.preprocessing.tagging.drug import DrugTagger
+from narrant.preprocessing.pharmacy.dosage import DosageFormTagger
+from narrant.preprocessing.pharmacy.drug import DrugTagger
 from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
 from narrant.pubtator.extract import read_tagged_documents
-from nitests.util import create_test_kwargs, get_test_resource_filepath, tmp_rel_path, \
-    resource_rel_path
+from nitests.util import create_test_kwargs, get_test_resource_filepath, resource_rel_path
 
 
 class TestDictagger(unittest.TestCase):

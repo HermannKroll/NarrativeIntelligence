@@ -3,7 +3,7 @@ import unittest
 
 import narrant.preprocessing.enttypes as et
 import nitests.util as util
-from narrant.preprocessing.tagging.metadictagger import PharmDictTagger
+from narrant.preprocessing.pharmacy.pharmdicttagger import PharmDictTagger
 from narrant.pubtator.document import parse_tag_list, TaggedEntity
 from narrant.pubtator.extract import read_tagged_documents
 
