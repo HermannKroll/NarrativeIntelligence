@@ -1,6 +1,5 @@
 import unittest
 
-from narrant.preprocessing.enttypes import VACCINE
 from narrant.preprocessing.pharmacy.drug import DrugTagger
 from narrant.pubtator.document import TaggedDocument
 from nitests.util import create_test_kwargs
@@ -41,5 +40,3 @@ class TestDrugVocabulary(unittest.TestCase):
         doc.sort_tags()
 
         self.assertEqual(0, len(doc.tags))
-
-
