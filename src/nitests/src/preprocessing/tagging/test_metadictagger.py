@@ -63,8 +63,7 @@ class TestMetadictagger(unittest.TestCase):
     @staticmethod
     def make_metatag():
         factory = PharmDictTagger(TestMetadictagger.ent_type_set,
-                                  util.create_test_kwargs(
-                                           util.get_test_resource_filepath("infiles/test_metadictagger/")))
+                                  util.create_test_kwargs())
         metatag = factory.create_MetaDicTagger()
         metatag.prepare()
         return metatag

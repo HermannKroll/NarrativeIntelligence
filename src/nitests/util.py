@@ -10,16 +10,9 @@ from narrant.pubtator.document import TaggedEntity
 from narrant.pubtator.extract import collect_ids_from_dir
 
 
-def create_test_kwargs(in_dir=None):
-    if in_dir:
-        _, mapping_file_id, mapping_id_file = collect_ids_from_dir(in_dir)
-    else:
-        mapping_id_file, mapping_file_id = None, None
+def create_test_kwargs():
     config = cnf.Config(PREPROCESS_CONFIG)
-    test_kwargs = dict(collection="testcol", root_dir=make_test_tempdir(), input_dir=in_dir,
-                       logger=logging,
-                       log_dir=make_test_tempdir(),
-                       config=config, mapping_id_file=mapping_id_file, mapping_file_id=mapping_file_id)
+    test_kwargs = dict(logger=logging, config=config, collection='TestCollection')
     return test_kwargs
 
 
