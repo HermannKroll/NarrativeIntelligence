@@ -116,7 +116,7 @@ def zbmed_load_json_file_to_database(json_file: str, document_collection: str) -
             a_concept = anno["concept"]
             a_start = anno["offset"]["start"]
             a_end = anno["offset"]["end"]
-            a_text = title[a_start:a_end]
+            a_text = title[a_start:a_end].lower()
             e_id, e_type = derive_ent_id_and_type_from_concept_str(a_concept, a_class)
             if e_id and e_type:
                 entity_annotations.append(TaggedEntity(document=art_doc_id, start=a_start, end=a_end,
@@ -128,7 +128,7 @@ def zbmed_load_json_file_to_database(json_file: str, document_collection: str) -
             a_concept = anno["concept"]
             a_start = anno["offset"]["start"]
             a_end = anno["offset"]["end"]
-            a_text = abstract[a_start:a_end]
+            a_text = abstract[a_start:a_end].lower()
 
             e_id, e_type = derive_ent_id_and_type_from_concept_str(a_concept, a_class)
             if e_id and e_type:
