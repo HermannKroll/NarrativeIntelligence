@@ -15,7 +15,7 @@ def export_doc_tag_pred(out_file: Union[Path, str], collection: str=None, ids: L
     pred_query = ses.execute(ses.query(Predication, Sentence)
                              .filter(Predication.sentence_id == Sentence.id)
                              .yield_per(10_000)
-                             .order_by(Predication.document_collection, Predication.document_id))
+                             .order_by(Predication.document_collection, Predication.document_id, Predication.sentence_id))
     with open(out_file, "w+") as f:
         for res in iter_join(doc_query, ["id", "collection"],
                              [tag_query, pred_query], [["document_id", "document_collection"],

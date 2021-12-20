@@ -8,7 +8,7 @@ from narraint.pollux.doctranslation import SourcedDocument, DocumentTranslationL
 
 
 class PolluxLoader(DocumentTranslationLoader):
-    def __init__(self, collection):
+    def __init__(self, collection, loader_kwargs=None):
         super().__init__(collection)
 
     # make this an overridable class and include it into toolbox
@@ -18,15 +18,16 @@ class PolluxLoader(DocumentTranslationLoader):
         with open(file) as f:
             for line in f:
                 content = json.loads(line)
-                if not content["languages"] or 'eng' not in content["languages"] or len(content["languages"]) > 1:
-                    continue
+                #if not content["languages"] or 'eng' not in content["languages"] or len(content["languages"]) > 1:
+                    #continue
+                #    pass
                 source_id = content["id"]
                 source = file.name
-                title = content["title"].encode('unicode_escape').decode('unicode_escape')
-                for n, abstract in enumerate(content["abstracts"]):
-                    doc = TaggedDocument(title=title, abstract=abstract['value'].encode('unicode_escape').decode(
-                        'unicode_escape'))
-                    yield SourcedDocument(f"{source_id}:{n}", source, doc)
+                title = content["topic"].encode('unicode_escape').decode('unicode_escape')
+                #for n, abstract in enumerate(content["abstracts"]):
+                doc = TaggedDocument(title=title, abstract=content['abstract'].encode('unicode_escape').decode(
+                    'unicode_escape'))
+                yield SourcedDocument(f"{source_id}", source, doc)
 
     def count_documents(self, file: Union[Path, str]):
         count = 0

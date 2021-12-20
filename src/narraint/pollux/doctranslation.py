@@ -36,7 +36,7 @@ class DocumentTranslationLoader:
     overwritten.
     """
 
-    def __init__(self, collection: str):
+    def __init__(self, collection: str, loader_kwargs=None):
         """
         superconstructor to be called by subclass. The class instance is bound to a single document collection value for
         the document collection column in the databse
@@ -61,6 +61,7 @@ class DocumentTranslationLoader:
         )
         return [r for r in result][0][0] or 0
 
+    #TODO: it is an utterly bad idea to send one query per document. query all hashes at the start, than expand.
     def check_md5_changed(self, doc: SourcedDocument) -> str:
         """
         calculate the hexadecimal representation of md5 sum of a sourced document using its title and abstract
@@ -133,7 +134,7 @@ class DocumentTranslationLoader:
                         first = False
                     outf.write(json.dumps(sdoc.doc.to_dict()))
                     processed_docs += 1
-                    if len(translations) > 100:
+                    if len(translations) > 10000:
                         self.flush(translations)
                         translations = []
                 prog_logger.print_progress(processed_docs)
@@ -179,7 +180,7 @@ class DocumentTranslationLoader:
         raise NotImplementedError()
 
 
-def main(doctranslation_subclass: Type[DocumentTranslationLoader], doctrans_args=None, args: List[str] = None, parser = None):
+def main(doctranslation_subclass: Type[DocumentTranslationLoader], doctrans_args=None, args: List[str] = None, parser = None, loader_kwargs=None):
     """
     Run the document translation, insert translation entries into the document_translation table,
     export documents to a json file and load them into the database if -l flag is set.
@@ -200,14 +201,14 @@ def main(doctranslation_subclass: Type[DocumentTranslationLoader], doctrans_args
     parser.add_argument("-n", "--limit", type=int, help="Only exctract that many documents from source doc")
     args = parser.parse_args(args)
 
-    loader = doctranslation_subclass(args.collection)
+    loader = doctranslation_subclass(args.collection, loader_kwargs)
     logging.info("Pollux document translation")
     logging.debug(f"Input file: {args.input}")
     logging.debug(f"Output file: {args.output}")
     logging.info("Counting documents...")
     count = loader.count_documents(args.input)
     logging.info(f"Found {count} documents.")
-    prog = Progress(total=(args.limit or count), text="Translating")
+    prog = Progress(total=(args.limit or count), text="Translating", print_every=1000)
     proc_docs = loader.translate(args.input, args.output, diff=args.diff, prog_logger=prog, limit=args.limit)
     logging.info(f"Processed {proc_docs} new or changed documents.")
     if args.load:
