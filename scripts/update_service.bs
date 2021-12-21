@@ -1,0 +1,7 @@
+# Finally compute the new metadata service table2
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+
+# Compute new query table
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
+
+
