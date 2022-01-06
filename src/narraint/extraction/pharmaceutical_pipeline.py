@@ -178,7 +178,7 @@ def main():
         logging.info('=' * 60)
         logging.info(f'       Processing chunk {idx}/{num_of_chunks}...')
         logging.info('=' * 60)
-        logging.info(batch_ids)
+        logging.info(f'{len(batch_ids)} ids have to been processed in this batch')
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
                                           workers=args.workers, relation_vocab=relation_vocab,
                                           entity_filter=args.entity_filter)
