@@ -48,7 +48,7 @@ class ATCTree:
 
     def load_atc_tree(self, file=CHEMBL_ATC_CLASSIFICATION_FILE):
         logging.info('Reading ATC Chembl information...')
-        with open(CHEMBL_ATC_CLASSIFICATION_FILE, 'rt') as f:
+        with open(file, 'rt') as f:
             reader = csv.reader(f, delimiter=',')
             for row in islice(reader, 1, None):
                 c_id, who_name, level1, level2, level3, level4, level5, \
