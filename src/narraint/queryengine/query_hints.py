@@ -8,7 +8,7 @@ from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM,
 QUERY_LIMIT = 50000
 VAR_NAME = re.compile(r'(\?\w+)')
 VAR_TYPE_PREDICATE = re.compile(r'\((\w+),(\w+)\)')
-VAR_TYPE = re.compile(r'\((\w+)\)')
+VAR_TYPE = re.compile(r'\((\w+/?\w+?)\)')
 
 ENTITY_TYPE_VARIABLE = "Variable"
 
