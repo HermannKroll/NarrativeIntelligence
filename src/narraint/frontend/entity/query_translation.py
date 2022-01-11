@@ -20,7 +20,9 @@ class QueryTranslation:
         # support entry of targets
         self.variable_type_mappings["dosage form"] = DOSAGE_FORM
         self.variable_type_mappings["dosage forms"] = DOSAGE_FORM
-        self.variable_type_mappings["plant familiy"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plantfamily"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plantfamilies"] = PLANT_FAMILY_GENUS
+        self.variable_type_mappings["plant family"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["plant families"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["plantfamilies"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["plantgenus"] = PLANT_FAMILY_GENUS
@@ -206,3 +208,4 @@ class QueryTranslation:
             if o_t == 'Variable':
                 var_set.add(VAR_NAME.search(o).group(1))
         return len(var_set)
+
