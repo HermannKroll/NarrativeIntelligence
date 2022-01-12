@@ -46,6 +46,20 @@ class TestPlantTagger(unittest.TestCase):
         self.assertEqual("Acacia", tag.ent_id)
         self.assertEqual(PLANT_FAMILY_GENUS, tag.ent_type)
 
+    def test_text_tagging_family_and_genus_brackets(self):
+        text = "The wonderful plant (Vitaceae, test) is green."
+
+        doc1 = doc.TaggedDocument(title=text, abstract="", id=1)
+        self.tagger.tag_doc(doc1)
+        doc1.sort_tags()
+
+        self.assertEqual(1, len(doc1.tags))
+        tag = doc1.tags[0]
+        self.assertEqual(21, tag.start)
+        self.assertEqual(29, tag.end)
+        self.assertEqual("Vitaceae", tag.ent_id)
+        self.assertEqual(PLANT_FAMILY_GENUS, tag.ent_type)
+
     def test_text_tagging_genus_without_family(self):
         text = "Bla is a wonderful plant. Acacia is it too."
 
