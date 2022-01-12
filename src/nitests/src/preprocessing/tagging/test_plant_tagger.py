@@ -47,7 +47,7 @@ class TestPlantTagger(unittest.TestCase):
         self.assertEqual(PLANT_FAMILY_GENUS, tag.ent_type)
 
     def test_text_tagging_family_and_genus_brackets(self):
-        text = "The wonderful plant (Vitaceae, test) is green."
+        text = "The wonderful plant (Vitaceae, test), is green."
 
         doc1 = doc.TaggedDocument(title=text, abstract="", id=1)
         self.tagger.tag_doc(doc1)
