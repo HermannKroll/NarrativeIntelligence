@@ -1,4 +1,4 @@
-import csv
+import gzip
 import gzip
 import logging
 import pickle
@@ -12,55 +12,21 @@ import datrie
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
-from narraint.config import ENTITY_TAGGING_INDEX, CHEMBL_ATC_CLASSIFICATION_FILE
-from narrant.config import DOSAGE_FID_DESCS, DOSAGE_ADDITIONAL_DESCS_TERMS, MESH_DESCRIPTORS_FILE, GENE_FILE
+from narraint.config import ENTITY_TAGGING_INDEX
+from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
-from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL
-from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
-from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
-from narrant.vocabularies.drug_vocabulary import DrugVocabulary
-from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
+from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
+    VACCINE
 from narrant.progress import print_progress_with_eta
-
-
-class DosageFormTaggerVocabulary:
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def get_dosage_form_vocabulary_terms():
-        """
-        Get all self-designed vocabulary terms for DosageForms
-        :return: a dict mapping the dosage form id to a set of terms
-        """
-        dfid2terms = defaultdict(set)
-        with open(DOSAGE_FID_DESCS, 'rt') as f:
-            for line in f:
-                df_id, df_head, *rest = line.strip().split('\t')
-                dfid2terms[df_id].add(df_head)
-                if rest:
-                    rest = rest[0]
-                    if ';' in rest:
-                        terms = rest.split(';')
-                        for t in terms:
-                            dfid2terms[df_id].add(t.strip())
-                    else:
-                        dfid2terms[df_id].add(rest.strip())
-
-        with open(DOSAGE_ADDITIONAL_DESCS_TERMS, 'rt') as f:
-            for line in f:
-                df_id, synonyms = line.strip().split('\t')
-                if ';' in synonyms:
-                    terms = synonyms.split(';')
-                    for t in terms:
-                        dfid2terms[df_id].add(t.strip())
-                else:
-                    dfid2terms[df_id].add(synonyms.strip())
-        return dfid2terms
+from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
+from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
+from narrant.vocabularies.drug_vocabulary import DrugVocabulary
+from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
+from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
+from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
 class EntityTagger:
@@ -115,7 +81,8 @@ class EntityTagger:
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
-        self._add_fid_dosageform_terms()
+        self._add_fid_dosageform_terms(resolver=resolver)
+        self._add_vaccine_terms(resolver=resolver)
         self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
@@ -136,19 +103,23 @@ class EntityTagger:
                         self.term2entity[synonym.strip().lower()].add(Entity(gene_symbol, GENE))
         logging.info('Gene terms added')
 
-    def _add_fid_dosageform_terms(self):
+    def _add_fid_dosageform_terms(self, resolver: EntityResolver):
         """
         Add the additional dosage form terms to the internal translation dict
         :return: None
         """
-        for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
-            for t in terms:
-                term = t.strip().lower()
-                # its a mesh descriptor
-                if df_id.startswith('D'):
-                    self.term2entity[term].add(Entity(f'MESH:{df_id}', DOSAGE_FORM))
-                else:
-                    self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
+        for term, df_ids in resolver.dosageform.dosageform_vocabulary.vocabularies[DOSAGE_FORM].items():
+            for df_id in df_ids:
+                self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
+
+    def _add_vaccine_terms(self, resolver: EntityResolver):
+        """
+        Add all vaccine entries
+        :return:
+        """
+        for term, vaccine_ids in resolver.vaccine.vaccine_vocab.vocabularies[VACCINE].items():
+            for vaccine_id in vaccine_ids:
+                self.term2entity[term].add(Entity(vaccine_id, VACCINE))
 
     def _add_excipient_terms(self):
         """

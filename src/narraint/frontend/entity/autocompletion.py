@@ -6,9 +6,9 @@ from datetime import datetime
 import datrie
 
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
-from narraint.frontend.entity.entitytagger import DosageFormTaggerVocabulary, EntityTagger
+from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD
+    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE
 from narrant.progress import print_progress_with_eta
 
 
@@ -27,7 +27,7 @@ class AutocompletionUtil:
         else:
             self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target", "PlantGenus", "PlantGenera",
                                    SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG,
-                                   CHEMBL_CHEMICAL, METHOD, LAB_METHOD}
+                                   CHEMBL_CHEMICAL, METHOD, LAB_METHOD, VACCINE}
             self.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
 
             self.logger = logger
@@ -87,15 +87,6 @@ class AutocompletionUtil:
 
     def compute_known_entities_in_db(self):
         # Write dosage form terms + synonyms
-        for df_id, terms in DosageFormTaggerVocabulary.get_dosage_form_vocabulary_terms().items():
-            for t in terms:
-                if not t.endswith('s'):
-                    t = '{}s'.format(t)
-                t = t.replace('-', ' ')
-                if df_id.startswith('D'):
-                    df_id = 'MESH:{}'.format(df_id)
-                self.add_entity_to_dict(DOSAGE_FORM, t)
-
         logging.info('Adding entity tagger entries...')
         tagger = EntityTagger.instance()
         start_time = datetime.now()

@@ -40,7 +40,9 @@ COMMON_QUERIES = [
     'Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS',
     'Covid19 associated Human _AND_ Disease associated Human',
     'Covid 19 associated Target',
-    'Drug treats Disease'
+    'Drug treats Disease',
+    'Covid19 associated Vaccine',
+    'Covid19 associated Pfizer Covid 19 Vaccine AND Human associated Disease'
 ]
 
 DOCUMENT_COLLECTIONS = ['PubMed', 'LitCovid', "LongCovid", "ZBMed"]

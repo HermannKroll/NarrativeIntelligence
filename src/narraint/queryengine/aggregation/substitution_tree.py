@@ -38,12 +38,15 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
     def rank_results(self, results: List[QueryDocumentResult], ordered_var_names: List[str] = None, freq_sort_desc=True,
                      year_sort_desc=True, start_pos=None, end_pos=None) -> [QueryDocumentResultList, bool]:
         self._clear_state()
-        self.var_names = ordered_var_names
+        # retrieve the var names if not given
+        if results and not ordered_var_names:
+            self.var_names = sorted(list(results[0].var2substitution.keys()))
+        else:
+            self.var_names = ordered_var_names
 
         results.sort(key=lambda x: (x.publication_year, x.publication_month), reverse=year_sort_desc)
         # variable is used
         if self.var_names:
-            self.var_names = ordered_var_names
             for r in results:
                 self._add_query_result(r)
 

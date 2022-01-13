@@ -1094,6 +1094,10 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' <a onclick="event.stopPropagation()"' +
                 'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
                 'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+        } else if (ent_id.slice(0, 1) === "Q") {
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
+                'href="https://www.wikidata.org/wiki/' + ent_id + '" target="_blank"' +
+                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
         } else {
             button_string += ', '.repeat(!!i) + var_sub + ']'
         }
@@ -1283,6 +1287,7 @@ function getVariableData() {
         ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
         ['Species', "target groups, e.g. human, rats, etc."],
         ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
+        ["Vaccine", "used vaccines"]
     ];
 
     let out_tree = []
