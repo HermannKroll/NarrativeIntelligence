@@ -2,10 +2,11 @@ from unittest import TestCase
 
 from sqlalchemy import delete
 
+from kgextractiontoolbox.extraction.loading.load_extractions import PRED
+from kgextractiontoolbox.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode, \
+    get_subject_and_object_entities, clean_tuple_predicate_based
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication
-from kgextractiontoolbox.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode, \
-    get_subject_and_object_entities
 from narrant.backend.load_document import document_bulk_load
 from nitests import util
 
@@ -63,7 +64,8 @@ class LoadExtractionsTestCase(TestCase):
 
         openie_file = util.get_test_resource_filepath("extraction/openie_extractions_1.tsv")
         load_openie_tuples(openie_file, document_collection="Test_Load_OpenIE_1",
-                           entity_filter=OpenIEEntityFilterMode.NO_ENTITY_FILTER)
+                           entity_filter=OpenIEEntityFilterMode.NO_ENTITY_FILTER,
+                           keep_be_and_have=False)
 
         self.assertEqual(8, session.query(Predication).filter(
             Predication.document_collection == "Test_Load_OpenIE_1").count())
@@ -161,3 +163,75 @@ class LoadExtractionsTestCase(TestCase):
 
         self.assertEqual(0, session.query(Predication).filter(
             Predication.document_collection == "Test_Load_OpenIE_1").count())
+
+    def test_clean_tuple_predicate_based_not(self):
+        example1 = PRED(1, "USA", "will not tolerate", "be not tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+
+        cleaned = clean_tuple_predicate_based(example1)
+        self.assertEqual(cleaned, example1)
+
+        example2 = PRED(1, "USA", "will tolerate", "be tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+
+        cleaned2 = clean_tuple_predicate_based(example2)
+        self.assertEqual(cleaned2, example2)
+
+    def test_clean_tuple_predicate_based_ignore_be(self):
+        example1 = PRED(1, "USA", "will not tolerate", "be not tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+
+        cleaned = clean_tuple_predicate_based(example1, keep_be_and_have=False)
+        self.assertNotEqual(cleaned, example1)
+
+        correct1 = PRED(1, "USA", "will not tolerate", "not tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+        self.assertEqual(cleaned, correct1)
+
+        example2 = PRED(1, "USA", "will tolerate", "be tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+        cleaned2 = clean_tuple_predicate_based(example2, keep_be_and_have=False)
+        self.assertNotEqual(cleaned2, example2)
+        correct2 = PRED(1, "USA", "will tolerate", "tolerate", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+        self.assertEqual(cleaned2, correct2)
+
+    def test_clean_tuple_predicate_based_passive_voice(self):
+        # this triple should be flipped (passive voice)
+        example3 = PRED(1, "USA", "be tolerated by", "be tolerate by", "UDSSR", 0.0, "USA will not tolerate UDSSR.",
+                        "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+        correct3 = PRED(1, "UDSSR", "be tolerated by", "be tolerate", "USA", 0.0, "USA will not tolerate UDSSR.",
+                        "UDSSR", "UDSSR", "State", "USA", "USA", "State")
+
+        cleaned3 = clean_tuple_predicate_based(example3)
+        self.assertNotEqual(cleaned3, example3)
+        self.assertEqual(cleaned3, correct3)
+
+    def test_clean_tuple_predicate_based_fails_to(self):
+        example = PRED(1, "USA", "fails to offer", "fail to offer", "UDSSR", 0.0, "USA fails to offer the UDSSR.",
+                       "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+
+        cleaned = clean_tuple_predicate_based(example)
+        self.assertNotEqual(cleaned, example)
+        correct = PRED(1, "USA", "fails to offer", "fail offer", "UDSSR", 0.0, "USA fails to offer the UDSSR.",
+                       "USA", "USA", "State", "UDSSR", "UDSSR", "State")
+        self.assertEqual(cleaned, correct)
+
+    def test_clean_tuple_predicate_based_mate(self):
+        # Example extraction:
+        # 995    Henry A. Wallace,        is mate of from          be mate of from       Franklin D. Roosevelt  0.16
+        #  Letter from Govenor Herbert H. Lehman to William Wallace Farley, October 22, 1940 inviting Mr.
+        #  Farley to a supper party in honor of Henry A. Wallace, Vice Presidential Candidate and running mate of
+        # Franklin D. Roosevelt in the 1940 U.S. Presidential Election..
+        example = PRED(1, "Henry A. Wallace", "is mate of from", "be mate of from", "Franklin D. Roosevelt", 0.0,
+                       ".",
+                       "Henry A. Wallace", "Henry A. Wallace", "Person",
+                       "Franklin D. Roosevelt", "Franklin D. Roosevelt", "Person")
+
+        cleaned = clean_tuple_predicate_based(example)
+        self.assertNotEqual(cleaned, example)
+        correct = PRED(1, "Henry A. Wallace", "is mate of from", "be mate", "Franklin D. Roosevelt", 0.0,
+                       ".",
+                       "Henry A. Wallace", "Henry A. Wallace", "Person",
+                       "Franklin D. Roosevelt", "Franklin D. Roosevelt", "Person")
+        self.assertEqual(cleaned, correct)
