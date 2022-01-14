@@ -13,7 +13,7 @@ UPDATED_IDS="/hdd2/datasets/zbmed/updated_ids.txt"
 
 # First curl the updates
 # #curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"$START_CRAWL_DATA||/M","lt":"$STOP_CRAWL_DATA"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' > $ZBMED_JSON
-# curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2021-12-05||/M","lt":"2021-12-18"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' > $ZBMED_JSON
+curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2021-12-15||/M","lt":"2022-01-06"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' > $ZBMED_JSON
 
 # Load everything
 python3 ~/NarrativeIntelligence/src/narraint/backend/load_zbmed_json.py $ZBMED_JSON -c ZBMed
