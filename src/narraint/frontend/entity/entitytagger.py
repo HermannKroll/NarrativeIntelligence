@@ -1,6 +1,7 @@
 import gzip
 import gzip
 import logging
+import os.path
 import pickle
 import string
 from collections import defaultdict
@@ -13,20 +14,19 @@ from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
 from narraint.config import ENTITY_TAGGING_INDEX
-from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE
+from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
-    VACCINE
+    VACCINE, DISEASE
+from narrant.preprocessing.tagging.vocabulary import Vocabulary
 from narrant.progress import print_progress_with_eta
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
-from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
-from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
 class EntityTagger:
@@ -75,6 +75,7 @@ class EntityTagger:
         for e_term, e_id in resolver.species.get_reverse_index().items():
             self.term2entity[e_term.strip().lower()].add(Entity(e_id, SPECIES))
 
+        self._add_additional_diseases()
         self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
@@ -85,6 +86,16 @@ class EntityTagger:
         self._add_vaccine_terms(resolver=resolver)
         self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
+
+    def _add_additional_diseases(self):
+        logging.info('Adding additional diseases')
+        vocab_path = os.path.join(DISEASE_TAGGER_VOCAB_DIRECTORY, "vocabulary.tsv")
+        dis_vocab = Vocabulary(vocab_path)
+        dis_vocab.load_vocab(expand_terms=False)
+
+        for term, ent_ids in dis_vocab.vocabularies[DISEASE].items():
+            for ent_id in ent_ids:
+                self.term2entity[term.lower().strip()].add(Entity(ent_id, DISEASE))
 
     def _add_gene_terms(self, gene_input=GENE_FILE):
         gene_ids_in_db = Tag.get_gene_ids(SessionExtended.get())
