@@ -51,6 +51,43 @@ DELETE FROM Predication
 WHERE document_collection = 'scientists'
 and (length(subject_str) < 5 or length(object_str) < 5);
 
+
+SELECT subject_id, subject_str, predicate, relation,	 object_str, s.text
+FROM Predication join Sentence s on (Predication.sentence_id = s.id)
+WHERE extraction_type = 'OPENIE6_SF'  and Predication.document_collection = 'scientists'
+and subject_id = 'http://www.wikidata.org/entity/Q937'
+LIMIT 100;
+
+SELECT subject_id, subject_str, predicate, relation,	 object_str, s.text
+FROM Predication join Sentence s on (Predication.sentence_id = s.id)
+WHERE extraction_type = 'OPENIE6_SF'  and Predication.document_collection = 'scientists'
+and subject_type = 'Person'
+ORDER BY random()
+LIMIT 100;
+
+
+
+SELECT subject_id, subject_str, predicate, relation,	 object_str, s.text
+FROM Predication join Sentence s on (Predication.sentence_id = s.id)
+WHERE extraction_type = 'OPENIE6_SF'  and Predication.document_collection = 'scientists'
+and subject_type = 'Person' and relation = 'notable work'
+ORDER BY random()
+LIMIT 100;
+
+
+SELECT document_collection, extraction_type, count(*)
+From Predication
+GROUP by document_collection, extraction_type
+ORDER BY  document_collection, extraction_type ASC
+
+
+
+
+SELECT collection, count(*)
+From document
+GROUP by collection
+ORDER BY  collection ASC
+
 -- Degree Received
 SELECT Predication.*, Sentence.text
 FROM Predication JOIN Sentence on (Predication.sentence_id = Sentence."id")
