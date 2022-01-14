@@ -11,9 +11,11 @@ from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLEC
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, ENTITY_TYPE_EXPANSION, VAR_NAME, VAR_TYPE
+from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
+
+QUERY_DOCUMENT_LIMIT = 1500000
 
 
 class QueryEngine:
@@ -154,10 +156,6 @@ class QueryEngine:
                 if var_type:
                     var_type = var_type.group(1)
                     object_types = [var_type]
-                    if var_type in ENTITY_TYPE_EXPANSION:
-                        query = query.filter(PredicationDenorm.object_type.in_(ENTITY_TYPE_EXPANSION[var_type]))
-                    else:
-                        query = query.filter(PredicationDenorm.object_type == var_type)
             else:
                 query = query.filter(PredicationDenorm.object_id == o.entity_id)
                 object_types = [o.entity_type]
@@ -196,7 +194,6 @@ class QueryEngine:
         var2subs_to_prove = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         for result in query:
             prov_mapping = json.loads(result.provenance_mapping)
-
             # Apply document collection filter
             if document_collection_filter and len(document_collection_filter) >= 1:
                 if len(document_collection_filter) > 1:
@@ -204,9 +201,11 @@ class QueryEngine:
                 if LIT_COVID_COLLECTION in document_collection_filter or LONG_COVID_COLLECTION in document_collection_filter:
                     # keep only relevant document collection
                     # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
-                    prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if d_col in document_collection_filter}
+                    prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if
+                                    d_col in document_collection_filter}
                 else:
-                    prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if  d_col in document_collection_filter}
+                    prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if
+                                    d_col in document_collection_filter}
                 # only continue with prov mappings that are not empty
                 if not prov_mapping or len(prov_mapping) == 0:
                     continue
@@ -348,6 +347,14 @@ class QueryEngine:
                                                              document_collection=d_col))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
+                # Todo: Hack
+                if len(d_ids) > QUERY_DOCUMENT_LIMIT:
+                    logging.warning(f'Query limit was hit: {len(d_ids)} (Limit: {QUERY_DOCUMENT_LIMIT}')
+                    sorted_d_ids = sorted(list(list(d_ids)), reverse=True)
+                    logging.warning(f'Only considering the latest {QUERY_DOCUMENT_LIMIT} document ids')
+                    sorted_d_ids = sorted_d_ids[:QUERY_DOCUMENT_LIMIT]
+                    d_ids = set(sorted_d_ids)
+
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
 
                 doc2substitution = defaultdict(lambda: defaultdict(set))
