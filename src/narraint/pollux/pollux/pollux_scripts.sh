@@ -1,13 +1,13 @@
-#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -c scientists -d --format json /home/jan/wikiextractor/raw_docs
+#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -c pollux -d --format json /home/jan/wikiextractor/raw_docs
 
 
-# python3.8 -u /home/jan/narint/src/narraint/pollux/load_POLLUX.py /home/jan/wikiextractor/extraction -c scientists -t "/home/jan/pollux_data/raw_input/Wikidata - Scientist with POLLUX Article.tsv"
+# python3.8 -u /home/jan/narint/src/narraint/pollux/load_POLLUX.py /home/jan/wikiextractor/extraction -c pollux -t "/home/jan/pollux_data/raw_input/Wikidata - Scientist with POLLUX Article.tsv"
 #
 #
 
 POLLUX_DOC="/home/kroll/workingdir/pollux/pollux_docs.json"
 POLLUX_DOC_ENTITIES="/home/kroll/workingdir/pollux/pollux_docs_with_entities.json"
-POLLUX_VOCAB="/home/kroll/workingdir/pollux/POLLUX_VOCAB.tsv"
+POLLUX_VOCAB="/home/kroll/workingdir/pollux/cwe_vocab.tsv"
 
 POLLUX_OPENIE_EXTRACATIONS="/home/kroll/workingdir/pollux/extractions/openie.tsv"
 POLLUX_OPENIE5_EXTRACATIONS="/home/kroll/workingdir/pollux/extractions/openie51.tsv"
@@ -19,7 +19,7 @@ POLLUX_OPENIE6_EXTRACATIONS_TEST="/home/kroll/workingdir/pollux/extractions/open
 RELATION_VOCAB_SMALL="/home/kroll/workingdir/POLLUX/relation_vocab_small.json"
 
 # Analyze sentences
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.py $POLLUX_DOC_ENTITIES
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.py $POLLUX_DOC_ENTITIES
 
 
 
@@ -30,9 +30,9 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 #python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py $POLLUX_DOC_ENTITIES -c pollux -d -t --format json
 
 # First perform Stanza NER
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/stanza_ner.py -c scientists $POLLUX_DOC
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/stanza_ner.py -c pollux $POLLUX_DOC
 # Perform EL with our dictionaries
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/vocab_entity_linking.py $POLLUX_DOC -c scientists -v $POLLUX_VOCAB --skip-load -f
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/vocab_entity_linking.py $POLLUX_DOC -c pollux -v $POLLUX_VOCAB --skip-load -f
 
 # Next Delete all short entities
 
@@ -42,10 +42,10 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 
 
 # Load CoreNLP
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c scientists -et OPENIE_NF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c scientists -et OPENIE_PF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c scientists -et OPENIE_EF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c scientists -et OPENIE_SF --entity_filter only_subject_exact
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c pollux -et OPENIE_NF --entity_filter no_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c pollux -et OPENIE_PF --entity_filter partial_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c pollux -et OPENIE_EF --entity_filter exact_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE_EXTRACATIONS -c pollux -et OPENIE_SF --entity_filter only_subject_exact
 
 
 
@@ -54,31 +54,39 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 
 
 # Load OpenIE5.1
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c scientists -et OPENIE5_NF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c scientists -et OPENIE5_PF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c scientists -et OPENIE5_EF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c scientists -et OPENIE5_SF --entity_filter only_subject_exact
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c pollux -et OPENIE5_NF --entity_filter no_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c pollux -et OPENIE5_PF --entity_filter partial_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c pollux -et OPENIE5_EF --entity_filter exact_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE5_EXTRACATIONS -c pollux -et OPENIE5_SF --entity_filter only_subject_exact
 
 
 # run OpenIE6
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $POLLUX_DOC $POLLUX_OPENIE6_EXTRACATIONS  --no_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $POLLUX_DOC $POLLUX_OPENIE6_EXTRACATIONS  --no_entity_filter
+
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py "/home/kroll/workingdir/pollux/pollux_docs_test.json" "/home/kroll/workingdir/pollux/pollux_docs_test_openie6.tsv" --no_entity_filter
+
 
 # Load OpenIE6
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_NF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_PF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_EF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_SF --entity_filter only_subject_exact
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_NF_NVPF --entity_filter no_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_PF_NVPF --entity_filter partial_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_EF_NVPF --entity_filter exact_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_SF_NVPF --entity_filter only_subject_exact
 
+
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_NF_OVP --entity_filter no_entity_filter --keep_original_predicate
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_PF_OVP --entity_filter partial_entity_filter --keep_original_predicate
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_EF_OVP --entity_filter exact_entity_filter --keep_original_predicate
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_SF_OVP --entity_filter only_subject_exact --keep_original_predicate
 
 # PathIE with relation vocab
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/pipeline.py -c scientists -et PathIE --relation_vocab $RELATION_VOCAB_SMALL --workers 5
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/pipeline.py -c pollux -et PathIE --relation_vocab $RELATION_VOCAB_SMALL --workers 5
 
 
 # canonicalize
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab relation_vocab_small.json --min_predicate_threshold 0
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c pollux --relation_vocab relation_vocab_small.json --min_predicate_threshold 0
 
 # with word embeddings
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab relation_vocab_person.json --min_predicate_threshold 0 --min_distance 1.0 --word2vec /home/jan/models/wiki.en.bin
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c pollux --relation_vocab relation_vocab_person.json --min_predicate_threshold 0 --min_distance 1.0 --word2vec /home/jan/models/wiki.en.bin
 
 
 
@@ -108,7 +116,7 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 #echo "3. OpenIE6 NF POLLUX: ${DIFF}s"
 
 
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -d -t --format json $POLLUX_DOC_ENTITIES -c scientists
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -d -t --format json $POLLUX_DOC_ENTITIES -c pollux
 
 
 #START=$(date +%s.%N)
