@@ -48,11 +48,13 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 # run OpenIE6
 # python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $PUBMED_SAMPLE $PUBMED_OPENIE6_EXTRACTIONS  --no_entity_filter
 
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/analyze_openie_tuples.py $PUBMED_OPENIE6_EXTRACTIONS
+
 # Load OpenIE6
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_NF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_PF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_EF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_SF --entity_filter only_subject_exact
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_NF_NEW --entity_filter no_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_PF_NEW --entity_filter partial_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_EF_NEW --entity_filter exact_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $PUBMED_OPENIE6_EXTRACTIONS -c PubMed -et OPENIE6_SF_NEW --entity_filter only_subject_exact
 
 
 # PathIE with relation vocab

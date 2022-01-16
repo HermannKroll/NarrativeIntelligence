@@ -17,10 +17,11 @@ WIKIPEDIA_PATHIE_EXTRACATIONS_TEST="/home/kroll/workingdir/wikipedia/extractions
 WIKIPEDIA_OPENIE6_EXTRACATIONS_TEST="/home/kroll/workingdir/wikipedia/extractions/openie6_benchmark.tsv"
 
 RELATION_VOCAB_SMALL="/home/kroll/workingdir/wikipedia/relation_vocab_small.json"
+RELATION_VOCAB_PERSON="/home/kroll/workingdir/wikipedia/relation_vocab_person.json"
 
 
 # Analyze sentences
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.py $WIKIPEDIA_DOC_ENTITIES
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.py $WIKIPEDIA_DOC_ENTITIES
 
 
 # Export json content
@@ -61,11 +62,15 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 # run OpenIE6
 # python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $WIKIPEDIA_DOC $WIKIPEDIA_OPENIE6_EXTRACATIONS  --no_entity_filter
 
+# Analyze extractions
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/analyze_openie_tuples.py $WIKIPEDIA_OPENIE6_EXTRACATIONS
+
+
 # Load OpenIE6
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_NF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_PF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_EF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_SF --entity_filter only_subject_exact
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_NF_NEW --entity_filter no_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_PF_NEW --entity_filter partial_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_EF_NEW --entity_filter exact_entity_filter
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $WIKIPEDIA_OPENIE6_EXTRACATIONS -c scientists -et OPENIE6_SF_NEW --entity_filter only_subject_exact
 
 
 # PathIE with relation vocab
@@ -73,10 +78,10 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/count_sentences.p
 
 
 # canonicalize
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab relation_vocab_small.json --min_predicate_threshold 0
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab $RELATION_VOCAB_SMALL --min_predicate_threshold 0
 
 # with word embeddings
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab relation_vocab_person.json --min_predicate_threshold 0 --min_distance 1.0 --word2vec /home/jan/models/wiki.en.bin
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c scientists --relation_vocab $RELATION_VOCAB_PERSON --min_predicate_threshold 0 --min_distance 1.0 --word2vec /home/jan/models/wiki.en.bin
 
 
 

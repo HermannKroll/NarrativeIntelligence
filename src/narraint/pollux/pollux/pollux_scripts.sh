@@ -61,22 +61,15 @@ RELATION_VOCAB_SMALL="/home/kroll/workingdir/POLLUX/relation_vocab_small.json"
 
 
 # run OpenIE6
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $POLLUX_DOC $POLLUX_OPENIE6_EXTRACATIONS  --no_entity_filter
-
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py "/home/kroll/workingdir/pollux/pollux_docs_test.json" "/home/kroll/workingdir/pollux/pollux_docs_test_openie6.tsv" --no_entity_filter
-
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $POLLUX_DOC $POLLUX_OPENIE6_EXTRACATIONS  --no_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/analyze_openie_tuples.py $POLLUX_OPENIE6_EXTRACATIONS
 
 # Load OpenIE6
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_NF_NVPF --entity_filter no_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_PF_NVPF --entity_filter partial_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_EF_NVPF --entity_filter exact_entity_filter
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_SF_NVPF --entity_filter only_subject_exact
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_NF_NEW --entity_filter no_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_PF_NEW --entity_filter partial_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_EF_NEW --entity_filter exact_entity_filter
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_SF_NEW --entity_filter only_subject_exact
 
-
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_NF_OVP --entity_filter no_entity_filter --keep_original_predicate
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_PF_OVP --entity_filter partial_entity_filter --keep_original_predicate
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_EF_OVP --entity_filter exact_entity_filter --keep_original_predicate
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_openie_extractions.py $POLLUX_OPENIE6_EXTRACATIONS -c pollux -et OPENIE6_SF_OVP --entity_filter only_subject_exact --keep_original_predicate
 
 # PathIE with relation vocab
 # python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/pipeline.py -c pollux -et PathIE --relation_vocab $RELATION_VOCAB_SMALL --workers 5
