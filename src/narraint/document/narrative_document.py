@@ -74,9 +74,9 @@ class NarrativeDocument(TaggedDocument):
 
     def __init__(self, document_id, title: str, abstract: str,
                  metadata: NarrativeDocumentMetadata = None,
-                 tags: List[TaggedEntity] = None,
-                 sentences: List[DocumentSentence] = None,
-                 extracted_statements: List[StatementExtraction] = None):
+                 tags: List[TaggedEntity] = [],
+                 sentences: List[DocumentSentence] = [],
+                 extracted_statements: List[StatementExtraction] = []):
         super().__init__(id=document_id, title=title, abstract=abstract)
         self.tags = tags
         if self.tags:
