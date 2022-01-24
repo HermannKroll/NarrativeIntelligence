@@ -102,18 +102,18 @@ PUBMED_OPENIE6_TEMP="/home/kroll/workingdir/pubmed/openie6_performance.tsv"
 
 
 
-START=$(date +%s.%N)
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $PUBMED_SAMPLE $PUBMED_OPENIE6_TEMP  --no_entity_filter 2>> /dev/null 1>>/dev/null
-END=$(date +%s.%N)
-DIFF=$(echo "$END - $START" | bc)
-echo "1. OpenIE6 NF PubMed: ${DIFF}s"
+# START=$(date +%s.%N)
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $PUBMED_SAMPLE $PUBMED_OPENIE6_TEMP  --no_entity_filter 2>> /dev/null 1>>/dev/null
+# END=$(date +%s.%N)
+# DIFF=$(echo "$END - $START" | bc)
+# echo "1. OpenIE6 NF PubMed: ${DIFF}s"
 
 
-START=$(date +%s.%N)
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $PUBMED_SAMPLE $PUBMED_OPENIE6_TEMP  --no_entity_filter 2>> /dev/null 1>>/dev/null
-END=$(date +%s.%N)
-DIFF=$(echo "$END - $START" | bc)
-echo "2. OpenIE6 NF PubMed: ${DIFF}s"
+# START=$(date +%s.%N)
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/openie6/main.py $PUBMED_SAMPLE $PUBMED_OPENIE6_TEMP  --no_entity_filter 2>> /dev/null 1>>/dev/null
+# END=$(date +%s.%N)
+# DIFF=$(echo "$END - $START" | bc)
+# echo "2. OpenIE6 NF PubMed: ${DIFF}s"
 
 
 START=$(date +%s.%N)
