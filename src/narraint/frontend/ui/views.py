@@ -269,7 +269,9 @@ def get_narrative_documents(request):
         View.instance().query_logger.write_api_call(True, "get_narrative_document", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
-    except Exception:
+    except Exception as e:
+        logger.error(f"get_narrative_document: {e}")
+        traceback.print_exc()
         View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
