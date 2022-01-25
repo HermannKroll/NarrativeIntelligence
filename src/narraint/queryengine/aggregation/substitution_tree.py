@@ -48,11 +48,11 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
         # variable is used
         if self.var_names:
             for r in results:
-                self._add_query_result(r)
+                self._add_query_result_in_aggregation(r)
 
             self._populate_tree_structure(freq_sort_desc, start_pos, end_pos)
 
-           # self.root.sort_results_by_substitutions(freq_sort_desc)
+            # self.root.sort_results_by_substitutions(freq_sort_desc)
             if start_pos and end_pos:
                 self.root.set_slice(start_pos, end_pos)
 
@@ -64,61 +64,55 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
                 query_result.add_query_result(res)
             return query_result, False
 
-    def _add_query_result_in_tree(self, results: List[QueryDocumentResult], parent: QueryResultAggregateList, level: int):
-        # find the current substitution for this level
-        level_var = self.var_names[level]
-        substitution = results[0].var2substitution[level_var]
-        key = (level_var, substitution.entity_id, substitution.entity_type)
-        # check whether an aggregated query result node has been generated or generate it otherwise
-        if key not in self.generated_tree_aggregates:
-            var2sub = {level_var: substitution}
-            node = QueryResultAggregate(var2sub)
-            parent.add_query_result(node)
-            self.generated_tree_aggregates[key] = node
-        else:
-            node = self.generated_tree_aggregates[key]
-        # we are at the tree leaves - attach document result to node
-        if level == len(self.var_names) - 1:
-            # trick: documents are automatically added to leaves because they must have all subs for all vars
-            for res in results:
-                node.add_query_result(res)
-        # we have to generate the next level
-        else:
-            # do we need to generate a new aggregate list?
-            next_aggregated_list = QueryResultAggregateList()
-            node.add_query_result(next_aggregated_list)
-            self._add_query_result_in_tree(results, next_aggregated_list, level + 1)
+    def _generate_tree_structure(self):
+
+        query_aggregate_lists = {1: self.root}
+
+        # Go through all aggregated keys
+        for var_sub_key in self.varsubs2documents.keys():
+            # build all levels for the tree structure
+            for level in range(1, len(self.var_names) + 1):
+                # construct the current possible substitution on that level
+                # e.g. X = A
+                current_parent_key = var_sub_key[0:(level * 2 - 2)]
+                current_sub = var_sub_key[0:level * 2]
+
+                if not current_parent_key:
+                    parent = self.root
+                elif current_parent_key in query_aggregate_lists:
+                    parent = query_aggregate_lists[current_parent_key]
+                else:
+                    parent = QueryResultAggregateList()
+                    # we must put it under the corresponding aggregate node
+                    parent_of_parent = self.generated_tree_aggregates[current_parent_key]
+                    parent_of_parent.add_query_result(parent)
+                    query_aggregate_lists[current_parent_key] = parent
+
+                # Either we have already generated a tree node on that level
+                # or we must do it now
+                if current_sub not in self.generated_tree_aggregates:
+                    var2sub = {}
+                    for j in range((level-1)*2, len(current_sub), 2):
+                        var2sub[current_sub[j]] = current_sub[j + 1]
+                    node = QueryResultAggregate(var2sub)
+                    parent.add_query_result(node)
+                    self.generated_tree_aggregates[current_sub] = node
 
     def _populate_tree_structure(self, freq_sort_desc, start_pos, end_pos):
         all_result_lists = []
 
-        # compute the most frequent substitutions for level 1 var
-      #  level1_var_count = [(key, count) for key, count in self.level1_var_sub_count.items()]
-      #  level1_var_count.sort(key=lambda x: x[1], reverse=freq_sort_desc)
-     #   if start_pos < len(level1_var_count):
-      #      if end_pos <= len(level1_var_count):
-       #         level1_frequent_keys = {key for key, _ in level1_var_count[start_pos:end_pos]}
-        #    else:
-         #       level1_frequent_keys = {key for key, _ in level1_var_count[start_pos:end_pos]}
-        #else:
-         #   level1_frequent_keys = {key for key, _ in level1_var_count}
-
-        # only keep the relevant level 1 keys here
-        #self.level1_key_contained_in = {key for k, subkey in self.level1_key_contained_in.items()
-         #                               if k in level1_frequent_keys
-          #                              for key in subkey}
-
         # consider only substitutions that are on level 1 between start pos and end pos
         for key, results in self.varsubs2documents.items():
-      #      if key in self.level1_key_contained_in:
             all_result_lists.append((results, len(results)))
         all_result_lists.sort(key=lambda x: x[1], reverse=freq_sort_desc)
 
-        for results, _ in all_result_lists:
-            self._add_query_result_in_tree(results, self.root, 0)
+        # generate tree structure for all results
+        self._generate_tree_structure()
 
-        #self.root.results.sort(key=lambda x: x.get_result_size(), reverse=freq_sort_desc)
-        #for var_name in self.var_names[1:]:
+        # populate the structure
+        for key, results in self.varsubs2documents.items():
+            self.generated_tree_aggregates[key].results = results
+
         # sort also all subtrees
         todo = [self.root]
         while todo:
@@ -128,17 +122,11 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
                 if isinstance(res, QueryResultAggregateList) or isinstance(res, QueryResultAggregate):
                     todo.append(res)
 
-
-    def _add_query_result(self, result: QueryDocumentResult):
-      #  level1_var_sub = result.var2substitution[self.var_names[0]]
-      #  leve1_var_sub_key = (self.var_names[0], level1_var_sub.entity_id, level1_var_sub.entity_type)
-      #  self.level1_var_sub_count[leve1_var_sub_key] += 1
-
-        var_subs = set()
+    def _add_query_result_in_aggregation(self, result: QueryDocumentResult):
+        var_subs = list()
         for var_name in self.var_names:
             sub = result.var2substitution[var_name]
-            var_subs.add((var_name, sub.entity_id, sub.entity_type))
-        key = frozenset(var_subs)
-
-     #   self.level1_key_contained_in[leve1_var_sub_key].add(key)
+            var_subs.append(var_name)
+            var_subs.append(sub)
+        key = tuple(var_subs)
         self.varsubs2documents[key].append(result)

@@ -42,6 +42,19 @@ class QueryEntitySubstitution:
     def __repr__(self):
         return self.__str__()
 
+    def __eq__(self, other):
+        if isinstance(other, QueryEntitySubstitution):
+            if other.entity_type == self.entity_type and other.entity_id == self.entity_id and \
+                    other.entity_str == self.entity_str and other.entity_name == self.entity_name:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def __hash__(self):
+        return hash((self.entity_id, self.entity_type))
+
     def to_dict(self):
         return dict(n=self.entity_name, s=self.entity_str, id=self.entity_id,
                     t=self.entity_type)
