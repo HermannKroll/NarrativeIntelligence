@@ -957,7 +957,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     divDoc_Body.append(divDoc_Body_Link);
     divDoc_Body.append(divDoc_DocumentGraph);
 
-    let divDoc_Content = $('<br><b>' + title + '</b><br>' +
+    let divDoc_Content = $('<br><b><a class="btn-link" href="' + doi + '" target="_blank">' + title + '</a></b><br>' +
         "in: " + journals + " | " + month + year + '<br>' +
         "by: " + authors + '<br>');
 
