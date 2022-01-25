@@ -86,6 +86,38 @@ class TestDictagger(unittest.TestCase):
         self.assertIn(('carbon-copper', 32), indexed)
         self.assertNotIn(('carbon', 32), indexed)
 
+    def test_split_indexed_words_end(self):
+        content = "matica (Monimiacea) (Monimiaceae)."
+        indexed = split_indexed_words(content)
+        self.assertIn(('matica', 0), indexed)
+        self.assertIn(('Monimiacea', 8), indexed)
+        self.assertIn(('Monimiaceae', 21), indexed)
+
+    def test_split_indexed_words_non_characters(self):
+        content = "---(Monimiaceae)."
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimiaceae', 4), indexed)
+
+        content = "---(Monimi-aceae)."
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimi-aceae', 4), indexed)
+
+        content = "Monimi-aceae)."
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimi-aceae', 0), indexed)
+
+        content = "Monimiaceae)."
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimiaceae', 0), indexed)
+
+        content = "(-Monimiaceae"
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimiaceae', 2), indexed)
+
+        content = "(-Monimiaceae"
+        indexed = split_indexed_words(content)
+        self.assertIn(('Monimiaceae', 2), indexed)
+
     def test_clean_abbreviations(self):
         ent1 = doc.TaggedEntity(document=1, start=0, end=1, text="AB", ent_type="Drug", ent_id="A")
         not_ent1_full = doc.TaggedEntity(document=1, start=0, end=6, text="ABCDEF", ent_type="Drug", ent_id="B")
