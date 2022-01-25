@@ -96,6 +96,7 @@ class Predication(Extended, DatabaseTable):
     subject_id = Column(String, nullable=False)
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
+    predicate_org = Column(String, nullable=True)
     predicate = Column(String, nullable=False, index=True)
     relation = Column(String, nullable=True)
     object_id = Column(String, nullable=False)
@@ -319,7 +320,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     """
     doc_results = {}
 
-    logging.info(f'Querying {len(document_ids)} from collection: {document_collection}...')
+   # logging.info(f'Querying {len(document_ids)} from collection: {document_collection}...')
     # first query document titles and abstract
     doc_query = session.query(Document).filter(and_(Document.id.in_(document_ids),
                                                     Document.collection == document_collection))
@@ -327,7 +328,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     for res in doc_query:
         doc_results[res.id] = NarrativeDocument(document_id=res.id, title=res.title, abstract=res.abstract)
 
-    logging.info('Querying for document classification...')
+ #   logging.info('Querying for document classification...')
     # Next query the publication information
     classification_query = session.query(DocumentClassification).filter(and_(DocumentClassification.document_id.in_(document_ids),
                                                                        DocumentClassification.document_collection == document_collection))
@@ -335,7 +336,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     for res in classification_query:
         doc2classification[res.document_id].add((res.classification, res.explanation))
 
-    logging.info('Querying for metadata...')
+#    logging.info('Querying for metadata...')
     # Next query the publication information
     metadata_query = session.query(DocumentMetadata).filter(and_(DocumentMetadata.document_id.in_(document_ids),
                                                                  DocumentMetadata.document_collection == document_collection))
@@ -348,7 +349,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
                                              publication_doi=res.publication_doi)
         doc2metadata[res.document_id] = metadata
 
-    logging.info('Querying for tags...')
+  #  logging.info('Querying for tags...')
     # Next query for all tagged entities in that document
     tag_query = session.query(Tag).filter(and_(Tag.document_id.in_(document_ids),
                                                Tag.document_collection == document_collection))
@@ -364,7 +365,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
         doc_results[doc_id].tags = tags
         doc_results[doc_id].sort_tags()
 
-    logging.info('Querying for statement extractions...')
+   # logging.info('Querying for statement extractions...')
     # Next query for extracted statements
     es_query = session.query(Predication).filter(and_(Predication.document_id.in_(document_ids),
                                                       Predication.document_collection == document_collection))
@@ -383,7 +384,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     for doc_id, extractions in es_for_doc.items():
         doc_results[doc_id].extracted_statements = extractions
 
-    logging.info('Querying for sentences...')
+   # logging.info('Querying for sentences...')
     # Last query for document sentences
     sentence_query = session.query(Sentence).filter(and_(Sentence.document_id.in_(document_ids),
                                                          Sentence.document_collection == document_collection))
