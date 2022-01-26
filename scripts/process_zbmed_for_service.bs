@@ -8,6 +8,7 @@ ZBMED_PUBTATOR="/hdd2/datasets/zbmed/zbmed.json"
 UPDATED_IDS="/hdd2/datasets/zbmed/updated_ids.txt"
 
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
+PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
 
 ## Load everything
 # curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2019-12-01||/M","lt":"2021-12-18"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' >  $ZBMED_JSON
@@ -42,4 +43,8 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_pred
 
 # Apply the rules
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c ZBMed
+
+# Execute Cleaning Rules for Tagging
+echo 'cleaning predication table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 

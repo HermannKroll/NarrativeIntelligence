@@ -14,6 +14,7 @@ MEDLINE_BASELINE="/hdd2/datasets/pubmed_medline/2021_12/"
 MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2022_updates/"
 
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
+PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
 
 # First get all PubMed Pubtator PMIDs
 wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
@@ -62,16 +63,9 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_pred
 # Apply the rules
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c PubMed
 
+# Execute Cleaning Rules for Tagging
+echo 'cleaning predication table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 
 
-# Load the Metadata
-# Donwload the latest medline via wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
-# Download the latest updates via
-# wget -o ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
-# mv $MEDLINE_UPDATES/ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/*.* $MEDLINE_UPDATES/.
-# gunzip $MEDLINE_UPDATES/*.gz
 
-# Unzip everything
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
-# Load Baseline
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
