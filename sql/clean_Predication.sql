@@ -1,3 +1,7 @@
+-- Remove all 'newentry' genes
+DELETE FROM public.Predication AS p
+WHERE (p.subject_id = 'newentry' and p.subject_type = 'Gene') OR (p.object_id = 'newentry' and p.object_type = 'Gene');
+
 -- Update Dosage Form
 UPDATE public.Predication SET relation = 'administered' WHERE subject_type = 'DosageForm' or object_type = 'DosageForm';
 
