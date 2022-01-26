@@ -1,3 +1,7 @@
+#!/bin/bash
+VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
+
+
 # Load the Metadata
 # Donwload the latest medline via wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
 # Download the latest updates via
@@ -17,4 +21,7 @@ python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_se
 # Compute new query table
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
 
-
+# Finally vacuum all tables
+# Execute Cleaning Rules for Tagging
+echo 'vacuum db tables...'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $VACUUM_SQL
