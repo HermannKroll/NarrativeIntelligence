@@ -1,6 +1,13 @@
 -- Delete all Covid 19 Supplement Tags from TaggerOne
 DELETE FROM public.Tag as t where t.ent_id = 'MESH:C000657245' and t.ent_type = 'Disease';
 
+-- Delete far too general Disease Descriptor
+DELETE FROM public.Tag as t WHERE t.ent_id = 'MESH:D004194' and t.ent_type = 'Disease';
+
+-- Delete far too general Strain and Strains Tags
+DELETE FROM public.Tag as t WHERE t.ent_id = 'MESH:D013180' and t.ent_type = 'Disease' and t.ent_str = 'strain';
+DELETE FROM public.Tag as t WHERE t.ent_id = 'MESH:D013180' and t.ent_type = 'Disease' and t.ent_str = 'strains';
+
 -- Delete tags without entity ids
 DELETE FROM public.Tag as t WHERE t.ent_id = '';
 
