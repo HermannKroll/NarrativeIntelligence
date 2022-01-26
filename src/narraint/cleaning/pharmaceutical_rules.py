@@ -275,7 +275,7 @@ def check_type_constraints(reorder_tuples=True, document_collection: str = None)
         logging.info(f'Reordering {len(preds_to_reorder)} predication subject and objects...')
         insert_predication_ids_to_delete(preds_to_reorder)
         pred_query = session.query(Predication).join(PredicationToDelete,
-                                                     Predication.id == PredicationToDelete.predication_id)\
+                                                     Predication.id == PredicationToDelete.predication_id) \
             .yield_per(BULK_QUERY_CURSOR_COUNT)
         predication_values = []
         start_time = datetime.now()
@@ -320,6 +320,23 @@ def update_none_relation_to_associate(document_collection: str = None):
         logging.info('Updating every relation NULL to associated...')
         upt = update(Predication).where(Predication.relation.is_(None)).values(relation=ASSOCIATED_PREDICATE)
     session.execute(upt)
+    session.commit()
+
+
+def delete_symmetric_extractions(document_collection: str = None):
+    session = SessionExtended.get()
+    if document_collection:
+        logging.info(f'Deleting symmetric extractions in {document_collection} (subject == object)')
+        stmt = delete(Predication).where(and_(Predication.document_collection == document_collection,
+                                              and_(Predication.subject_id == Predication.object_id,
+                                                   Predication.subject_type == Predication.object_type)))
+    else:
+        logging.info(f'Deleting symmetric extractions in {document_collection} (subject == object)')
+        stmt = delete(Predication).where(and_(Predication.subject_id == Predication.object_id,
+                                              Predication.subject_type == Predication.object_type))
+
+    session.execute(stmt)
+    session.commit()
 
 
 def main():
@@ -339,6 +356,10 @@ def main():
     logging.info('=' * 60)
     logging.info('Applying pharmaceutical rules...')
     logging.info('=' * 60)
+    logging.info('=' * 60)
+    delete_symmetric_extractions(document_collection=document_collection)
+    logging.info('=' * 60)
+
     dosage_form_rule(document_collection=document_collection)
     method_rule(document_collection=document_collection)
     logging.info('=' * 60)
