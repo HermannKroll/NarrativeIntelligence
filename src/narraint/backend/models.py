@@ -91,8 +91,8 @@ class Predication(Extended, DatabaseTable):
     )
 
     id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
-    document_id = Column(BigInteger, nullable=False)
-    document_collection = Column(String, nullable=False)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
     subject_id = Column(String, nullable=False)
     subject_str = Column(String, nullable=False)
     subject_type = Column(String, nullable=False)
