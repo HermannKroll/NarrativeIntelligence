@@ -22,7 +22,6 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
-from narraint.queryengine.aggregation.substitution import ResultAggregationBySubstitution
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.logger import QueryLogger
@@ -276,7 +275,6 @@ def get_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
-
 @gzip_page
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
@@ -301,7 +299,7 @@ def get_query_sub_count(request):
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
 
         # next get the aggregation by var names
-        substitution_aggregation = ResultAggregationBySubstitution()
+        substitution_aggregation = ResultTreeAggregationBySubstitution()
         results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
 
         # generate a list of [(ent_id, ent_name, doc_count), ...]
@@ -316,7 +314,7 @@ def get_query_sub_count(request):
                                        count=aggregate.get_result_size()))
 
         View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
-                                                    time_needed=datetime.now()-time_start)
+                                                    time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
