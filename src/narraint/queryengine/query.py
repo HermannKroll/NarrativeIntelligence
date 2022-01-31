@@ -68,6 +68,11 @@ class FactPattern:
     def __repr__(self):
         return '({}, {}, {})'.format(self.subjects, self.predicate, self.objects)
 
+    def to_dict(self):
+        return dict(subjects=[s.to_dict() for s in self.subjects],
+                    relation=self.predicate,
+                    objects=[o.to_dict() for o in self.objects])
+
 
 class GraphQuery:
 
@@ -112,3 +117,6 @@ class GraphQuery:
                 if var_name not in var_names:
                     var_names.append(var_name)
         return var_names
+
+    def to_dict(self):
+        return dict(fact_patterns=[fp.to_dict() for fp in self.fact_patterns])

@@ -169,8 +169,8 @@ function addQueryPart() {
             $('#alert_translation').hide();
             createQueryListItem(subject, predicate, object)
         } else {
-            console.log('translation error:' + answer)
-            $('#alert_translation').text(answer);
+            console.log('translation error:' + response["query"])
+            $('#alert_translation').text(response["query"]);
             $('#alert_translation').fadeIn();
         }
     });

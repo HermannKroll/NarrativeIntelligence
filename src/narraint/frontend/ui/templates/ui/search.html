@@ -500,7 +500,7 @@
     <script type="text/javascript">
         const search_url = "{% url 'query' %}";
         const autocompletion_url = "{% url 'autocompletion' %}";
-        const query_check_url = "{% url 'check' %}";
+        const query_check_url = "{% url 'check_query' %}";
         const tree_info_url = "{% url 'tree_info' %}"
         const feedback_url = "{% url 'feedback' %}";
         const provenance_url = "{% url 'provenance' %}";
@@ -514,5 +514,5 @@
         $("#nav_item_help").removeClass("active");
         $("#nav_item_stats").removeClass("active");
     </script>
-    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=9" type="text/javascript"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=10" type="text/javascript"></script>
 {% endblock %}

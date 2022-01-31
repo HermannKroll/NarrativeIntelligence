@@ -15,7 +15,7 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database, Tag, \
+from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database, \
     TagInvertedIndex
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
@@ -158,12 +158,12 @@ def get_check_query(request):
             search_string)
         if query_fact_patterns:
             logging.info('query is valid')
-            return JsonResponse(dict(valid="True"))
+            return JsonResponse(dict(valid="True", query=query_fact_patterns.to_dict()))
         else:
             logging.info(f'query is not valid: {query_trans_string}')
-            return JsonResponse(dict(valid=query_trans_string))
-    except:
-        return JsonResponse(dict(valid="False"))
+            return JsonResponse(dict(valid="False", query=query_trans_string))
+    except Exception:
+        return JsonResponse(status=500, data=dict(valid="False", query=None))
 
 
 def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: str):
@@ -338,9 +338,9 @@ def get_document_ids_for_entity(request):
 
         # Query Database for all document ids that contain this entity
         session = SessionExtended.get()
-        query = session.query(TagInvertedIndex.document_ids)\
-            .filter(TagInvertedIndex.document_collection == document_collection)\
-            .filter(TagInvertedIndex.entity_id == entity_id)\
+        query = session.query(TagInvertedIndex.document_ids) \
+            .filter(TagInvertedIndex.document_collection == document_collection) \
+            .filter(TagInvertedIndex.entity_id == entity_id) \
             .filter(TagInvertedIndex.entity_type == entity_type)
 
         # execute query and get result (query can only have one result due to querying the PK)
@@ -359,6 +359,7 @@ def get_document_ids_for_entity(request):
         traceback.print_exc()
         View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
+
 
 # invokes Django to compress the results
 @gzip_page
