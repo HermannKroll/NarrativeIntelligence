@@ -7,7 +7,7 @@ VACCUM FULL public.document_translation;
 VACCUM FULL public.document_metadata;
 VACCUM FULL public.document_metadata_service;
 VACCUM FULL public.predication;
-VACCUM FULL public.predication_denorm;
+VACCUM FULL public.predication_inverted_index;
 VACCUM FULL public.predication_rating;
 VACCUM FULL public.predication_to_delete;
 VACCUM FULL public.sentence;
