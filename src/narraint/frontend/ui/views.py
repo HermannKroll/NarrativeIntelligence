@@ -151,6 +151,8 @@ def get_tree_info(request):
 
 
 def get_check_query(request):
+    if "query" not in request.GET:
+        return JsonResponse(status=500, data=dict(reason="query not given"))
     try:
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
@@ -164,6 +166,20 @@ def get_check_query(request):
             return JsonResponse(dict(valid="False", query=query_trans_string))
     except Exception:
         return JsonResponse(status=500, data=dict(valid="False", query=None))
+
+
+def get_term_to_entity(request):
+    if "term" not in request.GET:
+        return JsonResponse(status=500, data=dict(reason="term not given"))
+    try:
+        term = str(request.GET.get("term", "").strip()).lower()
+        try:
+            entities = View.instance().translation.convert_text_to_entity(term)
+            return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
+        except ValueError as e:
+            return JsonResponse(dict(valid=False, entity=f'{e}'))
+    except Exception as e:
+        return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
 def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: str):
