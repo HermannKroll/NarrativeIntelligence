@@ -12,4 +12,5 @@ VACCUM FULL public.predication_rating;
 VACCUM FULL public.predication_to_delete;
 VACCUM FULL public.sentence;
 VACCUM FULL public.doc_processedy_by_ie;
+VACUUM FULL public.tag_inverted_index;
 

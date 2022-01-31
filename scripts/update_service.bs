@@ -18,8 +18,9 @@ VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
 # Finally compute the new metadata service table2
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
-# Compute new query table
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/denormalize_prov.py
+# Compute reverse indexes
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_predication.py
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_tag.py
 
 # Finally vacuum all tables
 # Execute Cleaning Rules for Tagging
