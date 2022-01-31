@@ -85,7 +85,7 @@ class QueryTranslation:
             try:
                 e = self.entity_tagger.tag_entity(text)
             except KeyError:
-                raise ValueError("Unknown term: {}".format(text))
+                raise ValueError(f'term "{text}" unknown')
         return e
 
     def align_triple(self, text: str):
@@ -136,20 +136,20 @@ class QueryTranslation:
             try:
                 s = self.convert_text_to_entity(s_t)
             except ValueError as e:
-                error_msg = 'Subject unknown: {}'.format(e)
+                error_msg = 'Subject: {}'.format(e)
                 self.logger.error(error_msg)
                 return None, error_msg
 
             try:
                 o = self.convert_text_to_entity(o_t)
             except ValueError as e:
-                error_msg = 'Object unknown: {}'.format(e)
+                error_msg = 'Object: {}'.format(e)
                 self.logger.error(error_msg)
                 return None, error_msg
 
             p = p_t.lower()
             if p not in self.allowed_predicates:
-                error_msg = "Relation unknown: {}\n".format(p_t)
+                error_msg = "Relation: {}".format(p_t)
                 self.logger.error(error_msg)
                 return None, error_msg
 
