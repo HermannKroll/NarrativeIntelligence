@@ -214,8 +214,8 @@ class Predication(Extended, DatabaseTable):
         return sorted(predicates_with_count, key=lambda x: x[2], reverse=True)
 
 
-class PredicationDenorm(Extended, DatabaseTable):
-    __tablename__ = "predication_denorm"
+class PredicationInvertedIndex(Extended, DatabaseTable):
+    __tablename__ = "predication_inverted_index"
 
     id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
     subject_id = Column(String, nullable=False, index=True)

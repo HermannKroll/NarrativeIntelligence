@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, Sentence, PredicationDenorm, DocumentMetadataService
+from narraint.backend.models import Predication, Sentence, PredicationInvertedIndex, DocumentMetadataService
 from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
@@ -111,16 +111,16 @@ class QueryEngine:
         :return: provenance mapping, var2subs
         """
         session = SessionExtended.get()
-        query = session.query(PredicationDenorm)
+        query = session.query(PredicationInvertedIndex)
         # directly check predicate
         if fact_pattern.predicate != DO_NOT_CARE_PREDICATE:
-            query = query.filter(PredicationDenorm.relation == fact_pattern.predicate)
+            query = query.filter(PredicationInvertedIndex.relation == fact_pattern.predicate)
 
         var_names_in_query = []
         subject_types, object_types = [], []
         # check subjects
         if len(fact_pattern.subjects) > 1:
-            query = query.filter(PredicationDenorm.subject_id.in_([s.entity_id for s in fact_pattern.subjects]))
+            query = query.filter(PredicationInvertedIndex.subject_id.in_([s.entity_id for s in fact_pattern.subjects]))
             subject_types = [s.entity_type for s in fact_pattern.subjects]
         elif len(fact_pattern.subjects) == 1:
             s = next(iter(fact_pattern.subjects))
@@ -136,12 +136,12 @@ class QueryEngine:
                     var_type = var_type.group(1)
                     subject_types = [var_type]
             else:
-                query = query.filter(PredicationDenorm.subject_id == s.entity_id)
+                query = query.filter(PredicationInvertedIndex.subject_id == s.entity_id)
                 subject_types = [s.entity_type]
 
         # check objects
         if len(fact_pattern.objects) > 1:
-            query = query.filter(PredicationDenorm.object_id.in_([o.entity_id for o in fact_pattern.objects]))
+            query = query.filter(PredicationInvertedIndex.object_id.in_([o.entity_id for o in fact_pattern.objects]))
             object_types = [o.entity_type for o in fact_pattern.objects]
         elif len(fact_pattern.objects) == 1:
             o = next(iter(fact_pattern.objects))
@@ -157,24 +157,24 @@ class QueryEngine:
                     var_type = var_type.group(1)
                     object_types = [var_type]
             else:
-                query = query.filter(PredicationDenorm.object_id == o.entity_id)
+                query = query.filter(PredicationInvertedIndex.object_id == o.entity_id)
                 object_types = [o.entity_type]
 
         # check the subject types
         subject_types = QueryExpander.expand_entity_types(subject_types)
         if len(subject_types) > 1:
-            query = query.filter(PredicationDenorm.subject_type.in_(subject_types))
+            query = query.filter(PredicationInvertedIndex.subject_type.in_(subject_types))
         elif len(subject_types) == 1:
-            query = query.filter(PredicationDenorm.subject_type == subject_types[0])
+            query = query.filter(PredicationInvertedIndex.subject_type == subject_types[0])
         else:
             pass
 
         # check the object types
         object_types = QueryExpander.expand_entity_types(object_types)
         if len(object_types) > 1:
-            query = query.filter(PredicationDenorm.object_type.in_(object_types))
+            query = query.filter(PredicationInvertedIndex.object_type.in_(object_types))
         elif len(object_types) == 1:
-            query = query.filter(PredicationDenorm.object_type == object_types[0])
+            query = query.filter(PredicationInvertedIndex.object_type == object_types[0])
         else:
             pass
 
