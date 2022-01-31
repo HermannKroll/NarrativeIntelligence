@@ -15,7 +15,8 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database
+from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database, Tag, \
+    TagInvertedIndex
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -321,6 +322,43 @@ def get_query_sub_count(request):
         View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
         return HttpResponse(status=500)
 
+
+def get_document_ids_for_entity(request):
+    if "entity_id" not in request.GET or "entity_type" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        return JsonResponse(status=500, data=dict(reason="entity_id and entity_type are required parameters"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    try:
+        time_start = datetime.now()
+        entity_id, entity_type = str(request.GET["entity_id"]).strip(), str(request.GET["entity_type"]).strip()
+        document_collection = str(request.GET["data_source"]).strip()
+
+        # Query Database for all document ids that contain this entity
+        session = SessionExtended.get()
+        query = session.query(TagInvertedIndex.document_ids)\
+            .filter(TagInvertedIndex.document_collection == document_collection)\
+            .filter(TagInvertedIndex.entity_id == entity_id)\
+            .filter(TagInvertedIndex.entity_type == entity_type)
+
+        # execute query and get result (query can only have one result due to querying the PK)
+        row = query.first()
+        if row:
+            document_ids_str = row[0]
+        else:
+            document_ids_str = []
+        View.instance().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
+                                                    time_needed=datetime.now() - time_start)
+        # send results back
+        return JsonResponse(dict(document_ids=document_ids_str))
+
+    except Exception as e:
+        logger.error(f"get_document_ids_for_entity: {e}")
+        traceback.print_exc()
+        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 # invokes Django to compress the results
 @gzip_page
