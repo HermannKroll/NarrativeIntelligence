@@ -10,9 +10,6 @@ LONGCOVID_ID_FILE="/hdd2/datasets/pubmed_medline/long_covid_ids.tsv"
 UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_11_23_pubtator_updates.pubtator"
 UPDATED_IDS="/hdd2/datasets/pubmed_medline/pharmaceutical_relevant_ids.txt"
 
-MEDLINE_BASELINE="/hdd2/datasets/pubmed_medline/2021_12/"
-MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2022_updates/"
-
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
 PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
 
@@ -55,7 +52,7 @@ python3 ~/NarrativeAnnotation/src/narrant/backend/load_classification_for_docume
 python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # Do the statement extraction via our Pipeline
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 26 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c PubMed --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json

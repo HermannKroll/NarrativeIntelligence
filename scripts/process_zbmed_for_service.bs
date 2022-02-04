@@ -36,7 +36,7 @@ python3 ~/NarrativeAnnotation/src/narrant/backend/export.py -d $ZBMED_PUBTATOR -
 python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $ZBMED_PUBTATOR -c ZBMed --skip-load --workers 5 --gnormplus
 
 # Do the statement extraction for all ZBMed documents via our Pipeline
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 15 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 26 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c ZBMed --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json

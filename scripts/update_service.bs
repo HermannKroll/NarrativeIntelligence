@@ -1,16 +1,22 @@
 #!/bin/bash
+ROOT_DIR="/hdd2/datasets/pubmed_medline/"
 VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
+MEDLINE_BASELINE="/hdd2/datasets/pubmed_medline/2021_12/"
+MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2022_updates/"
 
+cd $ROOT_DIR
 
 # Load the Metadata
 # Donwload the latest medline via wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
 # Download the latest updates via
-# wget -o ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
-# mv $MEDLINE_UPDATES/ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/*.* $MEDLINE_UPDATES/.
-# gunzip $MEDLINE_UPDATES/*.gz
+# wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
+# cp $MEDLINE_UPDATES/ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/*.* $MEDLINE_UPDATES/.
+# gunzip -f $MEDLINE_UPDATES/*.gz
+
+# exit
 
 # Unzip everything
-# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
 # Load Baseline
 # python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
 

@@ -1,16 +1,16 @@
 -- Vacuum every table of the db
-VACCUM FULL public.document;
-VACCUM FULL public.document_classification;
-VACCUM FULL public.tag;
-VACCUM FULL public.doc_tagged_by;
-VACCUM FULL public.document_translation;
-VACCUM FULL public.document_metadata;
-VACCUM FULL public.document_metadata_service;
-VACCUM FULL public.predication;
-VACCUM FULL public.predication_inverted_index;
-VACCUM FULL public.predication_rating;
-VACCUM FULL public.predication_to_delete;
-VACCUM FULL public.sentence;
-VACCUM FULL public.doc_processedy_by_ie;
+VACUUM FULL public.document;
+VACUUM FULL public.document_classification;
+VACUUM FULL public.tag;
+VACUUM FULL public.doc_tagged_by;
+VACUUM FULL public.document_translation;
+VACUUM FULL public.document_metadata;
+VACUUM FULL public.document_metadata_service;
+VACUUM FULL public.predication;
+VACUUM FULL public.predication_inverted_index;
+VACUUM FULL public.predication_rating;
+VACUUM FULL public.predication_to_delete;
+VACUUM FULL public.sentence;
+VACUUM FULL public.doc_processedy_by_ie;
 VACUUM FULL public.tag_inverted_index;
 
