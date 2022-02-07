@@ -934,8 +934,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         month = month + "/";
     }
     // use the original document id if available
+    let doiText = "PMID";
     if (queryResult["org_document_id"] !== null && queryResult["org_document_id"].length > 0) {
         document_id = queryResult["org_document_id"];
+        doiText = "DOI";
     }
 
     let prov_ids = queryResult["prov"];
@@ -943,7 +945,9 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     let divDoc_Card = $('<div class="card"/>');
     let divDoc_Body = $('<div class="card-body"/>');
-    let divDoc_Body_Link = $('<a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
+    //let divDoc_Body_Link = $('<a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
+    let divDoc_Body_Link = $( '<a>'+ doiText + ": " + '</a><a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>' );
+
 
     divDoc_Body_Link.click(function () {
         sendDocumentClicked(lastQuery, document_id, collection, doi);
@@ -954,10 +958,9 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         'Document Graph</a>');
 
     divDoc_Body.append(divDoc_Image);
-    divDoc_Body.append(divDoc_Body_Link);
     divDoc_Body.append(divDoc_DocumentGraph);
 
-    let divDoc_Content = $('<br><b><a class="btn-link" href="' + doi + '" target="_blank">' + title + '</a></b><br>' +
+    let divDoc_Content = $('<br><b>'+ title+ '</b><br>' +
         "in: " + journals + " | " + month + year + '<br>' +
         "by: " + authors + '<br>');
 
@@ -965,6 +968,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     //let
     divDoc_Card.append(divDoc_Body);
+    divDoc_Body.append(divDoc_Body_Link);
+
 
     /*
     let divDoc = $('<div class="card"><div class="card-body">' +
