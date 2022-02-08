@@ -1,0 +1,165 @@
+openapi: 3.0.0
+info:
+  title: PubPharm Narrative Service API
+  description: PubPharm Narrative Service API
+  version: 1.0.0
+servers:
+  - url: http://134.169.32.177
+    description: PubPharm Narrative Service
+paths:
+  /autocompletion:
+    get:
+      summary: Returns a list of suggested autocompletions for the given term
+      description: Returns a list of suggested autocompletions for the given term
+      parameters:
+        - in: query
+          name: term
+          required: true
+          schema:
+            type: string
+          example: Metf
+          description: The term to complete
+        - in: query
+          name: entity_type
+          required: false
+          schema:
+            type: string
+          example: Drug
+          description: Completions must match the entity type (e.g., only complete drug names)
+      responses:
+        '200': # status code
+          description: A list of autocompletions
+          content:
+            application/json:
+              schema:
+                type: ArryOfString
+                example: ["Metformin", "MetforminGabapentinSalt", "MetforminGlycinate", "MetforminHydrochloride", "MetforminPregabalinSalt", "MetforminXr"]
+  /check_query:
+    get:
+      summary: Translates a text query string to a graph query
+      description:  Translates a text query string to a graph query
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          example: Metformin treats Diabetes Mellitus
+
+  /document_ids_for_entity:
+    get:
+      summary: Returns a list of document ids in which the entity was found
+      description: Returns a list of document ids in which the entity was found
+      parameters:
+        - in: query
+          name: entity_id
+          required: true
+          schema:
+            type: string
+          description: The entity id
+          example: CHEMBL1431
+        - in: query
+          name: entity_type
+          required: true
+          schema:
+            type: string
+          description: The entity type
+          example: Drug
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
+
+  /document_graph:
+    get:
+      summary: Returns the document graph for a given document
+      description: Returns the document graph for a given document
+      parameters:
+        - in: query
+          name: document
+          required: true
+          schema:
+            type: int
+          description: The document id
+          example: 30729119
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
+
+  /term_to_entity:
+    get:
+      summary: Translates an term into an entity
+      description: Translates an term into an entity
+      parameters:
+        - in: query
+          name: term
+          required: true
+          schema:
+            type: string
+          description: A term that should be translated into an entity
+          example: Metformin
+
+  /query_sub_count:
+    get:
+      summary: Counts the substitutions for a query variable
+      description: Counts the substitutions for a query variable. Note, that the query must contain exactly one variable.
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          example: Metformin treats ?X(Disease)
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
+
+  /query_narrative_documents:
+    get:
+      summary: Queries a list of narrative documents
+      description:  Queries a list of narrative documents. A narrative document contains title, abstract, metadata, entity tags and statements.
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          example: Metformin treats ?X(Disease)
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
+
+  /narrative_documents:
+    get:
+      summary: Returns a list of narrative documents
+      description: Returns a list of narrative documents. A narrative document contains title, abstract, metadata, entity tags and statements.
+      parameters:
+        - in: query
+          name: documents
+          required: true
+          schema:
+            type: string
+          description: A ; separated list of document ids OR a single document id
+          example: 30729119;34918774
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
