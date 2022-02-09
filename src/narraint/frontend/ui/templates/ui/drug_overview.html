@@ -1,0 +1,304 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototyp</title>
+    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
+</head>
+
+<body>
+
+    <div class="loading" id="loading">
+        <img src="{% static 'assets/loading.gif' %}">
+
+    </div>
+
+    <div class="navbar">
+        <div></div>
+        <div class="searchbar">
+            <input type="text" id='drugInput' placeholder="Search for Drug...">
+            <div onclick="searchDrug()" class="button">
+                <img src="{% static 'assets/searchicon.svg' %}">
+            </div>
+            <!--Website bauen on click-->
+        </div>
+        <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'assets/ifislogo.png' %}" class="ifislogo"></a>
+
+    </div>
+
+    <div class="content">
+
+        <div class="top_container">
+            <img src="#" id="structure">
+            <!--src vom img setzen-->
+            <div class="general_info">
+                <h1 id="name"></h1>
+                <!--text setzen-->
+                <table>
+                    <tr>
+                        <td>Molecular Formula:</td>
+                        <td id="formular"></td>
+                        <!--text setzen-->
+                    </tr>
+                    <tr>
+                        <td>Molecular Mass:</td>
+                        <td id="mass"></td>
+                        <!--text setzen-->
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Administration</h2>
+                    <div id="adminUnfold" class="plusButton" onclick="unfold('admin')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="adminFold" class="plusButton" style="display: none;" onclick="fold('admin')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="adminOptions">
+                    <select class="sortbar" id="adminSort" onchange="sortElements('admin')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="adminSearch" placeholder="Filter...">
+                        <div onclick="searchElements('admin')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="adminSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="adminContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Indications</h2>
+                    <div id="indiUnfold" class="plusButton" onclick="unfold('indi')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="indiFold" class="plusButton" style="display: none;" onclick="fold('indi')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="indiOptions">
+                    <select class="sortbar" id="indiSort" onchange="sortElements('indi')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                        <option value="pha">Phase</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="indiSearch" placeholder="Filter...">
+                        <div onclick="searchElements('indi')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="indiSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="indiContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Adverse Effects</h2>
+                    <div id="adveUnfold" class="plusButton" onclick="unfold('adve')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="adveFold" class="plusButton" style="display: none;" onclick="fold('adve')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="adveOptions">
+                    <select class="sortbar" id="adveSort" onchange="sortElements('adve')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="adveSearch" placeholder="Filter...">
+                        <div onclick="searchElements('adve')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="adveSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="adveContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Drug Interactions</h2>
+                    <div id="drugInterUnfold" class="plusButton" onclick="unfold('drugInter')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="drugInterFold" class="plusButton" style="display: none;" onclick="fold('drugInter')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="drugInterOptions">
+                    <select class="sortbar" id="drugInterSort" onchange="sortElements('drugInter')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="drugInterSearch" placeholder="Filter...">
+                        <div onclick="searchElements('drugInter')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="drugInterSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="drugInterContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Target Interactions</h2>
+                    <div id="targInterUnfold" class="plusButton" onclick="unfold('targInter')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="targInterFold" class="plusButton" style="display: none;" onclick="fold('targInter')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="targInterOptions">
+                    <select class="sortbar" id="targInterSort" onchange="sortElements('targInter')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="targInterSearch" placeholder="Filter...">
+                        <div onclick="searchElements('targInter')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="targInterSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="targInterContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container searchbox">
+            <div class="top_searchbox">
+                <div class="top_searchbox_left">
+                    <h2>Lab Methods</h2>
+                    <div id="labMethUnfold" class="plusButton" onclick="unfold('labMeth')">
+                        <img src="{% static 'assets/arrowdown.svg' %}">
+                    </div>
+                    <div id="labMethFold" class="plusButton" style="display: none;" onclick="fold('labMeth')">
+                        <img src="{% static 'assets/arrowup.svg' %}">
+                    </div>
+                </div>
+                <div class="top_searchbox_right" id="labMethOptions">
+                    <select class="sortbar" id="labMethSort" onchange="sortElements('labMeth')">
+                        <option value="rel">Most Relevant</option>
+                        <option value="alp">Alphabetical</option>
+                    </select>
+                    <div class="searchbar">
+                        <input type="text" id="labMethSearch" placeholder="Filter...">
+                        <div onclick="searchElements('labMeth')" class="button">
+                            <img src="{% static 'assets/filtericon.svg' %}">
+                        </div>
+                        <!--Suche on click-->
+                    </div>
+                </div>
+            </div>
+            <div class="bottom_searchbox_simple" id="labMethSimpleContent">
+                <!--Indications hier einfuegen-->
+            </div>
+            <div class="bottom_searchbox" id="labMethContent">
+                <!--Indications hier einfuegen-->
+            </div>
+        </div>
+
+        <div class="container news">
+            <h2>Recent Papers</h2>
+            <div class="news_bottom" id="news">
+                <!--Papers hier einfuegen-->
+            </div>
+        </div>
+
+    </div>
+
+    <div class="popup" id="newsPopup">
+        <div class="newsdetail">
+            <div class="top">
+                <a id="paperLink">View Paper</a>
+                <div onclick="hideDetail()">
+                    <img src="{% static 'assets/close.svg' %}">
+                </div>
+            </div>
+            <div class = "bottom">
+                <div class = "checkbox" id = "newsCheckbox"></div>   
+                <div class = "paper">
+                    <h2 id = "paperTitle"></h2>
+                    <p class="author" id = "paperAuthor"></p>
+                    <p class="journal" id = "paperJournal"></p>
+                    <p class="date" id = "paperDate"></p>
+                    <p class="abstract" id = "paperAbstract"></p> 
+                </div>
+                <div class="graph" id = "paperGraph"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const url_query = "http://134.169.32.177/";
+        const url_query_sub_count = "{% url 'query_sub_count' %}";
+        const url_query_chembl_indication = "{% url 'chembl_indication' %}";
+        const url_query_document_ids_for_entity = "{% url 'document_ids_for_entity' %}";
+        const url_document_graph =  "{% url 'document_graph' %}";
+        const url_narrative_documents =  "{% url 'narrative_documents' %}";
+        const url_chembl_phase = "{% static 'assets/chembl_phase_' %}";
+        const url_chembl_phase_new = "{% static 'assets/verification_new.png' %}"
+    </script>
+
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+
+    <script src="{% static 'js/paper.js' %}"></script>
+    <script src="{% static 'js/drugOverviewClient.js' %}"></script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}"></script>
+</body>

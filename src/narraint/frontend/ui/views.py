@@ -1,3 +1,4 @@
+import ast
 import base64
 import json
 import logging
@@ -7,6 +8,8 @@ import traceback
 from datetime import datetime
 from io import BytesIO
 
+import coreapi
+import psycopg2
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +20,7 @@ from sqlalchemy import func
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database, \
     TagInvertedIndex
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
+from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -29,6 +32,7 @@ from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
+from narrant.preprocessing.enttypes import DRUG
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -65,6 +69,51 @@ class View:
             cls.translation = QueryTranslation()
 
         return cls._instance
+
+
+def get_chembl_indication(request):
+    if "drug" not in request.GET:
+        return JsonResponse(status=500, data=dict(answer="Drug parameter is missing"))
+
+    try:
+        drug_str = str(request.GET['drug']).strip().lower()
+
+        try:
+            drug_ids = View.instance().entity_tagger.tag_entity(drug_str)
+            drug_ids = list([e.entity_id for e in drug_ids if e.entity_type == DRUG])
+            if len(drug_ids) == 0:
+                return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
+            with open(BACKEND_CONFIG, 'rt') as f:
+                config = json.load(f)
+            connection = psycopg2.connect(user=config["POSTGRES_USER"],
+                                          password=config["POSTGRES_PW"],
+                                          host=config["POSTGRES_HOST"],
+                                          port=config["POSTGRES_PORT"],
+                                          database="chembldb")
+            cursor = connection.cursor()
+            # CHEMBL_QUERY = "select mesh_id, max_phase_for_ind from drug_indication where molregno in ((select molregno from molecule_synonyms where synonyms ilike 'Simvastatin') union (select molregno from molecule_dictionary where pref_name ilike 'Simvastatin'))"
+            if len(drug_ids) > 1:
+                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
+                                        (select molregno from molecule_dictionary where chembl_id in %(drugs)s)"
+            else:
+                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
+                                                        (select molregno from molecule_dictionary where chembl_id = %(drugs)s)"
+            cursor.execute(query, {"drugs": tuple(drug_ids)})
+            records = cursor.fetchall()
+
+            results = []
+            for row in records:
+                results.append(dict(mesh_id='MESH:' + row[0],
+                                    max_phase_for_ind=row[1]))
+            connection.close()
+            return JsonResponse(dict(results=results))
+
+        except KeyError:
+            return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while fetching data from PostgreSQL", error)
+    return HttpResponse(status=500)
 
 
 def get_document_graph(request):
@@ -362,13 +411,14 @@ def get_document_ids_for_entity(request):
         # execute query and get result (query can only have one result due to querying the PK)
         row = query.first()
         if row:
-            document_ids_str = row[0]
+            # interpret the string from db as a python list
+            document_ids = ast.literal_eval(row[0])
         else:
-            document_ids_str = []
+            document_ids = []
         View.instance().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
                                                     time_needed=datetime.now() - time_start)
         # send results back
-        return JsonResponse(dict(document_ids=document_ids_str))
+        return JsonResponse(dict(document_ids=document_ids))
 
     except Exception as e:
         logger.error(f"get_document_ids_for_entity: {e}")
@@ -595,6 +645,28 @@ def post_report(request):
         return HttpResponse(status=500)
 
 
+API_SCHEMA = coreapi.Document(
+    title='Narrative Service API',
+    url='134.169.32.177/swagger-ui.html',
+    content={
+        'query': coreapi.Link(
+            url='/query',
+            action='get',
+            fields=[
+                coreapi.Field(
+                    name='query',
+                    required=True,
+                    location='query',
+                    description='The query string',
+                    example="Metformin treats Diabetes Mellitus"
+                )
+            ],
+            description='Return flight availability and prices.'
+        )
+    }
+)
+
+
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 
@@ -605,6 +677,10 @@ class SearchView(TemplateView):
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(SearchView.template_name)
         return super().get(request, *args, **kwargs)
+
+
+class SwaggerUIView(TemplateView):
+    template_name = "ui/swagger-ui.html"
 
 
 class StatsView(TemplateView):
@@ -644,8 +720,19 @@ class HelpView(TemplateView):
 
 
 class DocumentView(TemplateView):
-    template_name = "ui/document.html"
+    template_name = "ui/paper.html"
 
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(DocumentView.template_name)
         return super().get(request, *args, **kwargs)
+
+
+class DrugOverviewIndexView(TemplateView):
+    template_name = "ui/drug_overview_index.html"
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class DrugOverviewView(TemplateView):
+    template_name = "ui/drug_overview.html"

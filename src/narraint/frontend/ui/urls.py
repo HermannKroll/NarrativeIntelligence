@@ -1,12 +1,11 @@
 from django.urls import path
-from django.views.decorators.cache import never_cache
 
-from narraint.frontend.ui.views import SearchView, get_autocompletion, get_check_query, get_query, get_feedback, \
+from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_query, get_feedback, \
     post_report, get_provenance, get_document_graph, get_tree_info, get_query_sub_count, get_document_link_clicked, \
-    get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity
+    get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity, \
+    get_chembl_indication
 
 urlpatterns = [
-    path("", never_cache(SearchView.as_view()), name="search"),
     path("query", get_query, name="query"),
     path("query_sub_count", get_query_sub_count, name="query_sub_count"),
     path("autocompletion", get_autocompletion, name="autocompletion"),
@@ -20,5 +19,6 @@ urlpatterns = [
     path("document_clicked", get_document_link_clicked, name="document_clicked"),
     path("query_narrative_documents", get_query_narrative_documents, name="query_narrative_documents"),
     path("narrative_documents", get_narrative_documents, name="narrative_documents"),
-    path("document_ids_for_entity", get_document_ids_for_entity, name="document_ids_for_entity")
+    path("document_ids_for_entity", get_document_ids_for_entity, name="document_ids_for_entity"),
+    path("chembl_indication", get_chembl_indication, name="chembl_indication")
 ]

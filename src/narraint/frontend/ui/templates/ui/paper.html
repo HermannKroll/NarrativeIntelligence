@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototyp</title>
+    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
+</head>
+
+<body>
+<div class="popup_dummie">
+    <div class="newsdetail" style="margin: 3.5em 12% 5em 12%;">
+        <div class="top">
+            <a id="paperLink">View Paper</a>
+        </div>
+        <div class="bottom">
+            <div class="checkbox" id="newsCheckbox"></div>
+            <div class="paper">
+                <h2 id="paperTitle"></h2>
+                <p class="author" id="paperAuthor"></p>
+                <p class="journal" id="paperJournal"></p>
+                <p class="date" id="paperDate"></p>
+                <p class="abstract" id="paperAbstract"></p>
+            </div>
+            <div class="graph" id="paperGraph"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+<script src="{% static 'js/paper.js' %}"></script>
+<script>
+    const url_document_graph = "{% url 'document_graph' %}";
+    const url_narrative_documents = "{% url 'narrative_documents' %}";
+
+    let search = window.location.search;
+    let documentId = search.split("=")[1];
+
+    async.parallel([
+        async.apply(graph, documentId),
+        async.apply(query_highlight, documentId)
+    ], function (err, result) {
+        console.log(result)
+        fillPaperDetail(result[1].results[0], result[0]);
+    });
+
+    function graph(meta, callback_document) {
+        var query = url_document_graph + "?document=" + meta + "&data_source=PubMed"; // real shit
+        fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                data.meta = meta;
+                callback_document(null, data);
+            });
+    }
+
+    function query_highlight(meta, callback_document) {
+        var query = url_narrative_documents + "?documents=" + meta + "&data_source=PubMed";
+        fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                callback_document(null, data);
+            });
+    }
+</script>
+</body>

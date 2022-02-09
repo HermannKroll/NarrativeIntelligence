@@ -1,0 +1,43 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototyp</title>
+    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
+</head>
+
+<body>
+    <div class="topbar">
+        <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo"></a>
+    </div>
+
+    <div class="content main_page">
+        <img src="{% static 'assets/logo.png' %}" class="logo">
+        <div class="searchbar">
+            <input type="text" id='drugInput' placeholder="Search for Drug...">
+            <div onclick="searchDrug()" class="button">
+                <img src="{% static 'assets/searchicon.svg' %}">
+            </div>
+        </div>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et sem placerat, eleifend lacus eu, dapibus velit. Proin feugiat turpis non ante placerat, ac posuere mi aliquet. Praesent at purus massa. In consequat, mauris at varius finibus, dui massa porttitor nunc, elementum pulvinar sapien metus sit amet nisi. Duis neque odio, auctor at felis vitae, bibendum iaculis quam. Donec elementum ut metus convallis pharetra.
+        </p>
+    </div>
+    
+    <script>
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const drugOverview_url = "{% url 'drug_overview' %}";
+        function searchDrug() {
+            var keyword = document.getElementById('drugInput').value;
+            if (keyword == "") {
+                return;
+            }
+            window.location = drugOverview_url + "?drug=" + keyword;
+        }
+    </script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}" type="text/javascript"></script>
+</body>
