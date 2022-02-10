@@ -5,7 +5,7 @@ var drugInterData = null;
 var targInterData = null;
 var labMethData = null;
 var newsData = null;
-var maxCount = {"admin" : -1,"indi" : -1,"adve" : -1,"drugInter" : -1,"targInter" : -1,"labMeth" : -1};
+var maxCount = {"admin": -1, "indi": -1, "adve": -1, "drugInter": -1, "targInter": -1, "labMeth": -1};
 
 buildSite();
 
@@ -52,14 +52,19 @@ async function buildSite() {
                 .then(response => response.json())
                 .then(data => {
                     //console.log(data)
-                    var meta = data.document_ids.slice(0, 10);
-                    async.parallel([
-                        async.apply(query_graph, meta),
-                        async.apply(query_highlight, meta)
-                    ], function (err, result) {
-                        newsData = result;
-                        fillNews(newsData);
-                    });
+                    if (data.document_ids !== undefined) {
+                        if (data.document_ids.length > 10) {
+                            var meta = data.document_ids.slice(0, 10);
+                        } else {
+                            var meta = data.document_ids;
+                        }
+                        async.parallel([
+                            async.apply(query_highlight, meta)
+                        ], function (err, result) {
+                            newsData = result;
+                            fillNews(newsData);
+                        });
+                    }
                 });
 
 
@@ -80,9 +85,11 @@ async function buildSite() {
                     document.getElementById('mass').innerText = data2.molecule_properties.full_mwt;
                     //synonym seems to be correct
                     document.getElementById('name').innerText = data2.synonyms[0].split(" ")[0];
-                }).catch(e => {document.getElementById('name').innerText = keyword
-                    document.getElementById('formular').innerText = "-";
-                    document.getElementById('mass').innerText = "-";});//just give something to the user, so we can proceed
+                }).catch(e => {
+                document.getElementById('name').innerText = keyword
+                document.getElementById('formular').innerText = "-";
+                document.getElementById('mass').innerText = "-";
+            });//just give something to the user, so we can proceed
         })
         .catch();
 
@@ -104,7 +111,7 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if(adminData.length <= 0) {
+            if (adminData.length <= 0) {
                 return;
             }
             maxCount["admin"] = adminData[0].count;
@@ -116,7 +123,7 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if(adveData.length <= 0) {
+            if (adveData.length <= 0) {
                 return;
             }
             maxCount["adve"] = adveData[0].count;
@@ -128,7 +135,7 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             targInterData = data.sub_count_list;
-            if(targInterData.length <= 0) {
+            if (targInterData.length <= 0) {
                 return;
             }
             maxCount["targInter"] = targInterData[0].count;
@@ -140,7 +147,7 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             drugInterData = data.sub_count_list;
-            if(drugInterData.length <= 0) {
+            if (drugInterData.length <= 0) {
                 return;
             }
             maxCount["drugInter"] = drugInterData[0].count;
@@ -152,7 +159,7 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             labMethData = data.sub_count_list;
-            if(labMethData.length <= 0) {
+            if (labMethData.length <= 0) {
                 return;
             }
             maxCount["labMeth"] = labMethData[0].count;
@@ -163,36 +170,11 @@ async function buildSite() {
     document.getElementById("loading").style.display = "none";
 }
 
-function query_graph(meta, callback_document) {
-    var async_array = [];
-    for (var i = 0; i < meta.length; ++i) {
-        async_array[i] = async.apply(graph, meta[i]);
-        if (i == 9) {
-            break;
-        }
-    }
-    async.parallel(async_array,
-        function (err, result) {
-        callback_document(null, result);
-    });
-
-}
-
-function graph(meta, callback_graph_parallel) {
-    var query = url_document_graph + "?document=" + meta + "&data_source=PubMed"; // real shit
-    fetch(query)
-        .then(response => response.json())
-        .then(data => {
-            //console.log(JSON.stringify(data));
-            data.meta = meta;
-            callback_graph_parallel(null, data);
-        });
-}
 
 function query_highlight(meta, callback_document) {
-    var query = url_narrative_documents + "?documents=" ;
+    var query = url_narrative_documents + "?documents=";
     //console.log(meta)
-    for (var i = 0; i < 10; ++i) {
+    for (var i = 0; i < meta.length; ++i) {
         query += meta[i] + ";";
     }
     query = query.substring(0, query.length - 1);
@@ -214,6 +196,7 @@ function indi_query_tagging(keyword, callback_indi_tagging) {
             callback_indi_tagging(null, data);
         });
 }
+
 function indi_query_chembl(keyword, callback_indi_chembl) {
     //TODO: ändern wenn query funktioniert
     var query = url_query_chembl_indication + "?drug=" + keyword;
@@ -270,7 +253,6 @@ function chembl_indications(data_tagging, data_chembl, keyword_id) {
     fillSearchbox(document.getElementById("indiSimpleContent"), result, maxCount["indi"], 10, keyword_id);
     fillSearchbox(document.getElementById("indiContent"), result, maxCount["indi"], -1, keyword_id);
 }
-
 
 
 function searchElements(reference) {
@@ -424,26 +406,26 @@ function clearSearchBox(searchbox) {
 
 function fillNews(data) {
     var newsDiv = document.getElementById("news");
-    for (var i = 0; i < data[1].results.length; i++) {
+    for (var i = 0; i < data[0].results.length; i++) {
         const itemDiv = document.createElement('div');
         const itemHeader = document.createElement('h2');
         const itemJournal = document.createElement('p');
         const itemDate = document.createElement('p');
 
-        itemHeader.textContent = data[1].results[i].title;
-        itemJournal.textContent = data[1].results[i].metadata.journals;
+        itemHeader.textContent = data[0].results[i].title;
+        itemJournal.textContent = data[0].results[i].metadata.journals;
         itemJournal.classList.add("journal");
-        if (data[1].results[i].metadata.publication_month != 0) {
-            itemDate.textContent = data[1].results[i].metadata.publication_month + "/" +  data[1].results[i].metadata.publication_year;
+        if (data[0].results[i].metadata.publication_month != 0) {
+            itemDate.textContent = data[0].results[i].metadata.publication_month + "/" + data[0].results[i].metadata.publication_year;
         } else {
-            itemDate.textContent = data[1].results[i].metadata.publication_year;
+            itemDate.textContent = data[0].results[i].metadata.publication_year;
         }
         itemDate.classList.add("date");
         itemDiv.append(itemHeader);
         itemDiv.append(itemJournal);
         itemDiv.append(itemDate);
         itemDiv.id = "paper" + i;
-        itemDiv.addEventListener("click", function() {
+        itemDiv.addEventListener("click", function () {
             showDetail(itemDiv.id);
         });
 
@@ -452,9 +434,9 @@ function fillNews(data) {
 }
 
 function showDetail(paperid) {
-    var id = parseInt(paperid.substring(5),10);
+    var id = parseInt(paperid.substring(5), 10);
     document.getElementById("newsPopup").style.display = "flex";
-    fillPaperDetail(newsData[1].results[id], newsData[0][id]);
+    fillPaperDetail(newsData[0].results[id]);
 }
 
 function hideDetail() {
@@ -496,13 +478,13 @@ function getDataByReference(reference) {
     }
 }
 
-function colorInterpolation(r1, g1, b1, r2, g2, b2, scale){
+function colorInterpolation(r1, g1, b1, r2, g2, b2, scale) {
     var r = Math.trunc(r1 + (r2 - r1) * scale);
     var g = Math.trunc(g1 + (g2 - g1) * scale);
     var b = Math.trunc(b1 + (b2 - b1) * scale);
-    return "rgb(" + r + "," + g + "," + b + ")"; 
+    return "rgb(" + r + "," + g + "," + b + ")";
 }
 
-function rgb(r, g, b){
-    return "rgb(" + r + "," + g + "," + b + ")"; 
+function rgb(r, g, b) {
+    return "rgb(" + r + "," + g + "," + b + ")";
 }

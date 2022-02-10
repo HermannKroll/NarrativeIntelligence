@@ -12,7 +12,7 @@
 
 <body>
 <div class="popup_dummie">
-    <div class="newsdetail" style="margin: 3.5em 12% 5em 12%;">
+    <div class="newsdetail" style="margin: 3.5em 12% 3.5em 12%;">
         <div class="top">
             <a id="paperLink">View Paper</a>
         </div>
@@ -42,22 +42,11 @@
     let documentId = search.split("=")[1];
 
     async.parallel([
-        async.apply(graph, documentId),
         async.apply(query_highlight, documentId)
     ], function (err, result) {
         console.log(result)
-        fillPaperDetail(result[1].results[0], result[0]);
+        fillPaperDetail(result[1].results[0]);
     });
-
-    function graph(meta, callback_document) {
-        var query = url_document_graph + "?document=" + meta + "&data_source=PubMed"; // real shit
-        fetch(query)
-            .then(response => response.json())
-            .then(data => {
-                data.meta = meta;
-                callback_document(null, data);
-            });
-    }
 
     function query_highlight(meta, callback_document) {
         var query = url_narrative_documents + "?documents=" + meta + "&data_source=PubMed";

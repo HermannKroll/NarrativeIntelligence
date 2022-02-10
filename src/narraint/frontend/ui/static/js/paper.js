@@ -3,13 +3,32 @@ var tagsArray = null;
 var activeTypeMap = null;
 var document_graph = null;
 
-function fillPaperDetail(contentData, graphData) {
+function queryGraph(document_id) {
+    var query = url_document_graph + "?document=" + document_id + "&data_source=PubMed"; // real shit
+    fetch(query)
+        .then(response => response.json())
+        .then(data => {
+            data.meta = document_id;
+            document_graph = data;
+            const graphDiv = document.getElementById("paperGraph");
+            visualize_document_graph(graphDiv);
+        });
+}
+
+const emptyGraph = Object();
+emptyGraph["nodes"] = [];
+emptyGraph["facts"] = [];
+
+function fillPaperDetail(contentData) {
+    const graphDiv = document.getElementById("paperGraph");
+    document_graph = emptyGraph;
+    visualize_document_graph(graphDiv);
+
     const title = document.getElementById("paperTitle");
     const abstract = document.getElementById("paperAbstract");
     const date = document.getElementById("paperDate");
     const author = document.getElementById("paperAuthor");
     const journal = document.getElementById("paperJournal");
-    const graphDiv = document.getElementById("paperGraph");
     const link = document.getElementById("paperLink");
     title.textContent = contentData.title;
     abstract.textContent = contentData.abstract;
@@ -17,43 +36,45 @@ function fillPaperDetail(contentData, graphData) {
     journal.textContent = contentData.metadata.journals;
 
     if (contentData.metadata.publication_month !== 0) {
-        date.textContent = contentData.metadata.publication_month + "/" +  contentData.metadata.publication_year;
+        date.textContent = contentData.metadata.publication_month + "/" + contentData.metadata.publication_year;
     } else {
         date.textContent = contentData.metadata.publication_year;
     }
 
     link.href = contentData.metadata.doi;
     link.target = "_blank";
-    document_graph = graphData;
+
+    queryGraph(contentData.id);
 
 
     markInstance = new Mark([title, abstract]);
     tagsArray = contentData.tags;
     var typeArray = ["All"];
     for (var j = 0; j < tagsArray.length; j++) {
-        var startIndex = tagsArray[j].start >= title.textContent.length ? tagsArray[j].start -1 : tagsArray[j].start;
+        var startIndex = tagsArray[j].start >= title.textContent.length ? tagsArray[j].start - 1 : tagsArray[j].start;
         markInstance.markRanges([{
-            start : startIndex,
-            length : tagsArray[j].end - tagsArray[j].start}], {
-                "element": "a",
-                "className": tagsArray[j].type,
-                "each": function(e){
-                    e.href = markLink(tagsArray[j]);
-                    if (e.href != "javascript:;") {
-                        e.target = "_blank"
-                    }
-                },
-            });
-        if(!typeArray.includes(tagsArray[j].type)){
+            start: startIndex,
+            length: tagsArray[j].end - tagsArray[j].start
+        }], {
+            "element": "a",
+            "className": tagsArray[j].type,
+            "each": function (e) {
+                e.href = markLink(tagsArray[j]);
+                if (e.href != "javascript:;") {
+                    e.target = "_blank"
+                }
+            },
+        });
+        if (!typeArray.includes(tagsArray[j].type)) {
             typeArray.push(tagsArray[j].type);
         }
     }
     initCheckbox(typeArray);
-    visualize_document_graph(graphDiv);
+
 }
 
 function markLink(tags) {
-    if(tags.id.substring(0, 4) == "MESH") {
+    if (tags.id.substring(0, 4) == "MESH") {
         var meshId = tags.id.substring(5, tags.id.length);
         return "https://meshb.nlm.nih.gov/record/ui?ui=" + meshId;
     } else if (tags.id.substring(0, 6) == "CHEMBL") {
@@ -92,11 +113,11 @@ function initCheckbox(typeArray) {
         checkbox.id = item;
         checkbox.name = item;
         if (item == "All") {
-            checkbox.addEventListener("click", function() {
+            checkbox.addEventListener("click", function () {
                 checkboxActionAll();
             });
         } else {
-            checkbox.addEventListener("click", function() {
+            checkbox.addEventListener("click", function () {
                 checkboxAction();
             });
         }
@@ -110,7 +131,7 @@ function initCheckbox(typeArray) {
         activeTypeMap.set(checkbox.id, checkbox.checked);
     }
 
-    function checkboxActionAll(){
+    function checkboxActionAll() {
         const checkboxAll = document.getElementById("All");
         var checkboxes = document.getElementById("newsCheckbox").getElementsByTagName("input");
         for (let item of checkboxes) {
@@ -128,14 +149,15 @@ function initCheckbox(typeArray) {
         }
         markInstance.unmark();
         for (var j = 0; j < tagsArray.length; j++) {
-            var startIndex = tagsArray[j].start >= title.textContent.length ? tagsArray[j].start -1 : tagsArray[j].start;
+            var startIndex = tagsArray[j].start >= title.textContent.length ? tagsArray[j].start - 1 : tagsArray[j].start;
             if (activeTypeMap.get(tagsArray[j].type)) {
                 markInstance.markRanges([{
-                    start : startIndex,
-                    length : tagsArray[j].end - tagsArray[j].start}], {
+                    start: startIndex,
+                    length: tagsArray[j].end - tagsArray[j].start
+                }], {
                     "element": "a",
                     "className": tagsArray[j].type,
-                    "each": function(e){
+                    "each": function (e) {
                         e.href = markLink(tagsArray[j]);
                         if (e.href != "javascript:;") {
                             e.target = "_blank"
@@ -155,14 +177,14 @@ function visualize_document_graph(container) {
     let id = 1;
     let nodesToCreate = new vis.DataSet([]);
     nodes.forEach(node => {
-        let colorLabel = node.slice(node.indexOf("(") +1, node.indexOf(")"));
-        if(!activeTypeMap.get(colorLabel)) {
+        let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
+        if (!activeTypeMap.get(colorLabel)) {
             return;
         }
         node2id[node] = id;
         let color = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--' + colorLabel);
-        let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color':color};
+            .getPropertyValue('--' + colorLabel);
+        let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color};
         nodesToCreate.add(nodeData);
         id = id + 1;
     });
