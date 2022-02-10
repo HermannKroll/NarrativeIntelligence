@@ -385,7 +385,7 @@ p {
 }
 
 .searchbox .top_searchbox .top_searchbox_right {
-  display: none;
+  display: flex;
 }
 
 .searchbox .top_searchbox .top_searchbox_right .searchbar {
@@ -411,7 +411,7 @@ p {
   margin-top: 0.5em;
   overflow-y: scroll;
   height: 15em;
-  display: none;
+  display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   -ms-flex-line-pack: start;

@@ -115,7 +115,6 @@ async function buildSite() {
                 return;
             }
             maxCount["admin"] = adminData[0].count;
-            fillSearchbox(document.getElementById("adminSimpleContent"), adminData, maxCount["admin"], 10);
             fillSearchbox(document.getElementById("adminContent"), adminData, maxCount["admin"], -1);
         });
 
@@ -127,7 +126,6 @@ async function buildSite() {
                 return;
             }
             maxCount["adve"] = adveData[0].count;
-            fillSearchbox(document.getElementById("adveSimpleContent"), adveData, maxCount["adve"], 10);
             fillSearchbox(document.getElementById("adveContent"), adveData, maxCount["adve"], -1);
         });
 
@@ -139,7 +137,6 @@ async function buildSite() {
                 return;
             }
             maxCount["targInter"] = targInterData[0].count;
-            fillSearchbox(document.getElementById("targInterSimpleContent"), targInterData, maxCount["targInter"], 10);
             fillSearchbox(document.getElementById("targInterContent"), targInterData, maxCount["targInter"], -1);
         });
 
@@ -151,7 +148,6 @@ async function buildSite() {
                 return;
             }
             maxCount["drugInter"] = drugInterData[0].count;
-            fillSearchbox(document.getElementById("drugInterSimpleContent"), drugInterData, maxCount["drugInter"], 10);
             fillSearchbox(document.getElementById("drugInterContent"), drugInterData, maxCount["drugInter"], -1);
         });
 
@@ -163,7 +159,6 @@ async function buildSite() {
                 return;
             }
             maxCount["labMeth"] = labMethData[0].count;
-            fillSearchbox(document.getElementById("labMethSimpleContent"), labMethData, maxCount["labMeth"], 10);
             fillSearchbox(document.getElementById("labMethContent"), labMethData, maxCount["labMeth"], -1);
         });
 
@@ -250,7 +245,6 @@ function chembl_indications(data_tagging, data_chembl, keyword_id) {
     }
     maxCount["indi"] = result[0].count;
     indiData = result;
-    fillSearchbox(document.getElementById("indiSimpleContent"), result, maxCount["indi"], 10, keyword_id);
     fillSearchbox(document.getElementById("indiContent"), result, maxCount["indi"], -1, keyword_id);
 }
 

@@ -312,7 +312,7 @@ p {
             }
         }
         .top_searchbox_right {
-            display: none;
+            display: flex;
             .searchbar {
                 height: 1.5em;
                 width: 13em;
@@ -335,7 +335,7 @@ p {
         margin-top: 0.5em;
         overflow-y: scroll;
         height: 15em;
-        display: none;
+        display: flex;
         flex-wrap: wrap;
         align-content: flex-start;
         justify-content: flex-start;
