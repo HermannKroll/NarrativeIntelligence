@@ -11,6 +11,6 @@ VACUUM FULL public.predication_inverted_index;
 VACUUM FULL public.predication_rating;
 VACUUM FULL public.predication_to_delete;
 VACUUM FULL public.sentence;
-VACUUM FULL public.doc_processedy_by_ie;
+VACUUM FULL public.doc_processed_by_ie;
 VACUUM FULL public.tag_inverted_index;
 
