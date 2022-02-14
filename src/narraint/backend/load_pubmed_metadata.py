@@ -128,7 +128,7 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
         if not publication_month:
             publication_month = 0
         if authors or journals or publication_year:
-            doi_link = f'https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM{pmid}'
+            doi_link = f'https://www.pubpharm.de/vufind/Search/Results?lookfor=NLM {pmid}'
             metadata_to_insert.append(dict(document_id=pmid, document_collection=document_collection,
                                            authors=authors, journals=journals, publication_year=publication_year,
                                            publication_month=publication_month,
