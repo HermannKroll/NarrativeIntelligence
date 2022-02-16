@@ -1,9 +1,6 @@
-import json
-from collections import defaultdict
-
-import logging
-
 import csv
+import logging
+from collections import defaultdict
 from itertools import islice
 from typing import Set
 
