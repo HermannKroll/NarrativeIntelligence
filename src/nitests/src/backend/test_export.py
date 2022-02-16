@@ -21,7 +21,7 @@ class TestExport(unittest.TestCase):
     def test_export_pubtator(self):
         outfile = util.tmp_rel_path("export_out")
         testfile = util.get_test_resource_filepath("infiles/test_export/out/pubtator.txt")
-        export(outfile, ["Drug", "Disease"], export_format="pubtator", collection="TEST_EXPORT")
+        export(outfile, ["Drug", "Disease"], content=True, export_format="pubtator", collection="TEST_EXPORT")
         with open(outfile) as of, open(testfile) as tf:
             self.assertEqual(tf.read(), of.read())
 
