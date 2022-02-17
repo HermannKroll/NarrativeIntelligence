@@ -8,7 +8,6 @@ import traceback
 from datetime import datetime
 from io import BytesIO
 
-import coreapi
 import psycopg2
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
@@ -643,28 +642,6 @@ def post_report(request):
     except:
         traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)
-
-
-API_SCHEMA = coreapi.Document(
-    title='Narrative Service API',
-    url='134.169.32.177/swagger-ui.html',
-    content={
-        'query': coreapi.Link(
-            url='/query',
-            action='get',
-            fields=[
-                coreapi.Field(
-                    name='query',
-                    required=True,
-                    location='query',
-                    description='The query string',
-                    example="Metformin treats Diabetes Mellitus"
-                )
-            ],
-            description='Return flight availability and prices.'
-        )
-    }
-)
 
 
 class SearchView(TemplateView):
