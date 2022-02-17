@@ -24,7 +24,7 @@ async function buildSite() {
         return;
     }
     var keyword = search.split("=")[1];
-    document.getElementById('drugInput').value = keyword;
+    document.getElementById('drugInput').value = decodeURI(keyword);
 
     //search chembl api via keyword
     var keyword_id = 0;
@@ -63,6 +63,7 @@ async function buildSite() {
                         ], function (err, result) {
                             newsData = result;
                             fillNews(newsData);
+                            doneLoading("news");
                         });
                     }
                 });
@@ -86,7 +87,7 @@ async function buildSite() {
                     //synonym seems to be correct
                     document.getElementById('name').innerText = data2.synonyms[0].split(" ")[0];
                 }).catch(e => {
-                document.getElementById('name').innerText = keyword
+                document.getElementById('name').innerText = decodeURI(keyword);
                 document.getElementById('formular').innerText = "-";
                 document.getElementById('mass').innerText = "-";
             });//just give something to the user, so we can proceed
@@ -115,7 +116,8 @@ async function buildSite() {
                 return;
             }
             maxCount["admin"] = adminData[0].count;
-            fillSearchbox(document.getElementById("adminContent"), adminData, maxCount["admin"], -1);
+            fillSearchbox("admin", adminData, maxCount["admin"], -1);
+            doneLoading("admin");
         });
 
     fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
@@ -126,7 +128,8 @@ async function buildSite() {
                 return;
             }
             maxCount["adve"] = adveData[0].count;
-            fillSearchbox(document.getElementById("adveContent"), adveData, maxCount["adve"], -1);
+            fillSearchbox("adve", adveData, maxCount["adve"], -1);
+            doneLoading("adve");
         });
 
     fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
@@ -137,7 +140,8 @@ async function buildSite() {
                 return;
             }
             maxCount["targInter"] = targInterData[0].count;
-            fillSearchbox(document.getElementById("targInterContent"), targInterData, maxCount["targInter"], -1);
+            fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
+            doneLoading("targInter");
         });
 
     fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
@@ -148,7 +152,8 @@ async function buildSite() {
                 return;
             }
             maxCount["drugInter"] = drugInterData[0].count;
-            fillSearchbox(document.getElementById("drugInterContent"), drugInterData, maxCount["drugInter"], -1);
+            fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
+            doneLoading("drugInter");
         });
 
     fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
@@ -159,10 +164,9 @@ async function buildSite() {
                 return;
             }
             maxCount["labMeth"] = labMethData[0].count;
-            fillSearchbox(document.getElementById("labMethContent"), labMethData, maxCount["labMeth"], -1);
+            fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
+            doneLoading("labMeth");
         });
-
-    document.getElementById("loading").style.display = "none";
 }
 
 
@@ -245,11 +249,13 @@ function chembl_indications(data_tagging, data_chembl, keyword_id) {
     }
     maxCount["indi"] = result[0].count;
     indiData = result;
-    fillSearchbox(document.getElementById("indiContent"), result, maxCount["indi"], -1, keyword_id);
+    fillSearchbox("indi", result, maxCount["indi"], -1, keyword_id);
+    doneLoading("indi");
 }
 
 
 function searchElements(reference) {
+    startLoading(reference);
     var input = document.getElementById(reference + "Search").value.toUpperCase();
     var data = getDataByReference(reference);
     var newData = [];
@@ -268,12 +274,13 @@ function searchElements(reference) {
             }
         }
     }
-    var searchbox = document.getElementById(reference + "Content");
-    clearSearchBox(searchbox);
-    fillSearchbox(searchbox, newData, maxCount[reference], -1);
+    clearSearchBox(reference);
+    fillSearchbox(reference, newData, maxCount[reference], -1);
+    doneLoading(reference);
 }
 
 function sortElements(reference) {
+    startLoading(reference);
     var select = document.getElementById(reference + "Sort");
     var data = getDataByReference(reference);
     document.getElementById(reference + "Search").value = "";
@@ -301,12 +308,13 @@ function sortElements(reference) {
             break;
     }
     //console.log(data);
-    var searchbox = document.getElementById(reference + "Content");
-    clearSearchBox(searchbox);
-    fillSearchbox(searchbox, data, maxCount[reference], -1);
+    clearSearchBox(reference);
+    fillSearchbox(reference, data, maxCount[reference], -1);
+    doneLoading(reference);
 }
 
-function fillSearchbox(searchbox, data, max, elementCount, chembl_id = 0) {
+function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
+    searchbox = document.getElementById(reference + "Content");
     if (elementCount == -1 || elementCount > data.length) {
         elementCount = data.length;
     }
@@ -356,28 +364,22 @@ function getLinkToQuery(searchbox, item) {
 
     var predicate = '+';
     switch (searchbox.id) {
-        case "adminSimpleContent":
         case "adminContent":
             predicate += "administered";
             break;
-        case "indiSimpleContent":
         case "indiContent":
             predicate += "treats";
             break;
-        case "adveSimpleContent":
         case "adveContent":
             predicate += "induces";
             break;
-        case "drugInterSimpleContent":
         case "drugInterContent":
             predicate += "interacts";
             break;
-        case "targInterSimpleContent":
         case "targInterContent":
             predicate += "interacts";
             object = object.split("/")[0];
             break;
-        case "labMethSimpleContent":
         case "labMethContent":
             predicate += "method";
         default:
@@ -390,7 +392,8 @@ function getLinkToQuery(searchbox, item) {
     return link;
 }
 
-function clearSearchBox(searchbox) {
+function clearSearchBox(reference) {
+    searchbox = document.getElementById(reference + "Content");
     var first = searchbox.firstElementChild;
     while (first) {
         first.remove();
@@ -398,8 +401,18 @@ function clearSearchBox(searchbox) {
     }
 }
 
+function startLoading(reference) {
+    document.getElementById(reference + "Content").style.display = "none";
+    document.getElementById(reference + "Loading").style.display = "flex";
+}
+
+function doneLoading(reference) {
+    document.getElementById(reference + "Content").style.display = "flex";
+    document.getElementById(reference + "Loading").style.display = "none";
+}
+
 function fillNews(data) {
-    var newsDiv = document.getElementById("news");
+    var newsDiv = document.getElementById("newsContent");
     for (var i = 0; i < data[0].results.length; i++) {
         const itemDiv = document.createElement('div');
         const itemHeader = document.createElement('h2');
@@ -409,7 +422,7 @@ function fillNews(data) {
         itemHeader.textContent = data[0].results[i].title;
         itemJournal.textContent = data[0].results[i].metadata.journals;
         itemJournal.classList.add("journal");
-        if (data[0].results[i].metadata.publication_month != 0) {
+        if (data[0].results[i].metadata.publication_month !== 0) {
             itemDate.textContent = data[0].results[i].metadata.publication_month + "/" + data[0].results[i].metadata.publication_year;
         } else {
             itemDate.textContent = data[0].results[i].metadata.publication_year;
@@ -430,27 +443,11 @@ function fillNews(data) {
 function showDetail(paperid) {
     var id = parseInt(paperid.substring(5), 10);
     document.getElementById("newsPopup").style.display = "flex";
-    fillPaperDetail(newsData[0].results[id]);
+    fillPaperDetail(newsData[0].results[id], newsData[0][id]);
 }
 
 function hideDetail() {
     document.getElementById("newsPopup").style.display = "none";
-}
-
-function unfold(reference) {
-    document.getElementById(reference + "Fold").style.display = "flex";
-    document.getElementById(reference + "Content").style.display = "flex";
-    document.getElementById(reference + "Options").style.display = "flex"
-    document.getElementById(reference + "Unfold").style.display = "none";
-    document.getElementById(reference + "SimpleContent").style.display = "none";
-}
-
-function fold(reference) {
-    document.getElementById(reference + "Fold").style.display = "none";
-    document.getElementById(reference + "Content").style.display = "none";
-    document.getElementById(reference + "Options").style.display = "none"
-    document.getElementById(reference + "Unfold").style.display = "flex";
-    document.getElementById(reference + "SimpleContent").style.display = "flex";
 }
 
 function getDataByReference(reference) {

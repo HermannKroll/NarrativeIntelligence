@@ -1,3 +1,26 @@
+const typeColorMap = {
+    "Disease": "#aeff9a",
+    "Drug": "#ff8181",
+    "Species": "#b88cff",
+    "Excipient": "#ffcf97",
+    "LabMethod": "#9eb8ff",
+    "Chemical": "#fff38c",
+    "Gene": "#87e7ff",
+    "Method": "#7897ff",
+    "DosageForm": "#9189ff",
+    "Mutation": "#8cffa9",
+    "ProteinMutation": "#b9ffcb",
+    "DNAMutation": "#4aff78",
+    "Variant": "#ffa981",
+    "CellLine": "#729e64",
+    "SNP": "#fd83ca",
+    "DomainMotif": "#f383fd",
+    "Plant": "#dcfd83",
+    "Strain": "#75c4c7",
+    "Vaccine": "#c7767d"
+}
+
+
 var markInstance = null;
 var tagsArray = null;
 var activeTypeMap = null;
@@ -51,18 +74,21 @@ function fillPaperDetail(contentData) {
     tagsArray = contentData.tags;
     var typeArray = ["All"];
     for (var j = 0; j < tagsArray.length; j++) {
+        if (tagsArray[j].type === "PlantFamily/Genus") {
+            tagsArray[j].type = "Plant"
+        }
         var startIndex = tagsArray[j].start >= title.textContent.length ? tagsArray[j].start - 1 : tagsArray[j].start;
         markInstance.markRanges([{
             start: startIndex,
             length: tagsArray[j].end - tagsArray[j].start
         }], {
             "element": "a",
-            "className": tagsArray[j].type,
             "each": function (e) {
                 e.href = markLink(tagsArray[j]);
                 if (e.href != "javascript:;") {
                     e.target = "_blank"
                 }
+                e.style.backgroundColor = typeColorMap[tagsArray[j].type];
             },
         });
         if (!typeArray.includes(tagsArray[j].type)) {
@@ -123,7 +149,7 @@ function initCheckbox(typeArray) {
         }
         label.innerHTML = item;
         label.for = item;
-        connector.classList.add(item);
+        connector.style.backgroundColor = typeColorMap[item];
         connector.append(checkbox);
         connector.append(label);
         checkBoxDiv.append(connector);
@@ -156,14 +182,15 @@ function initCheckbox(typeArray) {
                     length: tagsArray[j].end - tagsArray[j].start
                 }], {
                     "element": "a",
-                    "className": tagsArray[j].type,
                     "each": function (e) {
                         e.href = markLink(tagsArray[j]);
                         if (e.href != "javascript:;") {
                             e.target = "_blank"
                         }
+                        e.style.backgroundColor = typeColorMap[tagsArray[j].type];
                     },
                 });
+
             }
         }
         visualize_document_graph(document.getElementById("paperGraph"));
@@ -178,12 +205,14 @@ function visualize_document_graph(container) {
     let nodesToCreate = new vis.DataSet([]);
     nodes.forEach(node => {
         let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
+        if (colorLabel == "PlantFamily/Genus") {
+            colorLabel = "Plant"
+        }
         if (!activeTypeMap.get(colorLabel)) {
             return;
         }
         node2id[node] = id;
-        let color = getComputedStyle(document.documentElement)
-            .getPropertyValue('--' + colorLabel);
+        let color = typeColorMap[colorLabel];
         let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color};
         nodesToCreate.add(nodeData);
         id = id + 1;
@@ -241,3 +270,4 @@ function visualize_document_graph(container) {
     });
     */
 }
+
