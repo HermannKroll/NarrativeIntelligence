@@ -42,6 +42,24 @@ const emptyGraph = Object();
 emptyGraph["nodes"] = [];
 emptyGraph["facts"] = [];
 
+function queryAndFilterPaperDetail(document_id, document_collection) {
+    async.parallel([
+        async.apply(query_highlight, document_id, document_collection)
+    ], function (err, result) {
+        console.log(result)
+        fillPaperDetail(result[0].results[0]);
+    });
+
+    function query_highlight(document_id, document_collection, callback_document) {
+        var query = url_narrative_documents + "?documents=" + document_id + "&data_source=" + document_collection;
+        fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                callback_document(null, data);
+            });
+    }
+}
+
 function fillPaperDetail(contentData) {
     const graphDiv = document.getElementById("paperGraph");
     document_graph = emptyGraph;
