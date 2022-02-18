@@ -58,13 +58,17 @@ async function buildSite() {
                         } else {
                             var meta = data.document_ids;
                         }
-                        async.parallel([
-                            async.apply(query_highlight, meta)
-                        ], function (err, result) {
-                            newsData = result;
-                            fillNews(newsData);
+                        if (meta.length > 0) {
+                            async.parallel([
+                                async.apply(query_highlight, meta)
+                            ], function (err, result) {
+                                newsData = result;
+                                fillNews(newsData);
+                                doneLoading("news");
+                            });
+                        } else {
                             doneLoading("news");
-                        });
+                        }
                     }
                 });
 
@@ -112,11 +116,10 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if (adminData.length <= 0) {
-                return;
+            if (adminData.length > 0) {
+                maxCount["admin"] = adminData[0].count;
+                fillSearchbox("admin", adminData, maxCount["admin"], -1);
             }
-            maxCount["admin"] = adminData[0].count;
-            fillSearchbox("admin", adminData, maxCount["admin"], -1);
             doneLoading("admin");
         });
 
@@ -124,11 +127,10 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if (adveData.length <= 0) {
-                return;
+            if (adveData.length > 0) {
+                maxCount["adve"] = adveData[0].count;
+                fillSearchbox("adve", adveData, maxCount["adve"], -1);
             }
-            maxCount["adve"] = adveData[0].count;
-            fillSearchbox("adve", adveData, maxCount["adve"], -1);
             doneLoading("adve");
         });
 
@@ -136,11 +138,10 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             targInterData = data.sub_count_list;
-            if (targInterData.length <= 0) {
-                return;
+            if (targInterData.length > 0) {
+                maxCount["targInter"] = targInterData[0].count;
+                fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
             }
-            maxCount["targInter"] = targInterData[0].count;
-            fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
             doneLoading("targInter");
         });
 
@@ -148,11 +149,10 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             drugInterData = data.sub_count_list;
-            if (drugInterData.length <= 0) {
-                return;
+            if (drugInterData.length > 0) {
+                maxCount["drugInter"] = drugInterData[0].count;
+                fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
             }
-            maxCount["drugInter"] = drugInterData[0].count;
-            fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
             doneLoading("drugInter");
         });
 
@@ -160,11 +160,10 @@ async function buildSite() {
         .then(response => response.json())
         .then(data => {
             labMethData = data.sub_count_list;
-            if (labMethData.length <= 0) {
-                return;
+            if (labMethData.length > 0) {
+                maxCount["labMeth"] = labMethData[0].count;
+                fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
             }
-            maxCount["labMeth"] = labMethData[0].count;
-            fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
             doneLoading("labMeth");
         });
 }
@@ -192,7 +191,12 @@ function indi_query_tagging(keyword, callback_indi_tagging) {
     fetch(query)
         .then(response => response.json())
         .then(data => {
-            callback_indi_tagging(null, data);
+            if (data.sub_count_list.length > 0) {
+                callback_indi_tagging(null, data);
+            } else {
+                doneLoading("indi");
+            }
+
         });
 }
 
