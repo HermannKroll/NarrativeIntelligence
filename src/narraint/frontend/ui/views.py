@@ -151,6 +151,7 @@ def get_document_graph(request):
                 result.append(dict(s=s, p=p, o=o))
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
+            session.remove()
             try:
                 View.instance().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
                                                                       len(facts))
@@ -414,6 +415,7 @@ def get_document_ids_for_entity(request):
             document_ids = ast.literal_eval(row[0])
         else:
             document_ids = []
+        session.remove()
         View.instance().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
                                                     time_needed=datetime.now() - time_start)
         # send results back
