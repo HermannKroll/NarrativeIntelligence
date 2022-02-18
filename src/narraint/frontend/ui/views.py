@@ -715,3 +715,7 @@ class DrugOverviewIndexView(TemplateView):
 
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
+
+
+logging.info('Initialize view')
+View.instance()
