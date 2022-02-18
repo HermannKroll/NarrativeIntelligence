@@ -946,21 +946,28 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_Card = $('<div class="card"/>');
     let divDoc_Body = $('<div class="card-body"/>');
     //let divDoc_Body_Link = $('<a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
-    let divDoc_Body_Link = $( '<a>'+ doiText + ": " + '</a><a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>' );
+    let divDoc_Body_Link = $('<a>' + doiText + ": " + '</a><a class="btn-link" href="' + doi + '" target="_blank">' + document_id + '</a>');
 
 
     divDoc_Body_Link.click(function () {
         sendDocumentClicked(lastQuery, document_id, collection, doi);
     });
     let divDoc_Image = $('<img src="' + pubpharm_image_url + '" height="25px"/>');
+
+
     let divDoc_DocumentGraph = $('<a class="btn-link float-right" ' +
-        'href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source=' + collection + '"  target="_blank">' +
-        'Document Graph</a>');
+        'href="' + document_url + '?document_id=' + art_doc_id + '&data_source=' + collection + '"  target="_blank">' +
+        'Document Content</a>');
+
+    /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
+    divDoc_DocumentGraph.click(function () {
+        self.frames["paper_frame"].location.href = "http://localhost:8000/document" + '?document_id=' + art_doc_id + '&data_source=' + collection;
+    }) */
 
     divDoc_Body.append(divDoc_Image);
     divDoc_Body.append(divDoc_DocumentGraph);
 
-    let divDoc_Content = $('<br><b>'+ title+ '</b><br>' +
+    let divDoc_Content = $('<br><b>' + title + '</b><br>' +
         "in: " + journals + " | " + month + year + '<br>' +
         "by: " + authors + '<br>');
 
