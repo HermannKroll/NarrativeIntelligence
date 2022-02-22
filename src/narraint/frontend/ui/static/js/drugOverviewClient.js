@@ -340,7 +340,7 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         itemDiv.append(itemText);
 
         if (item.max_phase_for_ind >= 0 && item.max_phase_for_ind != null) {
-            itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".png";
+            itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
             phaseLink.target = "_blank";
             phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + chembl_id + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
             phaseLink.append(itemImg)
