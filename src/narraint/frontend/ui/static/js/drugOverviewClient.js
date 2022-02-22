@@ -89,10 +89,51 @@ async function buildSite() {
                     document.getElementById('mass').innerText = data2.molecule_properties.full_mwt;
                     //synonym seems to be correct
                     document.getElementById('name').innerText = data2.synonyms[0].split(" ")[0];
+
+                    if (data2.molecule_properties.alogp) {
+                        document.getElementById('drug_alogp').innerText = data2.molecule_properties.alogp;
+                    } else {
+                        document.getElementById('drug_alogp').innerText = "-";
+                    }
+
+                    if (data2.molecule_properties.cx_logp) {
+                        document.getElementById('drug_cxlogp').innerText = data2.molecule_properties.cx_logp;
+                    } else {
+                        document.getElementById('drug_cxlogp').innerText = "-";
+                    }
+
+                    if (data2.molecule_properties.cx_most_apka) {
+                        document.getElementById('drug_cx_acid_pka').innerText = data2.molecule_properties.cx_most_apka;
+                    } else {
+                        document.getElementById('drug_cx_acid_pka').innerText = "-";
+                    }
+
+                    if (data2.molecule_properties.cx_most_bpka) {
+                        document.getElementById('drug_cx_basic_pka').innerText = data2.molecule_properties.cx_most_bpka;
+                    } else {
+                        document.getElementById('drug_cx_basic_pka').innerText = "-";
+                    }
+
+                    if(data2.molecule_properties.cx_logd){
+                        document.getElementById('drug_cx_logd').innerText = data2.molecule_properties.cx_logd;
+                    } else {
+                        document.getElementById('drug_cx_logd').innerText = "-";
+                    }
+
+                    let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + chemblid;
+                    document.getElementById('drug_chemblid').innerHTML = '<a href="'+ chembl_link + '" target="_blank">' + chemblid + '</a>' ;
+                 //   document.getElementById('drug_chemblid').href = "v
+
                 }).catch(e => {
                 document.getElementById('name').innerText = decodeURI(keyword);
                 document.getElementById('formular').innerText = "-";
                 document.getElementById('mass').innerText = "-";
+                document.getElementById('drug_alogp').innerText = "-";
+                document.getElementById('drug_cxlogp').innerText = "-";
+                document.getElementById('drug_cx_acid_pka').innerText = "-";
+                document.getElementById('drug_cx_basic_pka').innerText = "-";
+                document.getElementById('drug_cx_logd').innerText = "-";
+                document.getElementById('drug_chemblid').innerText = "-";
             });//just give something to the user, so we can proceed
         })
         .catch();
@@ -127,7 +168,7 @@ async function buildSite() {
                                 fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
                             }
                             doneLoading("targInter");
-                            
+
                             fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
                                 .then(response => response.json())
                                 .then(data => {
