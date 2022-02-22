@@ -339,6 +339,9 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         phaseLink.classList.add("phase");
         itemDiv.append(itemText);
 
+        countDiv.append(countLink);
+        itemDiv.append(countDiv);
+
         if (item.max_phase_for_ind >= 0 && item.max_phase_for_ind != null) {
             itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
             phaseLink.target = "_blank";
@@ -350,8 +353,6 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
             phaseLink.append(itemImg)
             itemDiv.append(phaseLink);
         }
-        countDiv.append(countLink);
-        itemDiv.append(countDiv);
 
         searchbox.append(itemDiv);
     }
