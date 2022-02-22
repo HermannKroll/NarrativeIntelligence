@@ -26,29 +26,33 @@ async function buildSite() {
     var keyword = search.split("=")[1];
     document.getElementById('drugInput').value = decodeURI(keyword);
 
-    //search chembl api via keyword
-    var keyword_id = 0;
-    fetch('https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q=' + keyword)
+    // translate the key to a drug id via the narrative service
+    fetch(url_term_2_entity + '?term=' + keyword)
         .then(response => response.json())
         .then(data => {
-            //get the chembl id (from an actual compound)
-            for (var i = 0; i < data.chembl_id_lookups.length; i++) {
-                if (data.chembl_id_lookups[i].entity_type == "COMPOUND") {
-                    keyword_id = data.chembl_id_lookups[i].chembl_id;
-                    break;
-                }
+            if (data.valid === false) {
+                return;
             }
+            let chemblid = "";
+            let entities = data["entity"];
+            entities.forEach(entity => {
+                if (entity.entity_type === 'Drug') {
+                    chemblid = entity.entity_id;
+                    return true;
+                }
+            });
 
+
+            console.log("Translated Chembl id: " + chemblid)
 
             async.parallel([
                 async.apply(indi_query_tagging, keyword),
                 async.apply(indi_query_chembl, keyword)
             ], function (err, indi_result) {
-                chembl_indications(indi_result[0], indi_result[1], keyword_id);
+                chembl_indications(indi_result[0], indi_result[1], chemblid);
             });
 
-            console.log(keyword_id)
-            fetch(url_query_document_ids_for_entity + "?entity_id=" + keyword_id + "&entity_type=Drug&data_source=PubMed")
+            fetch(url_query_document_ids_for_entity + "?entity_id=" + chemblid + "&entity_type=Drug&data_source=PubMed")
                 .then(response => response.json())
                 .then(data => {
                     //console.log(data)
@@ -73,17 +77,12 @@ async function buildSite() {
                 });
 
 
-            if (keyword_id == 0) {
-                console.log("No compound found :(");
-                return;
-            }
-
             //fill in the image via id
             var structureImage = document.getElementById('structure');
-            structureImage.src = "https://www.ebi.ac.uk/chembl/api/data/image/" + keyword_id;
+            structureImage.src = "https://www.ebi.ac.uk/chembl/api/data/image/" + chemblid;
 
             //get drug information via id
-            fetch('https://www.ebi.ac.uk/chembl/api/data/drug/' + keyword_id + '.json')
+            fetch('https://www.ebi.ac.uk/chembl/api/data/drug/' + chemblid + '.json')
                 .then(response => response.json())
                 .then(data2 => {
                     document.getElementById('formular').innerText = data2.molecule_properties.full_molformula;
@@ -98,19 +97,6 @@ async function buildSite() {
         })
         .catch();
 
-    /*const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ keyword })
-    };
-    const response = await fetch('/', options);
-    const data = await response.json();
-    //const data  = '["0": {}, "1" : {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinofdsfdsfl", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alsdfffffffffobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinasdasdol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alnol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Aloddbinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobidaanol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobdadgrsgrrzzrinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}, {"object_str": "Alobinol", "count":100, "chembl_verified":1, "max_phase_for_ind":3}]';
-    var processData = JSON.parse(data);*/
-
-    //console.log(data);
 
     fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
         .then(response => response.json())
@@ -121,51 +107,54 @@ async function buildSite() {
                 fillSearchbox("admin", adminData, maxCount["admin"], -1);
             }
             doneLoading("admin");
+
+            fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
+                .then(response => response.json())
+                .then(data => {
+                    adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
+                    if (adveData.length > 0) {
+                        maxCount["adve"] = adveData[0].count;
+                        fillSearchbox("adve", adveData, maxCount["adve"], -1);
+                    }
+                    doneLoading("adve");
+
+                    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
+                        .then(response => response.json())
+                        .then(data => {
+                            targInterData = data.sub_count_list;
+                            if (targInterData.length > 0) {
+                                maxCount["targInter"] = targInterData[0].count;
+                                fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
+                            }
+                            doneLoading("targInter");
+                            
+                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
+                                .then(response => response.json())
+                                .then(data => {
+                                    drugInterData = data.sub_count_list;
+                                    if (drugInterData.length > 0) {
+                                        maxCount["drugInter"] = drugInterData[0].count;
+                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
+                                    }
+                                    doneLoading("drugInter");
+
+                                    fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            labMethData = data.sub_count_list;
+                                            if (labMethData.length > 0) {
+                                                maxCount["labMeth"] = labMethData[0].count;
+                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
+                                            }
+                                            doneLoading("labMeth");
+                                        });
+                                });
+                        });
+
+                });
         });
 
-    fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
-        .then(response => response.json())
-        .then(data => {
-            adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if (adveData.length > 0) {
-                maxCount["adve"] = adveData[0].count;
-                fillSearchbox("adve", adveData, maxCount["adve"], -1);
-            }
-            doneLoading("adve");
-        });
 
-    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
-        .then(response => response.json())
-        .then(data => {
-            targInterData = data.sub_count_list;
-            if (targInterData.length > 0) {
-                maxCount["targInter"] = targInterData[0].count;
-                fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
-            }
-            doneLoading("targInter");
-        });
-
-    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
-        .then(response => response.json())
-        .then(data => {
-            drugInterData = data.sub_count_list;
-            if (drugInterData.length > 0) {
-                maxCount["drugInter"] = drugInterData[0].count;
-                fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
-            }
-            doneLoading("drugInter");
-        });
-
-    fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
-        .then(response => response.json())
-        .then(data => {
-            labMethData = data.sub_count_list;
-            if (labMethData.length > 0) {
-                maxCount["labMeth"] = labMethData[0].count;
-                fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
-            }
-            doneLoading("labMeth");
-        });
 }
 
 
