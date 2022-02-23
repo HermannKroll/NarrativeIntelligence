@@ -11,7 +11,7 @@ UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_11_23_pubtator_updates.pubt
 UPDATED_IDS="/hdd2/datasets/pubmed_medline/pharmaceutical_relevant_ids.txt"
 
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
-PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
+
 
 # First get all PubMed Pubtator PMIDs
 wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
@@ -53,16 +53,6 @@ python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceut
 
 # Do the statement extraction via our Pipeline
 python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 26 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
-
-# Do the canonicalizing step
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c PubMed --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
-
-# Apply the rules
-python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c PubMed
-
-# Execute Cleaning Rules for Predications
-echo 'cleaning predication table with hand-written rules'
-psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 
 
 
