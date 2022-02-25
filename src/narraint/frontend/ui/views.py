@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import traceback
+from collections import defaultdict
 from datetime import datetime
 from io import BytesIO
 
@@ -126,7 +127,7 @@ def get_document_graph(request):
             query = session.query(Predication).filter(Predication.document_collection == document_collection)
             query = query.filter(Predication.document_id == document_id)
             query = query.filter(Predication.relation.isnot(None))
-            facts = set()
+            facts = defaultdict(set)
             nodes = set()
             for r in query:
                 try:
@@ -137,18 +138,29 @@ def get_document_graph(request):
                     subject_name = f'{subject_name} ({r.subject_type})'
                     object_name = f'{object_name} ({r.object_type})'
 
-                    key = subject_name, r.relation, object_name
-                    key_flipped = object_name, r.relation, subject_name
-                    if key not in facts and key_flipped not in facts:
-                        facts.add(key)
+                    if subject_name < object_name:
+                        key = subject_name, r.relation, object_name
+                        so_key = subject_name, object_name
+                    else:
+                        key = object_name, r.relation, subject_name
+                        so_key = object_name, subject_name
+                    if key not in facts:
+                        facts[so_key].add(r.relation)
                         nodes.add(subject_name)
                         nodes.add(object_name)
                 except Exception:
                     pass
 
             result = []
-            for s, p, o in facts:
-                result.append(dict(s=s, p=p, o=o))
+            for (s, o), predicates in facts.items():
+                p_txt = []
+                for p in predicates:
+                    # if there is a more specific edge then associated, ignore it
+                    if len(predicates) > 1 and p == "associated":
+                        continue
+                    p_txt.append(p)
+                p_txt = '|'.join([pt for pt in p_txt])
+                result.append(dict(s=s, p=p_txt, o=o))
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
             session.remove()
