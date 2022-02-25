@@ -6,6 +6,8 @@ var targInterData = null;
 var labMethData = null;
 var newsData = null;
 var maxCount = {"admin": -1, "indi": -1, "adve": -1, "drugInter": -1, "targInter": -1, "labMeth": -1};
+let currentChemblID = null;
+let currentDrugName = null;
 
 buildSite();
 
@@ -30,6 +32,8 @@ async function buildSite() {
     fetch(url_term_2_entity + '?term=' + keyword)
         .then(response => response.json())
         .then(data => {
+            currentChemblID = null;
+            currentDrugName = null;
             if (data.valid === false) {
                 return;
             }
@@ -41,8 +45,8 @@ async function buildSite() {
                     return true;
                 }
             });
-
-
+            currentDrugName = keyword;
+            currentChemblID = chemblid;
             console.log("Translated Chembl id: " + chemblid)
 
             async.parallel([
@@ -357,6 +361,7 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         const itemDiv = document.createElement('div');
         const itemImg = document.createElement('img');
         const phaseLink = document.createElement('a');
+        const itemTextLink = document.createElement('a');
         const itemText = document.createElement('p');
         const countDiv = document.createElement('div');
         const countLink = document.createElement('a');
@@ -364,10 +369,15 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         countLink.target = "_blank";
         countLink.textContent = `${item.count}`;
         itemText.textContent = `${item.name}`;
+        itemTextLink.href = getLinkToQuery(searchbox, item);
+        itemTextLink.style.textDecoration = "none";
+        itemTextLink.style.color = "inherit";
+        itemTextLink.target = "_blank";
         countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, Math.log10(item.count) / Math.log10(max));
         countDiv.classList.add("count");
         phaseLink.classList.add("phase");
-        itemDiv.append(itemText);
+        itemTextLink.append(itemText);
+        itemDiv.append(itemTextLink);
 
         countDiv.append(countLink);
         itemDiv.append(countDiv);
@@ -391,7 +401,7 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
 function getLinkToQuery(searchbox, item) {
     var link = url_query + '?query=';
 
-    var keyword = document.getElementById('name').innerText;
+    var keyword = currentDrugName;
     keyword = keyword.split(' ').join('+');
     link += '"' + keyword + '"';
 
