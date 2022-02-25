@@ -29,7 +29,7 @@ urlpatterns = [
     path('drug_overview/', DrugOverviewView.as_view(), name='drug_overview'),
     path('drug_overview_index/', DrugOverviewIndexView.as_view(), name='drug_overview_index'),
     path("", never_cache(SearchView.as_view()), name="search"),
-    path('swagger-ui/', SwaggerUIView.as_view(
+    path('api/', SwaggerUIView.as_view(
         extra_context={'schema_url': 'openapi-schema'}
     ), name='swagger-ui')
 ]
