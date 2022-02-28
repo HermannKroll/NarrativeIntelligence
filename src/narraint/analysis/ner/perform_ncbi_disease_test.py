@@ -13,7 +13,7 @@ from narrant.preprocessing.pharmacy.disease import DiseaseTagger
 from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
 from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
-from narrant.pubtator.regex import TAG_LINE_NORMAL
+from kgextractiontoolbox.document.regex import TAG_LINE_NORMAL
 
 ONLY_MESH = True
 TAGTYPES = None

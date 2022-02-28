@@ -9,7 +9,7 @@ from narraint.queryengine.engine import QueryEngine
 from kgextractiontoolbox.document.export import export
 from kgextractiontoolbox.document.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
 from narrant.preprocessing import enttypes
-from narrant.pubtator.split import split
+from kgextractiontoolbox.document.split import split
 
 queries_pubmed = []
 

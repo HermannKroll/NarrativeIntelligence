@@ -10,7 +10,7 @@ from kgextractiontoolbox.extraction.openie.main import run_corenlp_openie
 from kgextractiontoolbox.extraction.openie6.main import openie6_run
 from kgextractiontoolbox.extraction.pathie.main import run_pathie
 from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
-from narrant.pubtator.count import count_documents
+from kgextractiontoolbox.document.count import count_documents
 
 PERFORMANCE_TEST_DIR = os.path.join(DATA_DIR, 'performance/')
 
