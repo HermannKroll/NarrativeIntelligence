@@ -2,7 +2,7 @@ import unittest
 
 import multiprocessing
 
-from narrant.backend.database import Session
+from kgextractiontoolbox.backend.database import Session
 from narrant.backend.models import Tagger
 
 

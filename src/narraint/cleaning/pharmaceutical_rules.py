@@ -13,7 +13,7 @@ from narraint.cleaning.pharmaceutical_vocabulary import DOSAGE_FORM_PREDICATE, M
     ASSOCIATED_PREDICATE_UNSURE, ASSOCIATED_PREDICATE
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     are_subject_and_object_correctly_ordered
-from narrant.backend.database import Session
+from kgextractiontoolbox.backend.database import Session
 from narrant.preprocessing.enttypes import DOSAGE_FORM, LAB_METHOD, METHOD
 from narrant.progress import print_progress_with_eta
 

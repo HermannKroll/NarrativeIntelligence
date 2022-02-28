@@ -2,7 +2,7 @@ from sqlalchemy.orm.scoping import ScopedSession
 
 from narraint.backend.models import Extended
 from narraint.config import BACKEND_CONFIG
-from narrant.backend.database import Session
+from kgextractiontoolbox.backend.database import Session
 
 
 class SessionExtended(Session):
