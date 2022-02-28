@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.backend.models import Document, Tag
-from kgextractiontoolbox.entitylinking.export_annotations import export
+from kgextractiontoolbox.document.export import export
 from kgextractiontoolbox.extraction.loading.load_openie_extractions import load_openie_tuples, OpenIEEntityFilterMode
 from kgextractiontoolbox.extraction.openie6.main import openie6_run
 

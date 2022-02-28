@@ -1,4 +1,4 @@
-#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -c scientists -d --format json /home/jan/wikiextractor/raw_docs
+#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -c scientists -d --format json /home/jan/wikiextractor/raw_docs
 
 
 # python3.8 -u /home/jan/narint/src/narraint/pollux/load_wikipedia.py /home/jan/wikiextractor/extraction -c scientists -t "/home/jan/pollux_data/raw_input/Wikidata - Scientist with Wikipedia Article.tsv"
@@ -25,7 +25,7 @@ RELATION_VOCAB_PERSON="/home/kroll/workingdir/wikipedia/relation_vocab_person.js
 
 
 # Export json content
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py $WIKIPEDIA_DOC -c scientists -d --format
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py $WIKIPEDIA_DOC -c scientists -d --format
 
 
 # First perform Stanza NER
@@ -111,7 +111,7 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_pred
 #echo "3. OpenIE6 NF Wikipedia: ${DIFF}s"
 
 
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -d -t --format json $WIKIPEDIA_DOC_ENTITIES -c scientists
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d -t --format json $WIKIPEDIA_DOC_ENTITIES -c scientists
 
 
 #START=$(date +%s.%N)

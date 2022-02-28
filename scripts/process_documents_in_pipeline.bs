@@ -45,7 +45,7 @@ echo 'cleaning predication table with hand-written rules'
 psql "host=127.0.0.1 port=5432 dbname=taggingdbtest user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 
 # Export the entity annotations
-python ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -d -t $3 --format json --collection $2
+python ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d -t $3 --format json --collection $2
 
 # Export the relations
 python ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/export_predications.py $4 --collection $2 --format tsv --metadata --none-relations

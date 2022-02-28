@@ -12,7 +12,7 @@ from spacy.lang.en import English
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.config import NLP_CONFIG
 from kgextractiontoolbox.document.count import count_documents
-from kgextractiontoolbox.entitylinking.export_annotations import export
+from kgextractiontoolbox.document.export import export
 from kgextractiontoolbox.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from kgextractiontoolbox.extraction.loading.load_extractions import clean_and_load_predications_into_db
 from kgextractiontoolbox.extraction.loading.load_openie_extractions import OpenIEEntityFilterMode

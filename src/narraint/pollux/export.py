@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Union
 
 from kgextractiontoolbox.backend.models import Predication, Sentence
-from kgextractiontoolbox.entitylinking.export_annotations import create_document_query, create_tag_query
+from kgextractiontoolbox.document.export import create_document_query, create_tag_query
 from narraint.backend.database import SessionExtended
 from narraint.pollux.util import iter_join, tagged_document_from_iterjoin
 

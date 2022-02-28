@@ -6,8 +6,8 @@ from narraint.analysis.retrieval.experiment_config import EXP_TEXTS_DIRECTORY
 from narraint.analysis.retrieval.mesh_evaluation import pubmed_mesh_hits
 from narraint.analysis.retrieval.search.strategy import PathIESearchStrategy
 from narraint.queryengine.engine import QueryEngine
-from narrant.backend.export import export
-from narrant.backend.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
+from kgextractiontoolbox.document.export import export
+from kgextractiontoolbox.document.exports.pmc_fulltext_export import export_pmc_fulltexts_with_tags
 from narrant.preprocessing import enttypes
 from narrant.pubtator.split import split
 

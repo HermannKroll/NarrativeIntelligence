@@ -64,7 +64,7 @@ def key_match(join_keys: List[str], key_values:List, row:Row):
 
 
 if __name__ == '__main__':
-    from kgextractiontoolbox.entitylinking.export_annotations import create_document_query, create_tag_query
+    from kgextractiontoolbox.document.export import create_document_query, create_tag_query
     from narraint.backend.database import SessionExtended
     ses = SessionExtended.get()
     doc_query = ses.execute(create_document_query(ses, collection="pollux"))

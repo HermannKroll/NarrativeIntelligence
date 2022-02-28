@@ -19,7 +19,7 @@ from kgextractiontoolbox.extraction.pathie.main import run_pathie
 from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
 from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, OPENIE6_EXTRACTION, \
     OPENIE_EXTRACTION
-from narrant.backend.export import export
+from kgextractiontoolbox.document.export import export
 from narrant.preprocessing.enttypes import CHEMICAL, GENE
 from narrant.progress import print_progress_with_eta
 

@@ -1,7 +1,7 @@
 import unittest
 
 from narraint.backend.database import SessionExtended
-from narrant.backend.export import export
+from kgextractiontoolbox.document.export import export
 from narrant.backend.load_document import document_bulk_load
 from nitests import util
 

@@ -1,4 +1,4 @@
-#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -c pollux -d --format json /home/jan/wikiextractor/raw_docs
+#python3.8 -u /home/jan/narint/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -c pollux -d --format json /home/jan/wikiextractor/raw_docs
 
 
 # python3.8 -u /home/jan/narint/src/narraint/pollux/load_POLLUX.py /home/jan/wikiextractor/extraction -c pollux -t "/home/jan/pollux_data/raw_input/Wikidata - Scientist with POLLUX Article.tsv"
@@ -24,10 +24,10 @@ RELATION_VOCAB_SMALL="/home/kroll/workingdir/POLLUX/relation_vocab_small.json"
 
 
 # Export json content
-#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py $POLLUX_DOC -c pollux -d --format json
+#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py $POLLUX_DOC -c pollux -d --format json
 
 # Export json documents with entities
-#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py $POLLUX_DOC_ENTITIES -c pollux -d -t --format json
+#python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py $POLLUX_DOC_ENTITIES -c pollux -d -t --format json
 
 # First perform Stanza NER
 # python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/stanza_ner.py -c pollux $POLLUX_DOC
@@ -109,7 +109,7 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/extraction/loading/load_op
 #echo "3. OpenIE6 NF POLLUX: ${DIFF}s"
 
 
-# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/export_annotations.py -d -t --format json $POLLUX_DOC_ENTITIES -c pollux
+# python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d -t --format json $POLLUX_DOC_ENTITIES -c pollux
 
 
 #START=$(date +%s.%N)
