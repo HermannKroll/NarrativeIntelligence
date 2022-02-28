@@ -12,10 +12,8 @@
 
 <body>
 <div class="popup_dummie">
-    <div class="newsdetail" style="margin: 3.5em 12% 3.5em 12%;">
-        <div class="top">
-            <a id="paperLink">View Paper</a>
-        </div>
+    <div class="newsdetail" style="margin: 3.5em 5% 3.5em 5%;">
+
         <div class="bottom">
             <div class="checkbox" id="newsCheckbox"></div>
             <div class="paper">
@@ -26,6 +24,9 @@
                 <p class="abstract" id="paperAbstract"></p>
             </div>
             <div class="graph" id="paperGraph"></div>
+        </div>
+        <div class="top">
+            <a id="paperLink">Paper DOI</a>
         </div>
     </div>
 </div>
@@ -39,22 +40,11 @@
     const url_narrative_documents = "{% url 'narrative_documents' %}";
 
     let search = window.location.search;
-    let documentId = search.split("=")[1];
+    const urlParams = new URLSearchParams(search);
+    let document_id = urlParams.get('document_id');
+    let data_source = urlParams.get("data_source");
 
-    async.parallel([
-        async.apply(query_highlight, documentId)
-    ], function (err, result) {
-        console.log(result)
-        fillPaperDetail(result[1].results[0]);
-    });
 
-    function query_highlight(meta, callback_document) {
-        var query = url_narrative_documents + "?documents=" + meta + "&data_source=PubMed";
-        fetch(query)
-            .then(response => response.json())
-            .then(data => {
-                callback_document(null, data);
-            });
-    }
+    queryAndFilterPaperDetail(document_id, data_source);
 </script>
 </body>

@@ -200,11 +200,13 @@
                         <div class="alert alert-info" role="alert">
                             Covid 19
                         </div>
-                         <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('&quot;post-acute COVID-19 syndrome&quot; associated Disease')">post-acute COVID-19 syndrome associated Disease
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('&quot;post-acute COVID-19 syndrome&quot; associated Disease')">
+                            post-acute COVID-19 syndrome associated Disease
                         </button>
-                       <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Drug treats &quot;post-acute COVID-19 syndrome&quot;')">Drug treats post-acute COVID-19 syndrome
+                        <button type="button" class="btn btn-outline-primary"
+                                onclick="example_search('Drug treats &quot;post-acute COVID-19 syndrome&quot;')">Drug
+                            treats post-acute COVID-19 syndrome
                         </button>
                         <button type="button" class="btn btn-outline-primary"
                                 onclick="example_search('Drug treats Covid19')">Drug treats Covid19
@@ -227,7 +229,7 @@
                                 onclick="example_search('Covid19 associated Vaccine')">
                             Covid19 associated Vaccine
                         </button>
-                           <button type="button" class="btn btn-outline-primary"
+                        <button type="button" class="btn btn-outline-primary"
                                 onclick="example_search('Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease')">
                             Covid19 associated Pfizer Covid 19 Vaccine AND Human associated Disease
                         </button>
@@ -491,13 +493,17 @@
         </div>
     </div>
     </div>
+
+
 {% endblock %}
 
 {% block javascript %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
+
     <script type="text/javascript">
+        const document_url = "{% url 'document' %}";
         const search_url = "{% url 'query' %}";
         const autocompletion_url = "{% url 'autocompletion' %}";
         const query_check_url = "{% url 'check_query' %}";
@@ -509,10 +515,12 @@
         const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png'  %}";
         const ok_symbol_url = "{% static 'ok.png' %}";
         const cancel_symbol_url = "{% static 'cancel.png' %}";
+        const url_graph_preview = "{% static 'graph_preview.png' %}";
 
         $("#nav_item_search").addClass("active");
         $("#nav_item_help").removeClass("active");
         $("#nav_item_stats").removeClass("active");
     </script>
-    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=10" type="text/javascript"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=11"
+            type="text/javascript"></script>
 {% endblock %}
