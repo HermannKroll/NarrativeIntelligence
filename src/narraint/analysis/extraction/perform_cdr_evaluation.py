@@ -22,7 +22,7 @@ from kgextractiontoolbox.document.load_document import read_tagger_mapping, UNKN
     document_bulk_load
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from kgextractiontoolbox.document.document import TaggedDocument
-from narrant.pubtator.extract import read_pubtator_documents
+from kgextractiontoolbox.document.extract import read_pubtator_documents
 
 pubtator_docs = ['CDR_TestSet.PubTator.txt']  # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']
 

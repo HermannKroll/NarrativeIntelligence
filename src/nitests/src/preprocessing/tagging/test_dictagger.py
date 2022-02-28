@@ -6,7 +6,7 @@ from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTag
 from narrant.preprocessing.pharmacy.dosage import DosageFormTagger
 from narrant.preprocessing.pharmacy.drug import DrugTagger
 from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
-from narrant.pubtator.extract import read_tagged_documents
+from kgextractiontoolbox.document.extract import read_tagged_documents
 from nitests.util import create_test_kwargs, get_test_resource_filepath, resource_rel_path
 
 

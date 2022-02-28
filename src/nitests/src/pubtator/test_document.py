@@ -4,7 +4,7 @@ import unittest
 from spacy.lang.en import English
 
 from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument, parse_tag_list
-from narrant.pubtator.extract import read_tagged_documents
+from kgextractiontoolbox.document.extract import read_tagged_documents
 from nitests.util import get_test_resource_filepath, tmp_rel_path
 
 

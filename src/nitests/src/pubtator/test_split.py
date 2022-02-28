@@ -1,7 +1,7 @@
 import unittest
 
 from kgextractiontoolbox.document import sanitize
-from narrant.pubtator.extract import read_tagged_documents
+from kgextractiontoolbox.document.extract import read_tagged_documents
 from nitests import util
 
 

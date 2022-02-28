@@ -3,7 +3,7 @@ import unittest
 import nitests.util as util
 from kgextractiontoolbox.document.count import get_document_ids
 from kgextractiontoolbox.document.document import TaggedEntity
-from narrant.pubtator.extract import read_tagged_documents
+from kgextractiontoolbox.document.extract import read_tagged_documents
 
 
 class TestExtractCount(unittest.TestCase):
