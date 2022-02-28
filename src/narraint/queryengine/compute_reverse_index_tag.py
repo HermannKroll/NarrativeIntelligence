@@ -8,7 +8,7 @@ from sqlalchemy import delete
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, TagInvertedIndex
 from narraint.config import QUERY_YIELD_PER_K
-from narrant.progress import Progress
+from kgextractiontoolbox.progress import Progress
 
 
 def compute_inverted_index_for_tags():

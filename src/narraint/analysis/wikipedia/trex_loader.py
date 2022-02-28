@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Document, Sentence
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 TREX_DOCUMENT_COLLECTION = "trex"
 SENTENCE_ID_START = 13259415

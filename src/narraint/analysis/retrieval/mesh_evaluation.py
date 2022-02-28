@@ -9,7 +9,7 @@ from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, OPENIE_EX
 from narraint.queryengine.engine import QueryEngine
 from narrant.entity.meshontology import MeSHOntology
 from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, GENE
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 # See list of subheadings: https://www.ncbi.nlm.nih.gov/books/NBK3827/table/pubmedhelp.T.mesh_subheadings/
 # More information: https://wayback.archive-it.org/org-350/20191102205211/https://www.nlm.nih.gov/mesh/topsubscope.html

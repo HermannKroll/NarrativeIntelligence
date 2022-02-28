@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 
 def _convert_wikidata_uri_to_id(uri):

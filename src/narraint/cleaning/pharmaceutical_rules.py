@@ -15,7 +15,7 @@ from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC
     are_subject_and_object_correctly_ordered
 from kgextractiontoolbox.backend.database import Session
 from narrant.preprocessing.enttypes import DOSAGE_FORM, LAB_METHOD, METHOD
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 BULK_INSERT_PRED_TO_DELETE_AFTER_K = 1000000
 BULK_QUERY_CURSOR_COUNT = 500000

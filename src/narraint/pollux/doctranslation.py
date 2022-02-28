@@ -14,7 +14,7 @@ from kgextractiontoolbox.document.document import TaggedDocument
 from narraint.backend import database as db
 from narraint.backend.models import DocumentTranslation
 from kgextractiontoolbox.document import load_document as load_document
-from narrant.progress import Progress
+from kgextractiontoolbox.progress import Progress
 
 
 @dataclass

@@ -22,7 +22,7 @@ from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE
 from narrant.preprocessing.tagging.vocabulary import Vocabulary
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary

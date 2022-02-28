@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from narrant.preprocessing.classifier import Classifier
+from kgextractiontoolbox.entitylinking.classifier import Classifier
 from kgextractiontoolbox.document.document import TaggedDocument
 from nitests import util
 

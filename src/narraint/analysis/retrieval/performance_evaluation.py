@@ -13,7 +13,7 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 RANDOM_FACTS = 1000000
 QUERIES_WITH_ONE_PRED = 10000

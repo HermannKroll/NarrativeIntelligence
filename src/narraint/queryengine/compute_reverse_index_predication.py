@@ -10,7 +10,7 @@ from narraint.backend.models import Predication, DocumentMetadataService
 from narraint.backend.models import PredicationInvertedIndex
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 
 def denormalize_predication_table():

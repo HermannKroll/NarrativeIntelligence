@@ -21,7 +21,7 @@ from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, PATHIE_ST
     OPENIE_EXTRACTION
 from kgextractiontoolbox.document.export import export
 from narrant.preprocessing.enttypes import CHEMICAL, GENE
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 CHEMPROT_VOCABULARY = dict(
     upregulates=["upregulat*", "up regulat*", "up-regulat*", "stimulat*", "activat*", "increase", 'potentiate',

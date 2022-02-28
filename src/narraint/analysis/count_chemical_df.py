@@ -4,7 +4,7 @@ from datetime import datetime
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 MIN_DOCS_FOR_ENTITY = 10
 MIN_DOCS_FOR_ENT_COMBINATION = 10

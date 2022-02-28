@@ -9,7 +9,7 @@ from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 
 
 class AutocompletionUtil:

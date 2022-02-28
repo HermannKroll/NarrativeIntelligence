@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 # Query pmid's from pmed
 # db: pubmed / pmc
-from narrant.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta
 from narrant.util.helpers import chunks
 
 
