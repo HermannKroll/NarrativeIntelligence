@@ -8,7 +8,7 @@ from lxml import etree
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import DocumentMetadata
-from narrant.backend.models import Document
+from kgextractiontoolbox.backend.models import Document
 from narrant.progress import print_progress_with_eta
 
 month_dict = {

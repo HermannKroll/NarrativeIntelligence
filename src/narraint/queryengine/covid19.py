@@ -1,7 +1,7 @@
 import logging
 
 from narraint.backend.database import SessionExtended
-from narrant.backend.models import DocumentClassification
+from kgextractiontoolbox.backend.models import DocumentClassification
 
 LIT_COVID_COLLECTION = "LitCovid"
 LONG_COVID_COLLECTION = "LongCovid"

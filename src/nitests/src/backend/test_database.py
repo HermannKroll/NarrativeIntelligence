@@ -4,7 +4,7 @@ import unittest
 
 from narraint.backend.database import SessionExtended
 from narraint.config import BACKEND_CONFIG
-from narrant.backend.models import Tagger
+from kgextractiontoolbox.backend.models import Tagger
 from nitests.util import tmp_rel_path
 
 

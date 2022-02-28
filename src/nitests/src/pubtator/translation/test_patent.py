@@ -2,7 +2,7 @@ import unittest
 
 from kgextractiontoolbox.backend.database import Session
 from narrant.backend.export import export
-from narrant.backend.models import Document, DocumentTranslation
+from kgextractiontoolbox.backend.models import Document, DocumentTranslation
 from narrant.pubtator.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 from narrant.pubtator.translation.doctranslation import run_document_translation

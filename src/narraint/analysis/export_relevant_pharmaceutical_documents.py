@@ -6,7 +6,7 @@ from sqlalchemy import and_, or_
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Document, DocTaggedBy, Tag
-from narrant.backend.models import DocumentClassification
+from kgextractiontoolbox.backend.models import DocumentClassification
 from narrant.preprocessing.enttypes import PLANT_FAMILY_GENUS, DRUG
 
 

@@ -3,7 +3,7 @@ import unittest
 import multiprocessing
 
 from kgextractiontoolbox.backend.database import Session
-from narrant.backend.models import Tagger
+from kgextractiontoolbox.backend.models import Tagger
 
 
 class TestDatabaseForking(unittest.TestCase):
