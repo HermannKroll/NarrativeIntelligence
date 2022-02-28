@@ -8,9 +8,9 @@ from matplotlib import pyplot as plt
 
 from narraint.config import DATA_DIR, PREPROCESS_CONFIG
 from narrant.preprocessing.config import Config
-from narrant.preprocessing.tagging.dictagger import DictTagger
+from kgextractiontoolbox.entitylinking.tagging.dictagger import DictTagger
 from narrant.preprocessing.pharmacy.disease import DiseaseTagger
-from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
+from kgextractiontoolbox.entitylinking.tagging.vocabulary import expand_vocabulary_term
 from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument
 from kgextractiontoolbox.document.extract import read_pubtator_documents
 from kgextractiontoolbox.document.regex import TAG_LINE_NORMAL

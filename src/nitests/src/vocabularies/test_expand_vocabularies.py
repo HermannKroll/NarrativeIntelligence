@@ -1,6 +1,6 @@
 import unittest
 
-from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
+from kgextractiontoolbox.entitylinking.tagging.vocabulary import expand_vocabulary_term
 
 
 class TestExpandVocabularyTerms(unittest.TestCase):
