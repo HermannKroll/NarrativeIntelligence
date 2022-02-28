@@ -2,7 +2,7 @@ import unittest
 
 import narrant.preprocessing.vocab_dictpreprocess as vdp
 import nitests
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from nitests import util
 
 

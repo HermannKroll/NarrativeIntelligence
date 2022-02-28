@@ -1,6 +1,6 @@
 from typing import List
 
-from narrant.pubtator.document import TaggedDocument, TaggedEntity
+from kgextractiontoolbox.document.document import TaggedDocument, TaggedEntity
 
 
 class DocumentSentence:

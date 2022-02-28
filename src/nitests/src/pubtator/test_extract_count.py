@@ -2,7 +2,7 @@ import unittest
 
 import nitests.util as util
 from narrant.pubtator.count import get_document_ids
-from narrant.pubtator.document import TaggedEntity
+from kgextractiontoolbox.document.document import TaggedEntity
 from narrant.pubtator.extract import read_tagged_documents
 
 

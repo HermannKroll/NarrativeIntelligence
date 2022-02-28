@@ -2,7 +2,7 @@ import re
 import unittest
 
 from narrant.preprocessing.classifier import Classifier
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from nitests import util
 
 

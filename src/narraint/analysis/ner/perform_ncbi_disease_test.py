@@ -11,7 +11,7 @@ from narrant.preprocessing.config import Config
 from narrant.preprocessing.tagging.dictagger import DictTagger
 from narrant.preprocessing.pharmacy.disease import DiseaseTagger
 from narrant.preprocessing.tagging.vocabulary import expand_vocabulary_term
-from narrant.pubtator.document import TaggedEntity, TaggedDocument
+from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 from narrant.pubtator.regex import TAG_LINE_NORMAL
 

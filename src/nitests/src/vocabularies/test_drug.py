@@ -1,7 +1,7 @@
 import unittest
 
 from narrant.preprocessing.pharmacy.drug import DrugTagger
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from nitests.util import create_test_kwargs
 
 

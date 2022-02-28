@@ -21,7 +21,7 @@ from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, OPENIE_EX
 from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
     document_bulk_load
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 
 pubtator_docs = ['CDR_TestSet.PubTator.txt']  # , 'CDR_DevelopmentSet.PubTator.txt', 'CDR_TrainingSet.PubTator.txt']

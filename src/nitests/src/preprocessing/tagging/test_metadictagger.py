@@ -4,7 +4,7 @@ import unittest
 import narrant.preprocessing.enttypes as et
 import nitests.util as util
 from narrant.preprocessing.pharmacy.pharmdicttagger import PharmDictTagger
-from narrant.pubtator.document import parse_tag_list, TaggedEntity
+from kgextractiontoolbox.document.document import parse_tag_list, TaggedEntity
 from narrant.pubtator.extract import read_tagged_documents
 
 

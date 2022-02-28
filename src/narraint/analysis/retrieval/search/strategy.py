@@ -10,7 +10,7 @@ from narraint.frontend.ui.views import convert_query_text_to_fact_patterns
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver
 from narrant.entity.meshontology import MeSHOntology
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 
 
 def compute_f_measure(precision, recall):

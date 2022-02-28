@@ -2,7 +2,7 @@ import unittest
 
 from narrant.preprocessing.enttypes import DISEASE
 from narrant.preprocessing.pharmacy.disease import DiseaseTagger
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from nitests.util import create_test_kwargs
 
 

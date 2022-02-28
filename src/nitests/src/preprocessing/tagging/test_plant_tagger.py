@@ -1,6 +1,6 @@
 import unittest
 
-import narrant.pubtator.document as doc
+import kgextractiontoolbox.document.document as doc
 from narrant.preprocessing.enttypes import PLANT_FAMILY_GENUS
 from narrant.preprocessing.pharmacy.plantfamilygenus import PlantFamilyGenusTagger
 from nitests.util import create_test_kwargs

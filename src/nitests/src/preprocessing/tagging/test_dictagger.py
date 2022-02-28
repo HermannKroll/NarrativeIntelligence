@@ -1,6 +1,6 @@
 import unittest
 
-import narrant.pubtator.document as doc
+import kgextractiontoolbox.document.document as doc
 from narrant.preprocessing.enttypes import DRUG
 from narrant.preprocessing.tagging.dictagger import split_indexed_words, DictTagger
 from narrant.preprocessing.pharmacy.dosage import DosageFormTagger

@@ -8,7 +8,7 @@ from narraint.backend.models import Document, Tag, DocumentMetadata, DocumentTra
 from narrant.entity.meshontology import MeSHOntology
 from narrant.preprocessing.enttypes import GENE, DISEASE
 from narrant.progress import Progress
-from narrant.pubtator.document import TaggedEntity, TaggedDocument
+from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument
 
 ZBMED_BULK_INSERT_AFTER_K = 1000
 

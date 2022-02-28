@@ -3,7 +3,7 @@ import unittest
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.document.export import export
 from kgextractiontoolbox.backend.models import Document, DocumentTranslation
-from narrant.pubtator.document import TaggedDocument
+from kgextractiontoolbox.document.document import TaggedDocument
 from narrant.pubtator.extract import read_pubtator_documents
 from narrant.pubtator.translation.doctranslation import run_document_translation
 from narrant.pubtator.translation.patent import PatentConverter

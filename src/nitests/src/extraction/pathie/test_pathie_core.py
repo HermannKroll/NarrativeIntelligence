@@ -3,7 +3,7 @@ from unittest import TestCase
 from kgextractiontoolbox.extraction.pathie.core import PathIEToken, pathie_reconstruct_sentence_sequence_from_tokens, \
     pathie_reconstruct_text_from_token_indexes, pathie_find_tags_in_sentence, pathie_find_relations_in_sentence, \
     PathIEDependency, pathie_extract_facts_from_sentence, pathie_use_keywords_from_predicate_vocabulary
-from narrant.pubtator.document import TaggedEntity
+from kgextractiontoolbox.document.document import TaggedEntity
 
 
 class TestPathIECore(TestCase):

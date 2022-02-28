@@ -9,7 +9,7 @@ from kgextractiontoolbox.backend import models
 from kgextractiontoolbox.backend.models import Base, DatabaseTable
 from narraint.document.narrative_document import NarrativeDocument, StatementExtraction, DocumentSentence, \
     NarrativeDocumentMetadata
-from narrant.pubtator.document import TaggedEntity
+from kgextractiontoolbox.document.document import TaggedEntity
 
 BULK_QUERY_CURSOR_COUNT_DEFAULT = 10000
 
