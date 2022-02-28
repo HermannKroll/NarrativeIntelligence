@@ -131,3 +131,5 @@ docker/GNormPlusJava.zip
 docker/TaggerOne/models
 /tmp-/
 /src/nitests/config/jsonfiles/backend.json
+/lib/cesi/
+/lib/KGExtractionToolbox/src/kgtests/
