@@ -3,7 +3,7 @@ import unittest
 import pytest
 
 import nitests.util
-from narrant.backend.load_document import document_bulk_load
+from kgextractiontoolbox.document.load_document import document_bulk_load
 from narrant.preprocessing import preprocess, dictpreprocess
 from nitests import util
 from nitests.src.preprocessing.tagging.test_metadictagger import assert_tags_pmc_4297_5600

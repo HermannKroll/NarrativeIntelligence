@@ -18,7 +18,7 @@ from kgextractiontoolbox.extraction.pathie.main import run_pathie
 from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
 from kgextractiontoolbox.extraction.versions import PATHIE_EXTRACTION, OPENIE_EXTRACTION, PATHIE_STANZA_EXTRACTION, \
     OPENIE6_EXTRACTION
-from narrant.backend.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
+from kgextractiontoolbox.document.load_document import read_tagger_mapping, UNKNOWN_TAGGER, insert_taggers, \
     document_bulk_load
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE
 from kgextractiontoolbox.document.document import TaggedDocument
