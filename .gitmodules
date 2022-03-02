@@ -3,4 +3,4 @@
 	url = git@github.com:HermannKroll/NarrativeAnnotation.git
 [submodule "lib/KGExtractionToolbox"]
 	path = lib/KGExtractionToolbox
-	url = https://github.com/HermannKroll/KGExtractionToolbox
+	url = https://github.com/HermannKroll/KGExtractionToolboxPrivate
