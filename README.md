@@ -1,6 +1,25 @@
 # Narrative Intelligence
+Caution: This project includes research software and is still in development.
+The project is mainly used for research.
 
-This project can be used to process documents using Narratives.
+It covers:
+- The [narrative service](http://134.169.32.177) 
+- Research/evaluation/brain storming scripts in the [analysis package](src/narraint/analysis)
+
+It requires two subprojects:
+- [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
+- [KGExtractionToolbox](https://github.com/HermannKroll/KGExtractionToolbox): Basic entity linking methods / information extraction / pipelines for automatisation
+
+
+To use this project, clone this project and its submodules via:
+```
+git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
+```
+
+# Getting Started
+
+# Overview
+
 
 
 ## Getting Started
