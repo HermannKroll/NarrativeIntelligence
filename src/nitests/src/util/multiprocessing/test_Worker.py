@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import time
 import unittest
 
 from narrant.util.multiprocessing.FileConsumerWorker import FileConsumerWorker
@@ -67,6 +68,7 @@ class TestWorker(unittest.TestCase):
             worker.start()
 
         result_set = {-n for n in range(1, 1000)}
+        result_set.add('shutdown_signal')
         for n in range(1, 1000):
             res = result_queue.get(block=True, timeout=5)
             self.assertIn(res, result_set)
