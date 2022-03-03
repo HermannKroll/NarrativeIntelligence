@@ -3,7 +3,7 @@ import argparse
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
-from translate_wiki import WikiLoader
+from narraint.document.translation.translate_wiki import WikiLoader
 
 def load(collection, extractor_dump, tsv_path):
     documents = []
