@@ -47,12 +47,12 @@ We require two working indexes for several scripts:
 
 The first script will build indexes that allow us to translate entity ids into names etc.
 ```
-python lib/NarrativeAnnotation/src/build_indexes.py
+python lib/NarrativeAnnotation/src/narrant/build_indexes.py
 ```
 
 The second index is required to work with our Narrative Web service.
 ```
-python src/narraint/narraint/build_all_indexes.py
+python src/narraint/build_all_indexes.py
 ```
 
 # SSH Server Interpreter
