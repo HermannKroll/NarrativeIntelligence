@@ -18,8 +18,8 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating, retrieve_narrative_documents_from_database, \
-    TagInvertedIndex
+from narraint.backend.models import Predication, PredicationRating, TagInvertedIndex
+from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger

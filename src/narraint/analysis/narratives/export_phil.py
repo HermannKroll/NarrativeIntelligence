@@ -2,7 +2,7 @@ import json
 import logging
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import retrieve_narrative_documents_from_database
+from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.engine import QueryEngine
