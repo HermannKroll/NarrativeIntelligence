@@ -3,6 +3,8 @@ from typing import Set, List
 
 from sqlalchemy import and_
 
+from kgextractiontoolbox.backend.models import DocumentSection
+from kgextractiontoolbox.document.document import DocumentSection as ds
 from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.backend.models import Document, DocumentClassification, DocumentMetadata, Tag, Predication, Sentence
 from narraint.document.narrative_document import NarrativeDocument, NarrativeDocumentMetadata, StatementExtraction, \
@@ -50,6 +52,15 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
                                              publication_doi=res.publication_doi)
         doc2metadata[res.document_id] = metadata
 
+    # Query for Document sections
+    sec_query = session.query(DocumentSection).filter(and_(DocumentSection.document_id.in_(document_ids),
+                                                           DocumentSection.document_collection == document_collection))
+    for res_sec in sec_query:
+        doc_results[res_sec.document_id].sections.append(ds(
+            position=res_sec.position,
+            title=res_sec.title,
+            text=res_sec.text
+        ))
     #  logging.info('Querying for tags...')
     # Next query for all tagged entities in that document
     tag_query = session.query(Tag).filter(and_(Tag.document_id.in_(document_ids),

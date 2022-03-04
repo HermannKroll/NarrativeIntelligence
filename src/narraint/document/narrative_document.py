@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from kgextractiontoolbox.document.document import TaggedDocument, TaggedEntity
@@ -72,18 +73,29 @@ class NarrativeDocumentMetadata:
 
 class NarrativeDocument(TaggedDocument):
 
-    def __init__(self, document_id, title: str, abstract: str,
+    def __init__(self, document_id: int = None, title: str = None, abstract: str = None,
                  metadata: NarrativeDocumentMetadata = None,
                  tags: List[TaggedEntity] = [],
                  sentences: List[DocumentSentence] = [],
                  extracted_statements: List[StatementExtraction] = []):
-        super().__init__(id=document_id, title=title, abstract=abstract)
+        super().__init__(id=document_id, title=title, abstract=abstract, ignore_tags=False)
         self.tags = tags
         if self.tags:
             self.sort_tags()
         self.metadata = metadata
         self.sentences = sentences
         self.extracted_statements = extracted_statements
+
+    def load_from_json(self, json_str: str, ignore_tags=False):
+        super().load_from_json(json_str=json_str, ignore_tags=ignore_tags)
+        json_dict = json.loads(json_str)
+        if 'metadata' in json_dict:
+            md = json_dict['metadata']
+            self.metadata = NarrativeDocumentMetadata(authors=md.get("authors", None),
+                                                      journals=md.get("journals", None),
+                                                      publication_doi=md.get("doi", None),
+                                                      publication_year=md.get("publication_year", None),
+                                                      publication_month=md.get("publication_month", None))
 
     def to_dict(self):
         """

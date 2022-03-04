@@ -23,6 +23,8 @@ class TestLoadDocument(unittest.TestCase):
         db_docs = retrieve_tagged_documents_from_database(session, {test_doc.id}, "TestLoading1")
 
         self.assertEqual(1, len(db_docs))
+        self.assertEqual(test_doc, db_docs[0])
+
         test1 = copy.copy(db_docs[0])
         test1.id = test_doc.id + 1
         self.assertNotEqual(test_doc, test1)
