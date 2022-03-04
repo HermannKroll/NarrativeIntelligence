@@ -46,6 +46,7 @@ class TestWorker(unittest.TestCase):
         worker1.start()
         worker2.start()
         result_set = {-n for n in range(1, 1000)}
+        result_set.add('shutdown_signal')
         for n in range(1, 1000):
             res = result_queue.get(block=True, timeout=5)
             self.assertIn(res, result_set)
