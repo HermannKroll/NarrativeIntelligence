@@ -17,7 +17,7 @@ TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
 wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
 
 # Export all known document ids from the database
-python3 ~/NarrativeAnnotation/src/narrant/backend/export_document_ids.py $PMIDS_IN_DB -c PubMed
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_document_ids.py $PMIDS_IN_DB -c PubMed
 
 # Compute the open ids (known PubTator ids but NOT in database)
 python3 ~/NarrativeAnnotation/src/narrant/util/compute_id_file_diff.py $ALL_PUBTATOR_PMIDS $PMIDS_IN_DB $IDS_TO_DOWNLOAD
@@ -26,7 +26,7 @@ python3 ~/NarrativeAnnotation/src/narrant/util/compute_id_file_diff.py $ALL_PUBT
 python3 ~/NarrativeAnnotation/src/narrant/pubtator/service/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
 
 # Load all PubTator files to database
-python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
 
 # Next, tag the documents with our PharmDictTagger
 python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -i $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
@@ -38,7 +38,8 @@ psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j
 
 
 # Perform pharmaceutical classification
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls Pharmaceutical -w 15 --skip-load
 
 
 # Load all LitCOVID + Long Covid classifications

@@ -12,7 +12,7 @@ echo $3
 echo $4
 
 # Load everything
-python3 ~/NarrativeAnnotation/src/narrant/backend/load_document.py $1 -c $2
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py $1 -c $2
 
 # Next, tag the documents with our PharmDictTagger
 python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c $2 --skip-load --workers 15
@@ -22,14 +22,14 @@ echo 'cleaning Tag table with hand-written rules'
 psql "host=127.0.0.1 port=5432 dbname=taggingdbtest user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
 
 # Perform pharmaceutical classification
-#python3 ~/NarrativeAnnotation/src/narrant/preprocessing/classification.py -c $2 -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c $2 -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c $2 -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls Pharmaceutical -w 15 --skip-load
 
 # Run GNormPlus
 #python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $1 -c $2 --skip-load --workers 3 --gnormplus
 # Run TaggerOne
 #python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $1 -c $2 --skip-load --workers 2 --tagger-one
 
-# exit
 
 # Do the statement extraction for all $2 documents via our Pipeline
 python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c $2 -et PathIE --workers 26 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
