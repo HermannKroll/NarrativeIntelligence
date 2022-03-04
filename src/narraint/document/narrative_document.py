@@ -154,3 +154,8 @@ class NarrativeDocument(TaggedDocument):
             tagged_dict["statements"] = list([es.to_dict() for es in self.extracted_statements])
 
         return tagged_dict
+
+    def __eq__(self, other):
+        if not isinstance(other, NarrativeDocument):
+            return False
+        return self.to_dict() == other.to_dict()
