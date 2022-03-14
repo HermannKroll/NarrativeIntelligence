@@ -3,7 +3,7 @@ import unittest
 
 from spacy.lang.en import English
 
-from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument, parse_tag_list
+from kgextractiontoolbox.document.document import TaggedEntity, TaggedDocument, parse_tag_list, DocumentSection
 from kgextractiontoolbox.document.extract import read_tagged_documents
 from nitests.util import get_test_resource_filepath, tmp_rel_path
 
@@ -256,3 +256,22 @@ class TestDocument(unittest.TestCase):
             self.assertEqual(True, doc.has_content())
             count += 1
         self.assertEqual(10, count)
+
+    def test_get_text_content(self):
+        text = "Simvastatin (ST) is a drug. Simvastatin is cool. Cool is also simVAStatin. ST is simvastatine."
+
+        doc1 = TaggedDocument(title="", abstract="", id=1)
+        doc1.sections.append(DocumentSection(position=0, title="", text=""))
+        doc1.sections.append(DocumentSection(position=0, title="", text=""))
+        doc1.sections.append(DocumentSection(position=0, title="", text=text))
+
+        self.assertEqual("", doc1.get_text_content().strip())
+
+        self.assertEqual(text, doc1.get_text_content(sections=True).strip())
+        self.assertEqual(7 * ' ' + text, doc1.get_text_content(sections=True))
+
+        doc2 = TaggedDocument(title="Hello", abstract="Test", id=1)
+        doc2.sections.append(DocumentSection(position=0, title="Introduction", text="Hello"))
+        doc2.sections.append(DocumentSection(position=0, title="Test", text=""))
+        self.assertEqual("Hello Test", doc2.get_text_content())
+        self.assertEqual("Hello Test Introduction Hello Test ", doc2.get_text_content(sections=True))

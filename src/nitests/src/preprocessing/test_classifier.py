@@ -1,8 +1,8 @@
 import re
 import unittest
 
+from kgextractiontoolbox.document.document import TaggedDocument, DocumentSection
 from kgextractiontoolbox.entitylinking.classifier import Classifier
-from kgextractiontoolbox.document.document import TaggedDocument
 from nitests import util
 
 
@@ -66,6 +66,42 @@ class TestClassifier(unittest.TestCase):
         ]
         for doc in positive_docs + negative_docs:
             classfier.classify_document(doc)
+
+        for doc in positive_docs:
+            self.assertIn('pet', doc.classification)
+        for doc in negative_docs:
+            self.assertNotIn('pet', doc.classification, msg=f"{doc}: false positive")
+
+    def test_classify_sections(self):
+        classfier = Classifier("pet", rule_path=TestClassifier.pet_rules)
+        positive_docs = [
+            TaggedDocument(title="a", abstract=""),
+            TaggedDocument(title="a", abstract=""),
+            TaggedDocument(title="a")
+        ]
+        positive_docs[0].sections.append(DocumentSection(0, "test", "some animals"))
+        positive_docs[0].sections.append(DocumentSection(0, "test", "Some people keep an animal in their house."))
+
+        positive_docs[1].sections.append(DocumentSection(0, "test", "a cute hamster"))
+        positive_docs[2].sections.append(DocumentSection(0, "test", "two kittens for sale"))
+
+        negative_docs = [
+            TaggedDocument(title="this has nothing to do with an animal"),
+            TaggedDocument(title="this is about hamsters")
+        ]
+
+        # no positive matches because sections are not considered
+        for doc in positive_docs + negative_docs:
+            classfier.classify_document(doc)
+
+        for doc in positive_docs:
+            self.assertNotIn('pet', doc.classification)
+        for doc in negative_docs:
+            self.assertNotIn('pet', doc.classification, msg=f"{doc}: false positive")
+
+        # test consider sections
+        for doc in positive_docs + negative_docs:
+            classfier.classify_document(doc, consider_sections=True)
 
         for doc in positive_docs:
             self.assertIn('pet', doc.classification)
