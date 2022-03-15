@@ -98,10 +98,11 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(
             "As compared with placebo, it was not possible to establish an effect on secretion volume for oxazepam alone.",
             doc.sentence_by_id[7].text)
+        self.assertEqual(1040, doc.sentence_by_id[7].start)
+        self.assertEqual(1148, doc.sentence_by_id[7].end)
+
         self.assertEqual("The results are discussed.",
                          doc.sentence_by_id[12].text)
-        self.assertEqual(1039, doc.sentence_by_id[7].start)
-        self.assertEqual(1147, doc.sentence_by_id[7].end)
 
         content = ""
         with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
@@ -279,3 +280,42 @@ class TestDocument(unittest.TestCase):
         doc2.sections.append(DocumentSection(position=0, title="Test", text=""))
         self.assertEqual("Hello Test", doc2.get_text_content())
         self.assertEqual("Hello Test Introduction Hello Test ", doc2.get_text_content(sections=True))
+
+    def test_split_sentences_sections(self):
+        doc1 = TaggedDocument(title="This is a text about the cyp3.a4 enzyme.", abstract="Blank.", id=1)
+        doc1.sections.append(
+            DocumentSection(position=0, title="Introduction", text="Lets see whether splitting works."))
+        doc1.sections.append(DocumentSection(position=0, title="Background", text="Lets hope that splitting works."))
+
+        # sections should be ignored
+        doc1._compute_nlp_indexes(self.nlp, sections=False)
+        self.assertEqual(2, len(doc1.sentence_by_id))
+        self.assertEqual(0, doc1.sentence_by_id[0].start)
+        self.assertEqual(40, doc1.sentence_by_id[0].end)
+
+        # now consider sections
+        doc1._compute_nlp_indexes(self.nlp, sections=True)
+        self.assertEqual(6, len(doc1.sentence_by_id))
+        self.assertEqual("This is a text about the cyp3.a4 enzyme.", doc1.sentence_by_id[0].text)
+        self.assertEqual(0, doc1.sentence_by_id[0].start)
+        self.assertEqual(40, doc1.sentence_by_id[0].end)
+
+        self.assertEqual("Blank.", doc1.sentence_by_id[1].text)
+        self.assertEqual(41, doc1.sentence_by_id[1].start)
+        self.assertEqual(47, doc1.sentence_by_id[1].end)
+
+        self.assertEqual("Introduction", doc1.sentence_by_id[2].text)
+        self.assertEqual(48, doc1.sentence_by_id[2].start)
+        self.assertEqual(60, doc1.sentence_by_id[2].end)
+
+        self.assertEqual("Lets see whether splitting works.", doc1.sentence_by_id[3].text)
+        self.assertEqual(61, doc1.sentence_by_id[3].start)
+        self.assertEqual(94, doc1.sentence_by_id[3].end)
+
+        self.assertEqual("Background", doc1.sentence_by_id[4].text)
+        self.assertEqual(95, doc1.sentence_by_id[4].start)
+        self.assertEqual(105, doc1.sentence_by_id[4].end)
+
+        self.assertEqual("Lets hope that splitting works.", doc1.sentence_by_id[5].text)
+        self.assertEqual(106, doc1.sentence_by_id[5].start)
+        self.assertEqual(137, doc1.sentence_by_id[5].end)

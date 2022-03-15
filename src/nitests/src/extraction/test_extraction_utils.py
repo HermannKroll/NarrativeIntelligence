@@ -60,7 +60,7 @@ class ExtractionUtilsTestCase(TestCase):
 
         self.assertEqual(3, len(doc2sentences[1313814]))
         self.assertEqual(
-            'Nerve growth factor nonresponsive pheochromocytoma cells: altered internalization results in signaling dysfunction. ',
+            'Nerve growth factor nonresponsive pheochromocytoma cells: altered internalization results in signaling dysfunction ',
             doc2sentences[1313814][0])
         self.assertEqual(
             'Variant rat pheochromocytoma (PC12) cells which fail to respond to nerve growth factor (NGF) (PC12nnr5) (Green, S. H., R. E. Rydel, J. L. Connoly, and L. A. Greene. ',
