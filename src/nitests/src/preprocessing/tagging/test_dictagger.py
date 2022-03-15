@@ -207,7 +207,7 @@ class TestDictagger(unittest.TestCase):
             "simvastatine": {"d1"}
         }
 
-        doc1 = doc.TaggedDocument(title="", abstract="", id=1)
+        doc1 = doc.TaggedDocument(title="a", abstract="", id=1)
         doc1.sections.append(doc.DocumentSection(position=0, title="", text=text))
 
         # test no tags when sections are not considered
@@ -236,7 +236,7 @@ class TestDictagger(unittest.TestCase):
             "simvastatine": {"d1"}
         }
 
-        doc1 = doc.TaggedDocument(title="", abstract="", id=1)
+        doc1 = doc.TaggedDocument(title="a", abstract="", id=1)
         doc1.sections.append(doc.DocumentSection(position=0, title="", text=""))
         doc1.sections.append(doc.DocumentSection(position=0, title="", text=""))
         doc1.sections.append(doc.DocumentSection(position=0, title="", text=text))
