@@ -92,12 +92,16 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(
             "SStudies on the action of an anticholinergic agent in combination with a tranquilizer on gastric juice secretion in mann.",
             doc.sentence_by_id[0].text)
+        self.assertEqual(0, doc.sentence_by_id[0].start)
+        self.assertEqual(121, doc.sentence_by_id[0].end)
 
         self.assertEqual(
             "As compared with placebo, it was not possible to establish an effect on secretion volume for oxazepam alone.",
             doc.sentence_by_id[7].text)
         self.assertEqual("The results are discussed.",
                          doc.sentence_by_id[12].text)
+        self.assertEqual(1039, doc.sentence_by_id[7].start)
+        self.assertEqual(1147, doc.sentence_by_id[7].end)
 
         content = ""
         with open(get_test_resource_filepath('PubMed54.txt'), 'rt') as f:
