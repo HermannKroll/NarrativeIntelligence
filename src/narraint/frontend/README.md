@@ -1,4 +1,4 @@
-# Narrative Intelligence WebService Deployment
+# Narrative Service Deployment
 
 ## Architektur
 
@@ -31,7 +31,7 @@ bis zu einer Minute dauern kann.
 3. Virtuelle Umgebung erstellen und Abhängigkeiten installieren
 4. Umgebungsvariablen setzen
     1. ``export DJANGO_SETTINGS_MODULE="frontend.settings.prod"``
-    2. ``export PYTHONPATH="~/PubMedSnorkel"``
+    2. ``export PYTHONPATH="~/NarrativeIntelligence"``
 5. Statische Dateien anlegen
     1. Verzeichnis ``/var/www/static`` erstellen
     2. Rechte und Modus anpassen (`chgrp -R www-data /var && chmod -R 775 /var/www`
@@ -42,28 +42,16 @@ bis zu einer Minute dauern kann.
 8. Nginx-Konfigurationsdatei nach `/etc/nginx/nginx.conf` kopieren
 9. Nginx neu starten: `sudo service nginx restart`
 
-## Index aufbauen
-
-Da das Erstellen des Index' zur Laufzeit zu lange dauert, wird dieser vorher erstellt und serialisiert. Der
-serialisierte Index wird dann beim Serverstart in den Speicher geladen.
-
-Der Index muss neu aufgebaut werden, wenn sich die `Descriptor`-Klasse aus dem `mesh`-Paket ändert oder die
-Deskriptor-Datei selbst. Die Pfade zum Index stehen in `frontend.settings.base`.
-
-# Hierzu muss man sich in der Conda Environment befinden
-
-		cd ~/PubMedSnorkel/utils
-		python tools.py --build-index
 
 ## Server neu starten
 
 Nach einem Server-Neustart muss der Gunicorn Server manuell gestartet werden.
 
 	screen
-	source ~/PubMedSnorkel/venv/bin/activate
+	source ~/NarrativeIntelligence/venv/bin/activate
 	export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
-	export PYTHONPATH="/home/kroll/PubMedSnorkel"
-	cd ~/PubMedSnorkel/frontend
+	export PYTHONPATH="/home/kroll/NarrativeIntelligence/src:/home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/src"
+	cd ~/NarrativeIntelligence/src/narraint/frontend
 	gunicorn -b 127.0.0.1:8080 --timeout 90 frontend.wsgi
 
 ## Projekt aktualisieren
@@ -73,7 +61,7 @@ neugestartet werden. Falls die Deskriptoren aktualisiert wurden, muss der Index 
 Index aufbauen*.
 
 	  # Projekt aktualisieren
-	  cd ~/PubMedSnorkel
+	  cd ~/NarrativeIntelligence
 	  git pull
 
 	 # Dateien kopieren (falls html oder js verändert)
@@ -86,3 +74,25 @@ Index aufbauen*.
 	  screen -r
 	  CTRL + C
 	  gunicorn -b 127.0.0.1:8080 --timeout 90 frontend.wsgi
+
+
+# PyCharm Configuration
+Create a new PyCharm Runtime Configuration. 
+
+Select 'Django Server'.
+
+Make sure that your local Python interpreter is used. Not the server SSH interpreter!
+
+Set environment variable to:
+```
+PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=frontend.settings.dev
+```
+
+Go to PyCharm -> Settings -> Languages & Frameworks -> Django
+
+Use the following settings
+```
+Enable Django Support: true
+Django Project root: NarrativeIntelligence\src\narraint\frontend
+Settings: frontend\settings\dev.py
+```

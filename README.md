@@ -22,39 +22,6 @@ Install all Python requirements:
 pip install -r requirements.txt
 ```
 
-Download the latest (currently 2022) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
-```
-bash lib/NarrativeAnnotation/download_data.sh
-```
-
-
-### Configuration
-*All* configuration lives inside the `config` directory. 
-The `*.example.json` files show the structure of the corresponding configuration file. 
-Copy the example file and remove the `.example` from the filename.
-
-The database can be configured with the file ``backend.json`` and using environment variables. 
-The environment variables are favoured over the `json`-configuration. 
-
-
-Next, configure your database connection. 
-```
-```
-
-
-## Build Indexes
-We require two working indexes for several scripts:
-
-The first script will build indexes that allow us to translate entity ids into names etc.
-```
-python lib/NarrativeAnnotation/src/narrant/build_indexes.py
-```
-
-The second index is required to work with our Narrative Web service.
-```
-python src/narraint/build_all_indexes.py
-```
-
 # SSH Server Interpreter
 Check out the latest version of the project. 
 Next open the project in PyCharm.
@@ -69,6 +36,65 @@ Next, configure the SSH Interpreter in PyCharm.
 Python Interpreter can be found in the local conda directory (.conda/...)
 
 
+# Download Additional Data
+Download the latest (currently 2022) MeSH Descriptor file. Then install the required Python packages. We recommend you to use Python 3.6 or higher.
+```
+cd lib/NarrativeAnnotation/
+bash download_data.sh
+cd ../../
+```
+
+
+### Configuration
+*All* configuration lives inside the `config` directory. 
+The `*.example.json` files show the structure of the corresponding configuration file. 
+Copy the example file and remove the `.example` from the filename.
+
+The database can be configured with the file ``backend.json`` and using environment variables. 
+The environment variables are favoured over the `json`-configuration. 
+
+
+Next, configure your database connection. 
+The latest version should look like:
+```
+{
+  "use_SQLite": false,
+  "SQLite_path": "sqlitebase.db",
+  "POSTGRES_DB": "fidpharmazie",
+  "POSTGRES_HOST": "134.169.32.169",
+  "POSTGRES_PORT": "5432",
+  "POSTGRES_USER": "tagginguser",
+  "POSTGRES_PW": "u3j4io1234u8-13!14",
+  "POSTGRES_SCHEMA": "public"
+}
+```
+
+
+## Build Indexes
+We require two working indexes for several scripts:
+
+The first script will build indexes that allow us to translate entity ids into names etc.
+```
+python3 lib/NarrativeAnnotation/src/narrant/build_indexes.py
+```
+
+The second index is required to work with our Narrative Web service.
+```
+python3 src/narraint/build_all_indexes.py
+```
+
+Note, both scripts can be executed via the remote interpreter :)
+
+
+# Setting up the Test Suite
+First, configure the database connection for the test suite.
+```
+cp src/nitests/config/jsonfiles/backend.example.json src/nitests/config/jsonfiles/backend.json
+```
+Adjust the SQL Lite Path in
+```
+src/nitests/config/jsonfiles/backend.json
+```
 
 # Additional Shared Resource Directory
 We have a shared Cloud Space: [OneDrive](https://1drv.ms/u/s!ArDgbq3ak3Zuh5oNxxBPfJSqqpB2cw?e=iMfQKR). Password: youshallnotpass
@@ -100,5 +126,4 @@ The projects core, the `narraint` package, consists of several Python packages a
 
 ## Narrative Service Database Schema
 ![DB Scheme](./docs/dbdiagram_service.png)
-
 
