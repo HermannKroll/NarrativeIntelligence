@@ -10,7 +10,7 @@ class TestClassifier(unittest.TestCase):
     pet_rules = util.get_test_resource_filepath("classifier_rules/testrules.txt")
 
     def test_read_ruleset(self):
-        rules = Classifier.read_ruleset(TestClassifier.pet_rules)
+        rules, _ = Classifier.read_ruleset(TestClassifier.pet_rules)
         self.assertIn([re.compile(r"kitten\w*\b", re.IGNORECASE)], rules)
         self.assertIn([re.compile(r"dog\w*\b", re.IGNORECASE)], rules)
         self.assertIn([re.compile(r"hamster\b", re.IGNORECASE)], rules)
@@ -107,3 +107,40 @@ class TestClassifier(unittest.TestCase):
             self.assertIn('pet', doc.classification)
         for doc in negative_docs:
             self.assertNotIn('pet', doc.classification, msg=f"{doc}: false positive")
+
+    def test_classification_positions(self):
+        classfier = Classifier("pet", rule_path=TestClassifier.pet_rules)
+        positive_docs = [
+            TaggedDocument(title="a", abstract="Some people keep an animal in their house."),
+            TaggedDocument(title="a cute hamster", abstract=""),
+            TaggedDocument(title="kittens for sale")
+        ]
+
+        for doc in positive_docs:
+            classfier.classify_document(doc)
+
+        positions0 = str(positive_docs[0].classification['pet'])
+        self.assertIn('(22, 28)', positions0)
+        self.assertIn('animal', positions0)
+        self.assertIn('(38, 43)', positions0)
+        self.assertIn('house', positions0)
+        self.assertIn('AND', positions0)
+
+        positions1 = str(positive_docs[1].classification['pet'])
+        self.assertIn('(7, 14)', positions1)
+        self.assertIn('hamster', positions1)
+
+        positions2 = str(positive_docs[2].classification['pet'])
+        self.assertIn('(0, 7)', positions2)
+        self.assertIn('kittens', positions2)
+
+    def test_classification_explanation(self):
+        classfier = Classifier("pet", rule_path=TestClassifier.pet_rules)
+        doc1 = TaggedDocument(title="kittens for sale")
+        classfier.classify_document(doc1)
+        self.assertEqual('kitten*:kittens(0, 7)', doc1.classification['pet'])
+
+        doc2 = TaggedDocument(title="Some people keep an animal in their house")
+        classfier.classify_document(doc2)
+        self.assertEqual('animal:animal(20, 26) AND house:house(36, 41)',
+                         doc2.classification['pet'])
