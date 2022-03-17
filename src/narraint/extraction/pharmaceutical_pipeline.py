@@ -15,7 +15,6 @@ from kgextractiontoolbox.document.count import count_documents
 from kgextractiontoolbox.document.export import export
 from kgextractiontoolbox.extraction.extraction_utils import filter_and_write_documents_to_tempdir
 from kgextractiontoolbox.extraction.loading.load_extractions import clean_and_load_predications_into_db
-from kgextractiontoolbox.extraction.loading.load_openie_extractions import OpenIEEntityFilterMode
 from kgextractiontoolbox.extraction.loading.load_pathie_extractions import read_pathie_extractions_tsv
 from kgextractiontoolbox.extraction.pathie.main import pathie_run_corenlp, pathie_process_corenlp_output_parallelized
 from kgextractiontoolbox.extraction.pathie_stanza.main import run_stanza_pathie
@@ -33,7 +32,7 @@ DOCUMENTS_TO_PROCESS_IN_ONE_BATCH = 500000
 def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collection, extraction_type, workers=1,
                                       corenlp_config=NLP_CONFIG,
                                       relation_vocab: RelationVocabulary = None,
-                                      entity_filter: OpenIEEntityFilterMode = OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER):
+                                      consider_sections=False):
     """
     Performs fact extraction for the given documents with the selected extraction type
     The document texts and tags will be exported automatically
@@ -45,7 +44,8 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
     :param workers: the number of parallel workers (if extraction method is parallelized)
     :param corenlp_config: the nlp config
     :param relation_vocab: the relation vocabulary for PathIE (optional)
-    :param entity_filter: the entity filter mode: Exact (IE arg must match entity str), Partial (entity is partially included), None = no entity checking
+    :param consider_sections: Should document sections be considered for text generation?
+
     :return: None
     """
     # Read config
@@ -85,7 +85,8 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
             logging.info('Filtering documents...')
             count_ie_files, doc2tags = filter_and_write_documents_to_tempdir(len(ids_to_process), document_export_file,
                                                                              ie_input_dir, ie_filelist_file, spacy_nlp,
-                                                                             workers)
+                                                                             workers,
+                                                                             consider_sections=consider_sections)
 
             corenlp_output_dir = os.path.join(working_dir, 'corenlp_output')
             if not os.path.exists(corenlp_output_dir):
@@ -105,7 +106,8 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
             pred_vocab = relation_vocab.relation_dict if relation_vocab else None
             logging.info('Starting PathIE Stanza...')
             start = datetime.now()
-            run_stanza_pathie(document_export_file, ie_output_file, predicate_vocabulary=pred_vocab)
+            run_stanza_pathie(document_export_file, ie_output_file, predicate_vocabulary=pred_vocab,
+                              consider_sections=consider_sections)
             logging.info((" done in {}".format(datetime.now() - start)))
 
         logging.info('Loading extractions into database...')
@@ -145,8 +147,8 @@ def main():
                         help="Batch size (how many documents should be processed and loaded in a batch)",
                         default=DOCUMENTS_TO_PROCESS_IN_ONE_BATCH, type=int)
     parser.add_argument('--relation_vocab', default=None, help='Path to a relation vocabulary (json file)')
-    parser.add_argument("--entity_filter", default=OpenIEEntityFilterMode.PARTIAL_ENTITY_FILTER,
-                        help="the entity filter mode", choices=OpenIEEntityFilterMode.to_str_list())
+    parser.add_argument("--sections", action="store_true", default=False,
+                        help="Should the section texts be considered in the extraction step?")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -181,7 +183,7 @@ def main():
         logging.info(f'{len(batch_ids)} ids have to been processed in this batch')
         process_documents_ids_in_pipeline(batch_ids, args.collection, args.extraction_type, corenlp_config=args.config,
                                           workers=args.workers, relation_vocab=relation_vocab,
-                                          entity_filter=args.entity_filter)
+                                          consider_sections=args.sections)
 
 
 if __name__ == "__main__":
