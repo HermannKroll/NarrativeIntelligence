@@ -22,9 +22,9 @@ class ExtractionUtilsTestCase(TestCase):
         self.assertEqual(2, len(doc2sentences[doc_id]))
 
         self.assertEqual(
-            'A double-blind study with intra-individual comparisons was carried out to investigate the effects of 15 mg of (8r)-3alpha-hydroxy-8-isopropyl-1alphaH-tropanium bromide(+/-)-tropate (Sch 1000), 15 mg Sch 1000 + 10 mg oxazepam, 10 mg oxazepam and placebo with oral administration in randomized sequence on gastric juice volume, amount of acid, concentration and pH values in 12 healthy volunteers.. ',
+            'A double-blind study with intra-individual comparisons was carried out to investigate the effects of 15 mg of (8r)-3alpha-hydroxy-8-isopropyl-1alphaH-tropanium bromide(+/-)-tropate (Sch 1000), 15 mg Sch 1000 + 10 mg oxazepam, 10 mg oxazepam and placebo with oral administration in randomized sequence on gastric juice volume, amount of acid, concentration and pH values in 12 healthy volunteers. ',
             doc2sentences[doc_id][0])
-        self.assertEqual('Stimulation was effected by 1 mug/kg/h pentagastrin via drip infusion.. ',
+        self.assertEqual('Stimulation was effected by 1 mug/kg/h pentagastrin via drip infusion. ',
                          doc2sentences[doc_id][1])
 
         self.assertEqual(1, len(doc2tags))
@@ -38,7 +38,7 @@ class ExtractionUtilsTestCase(TestCase):
         self.assertEqual(1, len(doc2sentences[doc_id]))
 
         self.assertEqual(
-            'The hydrolytic action of the basic enzyme was found to consist of two sequential events: (a) hydrolysis of 70% of the total cell ph osphatidylcholine without any evident hemolysis; and (b) complete hydrolysis of the remaining phosphatidylcholine, followed closely by extensive phosphatidylethanolamine hydrolysis and finally with onset of hemolysis, attack on the phosphatidylserine.. ',
+            'The hydrolytic action of the basic enzyme was found to consist of two sequential events: (a) hydrolysis of 70% of the total cell ph osphatidylcholine without any evident hemolysis; and (b) complete hydrolysis of the remaining phosphatidylcholine, followed closely by extensive phosphatidylethanolamine hydrolysis and finally with onset of hemolysis, attack on the phosphatidylserine. ',
             doc2sentences[doc_id][0])
 
         self.assertEqual(1, len(doc2tags))
@@ -51,13 +51,13 @@ class ExtractionUtilsTestCase(TestCase):
 
         self.assertEqual(3, len(doc2sentences[1313813]))
         self.assertEqual(
-            'Protein synthesis and secretion were assayed by following the incorporation or release, respectively, of [35S]methionine-labeled TCA-precipitable protein.. ',
+            'Protein synthesis and secretion were assayed by following the incorporation or release, respectively, of [35S]methionine-labeled TCA-precipitable protein. ',
             doc2sentences[1313813][0])
         self.assertEqual(
-            'The extent of protein secretion was unaffected by the phorbol ester PMA, 8-bromo-cAMP, or 8- bromo-cGMP but was doubled by the Ca2+ ionophore ionomycin.. ',
+            'The extent of protein secretion was unaffected by the phorbol ester PMA, 8-bromo-cAMP, or 8- bromo-cGMP but was doubled by the Ca2+ ionophore ionomycin. ',
             doc2sentences[1313813][1])
         self.assertEqual(
-            'In a pulse- label protocol in which proteins were prelabeled for 1 h before a chase period, constitutive secretion was unaffected by depletion of cytosolic Ca2+ but ionomycin was found to give a twofold stimulation of the secretion of presynthesized protein in a Ca(2+)-dependent manner.. ',
+            'In a pulse- label protocol in which proteins were prelabeled for 1 h before a chase period, constitutive secretion was unaffected by depletion of cytosolic Ca2+ but ionomycin was found to give a twofold stimulation of the secretion of presynthesized protein in a Ca(2+)-dependent manner. ',
             doc2sentences[1313813][2])
 
         self.assertEqual(3, len(doc2sentences[1313814]))
@@ -65,10 +65,10 @@ class ExtractionUtilsTestCase(TestCase):
             'Nerve growth factor nonresponsive pheochromocytoma cells: altered internalization results in signaling dysfunction. ',
             doc2sentences[1313814][0])
         self.assertEqual(
-            'Variant rat pheochromocytoma (PC12) cells which fail to respond to nerve growth factor (NGF) (PC12nnr5) (Green, S. H., R. E. Rydel, J. L. Connoly, and L. A. Greene.. ',
+            'Variant rat pheochromocytoma (PC12) cells which fail to respond to nerve growth factor (NGF) (PC12nnr5) (Green, S. H., R. E. Rydel, J. L. Connoly, and L. A. Greene. ',
             doc2sentences[1313814][1])
         self.assertEqual(
-            'They are apparently composed of two membrane-bound proteins, p75 and the protooncogene trk, both of which bind NGF, and apparently contribute singularly or in concert to the two observed affinities, and to the promotion of the NGF effects.. ',
+            'They are apparently composed of two membrane-bound proteins, p75 and the protooncogene trk, both of which bind NGF, and apparently contribute singularly or in concert to the two observed affinities, and to the promotion of the NGF effects. ',
             doc2sentences[1313814][2])
 
         self.assertEqual(10, len(doc2tags[1313813]))
@@ -129,4 +129,4 @@ class ExtractionUtilsTestCase(TestCase):
         self.assertEqual(1, len(doc2sentences))
         self.assertEqual(2, len(doc2sentences[1]))
         self.assertEqual('This is a test. ', doc2sentences[1][0])
-        self.assertEqual('Simvastatin is cool.. ', doc2sentences[1][1])
+        self.assertEqual('Simvastatin is cool. ', doc2sentences[1][1])
