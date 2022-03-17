@@ -1,12 +1,11 @@
 import unittest
 
-import pytest
-
 import nitests.util
+from kgextractiontoolbox.document.extract import read_tagged_documents
 from kgextractiontoolbox.document.load_document import document_bulk_load
-from narrant.preprocessing import preprocess, dictpreprocess
+from narrant.preprocessing import dictpreprocess
 from nitests import util
-from nitests.src.preprocessing.tagging.test_metadictagger import assert_tags_pmc_4297_5600
+from nitests.src.preprocessing.tagging.test_pharmdicttagger import assert_tags_pmc_4297_5600
 
 
 class TestPreprocess(unittest.TestCase):
@@ -26,7 +25,7 @@ class TestPreprocess(unittest.TestCase):
         path = util.resource_rel_path('infiles/test_metadictagger')
         args = [
             *f"-i {path} -t DR DF PF E -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 1 -y".split()
-            ]
+        ]
         dictpreprocess.main(args)
         doc1, doc2 = util.get_tags_from_database(4297), util.get_tags_from_database(5600)
         assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
@@ -51,18 +50,41 @@ class TestPreprocess(unittest.TestCase):
         assert_tags_pmc_4297_5600(self, {repr(t) for t in doc1}, {repr(t) for t in doc2})
         util.clear_database()
 
-    @pytest.mark.skip
-    def test_gnormplus_preprocess(self):
+    def test_dictpreprocess_ignore_sections(self):
+        in_file = util.get_test_resource_filepath("infiles/test_preprocess/fulltext_19128.json")
         workdir = nitests.util.make_test_tempdir()
-        args = [util.resource_rel_path('infiles/test_preprocess'),
+        args = [
+            *f"-i {in_file} -c PREPTEST --loglevel DEBUG --workdir {workdir} -w 2 -y".split()
+        ]
+        dictpreprocess.main(args)
 
-                *f"--gnormplus -c PREPTEST --loglevel DEBUG".split()
-                ]
-        preprocess.main(args)
-        print("after preprocess")
-        doc = util.get_tags_from_database(12098649)
-        print(doc)
-        pass
+        doc = list(read_tagged_documents(in_file))[0]
+        title_section_len = len(doc.get_text_content(sections=False))
+        doc_tags = util.get_tags_from_database(19128)
+        for t in doc_tags:
+            self.assertGreaterEqual(title_section_len, t.end)
+        util.clear_database()
+
+    def test_dictpreprocess_include_sections(self):
+        in_file = util.get_test_resource_filepath("infiles/test_preprocess/fulltext_19128.json")
+        workdir = nitests.util.make_test_tempdir()
+        args = [
+            *f"-i {in_file} -c PREPTEST --loglevel DEBUG --sections --workdir {workdir} -w 2 -y".split()
+        ]
+        dictpreprocess.main(args)
+
+        doc = list(read_tagged_documents(in_file))[0]
+        title_section_len = len(doc.get_text_content(sections=False))
+        doc_len = len(doc.get_text_content(sections=True))
+        doc_tags = util.get_tags_from_database(19128)
+        tags_in_fulltext = []
+        for t in doc_tags:
+            if t.end > title_section_len:
+                tags_in_fulltext.append(t)
+            self.assertGreaterEqual(doc_len, t.end)
+
+        self.assertLess(0, len(tags_in_fulltext))
+        util.clear_database()
 
 
 if __name__ == '__main__':
