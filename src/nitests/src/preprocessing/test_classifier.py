@@ -1,7 +1,11 @@
 import re
 import unittest
 
+import nitests
+from kgextractiontoolbox.backend.database import Session
+from kgextractiontoolbox.backend.retrieve import retrieve_tagged_documents_from_database
 from kgextractiontoolbox.document.document import TaggedDocument, DocumentSection
+from kgextractiontoolbox.entitylinking import classification
 from kgextractiontoolbox.entitylinking.classifier import Classifier
 from nitests import util
 
@@ -144,3 +148,34 @@ class TestClassifier(unittest.TestCase):
         classfier.classify_document(doc2)
         self.assertEqual('animal:animal(20, 26) AND house:house(36, 41)',
                          doc2.classification['pet'])
+
+    def test_classification_ignore_sections(self):
+        in_file = util.get_test_resource_filepath("infiles/test_classifyer/fulltext_test.json")
+        workdir = nitests.util.make_test_tempdir()
+        args = [
+            *f"-i {in_file} -c CLASSIFICATION_TEST_1 --loglevel DEBUG --cls pet --workdir {workdir} -w 2 -y -r {self.pet_rules}".split()
+        ]
+        classification.main(args)
+
+        session = Session.get()
+        classified_documents = retrieve_tagged_documents_from_database(session, document_ids={1, 2, 3},
+                                                                       document_collection="CLASSIFICATION_TEST_1")
+        positive_docs = {1}
+        for doc in classified_documents:
+            if 'pet' in doc.classification:
+                self.assertIn(doc.id, positive_docs)
+
+    def test_dictpreprocess_include_sections(self):
+        in_file = util.get_test_resource_filepath("infiles/test_preprocess/fulltext_19128.json")
+        workdir = nitests.util.make_test_tempdir()
+        args = [
+            *f"-i {in_file} -c CLASSIFICATION_TEST_2 --loglevel DEBUG --sections --cls pet --workdir {workdir} -w 2 -y -r {self.pet_rules}".split()
+        ]
+        classification.main(args)
+        session = Session.get()
+        classified_documents = retrieve_tagged_documents_from_database(session, document_ids={1, 2, 3},
+                                                                       document_collection="CLASSIFICATION_TEST_1")
+        positive_docs = {1, 2, 3}
+        for doc in classified_documents:
+            if 'pet' in doc.classification:
+                self.assertIn(doc.id, positive_docs)

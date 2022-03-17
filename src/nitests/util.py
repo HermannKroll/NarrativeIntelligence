@@ -3,6 +3,7 @@ import os
 import tempfile
 
 import narrant.preprocessing.config as cnf
+from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.backend.database import SessionExtended
 from narraint.config import GIT_ROOT_DIR
@@ -41,7 +42,7 @@ def is_file_content_equal(file_1, file_2):
 
 
 def get_tags_from_database(doc_id=None):
-    session = SessionExtended.get()
+    session = Session.get()
     if doc_id is None:
         result = session.execute("SELECT * FROM tag")
     else:
@@ -53,7 +54,7 @@ def get_tags_from_database(doc_id=None):
 
 def clear_database():
     """DANGER! ONLY USE IN TESTS, NOWHERE IN PRODUCTION CODE!"""
-    session = SessionExtended.get()
+    session = Session.get()
     if SessionExtended.is_sqlite:
         session.execute("DELETE FROM tag")
         session.execute("DELETE FROM doc_tagged_by")
