@@ -3,11 +3,10 @@ import os
 import tempfile
 
 import narrant.preprocessing.config as cnf
+from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.backend.database import SessionExtended
 from narraint.config import GIT_ROOT_DIR
 from narrant.config import PREPROCESS_CONFIG
-from kgextractiontoolbox.document.document import TaggedEntity
-from kgextractiontoolbox.document.extract import collect_ids_from_dir
 
 
 def create_test_kwargs():
