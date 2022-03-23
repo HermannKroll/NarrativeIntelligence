@@ -10,10 +10,10 @@ from itertools import islice
 
 import datrie
 
+from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
-from narraint.backend.database import SessionExtended
 from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
@@ -97,7 +97,7 @@ class EntityTagger:
                 self.term2entity[term.lower().strip()].add(Entity(ent_id, DISEASE))
 
     def _add_gene_terms(self, gene_input=GENE_FILE):
-        gene_ids_in_db = get_gene_ids(SessionExtended.get())
+        gene_ids_in_db = get_gene_ids(Session.get())
         logging.info('Reading gene input file: {}'.format(gene_input))
         with gzip.open(gene_input, 'rt') as f:
             for line in islice(f, 1, None):
