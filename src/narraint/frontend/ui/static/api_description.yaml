@@ -135,7 +135,27 @@ paths:
           required: true
           schema:
             type: string
-          example: Metformin treats ?X(Disease)
+          example: Metformin treats Diabetes Mellitus
+        - in: query
+          name: data_source
+          required: true
+          schema:
+            type: string
+          example: PubMed
+          description: The corresponding document collection
+
+
+  /query_document_ids:
+    get:
+      summary: Queries a list of document ids. The ids are sorted descending.
+      description:  Queries a list of document ids. The ids are sorted descending.
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          example: Metformin treats Diabetes Mellitus
         - in: query
           name: data_source
           required: true
