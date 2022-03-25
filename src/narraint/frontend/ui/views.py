@@ -312,6 +312,40 @@ def get_query_narrative_documents(request):
 
 
 @gzip_page
+def get_query_document_ids(request):
+    if "query" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    query = str(request.GET["query"]).strip()
+    document_collection = str(request.GET["data_source"]).strip()
+
+    graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+    if not graph_query or len(graph_query.fact_patterns) == 0:
+        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
+
+    if QueryTranslation.count_variables_in_query(graph_query) != 0:
+        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        return JsonResponse(status=500, data=dict(answer="Does not support queries with variables"))
+
+    try:
+        time_start = datetime.now()
+        # compute the query
+        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        result_ids = sorted(list({r.document_id for r in results}))
+        View.instance().query_logger.write_api_call(True, "get_query_document_ids", str(request),
+                                                    time_needed=datetime.now() - time_start)
+        return JsonResponse(dict(results=result_ids))
+    except Exception:
+        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        return JsonResponse(status=500, data=dict(answer="Internal server error"))
+
+
+@gzip_page
 def get_narrative_documents(request):
     if "document" not in request.GET and "documents" not in request.GET:
         View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
