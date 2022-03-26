@@ -69,9 +69,7 @@ p {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
   padding: 0.5em;
 }
 
@@ -88,7 +86,7 @@ p {
   display: -ms-flexbox;
   display: flex;
   position: relative;
-  place-content: space-between;
+  place-content: space-around;
 }
 
 .searchbar input {
@@ -173,7 +171,7 @@ p {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  place-content: space-between;
+  place-content: center;
   background-color: var(--grey_light1);
   position: fixed;
   z-index: 1000;
@@ -187,19 +185,51 @@ p {
   margin: 0.6em 0 0.6em 0;
 }
 
+.navbar .nav_spacer {
+  margin-right: auto;
+  width: 160pt;
+}
+
 .ifislogo {
-  width: auto;
+  height: inherit;
+  margin-left: auto;
+}
+.ifislogo .img {
   height: 90%;
   margin: 0.15em;
-  float: right;
+  width: auto;
 }
 
 .content {
-  margin: 3.5em 12% 5em 12%;
+  margin: 3.5em 12% 5em 16%;
   background-color: white;
   padding: 2em 7% 7% 7%;
   -webkit-box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
           box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.sidebar {
+  max-width: 14%;
+  min-width: 12%;
+  margin: 3.5em 0 5em 1%;
+  background-color: white;
+  padding: 1em 0.5% 3em 0.5%;
+  position: fixed;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.sidebar p {
+  text-align: center;
+  font-weight: bold;
+}
+.sidebar .link {
+  margin-top: 1em;
+}
+.sidebar .link a {
+  color: black;
+  text-decoration: none;
+}
+.sidebar .link:hover {
+  font-weight: bold;
 }
 
 .main_page {
@@ -260,8 +290,9 @@ p {
 }
 
 .top_container img:hover {
-  width: 24em;
-  height: 24em;
+  transition: 1s;
+  transform: scaleX(1.2) scaleY(1.2) translateX(20px) translateY(20px);
+  background-color: white;
 }
 
 .container {

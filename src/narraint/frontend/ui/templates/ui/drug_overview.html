@@ -19,7 +19,8 @@
 </div>
 
 <div class="navbar">
-    <div></div>
+    <div class="nav_spacer"></div>
+
     <div class="searchbar">
         <input type="text" id='drugInput' placeholder="Search for Drug...">
         <div onclick="searchDrug()" class="button">
@@ -27,7 +28,11 @@
         </div>
         <!--Website bauen on click-->
     </div>
-    <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'assets/ifislogo.png' %}" class="ifislogo"></a>
+
+    <a class="ifislogo" href="http://www.ifis.cs.tu-bs.de/">
+        <img class="img" src="{% static 'assets/ifislogo.png' %}" >
+    </a>
+</div>
 
 </div>
 
