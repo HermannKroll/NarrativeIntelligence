@@ -34,9 +34,62 @@
     </a>
 </div>
 
+<div class="sidebar">
+    <p>Overview</p>
+
+    <div class="link">
+        <a id="linkDrug" href="#">
+            Drug
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkAdministration" href="#Administration">
+            Administration
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkIndications" href="#Indications">
+            Indications
+        </a>
+    </div>
+
+
+    <div class="link" >
+        <a id="linkAdverseEffects" href="#AdverseEffects">
+            Adverse Effects
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkDrugInteractions"
+           href="#DrugInteractions">
+            Drug Interactions
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkTargetInteractions"
+           href="#TargetInteractions">
+            Target Interactions
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkLabMethods" href="#LabMethods">
+            Lab Methods
+        </a>
+    </div>
+
+    <div class="link" >
+        <a id="linkRecentPapers" href="#RecentPapers">
+            Recent Papers
+        </a>
+    </div>
 </div>
 
-<div class="content">
+<div class="content" id="drugContent">
 
     <div class="top_container">
         <img src="#" id="structure">
@@ -90,8 +143,7 @@
         </div>
     </div>
 
-
-    <div class="container searchbox">
+    <div class="container searchbox" id="Administration">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Administration</h2>
@@ -113,7 +165,7 @@
         </div>
     </div>
 
-    <div class="container searchbox">
+    <div class="container searchbox" id="Indications">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Indications</h2>
@@ -136,7 +188,7 @@
         </div>
     </div>
 
-    <div class="container searchbox">
+    <div class="container searchbox" id="AdverseEffects">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Adverse Effects</h2>
@@ -158,7 +210,7 @@
         </div>
     </div>
 
-    <div class="container searchbox">
+    <div class="container searchbox" id="DrugInteractions">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Drug Interactions</h2>
@@ -180,7 +232,7 @@
         </div>
     </div>
 
-    <div class="container searchbox">
+    <div class="container searchbox" id="TargetInteractions">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Target Interactions</h2>
@@ -202,7 +254,7 @@
         </div>
     </div>
 
-    <div class="container searchbox">
+    <div class="container searchbox" id="LabMethods">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Lab Methods</h2>
@@ -224,7 +276,7 @@
         </div>
     </div>
 
-    <div class="container news">
+    <div class="container news" id="RecentPapers">
         <h2>Recent Papers</h2>
         <div class="loading" id="newsLoading">
             <img src="{% static 'assets/loading.gif' %}">

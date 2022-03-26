@@ -148,6 +148,7 @@ async function buildSite() {
         .then(data => {
             adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
             if (adminData.length > 0) {
+                document.getElementById("linkAdministration").innerText += `(${adminData.length})`;
                 maxCount["admin"] = adminData[0].count;
                 fillSearchbox("admin", adminData, maxCount["admin"], -1);
             }
@@ -158,6 +159,7 @@ async function buildSite() {
                 .then(data => {
                     adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
                     if (adveData.length > 0) {
+                        document.getElementById("linkAdverseEffects").innerText += `(${adveData.length})`;
                         maxCount["adve"] = adveData[0].count;
                         fillSearchbox("adve", adveData, maxCount["adve"], -1);
                     }
@@ -168,6 +170,7 @@ async function buildSite() {
                         .then(data => {
                             targInterData = data.sub_count_list;
                             if (targInterData.length > 0) {
+                                document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
                                 maxCount["targInter"] = targInterData[0].count;
                                 fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
                             }
@@ -178,6 +181,7 @@ async function buildSite() {
                                 .then(data => {
                                     drugInterData = data.sub_count_list;
                                     if (drugInterData.length > 0) {
+                                        document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
                                         maxCount["drugInter"] = drugInterData[0].count;
                                         fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
                                     }
@@ -188,6 +192,7 @@ async function buildSite() {
                                         .then(data => {
                                             labMethData = data.sub_count_list;
                                             if (labMethData.length > 0) {
+                                                document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
                                                 maxCount["labMeth"] = labMethData[0].count;
                                                 fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
                                             }
@@ -226,6 +231,7 @@ function indi_query_tagging(keyword, callback_indi_tagging) {
         .then(response => response.json())
         .then(data => {
             if (data.sub_count_list.length > 0) {
+                document.getElementById("linkIndications").innerText += `(${data.sub_count_list.length})`
                 callback_indi_tagging(null, data);
             } else {
                 doneLoading("indi");
@@ -458,7 +464,13 @@ function doneLoading(reference) {
 
 function fillNews(data) {
     var newsDiv = document.getElementById("newsContent");
-    for (var i = 0; i < data[0].results.length; i++) {
+
+    let i = data[0].results.length;
+    if(i > 0) {
+        document.getElementById("linkRecentPapers").innerText += `(${i})`
+    }
+
+    for (--i; i >= 0; i--) {
         const itemDiv = document.createElement('div');
         const itemHeader = document.createElement('h2');
         const itemJournal = document.createElement('p');
