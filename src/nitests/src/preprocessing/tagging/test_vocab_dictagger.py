@@ -18,10 +18,3 @@ class TestVocabDictagger(unittest.TestCase):
         test_tags = set(TaggedDocument(testfile).tags)
         self.assertSetEqual(tags, test_tags)
         util.clear_database()
-
-    def test_custom_abbreviations_and_synonyms(self):
-        testfile = util.resource_rel_path('infiles/test_vocab_dictpreprocess/abbreviation_test_allowed.txt')
-        self.tagfile_test(testfile)
-
-    def test_vocab_expansion(self):
-        self.tagfile_test(util.resource_rel_path('infiles/test_vocab_dictpreprocess/expansion_test.txt'))
