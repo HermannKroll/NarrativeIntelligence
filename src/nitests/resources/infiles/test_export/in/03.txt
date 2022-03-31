@@ -1,3 +1,0 @@
-3|t|trailing document with no tags
-4|a|lorem ipsum dolor sit amet
-
