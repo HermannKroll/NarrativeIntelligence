@@ -9,12 +9,14 @@ from datetime import datetime
 from itertools import islice
 
 import datrie
+import narraint.frontend.entity.autocompletion as autocompletion
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
+
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
@@ -44,6 +46,7 @@ class EntityTagger:
         return EntityTagger.__instance
 
     def __init__(self, load_index=True):
+        self.autocompletion = None
         if EntityTagger.__instance is not None:
             raise Exception('This class is a singleton - use EntityTagger.instance()')
         else:
@@ -222,14 +225,23 @@ class EntityTagger:
             for chid in chids:
                 self.term2entity[term.lower()].add(Entity(chid, CHEMICAL))
 
-    def tag_entity(self, term: str):
+    def tag_entity(self, term: str, expand_search_by_prefix=True):
         """
         Tags an entity by given a string
         :param term: the entity term
+        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
         :return: a list of entities (entity_id, entity_type)
         """
         t_low = term.lower().strip()
         entities = set()
+        if expand_search_by_prefix:
+            if not self.autocompletion:
+                self.autocompletion = autocompletion.AutocompletionUtil.instance()
+            expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
+            logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
+            for term in expanded_terms:
+                entities.update(self.tag_entity(term, expand_search_by_prefix=False))
+
         if not t_low:
             raise KeyError('Does not know an entity for empty term: {}'.format(term))
         # check direct string

@@ -10,11 +10,11 @@ class EntityTaggerTestCase(TestCase):
     def setUp(self) -> None:
         self.entity_tagger = EntityTagger.instance()
 
-    def test_drugbank_entries(self):
+    def test_chembl_entries(self):
         """
         Tests whether drugbank names and headings can be tagged correctly
         """
-        metformin_tags = self.entity_tagger.tag_entity('metformin')
+        metformin_tags = self.entity_tagger.tag_entity('metformin', expand_search_by_prefix=False)
         valid_metformin_ids = {'CHEMBL1431'}
         self.assertEqual(1, len(metformin_tags))
         for t in metformin_tags:
@@ -22,7 +22,7 @@ class EntityTaggerTestCase(TestCase):
         self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('LA-6023')])
         self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('Metformin')])
 
-        simvastatin_tags = self.entity_tagger.tag_entity('simvastatin')
+        simvastatin_tags = self.entity_tagger.tag_entity('simvastatin', expand_search_by_prefix=False)
         valid_simvastatin_ids = {'CHEMBL1064'}
         self.assertEqual(1, len(simvastatin_tags))
         for t in simvastatin_tags:
@@ -32,13 +32,13 @@ class EntityTaggerTestCase(TestCase):
         self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('Simvastatin hydroxy acid'))).entity_id)
         self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('MK-0733'))).entity_id)
 
-        acetarsol_tags = self.entity_tagger.tag_entity('acetarsol')
+        acetarsol_tags = self.entity_tagger.tag_entity('acetarsol', expand_search_by_prefix=False)
         valid_acetarsol_ids = {'CHEMBL1330792'}
         for t in acetarsol_tags:
             self.assertIn(t.entity_id, valid_acetarsol_ids)
 
         valid_amantadine_ids = {'CHEMBL660'}
-        for t in self.entity_tagger.tag_entity('Amantadine'):
+        for t in self.entity_tagger.tag_entity('Amantadine', expand_search_by_prefix=False):
             self.assertIn(t.entity_id, valid_amantadine_ids)
 
         self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Symadine')])
@@ -48,6 +48,24 @@ class EntityTaggerTestCase(TestCase):
         valid_avapritinib_ids = {'CHEMBL4204794'}
         for t in self.entity_tagger.tag_entity('Avapritinib'):
             self.assertIn(t.entity_id, valid_avapritinib_ids)
+
+    def test_chembl_entries_with_expansion(self):
+        self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('LA-6023')])
+        self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('Metformin')])
+
+        self.assertIn('CHEMBL1064',[t.entity_id for t in self.entity_tagger.tag_entity('Simvastatin')])
+        self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('SYNVINOLIN')])
+        self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('Simvastatin hydroxy acid')])
+        self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('MK-0733')])
+
+        self.assertIn('CHEMBL1330792', [t.entity_id for t in self.entity_tagger.tag_entity('acetarsol')])
+
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Amantadine')])
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Symadine')])
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('AMANTADINE')])
+        self.assertIn('CHEMBL660', [t.entity_id for t in self.entity_tagger.tag_entity('Symmetrel')])
+
+        self.assertIn('CHEMBL4204794', [t.entity_id for t in self.entity_tagger.tag_entity('Avapritinib')])
 
     def test_mesh_entries(self):
         """

@@ -186,6 +186,10 @@ p {
     padding: 1em 0.5% 3em 0.5%;
     position: fixed;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    overflow: hidden;
+
+    transform: scaleX(1);
+    transition: 0.5s;
 
     p {
         text-align: center;
@@ -194,15 +198,62 @@ p {
 
     .link {
         margin-top: 1em;
-
+        white-space: nowrap;
         a {
             color: black;
             text-decoration: none;
+            white-space: nowrap;
+            display: inline-block;
+
+            .view_count {
+                transform: scale(1);
+                transition: 0.5s;
+            }
+        }
+        :hover {
+            font-weight: bold;
         }
     }
+}
 
-    .link:hover {
-        font-weight: bold;
+/*
+shrinks the size of the overview if the window width is lower than 1500px
+ */
+@media screen and (max-width: 1500px) {
+    .sidebar {
+        transition: width 0.5s;
+        width: 10%;
+    }
+    .view_count {
+        visibility: collapse;
+        opacity: 0;
+        transform: scale(0);
+        transition: 0.5s, visibility 0.5s, opacity 0.5s;
+    }
+}
+
+/*
+toggles the visibility of the checkboxes in the paper-view
+ */
+@media screen and (max-width: 1200px) {
+    .checkbox {
+        transform: scaleX(0);
+        transition: 0.25s, visibility 0.25s, opacity 0.25s, width 0.25s;
+        visibility: collapse;
+        opacity: 0;
+        width: 0;
+    }
+}
+
+/*
+toggles the visibility of the overview if the window width is lower than 600px
+ */
+@media screen and (max-width: 600px) {
+    .sidebar {
+        transform: scaleX(0) translateX(-20%);
+        transition: 0.25s, visibility 0.25s, opacity 0.25s;
+        opacity: 0;
+        visibility: collapse;
     }
 }
 
