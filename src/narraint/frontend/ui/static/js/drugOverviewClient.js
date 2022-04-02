@@ -207,6 +207,16 @@ async function buildSite() {
 
 }
 
+/**
+ * Scroll the window to the element specified by the parameter 'element_id'.
+ * @param element_id
+ */
+function scrollToElement(element_id) {
+    const y_offset = 80;
+    const pos = document.getElementById(element_id)
+        .getBoundingClientRect().top + window.scrollY - y_offset;
+    window.scrollTo({top: pos, behavior:'smooth'})
+}
 
 function query_highlight(meta, callback_document) {
     var query = url_narrative_documents + "?documents=";
