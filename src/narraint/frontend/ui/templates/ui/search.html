@@ -182,6 +182,37 @@
         </div>
     </div>
 
+    <!-- "popup" used to notify the user that the result is empty -->
+    <div class="modal_empty_result modal"
+         tabindex="-1" role="dialog" id="modal_empty_result">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">No Results</h5>
+                    <button type="button" class="close"
+                            onclick="$('#modal_empty_result').hide()"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The result set is empty. Do you want to search again more
+                    general using the predicate 'associated'?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary"
+                            id="btn_search_again">
+                        Yes
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="$('#modal_empty_result').hide()">
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="accordion" id="accordionExample">
             <div class="card mb-3">

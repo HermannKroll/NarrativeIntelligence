@@ -30,6 +30,11 @@ function uuidv4() {
     });
 }
 
+$('#btn_search_again').click(() => {
+    const predicate_input = document.getElementById('input_predicate');
+    predicate_input.selectedIndex = 0;
+    refreshSearch();
+})
 
 $('#cookiebtnDeny').click(() => {
     $('.toast').toast('hide')
@@ -570,6 +575,7 @@ let lastDataSource = "";
 
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
+    $('#modal_empty_result').hide();
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
@@ -676,14 +682,21 @@ const search = (event) => {
             if (query_limit_hit === true) {
                 document_header_appendix = " (Truncated)"
             }
-            if (result_size >= 0) {
+            if (result_size !== 0) {
                 documents_header.html(result_size + " Documents" + document_header_appendix)
+                // scroll to results
+                document.getElementById("resultdiv").scrollIntoView();
             } else {
                 documents_header.html("Documents")
-            }
 
-            // scroll to results
-            document.getElementById("resultdiv").scrollIntoView();
+                // check if the used predicated is to specific (!= 'associated')
+                let predicate_input = document.getElementById('input_predicate');
+                let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+
+                if (predicate !== 'associated') {
+                    $('#modal_empty_result').show();
+                }
+            }
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
