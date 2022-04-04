@@ -179,17 +179,14 @@ p {
 }
 
 .sidebar {
-    max-width: 14%;
-    min-width: 12%;
+    width: calc(100% - 2% - (100% - 16%) - 1%);
     margin: 3.5em 0 5em 1%; //top right bottom left
-    background-color: white;
     padding: 1em 0.5% 3em 0.5%;
-    position: fixed;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow: hidden;
 
-    transform: scaleX(1);
-    transition: 0.5s;
+    background-color: white;
+    position: fixed;
+    overflow: hidden;
 
     p {
         text-align: center;
@@ -198,63 +195,84 @@ p {
 
     .link {
         margin-top: 1em;
+        color: black;
+        cursor: pointer;
         white-space: nowrap;
-        a {
-            color: black;
-            text-decoration: none;
-            white-space: nowrap;
-            display: inline-block;
-            cursor: pointer;
-
-            .view_count {
-                transform: scale(1);
-                transition: 0.5s;
-            }
-        }
-        :hover {
+        height: 25px;
+        display: inline-flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .link:hover {
             font-weight: bold;
+    }
+
+    .sidebar_entry_name {
+        width: 77%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .sidebar_entry_count {
+        width: 23%;
+    }
+}
+
+@media screen and (max-width: 1250px) {
+    .sidebar .sidebar_entry_count {
+        width: 30%;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .newsdetail {
+        overflow-y: scroll !important;
+        .bottom {
+            display: inline-block !important;
+            .checkbox {
+                display: flex !important;
+                flex-direction: row !important;
+                width: 95% !important;
+                justify-content: center !important;
+
+                div {
+                    margin-right: 0.5em !important;
+                    justify-content: center !important;
+
+                    label {
+                        visibility: hidden !important;
+                        width: 0 !important;
+                    }
+                }
+            }
+            .paper {
+                overflow-y: auto !important;
+                width: 95% !important;
+            }
+
+            .graph {
+                width: 95% !important;
+                height: 400px !important;
+                margin-left: 1.5em !important;
+                border: 1px solid var(--grey_border) !important;
+            }
+
         }
     }
+
+    .sidebar .sidebar_entry_count {
+        //visibility: hidden;
+        width: 35%;
+    }
 }
 
-/*
-shrinks the size of the overview if the window width is lower than 1500px
- */
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 800px) {
     .sidebar {
-        transition: width 0.5s;
-        width: 10%;
+        visibility: hidden;
     }
-    .view_count {
-        visibility: collapse;
-        opacity: 0;
-        transform: scale(0);
-        transition: 0.5s, visibility 0.5s, opacity 0.5s;
-    }
-}
 
-/*
-toggles the visibility of the checkboxes in the paper-view
- */
-@media screen and (max-width: 1200px) {
-    .checkbox {
-        transform: scaleX(0);
-        transition: 0.25s, visibility 0.25s, opacity 0.25s, width 0.25s;
-        visibility: collapse;
-        opacity: 0;
-        width: 0;
-    }
-}
-
-/*
-toggles the visibility of the overview if the window width is lower than 600px
- */
-@media screen and (max-width: 600px) {
-    .sidebar {
-        transform: scaleX(0) translateX(-20%);
-        transition: 0.25s, visibility 0.25s, opacity 0.25s;
-        opacity: 0;
-        visibility: collapse;
+    .content {
+        margin-left: 12%;
     }
 }
 
@@ -319,6 +337,7 @@ toggles the visibility of the overview if the window width is lower than 600px
     .top_searchbox {
         display: flex;
         place-content: space-between;
+        overflow-wrap: normal;
         .top_searchbox_left {
             display: flex;
             align-items: center;
@@ -469,12 +488,14 @@ toggles the visibility of the overview if the window width is lower than 600px
         border-top: 1px solid var(--grey_border);
         .checkbox {
             display: flex;
+            overflow: hidden;
             flex-direction: column;
             width: 10%;
             padding: 0.75em;
             div {
                 display: flex;
                 align-items: center;
+                overflow: hidden;
                 box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.17), 0 2px 3px 0 rgba(0, 0, 0, 0.15);
                 border-radius: 0.33em;
                 margin-bottom: 0.75em;
@@ -487,6 +508,8 @@ toggles the visibility of the overview if the window width is lower than 600px
                 label {
                     margin-left: 0.33em;
                     font-size: 16px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
             }
