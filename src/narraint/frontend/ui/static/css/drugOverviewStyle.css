@@ -222,28 +222,68 @@ p {
     display: inline-block !important;
   }
   .newsdetail .bottom .checkbox {
+    margin-left: 0.5em !important;
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: wrap !important;
     width: 95% !important;
     justify-content: center !important;
+    padding-left: 0 !important;
   }
   .newsdetail .bottom .checkbox div {
     margin-right: 0.5em !important;
-    justify-content: center !important;
-  }
-  .newsdetail .bottom .checkbox div label {
-    visibility: hidden !important;
-    width: 0 !important;
   }
   .newsdetail .bottom .paper {
     overflow-y: auto !important;
     width: 95% !important;
+    margin-left: 0.5em !important;
+    padding-left: 0 !important;
   }
   .newsdetail .bottom .graph {
     width: 95% !important;
-    height: 400px !important;
-    margin-left: 1.5em !important;
+    margin-left: 0.5em !important;
+    margin-bottom: 2em !important;
     border: 1px solid var(--grey_border) !important;
+  }
+
+  .navbar {
+    display: inline-flex;
+    width: 100%;
+  }
+  .navbar .nav_spacer {
+    margin-right: auto;
+    width: 25%;
+  }
+  .navbar .searchbar {
+    display: flex;
+    width: 50%;
+    place-content: space-around;
+    flex-wrap: nowrap;
+  }
+  .navbar .ifislogo {
+    width: 25%;
+  }
+  .navbar .ifislogo .img {
+    height: 60%;
+    margin-top: 0.7em;
+  }
+
+  .searchbox .top_searchbox {
+    flex-wrap: wrap;
+  }
+  .searchbox .top_searchbox .top_searchbox_left {
+    white-space: nowrap;
+  }
+  .searchbox .top_searchbox .top_searchbox_right {
+    flex-wrap: wrap;
+  }
+
+  .top_container {
+    flex-wrap: wrap-reverse;
+  }
+  .top_container img:hover {
+    width: 15em !important;
+    height: 15em !important;
   }
 
   .sidebar .sidebar_entry_count {
@@ -253,6 +293,7 @@ p {
 @media screen and (max-width: 800px) {
   .sidebar {
     visibility: hidden;
+    width: 0;
   }
 
   .content {

@@ -230,45 +230,90 @@ p {
         .bottom {
             display: inline-block !important;
             .checkbox {
+                margin-left: 0.5em !important;
                 display: flex !important;
                 flex-direction: row !important;
+                flex-wrap: wrap !important;
                 width: 95% !important;
                 justify-content: center !important;
+                padding-left: 0 !important;
 
                 div {
                     margin-right: 0.5em !important;
-                    justify-content: center !important;
-
-                    label {
-                        visibility: hidden !important;
-                        width: 0 !important;
-                    }
                 }
             }
             .paper {
                 overflow-y: auto !important;
                 width: 95% !important;
+                margin-left: 0.5em !important;
+                padding-left: 0 !important;
             }
 
             .graph {
                 width: 95% !important;
-                height: 400px !important;
-                margin-left: 1.5em !important;
+                margin-left: 0.5em !important;
+                margin-bottom: 2em !important;
                 border: 1px solid var(--grey_border) !important;
             }
 
         }
     }
 
+    .navbar{
+        display: inline-flex;
+        width: 100%;
+        .nav_spacer {
+            margin-right: auto;
+            width: 25%;
+        }
+
+        .searchbar {
+            display: flex;
+            width: 50%;
+            place-content: space-around;
+            flex-wrap: nowrap;
+        }
+
+        .ifislogo {
+            width: 25%;
+            .img {
+                height: 60%;
+                margin-top: 0.7em;
+            }
+        }
+    }
+
+    .searchbox {
+        .top_searchbox {
+            flex-wrap: wrap;
+            .top_searchbox_left {
+                white-space: nowrap;
+            }
+            .top_searchbox_right {
+                flex-wrap: wrap;
+            }
+        }
+    }
+
+    .top_container {
+        flex-wrap: wrap-reverse;
+
+        img:hover {
+            width: 15em !important;
+            height: 15em !important;
+        }
+    }
+
     .sidebar .sidebar_entry_count {
-        //visibility: hidden;
         width: 35%;
     }
 }
 
 @media screen and (max-width: 800px) {
+    //remove sidebar
     .sidebar {
         visibility: hidden;
+        width: 0;
     }
 
     .content {
