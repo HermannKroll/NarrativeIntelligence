@@ -389,7 +389,9 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         itemTextLink.style.textDecoration = "none";
         itemTextLink.style.color = "inherit";
         itemTextLink.target = "_blank";
-        countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, Math.log10(item.count) / Math.log10(max));
+        let scale = Math.log10(item.count) / Math.log10(max);
+        scale = (isNaN(scale)) ? 1: scale; //scale can be NaN (div by 0) - set it to 1
+        countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
         countDiv.classList.add("count");
         phaseLink.classList.add("phase");
         itemTextLink.append(itemText);
