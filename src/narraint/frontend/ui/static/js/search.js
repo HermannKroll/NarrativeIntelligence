@@ -694,7 +694,7 @@ const search = (event) => {
                 let predicate = predicate_input.options[predicate_input.selectedIndex].value;
 
                 if (predicate !== 'associated') {
-                    $('#modal_empty_result').show();
+                    $('#modal_empty_result').modal("toggle");
                 }
             }
         } else {
@@ -1007,7 +1007,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
     uniqueProvenanceID = uniqueProvenanceID + 1;
-    let div_provenance_button = $('<button class="btn btn-light" data-toggle="collapse" data-target="#' + unique_div_id + '">Provenance</button>');
+    let div_provenance_button = $('<button class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#' + unique_div_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
     div_provenance_button.click(function () {
         if ($('#' + unique_div_id).html() === "") {
@@ -1045,7 +1045,7 @@ const createDocumentList = (results, query_len) => {
         button_string += 's'
     }
     ;
-    divH2.append('<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#' + collapseID + '" ' +
+    divH2.append('<button class="btn btn-link" type="button"data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse show" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     // tbd: grid
@@ -1129,7 +1129,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         i += 1;
     });
 
-    divH2.append('<button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + collapseID + '" ' +
+    divH2.append('<button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     let divCardBodyID = getUniqueBodyID();

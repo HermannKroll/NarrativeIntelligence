@@ -18,14 +18,14 @@
     <div class="container margin-top">
         <form action="{% url 'search' %}" id="search_form">
             {% csrf_token %}
-            <div class="form-group">
-                <div class="row no-gutters">
+            <div class="mb-3">
+                <div class="row no-gutters gx-0">
                     <div class="col-md-12 col-lg-4">
                         <div class="input-group">
 
                             <input type="text" class="form-control" placeholder="enter subject" id="input_subject">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
+                                <button class="btn btn-outline-secondary"data-bs-toggle="modal" data-bs-target="#atcModal"
                                         onclick="setConceptInputFieldSubject();" type="button">Browse
                                 </button>
                             </div>
@@ -33,7 +33,7 @@
                     </div>
                     <div class="col-md-6 col-lg-2">
                         <div class="input-group">
-                            <select class="custom-select" id="input_predicate">
+                            <select class="form-select" id="input_predicate">
                                 <option value="associated">associated</option>
                                 <option value="administered">administered</option>
                                 <option value="compares">compares</option>
@@ -52,7 +52,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="enter object" id="input_object">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#atcModal"
+                                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#atcModal"
                                         onclick="setConceptInputFieldObject();" type="button">Browse
                                 </button>
                             </div>
@@ -91,64 +91,14 @@
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <label><strong>Data Source:</strong></label>
-                <div class="wrapper-div">
-                    <div class="inner-div-left-mid">
-                        <input type="radio" id="radio_pubmed" name="data_source" value="PubMed"
-                               checked="checked" onclick="refreshSearch()">
-                        <label for="radio_pubmed">PubMed (<a href="https://pubmed.ncbi.nlm.nih.gov/">Help</a>)</label>
-                    </div>
-                    <div class="inner-div-left-mid">
-                        <input type="radio" id="radio_litcovid" name="data_source" value="LitCovid"
-                               onclick="refreshSearch()">
-                        <label for="radio_litcovid">LitCovid (<a
-                                href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">Help</a>)</label>
-                    </div>
-                    <div class="inner-div-left-mid">
-                        <input type="radio" id="radio_long_covid" name="data_source" value="LongCovid"
-                               onclick="refreshSearch()">
-                        <label for="radio_long_covid">Long Covid (<a
-                                href="https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1">Help</a>)</label>
-                    </div>
-                    <div class="inner-div-left-mid">
-                        <input type="radio" id="radio_zbmed" name="data_source" value="ZBMed"
-                               onclick="refreshSearch()">
-                        <label for="radio_zbmed">Covid 19 Pre-Prints via ZB MED (<a
-                                href="https://preview.zbmed.de/">Help</a>)</label>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <label><strong>Visualization:</strong></label>
-                <div class="wrapper-div">
-                    <div class="inner-div-left-mid">
-                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                               value="outer_ranking_substitution"
-                               checked="checked" onclick="refreshSearch()">
-                        <label for="radio_outer_ranking_a">Substitution-based Visualization</label><br>
-                    </div>
-                    <div class="inner-div-right-most">
-                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
-                               value="outer_ranking_ontology" onclick="refreshSearch()">
-                        <label for="radio_outer_ranking_b">MeSH-Taxonomy-based Visualization</label><br>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- "Bootstrap Modal" (popup window) for ATC classes -->
-        <div class="modal modal-lg" id="atcModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal" id="atcModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-xl modal-concept-select"
+                 role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Concept Selection:</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                         </button>
                     </div>
                     <div class="modal-header">
@@ -169,10 +119,10 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
                             Cancel
                         </button>
-                        <button id="atcTreeOK" class="btn btn-success" data-dismiss="modal" type="button" onclick="">
+                        <button id="atcTreeOK" class="btn btn-success" data-bs-dismiss="modal" type="button" onclick="">
                             OK
                         </button>
 
@@ -180,349 +130,386 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- "popup" used to notify the user that the result is empty -->
-    <div class="modal_empty_result modal"
-         tabindex="-1" role="dialog" id="modal_empty_result">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">No Results</h5>
-                    <button type="button" class="close"
-                            onclick="$('#modal_empty_result').hide()"
-                            aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    The result set is empty. Do you want to search again more
-                    general using the predicate 'associated'?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary"
-                            id="btn_search_again">
-                        Yes
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary"
-                            onclick="$('#modal_empty_result').hide()">
-                        No
-                    </button>
+        <!-- "popup" used to notify the user that the result is empty -->
+        <div class="modal" tabindex="-1" id="modal_empty_result" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">No Results</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        The result set is empty. Do you want to search again more
+                        general using the predicate 'associated'?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success"
+                                data-bs-dismiss="modal" id="btn_search_again">
+                            Yes
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
+                            No
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div class="accordion" id="accordionExample">
-            <div class="card mb-3">
-                <div class="card-header text-center" id="headingOne">
-                    <h2 class="mb-0">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse"
-                                data-target="#collapseExamples"
-                                aria-expanded="false" aria-controls="collapseExamples">
-                            Example Queries
-                        </button>
-                    </h2>
-                </div>
-                <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    <div class="card-body">
-                        <div class="alert alert-info" role="alert">
-                            Covid 19
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('&quot;post-acute COVID-19 syndrome&quot; associated Disease')">
-                            post-acute COVID-19 syndrome associated Disease
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Drug treats &quot;post-acute COVID-19 syndrome&quot;')">Drug
-                            treats post-acute COVID-19 syndrome
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Drug treats Covid19')">Drug treats Covid19
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;')">
-                            Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Disease associated Covid19')">Disease associated Covid19
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated Target')">Covid19 associated Target
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated Human _AND_ Disease associated Human')">
-                            Covid19 associated Human AND Disease associated Human
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated Vaccine')">
-                            Covid19 associated Vaccine
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease')">
-                            Covid19 associated Pfizer Covid 19 Vaccine AND Human associated Disease
-                        </button>
+        <div class="row">
+            <div class="accordion" id="accordionExample">
+                <div class="card mb-3">
+                    <div class="card-header text-center" id="headingOne">
+                        <h2 class="mb-0">
+                            <button class="btn btn-primary" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseExamples"
+                                    aria-expanded="false" aria-controls="collapseExamples">
+                                Example Queries
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseExamples" class="collapse" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+                        <div class="card-body">
+                            <div class="alert alert-info" role="alert">
+                                Covid 19
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('&quot;post-acute COVID-19 syndrome&quot; associated Disease')">
+                                post-acute COVID-19 syndrome associated Disease
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Drug treats &quot;post-acute COVID-19 syndrome&quot;')">Drug
+                                treats post-acute COVID-19 syndrome
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Drug treats Covid19')">Drug treats Covid19
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;')">
+                                Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Disease associated Covid19')">Disease associated Covid19
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Covid19 associated Target')">Covid19 associated Target
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Covid19 associated Human _AND_ Disease associated Human')">
+                                Covid19 associated Human AND Disease associated Human
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Covid19 associated Vaccine')">
+                                Covid19 associated Vaccine
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease')">
+                                Covid19 associated Pfizer Covid 19 Vaccine AND Human associated Disease
+                            </button>
 
-                        <div class="alert alert-info" role="alert">
-                            Methods
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
-                            Spectrometry method Simvastatin
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
-                            Simvastatin
-                        </button>
-                        <div class="alert alert-info" role="alert">
-                            Treatment
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
-                            treats
-                            "Diabetes Mellitus"
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin treats Hypercholesterolemia')">Simvastatin treats
-                            Hypercholesterolemia
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats ?X(Disease)')">Metformin treats ?X(Disease)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
-                        </button>
+                            <div class="alert alert-info" role="alert">
+                                Methods
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
+                                Spectrometry method Simvastatin
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(Method) method Simvastatin')">?X(Method) method Simvastatin
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
+                                Simvastatin
+                            </button>
+                            <div class="alert alert-info" role="alert">
+                                Treatment
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
+                                treats
+                                "Diabetes Mellitus"
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Simvastatin treats Hypercholesterolemia')">Simvastatin treats
+                                Hypercholesterolemia
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats ?X(Disease)')">Metformin treats ?X(Disease)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats ?X(Species)')">Metformin treats ?X(Species)
+                            </button>
 
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Plant Family Associations
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Plant Family Associations
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated
+                                ?Y(Disease)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
+                                associated ?Y(Disease)
+                            </button>
+
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Administered
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin administered ?X(DosageForm)')">Metformin administered
+                                ?X(DosageForm)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin administered Injections')">Metformin administered
+                                Injections
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Lidocaine administered ?X(DosageForm)')">Lidocaine administered
+                                ?X(DosageForm)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(Drug) administered liposomes')">?X(Drug)
+                                administered liposomes
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;')">
+                                ?X(Drug) administered "Nebulizers and Vaporizers"
+                            </button>
+
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Gene Interactions
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin inhibits mtor')">Metformin inhibits mtor
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin inhibits ?X(Target)')">Metformin inhibits ?X(Target)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits cyp3a4
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
+                                Simvastatin
+                            </button>
+
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Adverse Effects
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
+                                Rhabdomyolysis
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">
+                                Simvastatin induces
+                                Muscular Diseases
+                            </button>
+
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Complex Queries
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human')">
+                                Metformin treats Diabetes Mellitus AND Metformin associated human
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)')">
+                                Metformin treats Diabetes Mellitus AND Metformin associated ?X(Drug)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)')">
+                                Metformin treats Diabetes Mellitus AND Metformin administered ?X(DosageForm)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4')">
+                                Simvastatin induces "Muscular Diseases" AND ?X(Drug) inhibits cyp3a4
+                            </button>
+
+                            <br><br>
+                            <div class="alert alert-info" role="alert">
+                                Large Queries
+                            </div>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug) treats
+                                ?Dis(Disease)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary"
+                                    onclick="example_search('?Drug(Drug) administered ?Form(DosageForm)')">
+                                ?Drug(Drug) administered ?Form(DosageForm)
+                            </button>
+
+
                         </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Vinca associated ?Y(Disease)')">Vinca associated ?Y(Disease)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Digitalis associated ?Y(Disease)')">Digitalis associated
-                            ?Y(Disease)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
-                            associated ?Y(Disease)
-                        </button>
-
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Administered
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin administered ?X(DosageForm)')">Metformin administered
-                            ?X(DosageForm)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin administered Injections')">Metformin administered
-                            Injections
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Lidocaine administered ?X(DosageForm)')">Lidocaine administered
-                            ?X(DosageForm)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(Drug) administered liposomes')">?X(Drug)
-                            administered liposomes
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;')">
-                            ?X(Drug) administered "Nebulizers and Vaporizers"
-                        </button>
-
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Gene Interactions
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin inhibits mtor')">Metformin inhibits mtor
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin inhibits ?X(Target)')">Metformin inhibits ?X(Target)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits cyp3a4
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
-                            Simvastatin
-                        </button>
-
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Adverse Effects
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
-                            Rhabdomyolysis
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;')">
-                            Simvastatin induces
-                            Muscular Diseases
-                        </button>
-
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Complex Queries
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human')">
-                            Metformin treats Diabetes Mellitus AND Metformin associated human
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)')">
-                            Metformin treats Diabetes Mellitus AND Metformin associated ?X(Drug)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)')">
-                            Metformin treats Diabetes Mellitus AND Metformin administered ?X(DosageForm)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4')">
-                            Simvastatin induces "Muscular Diseases" AND ?X(Drug) inhibits cyp3a4
-                        </button>
-
-                        <br><br>
-                        <div class="alert alert-info" role="alert">
-                            Large Queries
-                        </div>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug) treats
-                            ?Dis(Disease)
-                        </button>
-                        <button type="button" class="btn btn-outline-primary"
-                                onclick="example_search('?Drug(Drug) administered ?Form(DosageForm)')">
-                            ?Drug(Drug) administered ?Form(DosageForm)
-                        </button>
-
-
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!--
-<div class="accordion" id="accordionQueryTranslation">
-<div class="card mb-3">
-    <div class="card-header text-center" id="headingOne">
-        <h2 class="mb-0">
-            <button class="btn btn-primary" type="button" data-toggle="collapse"
-                    data-target="#collapseTutorial"
-                    aria-expanded="false" aria-controls="collapseOne">
-                Tutorials / Getting Started
-            </button>
-        </h2>
-    </div>
 
-
-    <div id="collapseTutorial" class="collapse" aria-labelledby="headingOne"
-         data-parent="#accordionQueryTranslation">
-        <div class="card-body">
-            <div>
-                In <a href="https://youtu.be/cvzCRBS0P0Y">diesem Video</a> finden Sie eine kurze Einführung in den narrativen Prototypen:
-            </div>
-        </div>
-    </div>
-
-</div>
-</div>
--->
-    <div class="container" id="resultdiv">
 
         <div class="row">
+            <!-- left column: filter options menu-->
+            <div class="col-auto">
+                <form class="filter-container">
+
+                    <div class="filter-element">
+                        <label><strong>Data Source:</strong></label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio"id="radio_pubmed" name="data_source"
+                               value="PubMed" onclick="refreshSearch()" checked>
+                        <label class="filter-element-label" for="radio_pubmed">
+                            PubMed (<a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio" id="radio_litcovid" name="data_source"
+                               value="LitCovid" onclick="refreshSearch()">
+                        <label class="filter-element-label" for="radio_litcovid">
+                            LitCovid (<a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/" target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio" id="radio_long_covid" name="data_source"
+                               value="LongCovid" onclick="refreshSearch()">
+                        <label class="filter-element-label" for="radio_long_covid">
+                            Long Covid (<a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1" target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio"
+                               id="radio_zbmed" name="data_source"
+                               value="ZBMed" onclick="refreshSearch()">
+                        <label class="filter-element-label" for="radio_zbmed">
+                            Covid 19 Pre-Prints<br>via ZBMED (<a
+                                href="https://preview.zbmed.de/" target="_blank">Help</a>)
+                        </label>
+                    </div>
+
+
+                    <!-- Visualization Buttons -->
+                    <div class="filter-element">
+                        <label><strong>Visualization:</strong></label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                               value="outer_ranking_substitution"
+                               checked="checked" onclick="refreshSearch()">
+                        <label class="filter-element-label" for="radio_outer_ranking_a">
+                            Substitution-based</label>
+                    </div>
+                    <div class="filter-element">
+                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking"
+                               value="outer_ranking_ontology" onclick="refreshSearch()">
+                        <label class="filter-element-label" for="radio_outer_ranking_b">
+                            MeSH-Taxonomy-based</label>
+                    </div>
+                </form>
+            </div>
+
+            <!-- right column: results table -->
             <div class="col">
-                <h2 id="document_header">Results:
+                <div id="resultdiv">
+                    <div class="row">
+                        <div class="col">
+                            <h2 id="document_header">Results:
 
-                    <a href="https://youtu.be/DrG1u8497g0" target="_blank">
-                        <img src="{% static 'icons/help.png' %}" height="40px">
-                    </a>
-                </h2>
-            </div>
-            <div class="col-md-auto" id="div_input_page" style="display: none">
-                <label>Page: </label>
-                <input type="number" size="1" id="input_page_no" step="1" value="1"/>
-                <label> of </label>
-                <label id="label_max_page"> of X</label>
-            </div>
+                                <a href="https://youtu.be/DrG1u8497g0" target="_blank">
+                                    <img src="{% static 'icons/help.png' %}" height="40px">
+                                </a>
+                            </h2>
+                        </div>
+                        <div class="col-md-auto" id="div_input_page" style="display: none">
+                            <label>Page: </label>
+                            <input type="number" size="1" id="input_page_no" step="1" value="1"/>
+                            <label> of </label>
+                            <label id="label_max_page"> of X</label>
+                        </div>
 
-            <div class="col-md-auto">
-                <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
-                    <option selected value="True">Latest Publications First</option>
-                    <option value="False">Oldest Publications First</option>
-                </select>
-            </div>
-            <div class="col-md-auto">
-                <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
-                    <option selected value="True">Most Frequent Substitutions First</option>
-                    <option value="False">Unusual Substitutions First</option>
-                </select>
-            </div>
-        </div>
+                        <div class="col-md-auto">
+                            <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
+                                <option selected value="True">Latest Publications First</option>
+                                <option value="False">Oldest Publications First</option>
+                            </select>
+                        </div>
+                        <div class="col-md-auto">
+                            <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
+                                <option selected value="True">Most Frequent Substitutions First</option>
+                                <option value="False">Unusual Substitutions First</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="row">
-            <div class="row" id="div_wrapper_documents">
-                <div id="div_documents"></div>
-            </div>
-        </div>
-    </div>
-    <!-- Feedback stuff-->
-
-    <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
-            onclick="openFeedback()">
-        <span id="feedbackbtn_text">Feedback</span>
-        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
-    </button>
-    <div class="modal modal-xl" tabindex="-1" role="dialog" id="feedbackModal">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Send feedback with screenshot</h5>
-                    <button type="button" class="close" onclick="closeFeedback()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <div class="row">
+                        <div class="row" id="div_wrapper_documents">
+                            <div id="div_documents"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row mt-2">
-                            <div class="outsideWrapper">
-                                <div class="insideWrapper" id="screenshotContainer">
-                                    <img src="null" id="screenshot"
-                                         class="img-fluid coveredImage border border-primary">
-                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+            </div> <!--end col-->
+        </div> <!--end row-->
+
+        <!-- Feedback stuff-->
+        <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
+                onclick="openFeedback()">
+            <span id="feedbackbtn_text">Feedback</span>
+            <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+        </button>
+        <div class="modal" tabindex="-1" role="dialog" id="feedbackModal">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl"
+                 role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send feedback with screenshot</h5>
+                        <button type="button" class="btn-close"
+                                onclick="closeFeedback()" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row mt-2">
+                                <div class="outsideWrapper">
+                                    <div class="insideWrapper" id="screenshotContainer">
+                                        <img src="null" id="screenshot"
+                                             class="img-fluid coveredImage border border-primary">
+                                        <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col text-center">
+                                    <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col text-center">
-                                <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
-                                </button>
-                            </div>
-                        </div>
-                    </div>
 
-                    <p>Please mark the problematic section on the image above and/or describe the problem you have
-                        encountered:</p>
-                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
-                        Report
-                    </button>
+                        <p>Please mark the problematic section on the image above and/or describe the problem you have
+                            encountered:</p>
+                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                            Report
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
 
