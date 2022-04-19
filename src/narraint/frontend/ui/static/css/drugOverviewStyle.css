@@ -176,8 +176,8 @@ p {
 
 .sidebar {
   width: 13%;
-  margin: 3.5em 0 5em 1%;
-  padding: 1em 0.5% 3em 0.5%;
+  margin: 3.5em 1% 5em 1%;
+  padding: 1em 1% 3em 0.5%;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   background-color: white;
   position: fixed;
@@ -186,13 +186,17 @@ p {
 .sidebar p {
   text-align: center;
   font-weight: bold;
+  margin-bottom: 1em;
 }
 .sidebar .link {
-  margin-top: 1em;
+  padding: 0.25em;
+  border-radius: 0.33em;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.17), 0 2px 3px 0 rgba(0, 0, 0, 0.15);
+  margin-bottom: 1em;
   color: black;
   cursor: pointer;
   white-space: nowrap;
-  height: 25px;
+  height: 1.5em;
   display: inline-flex;
   justify-content: space-between;
   width: 100%;
