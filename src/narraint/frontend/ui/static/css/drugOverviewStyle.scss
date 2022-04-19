@@ -89,11 +89,15 @@ p {
         font-size: 16px;
     }
     .autocomplete-items {
+        display: flex;
+        flex-flow: column;
+        width: 84%;
+        margin-right: 15%;
+
         position: absolute;
         border: 1px solid var(--grey_border);
         background-color: white;
         z-index: 99;
-        width: auto;
         top: 100%;
         div {
             text-align: left;
