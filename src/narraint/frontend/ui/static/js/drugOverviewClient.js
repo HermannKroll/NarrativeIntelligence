@@ -53,7 +53,8 @@ async function buildSite() {
                 async.apply(indi_query_tagging, keyword),
                 async.apply(indi_query_chembl, keyword)
             ], function (err, indi_result) {
-                chembl_indications(indi_result[0], indi_result[1], chemblid);
+                console.log("Calling function with id ", chemblid)
+                chembl_indications(indi_result[0], indi_result[1]);
             });
 
             fetch(url_query_document_ids_for_entity + "?entity_id=" + chemblid + "&entity_type=Drug&data_source=PubMed")
@@ -260,7 +261,7 @@ function indi_query_chembl(keyword, callback_indi_chembl) {
         });
 }
 
-function chembl_indications(data_tagging, data_chembl, keyword_id) {
+function chembl_indications(data_tagging, data_chembl) {
     /*console.log("tagging:")
     console.log(data_tagging)
     console.log("chembl:")
@@ -303,7 +304,7 @@ function chembl_indications(data_tagging, data_chembl, keyword_id) {
     }
     maxCount["indi"] = result[0].count;
     indiData = result;
-    fillSearchbox("indi", result, maxCount["indi"], -1, keyword_id);
+    fillSearchbox("indi", result, maxCount["indi"], -1);
     doneLoading("indi");
 }
 
@@ -367,7 +368,7 @@ function sortElements(reference) {
     doneLoading(reference);
 }
 
-function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
+function fillSearchbox(reference, data, max, elementCount) {
     searchbox = document.getElementById(reference + "Content");
     if (elementCount == -1 || elementCount > data.length) {
         elementCount = data.length;
@@ -403,7 +404,7 @@ function fillSearchbox(reference, data, max, elementCount, chembl_id = 0) {
         if (item.max_phase_for_ind >= 0 && item.max_phase_for_ind != null) {
             itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
             phaseLink.target = "_blank";
-            phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + chembl_id + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
+            phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + currentChemblID + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
             phaseLink.append(itemImg)
             itemDiv.append(phaseLink);
         } else if (item.max_phase_for_ind != null) {
