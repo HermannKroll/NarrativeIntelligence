@@ -53,7 +53,6 @@ async function buildSite() {
                 async.apply(indi_query_tagging, keyword),
                 async.apply(indi_query_chembl, keyword)
             ], function (err, indi_result) {
-                console.log("Calling function with id ", chemblid)
                 chembl_indications(indi_result[0], indi_result[1]);
             });
 
@@ -82,9 +81,18 @@ async function buildSite() {
                 });
 
 
-            //fill in the image via id
+            //fill in the image via id using fetch to catch potential errors
             var structureImage = document.getElementById('structure');
-            structureImage.src = "https://www.ebi.ac.uk/chembl/api/data/image/" + chemblid;
+            fetch(`https://www.ebi.ac.uk/chembl/api/data/image/${chemblid}`)
+                .then((response) => {
+                    if(response.ok) {
+                        response.blob().then((blob) => {
+                            structureImage.src = URL.createObjectURL(blob);
+                        }).catch();
+                    } else {
+                        return Promise.reject(); /* no img available */
+                    }
+                }).catch(() => structureImage.hidden = true);
 
             //get drug information via id
             fetch('https://www.ebi.ac.uk/chembl/api/data/drug/' + chemblid + '.json')
@@ -151,7 +159,7 @@ async function buildSite() {
             if (adminData.length > 0) {
                 document.getElementById("linkAdministration").innerText += `(${adminData.length})`;
                 maxCount["admin"] = adminData[0].count;
-                fillSearchbox("admin", adminData, maxCount["admin"], -1);
+                fillSearchbox("admin", adminData, maxCount["admin"]);
             }
             doneLoading("admin");
 
@@ -162,7 +170,7 @@ async function buildSite() {
                     if (adveData.length > 0) {
                         document.getElementById("linkAdverseEffects").innerText += `(${adveData.length})`;
                         maxCount["adve"] = adveData[0].count;
-                        fillSearchbox("adve", adveData, maxCount["adve"], -1);
+                        fillSearchbox("adve", adveData, maxCount["adve"]);
                     }
                     doneLoading("adve");
 
@@ -173,7 +181,7 @@ async function buildSite() {
                             if (targInterData.length > 0) {
                                 document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
                                 maxCount["targInter"] = targInterData[0].count;
-                                fillSearchbox("targInter", targInterData, maxCount["targInter"], -1);
+                                fillSearchbox("targInter", targInterData, maxCount["targInter"]);
                             }
                             doneLoading("targInter");
 
@@ -184,7 +192,7 @@ async function buildSite() {
                                     if (drugInterData.length > 0) {
                                         document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
                                         maxCount["drugInter"] = drugInterData[0].count;
-                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"], -1);
+                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
                                     }
                                     doneLoading("drugInter");
 
@@ -195,7 +203,7 @@ async function buildSite() {
                                             if (labMethData.length > 0) {
                                                 document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
                                                 maxCount["labMeth"] = labMethData[0].count;
-                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"], -1);
+                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
                                             }
                                             doneLoading("labMeth");
                                         });
@@ -304,7 +312,7 @@ function chembl_indications(data_tagging, data_chembl) {
     }
     maxCount["indi"] = result[0].count;
     indiData = result;
-    fillSearchbox("indi", result, maxCount["indi"], -1);
+    fillSearchbox("indi", result, maxCount["indi"]);
     doneLoading("indi");
 }
 
@@ -330,7 +338,7 @@ function searchElements(reference) {
         }
     }
     clearSearchBox(reference);
-    fillSearchbox(reference, newData, maxCount[reference], -1);
+    fillSearchbox(reference, newData, maxCount[reference]);
     doneLoading(reference);
 }
 
@@ -364,16 +372,14 @@ function sortElements(reference) {
     }
     //console.log(data);
     clearSearchBox(reference);
-    fillSearchbox(reference, data, maxCount[reference], -1);
+    fillSearchbox(reference, data, maxCount[reference]);
     doneLoading(reference);
 }
 
-function fillSearchbox(reference, data, max, elementCount) {
+function fillSearchbox(reference, data, max) {
     searchbox = document.getElementById(reference + "Content");
-    if (elementCount == -1 || elementCount > data.length) {
-        elementCount = data.length;
-    }
-    for (var i = 0; i < elementCount; i++) {
+
+    for (var i = 0; i < data.length; i++) {
         var item = data[i];
         const itemDiv = document.createElement('div');
         const itemImg = document.createElement('img');
