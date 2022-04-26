@@ -1,13 +1,10 @@
 import argparse
-
 import logging
 
-from sqlalchemy import and_, or_
+from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Document, DocTaggedBy, Tag
-from kgextractiontoolbox.backend.models import DocumentClassification
-from narrant.preprocessing.enttypes import PLANT_FAMILY_GENUS, DRUG
+from narraint.backend.models import Tag
 
 
 def main():
@@ -24,17 +21,20 @@ def main():
 
     logging.info('Querying relevant document ids...')
     session = SessionExtended.get()
-    subquery_drug = session.query(Tag.document_id).filter(and_(Tag.document_collection == collection,
-                                                               Tag.ent_type.in_(
-                                                                   [DRUG, PLANT_FAMILY_GENUS]))).distinct()
+    # subquery_drug = session.query(Tag.document_id).filter(and_(Tag.document_collection == collection,
+    #                                                           Tag.ent_type.in_(
+    #                                                               [DRUG, PLANT_FAMILY_GENUS]))).distinct()
 
-    subquery_pharm = session.query(DocumentClassification.document_id).filter(
-        and_(DocumentClassification.document_collection == collection,
-             DocumentClassification.classification.in_(['LitCovid', 'LongCovid', 'Pharmaceutical']))).distinct()
+    # subquery_pharm = session.query(DocumentClassification.document_id).filter(
+    #    and_(DocumentClassification.document_collection == collection,
+    #         DocumentClassification.classification.in_(['LitCovid', 'LongCovid', 'Pharmaceutical']))).distinct()
 
-    query = session.query(Document.id).filter(Document.collection == collection).filter(
-        or_(Document.id.in_(subquery_drug),
-            Document.id.in_(subquery_pharm)))
+    # query = session.query(Document.id).filter(Document.collection == collection).filter(
+    #    or_(Document.id.in_(subquery_drug),
+    #        Document.id.in_(subquery_pharm)))
+
+    query = session.query(Tag.document_id).filter(Tag.document_collection == collection).group_by(
+        Tag.document_id).having(func.count(Tag.document_id) > 1)
 
     logging.info('Collecting document ids...')
     document_ids = set()
