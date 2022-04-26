@@ -1,5 +1,8 @@
 import logging
 
+from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.engine import QueryEngine
