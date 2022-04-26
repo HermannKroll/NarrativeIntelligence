@@ -9,7 +9,7 @@ var maxCount = {"admin": -1, "indi": -1, "adve": -1, "drugInter": -1, "targInter
 let currentChemblID = null;
 let currentDrugName = null;
 
-buildSite();
+buildSite().catch((err) => console.log(err));
 
 function searchDrug() {
     var keyword = document.getElementById('drugInput').value;
@@ -17,6 +17,20 @@ function searchDrug() {
         return;
     }
     window.location.search = "?drug=" + keyword;
+}
+
+function resetContainerLoading(keyword) {
+    doneLoading("admin");
+    doneLoading("adve");
+    doneLoading("targInter");
+    doneLoading("drugInter");
+    doneLoading("labMeth");
+    doneLoading("indi");
+    doneLoading("news");
+    document.getElementById("structure").hidden = true;
+    let text = document.getElementById("unknown_drug_name_tag");
+    text.style.display = "flex";
+    text.innerText = `Drug '${keyword}' is unknown`;
 }
 
 async function buildSite() {
@@ -35,6 +49,7 @@ async function buildSite() {
             currentChemblID = null;
             currentDrugName = null;
             if (data.valid === false) {
+                resetContainerLoading(keyword);
                 return;
             }
             let chemblid = "";
@@ -138,82 +153,79 @@ async function buildSite() {
                  //   document.getElementById('drug_chemblid').href = "v
 
                 }).catch(e => {
-                document.getElementById('name').innerText = decodeURI(keyword);
-                document.getElementById('formular').innerText = "-";
-                document.getElementById('mass').innerText = "-";
-                document.getElementById('drug_alogp').innerText = "-";
-                document.getElementById('drug_cxlogp').innerText = "-";
-                document.getElementById('drug_cx_acid_pka').innerText = "-";
-                document.getElementById('drug_cx_basic_pka').innerText = "-";
-                document.getElementById('drug_cx_logd').innerText = "-";
-                document.getElementById('drug_chemblid').innerText = "-";
-            });//just give something to the user, so we can proceed
-        })
-        .catch();
+                    document.getElementById('name').innerText = decodeURI(keyword);
+                    document.getElementById('formular').innerText = "-";
+                    document.getElementById('mass').innerText = "-";
+                    document.getElementById('drug_alogp').innerText = "-";
+                    document.getElementById('drug_cxlogp').innerText = "-";
+                    document.getElementById('drug_cx_acid_pka').innerText = "-";
+                    document.getElementById('drug_cx_basic_pka').innerText = "-";
+                    document.getElementById('drug_cx_logd').innerText = "-";
+                    document.getElementById('drug_chemblid').innerText = "-";
+                });//just give something to the user, so we can proceed
 
-
-    fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
-        .then(response => response.json())
-        .then(data => {
-            adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-            if (adminData.length > 0) {
-                document.getElementById("linkAdministration").innerText += `(${adminData.length})`;
-                maxCount["admin"] = adminData[0].count;
-                fillSearchbox("admin", adminData, maxCount["admin"]);
-            }
-            doneLoading("admin");
-
-            fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
+            /* fill the container with fetched tags */
+            fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
                 .then(response => response.json())
                 .then(data => {
-                    adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-                    if (adveData.length > 0) {
-                        document.getElementById("linkAdverseEffects").innerText += `(${adveData.length})`;
-                        maxCount["adve"] = adveData[0].count;
-                        fillSearchbox("adve", adveData, maxCount["adve"]);
+                    adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
+                    if (adminData.length > 0) {
+                        document.getElementById("linkAdministration").innerText += `(${adminData.length})`;
+                        maxCount["admin"] = adminData[0].count;
+                        fillSearchbox("admin", adminData, maxCount["admin"]);
                     }
-                    doneLoading("adve");
+                    doneLoading("admin");
 
-                    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
+                    fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
                         .then(response => response.json())
                         .then(data => {
-                            targInterData = data.sub_count_list;
-                            if (targInterData.length > 0) {
-                                document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
-                                maxCount["targInter"] = targInterData[0].count;
-                                fillSearchbox("targInter", targInterData, maxCount["targInter"]);
+                            adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
+                            if (adveData.length > 0) {
+                                document.getElementById("linkAdverseEffects").innerText += `(${adveData.length})`;
+                                maxCount["adve"] = adveData[0].count;
+                                fillSearchbox("adve", adveData, maxCount["adve"]);
                             }
-                            doneLoading("targInter");
+                            doneLoading("adve");
 
-                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
+                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
                                 .then(response => response.json())
                                 .then(data => {
-                                    drugInterData = data.sub_count_list;
-                                    if (drugInterData.length > 0) {
-                                        document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
-                                        maxCount["drugInter"] = drugInterData[0].count;
-                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
+                                    targInterData = data.sub_count_list;
+                                    if (targInterData.length > 0) {
+                                        document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
+                                        maxCount["targInter"] = targInterData[0].count;
+                                        fillSearchbox("targInter", targInterData, maxCount["targInter"]);
                                     }
-                                    doneLoading("drugInter");
+                                    doneLoading("targInter");
 
-                                    fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
+                                    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
                                         .then(response => response.json())
                                         .then(data => {
-                                            labMethData = data.sub_count_list;
-                                            if (labMethData.length > 0) {
-                                                document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
-                                                maxCount["labMeth"] = labMethData[0].count;
-                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
+                                            drugInterData = data.sub_count_list;
+                                            if (drugInterData.length > 0) {
+                                                document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
+                                                maxCount["drugInter"] = drugInterData[0].count;
+                                                fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
                                             }
-                                            doneLoading("labMeth");
+                                            doneLoading("drugInter");
+
+                                            fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    labMethData = data.sub_count_list;
+                                                    if (labMethData.length > 0) {
+                                                        document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
+                                                        maxCount["labMeth"] = labMethData[0].count;
+                                                        fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
+                                                    }
+                                                    doneLoading("labMeth");
+                                                });
                                         });
                                 });
                         });
-
                 });
-        });
-
-
+        })
+        .catch();
 }
 
 /**

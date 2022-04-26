@@ -346,6 +346,19 @@ p {
     }
 }
 
+.error_msg {
+    display: none;
+    background: rgba(255,0,0,0.6);
+	justify-content: center;
+	text-align: center;
+    font-weight: bold;
+	color: white;
+	width: fit-content;
+	margin: auto auto 2em auto;
+	padding: 0.5em;
+	border-radius: 1em;
+}
+
 .top_container {
     display: flex;
     .general_info {
