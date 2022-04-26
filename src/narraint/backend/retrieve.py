@@ -82,6 +82,8 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     es_query = session.query(Predication).filter(and_(Predication.document_id.in_(document_ids),
                                                       Predication.document_collection == document_collection))
     es_for_doc = defaultdict(list)
+    sentence_ids = set()
+    sentenceid2doc = defaultdict(set)
     for res in es_query:
         es_for_doc[res.document_id].append(StatementExtraction(subject_id=res.subject_id,
                                                                subject_type=res.subject_type,
@@ -92,17 +94,19 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
                                                                object_type=res.object_type,
                                                                object_str=res.object_str,
                                                                sentence_id=res.sentence_id))
+        sentence_ids.add(res.sentence_id)
+        sentenceid2doc[res.sentence_id].add(res.document_id)
 
     for doc_id, extractions in es_for_doc.items():
         doc_results[doc_id].extracted_statements = extractions
 
     # logging.info('Querying for sentences...')
     # Last query for document sentences
-    sentence_query = session.query(Sentence).filter(and_(Sentence.document_id.in_(document_ids),
-                                                         Sentence.document_collection == document_collection))
+    sentence_query = session.query(Sentence).filter(Sentence.id.in_(sentence_ids))
     doc2sentences = defaultdict(list)
     for res in sentence_query:
-        doc2sentences[res.document_id].append(DocumentSentence(sentence_id=res.id, text=res.text))
+        for doc_id in sentenceid2doc[res.sentence_id]:
+            doc2sentences[doc_id].append(DocumentSentence(sentence_id=res.id, text=res.text))
 
     for doc_id, sentences in doc2sentences.items():
         doc_results[doc_id].sentences = sentences
