@@ -105,7 +105,7 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
     sentence_query = session.query(Sentence).filter(Sentence.id.in_(sentence_ids))
     doc2sentences = defaultdict(list)
     for res in sentence_query:
-        for doc_id in sentenceid2doc[res.sentence_id]:
+        for doc_id in sentenceid2doc[res.id]:
             doc2sentences[doc_id].append(DocumentSentence(sentence_id=res.id, text=res.text))
 
     for doc_id, sentences in doc2sentences.items():
