@@ -167,9 +167,10 @@ def clean_unreferenced_sentences():
     clean_predication_to_delete_table(session)
 
 
-def dosage_form_rule(document_collection=None):
+def dosage_form_rule(document_collection=None, predicate_id_minimum=None):
     """
     Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
+    :param predication_id_minimum: only predication ids above this will be updated (note: statistics will be computed on the whole table)
     :return: None
     """
     logging.info('Applying DosageForm rule...')
@@ -187,13 +188,17 @@ def dosage_form_rule(document_collection=None):
         stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
                                                Predication.object_type == DOSAGE_FORM)). \
             values(relation=DOSAGE_FORM_PREDICATE)
+
+    if predicate_id_minimum:
+        stmt_1 = stmt_1.where(Predication.id > predicate_id_minimum)
     session.execute(stmt_1)
     session.commit()
 
 
-def method_rule(document_collection=None):
+def method_rule(document_collection=None, predicate_id_minimum=None):
     """
     Any relation between a Chemical/Disease and a DosageForm will be updated to DOSAGE_FORM_PREDICATE
+    :param predication_id_minimum: only predication ids above this will be updated (note: statistics will be computed on the whole table)
     :return: None
     """
     logging.info('Applying Method rule...')
@@ -210,15 +215,19 @@ def method_rule(document_collection=None):
         stmt_1 = update(Predication).where(or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
                                                Predication.object_type.in_([METHOD, LAB_METHOD]))). \
             values(relation=METHOD_PREDICATE)
+
+    if predicate_id_minimum:
+        stmt_1 = stmt_1.where(Predication.id > predicate_id_minimum)
     session.execute(stmt_1)
     session.commit()
 
 
-def check_type_constraints(reorder_tuples=True, document_collection: str = None):
+def check_type_constraints(reorder_tuples=True, document_collection: str = None, predicate_id_minimum: int = None):
     """
     Checks the type constraints
     If subject and object could be swapped to meet the constraint - they will be swapped
     Otherwise the extraction will be mapped to associate
+    :param predication_id_minimum: only predication ids above this will be updated (note: statistics will be computed on the whole table)
     :return: None
     """
     preds_to_associate = set()
@@ -244,6 +253,8 @@ def check_type_constraints(reorder_tuples=True, document_collection: str = None)
         pred_query = session.query(Predication).filter(Predication.relation != None) \
             .yield_per(BULK_QUERY_CURSOR_COUNT)
     start_time = datetime.now()
+    if predicate_id_minimum:
+        pred_query = pred_query.filter(Predication.id > predicate_id_minimum)
     for idx, pred in enumerate(pred_query):
         print_progress_with_eta("checking type constraints", idx, pred_count, start_time)
         if pred.relation in PREDICATE_TYPING:
@@ -314,6 +325,8 @@ def check_type_constraints(reorder_tuples=True, document_collection: str = None)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--collection", default=None, help="The document collection of interest")
+    parser.add_argument("--predicate_id_minimum", default=None, type=int, required=False,
+                        help="only predication ids above this will be updated (note: statistics will be computed on the whole table)")
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
@@ -329,13 +342,13 @@ def main():
     logging.info('Applying pharmaceutical rules...')
     logging.info('=' * 60)
 
-    dosage_form_rule(document_collection=document_collection)
-    method_rule(document_collection=document_collection)
+    dosage_form_rule(document_collection=document_collection, predicate_id_minimum=args.predicate_id_minimum)
+    method_rule(document_collection=document_collection, predicate_id_minimum=args.predicate_id_minimum)
     logging.info('=' * 60)
     session = SessionExtended.get()
     clean_predication_to_delete_table(session)
     logging.info('=' * 60)
-    check_type_constraints(document_collection=document_collection)
+    check_type_constraints(document_collection=document_collection, predicate_id_minimum=args.predicate_id_minimum)
     logging.info('=' * 60)
 
     #
