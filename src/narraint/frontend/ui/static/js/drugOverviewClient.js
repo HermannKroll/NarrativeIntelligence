@@ -43,7 +43,7 @@ async function buildSite() {
     document.getElementById('drugInput').value = decodeURI(keyword);
 
     // translate the key to a drug id via the narrative service
-    fetch(url_term_2_entity + '?term=' + keyword)
+    fetch(url_term_2_entity + '?expand_by_prefix=false&term=' + keyword)
         .then(response => response.json())
         .then(data => {
             currentChemblID = null;
