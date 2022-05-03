@@ -967,10 +967,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     });
     let divDoc_Image = $('<img src="' + pubpharm_image_url + '" height="25px"/>');
 
-
-    let divDoc_DocumentGraph = $('<a class="btn-link float-end" ' +
-        'href="' + document_url + '?document_id=' + art_doc_id + '&data_source=' + collection + '"  target="_blank">' +
-        'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</a>');
+    let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
+        'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
+    let href = document_url + '?document_id=' + art_doc_id + '&data_source=' + collection;
+    divDoc_DocumentGraph.click(() => {showPaperView(document_id, collection, href)})
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
@@ -1024,6 +1024,16 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     return divFinal;
 };
 
+const hidePaperView = () => {
+    document.getElementById("newsPopup").style.display = "none";
+    document.body.style.overflowY = "scroll";
+}
+
+const showPaperView = (document_id, collection, href) => {
+    queryAndFilterPaperDetail(document_id, collection, href);
+    document.body.style.overflowY = "hidden";
+    document.getElementById("newsPopup").style.display = "flex";
+}
 
 const createDocumentList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();

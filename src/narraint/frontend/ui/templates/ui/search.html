@@ -512,13 +512,40 @@
         </div>
     </div>
 
-
+    <div class="popup" id="newsPopup">
+    <div class="newsdetail">
+        <div class="top">
+            <a id="paperLink">View Paper</a>
+            <a id="paperTab">Open in a new tab
+                <img src="{% static 'assets/searchicon.svg' %}">
+            </a>
+            <div onclick="hidePaperView()">
+                <img src="{% static 'assets/close.svg' %}">
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="checkbox" id="newsCheckbox"></div>
+            <div class="paper">
+                <h2 id="paperTitle"></h2>
+                <p class="author" id="paperAuthor"></p>
+                <p class="journal" id="paperJournal"></p>
+                <p class="date" id="paperDate"></p>
+                <p class="abstract" id="paperAbstract"></p>
+            </div>
+            <div class="graph" id="paperGraph"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascript %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
+    <!-- used for paper view popup -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
@@ -535,10 +562,13 @@
         const cancel_symbol_url = "{% static 'cancel.png' %}";
         const url_graph_preview = "{% static 'graph_preview.png' %}";
 
+        const url_document_graph = "{% url 'document_graph' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+
         $("#nav_item_search").addClass("active");
         $("#nav_item_help").removeClass("active");
         $("#nav_item_stats").removeClass("active");
     </script>
-    <script src="{% static 'js/../../static/js/../../static/js/search.js' %}?version=12"
-            type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=11" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=11" type="text/javascript"></script>
 {% endblock %}

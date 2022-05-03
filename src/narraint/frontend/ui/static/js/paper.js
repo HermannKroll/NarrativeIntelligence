@@ -42,12 +42,18 @@ const emptyGraph = Object();
 emptyGraph["nodes"] = [];
 emptyGraph["facts"] = [];
 
-function queryAndFilterPaperDetail(document_id, document_collection) {
+function queryAndFilterPaperDetail(document_id, document_collection, href=null) {
     async.parallel([
         async.apply(query_highlight, document_id, document_collection)
     ], function (err, result) {
         console.log(result)
         fillPaperDetail(result[0].results[0]);
+
+        if(href != null) {
+            const anchor = document.getElementById("paperTab");
+            anchor.setAttribute("href", href);
+            anchor.setAttribute("target", "_blank");
+        }
     });
 
     function query_highlight(document_id, document_collection, callback_document) {
