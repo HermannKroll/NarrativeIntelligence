@@ -51,8 +51,8 @@ class DocumentMetadata(Extended, DatabaseTable):
         PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
     )
 
-    document_id = Column(BigInteger, nullable=False)
-    document_collection = Column(String, nullable=False)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
     document_id_original = Column(String, nullable=True)
     authors = Column(String, nullable=True)
     journals = Column(String, nullable=True)
@@ -68,8 +68,8 @@ class DocumentMetadataService(Extended, DatabaseTable):
         PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
     )
 
-    document_id = Column(BigInteger, nullable=False)
-    document_collection = Column(String, nullable=False)
+    document_id = Column(BigInteger, nullable=False, index=True)
+    document_collection = Column(String, nullable=False, index=True)
     document_id_original = Column(String, nullable=True)
     title = Column(String, nullable=True)
     authors = Column(String, nullable=True)
