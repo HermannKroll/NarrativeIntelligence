@@ -105,6 +105,13 @@ paths:
             type: string
           description: A term that should be translated into an entity
           example: Metformin
+        - in: query
+          name: expand_by_prefix
+          required: false
+          schema:
+            type: bool
+          description: enable or disable the entity expansion by prefix (if true all entities that start with this term are matches)
+          example: true
 
   /query_sub_count:
     get:
