@@ -56,8 +56,11 @@ async function buildSite() {
             let entities = data["entity"];
             entities.forEach(entity => {
                 if (entity.entity_type === 'Drug') {
-                    chemblid = entity.entity_id;
-                    return true;
+                    // select smallest chembl id (best match, oldest entry)
+                    if (chemblid === "" || entity.entity_id.length < chemblid.length ||
+                        (entity.entity_id < chemblid && entity.entity_id.length === chemblid.length)) {
+                        chemblid = entity.entity_id;
+                    }
                 }
             });
             currentDrugName = keyword;
@@ -100,7 +103,7 @@ async function buildSite() {
             var structureImage = document.getElementById('structure');
             fetch(`https://www.ebi.ac.uk/chembl/api/data/image/${chemblid}`)
                 .then((response) => {
-                    if(response.ok) {
+                    if (response.ok) {
                         response.blob().then((blob) => {
                             structureImage.src = URL.createObjectURL(blob);
                         }).catch();
@@ -142,27 +145,27 @@ async function buildSite() {
                         document.getElementById('drug_cx_basic_pka').innerText = "-";
                     }
 
-                    if(data2.molecule_properties.cx_logd){
+                    if (data2.molecule_properties.cx_logd) {
                         document.getElementById('drug_cx_logd').innerText = data2.molecule_properties.cx_logd;
                     } else {
                         document.getElementById('drug_cx_logd').innerText = "-";
                     }
 
                     let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + chemblid;
-                    document.getElementById('drug_chemblid').innerHTML = '<a href="'+ chembl_link + '" target="_blank">' + chemblid + '</a>' ;
-                 //   document.getElementById('drug_chemblid').href = "v
+                    document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + chemblid + '</a>';
+                    //   document.getElementById('drug_chemblid').href = "v
 
                 }).catch(e => {
-                    document.getElementById('name').innerText = decodeURI(keyword);
-                    document.getElementById('formular').innerText = "-";
-                    document.getElementById('mass').innerText = "-";
-                    document.getElementById('drug_alogp').innerText = "-";
-                    document.getElementById('drug_cxlogp').innerText = "-";
-                    document.getElementById('drug_cx_acid_pka').innerText = "-";
-                    document.getElementById('drug_cx_basic_pka').innerText = "-";
-                    document.getElementById('drug_cx_logd').innerText = "-";
-                    document.getElementById('drug_chemblid').innerText = "-";
-                });//just give something to the user, so we can proceed
+                document.getElementById('name').innerText = decodeURI(keyword);
+                document.getElementById('formular').innerText = "-";
+                document.getElementById('mass').innerText = "-";
+                document.getElementById('drug_alogp').innerText = "-";
+                document.getElementById('drug_cxlogp').innerText = "-";
+                document.getElementById('drug_cx_acid_pka').innerText = "-";
+                document.getElementById('drug_cx_basic_pka').innerText = "-";
+                document.getElementById('drug_cx_logd').innerText = "-";
+                document.getElementById('drug_chemblid').innerText = "-";
+            });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
             fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
@@ -236,7 +239,7 @@ function scrollToElement(element_id) {
     const y_offset = 80;
     const pos = document.getElementById(element_id)
         .getBoundingClientRect().top + window.scrollY - y_offset;
-    window.scrollTo({top: pos, behavior:'smooth'})
+    window.scrollTo({top: pos, behavior: 'smooth'})
 }
 
 function query_highlight(meta, callback_document) {
@@ -409,7 +412,7 @@ function fillSearchbox(reference, data, max) {
         itemTextLink.style.color = "inherit";
         itemTextLink.target = "_blank";
         let scale = Math.log10(item.count) / Math.log10(max);
-        scale = (isNaN(scale)) ? 1: scale; //scale can be NaN (div by 0) - set it to 1
+        scale = (isNaN(scale)) ? 1 : scale; //scale can be NaN (div by 0) - set it to 1
         countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
         countDiv.classList.add("count");
         phaseLink.classList.add("phase");
@@ -497,7 +500,7 @@ function fillNews(data) {
     var newsDiv = document.getElementById("newsContent");
 
     let i = data[0].results.length;
-    if(i > 0) {
+    if (i > 0) {
         document.getElementById("linkRecentPapers").innerText += `(${i})`
     }
 
