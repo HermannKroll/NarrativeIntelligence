@@ -234,8 +234,13 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="term not given"))
     try:
         term = str(request.GET.get("term", "").strip()).lower()
+        expand_by_prefix = True
+        if "expand_by_prefix" in request.GET:
+            expand_by_prefix_str = str(request.GET.get("expand_by_prefix", "").strip()).lower()
+            if expand_by_prefix_str == "false":
+                expand_by_prefix = False
         try:
-            entities = View.instance().translation.convert_text_to_entity(term)
+            entities = View.instance().translation.convert_text_to_entity(term, expand_search_by_prefix=expand_by_prefix)
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
