@@ -45,6 +45,11 @@ class StatementExtraction:
 
 class NarrativeDocumentMetadata:
 
+    def __eq__(self, other):
+        return self.publication_year == other.publication_year and self.publication_month == other.publication_month \
+               and self.authors == other.authors and self.journals == other.journals \
+               and self.publication_doi == other.publication_doi
+
     def __init__(self, publication_year: int, publication_month: int, authors: str, journals: str,
                  publication_doi: str):
         self.publication_year = publication_year
