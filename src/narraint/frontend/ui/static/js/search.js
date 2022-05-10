@@ -1031,8 +1031,6 @@ const hidePaperView = () => {
 
 const showPaperView = (document_id, collection, href) => {
     queryAndFilterPaperDetail(document_id, collection, href);
-    document.body.style.overflowY = "hidden";
-    document.getElementById("newsPopup").style.display = "flex";
 }
 
 const createDocumentList = (results, query_len) => {
