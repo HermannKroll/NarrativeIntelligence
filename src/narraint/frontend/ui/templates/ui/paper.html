@@ -11,7 +11,7 @@
 </head>
 
 <body>
-<div class="popup_dummie">
+<div class="popup_dummie" id="newsPopup" hidden>
     <div class="newsdetail" style="margin: 3.5em 5% 3.5em 5%;">
 
         <div class="bottom">
@@ -22,6 +22,9 @@
                 <p class="journal" id="paperJournal"></p>
                 <p class="date" id="paperDate"></p>
                 <p class="abstract" id="paperAbstract"></p>
+
+                <h3 class="classificationHeader">Classifications</h3>
+                <div id="tagsDiv" class="classTags"></div>
             </div>
             <div class="graph" id="paperGraph"></div>
         </div>
@@ -38,6 +41,8 @@
 <script>
     const url_document_graph = "{% url 'document_graph' %}";
     const url_narrative_documents = "{% url 'narrative_documents' %}";
+
+    document.getElementById('newsPopup').style.display = 'none';
 
     let search = window.location.search;
     const urlParams = new URLSearchParams(search);

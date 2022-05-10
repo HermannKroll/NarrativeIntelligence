@@ -49,6 +49,9 @@ function queryAndFilterPaperDetail(document_id, document_collection, href=null) 
         console.log(result)
         fillPaperDetail(result[0].results[0]);
 
+        document.getElementById("newsPopup").style.display = "flex";
+        document.body.style.overflowY = "hidden";
+
         if(href != null) {
             const anchor = document.getElementById("paperTab");
             anchor.setAttribute("href", href);
@@ -121,6 +124,22 @@ function fillPaperDetail(contentData) {
     }
     initCheckbox(typeArray);
 
+    fillClassifications(contentData.classification.Pharmaceutical);
+}
+
+function fillClassifications(text) {
+    if(text.length > 0) {
+        text = text.replaceAll(' ', '').replaceAll(';', ', ')
+        let tagsDiv = document.getElementById("tagsDiv");
+        let tags = document.createElement('div');
+        let header = document.createElement('div');
+        header.classList.add('classTagsHeader');
+        header.innerText = 'Pharmaceutical:';
+        tags.innerText = text;
+
+        tagsDiv.innerHTML = ''
+        tagsDiv.append(header, tags);
+    }
 }
 
 function markLink(tags) {

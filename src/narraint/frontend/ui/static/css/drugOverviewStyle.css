@@ -598,4 +598,25 @@ p {
   width: 43%;
 }
 
+.classTagsHeader {
+  margin-right: 0.25em;
+  font-weight: bold;
+}
+
+.classTags {
+  display: inline-flex;
+}
+
+.classificationHeader {
+  border-top: 1px solid var(--grey_border);
+  margin-bottom: 0;
+  padding-top: 0.25em;
+}
+
+@media screen and (max-width: 1400px) {
+  .classTags {
+    flex-wrap: wrap;
+  }
+}
+
 /*# sourceMappingURL=drugOverviewStyle.css.map */

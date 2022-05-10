@@ -533,8 +533,8 @@ function fillNews(data) {
 
 function showDetail(paperid) {
     var id = parseInt(paperid.substring(5), 10);
-    document.getElementById("newsPopup").style.display = "flex";
     fillPaperDetail(newsData[0].results[id], newsData[0][id]);
+    document.getElementById("newsPopup").style.display = "flex";
 }
 
 function hideDetail() {
