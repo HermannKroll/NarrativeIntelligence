@@ -16,6 +16,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "134.169.32.177",
+    "www.narrative.pubpharm.de"
 ]
 
 STATIC_ROOT = "/var/www/static"
