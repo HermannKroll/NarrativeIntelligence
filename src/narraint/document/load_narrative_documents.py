@@ -1,18 +1,20 @@
 import argparse
 import logging
+import os
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Union
 
 import kgextractiontoolbox.document.doctranslation as dc
 import kgextractiontoolbox.document.load_document as ld
-import narraint.document.jsonconverter as jc
+import narraint.document.narrative_json_converter as jc
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.document.count import count_documents
 from kgextractiontoolbox.document.extract import read_pubtator_documents
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.models import DocumentMetadata
 from narraint.document.narrative_document import NarrativeDocument
-from nitests import util
 
 
 def narrative_document_bulk_load(path: Union[Path, str], collection: str, tagger_mapping=None,
@@ -28,8 +30,10 @@ def narrative_document_bulk_load(path: Union[Path, str], collection: str, tagger
     :return: None
     """
     if artificial_document_ids:
-        out = util.tmp_rel_path("outfile.json")
-        dc.run_document_translation(path, out, jc.JSONConverter, collection, load_function=narrative_document_bulk_load)
+        temp_dir = tempfile.mkdtemp()
+        out = os.path.join(temp_dir, "outfile.json")
+        dc.run_document_translation(path, out, jc.NarrativeJSONConverter, collection, load_function=narrative_document_bulk_load)
+        shutil.rmtree(temp_dir)
     else:
         path_str = str(path).lower()
         if not path_str.endswith('.json'):
