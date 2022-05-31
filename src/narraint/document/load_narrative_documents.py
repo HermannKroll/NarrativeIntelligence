@@ -1,30 +1,35 @@
 import argparse
 import logging
+from pathlib import Path
+from typing import Union
 
+import kgextractiontoolbox.document.doctranslation as dc
+import kgextractiontoolbox.document.load_document as ld
+import narraint.document.jsonconverter as jc
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.document.count import count_documents
 from kgextractiontoolbox.document.extract import read_pubtator_documents
-import kgextractiontoolbox.document.load_document as ld
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.models import DocumentMetadata
 from narraint.document.narrative_document import NarrativeDocument
-import narraint.document.jsonconverter as jc
 from nitests import util
 
 
-def narrative_document_bulk_load(path: object, collection: str, tagger_mapping: object = None, logger: object = logging,
-                                 artificial_document_ids: object = False) -> object:
+def narrative_document_bulk_load(path: Union[Path, str], collection: str, tagger_mapping=None,
+                                 logger=logging,
+                                 artificial_document_ids: bool = False):
     """
     Loads a set of narrative document documents from a JSON into our database
     :param path: to a json file or directory of json files
     :param collection: the document collection to load
     :param tagger_mapping: tagger mapping if desired (optional)
     :param logger: logging class
+    :param artificial_document_ids: Forces to generate artificial document ids (e.g. for non-int ids)
     :return: None
     """
     if artificial_document_ids:
         out = util.tmp_rel_path("outfile.json")
-        ld.run_doctranslation(path, out, jc.JSONConverter, collection, load_function=narrative_document_bulk_load)
+        dc.run_document_translation(path, out, jc.JSONConverter, collection, load_function=narrative_document_bulk_load)
     else:
         path_str = str(path).lower()
         if not path_str.endswith('.json'):
@@ -87,7 +92,8 @@ def main(args=None):
                             datefmt='%Y-%m-%d:%H:%M:%S',
                             level=logging.INFO)
 
-    narrative_document_bulk_load(args.input, args.collection, tagger_mapping, artificial_document_ids=args.artificial_document_ids)
+    narrative_document_bulk_load(args.input, args.collection, tagger_mapping,
+                                 artificial_document_ids=args.artificial_document_ids)
 
 
 if __name__ == "__main__":
