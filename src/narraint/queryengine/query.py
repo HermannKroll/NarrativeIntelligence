@@ -18,6 +18,9 @@ class FactPattern:
                 return True
         return False
 
+    def get_flipped(self):
+        return FactPattern(self.objects, self.predicate, self.subjects)
+
     def get_subject_class(self):
         for s in self.subjects:
             if s.entity_class:
