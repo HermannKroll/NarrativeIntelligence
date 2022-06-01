@@ -970,7 +970,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
         'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
     let href = document_url + '?document_id=' + art_doc_id + '&data_source=' + collection;
-    divDoc_DocumentGraph.click(() => {showPaperView(document_id, collection, href)})
+    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection, href)})
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
