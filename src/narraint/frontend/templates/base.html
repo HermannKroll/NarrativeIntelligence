@@ -22,7 +22,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'search' %}">Narrative Prototype</a>
+        <a class="navbar-brand" href="{% url 'search' %}">Narrative Service</a>
         <a href="https://youtu.be/YDvUzrJdfm4" target="_blank">
           <img src="{% static 'icons/help.png' %}" height="40px">
         </a>
@@ -41,9 +41,13 @@
                 <li class="nav-item" id="nav_item_search">
                     <a class="nav-link" href="{% url 'search' %}">Search</a>
                 </li>
-                <li class="nav-item" id="nav_item_stats">
+                <li class="nav-item" id="nav_item_overview">
+                    <a class="nav-link" href="{% url 'drug_overview_index' %}">Drug Overviews</a>
+                </li>
+          <!--      <li class="nav-item" id="nav_item_stats">
                     <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
                 </li>
+            -->
                 <li class="nav-item" id="nav_item_help">
                     <a class="nav-link" href="{% url 'help' %}">Help</a>
                 </li>
