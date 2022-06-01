@@ -4,7 +4,7 @@ from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, MESH_ONTOLOGY
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE
+from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE, METHOD, DOSAGE_FORM
 
 
 class QueryOptimizerTestCase(TestCase):
@@ -271,3 +271,19 @@ class QueryOptimizerTestCase(TestCase):
         optimized_fp = optimized_q.fact_patterns[0]
         self.assertEqual("cyp3a4", next(iter(optimized_fp.subjects)).entity_id)
         self.assertEqual("?drug(Drug)", next(iter(optimized_fp.objects)).entity_id)
+
+    def test_optimize_dosageform_administered(self):
+        q = GraphQuery([FactPattern([Entity('CHEMBL2260549', DRUG), Entity('CHEMBL1697753', DRUG),
+                                     Entity('CHEMBL25', DRUG), Entity('MESH:D001760', METHOD),
+                                     Entity('MESH:D001760', DOSAGE_FORM), Entity('MESH:D055963', DISEASE)],
+                                    "administered",
+                                    [Entity("?dosageform(DosageForm)", DOSAGE_FORM)])])
+        optimized_q = QueryOptimizer.optimize_query(q)
+        self.assertEqual(1, len(optimized_q.fact_patterns))
+        subjects = set([e.entity_id for e in optimized_q.fact_patterns[0].subjects])
+        self.assertIn("CHEMBL2260549", subjects)
+        self.assertIn("CHEMBL1697753", subjects)
+        self.assertIn("CHEMBL25", subjects)
+
+        objects = set([e.entity_id for e in optimized_q.fact_patterns[0].objects])
+        self.assertIn("?dosageform(DosageForm)", objects)
