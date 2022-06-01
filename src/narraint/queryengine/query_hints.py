@@ -29,16 +29,16 @@ PREDICATE_EXPANSION = dict(
     decreases=['decreases', 'inhibits']
 )
 
-SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases"}
+SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases", "administered", "method"}
 
 PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, PLANT_FAMILY_GENUS},
                                {DISEASE, SPECIES}),
-                    'administered': ({DOSAGE_FORM},
-                                     {SPECIES, DISEASE, CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT,
-                                      PLANT_FAMILY_GENUS, DOSAGE_FORM, LAB_METHOD, METHOD}),
-                    'method': ({METHOD, LAB_METHOD},
-                               {SPECIES, DISEASE, CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT,
-                                PLANT_FAMILY_GENUS, DOSAGE_FORM, LAB_METHOD, METHOD}),
+     #               'administered': ({DOSAGE_FORM},
+     #                                {SPECIES, DISEASE, CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT,
+     #                                 PLANT_FAMILY_GENUS, DOSAGE_FORM, LAB_METHOD, METHOD}),
+      #              'method': ({METHOD, LAB_METHOD},
+       #                        {SPECIES, DISEASE, CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT,
+        #                        PLANT_FAMILY_GENUS, DOSAGE_FORM, LAB_METHOD, METHOD}),
                     'induces': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS},
                                 {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS}),
                     'decreases': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS},
