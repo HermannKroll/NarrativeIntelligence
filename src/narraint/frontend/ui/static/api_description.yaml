@@ -4,7 +4,7 @@ info:
   description: PubPharm Narrative Service API
   version: 1.0.0
 servers:
-  - url: http://134.169.32.177
+  - url: http://narrative.pubpharm.de
     description: PubPharm Narrative Service
 paths:
   /autocompletion:
