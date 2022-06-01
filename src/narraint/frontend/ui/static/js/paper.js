@@ -42,7 +42,7 @@ const emptyGraph = Object();
 emptyGraph["nodes"] = [];
 emptyGraph["facts"] = [];
 
-function queryAndFilterPaperDetail(document_id, document_collection, href=null) {
+function queryAndFilterPaperDetail(document_id, document_collection, href = null) {
     async.parallel([
         async.apply(query_highlight, document_id, document_collection)
     ], function (err, result) {
@@ -52,7 +52,7 @@ function queryAndFilterPaperDetail(document_id, document_collection, href=null) 
         document.getElementById("newsPopup").style.display = "flex";
         document.body.style.overflowY = "hidden";
 
-        if(href != null) {
+        if (href != null) {
             const anchor = document.getElementById("paperTab");
             anchor.setAttribute("href", href);
             anchor.setAttribute("target", "_blank");
@@ -124,11 +124,17 @@ function fillPaperDetail(contentData) {
     }
     initCheckbox(typeArray);
 
-    fillClassifications(contentData.classification.Pharmaceutical);
+    if ("Pharmaceutical" in contentData.classification) {
+        fillClassifications(contentData.classification.Pharmaceutical);
+    }
+    if ("PlantSpecific" in contentData.classification) {
+        fillClassifications(contentData.classification.PlantSpecific);
+    }
+
 }
 
 function fillClassifications(text) {
-    if(text.length > 0) {
+    if (text.length > 0) {
         text = text.replaceAll(' ', '').replaceAll(';', ', ')
         let tagsDiv = document.getElementById("tagsDiv");
         let tags = document.createElement('div');
