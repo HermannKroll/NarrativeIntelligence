@@ -25,9 +25,9 @@ python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c ZBM
 echo 'cleaning Tag table with hand-written rules'
 psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
 
-# Perform pharmaceutical classification
+# Perform classification
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
 
 # Export the document content
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d $ZBMED_PUBTATOR --collection ZBMed --format json
