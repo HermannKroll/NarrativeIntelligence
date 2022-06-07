@@ -190,7 +190,7 @@ def dosage_form_rule(document_collection=None, predicate_id_minimum=None):
             values(relation=DOSAGE_FORM_PREDICATE)
 
     if predicate_id_minimum:
-        stmt_1 = stmt_1.where(Predication.id > predicate_id_minimum)
+        stmt_1 = stmt_1.where(Predication.id >= predicate_id_minimum)
     session.execute(stmt_1)
     session.commit()
 
@@ -217,7 +217,7 @@ def method_rule(document_collection=None, predicate_id_minimum=None):
             values(relation=METHOD_PREDICATE)
 
     if predicate_id_minimum:
-        stmt_1 = stmt_1.where(Predication.id > predicate_id_minimum)
+        stmt_1 = stmt_1.where(Predication.id >= predicate_id_minimum)
     session.execute(stmt_1)
     session.commit()
 
