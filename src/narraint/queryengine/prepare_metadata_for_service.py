@@ -42,16 +42,16 @@ def compute_document_metadata_service_table(rebuild=False):
             relevant_doc_ids.add(row[0])
         logging.info(f'Found {len(relevant_doc_ids)} relevant document ids in predication table...')
 
-        if not rebuild:
-            logging.info('Querying document ids that have metadata in DocumentMetadataService table...')
-            aq = session.query(DocumentMetadataService.document_id)
-            aq = aq.filter(DocumentMetadataService.document_collection == d_col)
-            document_ids_with_metadata = set()
-            for row in aq:
-                document_ids_with_metadata.add(int(row[0]))
-            logging.info(f'{len(document_ids_with_metadata)} have already metadata in DocumentMetadataService table')
-            relevant_doc_ids = relevant_doc_ids - document_ids_with_metadata
-            logging.info(f'{len(relevant_doc_ids)} relevant document ids remaining to insert...')
+
+        logging.info('Querying document ids that have metadata in DocumentMetadataService table...')
+        aq = session.query(DocumentMetadataService.document_id)
+        aq = aq.filter(DocumentMetadataService.document_collection == d_col)
+        document_ids_with_metadata = set()
+        for row in aq:
+            document_ids_with_metadata.add(int(row[0]))
+        logging.info(f'{len(document_ids_with_metadata)} have already metadata in DocumentMetadataService table')
+        relevant_doc_ids = relevant_doc_ids - document_ids_with_metadata
+        logging.info(f'{len(relevant_doc_ids)} relevant document ids remaining to insert...')
 
         logging.info(f'Querying titles for collection: {d_col}')
         title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col).yield_per(
