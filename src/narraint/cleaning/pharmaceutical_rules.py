@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from io import StringIO
 
-from sqlalchemy import update, or_, delete, and_
+from sqlalchemy import update, or_, delete
 from sqlalchemy.cimmutabledict import immutabledict
 
 from kgextractiontoolbox.backend.database import Session
@@ -175,22 +175,16 @@ def dosage_form_rule(document_collection=None, predicate_id_minimum=None):
     """
     logging.info('Applying DosageForm rule...')
     session = SessionExtended.get()
-
+    logging.info(
+        f'{document_collection}: updating predicate to "{DOSAGE_FORM_PREDICATE}" for (DosageForm, *) pairs')
+    stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
+                                           Predication.object_type == DOSAGE_FORM))
     if document_collection:
-        logging.info(
-            f'{document_collection}: updating predicate to "{DOSAGE_FORM_PREDICATE}" for (DosageForm, *) pairs')
-        stmt_1 = update(Predication).where(and_(Predication.document_collection == document_collection,
-                                                or_(Predication.subject_type == DOSAGE_FORM,
-                                                    Predication.object_type == DOSAGE_FORM))). \
-            values(relation=DOSAGE_FORM_PREDICATE)
-    else:
-        logging.info('Updating predicate to "{}" for (DosageForm, *) pairs'.format(DOSAGE_FORM_PREDICATE))
-        stmt_1 = update(Predication).where(or_(Predication.subject_type == DOSAGE_FORM,
-                                               Predication.object_type == DOSAGE_FORM)). \
-            values(relation=DOSAGE_FORM_PREDICATE)
-
+        stmt_1 = stmt_1.where(Predication.document_collection == document_collection)
     if predicate_id_minimum:
         stmt_1 = stmt_1.where(Predication.id >= predicate_id_minimum)
+
+    stmt_1 = stmt_1.values(relation=DOSAGE_FORM_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
@@ -203,21 +197,16 @@ def method_rule(document_collection=None, predicate_id_minimum=None):
     """
     logging.info('Applying Method rule...')
     session = SessionExtended.get()
+    logging.info(f'{document_collection}: updating predicate to "{METHOD_PREDICATE}" for (Method, *) pairs')
+    stmt_1 = update(Predication).where(
+        or_(Predication.subject_type.in_([METHOD, LAB_METHOD]), Predication.object_type.in_([METHOD, LAB_METHOD])))
 
     if document_collection:
-        logging.info(f'{document_collection}: updating predicate to "{METHOD_PREDICATE}" for (Method, *) pairs')
-        stmt_1 = update(Predication).where(and_(Predication.document_collection == document_collection,
-                                                or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
-                                                    Predication.object_type.in_([METHOD, LAB_METHOD])))). \
-            values(relation=METHOD_PREDICATE)
-    else:
-        logging.info(f'Updating predicate to "{METHOD_PREDICATE}" for (Method, *) pairs')
-        stmt_1 = update(Predication).where(or_(Predication.subject_type.in_([METHOD, LAB_METHOD]),
-                                               Predication.object_type.in_([METHOD, LAB_METHOD]))). \
-            values(relation=METHOD_PREDICATE)
-
+        stmt_1 = stmt_1.where(Predication.document_collection == document_collection)
     if predicate_id_minimum:
         stmt_1 = stmt_1.where(Predication.id >= predicate_id_minimum)
+
+    stmt_1 = stmt_1.values(relation=METHOD_PREDICATE)
     session.execute(stmt_1)
     session.commit()
 
