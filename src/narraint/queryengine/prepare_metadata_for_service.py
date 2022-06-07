@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 from sqlalchemy import delete
@@ -8,7 +9,7 @@ from narraint.backend.models import Predication, DocumentMetadata, DocumentMetad
 BULK_QUERY_CURSOR_COUNT = 500000
 
 
-def compute_document_metadata_service_table():
+def compute_document_metadata_service_table(rebuild=False):
     """
     Computes the DocumentMetadataService table
     Titles and Metadata will be queried from Document and DocumentMetadata
@@ -17,10 +18,11 @@ def compute_document_metadata_service_table():
     """
     session = SessionExtended.get()
 
-    logging.info('Deleting old service metadata...')
-    stmt = delete(DocumentMetadataService)
-    session.execute(stmt)
-    session.commit()
+    if rebuild:
+        logging.info('Deleting old service metadata...')
+        stmt = delete(DocumentMetadataService)
+        session.execute(stmt)
+        session.commit()
 
     logging.info('Querying document collections the predication table...')
     q_p_ids = session.query(Predication.document_collection.distinct()) \
@@ -38,6 +40,18 @@ def compute_document_metadata_service_table():
         relevant_doc_ids = set()
         for row in pred_query:
             relevant_doc_ids.add(row[0])
+        logging.info(f'Found {len(relevant_doc_ids)} relevant document ids in predication table...')
+
+        if not rebuild:
+            logging.info('Querying document ids that have metadata in DocumentMetadataService table...')
+            aq = session.query(DocumentMetadataService.document_id)
+            aq = aq.filter(DocumentMetadataService.document_collection == d_col)
+            document_ids_with_metadata = set()
+            for row in aq:
+                document_ids_with_metadata.add(int(row[0]))
+            logging.info(f'{len(document_ids_with_metadata)} have already metadata in DocumentMetadataService table')
+            relevant_doc_ids = relevant_doc_ids - document_ids_with_metadata
+            logging.info(f'{len(relevant_doc_ids)} relevant document ids remaining to insert...')
 
         logging.info(f'Querying titles for collection: {d_col}')
         title_query = session.query(Document.id, Document.title).filter(Document.collection == d_col).yield_per(
@@ -92,7 +106,11 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
-    compute_document_metadata_service_table()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rebuild", action="store_true", default=False)
+    args = parser.parse_args()
+
+    compute_document_metadata_service_table(rebuild=args.rebuild)
 
 
 if __name__ == "__main__":
