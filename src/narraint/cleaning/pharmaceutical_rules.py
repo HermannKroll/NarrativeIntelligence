@@ -7,15 +7,15 @@ from io import StringIO
 from sqlalchemy import update, or_, delete, and_
 from sqlalchemy.cimmutabledict import immutabledict
 
+from kgextractiontoolbox.backend.database import Session
+from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationToDelete, Sentence
 from narraint.cleaning.pharmaceutical_vocabulary import DOSAGE_FORM_PREDICATE, METHOD_PREDICATE, \
-    ASSOCIATED_PREDICATE_UNSURE, ASSOCIATED_PREDICATE
+    ASSOCIATED_PREDICATE_UNSURE
 from narraint.queryengine.query_hints import sort_symmetric_arguments, SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     are_subject_and_object_correctly_ordered
-from kgextractiontoolbox.backend.database import Session
 from narrant.preprocessing.enttypes import DOSAGE_FORM, LAB_METHOD, METHOD
-from kgextractiontoolbox.progress import print_progress_with_eta
 
 BULK_INSERT_PRED_TO_DELETE_AFTER_K = 1000000
 BULK_QUERY_CURSOR_COUNT = 500000
@@ -234,27 +234,26 @@ def check_type_constraints(reorder_tuples=True, document_collection: str = None,
     preds_to_reorder = set()
     session = SessionExtended.get()
 
+    logging.info('Counting the number of predications...')
+    pred_count_q = session.query(Predication)
     if document_collection:
-        logging.info(f'{document_collection}: counting the number of predications...')
+        logging.info(f'Consider only in collection {document_collection}')
+        pred_count_q = pred_count_q.filter(Predication.document_collection == document_collection)
 
-        pred_count = session.query(Predication).filter(and_(Predication.document_collection == document_collection,
-                                                            Predication.relation != None)).count()
-    else:
-        logging.info('Counting the number of predications...')
-        pred_count = session.query(Predication).filter(Predication.relation != None).count()
-    logging.info(f'{pred_count} predications were found')
-    if document_collection:
-        logging.info(f'{document_collection}: Querying predications...')
-        pred_query = session.query(Predication).filter(and_(Predication.document_collection == document_collection,
-                                                            Predication.relation != None)) \
-            .yield_per(BULK_QUERY_CURSOR_COUNT)
-    else:
-        logging.info('Querying predications...')
-        pred_query = session.query(Predication).filter(Predication.relation != None) \
-            .yield_per(BULK_QUERY_CURSOR_COUNT)
-    start_time = datetime.now()
     if predicate_id_minimum:
-        pred_query = pred_query.filter(Predication.id > predicate_id_minimum)
+        logging.info(f'Consider only predication ids >= {predicate_id_minimum}')
+        pred_count_q = pred_count_q.filter(Predication.id >= predicate_id_minimum)
+
+    pred_count = pred_count_q.count()
+    logging.info(f'{pred_count} predications were found')
+    pred_query = session.query(Predication).filter(Predication.relation != None)
+    if document_collection:
+        pred_query = pred_query.filter(Predication.document_collection == document_collection)
+    if predicate_id_minimum:
+        logging.info(f'Consider only predication ids >= {predicate_id_minimum}')
+        pred_query = pred_query.filter(Predication.id >= predicate_id_minimum)
+    pred_query = pred_query.yield_per(BULK_QUERY_CURSOR_COUNT)
+    start_time = datetime.now()
     for idx, pred in enumerate(pred_query):
         print_progress_with_eta("checking type constraints", idx, pred_count, start_time)
         if pred.relation in PREDICATE_TYPING:
@@ -319,7 +318,6 @@ def check_type_constraints(reorder_tuples=True, document_collection: str = None,
         session.commit()
         clean_predication_to_delete_table(session)
         logging.info('Finished')
-
 
 
 def main():
