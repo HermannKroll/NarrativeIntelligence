@@ -40,8 +40,8 @@ psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
 # Compute reverse indexes
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_predication.py
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_tag.py
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
 # Finally vacuum all tables
 # Execute Cleaning Rules for Tagging
