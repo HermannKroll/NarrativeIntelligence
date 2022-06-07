@@ -25,3 +25,5 @@ CREATE INDEX tag_document_collection_idx ON TAG(document_collection);
 
 CREATE INDEX doc_tagged_by_doc_idx ON DOC_TAGGED_BY(document_id);
 CREATE INDEX doc_tagged_by_doc_collection_idx ON DOC_TAGGED_BY(document_collection);
+
+CREATE INDEX tag_entity_id_idx on TAG(ent_id);
