@@ -22,31 +22,37 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
         session.commit()
 
     logging.info('Counting the number of tags...')
-    tag_count = session.query(Tag)
-
-    if predication_id_min:
-        logging.info('Delta Mode activated - Only updating relevant inverted index entries')
-        tag_count.join(Predication).filter(Predication.id >= predication_id_min)
-        tag_count = tag_count.filter(and_(Tag.document_id == Predication.document_id,
-                                          Tag.document_collection == Predication.document_collection))
-
+    tag_count = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
+    tag_count = tag_count.distinct()
     tag_count = tag_count.count()
-
     logging.info(f'{tag_count} tags found')
+
+    collection2doc_ids = defaultdict(set)
+    if predication_id_min:
+        logging.info(f'Delta Mode activated - Only updating relevant inverted index entries (id >= {predication_id_min})')
+        doc_id_query = session.query(Predication.document_id, Predication.document_collection)
+        doc_id_query = doc_id_query.filter(Predication.id >= predication_id_min)
+        doc_id_query = doc_id_query.distinct()
+        count = 0
+        for row in doc_id_query:
+            collection2doc_ids[row.document_collection].add(int(row.document_id))
+            count += 1
+        logging.info(f'{count} document ids for {len(collection2doc_ids)} collections found...')
+
+
+
     progress = Progress(total=tag_count, print_every=1000, text="Computing inverted tag index...")
     progress.start_time()
-    query = session.query(Tag)
 
-    if predication_id_min:
-        query.join(Predication).filter(Predication.id >= predication_id_min)
-        query = query.filter(and_(Tag.document_id == Predication.document_id,
-                                  Tag.document_collection == Predication.document_collection))
-
-    query = query.yield_per(QUERY_YIELD_PER_K)
-
+    query = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
+    query = query.distinct()
+    query = query.yield_per(100*QUERY_YIELD_PER_K)
     index = defaultdict(set)
     for idx, tag_row in enumerate(query):
         progress.print_progress(idx)
+        if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
+            continue
+
         key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
         doc_id = tag_row.document_id
 
@@ -56,9 +62,14 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
 
     if predication_id_min:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
+        inv_count = session.query(TagInvertedIndex).count()
+        logging.info(f'{inv_count} entries in index found')
         inv_q = session.query(TagInvertedIndex).yield_per(QUERY_YIELD_PER_K)
+        p2 = Progress(total=inv_count, print_every=1000, text="Checking existing entries...")
+        p2.start_time()
         deleted_rows = 0
         for idx, row in enumerate(inv_q):
+            p2.print_progress(idx)
             row_key = row.entity_id, row.entity_type, row.document_collection
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
@@ -66,7 +77,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
                 index[row_key].update([int(doc_id) for doc_id in json.loads(row.document_ids)])
                 deleted_rows += 1
                 session.delete(row)
-
+        p2.done()
         logging.info(f'{deleted_rows} inverted index entries must be deleted')
         logging.debug('Committing...')
         session.commit()
