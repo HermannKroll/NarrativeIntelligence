@@ -6,7 +6,7 @@ from datetime import datetime
 
 from sqlalchemy import and_, delete
 
-from kgextractiontoolbox.progress import print_progress_with_eta, Progress
+from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadataService
 from narraint.backend.models import PredicationInvertedIndex
@@ -50,8 +50,11 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
     logging.info("Starting...")
     # fact_to_doc_ids = defaultdict(lambda: defaultdict(list))
     fact_to_prov_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+
+    progress = Progress(total=pred_count, print_every=1000, text="denormalizing predication...")
+    progress.start_time()
     for idx, prov in enumerate(prov_query):
-        print_progress_with_eta("denormalizing", idx, pred_count, start_time)
+        progress.print_progress(idx)
         s_id = prov.subject_id
         s_t = prov.subject_type
         p = prov.relation
@@ -69,6 +72,8 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
         if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
             #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
             fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
+
+    progress.done()
 
     # Restructure dictionaries
     # for k in fact_to_doc_ids:
@@ -113,8 +118,7 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
         session.commit()
         logging.info('Entries deleted')
 
-    logging.info("Beginning insert...")
-    insert_time = datetime.now()
+    logging.info("Compute insert...")
 
     # Converting all sets to lists again
     for k in fact_to_prov_ids:
@@ -123,8 +127,10 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
                 fact_to_prov_ids[k][v][w] = sorted(set(fact_to_prov_ids[k][v][w]))
 
     key_count = len(fact_to_prov_ids)
+    progress2 = Progress(total=key_count, print_every=100, text="insert values...")
+    progress2.start_time()
     for idx, k in enumerate(fact_to_prov_ids):
-        print_progress_with_eta("inserting values", idx, key_count, insert_time, print_every_k=100)
+        progress2.print_progress(idx)
         if idx % BULK_INSERT_AFTER_K == 0:
             PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
             insert_list.clear()
@@ -137,6 +143,7 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
             #     document_ids=json.dumps(fact_to_doc_ids[k]),
             provenance_mapping=json.dumps(fact_to_prov_ids[k])
         ))
+    progress2.done()
 
     PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
     insert_list.clear()
