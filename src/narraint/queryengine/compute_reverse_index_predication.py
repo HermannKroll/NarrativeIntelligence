@@ -26,12 +26,18 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
     pred_count = session.query(Predication).filter(Predication.relation != None)
     if predication_id_min:
         logging.info(f'Only considering predication ids above {predication_id_min}')
-        pred_count = pred_count.filter(Predication.id > predication_id_min)
+        pred_count = pred_count.filter(Predication.id >= predication_id_min)
     pred_count = pred_count.count()
 
     start_time = datetime.now()
     # "is not None" instead of "!=" None" DOES NOT WORK!
-    prov_query = session.query(Predication).filter(Predication.relation != None)
+    prov_query = session.query(Predication.id,
+                               Predication.document_id, Predication.document_collection,
+                               Predication.subject_id, Predication.subject_type,
+                               Predication.relation,
+                               Predication.object_id, Predication.object_type)
+
+    prov_query = prov_query.filter(Predication.relation != None)
 
     if consider_metadata:
         prov_query = prov_query.join(DocumentMetadataService,
@@ -40,7 +46,7 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
     if predication_id_min:
         prov_query = prov_query.filter(Predication.id >= predication_id_min)
 
-    prov_query = prov_query.yield_per(QUERY_YIELD_PER_K)
+    prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
 
     # Hack to support also the Covid 19 collection
     # TODO: not very generic
