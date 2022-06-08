@@ -6,7 +6,7 @@ from datetime import datetime
 
 from sqlalchemy import and_, delete
 
-from kgextractiontoolbox.progress import print_progress_with_eta
+from kgextractiontoolbox.progress import print_progress_with_eta, Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DocumentMetadataService
 from narraint.backend.models import PredicationInvertedIndex
@@ -82,9 +82,15 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
 
     if predication_id_min:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
+        inv_count = session.query(PredicationInvertedIndex).count()
+        logging.info(f'{inv_count} entries are in the inverted index')
         inv_q = session.query(PredicationInvertedIndex).yield_per(QUERY_YIELD_PER_K)
         deleted_rows = 0
+
+        p2 = Progress(total=inv_count, print_every=1000, text="Checking existing entries...")
+        p2.start_time()
         for idx, row in enumerate(inv_q):
+            p2.print_progress(idx)
             row_key = row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
@@ -101,6 +107,7 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
                 session.delete(row)
                 deleted_rows += 1
 
+        p2.done()
         logging.info(f'{deleted_rows} inverted index entries must be deleted')
         logging.debug('Committing...')
         session.commit()
