@@ -124,28 +124,40 @@ function fillPaperDetail(contentData) {
     }
     initCheckbox(typeArray);
 
-    if ("Pharmaceutical" in contentData.classification) {
-        fillClassifications(contentData.classification.Pharmaceutical);
-    }
-    if ("PlantSpecific" in contentData.classification) {
-        fillClassifications(contentData.classification.PlantSpecific);
-    }
-
+    fillClassifications(contentData.classification);
 }
 
-function fillClassifications(text) {
-    if (text.length > 0) {
-        text = text.replaceAll(' ', '').replaceAll(';', ', ')
-        let tagsDiv = document.getElementById("tagsDiv");
-        let tags = document.createElement('div');
-        let header = document.createElement('div');
-        header.classList.add('classTagsHeader');
-        header.innerText = 'Pharmaceutical:';
-        tags.innerText = text;
+function fillClassifications(classifications) {
+    const classContainer = document.getElementById('classContainer');
+    const classHeader = document.getElementById('classificationHeader');
 
-        tagsDiv.innerHTML = ''
-        tagsDiv.append(header, tags);
+    // paper has no classification data
+    if (!classifications) {
+        classHeader.style.display = 'None';
+        classContainer.style.display = 'None';
+        return;
     }
+
+    //clear previous stored classification data
+    classContainer.replaceChildren();
+
+    Object.entries(classifications).forEach(([key, value]) => {
+        console.log(key, value)
+        value = value.replaceAll(' ', '').replaceAll(';', ', ')
+        const classBox = document.createElement("div");
+        const tags = document.createElement('div');
+        const header = document.createElement('div');
+        classBox.classList.add('classTags');
+        header.classList.add('classTagsHeader');
+        header.innerText = key + ':';
+        tags.innerText = value;
+
+        classBox.append(header, tags);
+        classContainer.append(classBox);
+    })
+
+    classHeader.style.display = 'Block';
+    classContainer.style.display = 'Block';
 }
 
 function markLink(tags) {

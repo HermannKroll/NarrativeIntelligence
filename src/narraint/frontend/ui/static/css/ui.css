@@ -275,13 +275,16 @@
 
 .classTagsHeader {
     margin-right: 0.25em;
+    font-weight: bold;
 }
 
 .classTags {
     display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
 }
 
-.classificationHeader {
+#classificationHeader {
     border-top: 1px solid var(--grey_accent);
     margin-bottom: 0;
     padding-top: 0.25em;
