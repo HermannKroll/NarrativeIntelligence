@@ -157,16 +157,16 @@ async function buildSite() {
                     //   document.getElementById('drug_chemblid').href = "v
 
                 }).catch(e => {
-                document.getElementById('name').innerText = decodeURI(keyword);
-                document.getElementById('formular').innerText = "-";
-                document.getElementById('mass').innerText = "-";
-                document.getElementById('drug_alogp').innerText = "-";
-                document.getElementById('drug_cxlogp').innerText = "-";
-                document.getElementById('drug_cx_acid_pka').innerText = "-";
-                document.getElementById('drug_cx_basic_pka').innerText = "-";
-                document.getElementById('drug_cx_logd').innerText = "-";
-                document.getElementById('drug_chemblid').innerText = "-";
-            });//just give something to the user, so we can proceed
+                    document.getElementById('name').innerText = decodeURI(keyword);
+                    document.getElementById('formular').innerText = "-";
+                    document.getElementById('mass').innerText = "-";
+                    document.getElementById('drug_alogp').innerText = "-";
+                    document.getElementById('drug_cxlogp').innerText = "-";
+                    document.getElementById('drug_cx_acid_pka').innerText = "-";
+                    document.getElementById('drug_cx_basic_pka').innerText = "-";
+                    document.getElementById('drug_cx_logd').innerText = "-";
+                    document.getElementById('drug_chemblid').innerText = currentChemblID;
+                });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
             fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
