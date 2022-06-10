@@ -35,8 +35,9 @@ function resetContainerLoading(keyword) {
 
 async function buildSite() {
     var search = window.location.search;
-    if (search == "") {
-        document.getElementById("loading").style.display = "none"
+    if (search === "") {
+        // redirect to drug_overview_index page
+        window.location = url_drug_overview_idx;
         return;
     }
     var keyword = search.split("=")[1];
