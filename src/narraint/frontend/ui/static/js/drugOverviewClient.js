@@ -19,7 +19,7 @@ function searchDrug() {
     window.location.search = "?drug=" + keyword;
 }
 
-function resetContainerLoading(keyword) {
+function resetContainerLoading(keyword = null) {
     doneLoading("admin");
     doneLoading("adve");
     doneLoading("targInter");
@@ -30,6 +30,11 @@ function resetContainerLoading(keyword) {
     document.getElementById("structure").hidden = true;
     let text = document.getElementById("unknown_drug_name_tag");
     text.style.display = "flex";
+
+    if(keyword === null) {
+        text.innerText = `Unknown term`;
+        return;
+    }
     text.innerText = `Drug '${keyword}' is unknown`;
 }
 
@@ -64,6 +69,12 @@ async function buildSite() {
                     }
                 }
             });
+
+            if(chemblid === "") {
+                resetContainerLoading();
+                return;
+            }
+
             currentDrugName = keyword;
             currentChemblID = chemblid;
             console.log("Translated Chembl id: " + chemblid)
