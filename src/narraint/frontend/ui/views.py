@@ -18,7 +18,8 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating, TagInvertedIndex
+from narraint.backend.models import Predication, PredicationRating, \
+    TagInvertedIndex, SubstitutionGroupRating
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
@@ -660,6 +661,44 @@ def get_feedback(request):
             return HttpResponse(status=500)
     else:
         View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
+        return HttpResponse(status=500)
+
+
+def get_subgroup_feedback(request):
+    if request.GET.keys() & {"variable_name", "entity_id", "entity_type",
+                             "query", "rating", "userid"}:
+        try:
+            time_start = datetime.now()
+            variable_name = str(request.GET.get("variable_name", "").strip())
+            entity_name = str(request.GET.get("entity_name", "").strip())
+            entity_id = str(request.GET.get("entity_id", "").strip())
+            entity_type = str(request.GET.get("entity_type", "").strip())
+            query = str(request.GET.get("query", "").strip())
+            rating = str(request.GET.get("rating", "").strip())
+            userid = str(request.GET.get("userid", "").strip())
+
+            session = SessionExtended.get()
+
+            SubstitutionGroupRating.insert_sub_group_user_rating(
+                session, userid, query, variable_name, entity_name, entity_id,
+                entity_type, rating)
+
+            logging.info(f'User "{userid}" has rated "{variable_name}":'
+                         f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
+            try:
+                View.instance().query_logger.write_subgroup_rating_log(
+                    query, userid, variable_name, entity_name, entity_id, entity_type)
+            except IOError:
+                logging.debug('Could not write rating log file')
+            View.instance().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
+                                                        time_needed=datetime.now() - time_start)
+            return HttpResponse(status=200)
+        except Exception:
+            View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    else:
+        View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
         return HttpResponse(status=500)
 
 

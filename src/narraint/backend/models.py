@@ -156,3 +156,24 @@ class DocProcessedByIE(models.DocProcessedByIE):
     pass
 
 
+class SubstitutionGroupRating(Extended, DatabaseTable):
+    __tablename__ = "substitution_group_rating"
+    variable_name = Column(String, primary_key=True)
+    entity_name = Column(String, primary_key=True)
+    entity_id = Column(String, primary_key=True)
+    entity_type = Column(String, primary_key=True)
+    user_id = Column(String, primary_key=True)
+    query = Column(String, primary_key=True)
+    rating = Column(String)
+    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
+
+    @staticmethod
+    def insert_sub_group_user_rating(
+            session, user_id: str, query: str, variable_name: str,
+            entity_name: str, entity_id: str, entity_type: str, rating: str):
+        insert_stmt = insert(SubstitutionGroupRating).values(
+            user_id=user_id, query=query, variable_name=variable_name,
+            entity_name=entity_name, entity_id=entity_id,
+            entity_type=entity_type, rating=rating)
+        session.execute(insert_stmt)
+        session.commit()

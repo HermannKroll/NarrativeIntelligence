@@ -1081,10 +1081,36 @@ const createDocumentAggregateLazy = (divCardBodyID) => {
 
 const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
     let divCard = $('<div class="card"></div>');
-    let divCardHeader = $('<div class="card-header" id="' + headingID + '"></div>');
+    let divCardHeader = $('<div class="card-header" style="display: flex" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
-    let divH2 = $('<h2 class="mb-0"></h2>');
+    let divH2 = $('<h2 class="mb-0" style="width: 90%"></h2>');
     divCardHeader.append(divH2);
+
+    let rate_pos_id = getUniqueRateButtonID()
+    let imgAggrRatePos = $('<img style="cursor: pointer; margin-right: 5px"' +
+        ' id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+    let rate_neg_id = getUniqueRateButtonID()
+    let imgAggrRateNeg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+
+    imgAggrRatePos.click(() => {
+        let subgroup = queryAggregate.sub;
+        if (rateSubGroupExtraction(true, subgroup)) {
+            $('#' + rate_pos_id).fadeOut();
+            $('#' + rate_neg_id).fadeOut();
+        }
+    });
+
+    imgAggrRateNeg.click(() => {
+        let subgroup = queryAggregate.sub;
+        if (rateSubGroupExtraction(false, subgroup)) {
+            $('#' + rate_pos_id).fadeOut();
+            $('#' + rate_neg_id).fadeOut();
+        }
+    });
+
+    let divRateBtns = $('<div style="width: 10%; align-items: center; display: flex;"></div>')
+    divRateBtns.append(imgAggrRatePos, imgAggrRateNeg)
+    divCardHeader.append(divRateBtns)
 
     let resultList = queryAggregate["r"];
     let var_names = queryAggregate["v_n"];
@@ -1155,6 +1181,37 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
 
     return divCard;
 };
+
+function rateSubGroupExtraction(correct, subgroup) {
+    let userid = getUserIDFromLocalStorage();
+    if (userid === "cookie") {
+        console.log("waiting for cookie consent")
+        return false;
+    }
+    let variable = Object.keys(subgroup)[0];
+    console.log('nice user ' + userid + '  - has rated: ' + correct + ' for ' + variable);
+    let request = $.ajax({
+        url: subgroup_feedback_url,
+        data: {
+            variable_name: variable,
+            entity_name: subgroup[variable].n,
+            entity_id: subgroup[variable].id,
+            entity_type: subgroup[variable].t,
+            query: latest_valid_query,
+            rating: correct,
+            userid: userid
+        }
+    });
+
+    request.done(function (response) {
+        showInfoAtBottom("Thank you for your Feedback!")
+    });
+
+    request.fail(function (result) {
+        showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+    });
+    return true;
+}
 
 const createDocumentAggregateList = (results, query_len) => {
     let accordionID = "accordion" + getUniqueAccordionID();

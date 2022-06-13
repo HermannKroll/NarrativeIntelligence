@@ -20,6 +20,7 @@ class QueryLogger:
         self.log_dir_document_graph = os.path.join(log_dir, 'document_graphs')
         self.log_dir_views = os.path.join(log_dir, 'views')
         self.log_rating = os.path.join(log_dir, 'ratings')
+        self.log_subgroup_rating = os.path.join(log_dir, 'subgroup_ratings')
         self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
         self.log_dir_api_calls = os.path.join(log_dir, "api_calls")
         if not os.path.isdir(log_dir):
@@ -34,6 +35,8 @@ class QueryLogger:
             os.mkdir(self.log_dir_views)
         if not os.path.isdir(self.log_rating):
             os.mkdir(self.log_rating)
+        if not os.path.isdir(self.log_subgroup_rating):
+            os.mkdir(self.log_subgroup_rating)
         if not os.path.isdir(self.log_dir_document_clicks):
             os.mkdir(self.log_dir_document_clicks)
         if not os.path.isdir(self.log_dir_api_calls):
@@ -44,6 +47,7 @@ class QueryLogger:
         self.document_graph_log_header = 'timestamp\ttime needed\tdocument collection\tdocument id\t#facts'
         self.page_view_header = 'timestamp\tpage'
         self.rating_header = 'timestamp\tquery\tuser id\tprovenance ids'
+        self.subgroup_rating_header = 'timestamp\tquery\tuser id\tvariable name\tentity name\nentity id\tentity type'
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
         self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
 
@@ -123,6 +127,21 @@ class QueryLogger:
                 f.write(log_entry)
         else:
             logging.debug('appending to rating log file: {}'.format(log_file_name))
+            with open(log_file_name, 'a') as f:
+                f.write(log_entry)
+
+    def write_subgroup_rating_log(self, query: str, user_id:str, variable_name: str, entity_name: str, entity_id: str, entity_type: str):
+        log_file_name = os.path.join(self.log_subgroup_rating,
+                                     '{}-subgroup-ratings.log'.format(time.strftime("%Y-%m-%d")))
+        timestr = time.strftime("%Y.%m.%d-%H:%M:%S")
+        log_entry = f'\n{timestr}\t{query}\t{user_id}\t{variable_name}\t{entity_name}\t{entity_id}\t{entity_type}'
+        if not os.path.isfile(log_file_name):
+            logging.debug('creating new subgroup rating log file: {}'.format(log_file_name))
+            with open(log_file_name, 'w') as f:
+                f.write(self.subgroup_rating_header)
+                f.write(log_entry)
+        else:
+            logging.debug('appending to subgroup rating log file: {}'.format(log_file_name))
             with open(log_file_name, 'a') as f:
                 f.write(log_entry)
 
