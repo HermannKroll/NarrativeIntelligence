@@ -42,20 +42,27 @@ $('#cookiebtnDeny').click(() => {
     cookie_toast.hide();
 })
 
-$('#cookiebtnAccept').click(() => {
+const cookieAcceptBtnHandler = (callback) => {
     let userid = uuidv4();
     localStorage.setItem('userid', userid);
-    $('.toast').toast('hide')
+    $('.toast').toast('hide');
     let cookie_toast = $('#cookie_toast');
     cookie_toast.hide();
-})
+    callback();
+}
 
-function getUserIDFromLocalStorage() {
+function getUserIDFromLocalStorage(callback) {
     if (!localStorage.getItem('userid')) {
         console.log("no user id found in local storage");
+
+        //remove previously stored events and add the new callback event
+        $('#cookiebtnAccept').off('click').click(() => {
+            cookieAcceptBtnHandler(callback);
+        })
+
         let cookie_toast = $('#cookie_toast');
         cookie_toast.show();
-        cookie_toast.toast('show')
+        cookie_toast.toast('show');
         return "cookie";
     }
     return localStorage.getItem('userid');
@@ -784,8 +791,8 @@ const getUniqueRateButtonID = () => {
     return 'rb_' + rateButtonID;
 }
 
-function rateExtraction(correct, predication_ids_str) {
-    let userid = getUserIDFromLocalStorage();
+function rateExtraction(correct, predication_ids_str, callback) {
+    let userid = getUserIDFromLocalStorage(callback);
     if (userid === "cookie") {
         console.log("waiting for cookie consent")
         return false;
@@ -848,14 +855,14 @@ const createProvenanceDivElement = (explanations) => {
             let div_rate_neg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
 
             div_rate_pos.click(function () {
-                if (rateExtraction(true, predication_ids_str)) {
+                if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
                     $('#' + rate_pos_id).fadeOut();
                     $('#' + rate_neg_id).fadeOut();
                 }
 
             });
             div_rate_neg.click(function () {
-                if (rateExtraction(false, predication_ids_str)) {
+                if (rateExtraction(false, predication_ids_str, () => div_rate_neg.trigger('click'))) {
                     $('#' + rate_pos_id).fadeOut();
                     $('#' + rate_neg_id).fadeOut();
                 }
@@ -1094,7 +1101,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
 
     imgAggrRatePos.click(() => {
         let subgroup = queryAggregate.sub;
-        if (rateSubGroupExtraction(true, subgroup)) {
+        if (rateSubGroupExtraction(true, subgroup, () => imgAggrRatePos.trigger('click'))) {
             $('#' + rate_pos_id).fadeOut();
             $('#' + rate_neg_id).fadeOut();
         }
@@ -1102,7 +1109,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
 
     imgAggrRateNeg.click(() => {
         let subgroup = queryAggregate.sub;
-        if (rateSubGroupExtraction(false, subgroup)) {
+        if (rateSubGroupExtraction(false, subgroup, () => imgAggrRateNeg.trigger('click'))) {
             $('#' + rate_pos_id).fadeOut();
             $('#' + rate_neg_id).fadeOut();
         }
@@ -1182,8 +1189,8 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     return divCard;
 };
 
-function rateSubGroupExtraction(correct, subgroup) {
-    let userid = getUserIDFromLocalStorage();
+function rateSubGroupExtraction(correct, subgroup, callback) {
+    let userid = getUserIDFromLocalStorage(callback);
     if (userid === "cookie") {
         console.log("waiting for cookie consent")
         return false;
