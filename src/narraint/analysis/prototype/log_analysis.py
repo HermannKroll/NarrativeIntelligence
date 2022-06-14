@@ -1,4 +1,5 @@
 import glob
+import itertools
 import logging
 from argparse import ArgumentParser
 from collections import defaultdict
@@ -8,13 +9,14 @@ def analyze_query_logs(log_dir: str, output_file: str):
     all_logs = glob.glob(f'{log_dir}/**/*.log', recursive=True)
 
     count_queries = defaultdict(lambda: int(0))
-
+    query_count = 0
     for log in all_logs:
         with open(log, 'rt') as f:
             try:
-                for line in f:
+                for line in itertools.islice(f, 1, None):
                     timestamp, time_needed, collection, cache_hit, hits, query, trans_query = line.split('\t')
 
+                    query_count += 1
                     count_queries[query] += 1
             except ValueError:
                 pass # old log format
@@ -25,6 +27,8 @@ def analyze_query_logs(log_dir: str, output_file: str):
     with open(output_file, 'wt') as f:
         f.write('='*60+'\n')
         f.write(' '*25 + 'Log Summary\n')
+        f.write(f'  Queries         : {query_count}\n')
+        f.write(f'  Distinct Queries: {len(count_queries)}\n')
         f.write('='*60+'\n')
         f.write('Most frequent queries:\n')
         f.write('-'*60+'\n')
