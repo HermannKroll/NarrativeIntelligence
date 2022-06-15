@@ -273,15 +273,22 @@
     width: 43%;
 }
 
+.subgroupHeader {
+    width: 90%;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
 .subgroupRatingImg {
     cursor: pointer;
     margin-right: 5px;
-    margin-bottom: 5px;
 }
 
 .subgroupRatingDiv {
     width: 10%;
     align-items: center;
+    align-self: center;
     display: flex;
     flex-direction: row;
 }

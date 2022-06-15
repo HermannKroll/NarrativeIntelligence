@@ -1090,7 +1090,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" style="display: flex" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
-    let divH2 = $('<h2 class="mb-0" style="width: 90%"></h2>');
+    let divH2 = $('<h2 class="mb-0 subgroupHeader"></h2>');
     divCardHeader.append(divH2);
 
     let rate_pos_id = getUniqueRateButtonID()
@@ -1125,6 +1125,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let var_subs = queryAggregate["sub"];
     let result_size = queryAggregate["s"];
     let button_string = result_size + ' Document';
+    let url_str;
     if (result_size > 1) {
         button_string += 's'
     }
@@ -1142,29 +1143,23 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             var_sub = ent_name;
         }
         if (ent_id.slice(0, 6) === "CHEMBL") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
-                'href="https://www.ebi.ac.uk/chembl/compound_report_card/' + ent_id + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
-        } else if (ent_id.slice(0, 2) === "DB") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
-                'href="https://go.drugbank.com/drugs/' + ent_id + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            url_str = "https://www.ebi.ac.uk/chembl/compound_report_card/" + ent_id;
+        } else if (ent_id.slice(0, 2) === "DB") { //
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            url_str = 'https://go.drugbank.com/drugs/' + ent_id;
         } else if (ent_id.slice(0, 5) === 'MESH:') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
-                'href="https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5) + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            url_str = 'https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5);
         } else if (ent_type === 'Species') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
-                'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            url_str = 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id;
         } else if (ent_type === 'Gene') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' <a onclick="event.stopPropagation()"' +
-                'href="https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' ' + ent_id + ' )]';
+            url_str = 'https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id;
         } else if (ent_id.slice(0, 1) === "Q") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' <a onclick="event.stopPropagation()"' +
-                'href="https://www.wikidata.org/wiki/' + ent_id + '" target="_blank"' +
-                'style="font-weight:bold;"' + '>' + ent_id + '</a> ' + ')]'
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            url_str = 'https://www.wikidata.org/wiki/' + ent_id;
         } else {
             button_string += ', '.repeat(!!i) + var_sub + ']'
         }
@@ -1173,6 +1168,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
 
     divH2.append('<button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
+    divH2.append('<a href=' + url_str + ' target="_blank"><img height="20px" src=' + search_icon_url + '></a>')
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     let divCardBodyID = getUniqueBodyID();
     let divCardBody = $('<div class="card-body"></div>');
