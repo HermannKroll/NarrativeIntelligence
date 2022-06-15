@@ -1094,10 +1094,11 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCardHeader.append(divH2);
 
     let rate_pos_id = getUniqueRateButtonID()
-    let imgAggrRatePos = $('<img style="cursor: pointer; margin-right: 5px"' +
+    let imgAggrRatePos = $('<img class="subgroupRatingImg"' +
         ' id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
     let rate_neg_id = getUniqueRateButtonID()
-    let imgAggrRateNeg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+    let imgAggrRateNeg = $('<img class="subgroupRatingImg" ' +
+        ' id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
 
     imgAggrRatePos.click(() => {
         let subgroup = queryAggregate.sub;
@@ -1115,7 +1116,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         }
     });
 
-    let divRateBtns = $('<div style="width: 10%; align-items: center; display: flex;"></div>')
+    let divRateBtns = $('<div class="subgroupRatingDiv"></div>')
     divRateBtns.append(imgAggrRatePos, imgAggrRateNeg)
     divCardHeader.append(divRateBtns)
 

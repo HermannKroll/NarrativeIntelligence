@@ -273,6 +273,30 @@
     width: 43%;
 }
 
+.subgroupRatingImg {
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.subgroupRatingDiv {
+    width: 10%;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+}
+
+@media screen and (max-width: 991px) {
+    .subgroupRatingDiv {
+        flex-direction: column;
+    }
+
+    .subgroupRatingImg {
+        margin-right: 0;
+        margin-bottom: 2px;
+    }
+}
+
 .classTagsHeader {
     margin-right: 0.25em;
     font-weight: bold;
