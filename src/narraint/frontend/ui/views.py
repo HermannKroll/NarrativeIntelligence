@@ -40,7 +40,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-DO_CACHING = False
+DO_CACHING = True
 
 
 class View:
