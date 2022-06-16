@@ -42,13 +42,6 @@
         </div>
     </div>
 
-    <div class="link" onclick="scrollToElement('Administration')" style="background-color: #9189ff">
-        <div class="sidebar_entry_name" >
-            Administration
-        </div>
-        <div class="sidebar_entry_count" id="linkAdministration"></div>
-    </div>
-
     <div class="link" onclick="scrollToElement('Indications')" style="background-color: #aeff9a">
         <div class="sidebar_entry_name" >
             Indications
@@ -56,19 +49,11 @@
         <div class="sidebar_entry_count" id="linkIndications"></div>
     </div>
 
-
-    <div class="link" onclick="scrollToElement('AdverseEffects')" style="background-color: #aeff9a">
+    <div class="link" onclick="scrollToElement('Administration')" style="background-color: #9189ff">
         <div class="sidebar_entry_name" >
-            Adverse Effects
+            Administration
         </div>
-        <div class="sidebar_entry_count" id="linkAdverseEffects"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('DrugInteractions')" style="background-color: #ff8181">
-        <div class="sidebar_entry_name" >
-            Drug Interactions
-        </div>
-        <div class="sidebar_entry_count" id="linkDrugInteractions"></div>
+        <div class="sidebar_entry_count" id="linkAdministration"></div>
     </div>
 
     <div class="link" onclick="scrollToElement('TargetInteractions')" style="background-color: #b88cff">
@@ -84,6 +69,25 @@
         </div>
         <div class="sidebar_entry_count" id="linkLabMethods"></div>
     </div>
+
+    <div class="link" onclick="scrollToElement('DrugInteractions')" style="background-color: #ff8181">
+        <div class="sidebar_entry_name" >
+            Drug Interactions
+        </div>
+        <div class="sidebar_entry_count" id="linkDrugInteractions"></div>
+    </div>
+
+    <div class="link" onclick="scrollToElement('AdverseEffects')" style="background-color: #aeff9a">
+        <div class="sidebar_entry_name" >
+            Adverse Effects
+        </div>
+        <div class="sidebar_entry_count" id="linkAdverseEffects"></div>
+    </div>
+
+
+
+
+
 
     <div class="link" onclick="scrollToElement('RecentPapers')">
         <div class="sidebar_entry_name" >
@@ -147,28 +151,6 @@
         </div>
     </div>
 
-    <div class="container searchbox" id="Administration">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Administration</h2>
-            </div>
-            <div class="top_searchbox_right" id="adminOptions">
-                <select class="sortbar" id="adminSort" onchange="sortElements('admin')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="adminSearch" placeholder="Filter..."
-                       onkeyup="searchElements('admin')">
-            </div>
-        </div>
-        <div class="loading" id="adminLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="adminContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
     <div class="container searchbox" id="Indications">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
@@ -192,51 +174,29 @@
         </div>
     </div>
 
-    <div class="container searchbox" id="AdverseEffects">
+    <div class="container searchbox" id="Administration">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
-                <h2>Adverse Effects</h2>
+                <h2>Administration</h2>
             </div>
-            <div class="top_searchbox_right" id="adveOptions">
-                <select class="sortbar" id="adveSort" onchange="sortElements('adve')">
+            <div class="top_searchbox_right" id="adminOptions">
+                <select class="sortbar" id="adminSort" onchange="sortElements('admin')">
                     <option value="rel">Most Relevant</option>
                     <option value="alp">Alphabetical</option>
                 </select>
-                <input class="filterbar" type="text" id="adveSearch" placeholder="Filter..."
-                       onkeyup="searchElements('adve')">
+                <input class="filterbar" type="text" id="adminSearch" placeholder="Filter..."
+                       onkeyup="searchElements('admin')">
             </div>
         </div>
-        <div class="loading" id="adveLoading">
+        <div class="loading" id="adminLoading">
             <img src="{% static 'assets/loading.gif' %}">
         </div>
-        <div class="bottom_searchbox" id="adveContent">
+        <div class="bottom_searchbox" id="adminContent">
             <!--Indications hier einfuegen-->
         </div>
     </div>
 
-    <div class="container searchbox" id="DrugInteractions">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Drug Interactions</h2>
-            </div>
-            <div class="top_searchbox_right" id="drugInterOptions">
-                <select class="sortbar" id="drugInterSort" onchange="sortElements('drugInter')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="drugInterSearch" placeholder="Filter..."
-                       onkeyup="searchElements('drugInter')">
-            </div>
-        </div>
-        <div class="loading" id="drugInterLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="drugInterContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-    <div class="container searchbox" id="TargetInteractions">
+      <div class="container searchbox" id="TargetInteractions">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
                 <h2>Target Interactions</h2>
@@ -279,6 +239,52 @@
             <!--Indications hier einfuegen-->
         </div>
     </div>
+
+    <div class="container searchbox" id="DrugInteractions">
+        <div class="top_searchbox">
+            <div class="top_searchbox_left">
+                <h2>Drug Interactions</h2>
+            </div>
+            <div class="top_searchbox_right" id="drugInterOptions">
+                <select class="sortbar" id="drugInterSort" onchange="sortElements('drugInter')">
+                    <option value="rel">Most Relevant</option>
+                    <option value="alp">Alphabetical</option>
+                </select>
+                <input class="filterbar" type="text" id="drugInterSearch" placeholder="Filter..."
+                       onkeyup="searchElements('drugInter')">
+            </div>
+        </div>
+        <div class="loading" id="drugInterLoading">
+            <img src="{% static 'assets/loading.gif' %}">
+        </div>
+        <div class="bottom_searchbox" id="drugInterContent">
+            <!--Indications hier einfuegen-->
+        </div>
+    </div>
+
+
+    <div class="container searchbox" id="AdverseEffects">
+        <div class="top_searchbox">
+            <div class="top_searchbox_left">
+                <h2>Adverse Effects (Beta)</h2>
+            </div>
+            <div class="top_searchbox_right" id="adveOptions">
+                <select class="sortbar" id="adveSort" onchange="sortElements('adve')">
+                    <option value="rel">Most Relevant</option>
+                    <option value="alp">Alphabetical</option>
+                </select>
+                <input class="filterbar" type="text" id="adveSearch" placeholder="Filter..."
+                       onkeyup="searchElements('adve')">
+            </div>
+        </div>
+        <div class="loading" id="adveLoading">
+            <img src="{% static 'assets/loading.gif' %}">
+        </div>
+        <div class="bottom_searchbox" id="adveContent">
+            <!--Indications hier einfuegen-->
+        </div>
+    </div>
+
 
     <div class="container news" id="RecentPapers">
         <h2>Recent Papers</h2>
