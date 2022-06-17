@@ -497,7 +497,7 @@ p {
 
 .newsdetail {
   background-color: white;
-  margin: 3% 11% 6% 11%;
+  margin: 2% 2% calc(3.5em + 2%) 2%;
   padding: 1em;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.09);
 }
@@ -519,6 +519,14 @@ p {
 }
 .newsdetail .top div:hover {
   background-color: var(--grey_dark1);
+}
+.newsdetail .top a {
+  display: flex;
+}
+.newsdetail .top img {
+  align-self: center;
+  height: 1.5em;
+  width: 1.5em;
 }
 .newsdetail .bottom {
   display: flex;

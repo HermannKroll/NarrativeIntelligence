@@ -13,7 +13,9 @@
 <body>
 <div class="popup_dummie" id="newsPopup" hidden>
     <div class="newsdetail" style="margin: 3.5em 5% 3.5em 5%;">
-
+        <div class="top">
+            <a id="paperLink">View Paper</a>
+        </div>
         <div class="bottom">
             <div class="checkbox" id="newsCheckbox"></div>
             <div class="paper">
@@ -23,13 +25,15 @@
                 <p class="date" id="paperDate"></p>
                 <p class="abstract" id="paperAbstract"></p>
 
-                <h3 id="classificationHeader">Classifications</h3>
-                <div id="classContainer"></div>
+                <div id="classifications">
+                    <h2 id="classificationHeader">Classifications</h2>
+                    <div id="classificationDiv"></div>
+                    <p id="classificationInfo"
+                       style="margin-top: 10px; font-size:15px;">
+                        <em>(1,10) means text passage 1-10</em></p>
+                </div>
             </div>
             <div class="graph" id="paperGraph"></div>
-        </div>
-        <div class="top">
-            <a id="paperLink">Paper DOI</a>
         </div>
     </div>
 </div>

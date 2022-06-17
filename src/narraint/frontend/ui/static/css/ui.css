@@ -315,10 +315,9 @@
     margin-bottom: 5px;
 }
 
-#classificationHeader {
-    border-top: 1px solid var(--grey_accent);
-    margin-bottom: 0;
+#classifications {
     padding-top: 0.25em;
+    border-top: 1px solid var(--grey_accent);
 }
 
 @media screen and (max-width: 1000px) {

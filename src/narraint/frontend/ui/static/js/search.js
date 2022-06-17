@@ -976,8 +976,8 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
         'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
-    let href = document_url + '?document_id=' + art_doc_id + '&data_source=' + collection;
-    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection, href)})
+
+    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection)})
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
@@ -1036,8 +1036,8 @@ const hidePaperView = () => {
     document.body.style.overflowY = "scroll";
 }
 
-const showPaperView = (document_id, collection, href) => {
-    queryAndFilterPaperDetail(document_id, collection, href);
+const showPaperView = (document_id, collection) => {
+    queryAndFilterPaperDetail(document_id, collection);
 }
 
 const createDocumentList = (results, query_len) => {

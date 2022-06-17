@@ -42,7 +42,7 @@ const emptyGraph = Object();
 emptyGraph["nodes"] = [];
 emptyGraph["facts"] = [];
 
-function queryAndFilterPaperDetail(document_id, document_collection, href = null) {
+function queryAndFilterPaperDetail(document_id, document_collection) {
     async.parallel([
         async.apply(query_highlight, document_id, document_collection)
     ], function (err, result) {
@@ -51,12 +51,6 @@ function queryAndFilterPaperDetail(document_id, document_collection, href = null
 
         document.getElementById("newsPopup").style.display = "flex";
         document.body.style.overflowY = "hidden";
-
-        if (href != null) {
-            const anchor = document.getElementById("paperTab");
-            anchor.setAttribute("href", href);
-            anchor.setAttribute("target", "_blank");
-        }
     });
 
     function query_highlight(document_id, document_collection, callback_document) {
@@ -66,6 +60,14 @@ function queryAndFilterPaperDetail(document_id, document_collection, href = null
             .then(data => {
                 callback_document(null, data);
             });
+    }
+}
+
+function fillPaperNewTabView(href) {
+    const anchor = document.getElementById("paperTab");
+    if(anchor) {
+        anchor.setAttribute("href", href);
+        anchor.setAttribute("target", "_blank");
     }
 }
 
@@ -125,24 +127,25 @@ function fillPaperDetail(contentData) {
     initCheckbox(typeArray);
 
     fillClassifications(contentData.classification);
+
+    const href = `/document/?document_id=${contentData.id}&data_source=PubMed`;
+    fillPaperNewTabView(href);
 }
 
 function fillClassifications(classifications) {
-    const classContainer = document.getElementById('classContainer');
-    const classHeader = document.getElementById('classificationHeader');
+    const classDiv = document.getElementById('classificationDiv');
+    const classInfo = document.getElementById('classificationInfo');
 
     // paper has no classification data
-    if (!classifications) {
-        classHeader.style.display = 'None';
-        classContainer.style.display = 'None';
+    if (Object.keys(classifications).length === 0) {
+        classInfo.style.display = 'None';
         return;
     }
 
     //clear previous stored classification data
-    classContainer.replaceChildren();
+    classDiv.replaceChildren();
 
     Object.entries(classifications).forEach(([key, value]) => {
-        console.log(key, value)
         value = value.replaceAll(' ', '').replaceAll(';', ', ')
         const classBox = document.createElement("div");
         const tags = document.createElement('div');
@@ -153,11 +156,9 @@ function fillClassifications(classifications) {
         tags.innerText = value;
 
         classBox.append(header, tags);
-        classContainer.append(classBox);
+        classDiv.append(classBox);
     })
-
-    classHeader.style.display = 'Block';
-    classContainer.style.display = 'Block';
+    classInfo.style.display = 'Block';
 }
 
 function markLink(tags) {
