@@ -165,7 +165,6 @@ async function buildSite() {
 
                     let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + chemblid;
                     document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + chemblid + '</a>';
-                    //   document.getElementById('drug_chemblid').href = "v
 
                 }).catch(e => {
                     document.getElementById('name').innerText = decodeURI(keyword);
@@ -176,7 +175,9 @@ async function buildSite() {
                     document.getElementById('drug_cx_acid_pka').innerText = "-";
                     document.getElementById('drug_cx_basic_pka').innerText = "-";
                     document.getElementById('drug_cx_logd').innerText = "-";
-                    document.getElementById('drug_chemblid').innerText = currentChemblID;
+
+                    let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + chemblid;
+                    document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + chemblid + '</a>';
                 });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
