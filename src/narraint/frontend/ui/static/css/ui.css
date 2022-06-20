@@ -116,11 +116,6 @@
         width: 90%;
         max-width: 1200px;
     }
-
-    .modal-concept-select {
-        margin: 1em;
-        min-height: 80%;
-    }
 }
 
 #reportSpinner {
