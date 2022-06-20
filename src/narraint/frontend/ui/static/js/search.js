@@ -138,10 +138,10 @@ function createQueryListItem(subject, predicate, object) {
     let listItem = $('<li id="' + uniqueListItemID + '" class="list-group-item">'
         + '<div class="container">' +
         '  <div class="row">' +
-        '    <div class="col-sm"><span class="name">' + subject + '</span></div>' +
-        '    <div class="col-sm"><span class="name">' + predicate + '</span></div>' +
-        '    <div class="col-sm"><span class="name">' + object + '</span></div>' +
-        '    <div class="col-sm"><button class="btn btn-danger btn-xs pull-right remove-item" onclick="' + deleteEvent + '">-</button></div>' +
+        '    <div class="col-4" style="padding-left: 0"><span class="name">' + subject + '</span></div>' +
+        '    <div class="col-2"><span class="name">' + predicate + '</span></div>' +
+        '    <div class="col-4"><span class="name">' + object + '</span></div>' +
+        '    <div class="col-1"><button class="btn btn-danger remove-item" onclick="' + deleteEvent + '">-</button></div>' +
         '  </div>' +
         '</div>' +
         '</li>');
