@@ -1125,7 +1125,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     let var_subs = queryAggregate["sub"];
     let result_size = queryAggregate["s"];
     let button_string = result_size + ' Document';
-    let url_str;
+    let url_str = null;
     if (result_size > 1) {
         button_string += 's'
     }
@@ -1143,22 +1143,22 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
             var_sub = ent_name;
         }
         if (ent_id.slice(0, 6) === "CHEMBL") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id;
             url_str = "https://www.ebi.ac.uk/chembl/compound_report_card/" + ent_id;
         } else if (ent_id.slice(0, 2) === "DB") { //
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id;
             url_str = 'https://go.drugbank.com/drugs/' + ent_id;
         } else if (ent_id.slice(0, 5) === 'MESH:') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id;
             url_str = 'https://meshb.nlm.nih.gov/record/ui?ui=' + ent_id.slice(5);
         } else if (ent_type === 'Species') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id;
             url_str = 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + ent_id;
         } else if (ent_type === 'Gene') {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + "Target" + ' ' + ent_id;
             url_str = 'https://www.ncbi.nlm.nih.gov/gene/?term=' + ent_id;
         } else if (ent_id.slice(0, 1) === "Q") {
-            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id + ' )]';
+            button_string += ', '.repeat(!!i) + name + ':= ' + ent_name + ' (' + ent_type + ' ' + ent_id;
             url_str = 'https://www.wikidata.org/wiki/' + ent_id;
         } else {
             button_string += ', '.repeat(!!i) + var_sub + ']'
@@ -1166,9 +1166,23 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         i += 1;
     });
 
-    divH2.append('<button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
+    const btn = $('<button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
+        'style="padding-right: 0" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
-    divH2.append('<a href=' + url_str + ' target="_blank"><img height="20px" src=' + search_icon_url + '></a>')
+
+    divH2.append(btn)
+
+    //check if an url is used
+    if(url_str) {
+        const link = ('<a class="subgroupLinkImg" href=' + url_str + ' target="_blank"' +
+            ' onclick="event.stopPropagation()">' +
+            '<img height="18px" src=' + search_icon_url + '></a>')
+        const filler = $('<button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
+            'style="padding-left: 0" ' +
+            'aria-expanded="true" aria-controls="' + collapseID + '">)]</button>');
+        divH2.append(link, filler);
+    }
+
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     let divCardBodyID = getUniqueBodyID();
     let divCardBody = $('<div class="card-body"></div>');

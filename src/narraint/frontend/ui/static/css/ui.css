@@ -268,6 +268,14 @@
     width: 43%;
 }
 
+.subgroupLinkImg {
+    display: flex;
+    align-items: center;
+    margin-right: 2px;
+    margin-left: 2px;
+    padding-top: 2px;
+}
+
 .subgroupHeader {
     width: 90%;
     display: flex;
