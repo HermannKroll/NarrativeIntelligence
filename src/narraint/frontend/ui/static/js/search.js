@@ -23,6 +23,46 @@ let CYTOSCAPE_STYLE = [
     }
 ];
 
+// dictionary used to translate shortened urls into specific query links
+const short_urls = {
+    'q1':'&quot;post-acute COVID-19 syndrome&quot; associated Disease',
+    'q2':'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
+    'q3':'Drug treats Covid19',
+    'q4':'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
+    'q5':'Disease associated Covid19',
+    'q6':'Covid19 associated Target',
+    'q7':'Covid19 associated Human _AND_ Disease associated Human',
+    'q8':'Covid19 associated Vaccine',
+    'q9':'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
+    'q10':'&quot;Mass Spectrometry&quot; method Simvastatin',
+    'q11':'?X(Method) method Simvastatin',
+    'q12':'?X(LabMethod) method Simvastatin',
+    'q13':'Metformin treats &quot;Diabetes Mellitus&quot;',
+    'q14':'Simvastatin treats Hypercholesterolemia',
+    'q15':'Metformin treats ?X(Disease)',
+    'q16':'Metformin treats ?X(Species)',
+    'q17':'Vinca associated ?Y(Disease)',
+    'q18':'Digitalis associated ?Y(Disease)',
+    'q19':'?X(PlantFamily) associated ?Y(Disease)',
+    'q20':'Metformin administered ?X(DosageForm)',
+    'q21':'Metformin administered Injections',
+    'q22':'Lidocaine administered ?X(DosageForm)',
+    'q23':'?X(Drug) administered liposomes',
+    'q24':'?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
+    'q25':'Metformin inhibits mtor',
+    'q26':'Metformin inhibits ?X(Target)',
+    'q27':'?X(Drug) inhibits cyp3a4',
+    'q28':'cyp3a4 metabolises Simvastatin',
+    'q29':'Simvastatin induces Rhabdomyolysis',
+    'q30':'Simvastatin induces &quot;Muscular Diseases&quot;',
+    'q31':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
+    'q32':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
+    'q33':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
+    'q34':'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
+    'q35':'?Drug(Drug) treats ?Dis(Disease)',
+    'q36':'?Drug(Drug) administered ?Form(DosageForm)',
+};
+
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -231,7 +271,20 @@ let optionMapping = {
     "treats": 9
 }
 
+function tryDecodeShortURL(query) {
+    if(query in short_urls) {
+        //Known query abbreviation. Decode html escape sequences.
+        lastQuery = $('<div>'+ short_urls[query] + '</div>').text();
+        return true;
+    }
+    return false;
+}
+
 function example_search(search_str) {
+    if(tryDecodeShortURL(search_str)) {
+        search_str = lastQuery;
+    }
+
     $('#collapseExamples').collapse('hide');
     clearQueryBuilder();
     console.log(search_str);
