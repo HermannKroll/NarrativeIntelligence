@@ -50,6 +50,7 @@ class QueryLogger:
         self.log_subgroup_rating = os.path.join(log_dir, 'subgroup_ratings')
         self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
         self.log_dir_api_calls = os.path.join(log_dir, "api_calls")
+        self.log_dir_paper_view = os.path.join(log_dir, 'paper_view')
         if not os.path.isdir(log_dir):
             raise Exception(f'no provenance log dir available {log_dir}')
         if not os.path.isdir(self.log_dir_queries):
@@ -68,6 +69,8 @@ class QueryLogger:
             os.mkdir(self.log_dir_document_clicks)
         if not os.path.isdir(self.log_dir_api_calls):
             os.mkdir(self.log_dir_api_calls)
+        if not os.path.isdir(self.log_dir_paper_view):
+            os.mkdir(self.log_dir_paper_view)
 
         self.query_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.provenance_header = 'timestamp\ttime needed\tdocument collection\tdocument id\tprovenance ids'
@@ -77,6 +80,7 @@ class QueryLogger:
         self.subgroup_rating_header = 'timestamp\tquery\tuser id\tvariable name\tentity name\tentity id\tentity type'
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
         self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
+        self.paper_view_header = 'timestamp\tdoc id\tdoc collection'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -132,7 +136,7 @@ class QueryLogger:
                                      f'{time.strftime("%Y-%m-%d")}-documents_clicked.log')
         log_entry = f'{query}\t{document_collection}\t{document_id}\t{link}'
 
-        write_entry(log_entry, log_file_name, self.document_click_header, "click")
+        write_entry(log_entry, log_file_name, self.document_click_header, "link click")
 
     def write_api_call(self, success: bool, route: str, call: str,
                        time_needed=None):
@@ -144,3 +148,9 @@ class QueryLogger:
 
         log_entry = f'{time_needed}\t{success}\t{route}\t{call}'
         write_entry(log_entry, log_file_name, self.api_call_header, "api call")
+
+    def write_paper_view(self, doc_id, doc_collection):
+        log_file_name = os.path.join(self.log_dir_paper_view,
+                                     f'{time.strftime("%Y-%m-%d")}-paper_view.log')
+        log_entry = f'{doc_id}\t{doc_collection}'
+        write_entry(log_entry, log_file_name, self.paper_view_header, "paper view")

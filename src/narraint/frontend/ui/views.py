@@ -717,6 +717,20 @@ def get_document_link_clicked(request):
         return HttpResponse(status=500)
 
 
+def get_paper_view_log(request):
+    if request.GET.keys() & {"doc_id", "doc_collection"}:
+        doc_id = str(request.GET["doc_id"]).strip()
+        doc_collection = str(request.GET["doc_collection"]).strip()
+
+        try:
+            View.instance().query_logger.write_paper_view(doc_id, doc_collection)
+        except IOError:
+            logging.debug('Could not write paper view opened log file')
+
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
 @csrf_exempt
 def post_report(request):
     try:

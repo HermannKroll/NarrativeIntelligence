@@ -25,9 +25,10 @@ var markInstance = null;
 var tagsArray = null;
 var activeTypeMap = null;
 var document_graph = null;
+let documentCollection = null;
 
 function queryGraph(document_id) {
-    var query = url_document_graph + "?document=" + document_id + "&data_source=PubMed"; // real shit
+    const query = url_document_graph + "?document=" + document_id + "&data_source=" + documentCollection;
     fetch(query)
         .then(response => response.json())
         .then(data => {
@@ -43,10 +44,10 @@ emptyGraph["nodes"] = [];
 emptyGraph["facts"] = [];
 
 function queryAndFilterPaperDetail(document_id, document_collection) {
+    documentCollection = document_collection
     async.parallel([
         async.apply(query_highlight, document_id, document_collection)
     ], function (err, result) {
-        console.log(result)
         fillPaperDetail(result[0].results[0]);
 
         document.getElementById("newsPopup").style.display = "flex";
@@ -72,6 +73,11 @@ function fillPaperNewTabView(href) {
 }
 
 function fillPaperDetail(contentData) {
+    // initialize var with default value
+    if(documentCollection === null) {
+        documentCollection = "PubMed";
+    }
+
     const graphDiv = document.getElementById("paperGraph");
     document_graph = emptyGraph;
     visualize_document_graph(graphDiv);
@@ -128,9 +134,18 @@ function fillPaperDetail(contentData) {
 
     fillClassifications(contentData.classification);
 
-    const href = `/document/?document_id=${contentData.id}&data_source=PubMed`;
+    const href = `/document/?document_id=${contentData.id}&data_source=${documentCollection}`;
     fillPaperNewTabView(href);
+    sendPaperViewLog(contentData.id);
 }
+
+
+function sendPaperViewLog(docID) {
+    const url = `/paper_view_log?doc_id=${docID}&doc_collection=${documentCollection}`
+
+    fetch(url).catch();
+}
+
 
 function fillClassifications(classifications) {
     const classDiv = document.getElementById('classificationDiv');
