@@ -731,6 +731,51 @@ def get_paper_view_log(request):
     return HttpResponse(status=500)
 
 
+def get_drug_ov_search_log(request):
+    if request.GET.keys() & {"drug"}:
+        drug = str(request.GET["drug"]).strip()
+
+        try:
+            View.instance().query_logger.write_drug_ov_search(drug)
+        except IOError:
+            logging.debug('Could not write drug searched log file')
+
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
+def get_drug_ov_subst_href_log(request):
+    if request.GET.keys() & {"drug", "substance", "query"}:
+        drug = str(request.GET["drug"]).strip()
+        substance = str(request.GET["substance"]).strip()
+        query = str(request.GET["query"]).strip()
+
+        try:
+            View.instance().query_logger.write_drug_ov_substance_href(drug, substance, query)
+        except IOError:
+            logging.debug('Could not write substance href log file')
+
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
+def get_drug_ov_chembl_phase_href_log(request):
+    if request.GET.keys() & {"drug", "substance", "query", "phase"}:
+        drug = str(request.GET["drug"]).strip()
+        substance = str(request.GET["substance"]).strip()
+        query = str(request.GET["query"]).strip()
+        phase = str(request.GET["phase"]).strip()
+
+        try:
+            View.instance().query_logger.write_drug_ov_chembl_phase_href(
+                drug, substance, phase, query)
+        except IOError:
+            logging.debug('Could not write chembl phase href log file')
+
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
 @csrf_exempt
 def post_report(request):
     try:

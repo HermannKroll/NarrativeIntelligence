@@ -3,7 +3,8 @@ from django.urls import path
 from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_query, get_feedback, \
     post_report, get_provenance, get_document_graph, get_tree_info, get_query_sub_count, get_document_link_clicked, \
     get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity, \
-    get_chembl_indication, get_query_document_ids, get_subgroup_feedback, get_paper_view_log
+    get_chembl_indication, get_query_document_ids, get_subgroup_feedback, get_paper_view_log, \
+    get_drug_ov_search_log, get_drug_ov_subst_href_log, get_drug_ov_chembl_phase_href_log
 
 urlpatterns = [
     path("query", get_query, name="query"),
@@ -23,5 +24,8 @@ urlpatterns = [
     path("document_ids_for_entity", get_document_ids_for_entity, name="document_ids_for_entity"),
     path("chembl_indication", get_chembl_indication, name="chembl_indication"),
     path("query_document_ids", get_query_document_ids,  name="query_document_ids"),
-    path("paper_view_log", get_paper_view_log, name="paper_view_log")
+    path("paper_view_log", get_paper_view_log, name="paper_view_log"),
+    path("drug_search_log", get_drug_ov_search_log, name="drug_search_log"),
+    path("drug_substance_forward_log", get_drug_ov_subst_href_log, name="drug_substance_forward_log"),
+    path("drug_chembl_phase_log", get_drug_ov_chembl_phase_href_log, name="drug_chembl_phase_log"),
 ]

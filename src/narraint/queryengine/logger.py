@@ -51,6 +51,9 @@ class QueryLogger:
         self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
         self.log_dir_api_calls = os.path.join(log_dir, "api_calls")
         self.log_dir_paper_view = os.path.join(log_dir, 'paper_view')
+        self.log_dir_drug_ov_search = os.path.join(log_dir, 'drug_ov_search')
+        self.log_dir_drug_ov_subst_href = os.path.join(log_dir, 'drug_ov_substance_href')
+        self.log_dir_drug_ov_chembl_ph = os.path.join(log_dir, 'drug_ov_chembl_phase')
         if not os.path.isdir(log_dir):
             raise Exception(f'no provenance log dir available {log_dir}')
         if not os.path.isdir(self.log_dir_queries):
@@ -71,6 +74,12 @@ class QueryLogger:
             os.mkdir(self.log_dir_api_calls)
         if not os.path.isdir(self.log_dir_paper_view):
             os.mkdir(self.log_dir_paper_view)
+        if not os.path.isdir(self.log_dir_drug_ov_search):
+            os.mkdir(self.log_dir_drug_ov_search)
+        if not os.path.isdir(self.log_dir_drug_ov_subst_href):
+            os.mkdir(self.log_dir_drug_ov_subst_href)
+        if not os.path.isdir(self.log_dir_drug_ov_chembl_ph):
+            os.mkdir(self.log_dir_drug_ov_chembl_ph)
 
         self.query_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.provenance_header = 'timestamp\ttime needed\tdocument collection\tdocument id\tprovenance ids'
@@ -81,6 +90,9 @@ class QueryLogger:
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
         self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
         self.paper_view_header = 'timestamp\tdoc id\tdoc collection'
+        self.drug_ov_search_header = 'timestamp\tdrug'
+        self.drug_ov_subst_href_header = 'timestamp\tquery\tdrug\tsubstance'
+        self.drug_ov_chembl_phase_header = 'timestamp\tquery\tdrug\tsubstance\tphase'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -154,3 +166,24 @@ class QueryLogger:
                                      f'{time.strftime("%Y-%m-%d")}-paper_view.log')
         log_entry = f'{doc_id}\t{doc_collection}'
         write_entry(log_entry, log_file_name, self.paper_view_header, "paper view")
+
+    def write_drug_ov_search(self, drug):
+        log_file_name = os.path.join(self.log_dir_drug_ov_search,
+                                     f'{time.strftime("%Y-%m-%d")}-drug_ov_search.log')
+        log_entry = f'{drug}'
+        write_entry(log_entry, log_file_name, self.drug_ov_search_header,
+                    "drug ov search")
+
+    def write_drug_ov_substance_href(self, drug, substance, query):
+        log_file_name = os.path.join(self.log_dir_drug_ov_subst_href,
+                                     f'{time.strftime("%Y-%m-%d")}-drug_ov_subst_href.log')
+        log_entry = f'{query}\t{drug}\t{substance}'
+        write_entry(log_entry, log_file_name, self.drug_ov_subst_href_header,
+                    "drug ov substance href")
+
+    def write_drug_ov_chembl_phase_href(self, drug, substance, phase, query):
+        log_file_name = os.path.join(self.log_dir_drug_ov_chembl_ph,
+                                     f'{time.strftime("%Y-%m-%d")}-drug_ov_chembl_phase_href.log')
+        log_entry = f'{query}\t{drug}\t{substance}\t{phase}'
+        write_entry(log_entry, log_file_name, self.drug_ov_chembl_phase_header,
+                    "drug ov chembl phase href")

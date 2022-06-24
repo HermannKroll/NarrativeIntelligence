@@ -75,6 +75,8 @@ async function buildSite() {
                 return;
             }
 
+            logDrugSearch(keyword)
+
             currentDrugName = keyword;
             currentChemblID = chemblid;
             console.log("Translated Chembl id: " + chemblid)
@@ -408,7 +410,7 @@ function fillSearchbox(reference, data, max) {
     searchbox = document.getElementById(reference + "Content");
 
     for (var i = 0; i < data.length; i++) {
-        var item = data[i];
+        const item = data[i];
         const itemDiv = document.createElement('div');
         const itemImg = document.createElement('img');
         const phaseLink = document.createElement('a');
@@ -416,11 +418,14 @@ function fillSearchbox(reference, data, max) {
         const itemText = document.createElement('p');
         const countDiv = document.createElement('div');
         const countLink = document.createElement('a');
-        countLink.href = getLinkToQuery(searchbox, item);
+        const query = getLinkToQuery(searchbox, item);
+        const stringQuery = query.split('query=')[1].replaceAll('+', ' ')
+
+        countLink.href = query;
         countLink.target = "_blank";
         countLink.textContent = `${item.count}`;
         itemText.textContent = `${item.name}`;
-        itemTextLink.href = getLinkToQuery(searchbox, item);
+        itemTextLink.href = query;
         itemTextLink.style.textDecoration = "none";
         itemTextLink.style.color = "inherit";
         itemTextLink.target = "_blank";
@@ -439,6 +444,7 @@ function fillSearchbox(reference, data, max) {
             itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
             phaseLink.target = "_blank";
             phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + currentChemblID + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
+            phaseLink.onclick = logChemblPhaseHref.bind(null, currentDrugName, item.name, stringQuery, item.max_phase_for_ind);
             phaseLink.append(itemImg)
             itemDiv.append(phaseLink);
         } else if (item.max_phase_for_ind != null) {
@@ -446,6 +452,11 @@ function fillSearchbox(reference, data, max) {
             phaseLink.append(itemImg)
             itemDiv.append(phaseLink);
         }
+
+        //href Logging
+        let logFunction = logSubstanceHref.bind(null, currentDrugName, item.name, stringQuery);
+        itemTextLink.onclick = logFunction;
+        countLink.onclick = logFunction;
 
         searchbox.append(itemDiv);
     }
@@ -582,4 +593,33 @@ function colorInterpolation(r1, g1, b1, r2, g2, b2, scale) {
 
 function rgb(r, g, b) {
     return "rgb(" + r + "," + g + "," + b + ")";
+}
+
+/**
+ * Send drug-search logging information to backend
+ */
+function logDrugSearch(drug) {
+    const url = url_drug_search + '?drug=' + drug;
+    fetch(url).catch();
+}
+
+/**
+ * Send substation/interaction-clicked logging information to backend
+ */
+function logSubstanceHref(drug, substance, query) {
+    const url = url_substance_href + '?drug=' + drug
+        + '&substance=' + substance
+        + '&query=' + query;
+    fetch(url).catch();
+}
+
+/**
+ * Send chembl-phase-id-clicked logging information to backend
+ */
+function logChemblPhaseHref(drug, substance, query, phase) {
+    const url = url_chembl_phase_href + '?drug=' + drug
+        + '&substance=' + substance
+        + '&query=' + query
+        + '&phase=' + phase;
+    fetch(url).catch();
 }
