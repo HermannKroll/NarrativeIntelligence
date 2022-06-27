@@ -92,7 +92,7 @@ class QueryLogger:
         self.paper_view_header = 'timestamp\tdoc id\tdoc collection'
         self.drug_ov_search_header = 'timestamp\tdrug'
         self.drug_ov_subst_href_header = 'timestamp\tquery\tdrug\tentity'
-        self.drug_ov_chembl_phase_header = 'timestamp\tquery\tdrug\tsubstance\tphase'
+        self.drug_ov_chembl_phase_header = 'timestamp\tquery\tdrug\tdisease_name\tdisease_id\tphase'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -174,16 +174,16 @@ class QueryLogger:
         write_entry(log_entry, log_file_name, self.drug_ov_search_header,
                     "drug ov search")
 
-    def write_drug_ov_substance_href(self, drug, substance, query):
+    def write_drug_ov_substance_href(self, drug, entity, query):
         log_file_name = os.path.join(self.log_dir_drug_ov_subst_href,
                                      f'{time.strftime("%Y-%m-%d")}-drug_ov_subst_href.log')
-        log_entry = f'{query}\t{drug}\t{substance}'
+        log_entry = f'{query}\t{drug}\t{entity}'
         write_entry(log_entry, log_file_name, self.drug_ov_subst_href_header,
                     "drug ov substance href")
 
-    def write_drug_ov_chembl_phase_href(self, drug, entity, phase, query):
+    def write_drug_ov_chembl_phase_href(self, drug, disease_name, disease_id, phase, query):
         log_file_name = os.path.join(self.log_dir_drug_ov_chembl_ph,
                                      f'{time.strftime("%Y-%m-%d")}-drug_ov_chembl_phase_href.log')
-        log_entry = f'{query}\t{drug}\t{entity}\t{phase}'
+        log_entry = f'{query}\t{drug}\t{disease_name}\t{disease_id}\t{phase}'
         write_entry(log_entry, log_file_name, self.drug_ov_chembl_phase_header,
                     "drug ov chembl phase href")

@@ -444,7 +444,7 @@ function fillSearchbox(reference, data, max) {
             itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
             phaseLink.target = "_blank";
             phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + currentChemblID + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
-            phaseLink.onclick = logChemblPhaseHref.bind(null, currentDrugName, item.name, stringQuery, item.max_phase_for_ind);
+            phaseLink.onclick = logChemblPhaseHref.bind(null, currentDrugName, item.name, item.id, stringQuery, item.max_phase_for_ind);
             phaseLink.append(itemImg)
             itemDiv.append(phaseLink);
         } else if (item.max_phase_for_ind != null) {
@@ -616,9 +616,10 @@ function logSubstanceHref(drug, substance, query) {
 /**
  * Send chembl-phase-id-clicked logging information to backend
  */
-function logChemblPhaseHref(drug, substance, query, phase) {
+function logChemblPhaseHref(drug, disease_name, disease_id, query, phase) {
     const url = url_chembl_phase_href + '?drug=' + drug
-        + '&substance=' + substance
+        + '&disease_name=' + disease_name
+        + '&disease_id=' + disease_id
         + '&query=' + query
         + '&phase=' + phase;
     fetch(url).catch();

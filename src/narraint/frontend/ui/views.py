@@ -760,15 +760,16 @@ def get_drug_ov_subst_href_log(request):
 
 
 def get_drug_ov_chembl_phase_href_log(request):
-    if request.GET.keys() & {"drug", "substance", "query", "phase"}:
+    if request.GET.keys() & {"drug", "disease_name", "disease_id", "query", "phase"}:
         drug = str(request.GET["drug"]).strip()
-        substance = str(request.GET["substance"]).strip()
+        disease_name = str(request.GET["disease_name"]).strip()
+        disease_id = str(request.GET["disease_id"]).strip()
         query = str(request.GET["query"]).strip()
         phase = str(request.GET["phase"]).strip()
 
         try:
             View.instance().query_logger.write_drug_ov_chembl_phase_href(
-                drug, substance, phase, query)
+                drug, disease_name, disease_id, phase, query)
         except IOError:
             logging.debug('Could not write chembl phase href log file')
 
