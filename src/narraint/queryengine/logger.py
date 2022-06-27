@@ -91,7 +91,7 @@ class QueryLogger:
         self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
         self.paper_view_header = 'timestamp\tdoc id\tdoc collection'
         self.drug_ov_search_header = 'timestamp\tdrug'
-        self.drug_ov_subst_href_header = 'timestamp\tquery\tdrug\tsubstance'
+        self.drug_ov_subst_href_header = 'timestamp\tquery\tdrug\tentity'
         self.drug_ov_chembl_phase_header = 'timestamp\tquery\tdrug\tsubstance\tphase'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
@@ -181,9 +181,9 @@ class QueryLogger:
         write_entry(log_entry, log_file_name, self.drug_ov_subst_href_header,
                     "drug ov substance href")
 
-    def write_drug_ov_chembl_phase_href(self, drug, substance, phase, query):
+    def write_drug_ov_chembl_phase_href(self, drug, entity, phase, query):
         log_file_name = os.path.join(self.log_dir_drug_ov_chembl_ph,
                                      f'{time.strftime("%Y-%m-%d")}-drug_ov_chembl_phase_href.log')
-        log_entry = f'{query}\t{drug}\t{substance}\t{phase}'
+        log_entry = f'{query}\t{drug}\t{entity}\t{phase}'
         write_entry(log_entry, log_file_name, self.drug_ov_chembl_phase_header,
                     "drug ov chembl phase href")
