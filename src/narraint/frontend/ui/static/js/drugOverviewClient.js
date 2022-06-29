@@ -222,7 +222,7 @@ async function buildSite() {
                                         .then(data => {
                                             speciesData = data.sub_count_list;
                                             if (speciesData.length > 0) {
-                                                //document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
+                                                document.getElementById("linkSpecies").innerText += `(${speciesData.length})`;
                                                 maxCount["species"] = speciesData[0].count;
                                                 fillSearchbox("species", speciesData, maxCount["species"]);
                                             }
