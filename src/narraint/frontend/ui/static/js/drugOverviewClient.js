@@ -4,6 +4,7 @@ var adveData = null;
 var drugInterData = null;
 var targInterData = null;
 var labMethData = null;
+let speciesData = null;
 var newsData = null;
 var maxCount = {"admin": -1, "indi": -1, "adve": -1, "drugInter": -1, "targInter": -1, "labMeth": -1};
 let currentChemblID = null;
@@ -216,27 +217,39 @@ async function buildSite() {
                                     }
                                     doneLoading("targInter");
 
-                                    fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
+                                    fetch(url_query_sub_count + "?query=" + keyword + "+associated+?X(Species)&data_source=PubMed")// Given_Drug_Name associated ?X(Species)
                                         .then(response => response.json())
                                         .then(data => {
-                                            drugInterData = data.sub_count_list;
-                                            if (drugInterData.length > 0) {
-                                                document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
-                                                maxCount["drugInter"] = drugInterData[0].count;
-                                                fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
+                                            speciesData = data.sub_count_list;
+                                            if (speciesData.length > 0) {
+                                                //document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
+                                                maxCount["species"] = speciesData[0].count;
+                                                fillSearchbox("species", speciesData, maxCount["species"]);
                                             }
-                                            doneLoading("drugInter");
+                                            doneLoading("species");
 
-                                            fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
+                                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
                                                 .then(response => response.json())
                                                 .then(data => {
-                                                    labMethData = data.sub_count_list;
-                                                    if (labMethData.length > 0) {
-                                                        document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
-                                                        maxCount["labMeth"] = labMethData[0].count;
-                                                        fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
+                                                    drugInterData = data.sub_count_list;
+                                                    if (drugInterData.length > 0) {
+                                                        document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
+                                                        maxCount["drugInter"] = drugInterData[0].count;
+                                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
                                                     }
-                                                    doneLoading("labMeth");
+                                                    doneLoading("drugInter");
+
+                                                    fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
+                                                        .then(response => response.json())
+                                                        .then(data => {
+                                                            labMethData = data.sub_count_list;
+                                                            if (labMethData.length > 0) {
+                                                                document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
+                                                                maxCount["labMeth"] = labMethData[0].count;
+                                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
+                                                            }
+                                                            doneLoading("labMeth");
+                                                        });
                                                 });
                                         });
                                 });
@@ -491,6 +504,11 @@ function getLinkToQuery(searchbox, item) {
             break;
         case "labMethContent":
             predicate += "method";
+            break;
+        case "speciesContent":
+            predicate += "associated";
+            object = object.split("//")[0];
+            break;
         default:
             break;
     }

@@ -240,6 +240,28 @@
         </div>
     </div>
 
+    <div class="container searchbox" id="Species">
+        <div class="top_searchbox">
+            <div class="top_searchbox_left">
+                <h2>Species</h2>
+            </div>
+            <div class="top_searchbox_right" id="speciesOptions">
+                <select class="sortbar" id="speciesSort" onchange="sortElements('species')">
+                    <option value="rel">Most Relevant</option>
+                    <option value="alp">Alphabetical</option>
+                </select>
+                <input class="filterbar" type="text" id="speciesSearch" placeholder="Filter..."
+                       onkeyup="searchElements('species')">
+            </div>
+        </div>
+        <div class="loading" id="speciesLoading">
+            <img src="{% static 'assets/loading.gif' %}">
+        </div>
+        <div class="bottom_searchbox" id="speciesContent">
+            <!--Species data-->
+        </div>
+    </div>
+
     <div class="container searchbox" id="DrugInteractions">
         <div class="top_searchbox">
             <div class="top_searchbox_left">
