@@ -87,7 +87,8 @@
           "object_id":"MESH:D006333",
           "object_type":"Disease",
           "object_str":"heart failure",
-          "sentence_id":2456018
+          "sentence_id":2456018,
+          "confidence":0.5
        },
        ...
     ]
