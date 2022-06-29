@@ -18,7 +18,7 @@ class StatementExtraction:
 
     def __init__(self, subject_id: str, subject_type: str, subject_str: str,
                  predicate: str, relation: str, object_id: str, object_type: str, object_str: str,
-                 sentence_id: int):
+                 sentence_id: int, confidence: float=-1):
         self.subject_id = subject_id
         self.subject_type = subject_type
         self.subject_str = subject_str
@@ -27,6 +27,7 @@ class StatementExtraction:
         self.object_id = object_id
         self.object_type = object_type
         self.object_str = object_str
+        self.confidence = confidence
         self.sentence_id = sentence_id
 
     def to_dict(self):
@@ -39,7 +40,8 @@ class StatementExtraction:
             "object_id": self.object_id,
             "object_type": self.object_type,
             "object_str": self.object_str,
-            "sentence_id": self.sentence_id
+            "sentence_id": self.sentence_id,
+            "confidence": self.confidence
         }
 
 

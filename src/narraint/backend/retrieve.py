@@ -93,7 +93,8 @@ def retrieve_narrative_documents_from_database(session, document_ids: Set[int], 
                                                                object_id=res.object_id,
                                                                object_type=res.object_type,
                                                                object_str=res.object_str,
-                                                               sentence_id=res.sentence_id))
+                                                               sentence_id=res.sentence_id,
+                                                               confidence=res.confidence))
         sentence_ids.add(res.sentence_id)
         sentenceid2doc[res.sentence_id].add(res.document_id)
 
