@@ -1,14 +1,19 @@
-var adminData = null;
-var indiData = null;
-var adveData = null;
-var drugInterData = null;
-var targInterData = null;
-var labMethData = null;
-let speciesData = null;
-var newsData = null;
-var maxCount = {"admin": -1, "indi": -1, "adve": -1, "drugInter": -1, "targInter": -1, "labMeth": -1};
+let indiData = null;
+let newsData = null;
+
+let indiCount = 0;
+
 let currentChemblID = null;
 let currentDrugName = null;
+
+const overviews = { // prefix: {name, predicate, object, data, count}
+    admin: {predicate: "administered", object: "DosageForm", data: null, count: null},
+    targInter: {predicate: "interacts", object: "Target", data: null, count: null},
+    labMeth: {predicate: "method", object: "LabMethod", data: null, count: null},
+    species: {predicate: "associated", object: "?X(Species)", data: null, count: null},
+    drugInter: {predicate: "interacts", object: "Drug", data: null, count: null},
+    adve: {predicate: "induces", object: "Disease", data: null, count: null},
+}
 
 buildSite().catch((err) => console.log(err));
 
@@ -52,7 +57,7 @@ async function buildSite() {
     // translate the key to a drug id via the narrative service
     fetch(url_term_2_entity + '?expand_by_prefix=false&term=' + keyword)
         .then(response => response.json())
-        .then(data => {
+        .then(async data => {
             currentChemblID = null;
             currentDrugName = null;
             if (data.valid === false) {
@@ -115,7 +120,7 @@ async function buildSite() {
 
 
             //fill in the image via id using fetch to catch potential errors
-            var structureImage = document.getElementById('structure');
+            const structureImage = document.getElementById('structure');
             fetch(`https://www.ebi.ac.uk/chembl/api/data/image/${chemblid}`)
                 .then((response) => {
                     if (response.ok) {
@@ -184,77 +189,37 @@ async function buildSite() {
                 });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
-            fetch(url_query_sub_count + "?query=" + keyword + "+administered+DosageForm&data_source=PubMed")
-                .then(response => response.json())
-                .then(data => {
-                    adminData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-                    if (adminData.length > 0) {
-                        document.getElementById("linkAdministration").innerText += `(${adminData.length})`;
-                        maxCount["admin"] = adminData[0].count;
-                        fillSearchbox("admin", adminData, maxCount["admin"]);
-                    }
-                    doneLoading("admin");
+            for (let prefix in overviews) {
+                const ov = overviews[prefix];
+                const url = `${url_query_sub_count}?query=${keyword}+${ov.predicate}+${ov.object}&data_source=PubMed`;
+                // use await to request one overview after the other
+                await fetch(url)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((json) => {
+                        const data = json["sub_count_list"];
+                        if (!data) {
+                            doneLoading(ov);
+                            return;
+                        }
+                        ov.data = data;
 
-                    fetch(url_query_sub_count + "?query=" + keyword + "+induces+Disease&data_source=PubMed")
-                        .then(response => response.json())
-                        .then(data => {
-                            adveData = data.sub_count_list //Object.keys(data).map(function (k) { return data[k] });
-                            if (adveData.length > 0) {
-                                document.getElementById("linkAdverseEffects").innerText += `(${adveData.length})`;
-                                maxCount["adve"] = adveData[0].count;
-                                fillSearchbox("adve", adveData, maxCount["adve"]);
-                            }
-                            doneLoading("adve");
+                        const length = data["length"];
+                        if (length <= 0) {
+                            return;
+                        }
 
-                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Target&data_source=PubMed")
-                                .then(response => response.json())
-                                .then(data => {
-                                    targInterData = data.sub_count_list;
-                                    if (targInterData.length > 0) {
-                                        document.getElementById("linkTargetInteractions").innerText += `(${targInterData.length})`;
-                                        maxCount["targInter"] = targInterData[0].count;
-                                        fillSearchbox("targInter", targInterData, maxCount["targInter"]);
-                                    }
-                                    doneLoading("targInter");
-
-                                    fetch(url_query_sub_count + "?query=" + keyword + "+associated+?X(Species)&data_source=PubMed")// Given_Drug_Name associated ?X(Species)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            speciesData = data.sub_count_list;
-                                            if (speciesData.length > 0) {
-                                                document.getElementById("linkSpecies").innerText += `(${speciesData.length})`;
-                                                maxCount["species"] = speciesData[0].count;
-                                                fillSearchbox("species", speciesData, maxCount["species"]);
-                                            }
-                                            doneLoading("species");
-
-                                            fetch(url_query_sub_count + "?query=" + keyword + "+interacts+Drug&data_source=PubMed")
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    drugInterData = data.sub_count_list;
-                                                    if (drugInterData.length > 0) {
-                                                        document.getElementById("linkDrugInteractions").innerText += `(${drugInterData.length})`;
-                                                        maxCount["drugInter"] = drugInterData[0].count;
-                                                        fillSearchbox("drugInter", drugInterData, maxCount["drugInter"]);
-                                                    }
-                                                    doneLoading("drugInter");
-
-                                                    fetch(url_query_sub_count + "?query=" + keyword + "+method+LabMethod&data_source=PubMed")
-                                                        .then(response => response.json())
-                                                        .then(data => {
-                                                            labMethData = data.sub_count_list;
-                                                            if (labMethData.length > 0) {
-                                                                document.getElementById("linkLabMethods").innerText += `(${labMethData.length})`;
-                                                                maxCount["labMeth"] = labMethData[0].count;
-                                                                fillSearchbox("labMeth", labMethData, maxCount["labMeth"]);
-                                                            }
-                                                            doneLoading("labMeth");
-                                                        });
-                                                });
-                                        });
-                                });
-                        });
-                });
+                        document.getElementById(prefix + "Link").innerText += `(${length})`;
+                        overviews[prefix].count = data[0].count;
+                        fillSearchbox(prefix, data, overviews[prefix].count);
+                        doneLoading(prefix);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                        doneLoading(prefix);
+                    })
+            }
         })
         .catch();
 }
@@ -293,7 +258,7 @@ function indi_query_tagging(keyword, callback_indi_tagging) {
         .then(response => response.json())
         .then(data => {
             if (data.sub_count_list.length > 0) {
-                document.getElementById("linkIndications").innerText += `(${data.sub_count_list.length})`
+                document.getElementById("indiLink").innerText += `(${data.sub_count_list.length})`
                 callback_indi_tagging(null, data);
             } else {
                 doneLoading("indi");
@@ -313,10 +278,6 @@ function indi_query_chembl(keyword, callback_indi_chembl) {
 }
 
 function chembl_indications(data_tagging, data_chembl) {
-    /*console.log("tagging:")
-    console.log(data_tagging)
-    console.log("chembl:")
-    console.log(data_chembl)*/
     if (data_tagging.sub_count_list != null) {
         // Set um mit chembl abzugleichen
         var chembl_set = new Set();
@@ -353,9 +314,9 @@ function chembl_indications(data_tagging, data_chembl) {
             };
         }
     }
-    maxCount["indi"] = result[0].count;
+    indiCount = result[0].count;
     indiData = result;
-    fillSearchbox("indi", result, maxCount["indi"]);
+    fillSearchbox("indi", result, indiCount);
     doneLoading("indi");
 }
 
@@ -381,7 +342,7 @@ function searchElements(reference) {
         }
     }
     clearSearchBox(reference);
-    fillSearchbox(reference, newData, maxCount[reference]);
+    fillSearchbox(reference, newData, overviews[reference].count);
     doneLoading(reference);
 }
 
@@ -415,7 +376,7 @@ function sortElements(reference) {
     }
     //console.log(data);
     clearSearchBox(reference);
-    fillSearchbox(reference, data, maxCount[reference]);
+    fillSearchbox(reference, data, overviews[reference].count);
     doneLoading(reference);
 }
 
@@ -585,18 +546,14 @@ function hideDetail() {
 
 function getDataByReference(reference) {
     switch (reference) {
-        case "admin":
-            return adminData;
         case "indi":
             return indiData;
+        case "admin":
         case "adve":
-            return adveData;
         case "drugInter":
-            return drugInterData;
         case "targInter":
-            return targInterData;
         case "labMeth":
-            return labMethData;
+            return overviews[reference].data;
         default:
             return null;
     }
