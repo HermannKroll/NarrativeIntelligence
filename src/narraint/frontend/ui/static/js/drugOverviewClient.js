@@ -1,18 +1,19 @@
-let indiData = null;
 let newsData = null;
-
-let indiCount = 0;
 
 let currentChemblID = null;
 let currentDrugName = null;
 
 const overviews = { // prefix: {name, predicate, object, data, count}
-    admin: {predicate: "administered", object: "DosageForm", data: null, count: null},
-    targInter: {predicate: "interacts", object: "Target", data: null, count: null},
-    labMeth: {predicate: "method", object: "LabMethod", data: null, count: null},
-    species: {predicate: "associated", object: "?X(Species)", data: null, count: null},
-    drugInter: {predicate: "interacts", object: "Drug", data: null, count: null},
-    adve: {predicate: "induces", object: "Disease", data: null, count: null},
+    //dynamically created overviews
+    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: null, count: null, color: "#9189ff"},
+    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: null, count: null, color: "#b88cff"},
+    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: null, count: null, color: "#9eb8ff"},
+    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: null, count: null, color: "#b88cff"},
+    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: null, count: null, color: "#ff8181"},
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: null, count: null, color: "#aeff9a"},
+
+    //statically created overviews (add "isStatic: true")
+    indi: {name: "Indications", predicate: "treats", data: null, count: null, isStatic: true}
 }
 
 buildSite().catch((err) => console.log(err));
@@ -51,6 +52,9 @@ async function buildSite() {
         window.location = url_drug_overview_idx;
         return;
     }
+
+    createDynamicOverviews();
+
     var keyword = search.split("=")[1];
     document.getElementById('drugInput').value = decodeURI(keyword);
 
@@ -189,39 +193,107 @@ async function buildSite() {
                 });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
-            for (let prefix in overviews) {
-                const ov = overviews[prefix];
-                const url = `${url_query_sub_count}?query=${keyword}+${ov.predicate}+${ov.object}&data_source=PubMed`;
-                // use await to request one overview after the other
-                await fetch(url)
-                    .then((response) => {
-                        return response.json();
-                    })
-                    .then((json) => {
-                        const data = json["sub_count_list"];
-                        if (!data) {
-                            doneLoading(ov);
-                            return;
-                        }
-                        ov.data = data;
-
-                        const length = data["length"];
-                        if (length <= 0) {
-                            return;
-                        }
-
-                        document.getElementById(prefix + "Link").innerText += `(${length})`;
-                        overviews[prefix].count = data[0].count;
-                        fillSearchbox(prefix, data, overviews[prefix].count);
-                        doneLoading(prefix);
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                        doneLoading(prefix);
-                    })
-            }
+            await tryFillDynamicOverviews()
         })
         .catch();
+}
+
+/**
+ * Function tries to fetch specified data for each object in overviews list and
+ * fills it into the corresponding overview container.
+ * @returns {Promise<void>}
+ */
+async function tryFillDynamicOverviews() {
+    for (let prefix in overviews) {
+        // skip static overviews
+        if(overviews[prefix].isStatic) {
+            continue;
+        }
+
+        const ov = overviews[prefix];
+        const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
+        // use await to request one overview after the other
+        await fetch(url)
+            .then((response) => {
+                return response.json();
+            })
+            .then((json) => {
+                const data = json["sub_count_list"];
+                if (!data) {
+                    doneLoading(prefix);
+                    return;
+                }
+                ov.data = data;
+
+                const length = data["length"];
+                if (length <= 0) {
+                    return;
+                }
+
+                document.getElementById(prefix + "Link").innerText += `(${length})`;
+                overviews[prefix].count = data[0].count;
+                fillSearchbox(prefix);
+                doneLoading(prefix);
+            })
+            .catch((e) => {
+                console.log(e);
+                doneLoading(prefix);
+            });
+    }
+}
+
+/**
+ * Generates overview element and the navbar entry for every object in overviews
+ */
+function createDynamicOverviews() {
+    const overviewEntries = document.getElementById("overview_entries");
+    const sidebarEntries = document.getElementById("sidebar_entries");
+
+    overviewEntries.innerHtml = "";
+    sidebarEntries.innerHtml = "";
+
+    for(const prefix in overviews) {
+        //skip static overviews
+        if(overviews[prefix].isStatic) {
+            continue;
+        }
+
+        const ov = overviews[prefix];
+        const entry =
+`<div class="container searchbox" id="${prefix}Overview">
+    <div class="top_searchbox">
+        <div class="top_searchbox_left">
+            <h2>${ov.name}</h2>
+        </div>
+        <div class="top_searchbox_right" id="${prefix}Options">
+            <select class="sortbar" id="${prefix}Sort" onchange="sortElements('${prefix}')">
+                <option value="rel">Most Relevant</option>
+                <option value="alp">Alphabetical</option>
+            </select>
+            <input class="filterbar" type="text" id="${prefix}Search" placeholder="Filter..."
+                   onkeyup="searchElements('${prefix}')">
+        </div>
+    </div>
+    <div class="loading" id="${prefix}Loading">
+        <img src="${url_loading_gif}">
+    </div>
+    <div class="bottom_searchbox" id="${prefix}Content">
+    
+    </div>
+</div>`;
+
+        const row = //TODO find a way without manipulate name string...
+`<div class="link" onClick="scrollToElement('${prefix}Overview')"
+     style="background-color: ${ov.color}">
+    <div class="sidebar_entry_name">
+        ${ov.name.split(" (")[0]}
+    </div>
+    <div class="sidebar_entry_count" id="${prefix}Link"></div>
+</div>`;
+
+        overviewEntries.innerHTML += entry;
+        sidebarEntries.innerHTML += row;
+    }
 }
 
 /**
@@ -258,7 +330,7 @@ function indi_query_tagging(keyword, callback_indi_tagging) {
         .then(response => response.json())
         .then(data => {
             if (data.sub_count_list.length > 0) {
-                document.getElementById("indiLink").innerText += `(${data.sub_count_list.length})`
+                document.getElementById("indiLink").innerText += `(${data["sub_count_list"].length})`
                 callback_indi_tagging(null, data);
             } else {
                 doneLoading("indi");
@@ -278,6 +350,7 @@ function indi_query_chembl(keyword, callback_indi_chembl) {
 }
 
 function chembl_indications(data_tagging, data_chembl) {
+    const prefix = "indi";
     if (data_tagging.sub_count_list != null) {
         // Set um mit chembl abzugleichen
         var chembl_set = new Set();
@@ -314,28 +387,28 @@ function chembl_indications(data_tagging, data_chembl) {
             };
         }
     }
-    indiCount = result[0].count;
-    indiData = result;
-    fillSearchbox("indi", result, indiCount);
-    doneLoading("indi");
+    overviews[prefix].count = result[0].count;
+    overviews[prefix].data = result;
+    fillSearchbox(prefix);
+    doneLoading(prefix);
 }
 
 
 function searchElements(reference) {
     startLoading(reference);
-    var input = document.getElementById(reference + "Search").value.toUpperCase();
-    var data = getDataByReference(reference);
-    var newData = [];
-    if (input == "") {
+    const input = document.getElementById(reference + "Search").value.toUpperCase();
+    const data = getDataByReference(reference);
+    let newData = [];
+    if (input === "") {
         newData = data;
-    } else if (input.length == 1) {
-        for (var item of data) {
-            if (item.name.toUpperCase()[0] == input) {
+    } else if (input.length === 1) {
+        for (let item of data) {
+            if (item.name.toUpperCase()[0] === input) {
                 newData.push(item);
             }
         }
     } else {
-        for (var item of data) {
+        for (let item of data) {
             if (item.name.toUpperCase().includes(input)) {
                 newData.push(item);
             }
@@ -345,6 +418,7 @@ function searchElements(reference) {
     fillSearchbox(reference, newData, overviews[reference].count);
     doneLoading(reference);
 }
+
 
 function sortElements(reference) {
     startLoading(reference);
@@ -374,14 +448,20 @@ function sortElements(reference) {
             });
             break;
     }
-    //console.log(data);
+
     clearSearchBox(reference);
     fillSearchbox(reference, data, overviews[reference].count);
     doneLoading(reference);
 }
 
-function fillSearchbox(reference, data, max) {
-    searchbox = document.getElementById(reference + "Content");
+
+function fillSearchbox(reference, data = null, max = null) {
+    let searchbox = document.getElementById(reference + "Content");
+
+    if(data == null && max == null) {
+        data = overviews[reference].data;
+        max = overviews[reference].count;
+    }
 
     for (var i = 0; i < data.length; i++) {
         const item = data[i];
@@ -392,7 +472,7 @@ function fillSearchbox(reference, data, max) {
         const itemText = document.createElement('p');
         const countDiv = document.createElement('div');
         const countLink = document.createElement('a');
-        const query = getLinkToQuery(searchbox, item);
+        const query = getLinkToQuery(reference, item);
         const stringQuery = query.split('query=')[1].replaceAll('+', ' ')
 
         countLink.href = query;
@@ -436,57 +516,22 @@ function fillSearchbox(reference, data, max) {
     }
 }
 
-function getLinkToQuery(searchbox, item) {
-    var link = url_query + '?query=';
-
-    var keyword = currentDrugName;
-    keyword = keyword.split(' ').join('+');
-    link += '"' + keyword + '"';
-
-    var object = item.name;
-
-    var predicate = '+';
-    switch (searchbox.id) {
-        case "adminContent":
-            predicate += "administered";
-            break;
-        case "indiContent":
-            predicate += "treats";
-            break;
-        case "adveContent":
-            predicate += "induces";
-            break;
-        case "drugInterContent":
-            predicate += "interacts";
-            break;
-        case "targInterContent":
-            predicate += "interacts";
-            object = object.split("/")[0];
-            break;
-        case "labMethContent":
-            predicate += "method";
-            break;
-        case "speciesContent":
-            predicate += "associated";
-            object = object.split("//")[0];
-            break;
-        default:
-            break;
+function getLinkToQuery(reference, item) {
+    // return early if the prefix is not known
+    if(!(reference in overviews)) {
+        return "";
     }
-    link += predicate;
 
-    object = object.split(' ').join('+');
-    link += '+"' + object + '"';
-    return link;
+    const subject = currentDrugName.split(' ').join('+');
+    const predicate = overviews[reference].predicate;
+    const object = item.name.split("//")[0].split(' ').join('+');
+
+    return `${url_query}?query="${subject}"+${predicate}+"${object}"`;
 }
 
 function clearSearchBox(reference) {
-    searchbox = document.getElementById(reference + "Content");
-    var first = searchbox.firstElementChild;
-    while (first) {
-        first.remove();
-        first = searchbox.firstElementChild;
-    }
+    const searchbox = document.getElementById(reference + "Content");
+    searchbox.innerHTML = "";
 }
 
 function startLoading(reference) {
@@ -545,18 +590,10 @@ function hideDetail() {
 }
 
 function getDataByReference(reference) {
-    switch (reference) {
-        case "indi":
-            return indiData;
-        case "admin":
-        case "adve":
-        case "drugInter":
-        case "targInter":
-        case "labMeth":
-            return overviews[reference].data;
-        default:
-            return null;
+    if(reference in overviews) {
+        return overviews[reference].data;
     }
+    return null;
 }
 
 function colorInterpolation(r1, g1, b1, r2, g2, b2, scale) {

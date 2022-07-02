@@ -49,52 +49,7 @@
         <div class="sidebar_entry_count" id="indiLink"></div>
     </div>
 
-    <div class="link" onclick="scrollToElement('Administration')" style="background-color: #9189ff">
-        <div class="sidebar_entry_name" >
-            Administration
-        </div>
-        <div class="sidebar_entry_count" id="adminLink"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('TargetInteractions')" style="background-color: #b88cff">
-        <div class="sidebar_entry_name" >
-            Target Interactions
-        </div>
-        <div class="sidebar_entry_count" id="targInterLink"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('LabMethods')" style="background-color: #9eb8ff">
-        <div class="sidebar_entry_name" >
-            Lab Methods
-        </div>
-        <div class="sidebar_entry_count" id="labMethLink"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('Species')" style="background-color: #b88cff">
-        <div class="sidebar_entry_name" >
-            Species
-        </div>
-        <div class="sidebar_entry_count" id="speciesLink"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('DrugInteractions')" style="background-color: #ff8181">
-        <div class="sidebar_entry_name" >
-            Drug Interactions
-        </div>
-        <div class="sidebar_entry_count" id="drugInterLink"></div>
-    </div>
-
-    <div class="link" onclick="scrollToElement('AdverseEffects')" style="background-color: #aeff9a">
-        <div class="sidebar_entry_name" >
-            Adverse Effects
-        </div>
-        <div class="sidebar_entry_count" id="adveLink"></div>
-    </div>
-
-
-
-
-
+    <div id="sidebar_entries"></div>
 
     <div class="link" onclick="scrollToElement('RecentPapers')">
         <div class="sidebar_entry_name" >
@@ -181,140 +136,7 @@
         </div>
     </div>
 
-    <div class="container searchbox" id="Administration">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Administration</h2>
-            </div>
-            <div class="top_searchbox_right" id="adminOptions">
-                <select class="sortbar" id="adminSort" onchange="sortElements('admin')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="adminSearch" placeholder="Filter..."
-                       onkeyup="searchElements('admin')">
-            </div>
-        </div>
-        <div class="loading" id="adminLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="adminContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-      <div class="container searchbox" id="TargetInteractions">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Target Interactions</h2>
-            </div>
-            <div class="top_searchbox_right" id="targInterOptions">
-                <select class="sortbar" id="targInterSort" onchange="sortElements('targInter')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="targInterSearch" placeholder="Filter..."
-                       onkeyup="searchElements('targInter')">
-            </div>
-        </div>
-        <div class="loading" id="targInterLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="targInterContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-    <div class="container searchbox" id="LabMethods">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Lab Methods</h2>
-            </div>
-            <div class="top_searchbox_right" id="labMethOptions">
-                <select class="sortbar" id="labMethSort" onchange="sortElements('labMeth')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="labMethSearch" placeholder="Filter..."
-                       onkeyup="searchElements('labMeth')">
-            </div>
-        </div>
-        <div class="loading" id="labMethLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="labMethContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-    <div class="container searchbox" id="Species">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Species</h2>
-            </div>
-            <div class="top_searchbox_right" id="speciesOptions">
-                <select class="sortbar" id="speciesSort" onchange="sortElements('species')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="speciesSearch" placeholder="Filter..."
-                       onkeyup="searchElements('species')">
-            </div>
-        </div>
-        <div class="loading" id="speciesLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="speciesContent">
-            <!--Species data-->
-        </div>
-    </div>
-
-    <div class="container searchbox" id="DrugInteractions">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Drug Interactions</h2>
-            </div>
-            <div class="top_searchbox_right" id="drugInterOptions">
-                <select class="sortbar" id="drugInterSort" onchange="sortElements('drugInter')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="drugInterSearch" placeholder="Filter..."
-                       onkeyup="searchElements('drugInter')">
-            </div>
-        </div>
-        <div class="loading" id="drugInterLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="drugInterContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-
-    <div class="container searchbox" id="AdverseEffects">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Adverse Effects (Beta)</h2>
-            </div>
-            <div class="top_searchbox_right" id="adveOptions">
-                <select class="sortbar" id="adveSort" onchange="sortElements('adve')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                </select>
-                <input class="filterbar" type="text" id="adveSearch" placeholder="Filter..."
-                       onkeyup="searchElements('adve')">
-            </div>
-        </div>
-        <div class="loading" id="adveLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="adveContent">
-            <!--Indications hier einfuegen-->
-        </div>
-    </div>
-
-
+    <div id="overview_entries"></div>
     <div class="container news" id="RecentPapers">
         <h2>Recent Papers</h2>
         <div class="loading" id="newsLoading">
@@ -324,8 +146,6 @@
             <!--Papers hier einfuegen-->
         </div>
     </div>
-
-
 </div>
 
 <div class="popup" id="newsPopup">
@@ -370,7 +190,8 @@
     const url_document_graph = "{% url 'document_graph' %}";
     const url_narrative_documents = "{% url 'narrative_documents' %}";
     const url_chembl_phase = "{% static 'assets/chembl_phase_' %}";
-    const url_chembl_phase_new = "{% static 'assets/verification_new.svg' %}"
+    const url_chembl_phase_new = "{% static 'assets/verification_new.svg' %}";
+    const url_loading_gif = "{% static 'assets/loading.gif' %}";
     const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
 
     const url_drug_search = "{% url 'drug_search_log' %}";
