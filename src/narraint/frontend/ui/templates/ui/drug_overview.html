@@ -185,6 +185,50 @@
         </div>
     </div>
 </div>
+
+<!-- feedback elements -->
+<div class="feedback_button feedbackbtn" id="feedback_button"
+        onclick="openFeedback()" data-html2canvas-ignore="true" style="background-color: #3180ff">
+    <span id="feedbackbtn_text">Feedback</span>
+    <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+</div>
+<div class="popup" id="feedbackPopup">
+    <div class="feedback_window" role="document">
+        <div class="feedback_header" id="header">
+            <h3 class="">Send feedback with screenshot</h3>
+            <div onclick="closeFeedback()">
+                <img src="{% static 'assets/close.svg' %}">
+            </div>
+        </div>
+        <div class="feedback_body">
+            <div class="feedback_screen_wrap">
+                <div class="" id="screenshotContainer">
+                    <img src="null" id="screenshot"
+                         class="">
+                    <canvas class=""
+                             id="screenshotCanvas"></canvas>
+                </div>
+            </div>
+            <div class="">
+                <div class="feedback_button" onclick="resetCanvas()"
+                     style="background-color: #9f9f9f">Reset
+                </div>
+            </div>
+
+            <p>Please mark the problematic section on the image above and/or describe the problem you have
+                encountered:</p>
+            <textarea class="" id="feedbackText" rows="3"></textarea>
+        </div>
+        <div class="feedback_footer">
+            <div class="feedback_button" onclick="closeFeedback()"
+                style="background-color: #9f9f9f; margin-right: 1%">Cancel</div>
+            <div class="feedback_button" onclick="closeFeedback(true)"
+               style="background-color: #3180ff">Send Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const autocompletion_url = "{% url 'autocompletion' %}";
     const url_query = "http://narrative.pubpharm.de/";
@@ -198,6 +242,7 @@
     const url_chembl_phase_new = "{% static 'assets/verification_new.svg' %}";
     const url_loading_gif = "{% static 'assets/loading.gif' %}";
     const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
+    const url_feedback_report = "{% url 'report' %}";
 
     const url_drug_search = "{% url 'drug_search_log' %}";
     const url_substance_href = "{% url 'drug_substance_forward_log' %}";
@@ -207,8 +252,10 @@
 <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script src="{% static 'js/paper.js' %}?version=3"></script>
 <script src="{% static 'js/drugOverviewClient.js' %}?version=4"></script>
 <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=3"></script>
+<script src="{% static 'js/feedback.js' %}?version=3"></script>
 </body>
