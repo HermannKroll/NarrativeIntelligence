@@ -550,6 +550,11 @@ function fillNews(data) {
     let i = data[0].results.length;
     if (i > 0) {
         document.getElementById("linkRecentPapers").innerText += `(${i})`
+
+        let morePaper = document.getElementById("morePaperRef");
+        morePaper.href =
+            `https://www.pubpharm.de/vufind/Search/Results?lookfor=${currentDrugName}&type=AllFields`;
+        morePaper.style.display = 'block';
     }
 
     for (--i; i >= 0; i--) {
