@@ -42,13 +42,6 @@
         </div>
     </div>
 
-    <div class="link" onclick="scrollToElement('Indications')" style="background-color: #aeff9a">
-        <div class="sidebar_entry_name" >
-            Indications
-        </div>
-        <div class="sidebar_entry_count" id="indiLink"></div>
-    </div>
-
     <div id="sidebar_entries"></div>
 
     <div class="link" onclick="scrollToElement('RecentPapers')">
@@ -110,29 +103,6 @@
                 </tr>
 
             </table>
-        </div>
-    </div>
-
-    <div class="container searchbox" id="Indications">
-        <div class="top_searchbox">
-            <div class="top_searchbox_left">
-                <h2>Indications (Study Phase via ChEMBL)</h2>
-            </div>
-            <div class="top_searchbox_right" id="indiOptions">
-                <select class="sortbar" id="indiSort" onchange="sortElements('indi')">
-                    <option value="rel">Most Relevant</option>
-                    <option value="alp">Alphabetical</option>
-                    <option value="pha">Phase</option>
-                </select>
-                <input class="filterbar" type="text" id="indiSearch" placeholder="Filter..."
-                       onkeyup="searchElements('indi')">
-            </div>
-        </div>
-        <div class="loading" id="indiLoading">
-            <img src="{% static 'assets/loading.gif' %}">
-        </div>
-        <div class="bottom_searchbox" id="indiContent">
-            <!--Indications hier einfuegen-->
         </div>
     </div>
 

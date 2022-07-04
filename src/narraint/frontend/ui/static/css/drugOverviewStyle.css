@@ -409,6 +409,16 @@ p {
   padding-left: 0.5em;
   font-size: 15px;
 }
+.searchbox .top_searchbox .top_searchbox_right .showall {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5em;
+  font-size: 15px;
+}
+.searchbox .top_searchbox .top_searchbox_right .showall input {
+  height: 1.4em;
+  width: 1.4em;
+}
 .searchbox .bottom_searchbox {
   margin: 0.5em 0 0 0;
   overflow-y: auto;

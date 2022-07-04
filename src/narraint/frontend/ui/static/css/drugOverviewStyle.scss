@@ -431,6 +431,16 @@ p {
                 padding-left: 0.5em;
                 font-size: 15px;
             }
+            .showall {
+                display: flex;
+                align-items: center;
+                margin-right: 0.5em;
+                font-size: 15px;
+                input {
+                    height: 1.4em;
+                    width: 1.4em;
+                }
+            }
         }
     }
     .bottom_searchbox {

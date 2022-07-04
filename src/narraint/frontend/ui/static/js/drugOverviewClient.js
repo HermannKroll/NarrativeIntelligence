@@ -3,17 +3,86 @@ let newsData = null;
 let currentChemblID = null;
 let currentDrugName = null;
 
-const overviews = { // prefix: {name, predicate, object, data, count}
-    //dynamically created overviews
+const indiCreateCallback = () => document.getElementById("indiSort").innerHTML += ("<option value=\"pha\">Phase</option>")
+const adveCreateCallback = () => {
+    const options = document.getElementById("adveOptions");
+    const defaultHTML = options.innerHTML;
+    const newSettings =
+`<div xmlns="http://www.w3.org/1999/html" class="showall">
+    <input type="checkbox" onchange="adveChangeData()" id="adveShowAll"><label>Show All</label>
+</div>`;
+    options.innerHTML = newSettings + defaultHTML;
+};
+
+const adveDataCallback = async () => {
+    const prefix = "adve";
+    const ov = overviews[prefix];
+    const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
+    const altData = []
+    let length = 0;
+
+    await fetch(url)
+        .then((response) => {
+            return response.json();
+        })
+        .then((json) => {
+            const data = json["sub_count_list"];
+            if (!data) {
+                doneLoading(prefix);
+                return;
+            }
+            ov.data = data;
+
+            length = data["length"];
+        });
+    if (length <= 0) {
+        doneLoading(prefix);
+        return;
+    }
+
+    const indiData = overviews["indi"].data;
+    ov.data.forEach((entity) => {
+        const obj = indiData.find((element) => entity["name"] === element["name"])
+
+        //only add entities which count is higher than the one stored in
+        // indications or not contained in this array
+        if(!obj || obj["count"] < entity["count"]) {
+            altData.push(entity);
+        }
+    });
+
+    let max = 0;
+    altData.forEach((entity) => {if(max < entity["count"]) max = entity["count"]});
+
+    document.getElementById(prefix + "Link").innerText += `(${overviews[prefix].data.length})`
+
+    //swap data array with reduced data array
+    const dataCopy = overviews[prefix].data;
+    overviews[prefix].data = altData;
+
+    overviews[prefix]["altData"] = dataCopy;
+
+    fillSearchbox(prefix);
+    doneLoading(prefix);
+};
+
+/**
+ * Data structure of all overviews
+ * [DYNAMIC]
+ * prefix: {name, predicate, object, data, count, color}
+ *
+ * [STATIC]
+ * prefix: {name, predicate, object, data, count, color, isStatic: true}
+ * @type {{species: {predicate: string, data: null, color: string, name: string, count: null, object: string}, admin: {predicate: string, data: null, color: string, name: string, count: null, object: string}, labMeth: {predicate: string, data: null, color: string, name: string, count: null, object: string}, drugInter: {predicate: string, data: null, color: string, name: string, count: null, object: string}, indi: {predicate: string, isStatic: boolean, data: null, name: string, count: null}, targInter: {predicate: string, data: null, color: string, name: string, count: null, object: string}, adve: {predicate: string, data: null, color: string, name: string, count: null, object: string}}}
+ */
+const overviews = {
+    indi: {name: "Indications", predicate: "treats", data: null, count: null, color: "#aeff9a",isStatic: true, createCallback: indiCreateCallback}, //TODO object missing
     admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: null, count: null, color: "#9189ff"},
     targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: null, count: null, color: "#b88cff"},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: null, count: null, color: "#9eb8ff"},
     species: {name: "Species", predicate: "associated", object: "?X(Species)", data: null, count: null, color: "#b88cff"},
     drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: null, count: null, color: "#ff8181"},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: null, count: null, color: "#aeff9a"},
-
-    //statically created overviews (add "isStatic: true")
-    indi: {name: "Indications", predicate: "treats", data: null, count: null, isStatic: true}
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: null, count: null, color: "#aeff9a",isStatic: true, createCallback: adveCreateCallback, dataCallback: adveDataCallback}
 }
 
 buildSite().catch((err) => console.log(err));
@@ -205,12 +274,16 @@ async function buildSite() {
  */
 async function tryFillDynamicOverviews() {
     for (let prefix in overviews) {
-        // skip static overviews
-        if(overviews[prefix].isStatic) {
+        const ov = overviews[prefix];
+
+
+        // skip static overviews and call dataCallback Function
+        if(ov.isStatic) {
+            if(ov.dataCallback) {
+                await ov.dataCallback();
+            }
             continue;
         }
-
-        const ov = overviews[prefix];
         const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
         // use await to request one overview after the other
         await fetch(url)
@@ -253,11 +326,6 @@ function createDynamicOverviews() {
     sidebarEntries.innerHtml = "";
 
     for(const prefix in overviews) {
-        //skip static overviews
-        if(overviews[prefix].isStatic) {
-            continue;
-        }
-
         const ov = overviews[prefix];
         const entry =
 `<div class="container searchbox" id="${prefix}Overview">
@@ -293,6 +361,10 @@ function createDynamicOverviews() {
 
         overviewEntries.innerHTML += entry;
         sidebarEntries.innerHTML += row;
+
+        if(ov.createCallback) {
+            ov.createCallback();
+        }
     }
 }
 
@@ -306,6 +378,27 @@ function scrollToElement(element_id) {
         .getBoundingClientRect().top + window.scrollY - y_offset;
     window.scrollTo({top: pos, behavior: 'smooth'})
 }
+
+
+function adveChangeData() {
+    const prefix = "adve";
+    const ov = overviews[prefix];
+
+    //reset search text if the dataset is changed
+    document.getElementById(prefix + "Search").value = "";
+
+    clearSearchBox(prefix);
+    startLoading(prefix);
+
+    //swap data arrays
+    const altData = ov["altData"];
+    ov["altData"] = ov.data;
+    ov.data = altData;
+
+    fillSearchbox(prefix);
+    doneLoading(prefix);
+}
+
 
 function query_highlight(meta, callback_document) {
     var query = url_narrative_documents + "?documents=";
@@ -415,15 +508,15 @@ function searchElements(reference) {
         }
     }
     clearSearchBox(reference);
-    fillSearchbox(reference, newData, overviews[reference].count);
+    fillSearchbox(reference, newData);
     doneLoading(reference);
 }
 
 
 function sortElements(reference) {
     startLoading(reference);
-    var select = document.getElementById(reference + "Sort");
-    var data = getDataByReference(reference);
+    const select = document.getElementById(reference + "Sort");
+    const data = getDataByReference(reference);
     document.getElementById(reference + "Search").value = "";
     switch (select.value) {
         case "rel":
@@ -450,18 +543,21 @@ function sortElements(reference) {
     }
 
     clearSearchBox(reference);
-    fillSearchbox(reference, data, overviews[reference].count);
+    fillSearchbox(reference, data);
     doneLoading(reference);
 }
 
 
-function fillSearchbox(reference, data = null, max = null) {
-    let searchbox = document.getElementById(reference + "Content");
-
-    if(data == null && max == null) {
+function fillSearchbox(reference, data = null) {
+    const searchbox = document.getElementById(reference + "Content");
+    if(data == null) {
         data = overviews[reference].data;
-        max = overviews[reference].count;
     }
+
+    // TODO try to calculate this once and not every time the visualized
+    //  data is changed?
+    let max = 0;
+    data.forEach((entity) => {if(max < entity["count"]) max = entity["count"]});
 
     for (var i = 0; i < data.length; i++) {
         const item = data[i];
