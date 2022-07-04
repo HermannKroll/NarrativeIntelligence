@@ -57,10 +57,11 @@ const adveDataCallback = async () => {
     document.getElementById(prefix + "Link").innerText += `(${overviews[prefix].data.length})`
 
     //swap data array with reduced data array
-    const dataCopy = overviews[prefix].data;
+    const fullData = overviews[prefix].data;
     overviews[prefix].data = altData;
+    overviews[prefix]["altData"] = fullData;
 
-    overviews[prefix]["altData"] = dataCopy;
+    overviews[prefix].count = fullData[0]["count"];
 
     fillSearchbox(prefix);
     doneLoading(prefix);
@@ -550,14 +551,11 @@ function sortElements(reference) {
 
 function fillSearchbox(reference, data = null) {
     const searchbox = document.getElementById(reference + "Content");
+    const maxCount = overviews[reference].count;
+
     if(data == null) {
         data = overviews[reference].data;
     }
-
-    // TODO try to calculate this once and not every time the visualized
-    //  data is changed?
-    let max = 0;
-    data.forEach((entity) => {if(max < entity["count"]) max = entity["count"]});
 
     for (var i = 0; i < data.length; i++) {
         const item = data[i];
@@ -579,7 +577,7 @@ function fillSearchbox(reference, data = null) {
         itemTextLink.style.textDecoration = "none";
         itemTextLink.style.color = "inherit";
         itemTextLink.target = "_blank";
-        let scale = Math.log10(item.count) / Math.log10(max);
+        let scale = Math.log10(item.count) / Math.log10(maxCount);
         scale = (isNaN(scale)) ? 1 : scale; //scale can be NaN (div by 0) - set it to 1
         countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
         countDiv.classList.add("count");
