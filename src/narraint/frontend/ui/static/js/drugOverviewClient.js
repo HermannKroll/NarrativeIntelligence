@@ -3,87 +3,21 @@ let newsData = null;
 let currentChemblID = null;
 let currentDrugName = null;
 
-const indiCreateCallback = () => document.getElementById("indiSort").innerHTML += ("<option value=\"pha\">Phase</option>")
-const adveCreateCallback = () => {
-    const options = document.getElementById("adveOptions");
-    const defaultHTML = options.innerHTML;
-    const newSettings =
-`<div xmlns="http://www.w3.org/1999/html" class="showall">
-    <input type="checkbox" onchange="adveChangeData()" id="adveShowAll"><label>Show All</label>
-</div>`;
-    options.innerHTML = newSettings + defaultHTML;
-};
-
-const adveDataCallback = async () => {
-    const prefix = "adve";
-    const ov = overviews[prefix];
-    const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
-    const altData = []
-    let length = 0;
-
-    await fetch(url)
-        .then((response) => {
-            return response.json();
-        })
-        .then((json) => {
-            const data = json["sub_count_list"];
-            if (!data) {
-                doneLoading(prefix);
-                return;
-            }
-            ov.data = data;
-
-            length = data["length"];
-        });
-    if (length <= 0) {
-        doneLoading(prefix);
-        return;
-    }
-
-    const indiData = overviews["indi"].data;
-    ov.data.forEach((entity) => {
-        const obj = indiData.find((element) => entity["name"] === element["name"])
-
-        //only add entities which count is higher than the one stored in
-        // indications or not contained in this array
-        if(!obj || obj["count"] < entity["count"]) {
-            altData.push(entity);
-        }
-    });
-
-    let max = 0;
-    altData.forEach((entity) => {if(max < entity["count"]) max = entity["count"]});
-
-    document.getElementById(prefix + "Link").innerText += `(${overviews[prefix].data.length})`
-
-    //swap data array with reduced data array
-    const fullData = overviews[prefix].data;
-    overviews[prefix].data = altData;
-    overviews[prefix]["altData"] = fullData;
-
-    overviews[prefix].count = fullData[0]["count"];
-
-    fillSearchbox(prefix);
-    doneLoading(prefix);
-};
-
 /**
  * Data structure of all overviews
- * [DYNAMIC]
- * prefix: {name, predicate, object, data, count, color}
+ * prefix: {name, predicate, object, data, count, color, ...}
  *
- * [STATIC]
- * prefix: {name, predicate, object, data, count, color, isStatic: true}
- * @type {{species: {predicate: string, data: null, color: string, name: string, count: null, object: string}, admin: {predicate: string, data: null, color: string, name: string, count: null, object: string}, labMeth: {predicate: string, data: null, color: string, name: string, count: null, object: string}, drugInter: {predicate: string, data: null, color: string, name: string, count: null, object: string}, indi: {predicate: string, isStatic: boolean, data: null, name: string, count: null}, targInter: {predicate: string, data: null, color: string, name: string, count: null, object: string}, adve: {predicate: string, data: null, color: string, name: string, count: null, object: string}}}
+ * createCallback: gets called after creating the overview to change it
+ * dataCallback: gets called before data insertion to change the dataset
  */
 const overviews = {
-    indi: {name: "Indications", predicate: "treats", data: null, count: null, color: "#aeff9a",isStatic: true, createCallback: indiCreateCallback}, //TODO object missing
-    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: null, count: null, color: "#9189ff"},
-    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: null, count: null, color: "#b88cff"},
-    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: null, count: null, color: "#9eb8ff"},
-    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: null, count: null, color: "#b88cff"},
-    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: null, count: null, color: "#ff8181"},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: null, count: null, color: "#aeff9a",isStatic: true, createCallback: adveCreateCallback, dataCallback: adveDataCallback}
+    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: indiCreateCallback, dataCallback: indiDataCallback},
+    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: [], count: 0, color: "#9189ff"},
+    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: "#b88cff"},
+    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: "#9eb8ff"},
+    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: "#b88cff"},
+    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: [], count: 0, color: "#ff8181"},
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: adveCreateCallback, dataCallback: adveDataCallback},
 }
 
 buildSite().catch((err) => console.log(err));
@@ -160,13 +94,6 @@ async function buildSite() {
             currentDrugName = keyword;
             currentChemblID = chemblid;
             console.log("Translated Chembl id: " + chemblid)
-
-            async.parallel([
-                async.apply(indi_query_tagging, keyword),
-                async.apply(indi_query_chembl, keyword)
-            ], function (err, indi_result) {
-                chembl_indications(indi_result[0], indi_result[1]);
-            });
 
             fetch(url_query_document_ids_for_entity + "?entity_id=" + chemblid + "&entity_type=Drug&data_source=PubMed")
                 .then(response => response.json())
@@ -263,7 +190,7 @@ async function buildSite() {
                 });//just give something to the user, so we can proceed
 
             /* fill the container with fetched tags */
-            await tryFillDynamicOverviews()
+            await getOverviewData()
         })
         .catch();
 }
@@ -273,46 +200,48 @@ async function buildSite() {
  * fills it into the corresponding overview container.
  * @returns {Promise<void>}
  */
-async function tryFillDynamicOverviews() {
+async function getOverviewData() {
     for (let prefix in overviews) {
         const ov = overviews[prefix];
 
-
-        // skip static overviews and call dataCallback Function
-        if(ov.isStatic) {
-            if(ov.dataCallback) {
-                await ov.dataCallback();
-            }
-            continue;
-        }
         const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
         // use await to request one overview after the other
-        await fetch(url)
+        const data = await fetch(url)
             .then((response) => {
                 return response.json();
             })
             .then((json) => {
-                const data = json["sub_count_list"];
-                if (!data) {
-                    doneLoading(prefix);
-                    return;
-                }
-                ov.data = data;
-
-                const length = data["length"];
-                if (length <= 0) {
-                    return;
-                }
-
-                document.getElementById(prefix + "Link").innerText += `(${length})`;
-                overviews[prefix].count = data[0].count;
-                fillSearchbox(prefix);
-                doneLoading(prefix);
+                return json["sub_count_list"];
             })
             .catch((e) => {
                 console.log(e);
-                doneLoading(prefix);
+                return null;
             });
+
+        // check if fetch failed to load data
+        if (!data) {
+            doneLoading(prefix);
+            continue;
+        }
+        // check if the received data is invalid
+
+        const length = data["length"];
+        if (length <= 0) {
+            doneLoading(prefix);
+            continue;
+        }
+        overviews[prefix].data = data;
+        overviews[prefix].count = data[0].count;
+
+        document.getElementById(prefix + "Link").innerText += `(${length})`;
+
+        //manipulate data if needed
+        if(ov.dataCallback) {
+            await ov.dataCallback();
+        }
+
+        fillSearchbox(prefix);
+        doneLoading(prefix);
     }
 }
 
@@ -363,11 +292,76 @@ function createDynamicOverviews() {
         overviewEntries.innerHTML += entry;
         sidebarEntries.innerHTML += row;
 
+        // change overview elements if needed
         if(ov.createCallback) {
             ov.createCallback();
         }
     }
 }
+
+
+function indiCreateCallback() {
+    document.getElementById("indiSort").innerHTML += ("<option value=\"pha\">Phase</option>");
+}
+
+
+function adveCreateCallback() {
+    const options = document.getElementById("adveOptions");
+    const defaultHTML = options.innerHTML;
+    const newSettings =
+`<div xmlns="http://www.w3.org/1999/html" class="showall">
+    <input type="checkbox" onchange="adveSwapData()" id="adveShowAll"><label>Show All</label>
+</div>`;
+    options.innerHTML = newSettings + defaultHTML;
+}
+
+
+async function indiDataCallback() {
+    const prefix = "indi";
+    const data = overviews[prefix].data;
+
+    const chemblData = await fetch(`https://www.ebi.ac.uk/chembl/api/data/drug_indication?molecule_chembl_id=${currentChemblID}&limit=2500&format=json`)
+        .then((result) => {
+            return result.json();
+        })
+        .then((data) => {return data["drug_indications"]});
+
+    // match equivalent entities and add chembl phase
+    for(let idx in data) {
+        let entity = chemblData.find((e) => e["mesh_id"] === data[idx]["id"].split(":")[1]);
+        if(entity) {
+            data[idx].max_phase_for_ind = entity.max_phase_for_ind;
+        } else {
+            data[idx].max_phase_for_ind = -1;
+        }
+    }
+}
+
+
+async function adveDataCallback() {
+    const prefix = "adve";
+    const ov = overviews[prefix];
+    const altData = []
+
+    const indiData = overviews["indi"].data;
+    ov.data.forEach((entity) => {
+        const obj = indiData.find((element) => entity["name"] === element["name"])
+
+        //only add entities which count is greater than the one stored in
+        // indications or not contained in it
+        if(!obj || obj["count"] < entity["count"]) {
+            altData.push(entity);
+        }
+    });
+
+    //swap data array with reduced data array
+    const fullData = overviews[prefix].data;
+    overviews[prefix].data = altData;
+    overviews[prefix]["altData"] = fullData;
+
+    overviews[prefix].count = fullData[0]["count"];
+}
+
 
 /**
  * Scroll the window to the element specified by the parameter 'element_id'.
@@ -381,7 +375,7 @@ function scrollToElement(element_id) {
 }
 
 
-function adveChangeData() {
+function adveSwapData() {
     const prefix = "adve";
     const ov = overviews[prefix];
 
@@ -403,88 +397,17 @@ function adveChangeData() {
 
 function query_highlight(meta, callback_document) {
     var query = url_narrative_documents + "?documents=";
-    //console.log(meta)
     for (var i = 0; i < meta.length; ++i) {
         query += meta[i] + ";";
     }
     query = query.substring(0, query.length - 1);
     query += "&data_source=PubMed";
-    //console.log(query)
+
     fetch(query)
         .then(response => response.json())
         .then(data => {
-            //console.log(data)
             callback_document(null, data);
         });
-}
-
-function indi_query_tagging(keyword, callback_indi_tagging) {
-    var query = url_query_sub_count + "?query=" + keyword + "+treats+Disease&data_source=PubMed";
-    fetch(query)
-        .then(response => response.json())
-        .then(data => {
-            if (data.sub_count_list.length > 0) {
-                document.getElementById("indiLink").innerText += `(${data["sub_count_list"].length})`
-                callback_indi_tagging(null, data);
-            } else {
-                doneLoading("indi");
-            }
-
-        });
-}
-
-function indi_query_chembl(keyword, callback_indi_chembl) {
-    //TODO: ändern wenn query funktioniert
-    var query = url_query_chembl_indication + "?drug=" + keyword;
-    fetch(query)
-        .then(response => response.json())
-        .then(data => {
-            callback_indi_chembl(null, data);
-        });
-}
-
-function chembl_indications(data_tagging, data_chembl) {
-    const prefix = "indi";
-    if (data_tagging.sub_count_list != null) {
-        // Set um mit chembl abzugleichen
-        var chembl_set = new Set();
-        var phase_dict = {};
-        for (var i = 0; i < data_chembl.results.length; i++) {
-            if (data_chembl.results[i].mesh_id != null) {
-                var chemblDisease = data_chembl.results[i].mesh_id;
-                chembl_set.add(chemblDisease);
-                if (data_chembl.results[i].max_phase_for_ind != null) {
-                    phase_dict[chemblDisease] = data_chembl.results[i].max_phase_for_ind;
-                }
-            }
-        }
-    }
-    //format into json
-    var result = [];
-    for (var i = 0; i < data_tagging.sub_count_list.length; i++) {
-        var taggingDisease = data_tagging.sub_count_list[i].id;
-
-        if (chembl_set.has(taggingDisease) && taggingDisease in phase_dict) {
-            result[i] = {
-                "name": data_tagging.sub_count_list[i].name,
-                "count": data_tagging.sub_count_list[i].count,
-                "max_phase_for_ind": phase_dict[taggingDisease],
-                "id": taggingDisease
-            };
-
-        } else {
-            result[i] = {
-                "name": data_tagging.sub_count_list[i].name,
-                "count": data_tagging.sub_count_list[i].count,
-                "max_phase_for_ind": -1,
-                "id": taggingDisease
-            };
-        }
-    }
-    overviews[prefix].count = result[0].count;
-    overviews[prefix].data = result;
-    fillSearchbox(prefix);
-    doneLoading(prefix);
 }
 
 
