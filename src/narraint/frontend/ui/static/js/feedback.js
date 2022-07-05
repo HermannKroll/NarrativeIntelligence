@@ -12,7 +12,7 @@ async function openFeedback() {
 
     await new Promise(r => setTimeout(r, 10));
 
-    let canvas = await html2canvas(document.body, {scrollX: 0, scrollY: 0})
+    let canvas = await html2canvas(document.body, {scrollX: 0, scrollY: 0, logging:false})
 
     const base64image = canvas.toDataURL("image/png");
     const screenshot = document.getElementById("screenshot");
