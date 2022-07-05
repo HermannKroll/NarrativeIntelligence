@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+
+{% block title %}Narrative Information Access to Political Sciences{% endblock %}
+
+{% block content %}
+
+
+
+    <div class="container">
+        <h3>Query:</h3>
+        <textarea name="textarea" rows="10" cols="100" id="id_query"></textarea>
+        <h3>Parameters:</h3>
+        <label for="confidence_range" class="form-label">Confidence</label>
+        <label id="confidence_value">0.9</label>
+        <input type="range" class="form-range" id="confidence_range" value="0.9" min="0" max="1" step="0.1"
+               oninput="confidence_value.innerHTML=confidence_range.value"/>
+        <button class="btn btn-primary" onclick="ps_search();" id="btn_search">Search</button>
+
+    </div>
+    <div class="container">
+        <h1>Results:</h1>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        const ps_search_url = "{% url 'ps_query' %}";
+    </script>
+
+    <script src="{% static 'js/ps_search.js' %}?version=1" type="text/javascript"></script>
+
+
+{% endblock %}

@@ -241,7 +241,8 @@ def get_term_to_entity(request):
             if expand_by_prefix_str == "false":
                 expand_by_prefix = False
         try:
-            entities = View.instance().translation.convert_text_to_entity(term, expand_search_by_prefix=expand_by_prefix)
+            entities = View.instance().translation.convert_text_to_entity(term,
+                                                                          expand_search_by_prefix=expand_by_prefix)
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
@@ -865,6 +866,30 @@ class DrugOverviewIndexView(TemplateView):
 
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
+
+
+# invokes Django to compress the results
+@gzip_page
+def get_ps_query(request):
+    if request.GET.keys() & {"query", "confidence"}:
+        query = request.GET["query"].strip()
+        confidence = request.GET["confidence"]
+        try:
+            confidence = float(confidence)
+            logging.info('Received political sciences query...')
+            logging.info(f'Search with conf. {confidence} for query: {query}')
+            return JsonResponse(status=200, data=dict(reason="query or confidence are missing"))
+        except ValueError:
+            return JsonResponse(status=500, data=dict(reason=f"confidence must be a float (not {confidence}"))
+    else:
+        return JsonResponse(status=500, data=dict(reason="query or confidence are missing"))
+
+
+class PoliticalSciencesView(TemplateView):
+    template_name = "ui/political_sciences.html"
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 logging.info('Initialize view')
