@@ -19,7 +19,9 @@
 </div>
 
 <div class="navbar">
-    <div class="nav_spacer"></div>
+    <div class="nav_spacer">
+        <!-- Impressum -->
+    </div>
 
     <div class="searchbar">
         <input type="text" id='drugInput' placeholder="Search for Drug...">
@@ -29,9 +31,10 @@
         <!--Website bauen on click-->
     </div>
 
-    <a class="ifislogo" href="http://www.ifis.cs.tu-bs.de/">
-        <img class="img" src="{% static 'assets/ifislogo.png' %}" >
-    </a>
+    <div class="nav_logos">
+        <a href="https://www.pubpharm.de"><img src="{% static 'fid_logo.png'%}" height="50px" alt="FID Logo"></a>
+        <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'assets/ifislogo.png' %}" height="50px" alt="Ifis Logo"></a>
+    </div>
 </div>
 
 <div class="sidebar">

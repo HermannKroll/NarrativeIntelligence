@@ -158,22 +158,24 @@ p {
     .searchbar {
         width: 35em;
         margin: 0.6em 0 0.6em 0;
+        display: flex;
+        place-content: space-around;
+        height: 2.5em;
+        flex-wrap: nowrap;
     }
 
     .nav_spacer {
         margin-right: auto;
-        width: 160pt;
+        width: 25%;
     }
-}
 
-.ifislogo {
-    height: inherit;
-    margin-left: auto;
-
-    .img {
-        height: 90%;
-        margin: 0.15em;
-        width: auto;
+    .nav_logos {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        margin-left: auto;
+        height: 100%;
+        padding: 0.2em;
     }
 }
 
@@ -270,11 +272,16 @@ p {
     }
 
     .navbar{
-        display: inline-flex;
+        display: flex;
+        flex-wrap: wrap-reverse;
         width: 100%;
+        height: fit-content;
         .nav_spacer {
-            margin-right: auto;
-            width: 25%;
+            display: none;
+        }
+
+        .button {
+            min-width: 2.2em;
         }
 
         .searchbar {
@@ -282,14 +289,11 @@ p {
             width: 50%;
             place-content: space-around;
             flex-wrap: nowrap;
+            max-height: 2.5em;
         }
 
-        .ifislogo {
-            width: 25%;
-            .img {
-                height: 60%;
-                margin-top: 0.7em;
-            }
+        .nav_logos {
+            margin: auto;
         }
     }
 
@@ -301,6 +305,7 @@ p {
             }
             .top_searchbox_right {
                 flex-wrap: wrap;
+                flex-direction: column;
             }
         }
     }
