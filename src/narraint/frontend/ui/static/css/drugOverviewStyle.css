@@ -133,13 +133,28 @@ p {
   height: 3.5em;
   width: 100%;
   display: flex;
-  justify-content: flex-end;
   background-color: var(--grey_light1);
   position: fixed;
   top: 0;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+#impressum {
+  display: flex;
+  align-items: center;
+  margin-left: 1%;
+  position: relative;
+}
+#impressum a {
+  border-radius: 0.25em;
+  padding: 0.6em 0.6em;
+  text-decoration: none;
+  color: #858585;
+}
+#impressum a:hover {
+  background-color: whitesmoke;
 }
 
 .navbar {
@@ -261,7 +276,7 @@ p {
 
   .navbar {
     display: flex;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     width: 100%;
     height: fit-content;
   }
@@ -277,9 +292,17 @@ p {
     place-content: space-around;
     flex-wrap: nowrap;
     max-height: 2.5em;
+    margin-left: auto;
+    margin-right: auto;
   }
-  .navbar .nav_logos {
-    margin: auto;
+  .navbar :nth-child(1) {
+    order: 1;
+  }
+  .navbar :nth-child(2) {
+    order: 3;
+  }
+  .navbar :nth-child(3) {
+    order: 2;
   }
 
   .searchbox .top_searchbox {
@@ -449,6 +472,7 @@ p {
   display: flex;
   align-items: center;
   margin-left: 0.5em;
+  position: relative;
 }
 .searchbox .bottom_searchbox div .phase img {
   width: 1.25em;
