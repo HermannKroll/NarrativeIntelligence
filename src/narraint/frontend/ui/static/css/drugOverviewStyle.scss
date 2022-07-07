@@ -223,10 +223,12 @@ p {
         width: 77%;
         text-overflow: ellipsis;
         overflow: hidden;
+        position: relative;
     }
 
     .sidebar_entry_count {
         width: 23%;
+        position: relative;
     }
 }
 
@@ -470,6 +472,7 @@ p {
                 display: flex;
                 align-items: center;
                 margin-left: 0.5em;
+                position: relative;
 
                 img {
                     width: 1.25em;
