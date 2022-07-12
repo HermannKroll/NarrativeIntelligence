@@ -116,6 +116,8 @@ p {
     .button {
         background-color: var(--action_green);
         width: 15%;
+        min-width: 3em;
+        max-width: 8em;
         cursor: pointer;
         display: flex;
         border-width: 1px 1px 1px 0px;
@@ -151,11 +153,10 @@ p {
     position: relative;
 
     a {
-        //align-self: center;
         border-radius: 0.25em;
         padding: 0.6em 0.6em;
         text-decoration: none;
-        color: #858585;
+        color: #006dae;
     }
     a:hover {
         background-color: whitesmoke;
