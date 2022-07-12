@@ -116,6 +116,8 @@ p {
     .button {
         background-color: var(--action_green);
         width: 15%;
+        min-width: 3em;
+        max-width: 8em;
         cursor: pointer;
         display: flex;
         border-width: 1px 1px 1px 0px;
