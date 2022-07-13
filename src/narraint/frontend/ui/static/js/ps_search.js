@@ -40,6 +40,8 @@ const ps_search = (event) => {
     request.done(function (response) {
         setButtonSearching(false);
         console.log(response);
+
+        document.getElementById("id_results").value =  JSON.stringify(response, null, 4);
     });
 
     request.fail(function (result) {

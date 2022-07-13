@@ -11,6 +11,7 @@ from io import BytesIO
 from json import JSONDecodeError
 
 import psycopg2
+import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -893,7 +894,10 @@ def get_ps_query(request):
             confidence = float(confidence)
             logging.info('Received political sciences query...')
             logging.info(f'Search with conf. {confidence} for query: {query}')
-            return JsonResponse(status=200, data=dict(reason="query or confidence are missing"))
+            nd_result = requests.get(f"http://127.0.0.1:5000//query?confidence={confidence}&query_str={query}")
+            json_data = nd_result.json()
+            if nd_result.status_code == 200:
+                return JsonResponse(status=200, data=json_data)
         except ValueError:
             return JsonResponse(status=500, data=dict(reason=f"confidence must be a float (not {confidence}"))
     else:
