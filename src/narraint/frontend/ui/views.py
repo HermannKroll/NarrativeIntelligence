@@ -8,6 +8,7 @@ import traceback
 from collections import defaultdict
 from datetime import datetime
 from io import BytesIO
+from json import JSONDecodeError
 
 import psycopg2
 from PIL import Image
@@ -732,48 +733,62 @@ def get_paper_view_log(request):
     return HttpResponse(status=500)
 
 
-def get_drug_ov_search_log(request):
-    if request.GET.keys() & {"drug"}:
-        drug = str(request.GET["drug"]).strip()
+def post_drug_ov_search_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
 
+    if data and data.keys() & {"drug"}:
+        drug = data["drug"]
         try:
             View.instance().query_logger.write_drug_ov_search(drug)
         except IOError:
             logging.debug('Could not write drug searched log file')
-
         return HttpResponse(status=200)
     return HttpResponse(status=500)
 
 
-def get_drug_ov_subst_href_log(request):
-    if request.GET.keys() & {"drug", "substance", "query"}:
-        drug = str(request.GET["drug"]).strip()
-        substance = str(request.GET["substance"]).strip()
-        query = str(request.GET["query"]).strip()
+def post_drug_ov_subst_href_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
 
+    if data and data.keys() & {"drug", "substance", "query"}:
+        drug = data["drug"]
+        substance = data["substance"]
+        query = data["query"]
         try:
             View.instance().query_logger.write_drug_ov_substance_href(drug, substance, query)
         except IOError:
             logging.debug('Could not write substance href log file')
-
         return HttpResponse(status=200)
     return HttpResponse(status=500)
 
 
-def get_drug_ov_chembl_phase_href_log(request):
-    if request.GET.keys() & {"drug", "disease_name", "disease_id", "query", "phase"}:
-        drug = str(request.GET["drug"]).strip()
-        disease_name = str(request.GET["disease_name"]).strip()
-        disease_id = str(request.GET["disease_id"]).strip()
-        query = str(request.GET["query"]).strip()
-        phase = str(request.GET["phase"]).strip()
+def post_drug_ov_chembl_phase_href_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
 
+    if data and data.keys() & {"drug", "disease_name", "disease_id", "query", "phase"}:
+        drug = data["drug"]
+        disease_name = data["disease_name"]
+        disease_id = data["disease_id"]
+        phase = data["phase"]
+        query = data["query"]
         try:
-            View.instance().query_logger.write_drug_ov_chembl_phase_href(
-                drug, disease_name, disease_id, phase, query)
+            View.instance().query_logger.write_drug_ov_chembl_phase_href(drug, disease_name, disease_id, phase, query)
         except IOError:
             logging.debug('Could not write chembl phase href log file')
-
         return HttpResponse(status=200)
     return HttpResponse(status=500)
 

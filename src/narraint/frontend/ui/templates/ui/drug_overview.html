@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 
 <!DOCTYPE html>
 <html>
@@ -220,6 +221,8 @@
     const url_drug_search = "{% url 'drug_search_log' %}";
     const url_substance_href = "{% url 'drug_substance_forward_log' %}";
     const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 </script>
 
 <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>

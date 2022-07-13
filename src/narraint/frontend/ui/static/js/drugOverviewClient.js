@@ -633,28 +633,56 @@ function rgb(r, g, b) {
  * Send drug-search logging information to backend
  */
 function logDrugSearch(drug) {
-    const url = url_drug_search + '?drug=' + drug;
-    fetch(url).catch();
+    const request = new Request(
+        url_drug_search,
+        {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify({drug: drug})
+        }
+    );
+    fetch(request).catch(e => console.log(e))
 }
 
 /**
  * Send substation/interaction-clicked logging information to backend
  */
 function logSubstanceHref(drug, substance, query) {
-    const url = url_substance_href + '?drug=' + drug
-        + '&substance=' + substance
-        + '&query=' + query;
-    fetch(url).catch();
+    const request = new Request(
+        url_substance_href,
+        {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify({
+                drug: drug,
+                substance: substance,
+                query: query
+            })
+        }
+    );
+    fetch(request).catch(e => console.log(e))
 }
 
 /**
  * Send chembl-phase-id-clicked logging information to backend
  */
 function logChemblPhaseHref(drug, disease_name, disease_id, query, phase) {
-    const url = url_chembl_phase_href + '?drug=' + drug
-        + '&disease_name=' + disease_name
-        + '&disease_id=' + disease_id
-        + '&query=' + query
-        + '&phase=' + phase;
-    fetch(url).catch();
+    const request = new Request(
+        url_chembl_phase_href,
+        {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify({
+                drug: drug,
+                disease_name: disease_name,
+                disease_id: disease_id,
+                query: query,
+                phase: phase
+            })
+        }
+    );
+    fetch(request).catch(e => console.log(e))
 }
