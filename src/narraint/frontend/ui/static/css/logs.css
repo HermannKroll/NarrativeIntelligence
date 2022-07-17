@@ -45,20 +45,16 @@ body, html {
 }
 
 .tableFixHead {
+  margin: 25px 0;
   overflow: auto;
   height: 400px;
 }
 
-.tableFixHead thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
 .queryTable {
+  width: 450px;
+  overflow: auto;
   border-spacing: 0;
   border-radius: 15px;
-  margin: 25px 0;
   font-size: 0.9em;
   min-width: 400px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -73,12 +69,21 @@ body, html {
 }
 
 .queryTable thead tr {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   background-color: #009879;
   color: #ffffff;
   text-align: left;
 }
 
-.queryTable th,
+.queryTable th {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 15px;
+}
+
 .queryTable td {
   padding: 12px 15px;
 }
