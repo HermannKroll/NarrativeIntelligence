@@ -69,7 +69,6 @@ function load_usage_graph(data, y_label) {
     canvas.setAttribute("id", "myChart");
     chartDiv.appendChild(canvas);
     let values = getValues(data["365"]);
-    console.log(getValues(data["31"]));
     createGraph(values[0], values[1], canvas, y_label);
     usage.appendChild(chartDiv);
     graphInput.oninput = function() {
@@ -154,8 +153,6 @@ function getValues(data) {
     let y_values = [];
     let values = [];
     for (let obj in data) {
-        console.log(obj);
-        console.log(data[obj]);
         x_values.push(obj);
         y_values.push(data[obj]);
     }
