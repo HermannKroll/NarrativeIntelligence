@@ -178,6 +178,20 @@ class SubstitutionGroupRating(Extended, DatabaseTable):
         session.execute(insert_stmt)
         session.commit()
 
+    @staticmethod
+    def query_subgroup_ratings_as_dicts(session):
+        query = session.query(SubstitutionGroupRating)
+        if not query:
+            return dict()
+        for res in query:
+            yield dict(variable_name=res.variable_name,
+                       entity_name=res.entity_name,
+                       entity_id=res.entity_id,
+                       entity_type=res.entity_type,
+                       query=res.query,
+                       user_id=res.user_id,
+                       rating=res.rating)
+
 
 class DrugKeywords(Extended, DatabaseTable):
     __tablename__ = "drug_keywords"
