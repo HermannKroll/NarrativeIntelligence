@@ -12,11 +12,11 @@ function load_data(data) {
     let narrative = data["narrative"];
     let overview = data["overview"];
     load_title("Narrative Service");
-    load_top_querystring(narrative["topTenQueries"], "Top 10 searched queries");
+    load_top_querystring(narrative["topTenQueries"], "Top 100 searched queries");
     load_performed_queries(narrative["amountQueries"], "Performed Queries");
     load_usage_graph(narrative['graphInput'], "performed queries");
     load_title("Drug Overviews");
-    load_top_querystring(overview["topTenQueries"], "Top 10 searches");
+    load_top_querystring(overview["topTenQueries"], "Top 100 searches");
     load_performed_queries(overview["amountQueries"], "Performed searches");
     load_usage_graph(overview['graphInput'], "performed searches");
 }
