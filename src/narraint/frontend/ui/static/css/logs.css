@@ -47,7 +47,8 @@ body, html {
 .tableFixHead {
   margin: 25px 0;
   overflow: auto;
-  height: 400px;
+  min-height: 100px;
+  max-height: 400px;
 }
 
 .queryTable {

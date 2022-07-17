@@ -170,6 +170,8 @@ function load_performed_queries(data,title) {
     performedQueries.className = "section";
     let titlePQ = document.createElement("h2");
     titlePQ.innerHTML = title;
+    let fixTableHeads = document.createElement("div");
+    fixTableHeads.className = "tableFixHead";
     let amountTable = document.createElement("table");
     amountTable.className = "queryTable";
     let tHeader = document.createElement("thead");
@@ -209,7 +211,8 @@ function load_performed_queries(data,title) {
     }
     amountTable.appendChild(tbody);
     performedQueries.appendChild(titlePQ);
-    performedQueries.appendChild(amountTable);
+    fixTableHeads.appendChild(amountTable)
+    performedQueries.appendChild(fixTableHeads);
     db.appendChild(performedQueries);
 }
 
