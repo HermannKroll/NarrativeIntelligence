@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 
 <!DOCTYPE html>
 <html>
@@ -45,6 +46,7 @@
 <script>
     const url_document_graph = "{% url 'document_graph' %}";
     const url_narrative_documents = "{% url 'narrative_documents' %}";
+    const url_paper_view_log = "{% url 'paper_view_log' %}";
 
     document.getElementById('newsPopup').style.display = 'none';
 
@@ -53,6 +55,7 @@
     let document_id = urlParams.get('document_id');
     let data_source = urlParams.get("data_source");
 
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     queryAndFilterPaperDetail(document_id, data_source);
 </script>

@@ -141,9 +141,19 @@ function fillPaperDetail(contentData) {
 
 
 function sendPaperViewLog(docID) {
-    const url = `/paper_view_log?doc_id=${docID}&doc_collection=${documentCollection}`
-
-    fetch(url).catch();
+    const request = new Request(
+        url_paper_view_log,
+        {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify({
+                doc_id: docID,
+                doc_collection: documentCollection,
+            })
+        }
+    );
+    fetch(request).catch(e => console.log(e))
 }
 
 

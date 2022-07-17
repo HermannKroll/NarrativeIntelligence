@@ -636,15 +636,21 @@ def get_provenance(request):
         return HttpResponse(status=500)
 
 
-def get_feedback(request):
-    if "predicationids" in request.GET and "query" in request.GET and "rating" in request.GET and \
-            "userid" in request.GET:
+def post_feedback(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"query", "rating", "userid", "predicationids"}:
         try:
             time_start = datetime.now()
-            predication_ids = str(request.GET.get("predicationids", "").strip())
-            query = str(request.GET.get("query", "").strip())
-            rating = str(request.GET.get("rating", "").strip())
-            userid = str(request.GET.get("userid", "").strip())
+            predication_ids = data["predicationids"]
+            query = data["query"]
+            rating = data["rating"]
+            userid = data["userid"]
 
             session = SessionExtended.get()
             for pred_id in predication_ids.split(','):
@@ -662,23 +668,28 @@ def get_feedback(request):
             View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
-    else:
-        View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
+    View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
+    return HttpResponse(status=500)
+
+
+def post_subgroup_feedback(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
         return HttpResponse(status=500)
 
-
-def get_subgroup_feedback(request):
-    if request.GET.keys() & {"variable_name", "entity_id", "entity_type",
-                             "query", "rating", "userid"}:
+    if data and data.keys() & {"variable_name", "entity_id", "entity_type", "query", "rating", "userid"}:
         try:
             time_start = datetime.now()
-            variable_name = str(request.GET.get("variable_name", "").strip())
-            entity_name = str(request.GET.get("entity_name", "").strip())
-            entity_id = str(request.GET.get("entity_id", "").strip())
-            entity_type = str(request.GET.get("entity_type", "").strip())
-            query = str(request.GET.get("query", "").strip())
-            rating = str(request.GET.get("rating", "").strip())
-            userid = str(request.GET.get("userid", "").strip())
+            variable_name = data["variable_name"]
+            entity_name = data["entity_name"]
+            entity_id = data["entity_id"]
+            entity_type = data["entity_type"]
+            query = data["query"]
+            rating = data["rating"]
+            userid = data["userid"]
 
             session = SessionExtended.get()
 
@@ -700,37 +711,57 @@ def get_subgroup_feedback(request):
             View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
-    else:
-        View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+
+    View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+    return HttpResponse(status=500)
+
+
+def post_document_link_clicked(request):
+    data = None
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
         return HttpResponse(status=500)
 
-
-def get_document_link_clicked(request):
-    if "query" in request.GET and "document_id" in request.GET and "link" in request.GET and "data_source" in request.GET:
-        query = str(request.GET["query"]).strip()
-        document_id = str(request.GET["document_id"]).strip()
-        document_collection = str(request.GET["data_source"]).strip()
-        link = str(request.GET["link"]).strip()
+    if data and data.keys() & {"query", "document_id", "link", "data_source"}:
+        query = data["query"]
+        document_id = data["document_id"]
+        document_collection = data["data_source"]
+        link = data["link"]
         try:
             View.instance().query_logger.write_document_link_clicked(query, document_collection, document_id, link)
         except IOError:
-            logging.debug('Could not write document clicked log file')
+            View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
+            return HttpResponse(status=500)
+        View.instance().query_logger.write_api_call(True, "document_clicked", str(request))
         return HttpResponse(status=200)
-    else:
+    View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
+    return HttpResponse(status=500)
+
+
+def post_paper_view_log(request):
+    data = None
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
         return HttpResponse(status=500)
 
-
-def get_paper_view_log(request):
-    if request.GET.keys() & {"doc_id", "doc_collection"}:
-        doc_id = str(request.GET["doc_id"]).strip()
-        doc_collection = str(request.GET["doc_collection"]).strip()
+    if data and data.keys() & {"doc_id", "doc_collection"}:
+        doc_id = data["doc_id"]
+        doc_collection = data["doc_collection"]
 
         try:
             View.instance().query_logger.write_paper_view(doc_id, doc_collection)
         except IOError:
-            logging.debug('Could not write paper view opened log file')
+            View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
+            return HttpResponse(status=500)
 
+        View.instance().query_logger.write_api_call(True, "paper_view_log", str(request))
         return HttpResponse(status=200)
+    View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
     return HttpResponse(status=500)
 
 
@@ -794,7 +825,6 @@ def post_drug_ov_chembl_phase_href_log(request):
     return HttpResponse(status=500)
 
 
-@csrf_exempt
 def post_report(request):
     try:
         req_data = json.loads(request.body.decode("utf-8"))

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% csrf_token %}
 {% load static %}
 
 {% block css %}
@@ -582,6 +583,7 @@
         const cancel_symbol_url = "{% static 'cancel.png' %}";
         const search_icon_url = "{% static 'assets/searchicon.svg' %}"
         const url_graph_preview = "{% static 'graph_preview.png' %}";
+        const url_paper_view_log = "{% url 'paper_view_log' %}";
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";
@@ -589,6 +591,8 @@
         $("#nav_item_search").addClass("active");
         $("#nav_item_help").removeClass("active");
         //$("#nav_item_stats").removeClass("active");
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
     <script src="{% static 'js/search.js' %}?version=14" type="text/javascript"></script>
     <script src="{% static 'js/paper.js' %}?version=14" type="text/javascript"></script>

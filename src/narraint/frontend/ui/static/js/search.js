@@ -412,6 +412,8 @@ function closeFeedback(send = false) {
         };
         const options = {
             method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
             body: JSON.stringify(params)
         };
         fetch(report_url, options).then(response => {
@@ -851,24 +853,27 @@ function rateExtraction(correct, predication_ids_str, callback) {
         return false;
     }
     console.log('nice user ' + userid + '  - has rated: ' + correct + ' for ' + predication_ids_str);
-    let request = $.ajax({
-        url: feedback_url,
-        data: {
+
+    const options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+        mode: 'same-origin',
+        body: JSON.stringify({
             predicationids: predication_ids_str,
             query: latest_valid_query,
             rating: correct,
             userid: userid
-        }
-    });
+        })
+    };
 
-    request.done(function (response) {
-        showInfoAtBottom("Thank you for your Feedback!")
-    });
-
-    request.fail(function (result) {
-        showInfoAtBottom("Your feedback couldn't be transferred - please try again")
-    });
-
+    fetch(feedback_url, options)
+        .then(response => {
+            if (response.ok) {
+                showInfoAtBottom("Thank you for your Feedback!")
+            } else {
+                showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+            }
+        });
 
     return true;
 }
@@ -973,23 +978,26 @@ function queryAndVisualizeProvenanceInformation(query, document_id, data_source,
 let uniqueProvenanceID = 1;
 
 function sendDocumentClicked(query, document_id, data_source, document_link) {
-    let request = $.ajax({
-        url: document_clicked_url,
-        data: {
+    const options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+        mode: 'same-origin',
+        body: JSON.stringify({
             query: query,
             document_id: document_id,
             data_source: data_source,
             link: document_link
-        }
-    });
+        })
+    };
 
-    request.done(function (response) {
-        console.log("Sent document clicked info")
-    });
-
-    request.fail(function (result) {
-        showInfoAtBottom("Query for provenance failed - please try again")
-    });
+    fetch(document_clicked_url, options)
+        .then(response => {
+            if (response.ok) {
+                console.log("Sent document clicked info")
+            } else {
+                showInfoAtBottom("Query for provenance failed - please try again")
+            }
+        });
 }
 
 const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
@@ -1261,9 +1269,12 @@ function rateSubGroupExtraction(correct, subgroup, callback) {
     }
     let variable = Object.keys(subgroup)[0];
     console.log('nice user ' + userid + '  - has rated: ' + correct + ' for ' + variable);
-    let request = $.ajax({
-        url: subgroup_feedback_url,
-        data: {
+
+    const options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+        mode: 'same-origin',
+        body: JSON.stringify({
             variable_name: variable,
             entity_name: subgroup[variable].n,
             entity_id: subgroup[variable].id,
@@ -1271,16 +1282,17 @@ function rateSubGroupExtraction(correct, subgroup, callback) {
             query: latest_valid_query,
             rating: correct,
             userid: userid
-        }
-    });
+        })
+    };
 
-    request.done(function (response) {
-        showInfoAtBottom("Thank you for your Feedback!")
-    });
-
-    request.fail(function (result) {
-        showInfoAtBottom("Your feedback couldn't be transferred - please try again")
-    });
+    fetch(subgroup_feedback_url, options)
+        .then(response => {
+            if (response.ok) {
+                showInfoAtBottom("Thank you for your Feedback!")
+            } else {
+                showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+            }
+        });
     return true;
 }
 
