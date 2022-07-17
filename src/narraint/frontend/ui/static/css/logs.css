@@ -1,0 +1,150 @@
+body, html {
+  font-family: 'Century Gothic';
+  font-size: 50px;
+  width: 100%;
+  height: 100%;
+  color: black;
+  overflow: hidden;
+  font-size: 100%;
+  background-color: rgb(212, 212, 212);
+}
+
+#dashboard {
+  position: absolute;
+  margin-left: -8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  width: 100%;
+  bottom: 0px;
+  top: 0px;
+  background-color: rgb(212, 212, 212);
+  overflow: auto;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #009879;
+  border-radius: 25px;
+  color: white;
+  margin: 1%;
+  width: 100%;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 25px;
+  padding: 1%;
+  margin: 1%;
+}
+
+.tableFixHead {
+  overflow: auto;
+  height: 400px;
+}
+
+.tableFixHead thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.queryTable {
+  border-spacing: 0;
+  border-radius: 15px;
+  margin: 25px 0;
+  font-size: 0.9em;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.queryTable tr:first-of-type th:first-child {
+  -webkit-border-radius: 15px 0px 0px 0px;
+}
+
+.queryTable tr:first-of-type th:last-child {
+  -webkit-border-radius: 0px 15px 0px 0px;
+}
+
+.queryTable thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.queryTable th,
+.queryTable td {
+  padding: 12px 15px;
+}
+
+.queryTable tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.buttonRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+datalist {
+  display: flex;
+  font-size: 0.6em;
+  justify-content: space-between;
+  color: black;
+  width: 100%;
+}
+
+input {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #009879;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #009879;
+  cursor: pointer;
+}
+
+#myChart {
+  width: 100%;
+  min-width: 420px;
+  margin-top: 4%;
+}

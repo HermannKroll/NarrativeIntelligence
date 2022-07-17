@@ -36,6 +36,7 @@ from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import DRUG
+from narraint.queryengine.log_statistics import create_dictionary_of_logs, get_date_of_today
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -783,6 +784,13 @@ def post_drug_ov_search_log(request):
     return HttpResponse(status=500)
 
 
+def get_logs_data(request):
+    try:
+        return JsonResponse(LogsView.data_dict)
+    except:
+        return HttpResponse(status=500)
+
+
 def post_drug_ov_subst_href_log(request):
     data = None  # init needed for second evaluation step
     try:
@@ -875,6 +883,23 @@ class SearchView(TemplateView):
 
 class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
+
+
+class LogsView(TemplateView):
+    template_name = "ui/logs.html"
+    log_date = None
+    data_dict = None
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(LogsView.template_name)
+        if not LogsView.log_date or LogsView.log_date != get_date_of_today() or not LogsView.data_dict:
+            try:
+                logger.debug("hi")
+                LogsView.data_dict = create_dictionary_of_logs()
+                LogsView.log_date = get_date_of_today()
+            except:
+                traceback.print_exc(file=sys.stdout)
+        return super().get(request, *args, **kwargs)
 
 
 class StatsView(TemplateView):
