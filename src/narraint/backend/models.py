@@ -177,3 +177,15 @@ class SubstitutionGroupRating(Extended, DatabaseTable):
             entity_type=entity_type, rating=rating)
         session.execute(insert_stmt)
         session.commit()
+
+
+class DrugKeywords(Extended, DatabaseTable):
+    __tablename__ = "drug_keywords"
+    subject_id = Column(String, nullable=False, primary_key=True)
+    keyword_data = Column(String, nullable=False)
+
+    @staticmethod
+    def insert_drug_keyword_data(session, subject_id: str, keyword_data: str):
+        insert_stmt = insert(DrugKeywords).values(subject_id=subject_id, keyword_data=keyword_data)
+        session.execute(insert_stmt)
+        session.commit()
