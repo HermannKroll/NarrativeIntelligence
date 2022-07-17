@@ -46,6 +46,12 @@
         </div>
     </div>
 
+    <div class="link" onclick="scrollToElement('KeywordCloud')">
+        <div class="sidebar_entry_name" >
+            Keywords
+        </div>
+    </div>
+
     <div id="sidebar_entries"></div>
 
     <div class="link" onclick="scrollToElement('RecentPapers')">
@@ -109,7 +115,10 @@
             </table>
         </div>
     </div>
-
+    <div class="container word_cloud" id="KeywordCloud">
+        <h2>Keyword Cloud</h2>
+        <ul class="cloud" id="keyword_cloud"></ul>
+    </div>
     <div id="overview_entries"></div>
     <div class="container news" id="RecentPapers">
         <h2>Recent Papers</h2>
@@ -225,6 +234,7 @@
     const url_loading_gif = "{% static 'assets/loading.gif' %}";
     const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
     const url_feedback_report = "{% url 'report' %}";
+    const url_keywords = "{% url 'keywords' %}";
 
     const url_drug_search = "{% url 'drug_search_log' %}";
     const url_substance_href = "{% url 'drug_substance_forward_log' %}";

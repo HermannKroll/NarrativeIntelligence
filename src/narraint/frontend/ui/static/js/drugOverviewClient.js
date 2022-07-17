@@ -189,8 +189,9 @@ async function buildSite() {
                     document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + chemblid + '</a>';
                 });//just give something to the user, so we can proceed
 
+            await load_wordcloud();
             /* fill the container with fetched tags */
-            await getOverviewData()
+            await getOverviewData();
         })
         .catch();
 }
@@ -685,4 +686,25 @@ function logChemblPhaseHref(drug, disease_name, disease_id, query, phase) {
         }
     );
     fetch(request).catch(e => console.log(e))
+}
+
+async function load_wordcloud() {
+    const data = await fetch(url_keywords + "?substance_id=" + currentChemblID)
+        .then(async (response) => {
+            return await response.json().then((data) => { return data["keywords"] })
+        })
+        .catch(() => {
+            console.log("No keywords for " + currentDrugName + "available.");
+            return null;
+        });
+
+    const cloud = document.getElementById("keyword_cloud")
+
+    for(const i in data) {
+        const keyword = Object.keys(data[i])[0];
+        const number = data[i][keyword];
+
+        const element = `<li data-weight="${number}" class="keyword">${keyword}</li>`;
+        cloud.innerHTML += element;
+    }
 }

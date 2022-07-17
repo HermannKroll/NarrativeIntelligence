@@ -21,7 +21,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
-    TagInvertedIndex, SubstitutionGroupRating
+    TagInvertedIndex, SubstitutionGroupRating, DrugKeywords
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
@@ -811,6 +811,24 @@ def post_report(request):
     except:
         traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)
+
+
+def get_keywords(request):
+    if request.GET.keys() & {"substance_id"}:
+        substance_id = request.GET.get("substance_id", "")
+        try:
+            session = SessionExtended.get()
+            query = session.query(DrugKeywords.keyword_data).filter(DrugKeywords.subject_id == substance_id)
+            result = query.first()
+
+            keywords = ""
+            if result:
+                keywords = ast.literal_eval(result[0])
+            return JsonResponse(dict(keywords=keywords))
+
+        except Exception:
+            logging.debug(f"Could not retrieve keywords for {substance_id}")
+    return HttpResponse(status=500)
 
 
 class SearchView(TemplateView):
