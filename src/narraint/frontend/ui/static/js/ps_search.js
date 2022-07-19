@@ -32,18 +32,28 @@ const ps_search = (event) => {
 
     let query = document.getElementById("id_query").value;
     let confidence = document.getElementById("confidence_range").value;
-    let wikipedia = false;//$('#wikipedia').checked;
-    let europarl = true;//$('#europarl:checked').val();
-    console.log('Query     : ' + query)
-    console.log('Confidence: ' + confidence)
-    console.log('Wikipedia : ' + wikipedia)
-    console.log('EuroParl  : ' + europarl)
+    let wikipedia = $('#wikipedia').is(':checked');
+    let europarl =$('#europarl:checked').is(':checked');
+
+
+    let sources = [];
+    if (wikipedia === true){
+        sources.push("wikipedia");
+    }
+    if (europarl === true){
+        sources.push("europarl");
+    }
+    console.log('Query     : ' + query);
+    console.log('Confidence: ' + confidence);
+    console.log('Wikipedia : ' + wikipedia);
+    console.log('EuroParl  : ' + europarl);
+    console.log("Sources   :" + sources);
     let request = $.ajax({
         url: ps_search_url,
         data: {
             query: query,
             confidence: confidence,
-            sources: "wikipedia;europarl"
+            sources: sources.join(';')
         }
     });
 
@@ -64,7 +74,9 @@ const ps_search = (event) => {
             }
         )
         console.log(tableData);
-        $('#id_result_table').bootstrapTable('append', tableData);
+        let tableDiv = $('#id_result_table');
+        tableDiv.bootstrapTable('removeAll');
+        tableDiv.bootstrapTable('append', tableData);
     });
 
     request.fail(function (result) {
