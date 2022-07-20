@@ -4,11 +4,14 @@ import sys
 
 import sqlalchemy
 from typing import List
+
+from sqlalchemy import and_
 from yake import KeywordExtractor
 
+from kgextractiontoolbox.backend.models import Document
+from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, DrugKeywords
-from narraint.backend.retrieve import retrieve_narrative_documents_from_database
+from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, EntityKeywords
 
 MAX_NGRAM_WORD_SIZE = 3
 NUM_KEYWORDS = 20
@@ -43,7 +46,7 @@ def generate_keywords(extractor: KeywordExtractor, text: str) -> str:
         return return_str
 
 
-def query_drugs():
+def main():
     """
     Generates for each drug (enitity_id having subject_type == "Drug") a JSON list of keywords stored as a string in the
     corresponding table (drug_keywords). 100 or less random abstracts are concatenated to create a pseudo random
@@ -62,13 +65,16 @@ def query_drugs():
 
     drugs: List[sqlalchemy.engine.row.Row] = q.all()  # first()#
     if drugs:
-        sys.stdout.write(f"Creating keywords for {len(drugs)} drugs:      ")
+        sys.stdout.write(f"Creating keywords for {len(drugs)} drugs\n")
     else:
         print("Could not retrieve drug ids. Exiting.")
         return
 
+    p = Progress(total=len(drugs))
+    p.start_time()
+
     skipped_drugs = 0
-    for i in range(len(drugs)):#range(1):#
+    for i in range(len(drugs)):  # range(1):#
         # retrieve all document_ids for one drug
         subject_id = dict(drugs[i])["subject_id"]
         q = session.query(TagInvertedIndex.document_ids) \
@@ -85,14 +91,17 @@ def query_drugs():
             document_ids = set(random.sample(document_ids, num_abstracts))  # random num_abstracts elements
         else:
             skipped_drugs += 1
-            # print(f"Skipping {subject_id}: No documents found!")
             continue
 
-        # retrieve documents by id and concatenate the abstract texts
-        documents = retrieve_narrative_documents_from_database(session, document_ids, document_collection)
-        text = ""
-        for j in range(len(documents)):
-            text += " " + documents[j].abstract
+        # query document abstract
+        doc_query = session.query(Document.abstract).filter(and_(Document.id.in_(document_ids),
+                                                                 Document.collection == document_collection))
+        text = []
+
+        for res in doc_query:
+            text.append(res[0])
+
+        text = " ".join([t for t in text])
 
         keywords = generate_keywords(extractor, text)
         # print(keywords)
@@ -101,15 +110,13 @@ def query_drugs():
             skipped_drugs += 1
             continue
 
-        DrugKeywords.insert_drug_keyword_data(session, subject_id, keywords)
-
-        # display progress
-        sys.stdout.write(f"\b\b\b\b\b{i + 1:5d}")
-        sys.stdout.flush()
+        EntityKeywords.insert_entity_keyword_data(session, subject_id, entity_type, keywords)
+        p.print_progress(i + 1)
 
     session.remove()
-    print(f"\nFinished generating keys. Skipped {skipped_drugs} drugs.")
+    p.done()
+    print(f"Skipped {skipped_drugs} drugs.")
 
 
 if __name__ == "__main__":
-    query_drugs()
+    main()
