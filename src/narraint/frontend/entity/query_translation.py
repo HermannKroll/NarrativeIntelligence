@@ -7,7 +7,7 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS
+from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS, DRUG
 
 
 class QueryTranslation:
@@ -77,6 +77,8 @@ class QueryTranslation:
             e = [Entity(text.split(":", 1)[1], SPECIES)]
         elif text_low.startswith('fidx'):
             e = [Entity(text.upper(), DOSAGE_FORM)]
+        elif text_low.startswith('chembl'):
+            e = [Entity(text.upper(), DRUG)]
         else:
             # check if the user expects a variable here
             may_variable = self.check_wrong_variable_entry(text_low)
