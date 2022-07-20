@@ -21,7 +21,7 @@ from sqlalchemy import func
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
-    TagInvertedIndex, SubstitutionGroupRating, DrugKeywords
+    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
@@ -856,7 +856,7 @@ def get_keywords(request):
         substance_id = request.GET.get("substance_id", "")
         try:
             session = SessionExtended.get()
-            query = session.query(DrugKeywords.keyword_data).filter(DrugKeywords.subject_id == substance_id)
+            query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
             result = query.first()
 
             keywords = ""
