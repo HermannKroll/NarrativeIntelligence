@@ -969,7 +969,7 @@ def get_ps_query(request):
             logging.info('Received political sciences query...')
             logging.info(f'Search with conf. {confidence} for query: {query}')
             logging.info(f'Sources: {sources}')
-            nd_result = requests.get(f"http://127.0.0.1:5000//query?confidence={confidence}&sources={sources}&query_str={query}")
+            nd_result = requests.get(f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}")
             json_data = nd_result.json()
             if nd_result.status_code == 200:
                 return JsonResponse(status=200, data=json_data)
