@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block css %}
+    <link href="https://unpkg.com/bootstrap-table@1.20.2/dist/bootstrap-table.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block title %}Narrative Information Access to Political Sciences{% endblock %}
@@ -12,23 +13,50 @@
 
     <div class="container">
         <h3>Query:</h3>
-        <textarea name="textarea" rows="10" cols="100" id="id_query">Obama born August</textarea>
+        <textarea name="textarea" rows="5" cols="100" id="id_query">Obama born August</textarea>
         <h3>Parameters:</h3>
         <label for="confidence_range" class="form-label">Confidence</label>
-        <label id="confidence_value">0.9</label>
+        <label id="confidence_value">0.8</label>
         <input type="range" class="form-range" id="confidence_range" value="0.9" min="0" max="1" step="0.1"
                oninput="confidence_value.innerHTML=confidence_range.value"/>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="wikipedia" checked>
+            <label class="form-check-label" for="wikipedia">
+                Wikipedia
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="europarl" checked>
+            <label class="form-check-label" for="europarl">
+                EuroParl
+            </label>
+        </div>
+
         <button class="btn btn-primary" onclick="ps_search();" id="btn_search">Search</button>
 
     </div>
     <div class="container">
         <h1>Results:</h1>
-        <textarea name="textarea" rows="20" cols="100" id="id_results"></textarea>
+        <table class="table table-striped" id="id_result_table" data-toggle="table">
+            <thead>
+            <tr>
+                <th scope="col" data-field="id">#</th>
+                <th scope="col" data-field="confidence">Conf.</th>
+                <th scope="col" data-field="source">Data Source</th>
+                <th scope="col" data-field="provenance">Provenance</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
     </div>
 
 {% endblock %}
 
 {% block javascript %}
+    <script src="https://unpkg.com/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
     <script type="text/javascript">
         const ps_search_url = "{% url 'ps_query' %}";
     </script>
