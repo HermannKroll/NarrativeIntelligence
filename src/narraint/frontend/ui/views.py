@@ -881,6 +881,19 @@ class SearchView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
+class NewSearchView(TemplateView):
+    template_name = "ui/new_search.html"
+
+    def __init__(self):
+        init_view = View.instance()
+        super(NewSearchView, self).__init__()
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(
+            NewSearchView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
 class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
 
