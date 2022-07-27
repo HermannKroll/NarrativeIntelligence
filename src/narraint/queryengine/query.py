@@ -120,7 +120,8 @@ class GraphQuery:
             parts.append(fp.predicate)
             parts.extend(sorted([o.entity_id for o in fp.objects]))
 
-        parts.extend(sorted([[e.entity_id for e in ae] for ae in self.additional_entities][0]))
+        for ae in self.additional_entities:
+            parts.extend(sorted([e.entity_id for e in ae]))
         return '_'.join(parts)
 
     def get_var_names_in_order(self):
