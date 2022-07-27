@@ -538,6 +538,57 @@ $(document).ready(function () {
         }
     });
 
+    $('#input_entities').autocomplete({
+        minLength: 2,
+        autoFocus: true,
+        source: function (request, response) {
+            const entities = request.term.split(";");
+            const relevantTerm = entities[entities.length - 1].trim();
+
+            // check if term is empty
+            if(relevantTerm.replaceAll(" ", "").length === 0) {
+                return;
+            }
+
+            $.ajax({
+                type: "GET",
+                url: autocompletion_url,
+                data: {
+                    term: relevantTerm
+                },
+                success: function (data) {
+                    // delegate back to autocomplete, but extract the last term
+                    response(data["terms"]);
+                }
+            });
+        }
+        ,
+        focus: function () {
+            // prevent value inserted on focus
+            return false;
+        }
+        ,
+        select: function (event, ui) {
+            const values = this.value.split(";");
+
+            this.value = ""
+            for(const i in values) {
+                if(i < values.length - 1) {
+                    this.value += values[i] + ";"
+                }
+            }
+
+            this.value += ui.item.value.trim();
+            return false;
+        }
+
+    }).on("keydown", function (event) {
+        // don't navigate away from the field on tab when selecting an item
+        if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
+            event.preventDefault();
+        }
+    });
+
     document.getElementById("input_page_no").addEventListener('change', (event) => {
         pageUpdated();
     });
@@ -587,6 +638,11 @@ function initFromURLQueryParams() {
 
     if (params.has("start_pos")) {
         setCurrentPage(parseInt(params.get("start_pos")))
+    }
+
+    if (params.has("entities")) {
+        document.getElementById("input_entities").value
+            = params.get("entities");
     }
 
     if (params.has("query")) {
@@ -651,6 +707,8 @@ const search = (event) => {
     }
     let end_pos = start_pos + DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 
+    const entities = document.getElementById("input_entities").value;
+
     let freq_element = document.getElementById("select_sorting_freq");
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
@@ -663,6 +721,7 @@ const search = (event) => {
     let inner_ranking = "NOT IMPLEMENTED";
 
     console.log("Query: " + query);
+    console.log("Entities: " + entities.split(";"));
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
     console.log("Inner Ranking: " + inner_ranking)
@@ -674,18 +733,20 @@ const search = (event) => {
 
     const url = new URL(window.location.href);
     url.searchParams.set('query', query);
+    url.searchParams.set("entities", entities);
     url.searchParams.set("data_source", data_source);
     url.searchParams.set("visualization", outer_ranking);
     url.searchParams.set("sort_frequency_desc", freq_sort_desc);
     url.searchParams.set("sort_year_desc", year_sort_desc);
     url.searchParams.set("start_pos", start_pos);
     //   url.searchParams.set("end_pos", end_pos);
-    window.history.pushState("Query", "Title", "/" + url.search.toString());
+    window.history.pushState("Query", "Title", "/new_search" + url.search.toString());
 
     let request = $.ajax({
-        url: search_url,
+        url: new_search_url,
         data: {
             query: query,
+            entities: entities,
             data_source: data_source,
             outer_ranking: outer_ranking,
             freq_sort: freq_sort_desc,

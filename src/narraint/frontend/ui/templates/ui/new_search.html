@@ -72,8 +72,7 @@
                 </div>
                 <div class="row gx-0">
                     <div class="col input-group">
-                        <input class="form-control" type="text"
-                               placeholder="enter entities">
+                        <input class="form-control" type="text" placeholder="enter entities" id="input_entities">
                     </div>
                 </div>
 
@@ -578,7 +577,7 @@
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
-        const search_url = "{% url 'query' %}";
+        const new_search_url = "{% url 'new_query' %}";
         const autocompletion_url = "{% url 'autocompletion' %}";
         const query_check_url = "{% url 'check_query' %}";
         const tree_info_url = "{% url 'tree_info' %}"

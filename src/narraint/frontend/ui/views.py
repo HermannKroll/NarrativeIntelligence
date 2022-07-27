@@ -604,6 +604,145 @@ def get_query(request):
             dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
 
 
+# invokes Django to compress the results
+@gzip_page
+def get_new_query(request):
+    results_converted = []
+    is_aggregate = False
+    valid_query = False
+    query_limit_hit = False
+    query_trans_string = ""
+    if "query" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
+    if "data_source" not in request.GET:
+        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    try:
+        query = str(request.GET.get("query", "").strip())
+        data_source = str(request.GET.get("data_source", "").strip())
+
+        if "entities" in request.GET:
+            req_entities = str(request.GET.get("entities", "").strip()).split(";")
+        else:
+            req_entities = None
+
+        if "outer_ranking" in request.GET:
+            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        else:
+            outer_ranking = "outer_ranking_substitution"
+
+        if "start_pos" in request.GET:
+            start_pos = request.GET.get("start_pos").strip()
+            try:
+                start_pos = int(start_pos)
+            except ValueError:
+                start_pos = None
+        else:
+            start_pos = None
+        if "end_pos" in request.GET:
+            end_pos = request.GET.get("end_pos").strip()
+            try:
+                end_pos = int(end_pos)
+            except ValueError:
+                end_pos = None
+        else:
+            end_pos = None
+
+        if "freq_sort" in request.GET:
+            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
+            if freq_sort_desc == 'False':
+                freq_sort_desc = False
+            else:
+                freq_sort_desc = True
+        else:
+            freq_sort_desc = True
+
+        if "year_sort" in request.GET:
+            year_sort_desc = str(request.GET.get("year_sort", "").strip())
+            if year_sort_desc == 'False':
+                year_sort_desc = False
+            else:
+                year_sort_desc = True
+        else:
+            year_sort_desc = True
+
+        # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
+        logging.info(f'Query string is: {query}')
+        logging.info(f'Additional entities are {req_entities}')
+        logging.info("Selected data source is {}".format(data_source))
+        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+        # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
+        time_start = datetime.now()
+
+        graph_query, query_trans_string = View.instance().translation\
+            .convert_query_text_to_fact_patterns(query)
+        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+            results_converted = []
+            query_trans_string = "Data source is unknown"
+            logger.error('parsing error')
+        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+            query_trans_string = "Outer ranking strategy is unknown"
+            logger.error('parsing error')
+        elif not graph_query or len(graph_query.fact_patterns) == 0:
+            results_converted = []
+            logger.error('parsing error')
+        elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
+                graph_query) > 1:
+            results_converted = []
+            nt_string = ""
+            query_trans_string = "Do not support multiple variables in an ontology-based ranking"
+            logger.error("Do not support multiple variables in an ontology-based ranking")
+        else:
+            # search for all documents containing all additional entities
+            if req_entities is not None:
+                for re in req_entities:
+                    try:
+                        entity_ids = View.instance().translation.convert_text_to_entity(re)
+                        graph_query.add_additional_entities(list(entity_ids))
+                    except ValueError:
+                        logging.debug(f'No conversion found for {re}')
+                        continue
+
+            logger.info(f'Translated Query is: {str(graph_query)}')
+            valid_query = True
+            document_collection = data_source
+
+            results, cache_hit, time_needed = \
+                do_query_processing_with_caching(graph_query, document_collection)
+            result_ids = {r.document_id for r in results}
+            opt_query = QueryOptimizer.optimize_query(graph_query)
+            View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+                                                         query, opt_query)
+            results_converted = []
+            if outer_ranking == 'outer_ranking_substitution':
+                substitution_aggregation = ResultTreeAggregationBySubstitution()
+                sorted_var_names = graph_query.get_var_names_in_order()
+                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
+                                                                                     freq_sort_desc, year_sort_desc,
+                                                                                     start_pos, end_pos)
+                results_converted = results_ranked.to_dict()
+            elif outer_ranking == 'outer_ranking_ontology':
+                substitution_ontology = ResultAggregationByOntology()
+                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                                  year_sort_desc)
+                results_converted = results_ranked.to_dict()
+
+        View.instance().query_logger.write_api_call(True, "get_query", str(request),
+                                                    time_needed=datetime.now() - time_start)
+        return JsonResponse(
+            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
+                 query_translation=query_trans_string,
+                 query_limit_hit="False"))
+    except Exception:
+        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        query_trans_string = "keyword query cannot be converted (syntax error)"
+        traceback.print_exc(file=sys.stdout)
+        return JsonResponse(
+            dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+
+
 def get_provenance(request):
     if "prov" in request.GET and "document_id" in request.GET and "data_source" in request.GET:
         try:

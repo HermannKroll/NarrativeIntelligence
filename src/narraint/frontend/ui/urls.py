@@ -4,10 +4,11 @@ from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_
     post_report, get_provenance, get_document_graph, get_tree_info, get_query_sub_count, post_document_link_clicked, \
     get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity, \
     get_chembl_indication, get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
-    post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, get_ps_query, get_keywords, get_logs_data
+    post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, get_ps_query, get_keywords, get_logs_data, get_new_query
 
 urlpatterns = [
     path("query", get_query, name="query"),
+    path("new_query", get_new_query, name="new_query"),
     path("query_sub_count", get_query_sub_count, name="query_sub_count"),
     path("autocompletion", get_autocompletion, name="autocompletion"),
     path("check_query", get_check_query, name="check_query"),
