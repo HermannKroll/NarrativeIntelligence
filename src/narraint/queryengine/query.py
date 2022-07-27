@@ -85,6 +85,8 @@ class GraphQuery:
         else:
             self.fact_patterns = fact_patterns
 
+        self.additional_entities = list()
+
     def has_entity(self):
         for fp in self.fact_patterns:
             if fp.has_entity():
@@ -93,6 +95,12 @@ class GraphQuery:
 
     def add_fact_pattern(self, fact_pattern: FactPattern):
         self.fact_patterns.append(fact_pattern)
+
+    def add_additional_entities(self, entity_ids):
+        self.additional_entities.append(list(entity_ids))
+
+    def has_additional_entities(self) -> bool:
+        return len(self.additional_entities) > 0
 
     def __iter__(self):
         for fp in self.fact_patterns:
@@ -111,6 +119,8 @@ class GraphQuery:
             parts.extend(sorted([s.entity_id for s in fp.subjects]))
             parts.append(fp.predicate)
             parts.extend(sorted([o.entity_id for o in fp.objects]))
+
+        parts.extend(sorted([[e.entity_id for e in ae] for ae in self.additional_entities][0]))
         return '_'.join(parts)
 
     def get_var_names_in_order(self):

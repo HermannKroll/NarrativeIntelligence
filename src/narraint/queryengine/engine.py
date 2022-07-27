@@ -1,3 +1,4 @@
+import ast
 import itertools
 import json
 import logging
@@ -6,7 +7,8 @@ from datetime import datetime
 from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, Sentence, PredicationInvertedIndex, DocumentMetadataService
+from narraint.backend.models import Predication, Sentence, \
+    PredicationInvertedIndex, DocumentMetadataService, TagInvertedIndex
 from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
@@ -243,10 +245,42 @@ class QueryEngine:
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
+        additional_entities_copy = graph_query.additional_entities
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
             logging.debug('Query will not yield results - returning empty list')
             return []
+        graph_query.additional_entities = additional_entities_copy
+        # calculate document_ids for additional entities if needed
+        if graph_query.has_additional_entities():
+            valid_document_ids = set()
+            session = SessionExtended.get()
+
+            for entities in graph_query.additional_entities:
+                entity_docs = set()
+
+                for en in entities:
+                    # TODO search for potentially more than one collection
+                    result = session.query(TagInvertedIndex.document_ids) \
+                        .filter(TagInvertedIndex.document_collection ==
+                                list(document_collection_filter)[0]) \
+                        .filter(TagInvertedIndex.entity_id == en.entity_id)
+
+                    # execute query and get result (query can only have one result due to querying the PK)
+                    row = result.first()
+                    if row:
+                        # interpret the string from db as a python string list
+                        entity_docs.update([str(x) for x in ast.literal_eval(row[0])])
+                logging.debug(f"{len(entity_docs)}")
+                if len(valid_document_ids) == 0:
+                    valid_document_ids.update(entity_docs)
+                elif len(entity_docs) > 0:
+                    valid_document_ids.intersection_update(entity_docs)
+
+            session.remove()
+            logging.debug(f'Result count document_ids {len(valid_document_ids)}')
+        else:
+            valid_document_ids = None
 
         collection2valid_doc_ids = defaultdict(set)
         collection2valid_subs = {}
@@ -336,6 +370,11 @@ class QueryEngine:
         # No variables are used in the query
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
+                # only allow documents containing additional entities
+                if valid_document_ids:
+                    d_ids.intersection_update(valid_document_ids)
+                    logging.debug(f'Additional entities left {len(d_ids)} doc_ids')
+
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
                     title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
@@ -347,6 +386,12 @@ class QueryEngine:
                                                              document_collection=d_col))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
+
+                # only allow documents containing additional entities
+                if valid_document_ids:
+                    d_ids.intersection_update(valid_document_ids)
+                    logging.debug(f'Additional entities left {len(d_ids)} doc_ids')
+
                 # Todo: Hack
                 if len(d_ids) > QUERY_DOCUMENT_LIMIT:
                     logging.warning(f'Query limit was hit: {len(d_ids)} (Limit: {QUERY_DOCUMENT_LIMIT}')
