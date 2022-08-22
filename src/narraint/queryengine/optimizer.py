@@ -196,4 +196,7 @@ class QueryOptimizer:
         # optimize wrong symmetric predicate argument order
         # must be the last check!
         optimized = QueryOptimizer.optimize_symmetric_predicate(optimized, and_mod)
+        # copy already existing additional entities if needed
+        if optimized:
+            optimized.additional_entities = graph_query.additional_entities
         return optimized
