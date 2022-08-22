@@ -5,14 +5,6 @@ from narraint.frontend.ui.views import View
 from narraint.queryengine.engine import QueryEngine
 import requests
 
-
-# inputs = [
-#     ["\"post-acute COVID-19 syndrome\" associated Disease", "PubMed", 1424],
-#     ["Covid19 associated Target", "PubMed", 18039],
-#     ["Simvastatin induces Rhabdomyolysis", "PubMed", 82],
-#     ["Metformin inhibits mtor", "PubMed", 282],
-#     ["Metformin treats \"Diabetes Mellitus\" _AND_ Metformin associated human", "PubMed", 4055]
-# ]
 inputs = [
     '"post-acute COVID-19 syndrome" associated Disease',
     'Covid19 associated Target',
