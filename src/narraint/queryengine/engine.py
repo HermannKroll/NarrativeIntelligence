@@ -245,12 +245,10 @@ class QueryEngine:
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
-        additional_entities_copy = graph_query.additional_entities
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
             logging.debug('Query will not yield results - returning empty list')
             return []
-        graph_query.additional_entities = additional_entities_copy
         # calculate document_ids for additional entities if needed
         if graph_query.has_additional_entities():
             valid_document_ids = set()
@@ -259,18 +257,31 @@ class QueryEngine:
             for entities in graph_query.additional_entities:
                 entity_docs = set()
 
-                for en in entities:
-                    # TODO search for potentially more than one collection
-                    result = session.query(TagInvertedIndex.document_ids) \
-                        .filter(TagInvertedIndex.document_collection ==
-                                list(document_collection_filter)[0]) \
-                        .filter(TagInvertedIndex.entity_id == en.entity_id)
+                entity_ids = [en.entity_id for en in entities]
+                entity_types = list(set([en.entity_type for en in entities]))
 
-                    # execute query and get result (query can only have one result due to querying the PK)
-                    row = result.first()
-                    if row:
-                        # interpret the string from db as a python string list
-                        entity_docs.update([str(x) for x in ast.literal_eval(row[0])])
+                q = session.query(TagInvertedIndex.document_ids)
+                if len(document_collection_filter) == 1:
+                    q = q.filter(TagInvertedIndex.document_collection ==
+                        list(document_collection_filter)[0])
+                else:
+                    q = q.filter(TagInvertedIndex.document_collection.
+                                 in_(document_collection_filter))
+
+                if len(entity_ids) == 1:
+                    q = q.filter(TagInvertedIndex.entity_id == entity_ids[0])
+                else:
+                    q = q.filter(TagInvertedIndex.entity_id.in_(entity_ids))
+
+                if len(entity_types) == 1:
+                    q = q.filter(TagInvertedIndex.entity_type == entity_types[0])
+                else:
+                    q = q.filter(TagInvertedIndex.entity_type.in_(entity_types))
+
+                for row in q:
+                    # interpret the string from db as a python string list
+                    entity_docs.update([str(x) for x in ast.literal_eval(row[0])])
+
                 logging.debug(f"{len(entity_docs)}")
                 if len(valid_document_ids) == 0:
                     valid_document_ids.update(entity_docs)
