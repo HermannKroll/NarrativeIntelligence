@@ -68,7 +68,7 @@ class EntityTagger:
         for term in terms:
             self.term2entity[term.replace('-', ' ')].update(self.term2entity[term])
 
-        logging.info('Index load')
+        logging.info(f'Index load ({len(self.term2entity)} different terms)')
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX):
         logging.info('Computing entity tagging index...')
