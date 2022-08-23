@@ -1,0 +1,59 @@
+#!/bin/bash
+
+
+ALL_PUBTATOR_PMIDS="/hdd2/datasets/pubmed_medline/pubtator_pmids_all.txt"
+PMIDS_IN_DB="/hdd2/datasets/pubmed_medline/pmids_in_db.txt"
+IDS_TO_DOWNLOAD="/hdd2/datasets/pubmed_medline/pubtator_pmids_to_download.txt"
+LITCOVID_ID_FILE="/hdd2/datasets/pubmed_medline/litcovid_ids.tsv"
+LONGCOVID_ID_FILE="/hdd2/datasets/pubmed_medline/long_covid_ids.tsv"
+
+UPDATES_PUBTATOR="/hdd2/datasets/pubmed_medline/2021_11_23_pubtator_updates.pubtator"
+UPDATED_IDS="/hdd2/datasets/pubmed_medline/pharmaceutical_relevant_ids.txt"
+
+TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
+
+
+# First get all PubMed Pubtator PMIDs
+wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
+
+# Export all known document ids from the database
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_document_ids.py $PMIDS_IN_DB -c PubMed
+
+# Compute the open ids (known PubTator ids but NOT in database)
+python3 ~/NarrativeAnnotation/src/narrant/util/compute_id_file_diff.py $ALL_PUBTATOR_PMIDS $PMIDS_IN_DB $IDS_TO_DOWNLOAD
+
+# Download all PubTator files + their annotations
+python3 ~/NarrativeAnnotation/src/narrant/pubtator/service/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
+
+# Load all PubTator files to database
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/NarrativeAnnotation/resources/pubtator_central_taggermap.json
+
+# Next, tag the documents with our PharmDictTagger
+python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -i $UPDATES_PUBTATOR -c PubMed --skip-load --workers 15
+
+
+# Execute Cleaning Rules for Tagging
+echo 'cleaning Tag table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
+
+
+# Perform classification
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
+
+
+# Load all LitCOVID + Long Covid classifications
+wget https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export/all/tsv -O $LITCOVID_ID_FILE
+wget 'https://www.ncbi.nlm.nih.gov/research/coronavirus-api/export/tsv?text=e_condition%3ALongCovid&filters=%7B%7D' -O $LONGCOVID_ID_FILE
+
+python3 ~/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py $LITCOVID_ID_FILE LitCovid -c PubMed
+python3 ~/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py $LONGCOVID_ID_FILE LongCovid -c PubMed
+
+# Finally, all files have been tagged
+python3 ~/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+
+# Do the statement extraction via our Pipeline
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 26 --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
+
+
+

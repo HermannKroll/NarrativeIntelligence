@@ -1,0 +1,256 @@
+{% load static %}
+{% csrf_token %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narrative Service</title>
+    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
+</head>
+
+<body>
+
+<div class="loading" id="loading">
+    <img src="{% static 'assets/loading.gif' %}">
+
+</div>
+
+<div class="navbar">
+    <div class="nav_spacer" id="impressum">
+        <a href="https://blogs.tu-braunschweig.de/pubpharm/impressum/" target="_blank">Impressum</a>
+    </div>
+
+    <div class="searchbar">
+        <input type="text" id='drugInput' placeholder="Search for Drug...">
+        <div onclick="searchDrug()" class="button">
+            <img src="{% static 'assets/searchicon.svg' %}">
+        </div>
+        <!--Website bauen on click-->
+    </div>
+
+    <div class="nav_logos">
+        <a href="https://www.pubpharm.de" style="margin-right: 1em" target="_blank"><img src="{% static 'fid_logo.png'%}" height="50px" alt="FID Logo"></a>
+        <a href="http://www.ifis.cs.tu-bs.de/" target="_blank"><img src="{% static 'assets/ifislogo.png' %}" height="50px" alt="Ifis Logo"></a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <p>Overview</p>
+    <div class="link" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="sidebar_entry_name" >
+            Drug
+        </div>
+    </div>
+
+    <div class="link" onclick="scrollToElement('KeywordCloud')">
+        <div class="sidebar_entry_name" >
+            Keywords
+        </div>
+    </div>
+
+    <div id="sidebar_entries"></div>
+
+    <div class="link" onclick="scrollToElement('RecentPapers')">
+        <div class="sidebar_entry_name" >
+            Recent Papers
+        </div>
+        <div class="sidebar_entry_count" id="linkRecentPapers"></div>
+    </div>
+</div>
+
+<div class="content" id="drugContent">
+    <div id="unknown_drug_name_tag" class="error_msg"></div>
+    <div class="top_container">
+        <img src="#" id="structure">
+        <!--src vom img setzen-->
+        <div class="general_info">
+            <h1 id="name"></h1>
+            <!--text setzen-->
+            <table>
+                <tr>
+                    <td>Molecular Formula:</td>
+                    <td id="formular"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>Molecular Mass:</td>
+                    <td id="mass"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>ALogP:</td>
+                    <td id="drug_alogp"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>CX LogP:</td>
+                    <td id="drug_cxlogp"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>CX Acid pKA:</td>
+                    <td id="drug_cx_acid_pka"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>CX Basic pKA:</td>
+                    <td id="drug_cx_basic_pka"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>CX LogD pH 7.4:</td>
+                    <td id="drug_cx_logd"></td>
+                    <!--text setzen-->
+                </tr>
+                <tr>
+                    <td>See ChEMBL:</td>
+                    <td id="drug_chemblid"></td>
+                    <!--text setzen-->
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <div class="container word_cloud" id="KeywordCloud">
+        <h2>Keyword Cloud</h2>
+        <ul class="cloud" id="keyword_cloud"></ul>
+    </div>
+    <div id="overview_entries"></div>
+    <div class="container news" id="RecentPapers">
+        <h2>Recent Papers</h2>
+        <div class="loading" id="newsLoading">
+            <img src="{% static 'assets/loading.gif' %}">
+        </div>
+        <div class="news_bottom" id="newsContent">
+            <!--Papers hier einfuegen-->
+        </div>
+
+        <a id="morePaperRef" style="display: none" target="_blank">
+            More paper
+        </a>
+
+    </div>
+</div>
+
+<div class="popup" id="newsPopup">
+    <div class="newsdetail">
+        <div class="top">
+            <a id="paperLink">View Paper</a>
+            <a id="paperTab">Open in a new tab
+                <img src="{% static 'assets/searchicon.svg' %}">
+            </a>
+            <div onclick="hideDetail()">
+                <img src="{% static 'assets/close.svg' %}">
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="checkbox" id="newsCheckbox"></div>
+            <div class="paper">
+                <h2 id="paperTitle"></h2>
+                <p class="author" id="paperAuthor"></p>
+                <p class="journal" id="paperJournal"></p>
+                <p class="date" id="paperDate"></p>
+                <p class="abstract" id="paperAbstract"></p>
+
+                <div id="classifications">
+                    <h2 id="classificationHeader">Classifications</h2>
+                    <div id="classificationDiv"></div>
+                    <p id="classificationInfo"
+                       style="margin-top: 10px; font-size:15px;">
+                        <em>(1,10) means text passage 1-10</em></p>
+                </div>
+            </div>
+            <div class="graph" id="paperGraph"></div>
+        </div>
+    </div>
+</div>
+
+<!-- feedback elements -->
+<div class="feedback_button feedbackbtn" id="feedback_button"
+        onclick="openFeedback()" data-html2canvas-ignore="true" style="background-color: #3180ff">
+    <span id="feedbackbtn_text">Feedback</span>
+    <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+</div>
+<div class="popup" id="feedbackPopup">
+    <div class="feedback_window" role="document">
+        <div class="feedback_header" id="header">
+            <h3 class="">Send feedback with screenshot</h3>
+            <div onclick="closeFeedback()">
+                <img src="{% static 'assets/close.svg' %}">
+            </div>
+        </div>
+        <div class="feedback_body">
+            <div class="feedback_screen_wrap">
+                <div class="" id="screenshotContainer">
+                    <img src="null" id="screenshot"
+                         class="">
+                    <canvas class=""
+                             id="screenshotCanvas"></canvas>
+                </div>
+            </div>
+            <div class="">
+                <div class="feedback_button" onclick="resetCanvas()"
+                     style="background-color: #9f9f9f">Reset
+                </div>
+            </div>
+
+            <p>Please mark the problematic section on the image above and/or describe the problem you have
+                encountered:</p>
+            <textarea class="" id="feedbackText" rows="3"></textarea>
+        </div>
+        <div class="feedback_footer">
+            <div class="feedback_button" onclick="closeFeedback()"
+                style="background-color: #9f9f9f; margin-right: 1%">Cancel</div>
+            <div class="feedback_button" onclick="closeFeedback(true)"
+               style="background-color: #3180ff">Send Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<noscript>
+    <div class="noscript">
+        <div>
+            This website requires JavaScript enabled to function properly.
+        </div>
+    </div>
+</noscript>
+
+<script>
+    const autocompletion_url = "{% url 'autocompletion' %}";
+    const url_query = "http://narrative.pubpharm.de/";
+    const url_query_sub_count = "{% url 'query_sub_count' %}";
+    const url_query_chembl_indication = "{% url 'chembl_indication' %}";
+    const url_query_document_ids_for_entity = "{% url 'document_ids_for_entity' %}";
+    const url_term_2_entity = "{% url 'term_to_entity' %}";
+    const url_document_graph = "{% url 'document_graph' %}";
+    const url_narrative_documents = "{% url 'narrative_documents' %}";
+    const url_chembl_phase = "{% static 'assets/chembl_phase_' %}";
+    const url_chembl_phase_new = "{% static 'assets/verification_new.svg' %}";
+    const url_loading_gif = "{% static 'assets/loading.gif' %}";
+    const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
+    const url_feedback_report = "{% url 'report' %}";
+    const url_keywords = "{% url 'keywords' %}";
+    const url_paper_view_log = "{% url 'paper_view_log' %}";
+
+    const url_drug_search = "{% url 'drug_search_log' %}";
+    const url_substance_href = "{% url 'drug_substance_forward_log' %}";
+    const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+</script>
+
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="{% static 'js/paper.js' %}?version=4"></script>
+<script src="{% static 'js/drugOverviewClient.js' %}?version=7"></script>
+<script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=4"></script>
+<script src="{% static 'js/feedback.js' %}?version=5"></script>
+</body>

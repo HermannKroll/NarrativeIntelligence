@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="Layer_1"
+   version="1.1"
+   viewBox="0 0 16 16"
+   xml:space="preserve"
+   sodipodi:docname="chembl_phase_3.svg"
+   inkscape:version="0.91 r13725"
+   width="16"
+   height="16"><metadata
+   id="metadata10"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+   id="defs15">
+</defs><sodipodi:namedview
+   id="namedview13"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="26"
+   inkscape:cx="-2.7528831"
+   inkscape:cy="3.0946335"
+   inkscape:window-width="1920"
+   inkscape:window-height="1017"
+   inkscape:window-x="1072"
+   inkscape:window-y="286"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1"
+   fit-margin-top="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-bottom="0" /><style
+   type="text/css"
+   id="style2">
+	.st0{fill:#31AF91;}
+	.st1{fill:#FFFFFF;}
+</style><g
+   id="g6"
+   style="fill:#8eb72b;fill-opacity:1"
+   transform="scale(0.125,0.125)"><circle
+     class="st0"
+     cx="64"
+     cy="64"
+     r="64"
+     id="circle4"
+     style="fill:#8eb72b;fill-opacity:1" /></g><text
+   xml:space="preserve"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58076286px;line-height:1.35000002;font-family:Rubik;-inkscape-font-specification:'Rubik, Normal';fill:#ffffff;fill-opacity:1;stroke:none"
+   x="2.3720279"
+   y="12.318397"
+   id="text3074"
+   transform="scale(1.0353702,0.96583811)"><tspan
+     sodipodi:role="line"
+     id="tspan3072"
+     x="2.3720279"
+     y="12.318397">III</tspan></text>
+
+</svg>

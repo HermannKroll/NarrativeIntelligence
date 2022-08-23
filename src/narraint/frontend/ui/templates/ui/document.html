@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+
+{% block title %}Document Graph{% endblock %}
+
+{% block content %}
+
+
+
+    <div class="container margin-top">
+        <div class="row">
+            <style type="text/css">
+                #mynetwork {
+                    width: 1400px;
+                    height: 700px;
+                    border: 1px solid lightgray;
+                }
+            </style>
+            <div id="mynetwork"></div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript">
+        const document_graph_url = "{% url 'document_graph' %}";
+    </script>
+    <script src="{% static 'js/../../static/js/../../static/js/document.js' %}?version=4" type="text/javascript"></script>
+
+{% endblock %}

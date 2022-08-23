@@ -1,0 +1,21 @@
+PredicationDenorm
+-
+id bigint PK
+subject_id string
+subject_type string
+relation string
+object_id string
+object_type string
+provenance_mapping string
+
+DocumentMetadataService:
+-
+document_id bigint FK >- Document.id
+document_collection string FK >- Document.collection
+document_id_original string
+title string
+authors string
+journals string
+publication_year int
+publication_month int
+publication_doi string

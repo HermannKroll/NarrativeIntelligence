@@ -1,0 +1,131 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+    {% block css %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'search' %}">Narrative Service</a>
+        <a href="https://youtu.be/YDvUzrJdfm4" target="_blank">
+          <img src="{% static 'icons/help.png' %}" height="40px">
+        </a>
+
+        <span class="collapse navbar-collapse navbar-text text-nowrap">
+            Last updated 10.06.2022
+        </span>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item" id="nav_item_search">
+                    <a class="nav-link" href="{% url 'search' %}">Search</a>
+                </li>
+                <li class="nav-item" id="nav_item_overview">
+                    <a class="nav-link" href="{% url 'drug_overview_index' %}">Drug Overviews</a>
+                </li>
+          <!--      <li class="nav-item" id="nav_item_stats">
+                    <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
+                </li>
+            -->
+                <li class="nav-item" id="nav_item_help">
+                    <a class="nav-link" href="{% url 'help' %}">Help</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://blogs.tu-braunschweig.de/pubpharm/impressum/">Impressum</a>
+                </li>
+            </ul>
+        </div>
+        <a href="https://www.pubpharm.de"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo"></a>
+        <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"/></a>
+    </div>
+</nav>
+
+<div class="fixed-bottom p-4 toast bg-dark text-white w-100 mw-100" role="alert" data-autohide="false" id="cookie_toast"
+     style="display:none;">
+    <div class="toast-body p-4 d-flex flex-column">
+        <h4>Cookie Warning</h4>
+        <p>
+            This website will generate a random user id to store your ratings on the server. The user id is just a
+            random number and is not associated with personal data.
+        </p>
+        <div class="ml-auto">
+            <button type="button" class="btn btn-outline-light mr-3" id="cookiebtnDeny">
+                Deny
+            </button>
+            <button type="button" class="btn btn-light" id="cookiebtnAccept">
+                Accept
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<nav class="navbar fixed-bottom navbar-light" style="display:none;" style="background-color: #e3f2fd;"
+     id="nav_bar_bottom">
+    <a class="navbar-brand mx-auto">
+        <div class="alert alert-info" id="info_for_user" style="display:none;" role="alert">
+            Thank you for your Feedback!
+        </div>
+    </a>
+
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous" type="text/javascript"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script>
+    let nav_bar_bottom = $("#nav_bar_bottom");
+    let info_element = $('#info_for_user');
+
+    nav_bar_bottom.hide();
+
+    function showInfoAtBottom(text) {
+        nav_bar_bottom.show();
+        info_element.text(text);
+        info_element.fadeIn();
+
+        setTimeout(function () {
+            info_element.fadeOut();
+            nav_bar_bottom.fadeOut();
+        }, 1500);
+
+
+    }
+</script>
+
+{% block javascript %}{% endblock %}
+</body>
+</html>

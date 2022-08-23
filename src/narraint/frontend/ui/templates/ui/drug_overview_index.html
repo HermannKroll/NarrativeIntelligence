@@ -1,0 +1,58 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narrative Service</title>
+    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
+</head>
+
+<body>
+    <div class="topbar">
+        <div id="impressum"><a href="https://blogs.tu-braunschweig.de/pubpharm/impressum/" target="_blank" >Impressum</a></div>
+        <a href="https://www.pubpharm.de" style="margin: 0 1% 0 auto" target="_blank"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo" target="_blank"></a>
+        <a href="http://www.ifis.cs.tu-bs.de/" style="margin-right: 1%" target="_blank"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"></a>
+    </div>
+
+    <div class="content main_page">
+        <h1>Drug Overviews</h1>
+        <div class="searchbar">
+            <input type="text" id='drugInput' placeholder="Search for Drug...">
+            <div onclick="searchDrug()" class="button">
+                <img src="{% static 'assets/searchicon.svg' %}">
+            </div>
+        </div>
+        <p>
+            Please type in a drug name.
+            Drug Overviews generates you structured overviews about active compounds.
+        </p>
+
+        <br>
+
+        <p><a href="http://www.pubpharm.de">www.pubpharm.de</a></p>
+    </div>
+
+    <noscript>
+        <div class="noscript">
+            <div>
+                This website requires JavaScript enabled to function properly.
+            </div>
+        </div>
+    </noscript>
+    
+    <script>
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const drugOverview_url = "{% url 'drug_overview' %}";
+        function searchDrug() {
+            var keyword = document.getElementById('drugInput').value;
+            if (keyword == "") {
+                return;
+            }
+            window.location = drugOverview_url + "?drug=" + keyword;
+        }
+    </script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=4" type="text/javascript"></script>
+</body>

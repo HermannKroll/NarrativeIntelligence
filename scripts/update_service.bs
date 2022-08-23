@@ -1,0 +1,49 @@
+#!/bin/bash
+ROOT_DIR="/hdd2/datasets/pubmed_medline/"
+VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
+MEDLINE_BASELINE="/hdd2/datasets/pubmed_medline/2021_12/"
+MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2022_updates/"
+PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
+PREDICATION_MINIMUM_UPDATE_ID=481895067
+
+cd $ROOT_DIR
+
+# Load the Metadata
+# Donwload the latest medline via wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+# Download the latest updates via
+wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
+cp $MEDLINE_UPDATES/ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/*.* $MEDLINE_UPDATES/.
+gunzip -f $MEDLINE_UPDATES/*.gz
+
+
+# Unzip everything
+python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# Load Baseline
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
+
+# Execute Cleaning Rules for Predications
+# echo 'cleaning predication table with hand-written rules'
+# psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
+
+# Do the canonicalizing step
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+
+# Apply the rules
+python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+
+# Execute Cleaning Rules for Predications
+echo 'cleaning predication table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
+
+
+# Finally compute the new metadata service table2
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+
+# Compute reverse indexes
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+
+# Finally vacuum all tables
+# Execute Cleaning Rules for Tagging
+echo 'vacuum db tables...'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $VACUUM_SQL

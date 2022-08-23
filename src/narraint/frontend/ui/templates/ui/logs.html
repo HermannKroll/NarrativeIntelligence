@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/logs.css' %}">
+</head>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
+<body>
+    <div id="dashboard">
+    </div>
+    <script src="{% static 'js/json_logger_data.js' %}?version=1"></script>
+    <script type="text/javascript">
+        const logs_url = "{% url 'logs' %}";
+    </script>
+</body>
+</html>

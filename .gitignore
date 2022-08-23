@@ -15,7 +15,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -111,6 +110,7 @@ venv.bak/
 # Files
 data/
 tmp/
+reports/
 
 # macOS
 .DS_Store
@@ -120,7 +120,7 @@ narrative/*.log
 venvlinux/
 tmp/
 logs/
-
+cache/
 config/*
 !config/*.prod.json
 !config/*.example.json
@@ -129,3 +129,7 @@ config/*
 docker/*.tgz
 docker/GNormPlusJava.zip
 docker/TaggerOne/models
+/tmp-/
+/src/nitests/config/jsonfiles/backend.json
+/lib/cesi/
+/lib/KGExtractionToolbox/src/kgtests/
