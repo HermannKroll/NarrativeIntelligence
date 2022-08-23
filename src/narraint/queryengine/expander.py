@@ -71,5 +71,8 @@ class QueryExpander:
             else:
                 expanded_queries.append(GraphQuery([FactPattern(fp.subjects, fp.predicate, fp.objects)]))
                 query_fact_patterns_expanded.append([(list(fp.subjects)[0], fp.predicate, list(fp.objects)[0])])
-
+        # copy already existing additional entities if needed
+        if graph_query.additional_entities:
+            for q in expanded_queries:
+                q.additional_entities = graph_query.additional_entities
         return expanded_queries
