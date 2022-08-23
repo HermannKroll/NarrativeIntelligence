@@ -1,5 +1,4 @@
 import gzip
-import gzip
 import logging
 import os.path
 import pickle
@@ -9,13 +8,13 @@ from datetime import datetime
 from itertools import islice
 
 import datrie
-import narraint.frontend.entity.autocompletion as autocompletion
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
+
 
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
@@ -25,9 +24,11 @@ from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
+from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
+from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
 class EntityTagger:
@@ -84,8 +85,8 @@ class EntityTagger:
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
-        self._add_fid_dosageform_terms(resolver=resolver)
-        self._add_vaccine_terms(resolver=resolver)
+        self._add_fid_dosageform_terms()
+        self._add_vaccine_terms()
         self._add_plant_families()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
@@ -116,21 +117,21 @@ class EntityTagger:
                         self.term2entity[synonym.strip().lower()].add(Entity(gene_symbol, GENE))
         logging.info('Gene terms added')
 
-    def _add_fid_dosageform_terms(self, resolver: EntityResolver):
+    def _add_fid_dosageform_terms(self):
         """
         Add the additional dosage form terms to the internal translation dict
         :return: None
         """
-        for term, df_ids in resolver.dosageform.dosageform_vocabulary.vocabularies[DOSAGE_FORM].items():
+        for term, df_ids in DosageFormVocabulary.create_dosage_form_vocabulary(expand_by_s_and_e=False).items():
             for df_id in df_ids:
                 self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
 
-    def _add_vaccine_terms(self, resolver: EntityResolver):
+    def _add_vaccine_terms(self):
         """
         Add all vaccine entries
         :return:
         """
-        for term, vaccine_ids in resolver.vaccine.vaccine_vocab.vocabularies[VACCINE].items():
+        for term, vaccine_ids in VaccineVocabulary.create_vaccine_vocabulary(expand_by_s_and_e=False).items():
             for vaccine_id in vaccine_ids:
                 self.term2entity[term].add(Entity(vaccine_id, VACCINE))
 
@@ -236,6 +237,7 @@ class EntityTagger:
         entities = set()
         if expand_search_by_prefix:
             if not self.autocompletion:
+                from narraint.frontend.entity import autocompletion
                 self.autocompletion = autocompletion.AutocompletionUtil.instance()
             expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
             logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
