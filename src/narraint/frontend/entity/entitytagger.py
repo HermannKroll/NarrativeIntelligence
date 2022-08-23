@@ -62,6 +62,12 @@ class EntityTagger:
         logging.info(f'Loading entity tagging index from {index_path}')
         with open(index_path, 'rb') as f:
             self.term2entity = pickle.load(f)
+
+        logging.info('Enhancing index...')
+        terms = set(self.term2entity)
+        for term in terms:
+            self.term2entity[term.replace('-', ' ')].update(self.term2entity[term])
+
         logging.info('Index load')
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX):
@@ -233,7 +239,7 @@ class EntityTagger:
         :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
         :return: a list of entities (entity_id, entity_type)
         """
-        t_low = term.lower().strip()
+        t_low = term.lower().strip().replace('-', ' ')
         entities = set()
         if expand_search_by_prefix:
             if not self.autocompletion:
