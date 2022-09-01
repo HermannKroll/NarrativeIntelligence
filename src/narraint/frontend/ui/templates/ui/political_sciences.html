@@ -12,8 +12,10 @@
 
 
     <div class="container">
-        <h3>Query:</h3>
-        <textarea name="textarea" rows="5" cols="100" id="id_query">Obama born August</textarea>
+        <h3>Query Statement (Complete Sentence):</h3>
+        <textarea name="textarea" rows="2" cols="100" id="id_statement">United States invade the Iraq</textarea>
+        <h3>Query (Keyword Filter Expression):</h3>
+        <textarea name="textarea" rows="2" cols="100" id="id_query">(U.S.|United States|US) (Iraq|Bagdad)</textarea>
         <h3>Parameters:</h3>
         <label for="confidence_range" class="form-label">Confidence</label>
         <label id="confidence_value">0.8</label>
@@ -61,7 +63,7 @@
         const ps_search_url = "{% url 'ps_query' %}";
     </script>
 
-    <script src="{% static 'js/ps_search.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/ps_search.js' %}?version=3" type="text/javascript"></script>
 
 
 {% endblock %}

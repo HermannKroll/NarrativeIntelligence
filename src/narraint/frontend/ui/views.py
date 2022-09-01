@@ -676,7 +676,7 @@ def get_new_query(request):
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
 
-        graph_query, query_trans_string = View.instance().translation\
+        graph_query, query_trans_string = View.instance().translation \
             .convert_query_text_to_fact_patterns(query)
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
@@ -1116,12 +1116,19 @@ def get_ps_query(request):
         query = request.GET["query"].strip()
         confidence = request.GET["confidence"]
         sources = request.GET["sources"]
+        if "statement" in request.GET:
+            statement = request.GET["statement"]
+        else:
+            statement = None
         try:
             confidence = float(confidence)
             logging.info('Received political sciences query...')
             logging.info(f'Search with conf. {confidence} for query: {query}')
+            if statement:
+                logging.info(f'Use statement "{statement}"')
             logging.info(f'Sources: {sources}')
-            nd_result = requests.get(f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}")
+            nd_result = requests.get(
+                f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}&statement={statement}")
             json_data = nd_result.json()
             if nd_result.status_code == 200:
                 return JsonResponse(status=200, data=json_data)
