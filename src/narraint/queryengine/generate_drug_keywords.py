@@ -59,12 +59,16 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
     :param stem_dict: dictionary word stem with the shortest stemmed word
     :return: JSON-style list as a string containing 20 keywords
     """
-    #  keywords [(ngram: str, score: float)]
+    # raw_keywords [(ngram: str, score: float)]
     raw_keywords = extractor.extract_keywords(text)
-    keywords = list()
+    keyword_map = list()
+    keywords = set()
+    normalized_keywords = list()
     try:
-        for i in range(len(raw_keywords)):
-            keyword: str = raw_keywords[i][0]
+        for keyword, score in raw_keywords:
+            # ignore already known keywords
+            if keyword in keywords:
+                continue
             # ignore the key if it is part of the entity_name
             if entity_name.lower().find(keyword.lower()) >= 0 \
                     or entity_name.lower() == keyword.lower():
@@ -72,32 +76,34 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
             # replace keywords with the most likely stem
             stem = stemmer.stem(keyword)
             if stem in stem_dict.keys():
-                if len(stem) + 1 == stem_dict[stem] \
-                        and stem_dict[stem][-1] == 's':
-                    keywords.append((stem, raw_keywords[i][1]))
-                else:
-                    keywords.append((stem_dict[stem], raw_keywords[i][1]))
+                if len(stem) + 1 == len(stem_dict[stem]) \
+                        and stem_dict[stem][-1] == 's'\
+                        and stem not in keywords:
+                    keyword_map.append((stem, score))
+                    keywords.add(stem)
+                elif stem_dict[stem] not in keywords:
+                    keyword_map.append((stem_dict[stem], score))
+                    keywords.add(stem_dict[stem])
             else:
-                keywords.append(raw_keywords[i])
+                keyword_map.append((keyword, score))
+                keywords.add(keyword)
 
-        # just remove the lowest valued key if no keyword equals the entity name
-        while len(keywords) > 20:
-            keywords.remove(keywords[-1])
+        # use the 20 first highest valued keys
+        if len(keyword_map) > 20:
+            keyword_map = keyword_map[:20]
 
-        #  normalize data for better html visualizations
-        minimum = keywords[0][1]
-        denominator = keywords[-1][1] - keywords[0][1]  # max - min
+        # normalize data for better html visualizations
+        minimum = keyword_map[0][1]
+        denominator = keyword_map[-1][1] - keyword_map[0][1]  # max - min
 
-        normalized_keywords = []
-        for obj in keywords:
+        for obj in keyword_map:
             #  inverted normalized scores (1-8) for text size
             #  lower value means higher relevance (-> inverted)
             normalized_keywords.append({obj[0]: 8 - int(((obj[1] - minimum) /
                                                          denominator) * 7)})
-        keywords = normalized_keywords
 
     finally:
-        return str(keywords)
+        return str(normalized_keywords)
 
 
 def main():
@@ -138,7 +144,7 @@ def main():
     p.start_time()
 
     skipped_drugs = 0
-    for i in range(len(drugs)):  #range(100):#
+    for i in range(len(drugs)):  #range(10):#
         # retrieve all document_ids for one drug
         entity_id = dict(drugs[i])["subject_id"]
         q = session.query(TagInvertedIndex.document_ids)
