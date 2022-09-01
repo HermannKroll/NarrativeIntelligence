@@ -1046,9 +1046,10 @@ class LogsView(TemplateView):
         View.instance().query_logger.write_page_view_log(LogsView.template_name)
         if not LogsView.log_date or LogsView.log_date != get_date_of_today() or not LogsView.data_dict:
             try:
-                logger.debug("hi")
+                logger.debug("Computing logs")
                 LogsView.data_dict = create_dictionary_of_logs()
                 LogsView.log_date = get_date_of_today()
+                logger.debug("Logs computed")
             except:
                 traceback.print_exc(file=sys.stdout)
         return super().get(request, *args, **kwargs)
