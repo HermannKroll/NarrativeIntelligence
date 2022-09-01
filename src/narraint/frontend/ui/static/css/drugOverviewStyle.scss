@@ -144,9 +144,24 @@ p {
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+
+    .nav_spacer {
+        margin-right: auto;
+        //width: 25%;
+    }
+
+    .nav_logos {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        margin-left: auto;
+        height: 100%;
+        padding: 0.2em;
+        margin-right: 1em;
+    }
 }
 
-#impressum {
+.topbar_link {
     display: flex;
     align-items: center;
     margin-left: 1%;
@@ -157,6 +172,7 @@ p {
         padding: 0.6em 0.6em;
         text-decoration: none;
         color: #006dae;
+        white-space: nowrap;
     }
     a:hover {
         background-color: whitesmoke;
@@ -184,7 +200,6 @@ p {
 
     .nav_spacer {
         margin-right: auto;
-        width: 25%;
     }
 
     .nav_logos {
@@ -297,7 +312,11 @@ p {
         width: 100%;
         height: fit-content;
         .nav_spacer {
-            display: none;
+            margin-right: unset;
+        }
+
+        .nav_logos {
+            margin-left: unset;
         }
 
         .button {
@@ -318,10 +337,13 @@ p {
             order: 1;
         }
         :nth-child(2) {
-            order: 3;
+            order: 2;
         }
         :nth-child(3) {
-            order: 2;
+            order: 4;
+        }
+        :nth-child(4) {
+            order: 3;
         }
     }
 
@@ -350,9 +372,19 @@ p {
     .sidebar .sidebar_entry_count {
         width: 35%;
     }
+
+    .topbar{
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        height: fit-content;
+    }
 }
 
 @media screen and (max-width: 800px) {
+    body {
+        background-color: white;
+    }
     //remove sidebar
     .sidebar {
         visibility: hidden;
@@ -360,7 +392,7 @@ p {
     }
 
     .content {
-        margin-left: 12%;
+        margin: 5em 0 0 0;
     }
 }
 

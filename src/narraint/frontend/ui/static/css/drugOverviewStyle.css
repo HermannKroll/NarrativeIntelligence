@@ -142,20 +142,33 @@ p {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
+.topbar .nav_spacer {
+  margin-right: auto;
+}
+.topbar .nav_logos {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  margin-left: auto;
+  height: 100%;
+  padding: 0.2em;
+  margin-right: 1em;
+}
 
-#impressum {
+.topbar_link {
   display: flex;
   align-items: center;
   margin-left: 1%;
   position: relative;
 }
-#impressum a {
+.topbar_link a {
   border-radius: 0.25em;
   padding: 0.6em 0.6em;
   text-decoration: none;
   color: #006dae;
+  white-space: nowrap;
 }
-#impressum a:hover {
+.topbar_link a:hover {
   background-color: whitesmoke;
 }
 
@@ -180,7 +193,6 @@ p {
 }
 .navbar .nav_spacer {
   margin-right: auto;
-  width: 25%;
 }
 .navbar .nav_logos {
   display: flex;
@@ -275,6 +287,7 @@ p {
     margin-bottom: 2em !important;
     border: 1px solid var(--grey_border) !important;
   }
+
   .navbar {
     display: flex;
     flex-wrap: wrap;
@@ -282,7 +295,10 @@ p {
     height: fit-content;
   }
   .navbar .nav_spacer {
-    display: none;
+    margin-right: unset;
+  }
+  .navbar .nav_logos {
+    margin-left: unset;
   }
   .navbar .button {
     min-width: 2.2em;
@@ -300,11 +316,15 @@ p {
     order: 1;
   }
   .navbar :nth-child(2) {
-    order: 3;
-  }
-  .navbar :nth-child(3) {
     order: 2;
   }
+  .navbar :nth-child(3) {
+    order: 4;
+  }
+  .navbar :nth-child(4) {
+    order: 3;
+  }
+
   .searchbox .top_searchbox {
     flex-wrap: wrap;
   }
@@ -315,6 +335,7 @@ p {
     flex-wrap: wrap;
     flex-direction: column;
   }
+
   .top_container {
     flex-wrap: wrap-reverse;
   }
@@ -322,17 +343,30 @@ p {
     width: 15em !important;
     height: 15em !important;
   }
+
   .sidebar .sidebar_entry_count {
     width: 35%;
   }
+
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: fit-content;
+  }
 }
 @media screen and (max-width: 800px) {
+  body {
+    background-color: white;
+  }
+
   .sidebar {
     visibility: hidden;
     width: 0;
   }
+
   .content {
-    margin-left: 12%;
+    margin: 5em 0 0 0;
   }
 }
 .main_page {
@@ -755,7 +789,7 @@ p {
   left: 0;
 }
 .noscript div {
-  background-color: rgb(180, 30, 30);
+  background-color: #b41e1e;
   border-radius: 1em;
   font-size: x-large;
   margin: auto;
