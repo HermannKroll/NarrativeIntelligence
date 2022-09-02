@@ -12,11 +12,11 @@ function load_data(data) {
     let narrative = data["narrative"];
     let overview = data["overview"];
     load_title("Narrative Service");
-    load_top_querystring(narrative["topTenQueries"], "Top 100 searched queries");
+    load_top_querystring(narrative["topQueries"], "Top 100 searched queries");
     load_performed_queries(narrative["amountQueries"], "Performed Queries");
     load_usage_graph(narrative['graphInput'], "performed queries");
     load_title("Drug Overviews");
-    load_top_querystring(overview["topTenQueries"], "Top 100 searches");
+    load_top_querystring(overview["topQueries"], "Top 100 searches");
     load_performed_queries(overview["amountQueries"], "Performed searches");
     load_usage_graph(overview['graphInput'], "performed searches");
 }
@@ -36,7 +36,7 @@ function load_usage_graph(data, y_label) {
     let usage = document.createElement("div");
     usage.className = "section";
     let titleUG = document.createElement("h2");
-    titleUG.innerHTML = "Usage in the last";
+    titleUG.innerHTML = "Last Usage";
     let graphInput = document.createElement("input");
     graphInput.className = "slider";
     graphInput.setAttribute("type", "range");
@@ -215,8 +215,8 @@ function load_performed_queries(data,title) {
 
 function load_top_querystring(data, title) {
     let db = document.getElementById("dashboard");
-    let topTenQueries = document.createElement("div");
-    topTenQueries.className = "section";
+    let topQueries = document.createElement("div");
+    topQueries.className = "section";
     let titleTFQ = document.createElement("h2");
     titleTFQ.innerHTML = title;
     let input = document.createElement("input");
@@ -247,9 +247,9 @@ function load_top_querystring(data, title) {
     timesList.appendChild(elementMonth);
     timesList.appendChild(elementYear);
     timesList.appendChild(elementAll);
-    topTenQueries.appendChild(titleTFQ);
-    topTenQueries.appendChild(input);
-    topTenQueries.appendChild(timesList);
+    topQueries.appendChild(titleTFQ);
+    topQueries.appendChild(input);
+    topQueries.appendChild(timesList);
     let fixTableHeads = document.createElement("div");
     fixTableHeads.className = "tableFixHead";
     let queryTable = document.createElement("table");
@@ -308,8 +308,8 @@ function load_top_querystring(data, title) {
         queryTable.appendChild(tbody);
     }
     fixTableHeads.appendChild(queryTable);
-    topTenQueries.appendChild(fixTableHeads);
-    db.appendChild(topTenQueries);
+    topQueries.appendChild(fixTableHeads);
+    db.appendChild(topQueries);
 }
 
 function iterateThroughData(data, time, element) {

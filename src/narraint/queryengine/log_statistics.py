@@ -1,5 +1,6 @@
 import json
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
 import pandas as pd
 from narraint.config import LOG_DIR
@@ -25,13 +26,11 @@ def get_json_of_log(path):
                     details = [x.strip() for x in details]
                     structure = {key: value for key, value in zip(header_list, details)}
                     date = structure['timestamp'].split('-')[0]
-                    structure["data_object"] = datetime.strptime(date, '%Y.%m.%d').date()
+                    structure["date_object"] = datetime.strptime(date, '%Y.%m.%d').date()
                     data.append(structure)
         except:
             pass
-    # data_json = json.dumps(data, indent=4)
-    # print(data_json)
-    # json_object = json.loads(data_json)
+
     return data
 
 
@@ -46,140 +45,93 @@ def get_list_of_parameter(json_object, parameter):
     return parameter_list
 
 
-def get_most_searched_parameter(amount, json_object_narrative, json_object_overview):
-    result_queries = dict()
-    result_queries["t"] = get_most_searched_parameter_per_time(amount, json_object_narrative, "query string", "t")
-    result_queries["tw"] = get_most_searched_parameter_per_time(amount, json_object_narrative, "query string", "tw")
-    result_queries["tm"] = get_most_searched_parameter_per_time(amount, json_object_narrative, "query string", "tm")
-    result_queries["ty"] = get_most_searched_parameter_per_time(amount, json_object_narrative, "query string", "ty")
-    result_queries["a"] = get_most_searched_parameter_per_time(amount, json_object_narrative, "query string", "a")
+def get_most_searched_parameter(top_k, json_object_narrative, json_object_overview):
+    result_queries = get_most_searched_parameter_per_time(top_k, json_object_narrative, "query string")
+    result_overview = get_most_searched_parameter_per_time(top_k, json_object_overview, "drug")
 
-    result_overview = dict()
-    result_overview["t"] = get_most_searched_parameter_per_time(amount, json_object_overview, "drug", "t")
-    result_overview["tw"] = get_most_searched_parameter_per_time(amount, json_object_overview, "drug", "tw")
-    result_overview["tm"] = get_most_searched_parameter_per_time(amount, json_object_overview, "drug", "tm")
-    result_overview["ty"] = get_most_searched_parameter_per_time(amount, json_object_overview, "drug", "ty")
-    result_overview["a"] = get_most_searched_parameter_per_time(amount, json_object_overview, "drug", "a")
     return result_queries, result_overview
 
 
-def get_most_searched_parameter_per_time(amount, json_object, parameter, time):
+def get_most_searched_parameter_per_time(top_k, json_object, parameter):
     today = datetime.now().date()
-    parameter_list = get_list_of_parameter(json_object, parameter)
-    amount_list = []
+    parameter_list = list(set(get_list_of_parameter(json_object, parameter)))
+    counter_per_parameter = {"t": {}, "tw": {}, "tm": {}, "ty": {}, "a": {}}
     for p in parameter_list:
-        amount_list.append(0)
+        counter_per_parameter["t"][p] = 0
+        counter_per_parameter["tw"][p] = 0
+        counter_per_parameter["tm"][p] = 0
+        counter_per_parameter["ty"][p] = 0
+        counter_per_parameter["a"][p] = 0
     for i in json_object:
         if i.__contains__(parameter):
-            if i.__contains__('timestamp') and i['timestamp'] != '':
-                date_object = i["data_object"]
-                if time == "t":
-                    if date_object == today:
-                        amount_list[parameter_list.index(i[parameter])] += 1
-                elif time == "tw":
-                    if date_object > today - timedelta(days=today.weekday()):
-                        amount_list[parameter_list.index(i[parameter])] += 1
-                elif time == "tm":
-                    if date_object.month == today.month and date_object.year == today.year:
-                        amount_list[parameter_list.index(i[parameter])] += 1
-                elif time == "ty":
-                    if date_object.year == today.year:
-                        amount_list[parameter_list.index(i[parameter])] += 1
-                elif time == "a":
-                    amount_list[parameter_list.index(i[parameter])] += 1
-    match_list = zip(amount_list, parameter_list)
-    match_list = sorted(match_list)
-    match_list.reverse()
-    # print(match_list)
-    top_list = dict()
-    list_range = 0
-    if len(match_list) < amount:
-        list_range = len(match_list)
-    else:
-        list_range = amount
-    for j in range(list_range):
-        top_list[match_list[j][1]] = match_list[j][0]
-    # print(top_list)
-    return top_list
+            date_object = i["date_object"]
+            parameter_value = i[parameter]
+            if date_object == today:
+                counter_per_parameter["t"][parameter_value] += 1
+            if date_object > today - timedelta(days=today.weekday()):
+                counter_per_parameter["tw"][parameter_value] += 1
+            if date_object.month == today.month and date_object.year == today.year:
+                counter_per_parameter["tm"][parameter_value] += 1
+            if date_object.year == today.year:
+                counter_per_parameter["ty"][parameter_value] += 1
+            counter_per_parameter["a"][parameter_value] += 1
+
+    counter_per_parameter_sorted = {}
+    for date_agg, values in counter_per_parameter.items():
+        value_list = list([(k, v) for k, v in values.items() if v > 0])
+        value_list.sort(key=lambda x: x[1], reverse=True)
+        counter_per_parameter_sorted[date_agg] = {q: count for q, count in value_list[:top_k]}
+
+    return counter_per_parameter_sorted
 
 
-def get_amount_of_occurrences(json_object, time):
+def get_amount_of_occurrences(json_object):
     today = datetime.now().date()
-    counter = 0
+    counter = {"t": 0, "tw": 0, "tm": 0, "lm": 0, "ty": 0, "ly": 0}
     for i in json_object:
-        if i.__contains__('timestamp') and i['timestamp'] != '':
-            date = i['timestamp'].split('-')[0]
-            date_object = datetime.strptime(date, '%Y.%m.%d').date()
-            if time == "t":
-                if date_object == today:
-                    counter += 1
-            elif time == "tw":
-                if date_object > today - timedelta(days=today.weekday()):
-                    counter += 1
-            elif time == "tm":
-                if date_object.month == today.month and date_object.year == today.year:
-                    counter += 1
-            elif time == "lm":
-                if date_object.month == today.month - 1 and date_object.year == today.year:
-                    counter += 1
-            elif time == "ty":
-                if date_object.year == today.year:
-                    counter += 1
-            elif time == "ly":
-                if date_object.year == today.year - 1:
-                    counter += 1
+        date_object = i["date_object"]
+        if date_object == today:
+            counter["t"] += 1
+        if date_object > today - timedelta(days=today.weekday()):
+            counter["tw"] += 1
+        if date_object.month == today.month and date_object.year == today.year:
+            counter["tm"] += 1
+        if date_object.month == today.month - 1 and date_object.year == today.year:
+            counter["lm"] += 1
+        if date_object.year == today.year:
+            counter["ty"] += 1
+        if date_object.year == today.year - 1:
+            counter["ly"] += 1
     return counter
 
 
 def get_all_amounts_of_occurrences(narrative_json, overview_json):
-    amounts_narrative = dict()
-    amounts_narrative["t"] = get_amount_of_occurrences(narrative_json, "t")
-    amounts_narrative["tw"] = get_amount_of_occurrences(narrative_json, "tw")
-    amounts_narrative["tm"] = get_amount_of_occurrences(narrative_json, "tm")
-    amounts_narrative["lm"] = get_amount_of_occurrences(narrative_json, "lm")
-    amounts_narrative["ty"] = get_amount_of_occurrences(narrative_json, "ty")
-    amounts_narrative["ly"] = get_amount_of_occurrences(narrative_json, "ly")
-
-    amounts_overview = dict()
-    amounts_overview["t"] = get_amount_of_occurrences(overview_json, "t")
-    amounts_overview["tw"] = get_amount_of_occurrences(overview_json, "tw")
-    amounts_overview["tm"] = get_amount_of_occurrences(overview_json, "tm")
-    amounts_overview["lm"] = get_amount_of_occurrences(overview_json, "lm")
-    amounts_overview["ty"] = get_amount_of_occurrences(overview_json, "ty")
-    amounts_overview["ly"] = get_amount_of_occurrences(overview_json, "ly")
+    amounts_narrative = get_amount_of_occurrences(narrative_json)
+    amounts_overview = get_amount_of_occurrences(overview_json)
     return amounts_narrative, amounts_overview
 
 
-def get_graph_input_per_time(json_object, time):
+def get_graph_input_per_time(json_object, time_deltas):
     today = datetime.now().date()
-    time_limit = today - timedelta(days=time)
-    amount_per_day = dict()
-    start = time
-    for t in range(time + 1):
-        counter = 0
-        for i in json_object:
-            if i.__contains__('timestamp') and i['timestamp'] != '':
-                date = i['timestamp'].split('-')[0]
-                date_object = datetime.strptime(date, '%Y.%m.%d').date()
-                if date_object == time_limit + timedelta(days=t):
-                    counter += 1
-        amount_per_day[start] = counter
-        start -= 1
-    return amount_per_day
+
+    count_per_day_and_time = {}
+    for time_delta in time_deltas:
+        count_per_day_and_time[time_delta] = defaultdict(int)
+
+    for i in json_object:
+        date_object = i["date_object"]
+        for time_delta in time_deltas:
+            for j in range(0, time_delta + 1):
+                if j == (today - date_object).days:
+                    count_per_day_and_time[time_delta][j] += 1
+
+    return count_per_day_and_time
 
 
 def get_graph_input(json_object_narrative, json_object_overview):
-    result_narrative = dict()
-    result_narrative["7"] = get_graph_input_per_time(json_object_narrative, 7)
-    result_narrative["31"] = get_graph_input_per_time(json_object_narrative, 31)
-    result_narrative["182"] = get_graph_input_per_time(json_object_narrative, 182)
-    result_narrative["365"] = get_graph_input_per_time(json_object_narrative, 365)
+    result_narrative = get_graph_input_per_time(json_object_narrative, [7, 31, 182, 365])
 
-    result_overview = dict()
-    result_overview["7"] = get_graph_input_per_time(json_object_overview, 7)
-    result_overview["31"] = get_graph_input_per_time(json_object_overview, 31)
-    result_overview["182"] = get_graph_input_per_time(json_object_overview, 182)
-    result_overview["365"] = get_graph_input_per_time(json_object_overview, 365)
+    result_overview = get_graph_input_per_time(json_object_overview, [7, 31, 182, 365])
     return result_narrative, result_overview
 
 
@@ -189,9 +141,9 @@ def create_dictionary_of_logs():
     result = dict()
     result_narrative = dict()
     result_overview = dict()
-    result_narrative['topTenQueries'], result_overview['topTenQueries'] = get_most_searched_parameter(100,
-                                                                                                      narrative_json,
-                                                                                                      overview_json)
+    result_narrative['topQueries'], result_overview['topQueries'] = get_most_searched_parameter(100,
+                                                                                                narrative_json,
+                                                                                                overview_json)
     result_narrative['amountQueries'], result_overview['amountQueries'] = get_all_amounts_of_occurrences(narrative_json,
                                                                                                          overview_json)
     result_narrative['graphInput'], result_overview['graphInput'] = get_graph_input(narrative_json, overview_json)
