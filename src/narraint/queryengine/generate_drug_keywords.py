@@ -1,4 +1,5 @@
 import ast
+import os.path
 import random
 
 import sqlalchemy
@@ -12,10 +13,14 @@ from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, EntityKeywords
+from narraint.config import RESOURCE_DIR
 from narrant.entity.entityresolver import EntityResolver
 
 # used to switch between table access and debugging console prints
 ACCESS_ENTITY_KEYWORDS_TABLE = True
+
+# TODO: set name as global var in some config file?
+STOPWORD_LIST_NAME = "stopword_drug_keywords.txt"
 
 MAX_NGRAM_WORD_SIZE = 1
 NUM_KEYWORDS = 25
@@ -106,6 +111,18 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
         return str(normalized_keywords)
 
 
+def set_stopword_list():
+    try:
+        stopword_path = os.path.join(RESOURCE_DIR ,STOPWORD_LIST_NAME)
+        with open(stopword_path, "r") as file:
+            stopwords = set([word.strip() for word in file])
+            extractor.stopword_set = stopwords
+            file.close()
+            print(f"Created stopword list with {len(stopwords)} entries")
+    except IOError as e:
+        print("Could not read stopword list. Using YAKE's default wordlist.")
+
+
 def main():
     """
     Generates for each drug (entity_id having subject_type == "Drug") a JSON
@@ -117,6 +134,8 @@ def main():
     """
     entity_type = "Drug"
     document_collection = "PubMed"
+
+    set_stopword_list()
 
     session = SessionExtended.get()
 
