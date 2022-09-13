@@ -162,6 +162,7 @@
     height: 100%;
 }
 .newsdetail {
+    height: 90%;
     background-color: white;
     margin: 2% 2% 2% 2%;
     padding: 1em;
