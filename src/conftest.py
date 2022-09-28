@@ -48,7 +48,7 @@ def pytest_sessionstart(session):
 
     print('writing test configs...')
     backend_config = tmp_rel_path("test_backend.json")
-    backend_db = tmp_rel_path("test.db").replace("\\", "/")
+    backend_db = tmp_rel_path("test.db")
 
     config_content = '{"use_SQLite": true, "SQLite_path": "' + backend_db + '"}'
     with open(backend_config, 'wt') as f:
