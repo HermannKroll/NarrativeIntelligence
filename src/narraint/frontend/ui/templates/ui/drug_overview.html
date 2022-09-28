@@ -115,8 +115,15 @@
         </div>
     </div>
     <div class="container word_cloud" id="KeywordCloud">
-        <h2>Keyword Cloud</h2>
-        <ul class="cloud" id="keyword_cloud"></ul>
+        <div class="top_searchbox">
+            <div class="top_searchbox_left">
+                <h2>Keyword Cloud</h2>
+            </div>
+        </div>
+        <div class="loading" id="wordCloudLoading">
+            <img src="{% static 'assets/loading.gif' %}" alt="Loading...">
+        </div>
+        <ul class="cloud" id="wordCloudContent"></ul>
     </div>
     <div id="overview_entries"></div>
     <div class="container news" id="RecentPapers">

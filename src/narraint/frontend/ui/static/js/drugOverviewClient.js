@@ -698,7 +698,7 @@ async function load_wordcloud() {
             return null;
         });
 
-    const cloud = document.getElementById("keyword_cloud")
+    const cloud = document.getElementById("wordCloudContent")
 
     for(const i in data) {
         const keyword = Object.keys(data[i])[0];
@@ -707,4 +707,5 @@ async function load_wordcloud() {
         const element = `<li data-weight="${number}" class="keyword">${keyword}</li>`;
         cloud.innerHTML += element;
     }
+    doneLoading("wordCloud");
 }
