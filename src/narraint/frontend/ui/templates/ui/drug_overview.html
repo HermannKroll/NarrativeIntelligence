@@ -45,6 +45,12 @@
         </div>
     </div>
 
+    <div class="link" onclick="scrollToElement('drugNetworkOverview')">
+        <div class="sidebar_entry_name" >
+            Network
+        </div>
+    </div>
+
     <div class="link" onclick="scrollToElement('KeywordCloud')">
         <div class="sidebar_entry_name" >
             Keywords
@@ -114,6 +120,24 @@
             </table>
         </div>
     </div>
+    
+    <!-- drug-target-disease-network -->
+    <div class="container searchbox" id="drugNetworkOverview" style="height:
+    fit-content">
+        <div class="top_searchbox">
+            <div class="top_searchbox_left">
+                <h2>Drug-Target-Disease Network</h2>
+            </div>
+        </div>
+        <div class="loading" id="drugNetworkLoading">
+            <img src="{% static 'assets/loading.gif' %}" alt="Loading...">
+        </div>
+        <div id="drugNetworkContent" style="height:
+        600px; display: none">
+
+        </div>
+    </div>
+    
     <div class="container word_cloud" id="KeywordCloud">
         <div class="top_searchbox">
             <div class="top_searchbox_left">

@@ -190,8 +190,10 @@ async function buildSite() {
                 });//just give something to the user, so we can proceed
 
             await load_wordcloud();
-            /* fill the container with fetched tags */
-            await getOverviewData();
+            //fill the container with fetched tags
+            await getOverviewData()
+                //calculate the network graph after all overviews are filled
+                .then(() => fillDrugNetwork());
         })
         .catch();
 }
@@ -708,4 +710,144 @@ async function load_wordcloud() {
         cloud.innerHTML += element;
     }
     doneLoading("wordCloud");
+}
+
+function fillDrugNetwork() {
+    const options = {
+        autoResize: true,
+        physics: {
+            solver: "repulsion",
+            /* solvers:
+             * 'barnesHut' (default),
+             * 'repulsion',
+             * 'hierarchicalRepulsion',
+             * 'forceAtlas2Based'
+             */
+            // stabilization: true
+            // barnesHut: {
+            //     gravitationalConstant: -2000,
+            //     centralGravity: 0.75,
+            //     springLength: 50, //was 140
+            //     springConstant: 0.08,
+            //     damping: 0.85,
+            //     avoidOverlap: 0.75
+            // },
+            // stabilization: {
+            //     enabled: true,
+            //     iterations: 2000,
+            //     updateInterval: 100,
+            //     onlyDynamicEdges: false,
+            //     fit: true
+            // },
+        },
+        interaction: {
+            hover: true
+        },
+        layout: {
+            improvedLayout: true
+        },
+        groups: {
+            diseaseNode: {
+                color: "#21b900",
+                font: {
+                    color: "#ffffff",
+                    size: 20
+                },
+                shape: "box"
+            },
+            targetNode: {
+                color: "#00c6ff",
+                font: {
+                    color: "#ffffff",
+                    size: 20
+                },
+                shape: "box"
+            },
+            phaseNode: {
+                color: {
+                    background: "#ffffff",
+                    border: "#21b900"
+                },
+                shape: "circularImage",
+                size: 18,
+            },
+        }
+    };
+    const nodes = new vis.DataSet();
+    const edges = new vis.DataSet();
+    const networkContainer = document.getElementById("drugNetworkContent");
+    let idx = 2;
+
+    // root node
+    nodes.add({id: 1, label: currentDrugName, group: "targetNode"})
+
+    // associated diseases (first 10 elements)
+    overviews["indi"].data.slice(0,10).forEach((disease) => {
+        const url = (disease.max_phase_for_ind >= 0) ? `${url_chembl_phase}${disease.max_phase_for_ind}.svg`: url_chembl_phase_new;
+        nodes.add({id: idx, label: disease.name, group: "diseaseNode"});
+        nodes.add({id: (idx * 100),
+            image: url,
+            group: "phaseNode",
+            title: `Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
+        });
+        edges.add({
+            from: (idx * 100), to: 1,
+            title: `${disease.count}`,
+            font: { color: "#ffffff", strokeWidth: 0 },
+        });
+        edges.add({
+            from: idx, to: (idx * 100),
+            label: `${disease.count}`,
+            title: `${disease.count}`,
+            font: { color: "#ffffff", strokeWidth: 0 },
+        })
+        ++idx;
+    });
+
+    // associated targets (first 10 elements)
+    overviews["targInter"].data.slice(0,10).forEach((target) => {
+    // overviews["drugInter"].data.slice(0,10).forEach((target) => {
+        const text = target.name.split("//")[0];
+        nodes.add({id: idx, label: text, group: "targetNode"});
+        edges.add({
+            from: idx, to: 1,
+            label: `${target.count}`,
+            title: `${target.count}`,
+            font: { color: "#ffffff", strokeWidth: 0 }
+        });
+        ++idx;
+    });
+    const network = new vis.Network(networkContainer, { nodes: nodes, edges: edges }, options)
+
+    network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network) );
+    doneLoading("drugNetwork");
+    // network.physics.physicsEnabled = false;
+}
+
+const networkSelectEdgeCallback = (e, network) => {
+    let predicate = "interacts";
+
+    // return early if the root node is selected
+    if (e.nodes.length >= 1 && e.nodes[0] === 1) {
+        network.unselectAll();
+        return;
+    }
+
+    // retrieve the adjacent nodes (have to be 2)
+    const nodes = network.getConnectedNodes(e.edges[0]);
+    if(nodes.length !== 2) {
+        network.unselectAll();
+        return;
+    }
+
+    // if one of them has an id larger than 100 it is most likely the
+    // phase node, so we have to correct the id.
+    if(nodes[0] > 100 || nodes[1] > 100) {
+        predicate = "treats";
+    }
+    const object = network.body.nodes[(nodes[0] > 100) ? nodes[0] / 100: nodes[0]].options.label
+
+    // open the corresponding query in a new tab
+    window.open(`/?query="${currentDrugName}"+${predicate}+"${object}"`, '_blank');
+    network.unselectAll();
 }
