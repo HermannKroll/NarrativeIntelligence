@@ -112,7 +112,7 @@ def set_stopword_list():
     try:
         with open(DRUG_KEYWORD_STOPWORD_LIST, "r") as file:
             stopwords = set([word.strip() for word in file])
-            extractor.stopword_set = stopwords
+            extractor.stopword_set.update(stopwords)
             file.close()
             print(f"Created stopword list with {len(stopwords)} entries")
     except IOError as e:
