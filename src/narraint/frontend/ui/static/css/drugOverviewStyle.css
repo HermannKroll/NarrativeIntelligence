@@ -287,7 +287,6 @@ p {
     margin-bottom: 2em !important;
     border: 1px solid var(--grey_border) !important;
   }
-
   .navbar {
     display: flex;
     flex-wrap: wrap;
@@ -324,7 +323,6 @@ p {
   .navbar :nth-child(4) {
     order: 3;
   }
-
   .searchbox .top_searchbox {
     flex-wrap: wrap;
   }
@@ -335,7 +333,6 @@ p {
     flex-wrap: wrap;
     flex-direction: column;
   }
-
   .top_container {
     flex-wrap: wrap-reverse;
   }
@@ -343,11 +340,9 @@ p {
     width: 15em !important;
     height: 15em !important;
   }
-
   .sidebar .sidebar_entry_count {
     width: 35%;
   }
-
   .topbar {
     display: flex;
     flex-wrap: wrap;
@@ -359,12 +354,10 @@ p {
   body {
     background-color: white;
   }
-
   .sidebar {
     visibility: hidden;
     width: 0;
   }
-
   .content {
     margin: 5em 0 0 0;
   }
@@ -525,6 +518,8 @@ p {
 #drugNetworkContent {
   margin: 0.5em;
   background-color: #1E2021;
+  height: 750px;
+  display: none;
 }
 
 .news h2 {
@@ -795,7 +790,7 @@ p {
   left: 0;
 }
 .noscript div {
-  background-color: #b41e1e;
+  background-color: rgb(180, 30, 30);
   border-radius: 1em;
   font-size: x-large;
   margin: auto;

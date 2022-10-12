@@ -723,22 +723,6 @@ function fillDrugNetwork() {
              * 'hierarchicalRepulsion',
              * 'forceAtlas2Based'
              */
-            // stabilization: true
-            // barnesHut: {
-            //     gravitationalConstant: -2000,
-            //     centralGravity: 0.75,
-            //     springLength: 50, //was 140
-            //     springConstant: 0.08,
-            //     damping: 0.85,
-            //     avoidOverlap: 0.75
-            // },
-            // stabilization: {
-            //     enabled: true,
-            //     iterations: 2000,
-            //     updateInterval: 100,
-            //     onlyDynamicEdges: false,
-            //     fit: true
-            // },
         },
         interaction: {
             hover: true
@@ -806,9 +790,14 @@ function fillDrugNetwork() {
 
     // associated targets (first 10 elements)
     overviews["targInter"].data.slice(0,10).forEach((target) => {
-    // overviews["drugInter"].data.slice(0,10).forEach((target) => {
-        const text = target.name.split("//")[0];
-        nodes.add({id: idx, label: text, group: "targetNode"});
+        const names = target.name.split("//");
+
+        nodes.add({
+            id: idx,
+            label: (names.length > 1) ? names[1]: names[0],
+            title: (names.length > 1) ? names[0]: null,
+            group: "targetNode"
+        });
         edges.add({
             from: idx, to: 1,
             label: `${target.count}`,
