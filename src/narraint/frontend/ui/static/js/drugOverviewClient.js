@@ -1,5 +1,5 @@
 let newsData = null;
-
+let network = null;
 let currentChemblID = null;
 let currentDrugName = null;
 
@@ -194,7 +194,7 @@ async function buildSite() {
             //fill the container with fetched tags
             await getOverviewData()
                 //calculate the network graph after all overviews are filled
-                .then(() => fillDrugNetwork());
+                .then(() => createNetworkGraph());
         })
         .catch();
 }
@@ -370,12 +370,13 @@ async function adveDataCallback() {
 /**
  * Scroll the window to the element specified by the parameter 'element_id'.
  * @param element_id
+ * @param smooth
  */
-function scrollToElement(element_id) {
+function scrollToElement(element_id, smooth=true) {
     const y_offset = 80;
     const pos = document.getElementById(element_id)
         .getBoundingClientRect().top + window.scrollY - y_offset;
-    window.scrollTo({top: pos, behavior: 'smooth'})
+    window.scrollTo({top: pos, behavior: ((smooth) ? "smooth": "instant")})
 }
 
 
@@ -713,17 +714,11 @@ async function load_wordcloud() {
     doneLoading("wordCloud");
 }
 
-function fillDrugNetwork() {
+function createNetworkGraph() {
     const options = {
         autoResize: true,
         physics: {
-            solver: "repulsion",
-            /* solvers:
-             * 'barnesHut' (default),
-             * 'repulsion',
-             * 'hierarchicalRepulsion',
-             * 'forceAtlas2Based'
-             */
+            solver: "repulsion",//barnesHut,repulsion,hierarchicalRepulsion,forceAtlas2Based
         },
         interaction: {
             hover: true
@@ -732,18 +727,26 @@ function fillDrugNetwork() {
             improvedLayout: true
         },
         groups: {
-            diseaseNode: {
-                color: "#21b900",
+            indicationNode: {
+                color: overviews.indi.color,
                 font: {
-                    color: "#ffffff",
+                    color: "#000",
                     size: 20
                 },
                 shape: "box"
             },
-            targetNode: {
-                color: "#00c6ff",
+            targetInteractionNode: {
+                color: overviews.targInter.color,
                 font: {
-                    color: "#ffffff",
+                    color: "#000",
+                    size: 20
+                },
+                shape: "box"
+            },
+            drugAssociationNode: {
+                color: overviews.drugAssoc.color,
+                font: {
+                    color: "#000",
                     size: 20
                 },
                 shape: "box"
@@ -751,72 +754,113 @@ function fillDrugNetwork() {
             phaseNode: {
                 color: {
                     background: "#ffffff",
-                    border: "#21b900"
+                    border: overviews.indi.color
                 },
                 shape: "circularImage",
                 size: 18,
             },
         }
     };
+
+    const networkContainer = document.getElementById("drugNetworkContent");
+    network = new vis.Network(networkContainer, {}, options)
+    network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network) );
+    updateNetworkGraph(true);
+}
+
+function updateNetworkGraph(firstInit=false) {
+    if (!firstInit) {
+        startLoading("drugNetwork");
+        network.physics.physicsEnabled = true;
+    }
+
+    const topK = document.getElementById("drugNetworkSlider").value;
+    const drawDiseases = document.getElementById("drugNetworkCheckboxDisease").checked;
+    const drawTargets = document.getElementById("drugNetworkCheckboxTarget").checked;
+    const drawDrugs = document.getElementById("drugNetworkCheckboxDrug").checked;
+
+    document.getElementById("drugNetworkAmount").innerText = `Top ${topK} per type`;
+
+
     const nodes = new vis.DataSet();
     const edges = new vis.DataSet();
-    const networkContainer = document.getElementById("drugNetworkContent");
     let idx = 2;
 
     // root node
-    nodes.add({id: 1, label: currentDrugName, group: "targetNode"})
+    nodes.add({id: 1, label: currentDrugName, group: "drugAssociationNode"})
 
-    // associated diseases (first 10 elements)
-    overviews["indi"].data.slice(0,10).forEach((disease) => {
-        const url = (disease.max_phase_for_ind >= 0) ? `${url_chembl_phase}${disease.max_phase_for_ind}.svg`: url_chembl_phase_new;
-        nodes.add({id: idx, label: disease.name, group: "diseaseNode"});
-        nodes.add({id: (idx * 100),
-            image: url,
-            group: "phaseNode",
-            title: `Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
+    if(drawDiseases) {
+        // disease treatments (first 10 elements)
+        overviews.indi.data.slice(0,topK).forEach((disease) => {
+            const url = (disease.max_phase_for_ind >= 0) ? `${url_chembl_phase}${disease.max_phase_for_ind}.svg`: url_chembl_phase_new;
+            nodes.add({id: idx, label: disease.name, group: "indicationNode", predicate: overviews.indi.predicate});
+            nodes.add({id: (idx * 100),
+                image: url,
+                group: "phaseNode",
+                title: `Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
+            });
+            edges.add({
+                from: (idx * 100), to: 1,
+                title: `${disease.count}`,
+                font: { color: "#ffffff", strokeWidth: 0 },
+            });
+            edges.add({
+                from: idx, to: (idx * 100),
+                label: `${disease.count}`,
+                title: `${disease.count}`,
+                font: { color: "#ffffff", strokeWidth: 0 },
+            })
+            ++idx;
         });
-        edges.add({
-            from: (idx * 100), to: 1,
-            title: `${disease.count}`,
-            font: { color: "#ffffff", strokeWidth: 0 },
-        });
-        edges.add({
-            from: idx, to: (idx * 100),
-            label: `${disease.count}`,
-            title: `${disease.count}`,
-            font: { color: "#ffffff", strokeWidth: 0 },
-        })
-        ++idx;
-    });
+    }
 
-    // associated targets (first 10 elements)
-    overviews["targInter"].data.slice(0,10).forEach((target) => {
-        const names = target.name.split("//");
+    if (drawTargets) {
+        // target interactions (first 10 elements)
+        overviews.targInter.data.slice(0,topK).forEach((target) => {
+            const names = target.name.split("//");
 
-        nodes.add({
-            id: idx,
-            label: (names.length > 1) ? names[1]: names[0],
-            title: (names.length > 1) ? names[0]: null,
-            group: "targetNode"
+            nodes.add({
+                id: idx,
+                label: (names.length > 1) ? names[1]: names[0],
+                title: (names.length > 1) ? names[0]: false,
+                group: "targetInteractionNode",
+                predicate: overviews.targInter.predicate
+            });
+            edges.add({
+                from: idx, to: 1,
+                label: `${target.count}`,
+                title: `${target.count}`,
+                font: { color: "#ffffff", strokeWidth: 0 }
+            });
+            ++idx;
         });
-        edges.add({
-            from: idx, to: 1,
-            label: `${target.count}`,
-            title: `${target.count}`,
-            font: { color: "#ffffff", strokeWidth: 0 }
-        });
-        ++idx;
-    });
-    const network = new vis.Network(networkContainer, { nodes: nodes, edges: edges }, options)
+    }
 
-    network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network) );
+    if (drawDrugs) {
+        // associated drugs (first 10 elements)
+        overviews.drugAssoc.data.slice(0,topK).forEach((drug) => {
+            nodes.add({
+                id: idx,
+                label: drug.name,
+                group: "drugAssociationNode",
+                predicate: overviews.drugAssoc.predicate
+            });
+            edges.add({
+                from: idx, to: 1,
+                label: `${drug.count}`,
+                title: `${drug.count}`,
+                font: { color: "#ffffff", strokeWidth: 0 }
+            });
+            ++idx;
+        });
+    }
+
+    network.setData({ nodes: nodes, edges: edges });
     doneLoading("drugNetwork");
-    // network.physics.physicsEnabled = false;
+    network.physics.physicsEnabled = false;
 }
 
 const networkSelectEdgeCallback = (e, network) => {
-    let predicate = "interacts";
-
     // return early if the root node is selected
     if (e.nodes.length >= 1 && e.nodes[0] === 1) {
         network.unselectAll();
@@ -831,13 +875,33 @@ const networkSelectEdgeCallback = (e, network) => {
     }
 
     // if one of them has an id larger than 100 it is most likely the
-    // phase node, so we have to correct the id.
-    if(nodes[0] > 100 || nodes[1] > 100) {
-        predicate = "treats";
-    }
-    const object = network.body.nodes[(nodes[0] > 100) ? nodes[0] / 100: nodes[0]].options.label
+    // phase node, so we have to adjust the id.
+    const idx = (nodes[0] > 100) ? nodes[0] / 100: nodes[0];
+
+    // check if the entity has a longer name stored in "title"
+    const object = (network.body.nodes[idx].options.title) ?
+        network.body.nodes[idx].options.title:
+        network.body.nodes[idx].options.label;
+    const predicate = network.body.nodes[idx].options.predicate;
 
     // open the corresponding query in a new tab
     window.open(`/?query="${currentDrugName}"+${predicate}+"${object}"`, '_blank');
     network.unselectAll();
+}
+
+function fullscreenNetworkGraph() {
+    const networkDiv = document.getElementById("drugNetworkContainer");
+
+    if (!networkDiv.classList.contains("drugNetworkContainerFullscreen")) {
+        window.scrollTo({top: 0});
+        networkDiv.classList.add("drugNetworkContainerFullscreen");
+        networkDiv.classList.remove("drugNetworkContainer");
+        document.body.style.overflow = "hidden";
+    } else {
+        networkDiv.classList.remove("drugNetworkContainerFullscreen");
+        networkDiv.classList.add("drugNetworkContainer");
+        scrollToElement('drugNetworkOverview', false);
+        document.body.style.overflowY = "scroll";
+    }
+    updateNetworkGraph();
 }
