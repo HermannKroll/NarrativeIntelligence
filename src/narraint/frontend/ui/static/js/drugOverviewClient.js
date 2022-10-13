@@ -779,7 +779,7 @@ function updateNetworkGraph(firstInit=false) {
     const drawTargets = document.getElementById("drugNetworkCheckboxTarget").checked;
     const drawDrugs = document.getElementById("drugNetworkCheckboxDrug").checked;
 
-    document.getElementById("drugNetworkAmount").innerText = `Top ${topK} per type`;
+    document.getElementById("drugNetworkAmount").innerText = `Top ${topK}`;
 
 
     const nodes = new vis.DataSet();
