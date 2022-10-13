@@ -1,4 +1,5 @@
 import ast
+import logging
 import random
 from typing import List, Dict
 
@@ -14,7 +15,7 @@ from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, 
 from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
 from narrant.entity.entityresolver import EntityResolver
 
-# used to switch between table access and debugging console prints
+# used to switch between table access and debugging console logging.infos
 ACCESS_ENTITY_KEYWORDS_TABLE = True
 
 MAX_NGRAM_WORD_SIZE = 1
@@ -114,9 +115,9 @@ def set_stopword_list():
             stopwords.update(set(w.lower() for w in stopwords))
             extractor.stopword_set.update(stopwords)
             file.close()
-            print(f"Created stopword list with {len(stopwords)} entries")
+            logging.info(f"Created stopword list with {len(stopwords)} entries")
     except IOError as e:
-        print("Could not read stopword list. Using YAKE's default wordlist.")
+        logging.warning("Could not read stopword list. Using YAKE's default wordlist.")
 
 
 def main():
@@ -128,6 +129,10 @@ def main():
 
     :return: None
     """
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.INFO)
+
     entity_type = "Drug"
     document_collection = "PubMed"
 
@@ -140,7 +145,7 @@ def main():
         q = session.query(EntityKeywords)
         q = q.filter(EntityKeywords.entity_type == "Drug")
         q = q.delete()
-        print(f"{q} previously stored DRUG keywords deleted")
+        logging.info(f"{q} previously stored DRUG keywords deleted")
         session.commit()
 
     # query all existing drug entities
@@ -150,9 +155,9 @@ def main():
 
     drugs: List[sqlalchemy.engine.row.Row] = q.all()  # first()#
     if drugs:
-        print(f"Creating keywords for {len(drugs)} drugs")
+        logging.info(f"Creating keywords for {len(drugs)} drugs")
     else:
-        print("Could not retrieve drug ids. Exiting.")
+        logging.info("Could not retrieve drug ids. Exiting.")
         return
 
     p = Progress(total=len(drugs))
@@ -197,13 +202,13 @@ def main():
         if ACCESS_ENTITY_KEYWORDS_TABLE:
             EntityKeywords.insert_entity_keyword_data(session, entity_id, entity_type, str(keywords))
         else:
-            print("\n", i, entity_name, keywords)
+            logging.info("\n", i, entity_name, keywords)
 
         p.print_progress(i + 1)
 
     session.remove()
     p.done()
-    print(f"Skipped {skipped_drugs} drugs.")
+    logging.info(f"Skipped {skipped_drugs} drugs.")
 
 
 if __name__ == "__main__":
