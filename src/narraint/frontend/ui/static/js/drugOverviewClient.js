@@ -889,19 +889,44 @@ const networkSelectEdgeCallback = (e, network) => {
     network.unselectAll();
 }
 
-function fullscreenNetworkGraph() {
+function toggleFullscreenNetworkGraph() {
     const networkDiv = document.getElementById("drugNetworkContainer");
 
-    if (!networkDiv.classList.contains("drugNetworkContainerFullscreen")) {
-        window.scrollTo({top: 0});
-        networkDiv.classList.add("drugNetworkContainerFullscreen");
-        networkDiv.classList.remove("drugNetworkContainer");
-        document.body.style.overflow = "hidden";
+    const fullscreenFunc = () => {
+        if (networkDiv.requestFullscreen) { // normal browsers
+            return networkDiv.requestFullscreen();
+        } else if (networkDiv.webkitRequestFullscreen) { // safari
+            return networkDiv.webkitRequestFullscreen();
+        } else if (networkDiv.msRequestFullscreen) { // ie
+            return networkDiv.msRequestFullscreen();
+        } else {
+            // no fullscreen mode available
+            return Promise.reject("No Fullscreen available");
+        }
+    }
+
+    if (networkDiv.classList.contains("drugNetworkContainer")) {
+        fullscreenFunc()
+            .then(() => {
+                window.scrollTo({top: 0});
+                networkDiv.classList.add("drugNetworkContainerFullscreen");
+                networkDiv.classList.remove("drugNetworkContainer");
+                document.getElementById("drugNetworkFullscreen").value = "Close";
+                document.body.style.overflow = "hidden";
+            })
+            .catch((e) => console.log(e));
     } else {
-        networkDiv.classList.remove("drugNetworkContainerFullscreen");
-        networkDiv.classList.add("drugNetworkContainer");
-        scrollToElement('drugNetworkOverview', false);
-        document.body.style.overflowY = "scroll";
+        document.exitFullscreen()
+            .catch(/* potential TypeError: Not in fullscreen mode */)
+            .finally(() => {
+                // use finally to close the fullscreen even if the user closed the
+                // fullscreen mode by clicking F11 earlier
+                networkDiv.classList.remove("drugNetworkContainerFullscreen");
+                networkDiv.classList.add("drugNetworkContainer");
+                scrollToElement('drugNetworkOverview', false);
+                document.getElementById("drugNetworkFullscreen").value = "Fullscreen";
+                document.body.style.overflowY = "scroll";
+            });
     }
     updateNetworkGraph();
 }
