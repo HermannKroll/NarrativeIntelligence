@@ -58,4 +58,4 @@ PHARM_RELATION_CONSTRAINTS = os.path.join(RESOURCE_DIR, "pharm_relation_type_con
 NLP_CONFIG = os.path.join(CONFIG_DIR, 'nlp.json')
 
 # Drug keyword extraction stopword list
-DRUG_KEYWORD_STOPWORD_LIST = os.path.join(RESOURCE_DIR, 'stopword_drug_keywords.txt')
+DRUG_KEYWORD_STOPWORD_LIST = os.path.join(RESOURCE_DIR, 'stopwords_drug_keywords.txt')

@@ -1,13 +1,11 @@
 import ast
-import os.path
 import random
+from typing import List, Dict
 
 import sqlalchemy
-from typing import List
-
+from nltk.stem.porter import PorterStemmer
 from sqlalchemy import and_
 from yake import KeywordExtractor
-from nltk.stem.porter import PorterStemmer
 
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
@@ -26,7 +24,7 @@ extractor = KeywordExtractor(n=MAX_NGRAM_WORD_SIZE, top=NUM_KEYWORDS, dedupLim=0
 stemmer = PorterStemmer()
 
 
-def generate_stem_dict(text: str) -> dict[str, str]:
+def generate_stem_dict(text: str) -> Dict[str, str]:
     """
     Generates a dict containing a pair of the word stem and the shortest word
     which results the corresponding stem.
@@ -37,7 +35,7 @@ def generate_stem_dict(text: str) -> dict[str, str]:
     stem_dict = dict()
 
     # remove all unwanted chars
-    mapping = text.maketrans('','',',.!?":\'*+')
+    mapping = text.maketrans('', '', ',.!?":\'*+')
     text = text.translate(mapping)
 
     for word in set(text.split(' ')):
@@ -79,7 +77,7 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
             stem = stemmer.stem(keyword)
             if stem in stem_dict.keys():
                 if len(stem) + 1 == len(stem_dict[stem]) \
-                        and stem_dict[stem][-1] == 's'\
+                        and stem_dict[stem][-1] == 's' \
                         and stem not in keywords:
                     keyword_map.append((stem, score))
                     keywords.add(stem)
@@ -111,7 +109,9 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
 def set_stopword_list():
     try:
         with open(DRUG_KEYWORD_STOPWORD_LIST, "r") as file:
-            stopwords = set([word.strip() for word in file])
+            stopwords = set([word.strip() for word in file.readlines()])
+            # add all lower case versions
+            stopwords.update(set(w.lower() for w in stopwords))
             extractor.stopword_set.update(stopwords)
             file.close()
             print(f"Created stopword list with {len(stopwords)} entries")
@@ -159,7 +159,7 @@ def main():
     p.start_time()
 
     skipped_drugs = 0
-    for i in range(len(drugs)):  #range(10):#
+    for i in range(len(drugs)):  # range(10):#
         # retrieve all document_ids for one drug
         entity_id = dict(drugs[i])["subject_id"]
         q = session.query(TagInvertedIndex.document_ids)
