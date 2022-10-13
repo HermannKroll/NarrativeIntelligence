@@ -800,7 +800,7 @@ function updateNetworkGraph(firstInit=false) {
             nodes.add({id: (idx * 100),
                 image: url,
                 group: "phaseNode",
-                title: `Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
+                title: `Clinical Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
             });
             edges.add({
                 from: (idx * 100), to: 1,
