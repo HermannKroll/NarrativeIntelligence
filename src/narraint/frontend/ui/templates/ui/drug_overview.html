@@ -131,14 +131,14 @@
         </div>
         <div class="drugNetworkContainer" id="drugNetworkContainer">
             <div class="drugNetworkSelection">
+                <div class="drugNetworkButton" style="background-color: #ff8181" onchange="updateNetworkGraph()">
+                    <label><input id="drugNetworkCheckboxDrug" type="checkbox" checked>Drug</label>
+                </div>
                 <div class="drugNetworkButton" style="background-color: #aeff9a" onchange="updateNetworkGraph()">
                     <label><input id="drugNetworkCheckboxDisease" type="checkbox" checked>Disease</label>
                 </div>
                 <div class="drugNetworkButton" style="background-color: #b88cff" onchange="updateNetworkGraph()">
                     <label><input id="drugNetworkCheckboxTarget" type="checkbox" checked>Target</label>
-                </div>
-                <div class="drugNetworkButton" style="background-color: #ff8181" onchange="updateNetworkGraph()">
-                    <label><input id="drugNetworkCheckboxDrug" type="checkbox" checked>Drug</label>
                 </div>
             </div>
             <div class="loading" id="drugNetworkLoading">
