@@ -1,0 +1,3 @@
+#!/bin/bash
+# Generate Drug Overviews
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/generate_drug_keywords.py
