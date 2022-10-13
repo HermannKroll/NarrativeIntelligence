@@ -752,10 +752,7 @@ function createNetworkGraph() {
                 shape: "box"
             },
             phaseNode: {
-                color: {
-                    background: "#ffffff",
-                    border: overviews.indi.color
-                },
+                color: overviews.indi.color,
                 shape: "circularImage",
                 size: 18,
             },
