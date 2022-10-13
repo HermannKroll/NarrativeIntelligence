@@ -16,9 +16,9 @@ const overviews = {
     targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: "#b88cff"},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: "#9eb8ff"},
     species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: "#b88cff"},
+    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: "#ff8181"},
     drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: [], count: 0, color: "#ff8181"},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: adveCreateCallback, dataCallback: adveDataCallback},
-    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: "#ff8181"}
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: adveCreateCallback, dataCallback: adveDataCallback}
 }
 
 buildSite().catch((err) => console.log(err));
