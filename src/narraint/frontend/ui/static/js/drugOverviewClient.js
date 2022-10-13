@@ -766,6 +766,12 @@ function createNetworkGraph() {
     network = new vis.Network(networkContainer, {}, options)
     network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network) );
     updateNetworkGraph(true);
+
+    // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
+    const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(true)}
+    document.onfullscreenchange = fsCloseAction;
+    document.onwebkitfullscreenchange = fsCloseAction;
+    document.onmsfullscreenchange = fsCloseAction;
 }
 
 function updateNetworkGraph(firstInit=false) {
@@ -802,13 +808,13 @@ function updateNetworkGraph(firstInit=false) {
             edges.add({
                 from: (idx * 100), to: 1,
                 title: `${disease.count}`,
-                font: { color: "#ffffff", strokeWidth: 0 },
+                font: { color: "#000", strokeWidth: 0 },
             });
             edges.add({
                 from: idx, to: (idx * 100),
                 label: `${disease.count}`,
                 title: `${disease.count}`,
-                font: { color: "#ffffff", strokeWidth: 0 },
+                font: { color: "#000", strokeWidth: 0 },
             })
             ++idx;
         });
@@ -830,7 +836,7 @@ function updateNetworkGraph(firstInit=false) {
                 from: idx, to: 1,
                 label: `${target.count}`,
                 title: `${target.count}`,
-                font: { color: "#ffffff", strokeWidth: 0 }
+                font: { color: "#000", strokeWidth: 0 }
             });
             ++idx;
         });
@@ -849,7 +855,7 @@ function updateNetworkGraph(firstInit=false) {
                 from: idx, to: 1,
                 label: `${drug.count}`,
                 title: `${drug.count}`,
-                font: { color: "#ffffff", strokeWidth: 0 }
+                font: { color: "#000", strokeWidth: 0 }
             });
             ++idx;
         });
@@ -889,24 +895,12 @@ const networkSelectEdgeCallback = (e, network) => {
     network.unselectAll();
 }
 
-function toggleFullscreenNetworkGraph() {
+function toggleFullscreenNetworkGraph(closeOnly=false) {
     const networkDiv = document.getElementById("drugNetworkContainer");
 
-    const fullscreenFunc = () => {
-        if (networkDiv.requestFullscreen) { // normal browsers
-            return networkDiv.requestFullscreen();
-        } else if (networkDiv.webkitRequestFullscreen) { // safari
-            return networkDiv.webkitRequestFullscreen();
-        } else if (networkDiv.msRequestFullscreen) { // ie
-            return networkDiv.msRequestFullscreen();
-        } else {
-            // no fullscreen mode available
-            return Promise.reject("No Fullscreen available");
-        }
-    }
-
-    if (networkDiv.classList.contains("drugNetworkContainer")) {
-        fullscreenFunc()
+    if (networkDiv.classList.contains("drugNetworkContainer") && !closeOnly) {
+        const reqFullscreen = networkDiv.requestFullscreen || networkDiv.webkitRequestFullScreen || networkDiv.msRequestFullScreen;
+        reqFullscreen.call(networkDiv)
             .then(() => {
                 window.scrollTo({top: 0});
                 networkDiv.classList.add("drugNetworkContainerFullscreen");
@@ -915,9 +909,10 @@ function toggleFullscreenNetworkGraph() {
                 document.body.style.overflow = "hidden";
             })
             .catch((e) => console.log(e));
-    } else {
-        document.exitFullscreen()
-            .catch(/* potential TypeError: Not in fullscreen mode */)
+    } else if (networkDiv.classList.contains("drugNetworkContainerFullscreen")){
+        const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        closeFullScreen.call(document)
+            .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)
             .finally(() => {
                 // use finally to close the fullscreen even if the user closed the
                 // fullscreen mode by clicking F11 earlier
