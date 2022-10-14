@@ -4,11 +4,9 @@ document.getElementById("screenshot").addEventListener('load', (e) => {
 });
 
 async function openFeedback() {
-    console.log("click")
-
-    const feedbackBtnTxt = document.getElementById("feedbackbtn_text");
-    feedbackBtnTxt.innerText = "Generating Screenshot (may take a while)";
-    document.getElementById("feedbackText").value = "";
+    document.getElementById("feedbackbtn_text").innerText = "Generating Screenshot (may take a while)";
+    document.getElementById("reportSpinner").style.display = "inline-block";
+    document.getElementById("feedback_button").classList.add("disabled");
 
     await new Promise(r => setTimeout(r, 10));
 
@@ -23,7 +21,9 @@ async function openFeedback() {
     const popup = document.getElementById("feedbackPopup");
     popup.style.display = "block"
 
-    feedbackBtnTxt.innerText = "Feedback";
+    document.getElementById("feedbackbtn_text").innerText = "Feedback";
+    document.getElementById("reportSpinner").style.display = "none";
+    document.getElementById("feedback_button").classList.remove("disabled");
 
     document.getElementById("screenshotCanvas").remove();
 

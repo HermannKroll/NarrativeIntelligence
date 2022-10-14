@@ -90,7 +90,7 @@ async function buildSite() {
                 return;
             }
 
-            logDrugSearch(keyword)
+            // logDrugSearch(keyword)
 
             currentDrugName = keyword;
             currentChemblID = chemblid;
@@ -262,7 +262,7 @@ function createDynamicOverviews() {
     for(const prefix in overviews) {
         const ov = overviews[prefix];
         const entry =
-`<div class="container searchbox" id="${prefix}Overview">
+`<div class="box searchbox" id="${prefix}Overview">
     <div class="top_searchbox">
         <div class="top_searchbox_left">
             <h2>${ov.name}</h2>
@@ -373,9 +373,8 @@ async function adveDataCallback() {
  * @param smooth
  */
 function scrollToElement(element_id, smooth=true) {
-    const y_offset = 80;
     const pos = document.getElementById(element_id)
-        .getBoundingClientRect().top + window.scrollY - y_offset;
+        .getBoundingClientRect().top + window.scrollY;
     window.scrollTo({top: pos, behavior: ((smooth) ? "smooth": "instant")})
 }
 
