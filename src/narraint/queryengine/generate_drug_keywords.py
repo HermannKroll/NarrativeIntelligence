@@ -1,13 +1,12 @@
 import ast
-import os.path
+import logging
 import random
+from typing import List, Dict
 
 import sqlalchemy
-from typing import List
-
+from nltk.stem.porter import PorterStemmer
 from sqlalchemy import and_
 from yake import KeywordExtractor
-from nltk.stem.porter import PorterStemmer
 
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
@@ -16,7 +15,7 @@ from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, 
 from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
 from narrant.entity.entityresolver import EntityResolver
 
-# used to switch between table access and debugging console prints
+# used to switch between table access and debugging console logging.infos
 ACCESS_ENTITY_KEYWORDS_TABLE = True
 
 MAX_NGRAM_WORD_SIZE = 1
@@ -26,7 +25,7 @@ extractor = KeywordExtractor(n=MAX_NGRAM_WORD_SIZE, top=NUM_KEYWORDS, dedupLim=0
 stemmer = PorterStemmer()
 
 
-def generate_stem_dict(text: str) -> dict[str, str]:
+def generate_stem_dict(text: str) -> Dict[str, str]:
     """
     Generates a dict containing a pair of the word stem and the shortest word
     which results the corresponding stem.
@@ -37,7 +36,7 @@ def generate_stem_dict(text: str) -> dict[str, str]:
     stem_dict = dict()
 
     # remove all unwanted chars
-    mapping = text.maketrans('','',',.!?":\'*+')
+    mapping = text.maketrans('', '', ',.!?":\'*+')
     text = text.translate(mapping)
 
     for word in set(text.split(' ')):
@@ -79,7 +78,7 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
             stem = stemmer.stem(keyword)
             if stem in stem_dict.keys():
                 if len(stem) + 1 == len(stem_dict[stem]) \
-                        and stem_dict[stem][-1] == 's'\
+                        and stem_dict[stem][-1] == 's' \
                         and stem not in keywords:
                     keyword_map.append((stem, score))
                     keywords.add(stem)
@@ -111,12 +110,14 @@ def generate_keywords(text: str, entity_name: str, stem_dict: dict) -> str:
 def set_stopword_list():
     try:
         with open(DRUG_KEYWORD_STOPWORD_LIST, "r") as file:
-            stopwords = set([word.strip() for word in file])
+            stopwords = set([word.strip() for word in file.readlines()])
+            # add all lower case versions
+            stopwords.update(set(w.lower() for w in stopwords))
             extractor.stopword_set.update(stopwords)
             file.close()
-            print(f"Created stopword list with {len(stopwords)} entries")
+            logging.info(f"Created stopword list with {len(stopwords)} entries")
     except IOError as e:
-        print("Could not read stopword list. Using YAKE's default wordlist.")
+        logging.warning("Could not read stopword list. Using YAKE's default wordlist.")
 
 
 def main():
@@ -128,6 +129,10 @@ def main():
 
     :return: None
     """
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
+                        level=logging.INFO)
+
     entity_type = "Drug"
     document_collection = "PubMed"
 
@@ -140,7 +145,7 @@ def main():
         q = session.query(EntityKeywords)
         q = q.filter(EntityKeywords.entity_type == "Drug")
         q = q.delete()
-        print(f"{q} previously stored DRUG keywords deleted")
+        logging.info(f"{q} previously stored DRUG keywords deleted")
         session.commit()
 
     # query all existing drug entities
@@ -150,16 +155,16 @@ def main():
 
     drugs: List[sqlalchemy.engine.row.Row] = q.all()  # first()#
     if drugs:
-        print(f"Creating keywords for {len(drugs)} drugs")
+        logging.info(f"Creating keywords for {len(drugs)} drugs")
     else:
-        print("Could not retrieve drug ids. Exiting.")
+        logging.info("Could not retrieve drug ids. Exiting.")
         return
 
     p = Progress(total=len(drugs))
     p.start_time()
 
     skipped_drugs = 0
-    for i in range(len(drugs)):  #range(10):#
+    for i in range(len(drugs)):  # range(10):#
         # retrieve all document_ids for one drug
         entity_id = dict(drugs[i])["subject_id"]
         q = session.query(TagInvertedIndex.document_ids)
@@ -197,13 +202,13 @@ def main():
         if ACCESS_ENTITY_KEYWORDS_TABLE:
             EntityKeywords.insert_entity_keyword_data(session, entity_id, entity_type, str(keywords))
         else:
-            print("\n", i, entity_name, keywords)
+            logging.info("\n", i, entity_name, keywords)
 
         p.print_progress(i + 1)
 
     session.remove()
     p.done()
-    print(f"Skipped {skipped_drugs} drugs.")
+    logging.info(f"Skipped {skipped_drugs} drugs.")
 
 
 if __name__ == "__main__":
