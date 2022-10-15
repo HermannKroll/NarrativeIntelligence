@@ -28,6 +28,10 @@ p {
   background-color: white;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+.main_page h1 {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
 .main_page .searchbar {
   width: 100%;
   height: 2.75em;
@@ -123,7 +127,6 @@ p {
   background-color: var(--action_green_highlight);
 }
 .searchbarContainer {
-  width: 100%;
   height: 2.75em;
   margin: 0.25em;
   display: flex;
@@ -146,7 +149,6 @@ p {
 .sidebar .link {
   padding: 0.25em;
   border-radius: 0.33em;
-  border: 1px solid var(--grey_dark2);
   margin-bottom: 1em;
   color: black;
   cursor: pointer;
@@ -155,9 +157,10 @@ p {
   display: inline-flex;
   justify-content: space-between;
   width: 100%;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.09);
 }
 .sidebar .link:hover {
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.09);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.28), 0 6px 10px 0 rgba(0, 0, 0, 0.27);
 }
 .sidebar .sidebar_entry_name {
   width: 76%;
@@ -197,121 +200,6 @@ p {
   border-radius: 100em;
   box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.17), 0 2px 3px 0 rgba(0, 0, 0, 0.15);
 }
-
-
-
-/*@media screen and (max-width: 1250px) {*/
-/*  .sidebar .sidebar_entry_count {*/
-/*    width: 30%;*/
-/*  }*/
-/*}*/
-/*@media screen and (max-width: 1000px) {*/
-/*  .newsdetail {*/
-/*    overflow-y: scroll !important;*/
-/*  }*/
-/*  .newsdetail .bottom {*/
-/*    display: inline-block !important;*/
-/*  }*/
-/*  .newsdetail .bottom .checkbox {*/
-/*    margin-left: 0.5em !important;*/
-/*    display: flex !important;*/
-/*    flex-direction: row !important;*/
-/*    flex-wrap: wrap !important;*/
-/*    width: 95% !important;*/
-/*    justify-content: center !important;*/
-/*    padding-left: 0 !important;*/
-/*  }*/
-/*  .newsdetail .bottom .checkbox div {*/
-/*    margin-right: 0.5em !important;*/
-/*  }*/
-/*  .newsdetail .bottom .paper {*/
-/*    overflow-y: auto !important;*/
-/*    width: 95% !important;*/
-/*    margin-left: 0.5em !important;*/
-/*    padding-left: 0 !important;*/
-/*  }*/
-/*  .newsdetail .bottom .graph {*/
-/*    width: 95% !important;*/
-/*    margin-left: 0.5em !important;*/
-/*    margin-bottom: 2em !important;*/
-/*    border: 1px solid var(--grey_border) !important;*/
-/*  }*/
-/*  .navbar {*/
-/*    display: flex;*/
-/*    flex-wrap: wrap;*/
-/*    width: 100%;*/
-/*    height: fit-content;*/
-/*  }*/
-/*  .navbar .nav_spacer {*/
-/*    margin-right: unset;*/
-/*  }*/
-/*  .navbar .nav_logos {*/
-/*    margin-left: unset;*/
-/*  }*/
-/*  .navbar .button {*/
-/*    min-width: 2.2em;*/
-/*  }*/
-/*  .navbar .searchbar {*/
-/*    display: flex;*/
-/*    width: 50%;*/
-/*    place-content: space-around;*/
-/*    flex-wrap: nowrap;*/
-/*    max-height: 2.5em;*/
-/*    margin-left: auto;*/
-/*    margin-right: auto;*/
-/*  }*/
-/*  .navbar :nth-child(1) {*/
-/*    order: 1;*/
-/*  }*/
-/*  .navbar :nth-child(2) {*/
-/*    order: 2;*/
-/*  }*/
-/*  .navbar :nth-child(3) {*/
-/*    order: 4;*/
-/*  }*/
-/*  .navbar :nth-child(4) {*/
-/*    order: 3;*/
-/*  }*/
-/*  .searchbox .top_searchbox {*/
-/*    flex-wrap: wrap;*/
-/*  }*/
-/*  .searchbox .top_searchbox .top_searchbox_left {*/
-/*    white-space: nowrap;*/
-/*  }*/
-/*  .searchbox .top_searchbox .top_searchbox_right {*/
-/*    flex-wrap: wrap;*/
-/*    flex-direction: column;*/
-/*  }*/
-/*  .top_container {*/
-/*    flex-wrap: wrap-reverse;*/
-/*  }*/
-/*  .top_container img:hover {*/
-/*    width: 15em !important;*/
-/*    height: 15em !important;*/
-/*  }*/
-/*  .sidebar .sidebar_entry_count {*/
-/*    width: 35%;*/
-/*  }*/
-/*  .topbar {*/
-/*    display: flex;*/
-/*    flex-wrap: wrap;*/
-/*    width: 100%;*/
-/*    height: fit-content;*/
-/*  }*/
-/*}*/
-/*@media screen and (max-width: 800px) {*/
-/*  body {*/
-/*    background-color: white;*/
-/*  }*/
-/*  .sidebar {*/
-/*    visibility: hidden;*/
-/*    width: 0;*/
-/*  }*/
-/*  .content {*/
-/*    margin: 5em 0 0 0;*/
-/*  }*/
-/*}*/
-
 
 .top_container {
   display: flex;
@@ -365,6 +253,7 @@ p {
 .searchbox .top_searchbox .top_searchbox_left h2 {
   font-size: 16px;
   margin: 0;
+  font-weight: bold;
 }
 .searchbox .top_searchbox .top_searchbox_right {
   display: flex;
@@ -510,6 +399,7 @@ p {
 
 .news h2 {
   font-size: 16px;
+  font-weight: bold;
   margin: 0;
 }
 .news .news_bottom {
@@ -536,6 +426,7 @@ p {
 }
 .news .news_bottom div h2 {
   font-size: 15px;
+  font-weight: bold;
 }
 .news .news_bottom div .journal {
   margin-top: 0.5em;
@@ -875,4 +766,80 @@ ul.cloud li:hover {
 .word_cloud h2 {
   font-size: 16px;
   margin: 0;
+}
+
+@media screen and (max-width: 1250px) {
+  .sidebar .sidebar_entry_count {
+    width: 30%;
+  }
+  .sidebar .sidebar_entry_name {
+    width: 70%;
+  }
+}
+@media screen and (max-width: 1000px) {
+  .newsdetail {
+    overflow-y: scroll !important;
+  }
+  .newsdetail .bottom {
+    display: inline-block !important;
+  }
+  .newsdetail .bottom .checkbox {
+    margin-left: 0.5em !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 95% !important;
+    justify-content: center !important;
+    padding-left: 0 !important;
+  }
+  .newsdetail .bottom .checkbox div {
+    margin-right: 0.5em !important;
+  }
+  .newsdetail .bottom .paper {
+    overflow-y: auto !important;
+    width: 95% !important;
+    margin-left: 0.5em !important;
+    padding-left: 0 !important;
+  }
+  .newsdetail .bottom .graph {
+    width: 95% !important;
+    margin-left: 0.5em !important;
+    margin-bottom: 2em !important;
+    border: 1px solid var(--grey_border) !important;
+  }
+  .searchbox .top_searchbox {
+    flex-wrap: wrap;
+  }
+  .searchbox .top_searchbox .top_searchbox_left {
+    white-space: nowrap;
+  }
+  .searchbox .top_searchbox .top_searchbox_right {
+    flex-wrap: wrap;
+    flex-direction: column;
+  }
+  .top_container {
+    flex-wrap: wrap-reverse;
+  }
+  .top_container img:hover {
+    width: 15em !important;
+    height: 15em !important;
+  }
+  .sidebar .sidebar_entry_count {
+    width: 35%;
+  }
+  .sidebar .sidebar_entry_name {
+    width: 65%;
+  }
+}
+@media screen and (max-width: 800px) {
+  body {
+    background-color: white;
+  }
+  .sidebar {
+    visibility: hidden;
+    width: 0;
+  }
+  .content {
+    margin: 0;
+  }
 }
