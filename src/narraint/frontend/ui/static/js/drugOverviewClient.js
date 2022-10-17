@@ -901,7 +901,7 @@ function toggleFullscreenNetworkGraph(closeOnly=false) {
                 window.scrollTo({top: 0});
                 networkDiv.classList.add("drugNetworkContainerFullscreen");
                 networkDiv.classList.remove("drugNetworkContainer");
-                document.getElementById("drugNetworkFullscreen").value = "Close";
+                document.getElementById("drugNetworkFullscreen").innerText = "Close";
                 document.body.style.overflow = "hidden";
             })
             .catch((e) => console.log(e));
@@ -915,7 +915,7 @@ function toggleFullscreenNetworkGraph(closeOnly=false) {
                 networkDiv.classList.remove("drugNetworkContainerFullscreen");
                 networkDiv.classList.add("drugNetworkContainer");
                 scrollToElement('drugNetworkOverview', false);
-                document.getElementById("drugNetworkFullscreen").value = "Fullscreen";
+                document.getElementById("drugNetworkFullscreen").innerText = "Fullscreen";
                 document.body.style.overflowY = "scroll";
             });
     }

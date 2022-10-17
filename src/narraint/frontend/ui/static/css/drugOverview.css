@@ -347,7 +347,7 @@ p {
 
 .drugNetworkContent {
   background-color: #eeeeee;
-  height: calc(100% - 5em);
+  height: calc(100% - 5.75em);
   display: none;
   margin-top: 0.25em;
 }
@@ -381,20 +381,6 @@ p {
   display: flex;
   height: 2.5em;
   margin-top: 0.25em;
-  padding-right: 0.25em;
-}
-.drugNetworkFooter a {
-  margin-left: auto;
-  margin-right: 0.25em;
-}
-.drugNetworkFooter label {
-  display: flex;
-  flex-direction: column;
-  margin-right: 0.5em;
-}
-.drugNetworkFooter label datalist {
-  display: flex;
-  justify-content: space-between;
 }
 
 .news h2 {
