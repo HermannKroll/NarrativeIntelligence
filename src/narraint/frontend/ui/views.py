@@ -75,51 +75,6 @@ class View:
         return cls._instance
 
 
-def get_chembl_indication(request):
-    if "drug" not in request.GET:
-        return JsonResponse(status=500, data=dict(answer="Drug parameter is missing"))
-
-    try:
-        drug_str = str(request.GET['drug']).strip().lower()
-
-        try:
-            drug_ids = View.instance().entity_tagger.tag_entity(drug_str)
-            drug_ids = list([e.entity_id for e in drug_ids if e.entity_type == DRUG])
-            if len(drug_ids) == 0:
-                return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
-            with open(BACKEND_CONFIG, 'rt') as f:
-                config = json.load(f)
-            connection = psycopg2.connect(user=config["POSTGRES_USER"],
-                                          password=config["POSTGRES_PW"],
-                                          host=config["POSTGRES_HOST"],
-                                          port=config["POSTGRES_PORT"],
-                                          database="chembldb")
-            cursor = connection.cursor()
-            # CHEMBL_QUERY = "select mesh_id, max_phase_for_ind from drug_indication where molregno in ((select molregno from molecule_synonyms where synonyms ilike 'Simvastatin') union (select molregno from molecule_dictionary where pref_name ilike 'Simvastatin'))"
-            if len(drug_ids) > 1:
-                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
-                                        (select molregno from molecule_dictionary where chembl_id in %(drugs)s)"
-            else:
-                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
-                                                        (select molregno from molecule_dictionary where chembl_id = %(drugs)s)"
-            cursor.execute(query, {"drugs": tuple(drug_ids)})
-            records = cursor.fetchall()
-
-            results = []
-            for row in records:
-                results.append(dict(mesh_id='MESH:' + row[0],
-                                    max_phase_for_ind=row[1]))
-            connection.close()
-            return JsonResponse(dict(results=results))
-
-        except KeyError:
-            return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
-    return HttpResponse(status=500)
-
-
 def get_document_graph(request):
     if "document" in request.GET and "data_source" in request.GET:
         document_id = str(request.GET.get("document", "").strip())
