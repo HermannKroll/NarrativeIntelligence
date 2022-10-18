@@ -12,14 +12,14 @@ let currentDrugName = null;
  * dataCallback: gets called before data insertion to change the dataset
  */
 const overviews = {
-    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: indiCreateCallback, dataCallback: indiDataCallback},
-    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: [], count: 0, color: "#9189ff"},
-    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: "#b88cff"},
-    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: "#9eb8ff"},
-    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: "#b88cff"},
-    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: "#ff8181"},
-    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: [], count: 0, color: "#ff8181"},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: "#aeff9a", createCallback: adveCreateCallback, dataCallback: adveDataCallback}
+    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", data: [], count: 0, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
+    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: [], count: 0, color: typeColorMap["DosageForm"]},
+    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: typeColorMap["Species"]},
+    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: typeColorMap["LabMethod"]},
+    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: typeColorMap["Species"]},
+    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: typeColorMap["Drug"]},
+    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: [], count: 0, color: typeColorMap["Drug"]},
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback}
 }
 
 buildSite().catch((err) => console.log(err));
@@ -52,16 +52,14 @@ function resetContainerLoading(keyword = null) {
 }
 
 async function buildSite() {
-    var search = window.location.search;
+    const search = window.location.search;
     if (search === "") {
-        // redirect to drug_overview_index page
-        window.location = url_drug_overview_idx;
-        return;
+        window.location.search = "drug=Simvastatin";
     }
 
     createDynamicOverviews();
 
-    var keyword = search.split("=")[1];
+    const keyword = search.split("=")[1];
     document.getElementById('drugInput').value = decodeURI(keyword);
 
     // translate the key to a drug id via the narrative service
@@ -91,7 +89,7 @@ async function buildSite() {
                 return;
             }
 
-            // logDrugSearch(keyword)
+            logDrugSearch(keyword)
 
             currentDrugName = keyword;
             currentChemblID = chemblid;
