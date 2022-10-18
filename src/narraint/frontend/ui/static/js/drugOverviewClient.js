@@ -1,5 +1,6 @@
 let newsData = null;
 let network = null;
+let currentFullscreenPrefix = null;
 let currentChemblID = null;
 let currentDrugName = null;
 
@@ -764,7 +765,7 @@ function createNetworkGraph() {
     updateNetworkGraph(true);
 
     // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
-    const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(true)}
+    const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix,true)}
     document.onfullscreenchange = fsCloseAction;
     document.onwebkitfullscreenchange = fsCloseAction;
     document.onmsfullscreenchange = fsCloseAction;
@@ -891,33 +892,35 @@ const networkSelectEdgeCallback = (e, network) => {
     network.unselectAll();
 }
 
-function toggleFullscreenNetworkGraph(closeOnly=false) {
-    const networkDiv = document.getElementById("drugNetworkContainer");
+function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
+    const networkDiv = document.getElementById(`${prefix}Container`);
+    if (!networkDiv)
+        return;
 
-    if (networkDiv.classList.contains("drugNetworkContainer") && !closeOnly) {
+    if (document.fullscreenElement?.id !== `${prefix}Container` && !closeOnly) {
         const reqFullscreen = networkDiv.requestFullscreen || networkDiv.webkitRequestFullScreen || networkDiv.msRequestFullScreen;
         reqFullscreen.call(networkDiv)
             .then(() => {
-                window.scrollTo({top: 0});
-                networkDiv.classList.add("drugNetworkContainerFullscreen");
-                networkDiv.classList.remove("drugNetworkContainer");
-                document.getElementById("drugNetworkFullscreen").innerText = "Close";
-                document.body.style.overflow = "hidden";
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Close";
+                currentFullscreenPrefix = prefix;
             })
             .catch((e) => console.log(e));
-    } else if (networkDiv.classList.contains("drugNetworkContainerFullscreen")){
+    } else if (document.fullscreenElement?.id === `${prefix}Container`) {
         const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
         closeFullScreen.call(document)
             .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)
             .finally(() => {
                 // use finally to close the fullscreen even if the user closed the
                 // fullscreen mode by clicking F11 earlier
-                networkDiv.classList.remove("drugNetworkContainerFullscreen");
-                networkDiv.classList.add("drugNetworkContainer");
-                scrollToElement('drugNetworkOverview', false);
-                document.getElementById("drugNetworkFullscreen").innerText = "Fullscreen";
-                document.body.style.overflowY = "scroll";
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Fullscreen";
+                currentFullscreenPrefix = null;
             });
     }
-    updateNetworkGraph();
+    centerNetwork(network)
+}
+
+function centerNetwork(network) {
+    network.fit({
+        animation: true
+    })
 }

@@ -26,6 +26,7 @@ var tagsArray = null;
 var activeTypeMap = null;
 var document_graph = null;
 let documentCollection = null;
+let papernetwork = null;
 
 function queryGraph(document_id) {
     const query = url_document_graph + "?document=" + document_id + "&data_source=" + documentCollection;
@@ -350,7 +351,7 @@ function visualize_document_graph(container) {
     };
 
     // initialize your network!
-    var network = new vis.Network(container, data, options);
+    papernetwork = new vis.Network(container, data, options);
     /* this would stop the physics engine once and for all, so dragging only drags one node aswell
     network.on("stabilizationIterationsDone", function () {
         network.setOptions( { physics: false } );
