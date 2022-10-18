@@ -54,7 +54,7 @@ function resetContainerLoading(keyword = null) {
 async function buildSite() {
     const search = window.location.search;
     if (search === "") {
-        window.location.search = "drug=Simvastatin";
+        window.location.search = "drug=Metformin";
     }
 
     createDynamicOverviews();
