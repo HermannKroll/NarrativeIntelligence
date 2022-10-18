@@ -132,16 +132,15 @@
                     <div class="range me-1 mt-auto mb-1">
                         <input type="range" class="my-auto text-secondary" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
                     </div>
-                    <button class="btn btn-secondary me-1" onclick="updateNetworkGraph()">
+                    <button class="btn btn-secondary me-1" onclick="centerNetwork(network)">
                         Center
                     </button>
-                    <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph()">
+                    <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('drugNetwork')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
                         </svg>
-                        <span type="button" id="drugNetworkFullscreen" onclick="toggleFullscreenNetworkGraph()">Fullscreen</span>
+                        <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
                     </button>
-
                 </div>
             </div>
         </div>
@@ -202,7 +201,20 @@
                             <em>(1,10) means text passage 1-10</em></p>
                     </div>
                 </div>
-                <div class="graph" id="paperGraph"></div>
+                <div class="graphContainer" id="graphContainer">
+                    <div class="graphNetwork" id="paperGraph"></div>
+                    <div class="graphFooter">
+                        <button class="btn btn-secondary me-1 ms-auto" onclick="centerNetwork(papernetwork)">
+                            Center
+                        </button>
+                        <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('graph')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                            </svg>
+                            <span type="button" id="graphFullscreen">Fullscreen</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

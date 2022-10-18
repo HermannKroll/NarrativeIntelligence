@@ -332,17 +332,7 @@ p {
 .drugNetworkContainer {
   height: 90vh;
   margin: 0.5em;
-}
-
-.drugNetworkContainerFullscreen {
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  background-color: white;
+  background-color: var(--grey_dark1);
 }
 
 .drugNetworkContent {
@@ -530,13 +520,21 @@ p {
   font-size: 16px;
   margin-top: 1em;
 }
-.newsdetail .bottom .graph {
+.newsdetail .bottom .graphContainer {
+  display: flex;
+  flex-direction: column;
   background-color: #eeeeee;
   border: 1px solid var(--grey_border);
   border-top: 0;
   margin: 0 0.75em 0.75em 0;
   height: 100%;
   width: 43%;
+}
+.newsdetail .bottom .graphContainer .graphNetwork{
+  height: calc(100% - 2.5em);
+}
+.newsdetail .bottom .graphContainer .graphFooter{
+  display: flex;
 }
 
 .classTagsHeader {
@@ -787,7 +785,7 @@ ul.cloud li:hover {
     margin-left: 0.5em !important;
     padding-left: 0 !important;
   }
-  .newsdetail .bottom .graph {
+  .newsdetail .bottom .graphContent {
     width: 95% !important;
     margin-left: 0.5em !important;
     margin-bottom: 2em !important;
