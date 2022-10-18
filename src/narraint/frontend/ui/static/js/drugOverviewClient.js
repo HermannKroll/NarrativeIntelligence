@@ -748,12 +748,7 @@ function createNetworkGraph() {
                     size: 20
                 },
                 shape: "box"
-            },
-            phaseNode: {
-                color: overviews.indi.color,
-                shape: "circularImage",
-                size: 18,
-            },
+            }
         }
     };
 
@@ -770,6 +765,8 @@ function createNetworkGraph() {
 }
 
 function updateNetworkGraph(firstInit=false) {
+    const phaseMap = ["?", "0", "I", "II", "III", "IV"];
+
     if (!firstInit) {
         startLoading("drugNetwork");
         network.physics.physicsEnabled = true;
@@ -792,25 +789,21 @@ function updateNetworkGraph(firstInit=false) {
 
     if(drawDiseases) {
         // disease treatments (first 10 elements)
-        overviews.indi.data.slice(0,topK).forEach((disease) => {
-            const url = (disease.max_phase_for_ind >= 0) ? `${url_chembl_phase}${disease.max_phase_for_ind}.svg`: url_chembl_phase_new;
-            nodes.add({id: idx, label: disease.name, group: "indicationNode", predicate: overviews.indi.predicate});
-            nodes.add({id: (idx * 100),
-                image: url,
-                group: "phaseNode",
-                title: `Clinical Phase: ${disease.max_phase_for_ind >= 0 ? disease.max_phase_for_ind: "unknown"}`
+        overviews.indi.data.slice(0,topK).forEach((dis) => {
+            nodes.add({
+                id: idx,
+                label: `${dis.name} (${phaseMap[dis.max_phase_for_ind + 1]})`,
+                object: dis.name,
+                group: "indicationNode",
+                predicate: overviews.indi.predicate
             });
             edges.add({
-                from: (idx * 100), to: 1,
-                title: `${disease.count}`,
+                from: idx, to: 1,
+                label: `${dis.count}`,
+                title: `${dis.count}`,
                 font: { color: "#000", strokeWidth: 0 },
+                length: 500
             });
-            edges.add({
-                from: idx, to: (idx * 100),
-                label: `${disease.count}`,
-                title: `${disease.count}`,
-                font: { color: "#000", strokeWidth: 0 },
-            })
             ++idx;
         });
     }
@@ -824,6 +817,7 @@ function updateNetworkGraph(firstInit=false) {
                 id: idx,
                 label: (names.length > 1) ? names[1]: names[0],
                 title: (names.length > 1) ? names[0]: false,
+                object: (names.length > 1) ? names[1]: names[0],
                 group: "targetInteractionNode",
                 predicate: overviews.targInter.predicate
             });
@@ -831,7 +825,8 @@ function updateNetworkGraph(firstInit=false) {
                 from: idx, to: 1,
                 label: `${target.count}`,
                 title: `${target.count}`,
-                font: { color: "#000", strokeWidth: 0 }
+                font: { color: "#000", strokeWidth: 0 },
+                length: 250
             });
             ++idx;
         });
@@ -843,6 +838,7 @@ function updateNetworkGraph(firstInit=false) {
             nodes.add({
                 id: idx,
                 label: drug.name,
+                object: drug.name,
                 group: "drugAssociationNode",
                 predicate: overviews.drugAssoc.predicate
             });
@@ -850,7 +846,8 @@ function updateNetworkGraph(firstInit=false) {
                 from: idx, to: 1,
                 label: `${drug.count}`,
                 title: `${drug.count}`,
-                font: { color: "#000", strokeWidth: 0 }
+                font: { color: "#000", strokeWidth: 0 },
+                length: 375
             });
             ++idx;
         });
@@ -875,14 +872,8 @@ const networkSelectEdgeCallback = (e, network) => {
         return;
     }
 
-    // if one of them has an id larger than 100 it is most likely the
-    // phase node, so we have to adjust the id.
-    const idx = (nodes[0] > 100) ? nodes[0] / 100: nodes[0];
-
-    // check if the entity has a longer name stored in "title"
-    const object = (network.body.nodes[idx].options.title) ?
-        network.body.nodes[idx].options.title:
-        network.body.nodes[idx].options.label;
+    const idx = nodes[0];
+    const object = network.body.nodes[idx].options.object;
     const predicate = network.body.nodes[idx].options.predicate;
 
     // open the corresponding query in a new tab
@@ -914,7 +905,8 @@ function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
                 currentFullscreenPrefix = null;
             });
     }
-    centerNetwork(network)
+    setTimeout(centerNetwork, 250, (prefix === "drugNetwork")? network: papernetwork);
+
 }
 
 function centerNetwork(network) {
