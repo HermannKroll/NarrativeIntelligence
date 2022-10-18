@@ -22,6 +22,8 @@ function autoComplete(input) {
         var outerDiv = document.createElement("div");
         outerDiv.id = this.id + "autocomplete";
         outerDiv.classList.add("autocomplete-items");
+        outerDiv.classList.add("dropdown-menu");
+        outerDiv.style.width = `${input.clientWidth}px`;
         this.parentNode.appendChild(outerDiv);
         //names = getDrugNames(value);
         //console.log(names);

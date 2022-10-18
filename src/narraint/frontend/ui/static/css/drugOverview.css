@@ -11,11 +11,6 @@
   --grey_border: #616161;
 }
 
-body {
-  background-color: var(--ifis_green_light);
-  font-size: 1rem;
-}
-
 p {
   margin: 0;
   font-size: 15px;
@@ -25,8 +20,6 @@ p {
   padding: 10em 20% 9.5em 20%;
   text-align: center;
   margin: 0 12% 5em 16%;
-  background-color: white;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .main_page h1 {
   font-weight: bold;
@@ -56,88 +49,36 @@ p {
 .content {
   margin: 0 12% 5em 16%;
   padding: 2em 7% 7% 7%;
-  background-color: white;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-.searchbar {
-  display: flex;
-  position: relative;
-  place-content: space-around;
-}
-.searchbar input {
-  width: 85%;
-  border-width: 1px 0px 1px 1px;
-  border-style: solid;
-  border-color: var(--grey_border);
-  background-color: white;
-  border-radius: 0.25em 0 0 0.25em;
-  padding-left: 0.5em;
-  font-size: 16px;
-}
-.searchbar input:focus {
-  outline: none;
-  border-color: var(--action_green);
-  box-shadow: 0 0 0.5em var(--action_green);
-}
-.searchbar select option:hover {
+select option:hover {
   color: white;
   background-color: var(--action_green);
 }
-.searchbar .autocomplete-items {
+.autocomplete-items {
   display: flex;
   flex-flow: column;
-  width: 84%;
-  margin-right: 15%;
   position: absolute;
-  border: 1px solid var(--grey_border);
-  background-color: white;
   z-index: 99;
   top: 100%;
 }
-.searchbar .autocomplete-items div {
-  text-align: left;
+.autocomplete-items div {
   font-size: 15px;
-  width: auto;
   padding: 0.5em;
+  text-align: left;
   cursor: pointer;
+  margin-bottom: 0.25em;
 }
-.searchbar .autocomplete-items div:hover {
+.autocomplete-items div:hover {
   background-color: var(--grey_light1);
 }
-.searchbar .autocomplete-active {
+.autocomplete-active {
   background-color: var(--grey_light1) !important;
 }
-.searchbar .button {
-  background-color: var(--action_green);
-  width: 15%;
-  min-width: 3em;
-  max-width: 8em;
-  cursor: pointer;
-  display: flex;
-  border-width: 1px 1px 1px 0px;
-  border-style: solid;
-  border-color: var(--grey_border);
-  border-radius: 0 0.25em 0.25em 0;
-  justify-content: center;
-}
-.searchbar .button img {
-  margin: 0.45em;
-}
-.searchbar .button:hover {
-  background-color: var(--action_green_highlight);
-}
-.searchbarContainer {
-  height: 2.75em;
-  margin: 0.25em;
-  display: flex;
-  place-content: center;
-}
+
 .sidebar {
   width: 14%;
   margin: 0 0 5em 1%;
   padding: 1em 0.5% 1em 0.5%;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  background-color: white;
   position: fixed;
   overflow: hidden;
 }
