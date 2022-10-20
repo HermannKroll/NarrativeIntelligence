@@ -243,38 +243,43 @@
         <span id="feedbackbtn_text">Feedback</span>
         <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status" style="display: none"></span>
     </button>
-    <div class="popup" id="feedbackPopup">
-        <div class="feedback_window" role="document">
-            <div class="feedback_header" id="header">
-                <h3 class="">Send feedback with screenshot</h3>
-                <div onclick="closeFeedback()">
-                    <img src="{% static 'assets/close.svg' %}">
-                </div>
-            </div>
-            <div class="feedback_body">
-                <div class="feedback_screen_wrap">
-                    <div class="" id="screenshotContainer">
-                        <img src="null" id="screenshot"
-                             class="">
-                        <canvas class=""
-                                 id="screenshotCanvas"></canvas>
-                    </div>
-                </div>
-                <div class="">
-                    <div class="feedback_button" onclick="resetCanvas()"
-                         style="background-color: #9f9f9f">Reset
-                    </div>
-                </div>
 
-                <p>Please mark the problematic section on the image above and/or describe the problem you have
-                    encountered:</p>
-                <textarea class="" id="feedbackText" rows="3"></textarea>
-            </div>
-            <div class="feedback_footer">
-                <div class="feedback_button" onclick="closeFeedback()"
-                    style="background-color: #9f9f9f; margin-right: 1%">Cancel</div>
-                <div class="feedback_button" onclick="closeFeedback(true)"
-                   style="background-color: #3180ff">Send Report</button>
+    <div class="modal" tabindex="-1" role="dialog" id="feedbackPopup">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send feedback with screenshot</h5>
+                    <button type="button" class="btn-close"
+                            onclick="closeFeedback()" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <div class="outsideWrapper">
+                                <div class="insideWrapper" id="screenshotContainer">
+                                    <img src="null" id="screenshot" class="img-fluid coveredImage border border-primary">
+                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-secondary" onclick="resetCanvas()">Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>Please mark the problematic section on the image above and/or describe the problem you have
+                        encountered:</p>
+                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                        Report
+                    </button>
                 </div>
             </div>
         </div>

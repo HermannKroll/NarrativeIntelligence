@@ -29,6 +29,7 @@ async function openFeedback() {
 
     let screenshotCanvas = document.createElement("canvas");
     screenshotCanvas.id = "screenshotCanvas";
+    screenshotCanvas.classList.add("coveringCanvas");
     document.getElementById("screenshotContainer").append(screenshotCanvas);
 
     screenshotCanvas.setAttribute('width', canvas.width);
