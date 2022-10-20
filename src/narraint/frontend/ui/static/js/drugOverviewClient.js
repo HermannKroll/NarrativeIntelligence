@@ -33,16 +33,15 @@ function searchDrug() {
 }
 
 function resetContainerLoading(keyword = null) {
-    doneLoading("admin");
-    doneLoading("adve");
-    doneLoading("targInter");
-    doneLoading("drugInter");
-    doneLoading("labMeth");
-    doneLoading("indi");
+    for (const key in overviews) {
+        doneLoading(key)
+    }
+    doneLoading("drugNetwork");
+    doneLoading("wordCloud")
     doneLoading("news");
     document.getElementById("structure").hidden = true;
     let text = document.getElementById("unknown_drug_name_tag");
-    text.style.display = "flex";
+    text.style.setProperty("display","flex", "important");
 
     if(keyword === null) {
         text.innerText = `Unknown term`;
@@ -236,7 +235,7 @@ async function getOverviewData() {
         overviews[prefix].data = data;
         overviews[prefix].count = data[0].count;
 
-        document.getElementById(prefix + "Link").innerText += `(${length})`;
+        document.getElementById(prefix + "Link").innerText = length;
 
         //manipulate data if needed
         if(ov.dataCallback) {
@@ -261,22 +260,24 @@ function createDynamicOverviews() {
     for(const prefix in overviews) {
         const ov = overviews[prefix];
         const entry =
-`<div class="box searchbox" id="${prefix}Overview">
-    <div class="top_searchbox">
-        <div class="top_searchbox_left">
-            <h2>${ov.name}</h2>
-        </div>
-        <div class="top_searchbox_right" id="${prefix}Options">
-            <select class="sortbar" id="${prefix}Sort" onchange="sortElements('${prefix}')">
-                <option value="rel">Most Relevant</option>
-                <option value="alp">Alphabetical</option>
-            </select>
-            <input class="filterbar" type="text" id="${prefix}Search" placeholder="Filter..."
-                   onkeyup="searchElements('${prefix}')">
+`<div class="container border rounded mt-4 g-0" id="${prefix}Overview">
+    <div class="row border-bottom p-1 g-0 bg-light-grey">
+        <h5 class="col-xl-6 mt-1 gx-4">${ov.name}</h5>
+        <div class="col-xl-6 g-0">
+            <div class="input-group" id="${prefix}Options">
+                <select class="form-select" id="${prefix}Sort" onchange="sortElements('${prefix}')">
+                    <option value="rel">Most Relevant</option>
+                    <option value="alp">Alphabetical</option>
+                </select>
+                <input class="form-control" type="text" id="${prefix}Search" placeholder="Filter..."
+                       onkeyup="searchElements('${prefix}')">
+            </div>
         </div>
     </div>
-    <div class="loading" id="${prefix}Loading">
-        <img src="${url_loading_gif}">
+    <div class="row my-5 align-items-center" id="${prefix}Loading">
+        <div class="spinner-border mx-auto my-auto" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
     <div class="bottom_searchbox" id="${prefix}Content">
     
@@ -284,12 +285,12 @@ function createDynamicOverviews() {
 </div>`;
 
         const row = //TODO find a way without manipulate name string...
-`<div class="link" onClick="scrollToElement('${prefix}Overview')"
+`<div class="row rounded mt-2 g-0 p-1 d-flex flex-nowrap shadow-sm" onClick="scrollToElement('${prefix}Overview')"
      style="background-color: ${ov.color}">
-    <div class="sidebar_entry_name">
+    <div class="col-8 text-nowrap text-truncate overflow-hidden fs-0-85">
         ${ov.name.split(" (")[0]}
     </div>
-    <div class="sidebar_entry_count" id="${prefix}Link"></div>
+    <span class="badge rounded-pill bg-light text-dark border col-3 w-auto me-auto fs-0-75" id="${prefix}Link"></span>
 </div>`;
 
         overviewEntries.innerHTML += entry;
@@ -312,9 +313,10 @@ function adveCreateCallback() {
     const options = document.getElementById("adveOptions");
     const defaultHTML = options.innerHTML;
     const newSettings =
-`<div xmlns="http://www.w3.org/1999/html" class="showall">
-    <input type="checkbox" onchange="adveSwapData()" id="adveShowAll"><label>Show All</label>
-</div>`;
+`<div class="input-group-text">
+    <input class="form-check-input mt-0 me-1" type="checkbox" onChange="adveSwapData()" id="adveShowAll">
+    Show All
+</div>`
     options.innerHTML = newSettings + defaultHTML;
 }
 
@@ -569,7 +571,7 @@ function fillNews(data) {
 
     let i = data[0].results.length;
     if (i > 0) {
-        document.getElementById("linkRecentPapers").innerText += `(${i})`
+        document.getElementById("linkRecentPapers").innerText = i;
 
         let morePaper = document.getElementById("morePaperRef");
         morePaper.href =

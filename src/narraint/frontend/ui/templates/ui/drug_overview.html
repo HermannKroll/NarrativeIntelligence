@@ -10,172 +10,184 @@
 {% block content %}
     {% csrf_token %}
 
-    <div class="container my-2">
-        <div class="row col-6 offset-3">
-            <div class="input-group">
-                <input type="text" class="form-control" id='drugInput' placeholder="Search for Drug...">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" onclick="searchDrug()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search mb-1" viewBox="0 0 16 16">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
-                        </svg>
-                    </button>
+    <div class="d-flex flex-row overflow-scroll">
+        <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
+            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="background-color: lightgrey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85" >
+                    Drug
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="sidebar border rounded">
-        <p>Overview</p>
-        <div class="link" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="background-color: lightgrey">
-            <div class="sidebar_entry_name" >
-                Drug
-            </div>
-        </div>
-
-        <div class="link" onclick="scrollToElement('drugNetworkOverview')" style="background-color: darkgrey">
-            <div class="sidebar_entry_name" >
-                DTD Network
-            </div>
-        </div>
-
-        <div class="link" onclick="scrollToElement('KeywordCloud')" style="background-color: grey">
-            <div class="sidebar_entry_name" >
-                Keywords
-            </div>
-        </div>
-
-        <div id="sidebar_entries"></div>
-
-        <div class="link" onclick="scrollToElement('RecentPapers')">
-            <div class="sidebar_entry_name" >
-                Recent Papers
-            </div>
-            <div class="sidebar_entry_count" id="linkRecentPapers"></div>
-        </div>
-    </div>
-
-    <div class="content" id="drugContent">
-        <div id="unknown_drug_name_tag" class="error_msg"></div>
-        <div class="top_container">
-            <img src="#" id="structure">
-            <!--src vom img setzen-->
-            <div class="general_info">
-                <h1 id="name"></h1>
-                <!--text setzen-->
-                <table>
-                    <tr>
-                        <td>Molecular Formula:</td>
-                        <td id="formular"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>Molecular Mass:</td>
-                        <td id="mass"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>ALogP:</td>
-                        <td id="drug_alogp"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>CX LogP:</td>
-                        <td id="drug_cxlogp"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>CX Acid pKA:</td>
-                        <td id="drug_cx_acid_pka"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>CX Basic pKA:</td>
-                        <td id="drug_cx_basic_pka"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>CX LogD pH 7.4:</td>
-                        <td id="drug_cx_logd"></td>
-                        <!--text setzen-->
-                    </tr>
-                    <tr>
-                        <td>See ChEMBL:</td>
-                        <td id="drug_chemblid"></td>
-                        <!--text setzen-->
-                    </tr>
-
-                </table>
-            </div>
-        </div>
-
-        <!-- drug-target-disease-network -->
-        <div class="box searchbox" id="drugNetworkOverview" style="height:
-        fit-content">
-            <div class="top_searchbox">
-                <div class="top_searchbox_left">
-                    <h2>Drug-Target-Disease Network</h2>
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="scrollToElement('drugNetworkOverview')" style="background-color: darkgrey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85" >
+                    DTD Network
                 </div>
             </div>
-            <div class="drugNetworkContainer" id="drugNetworkContainer">
-                <div class="drugNetworkSelection">
-                    <div class="drugNetworkButton" style="background-color: #ff8181" onchange="updateNetworkGraph()">
-                        <label><input id="drugNetworkCheckboxDrug" type="checkbox" checked>Drug</label>
-                    </div>
-                    <div class="drugNetworkButton" style="background-color: #aeff9a" onchange="updateNetworkGraph()">
-                        <label><input id="drugNetworkCheckboxDisease" type="checkbox" checked>Disease</label>
-                    </div>
-                    <div class="drugNetworkButton" style="background-color: #b88cff" onchange="updateNetworkGraph()">
-                        <label><input id="drugNetworkCheckboxTarget" type="checkbox" checked>Target</label>
+
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="scrollToElement('KeywordCloud')" style="background-color: grey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85" >
+                    Keywords
+                </div>
+            </div>
+
+            <div class="" id="sidebar_entries"></div>
+
+            <div class="row rounded border mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="scrollToElement('RecentPapers')">
+                <div class="col-8 text-nowrap text-truncate overflow-hidden text-nowrap fs-0-85" >
+                    Recent Papers
+                </div>
+                <span class="badge rounded-pill bg-light text-dark w-auto border fs-0-75" id="linkRecentPapers"></span>
+            </div>
+        </div>
+
+        <!-- Main page -->
+        <div class="container-xl col-12 col-lg-10 px-2 px-sm-0 px-lg-5 mb-5 ms-lg-0 mx-xxl-auto wide-size-content">
+            <!-- Searchbar -->
+            <div class="row">
+                <div class="container my-2">
+                <div class="row col-6 offset-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='drugInput' placeholder="Search for Drug...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" onclick="searchDrug()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search mb-1" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="loading" id="drugNetworkLoading" style="height: calc(100% - 5em); align-items: center">
-                    <img src="{% static 'assets/loading.gif' %}" alt="Loading...">
-                </div>
-                <div class="drugNetworkContent" id="drugNetworkContent"></div>
-                <div class="drugNetworkFooter">
-                    <div id="drugNetworkAmount" class="ms-auto me-1 my-auto">Top 6</div>
-                    <div class="range me-1 mt-auto mb-1">
-                        <input type="range" class="my-auto text-secondary" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
+            </div>
+            </div>
+            <!-- Content -->
+            <div class="row">
+                <div class="container" id="drugContent">
+                    <div id="unknown_drug_name_tag" class="bg-danger d-none text-center fs-3 fw-bolder text-white w-fc p-2 mx-auto my-3 rounded"></div>
+                    <div class="container d-flex flex-wrap flex-column-reverse flex-md-row border rounded py-2 g-2">
+                        <img src="#" id="structure" class="drug-structure border mx-auto mx-md-0">
+                        <!--src vom img setzen-->
+                        <div class="general_info mx-auto ms-md-4">
+                            <h2 id="name"></h2>
+                            <!--text setzen-->
+                            <table>
+                                <tr>
+                                    <td>Molecular Formula:</td>
+                                    <td id="formular"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>Molecular Mass:</td>
+                                    <td id="mass"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>ALogP:</td>
+                                    <td id="drug_alogp"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>CX LogP:</td>
+                                    <td id="drug_cxlogp"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>CX Acid pKA:</td>
+                                    <td id="drug_cx_acid_pka"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>CX Basic pKA:</td>
+                                    <td id="drug_cx_basic_pka"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>CX LogD pH 7.4:</td>
+                                    <td id="drug_cx_logd"></td>
+                                    <!--text setzen-->
+                                </tr>
+                                <tr>
+                                    <td>See ChEMBL:</td>
+                                    <td id="drug_chemblid"></td>
+                                    <!--text setzen-->
+                                </tr>
+
+                            </table>
+                        </div>
                     </div>
-                    <button class="btn btn-secondary me-1" onclick="centerNetwork(network)">
-                        Center
-                    </button>
-                    <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('drugNetwork')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
-                        </svg>
-                        <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
-                    </button>
+
+                    <!-- drug-target-disease-network -->
+                    <div class="container border rounded mt-4" id="drugNetworkOverview">
+                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
+                            <h5 class="col-12 gx-4 mt-1">Drug-Target-Disease Network</h5>
+                        </div>
+                        <div class="row col-12 py-1 vh-95 bg-white g-0" id="drugNetworkContainer">
+                            <div class="row g-0 ms-1">
+                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxDrug" onchange="updateNetworkGraph()" checked>
+                                <label class="btn btn-drug me-1 col-auto" for="drugNetworkCheckboxDrug">Drug</label>
+
+                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxTarget" onchange="updateNetworkGraph()" checked>
+                                <label class="btn btn-target mx-1 col-auto h" for="drugNetworkCheckboxTarget">Target</label>
+
+                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxDisease" onchange="updateNetworkGraph()" checked>
+                                <label class="btn btn-disease mx-1 col-auto" for="drugNetworkCheckboxDisease">Disease</label>
+                            </div>
+                            <div class="row p-0 my-1 g-0 h-graph align-items-center" id="drugNetworkLoading">
+                                <div class="spinner-border mx-auto my-auto" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="row p-0 my-1 g-0 bg-light-grey h-graph dp-none" id="drugNetworkContent"></div>
+                            <div class="row g-0 h-auto">
+                                <div class="col-auto ms-auto me-1 my-auto" id="drugNetworkAmount" >Top 6</div>
+                                <div class="col-auto range me-1 mt-auto mb-1">
+                                    <input type="range" class="my-auto text-secondary" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
+                                </div>
+                                <button class="col-auto btn btn-secondary me-1" onclick="centerNetwork(network)">
+                                    Center
+                                </button>
+                                <button class="col-auto btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('drugNetwork')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                                    </svg>
+                                    <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container border rounded mt-4" id="KeywordCloud">
+                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
+                            <h5 class="col-12 gx-4 mt-1">Keyword Cloud</h5>
+                        </div>
+                        <div class="row my-5 align-items-center" id="wordCloudLoading">
+                            <div class="spinner-border mx-auto my-auto" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <ul class="cloud" id="wordCloudContent"></ul>
+                    </div>
+
+                    <div id="overview_entries"></div>
+
+                    <div class="container border rounded mt-4" id="RecentPapers">
+                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
+                            <h5 class="col-12 gx-4 mt-1">Recent Papers</h5>
+                        </div>
+                        <div class="row my-5 align-items-center" id="newsLoading">
+                            <div class="spinner-border mx-auto my-auto" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="row news_bottom" id="newsContent"></div>
+
+                        <a class="row border-top ps-2 py-1 gx-5" id="morePaperRef" style="display: none" target="_blank">
+                            More paper
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="box word_cloud searchbox" id="KeywordCloud">
-            <div class="top_searchbox">
-                <div class="top_searchbox_left">
-                    <h2>Keyword Cloud</h2>
-                </div>
-            </div>
-            <div class="loading" id="wordCloudLoading">
-                <img src="{% static 'assets/loading.gif' %}" alt="Loading...">
-            </div>
-            <ul class="cloud" id="wordCloudContent"></ul>
-        </div>
-        <div id="overview_entries"></div>
-        <div class="box news" id="RecentPapers">
-            <h2>Recent Papers</h2>
-            <div class="loading" id="newsLoading">
-                <img src="{% static 'assets/loading.gif' %}">
-            </div>
-            <div class="news_bottom" id="newsContent">
-                <!--Papers hier einfuegen-->
-            </div>
-
-            <a id="morePaperRef" style="display: none" target="_blank">
-                More paper
-            </a>
-
         </div>
     </div>
 
