@@ -51,7 +51,7 @@ function queryAndFilterPaperDetail(document_id, document_collection) {
     ], function (err, result) {
         fillPaperDetail(result[0].results[0]);
 
-        document.getElementById("newsPopup").style.display = "flex";
+        document.getElementById("newsPopup").style.setProperty("display", "flex", "important");
         document.body.style.overflowY = "hidden";
     });
 

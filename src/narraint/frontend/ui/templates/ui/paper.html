@@ -1,62 +1,87 @@
+{% extends 'base.html' %}
 {% load static %}
-{% csrf_token %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prototyp</title>
-    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
-</head>
+{% block css %}
+        <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
+{% endblock %}
 
-<body>
-<div class="popup_dummie" id="newsPopup" hidden>
-    <div class="newsdetail" style="margin: 3.5em 5% 3.5em 5%;">
-        <div class="top">
-            <a id="paperLink">View Paper</a>
-        </div>
-        <div class="bottom">
-            <div class="checkbox" id="newsCheckbox"></div>
-            <div class="paper">
-                <h2 id="paperTitle"></h2>
-                <p class="author" id="paperAuthor"></p>
-                <p class="journal" id="paperJournal"></p>
-                <p class="date" id="paperDate"></p>
-                <p class="abstract" id="paperAbstract"></p>
+{% block title %}Narrative Service{% endblock %}
 
-                <div id="classifications">
-                    <h2 id="classificationHeader">Classifications</h2>
-                    <div id="classificationDiv"></div>
-                    <p id="classificationInfo"
-                       style="margin-top: 10px; font-size:15px;">
-                        <em>(1,10) means text passage 1-10</em></p>
+{% block content %}
+    {% csrf_token %}
+    <div class="popup_dummie position-relative vh-95 d-none" id="newsPopup">
+        <div class="newsdetail shadow-none m-0">
+            <div class="top">
+                <a id="paperLink">View Paper</a>
+            </div>
+            <div class="bottom">
+                <div class="checkbox" id="newsCheckbox"></div>
+                <div class="paper">
+                    <h2 id="paperTitle"></h2>
+                    <p class="author" id="paperAuthor"></p>
+                    <p class="journal" id="paperJournal"></p>
+                    <p class="date" id="paperDate"></p>
+                    <p class="abstract" id="paperAbstract"></p>
+
+                    <div id="classifications">
+                        <h2 id="classificationHeader">Classifications</h2>
+                        <div id="classificationDiv"></div>
+                        <p id="classificationInfo"
+                           style="margin-top: 10px; font-size:15px;">
+                            <em>(1,10) means text passage 1-10</em></p>
+                    </div>
+                </div>
+                <div class="graphContainer" id="graphContainer">
+                    <div class="graphNetwork" id="paperGraph"></div>
+                    <div class="graphFooter">
+                        <button class="btn btn-secondary me-1 ms-auto" onclick="centerNetwork(papernetwork)">
+                            Center
+                        </button>
+                        <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('graph')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                            </svg>
+                            <span type="button" id="graphFullscreen">Fullscreen</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="graph" id="paperGraph"></div>
         </div>
     </div>
-</div>
 
-<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
-<script src="{% static 'js/paper.js' %}?version=4"></script>
-<script>
-    const url_document_graph = "{% url 'document_graph' %}";
-    const url_narrative_documents = "{% url 'narrative_documents' %}";
-    const url_paper_view_log = "{% url 'paper_view_log' %}";
 
-    document.getElementById('newsPopup').style.display = 'none';
+    <noscript>
+        <div class="noscript">
+            <div>
+                This website requires JavaScript enabled to function properly.
+            </div>
+        </div>
+    </noscript>
+{% endblock %}
 
-    let search = window.location.search;
-    const urlParams = new URLSearchParams(search);
-    let document_id = urlParams.get('document_id');
-    let data_source = urlParams.get("data_source");
+{% block javascript %}
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+    <script src="{% static 'js/paper.js' %}?version=4"></script>
+    <script>
+        const url_document_graph = "{% url 'document_graph' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+        const url_paper_view_log = "{% url 'paper_view_log' %}";
+        let search = window.location.search;
+        const urlParams = new URLSearchParams(search);
+        let document_id = urlParams.get('document_id');
+        let data_source = urlParams.get("data_source");
+        let currentFullscreenPrefix = null;
 
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
+        const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix,true)}
+        document.onfullscreenchange = fsCloseAction;
+        document.onwebkitfullscreenchange = fsCloseAction;
+        document.onmsfullscreenchange = fsCloseAction;
 
-    queryAndFilterPaperDetail(document_id, data_source);
-</script>
-</body>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        queryAndFilterPaperDetail(document_id, data_source);
+    </script>
+{% endblock %}
