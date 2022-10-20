@@ -1,6 +1,5 @@
 let newsData = null;
 let network = null;
-let currentFullscreenPrefix = null;
 let currentChemblID = null;
 let currentDrugName = null;
 
@@ -758,12 +757,6 @@ function createNetworkGraph() {
     network = new vis.Network(networkContainer, {}, options)
     network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network) );
     updateNetworkGraph(true);
-
-    // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
-    const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix,true)}
-    document.onfullscreenchange = fsCloseAction;
-    document.onwebkitfullscreenchange = fsCloseAction;
-    document.onmsfullscreenchange = fsCloseAction;
 }
 
 function updateNetworkGraph(firstInit=false) {
@@ -881,38 +874,4 @@ const networkSelectEdgeCallback = (e, network) => {
     // open the corresponding query in a new tab
     window.open(`/?query="${currentDrugName}"+${predicate}+"${object}"`, '_blank');
     network.unselectAll();
-}
-
-function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
-    const networkDiv = document.getElementById(`${prefix}Container`);
-    if (!networkDiv)
-        return;
-
-    if (document.fullscreenElement?.id !== `${prefix}Container` && !closeOnly) {
-        const reqFullscreen = networkDiv.requestFullscreen || networkDiv.webkitRequestFullScreen || networkDiv.msRequestFullScreen;
-        reqFullscreen.call(networkDiv)
-            .then(() => {
-                document.getElementById(`${prefix}Fullscreen`).innerText = "Close";
-                currentFullscreenPrefix = prefix;
-            })
-            .catch((e) => console.log(e));
-    } else if (document.fullscreenElement?.id === `${prefix}Container`) {
-        const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-        closeFullScreen.call(document)
-            .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)
-            .finally(() => {
-                // use finally to close the fullscreen even if the user closed the
-                // fullscreen mode by clicking F11 earlier
-                document.getElementById(`${prefix}Fullscreen`).innerText = "Fullscreen";
-                currentFullscreenPrefix = null;
-            });
-    }
-    setTimeout(centerNetwork, 250, (prefix === "drugNetwork")? network: papernetwork);
-
-}
-
-function centerNetwork(network) {
-    network.fit({
-        animation: true
-    })
 }

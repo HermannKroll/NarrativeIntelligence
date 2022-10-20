@@ -359,3 +359,35 @@ function visualize_document_graph(container) {
     */
 }
 
+function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
+    const networkDiv = document.getElementById(`${prefix}Container`);
+    if (!networkDiv)
+        return;
+
+    if (document.fullscreenElement?.id !== `${prefix}Container` && !closeOnly) {
+        const reqFullscreen = networkDiv.requestFullscreen || networkDiv.webkitRequestFullScreen || networkDiv.msRequestFullScreen;
+        reqFullscreen.call(networkDiv)
+            .then(() => {
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Close";
+                currentFullscreenPrefix = prefix;
+            })
+            .catch((e) => console.log(e));
+    } else if (document.fullscreenElement?.id === `${prefix}Container`) {
+        const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        closeFullScreen.call(document)
+            .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)
+            .finally(() => {
+                // use finally to close the fullscreen even if the user closed the
+                // fullscreen mode by clicking F11 earlier
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Fullscreen";
+                currentFullscreenPrefix = null;
+            });
+    }
+    setTimeout(centerNetwork, 250, (prefix === "drugNetwork")? network: papernetwork);
+}
+
+function centerNetwork(network) {
+    network.fit({
+        animation: true
+    })
+}

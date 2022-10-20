@@ -12,7 +12,7 @@
 
 /* MISSING BOOTSTRAP5 STYLES */
 .vh-95 {
-  height: 95vh;
+  height: 95vh !important;
 }
 .h-graph {
   height: calc(100% - 5.5rem);

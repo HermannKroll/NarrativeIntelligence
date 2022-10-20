@@ -310,6 +310,13 @@
         const url_substance_href = "{% url 'drug_substance_forward_log' %}";
         const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
 
+        let currentFullscreenPrefix = null;
+        // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
+        const fsCloseAction = () => {if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix,true)}
+        document.onfullscreenchange = fsCloseAction;
+        document.onwebkitfullscreenchange = fsCloseAction;
+        document.onmsfullscreenchange = fsCloseAction;
+
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
 
