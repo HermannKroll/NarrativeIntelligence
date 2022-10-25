@@ -13,7 +13,7 @@ let currentDrugName = null;
 const overviews = {
     indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", data: [], count: 0, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
     admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: [], count: 0, color: typeColorMap["DosageForm"]},
-    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: typeColorMap["Species"]},
+    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: typeColorMap["Gene"]},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: typeColorMap["LabMethod"]},
     species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: typeColorMap["Species"]},
     drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: typeColorMap["Drug"]},
