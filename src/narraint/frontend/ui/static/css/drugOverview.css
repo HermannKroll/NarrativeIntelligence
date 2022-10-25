@@ -118,10 +118,6 @@ select option:hover {
   width: 15em;
   height: 15em;
 }
-.drug-structure:hover {
-  width: 24em;
-  height: 24em;
-}
 
 /* CONTAINER CONTENT ALIGNMENT */
 .bottom_searchbox {
@@ -462,6 +458,12 @@ ul.cloud li:hover {
 }
 
 /* BOOTSTRAP STYLE WRAPPER */
+@media (min-width: 576px) {
+  .drug-structure:hover {
+    width: 24em;
+    height: 24em;
+  }
+}
 @media (min-width: 992px) {
   .wide-size-sidebar {
     position: fixed !important;

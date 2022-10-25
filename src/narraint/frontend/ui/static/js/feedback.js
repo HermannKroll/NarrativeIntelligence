@@ -92,6 +92,8 @@ async function closeFeedback(send = false) {
     };
     const options = {
         method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+        mode: 'same-origin',
         body: JSON.stringify(params)
     };
     await fetch(url_feedback_report, options).then(response => {
