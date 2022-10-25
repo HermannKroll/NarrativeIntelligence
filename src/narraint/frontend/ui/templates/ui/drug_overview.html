@@ -120,15 +120,19 @@
                             <h5 class="col-12 gx-4 mt-1">Drug-Target-Disease Network</h5>
                         </div>
                         <div class="row col-12 py-1 vh-95 bg-white g-0" id="drugNetworkContainer">
-                            <div class="row g-0 ms-1">
-                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxDrug" onchange="updateNetworkGraph()" checked>
-                                <label class="btn btn-drug me-1 col-auto" for="drugNetworkCheckboxDrug">Drug</label>
-
-                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxTarget" onchange="updateNetworkGraph()" checked>
-                                <label class="btn btn-target mx-1 col-auto h" for="drugNetworkCheckboxTarget">Target</label>
-
-                                <input type="checkbox" class="btn-check" id="drugNetworkCheckboxDisease" onchange="updateNetworkGraph()" checked>
-                                <label class="btn btn-disease mx-1 col-auto" for="drugNetworkCheckboxDisease">Disease</label>
+                            <div class="input-group">
+                                <div class="input-group-text bg-drug" onchange="updateNetworkGraph()">
+                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxDrug" checked>
+                                    Drug
+                                </div>
+                                <div class="input-group-text bg-target" onchange="updateNetworkGraph()">
+                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxTarget" checked>
+                                    Target
+                                </div>
+                                <div class="input-group-text bg-disease" onchange="updateNetworkGraph()">
+                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxDisease" checked>
+                                    Disease
+                                </div>
                             </div>
                             <div class="row p-0 my-1 g-0 h-graph align-items-center" id="drugNetworkLoading">
                                 <div class="spinner-border mx-auto my-auto" role="status">
