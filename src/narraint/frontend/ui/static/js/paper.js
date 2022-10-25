@@ -372,7 +372,7 @@ function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
                 currentFullscreenPrefix = prefix;
             })
             .catch((e) => console.log(e));
-    } else if (document.fullscreenElement?.id === `${prefix}Container`) {
+    } else if (document.fullscreenElement?.id === `${prefix}Container` || closeOnly) {
         const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
         closeFullScreen.call(document)
             .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)

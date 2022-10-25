@@ -37,7 +37,7 @@
                 <div class="col-8 text-nowrap text-truncate overflow-hidden text-nowrap fs-0-85" >
                     Recent Papers
                 </div>
-                <span class="badge rounded-pill bg-light text-dark w-auto border fs-0-75" id="linkRecentPapers"></span>
+                <span class="badge rounded-pill bg-transparent text-dark w-auto fs-0-75" id="linkRecentPapers"></span>
             </div>
         </div>
 
@@ -62,11 +62,11 @@
             <div class="row">
                 <div class="container" id="drugContent">
                     <div id="unknown_drug_name_tag" class="bg-danger d-none text-center fs-3 fw-bolder text-white w-fc p-2 mx-auto my-3 rounded"></div>
-                    <div class="container d-flex flex-wrap flex-column-reverse flex-md-row border rounded py-2 g-2">
-                        <img src="#" id="structure" class="drug-structure border mx-auto mx-md-0">
+                    <div class="container d-flex flex-wrap flex-column-reverse flex-md-row border bg-dark-grey rounded py-2 g-2">
+                        <img src="#" id="structure" class="drug-structure border mx-auto bg-white me-md-4">
                         <!--src vom img setzen-->
                         <div class="general_info mx-auto ms-md-4">
-                            <h2 id="name"></h2>
+                            <h2 id="name" class="fw-bolder"></h2>
                             <!--text setzen-->
                             <table>
                                 <tr>
@@ -115,41 +115,41 @@
                     </div>
 
                     <!-- drug-target-disease-network -->
-                    <div class="container border rounded mt-4" id="drugNetworkOverview">
-                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
-                            <h5 class="col-12 gx-4 mt-1">Drug-Target-Disease Network</h5>
+                    <div class="container border rounded bg-dark-grey mt-4" id="drugNetworkOverview">
+                        <div class="row border-bottom border-dark px-1 pt-1">
+                            <h5 class="col-12 gx-0 fw-bolder mt-1">Drug-Target-Disease Network</h5>
                         </div>
-                        <div class="row col-12 py-1 vh-95 bg-white g-0" id="drugNetworkContainer">
-                            <div class="input-group">
-                                <div class="input-group-text bg-drug" onchange="updateNetworkGraph()">
-                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxDrug" checked>
-                                    Drug
+                        <div class="row vh-90-sm vh-fc bg-dark-grey" id="drugNetworkContainer">
+                            <div class="d-flex flex-row g-0 p-1 h-fc mx-auto ms-sm-0 w-fc mt-auto">
+                                <div class="bg-drug rounded p-1 d-flex me-1 align-items-center">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap" id="drugNetworkCheckboxDrug" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxDrug">Drug</label>
                                 </div>
-                                <div class="input-group-text bg-target" onchange="updateNetworkGraph()">
-                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxTarget" checked>
-                                    Target
+                                <div class="bg-target rounded p-1 d-flex me-1 d-flex align-items-center">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap" id="drugNetworkCheckboxTarget" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxTarget">Target</label>
                                 </div>
-                                <div class="input-group-text bg-disease" onchange="updateNetworkGraph()">
-                                    <input class="form-check-input form-check-input-lg mt-0 me-1" type="checkbox" id="drugNetworkCheckboxDisease" checked>
-                                    Disease
+                                <div class="bg-disease rounded p-1 d-flex me-1 d-flex align-items-center me-1">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap" id="drugNetworkCheckboxDisease" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxDisease">Disease</label>
                                 </div>
                             </div>
-                            <div class="row p-0 my-1 g-0 h-graph align-items-center" id="drugNetworkLoading">
+                            <div class="row p-0 g-0 h-graph align-items-center" id="drugNetworkLoading">
                                 <div class="spinner-border mx-auto my-auto" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
-                            <div class="row p-0 my-1 g-0 bg-light-grey h-graph dp-none" id="drugNetworkContent"></div>
-                            <div class="row g-0 h-auto">
-                                <div class="col-auto ms-auto me-1 my-auto" id="drugNetworkAmount" >Top 6</div>
-                                <div class="col-auto range me-1 mt-auto mb-1">
-                                    <input type="range" class="my-auto text-secondary" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
+                            <div class="row p-0 g-0 bg-light-grey h-graph dp-none" id="drugNetworkContent"></div>
+                            <div class="input-group mx-auto mb-auto me-sm-0 w-auto p-1 h-fc">
+                                <span class="input-group-text ml-auto" id="drugNetworkAmount">Top 6</span>
+                                <div class="input-group-text">
+                                    <input type="range" class="form-range mx-0 mx-sm-0" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
                                 </div>
-                                <button class="col-auto btn btn-secondary me-1" onclick="centerNetwork(network)">
+                                <button class="btn btn-secondary" onclick="centerNetwork(network)">
                                     Center
                                 </button>
-                                <button class="col-auto btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('drugNetwork')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                                <button class="btn btn-secondary d-flex align-items-center" onclick="toggleFullscreenNetworkGraph('drugNetwork')">
+                                    <svg class="me-1" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
                                     </svg>
                                     <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
@@ -158,9 +158,9 @@
                         </div>
                     </div>
 
-                    <div class="container border rounded mt-4" id="KeywordCloud">
-                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
-                            <h5 class="col-12 gx-4 mt-1">Keyword Cloud</h5>
+                    <div class="container border rounded bg-dark-grey mt-4" id="KeywordCloud">
+                        <div class="row border-bottom border-dark px-1 pt-1 mb-1">
+                            <h5 class="col-12 mt-1 fw-bolder gx-0">Keyword Cloud</h5>
                         </div>
                         <div class="row my-5 align-items-center" id="wordCloudLoading">
                             <div class="spinner-border mx-auto my-auto" role="status">
@@ -172,9 +172,9 @@
 
                     <div id="overview_entries"></div>
 
-                    <div class="container border rounded mt-4" id="RecentPapers">
-                        <div class="row border-bottom p-1 gx-5 bg-light-grey">
-                            <h5 class="col-12 gx-4 mt-1">Recent Papers</h5>
+                    <div class="container border bg-dark-grey rounded mt-4" id="RecentPapers">
+                        <div class="row border-bottom border-dark px-1 pt-1 mb-1">
+                            <h5 class="col-12 gx-0 fw-bolder mt-1">Recent Papers</h5>
                         </div>
                         <div class="row my-5 align-items-center" id="newsLoading">
                             <div class="spinner-border mx-auto my-auto" role="status">
@@ -182,7 +182,7 @@
                             </div>
                         </div>
 
-                        <div class="row news_bottom" id="newsContent"></div>
+                        <div class="row news_bottom bg-light-grey" id="newsContent"></div>
 
                         <a class="row border-top ps-2 py-1 gx-5" id="morePaperRef" style="display: none" target="_blank">
                             More paper
@@ -241,7 +241,7 @@
 
     <!-- feedback elements -->
     <button type="button" class="btn btn-primary feedbackbtn d-none d-lg-inline-block" id="feedback_button"
-            onclick="openFeedback()" data-html2canvas-ignore="true">
+            onclick="openFeedback()" data-html2canvas-ignore="true" style="z-index: 4">
         <span id="feedbackbtn_text">Feedback</span>
         <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status" style="display: none"></span>
     </button>
@@ -332,8 +332,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-    <script src="{% static 'js/paper.js' %}?version=5" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverviewClient.js' %}?version=9" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverviewClient.js' %}?version=10" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=6" type="text/javascript"></script>
 {% endblock %}

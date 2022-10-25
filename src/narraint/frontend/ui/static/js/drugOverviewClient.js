@@ -259,9 +259,9 @@ function createDynamicOverviews() {
     for(const prefix in overviews) {
         const ov = overviews[prefix];
         const entry =
-`<div class="container border rounded mt-4 g-0" id="${prefix}Overview">
-    <div class="row border-bottom p-1 g-0 bg-light-grey">
-        <h5 class="col-xl-6 mt-1 gx-4">${ov.name}</h5>
+`<div class="container border rounded mt-4 bg-dark-grey gx-0 p-1" id="${prefix}Overview">
+    <div class="row border-bottom border-dark pb-1 mb-1 mx-2 gx-5">
+        <h5 class="col-xl-6 my-auto fw-bolder gx-2">${ov.name}</h5>
         <div class="col-xl-6 g-0">
             <div class="input-group" id="${prefix}Options">
                 <select class="form-select" id="${prefix}Sort" onchange="sortElements('${prefix}')">
@@ -278,7 +278,7 @@ function createDynamicOverviews() {
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-    <div class="bottom_searchbox" id="${prefix}Content">
+    <div class="bottom_searchbox mx-2 mb-1 bg-light-grey g-0" id="${prefix}Content">
     
     </div>
 </div>`;
@@ -289,7 +289,7 @@ function createDynamicOverviews() {
     <div class="col-8 text-nowrap text-truncate overflow-hidden fs-0-85">
         ${ov.name.split(" (")[0]}
     </div>
-    <span class="badge rounded-pill bg-light text-dark border col-3 w-auto me-auto fs-0-75" id="${prefix}Link"></span>
+    <span class="badge rounded-pill bg-transparent text-dark col-3 w-auto me-auto fs-0-75" id="${prefix}Link"></span>
 </div>`;
 
         overviewEntries.innerHTML += entry;
