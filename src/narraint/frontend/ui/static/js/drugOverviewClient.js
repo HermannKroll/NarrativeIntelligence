@@ -2,23 +2,28 @@ let newsData = null;
 let network = null;
 let currentChemblID = null;
 let currentDrugName = null;
+let scrollUpdateTicking = false;
+const VISIBLE_ELEMENTS = 50;
 
 /**
  * Data structure of all overviews
  * prefix: {name, predicate, object, data, count, color, ...}
  *
+ * fullData: fetched entity data
+ * visibleData: subset of fullData, changed if container search is used
+ *
  * createCallback: gets called after creating the overview to change it
  * dataCallback: gets called before data insertion to change the dataset
  */
 const overviews = {
-    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", data: [], count: 0, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
-    admin: {name: "Administration", predicate: "administered", object: "DosageForm", data: [], count: 0, color: typeColorMap["DosageForm"]},
-    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", data: [], count: 0, color: typeColorMap["Gene"]},
-    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", data: [], count: 0, color: typeColorMap["LabMethod"]},
-    species: {name: "Species", predicate: "associated", object: "?X(Species)", data: [], count: 0, color: typeColorMap["Species"]},
-    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", data: [], count: 0, color: typeColorMap["Drug"]},
-    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", data: [], count: 0, color: typeColorMap["Drug"]},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", data: [], count: 0, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback}
+    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
+    admin: {name: "Administration", predicate: "administered", object: "DosageForm", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["DosageForm"]},
+    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Gene"]},
+    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["LabMethod"]},
+    species: {name: "Species", predicate: "associated", object: "?X(Species)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Species"]},
+    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
+    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
+    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback}
 }
 
 buildSite().catch((err) => console.log(err));
@@ -231,7 +236,8 @@ async function getOverviewData() {
             doneLoading(prefix);
             continue;
         }
-        overviews[prefix].data = data;
+        overviews[prefix].fullData = data;
+        overviews[prefix].visibleData = data;
         overviews[prefix].count = data[0].count;
 
         document.getElementById(prefix + "Link").innerText = length;
@@ -242,7 +248,6 @@ async function getOverviewData() {
         }
 
         fillSearchbox(prefix);
-        doneLoading(prefix);
     }
 }
 
@@ -278,9 +283,8 @@ function createDynamicOverviews() {
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-    <div class="bottom_searchbox mx-2 mb-1 bg-light-grey g-0" id="${prefix}Content">
-    
-    </div>
+    <div class="bottom_searchbox mx-2 mb-1 bg-light-grey g-0" id="${prefix}Content"
+            onscroll="scrollHandler('${prefix}')"></div>
 </div>`;
 
         const row = //TODO find a way without manipulate name string...
@@ -299,6 +303,21 @@ function createDynamicOverviews() {
         if(ov.createCallback) {
             ov.createCallback();
         }
+    }
+}
+
+
+const scrollHandler = (prefix) => {
+    // run only one event call at a time
+    if (!scrollUpdateTicking) {
+        scrollUpdateTicking = true;
+        window.requestAnimationFrame(async () => {
+            await scrollUpdateElements(prefix);
+            // prevent multiple event calls in a short amount of time
+            setTimeout(() => {
+                scrollUpdateTicking = false;
+            }, 50);
+        });
     }
 }
 
@@ -322,7 +341,7 @@ function adveCreateCallback() {
 
 async function indiDataCallback() {
     const prefix = "indi";
-    const data = overviews[prefix].data;
+    const data = overviews[prefix].fullData;
 
     const chemblData = await fetch(`https://www.ebi.ac.uk/chembl/api/data/drug_indication?molecule_chembl_id=${currentChemblID}&limit=2500&format=json`)
         .then((result) => {
@@ -339,6 +358,7 @@ async function indiDataCallback() {
             data[idx].max_phase_for_ind = -1;
         }
     }
+    overviews[prefix].numVisibleData = overviews[prefix].fullData
 }
 
 
@@ -347,8 +367,8 @@ async function adveDataCallback() {
     const ov = overviews[prefix];
     const altData = []
 
-    const indiData = overviews["indi"].data;
-    ov.data.forEach((entity) => {
+    const indiData = overviews["indi"].fullData;
+    ov.fullData.forEach((entity) => {
         const obj = indiData.find((element) => entity["name"] === element["name"])
 
         //only add entities which count is greater than the one stored in
@@ -359,11 +379,12 @@ async function adveDataCallback() {
     });
 
     //swap data array with reduced data array
-    const fullData = overviews[prefix].data;
-    overviews[prefix].data = altData;
-    overviews[prefix]["altData"] = fullData;
+    const fullData = overviews[prefix].fullData;
+    overviews[prefix].fullData = altData;
+    overviews[prefix].visibleData = altData;
+    overviews[prefix].altData = fullData;
 
-    overviews[prefix].count = fullData[0]["count"];
+    overviews[prefix].count = fullData[0].count;
 }
 
 
@@ -378,7 +399,10 @@ function scrollToElement(element_id, smooth=true) {
     window.scrollTo({top: pos, behavior: ((smooth) ? "smooth": "instant")})
 }
 
-
+/**
+ * Event listener function for adverse effect container check-input. By default, only elements which are not
+ * contained in indications data are visible. If the check-input is set also doubled elements are shown.
+ */
 function adveSwapData() {
     const prefix = "adve";
     const ov = overviews[prefix];
@@ -390,12 +414,13 @@ function adveSwapData() {
     startLoading(prefix);
 
     //swap data arrays
-    const altData = ov["altData"];
-    ov["altData"] = ov.data;
-    ov.data = altData;
+    const altData = ov.altData;
+    ov.altData = ov.fullData;
+    ov.fullData = altData;
+    ov.visibleData = altData;
 
+    clearSearchBox(prefix);
     fillSearchbox(prefix);
-    doneLoading(prefix);
 }
 
 
@@ -417,11 +442,12 @@ function query_highlight(meta, callback_document) {
 
 function searchElements(reference) {
     startLoading(reference);
+    document.getElementById(reference + "Sort").value = "rel";
     const input = document.getElementById(reference + "Search").value.toUpperCase();
-    const data = getDataByReference(reference);
+    const data = overviews[reference].fullData;
     let newData = [];
     if (input === "") {
-        newData = data;
+        newData = overviews[reference].fullData;
     } else if (input.length === 1) {
         for (let item of data) {
             if (item.name.toUpperCase()[0] === input) {
@@ -435,25 +461,23 @@ function searchElements(reference) {
             }
         }
     }
+    overviews[reference].visibleData = newData;
     clearSearchBox(reference);
-    fillSearchbox(reference, newData);
-    doneLoading(reference);
+    fillSearchbox(reference);
 }
 
 
 function sortElements(reference) {
     startLoading(reference);
     const select = document.getElementById(reference + "Sort");
-    const data = getDataByReference(reference);
-    document.getElementById(reference + "Search").value = "";
     switch (select.value) {
         case "rel":
-            data.sort(function (a, b) {
+            overviews[reference].visibleData.sort(function (a, b) {
                 return b.count - a.count;
             });
             break;
         case "alp":
-            data.sort(function (a, b) {
+            overviews[reference].visibleData.sort(function (a, b) {
                 if (a.name.toUpperCase() < b.name.toUpperCase()) {
                     return -1;
                 }
@@ -464,85 +488,62 @@ function sortElements(reference) {
             });
             break;
         case "pha":
-            data.sort(function (a, b) {
+            overviews[reference].visibleData.sort(function (a, b) {
                 return b.max_phase_for_ind - a.max_phase_for_ind;
             });
             break;
     }
 
     clearSearchBox(reference);
-    fillSearchbox(reference, data);
-    doneLoading(reference);
+    fillSearchbox(reference);
 }
 
 
-function fillSearchbox(reference, data = null) {
-    const searchbox = document.getElementById(reference + "Content");
-    const maxCount = overviews[reference].count;
+async function fillSearchbox(prefix) {
+    const searchbox = document.getElementById(prefix + "Content");
+    const maxCount = overviews[prefix].count;
+    const data = overviews[prefix].visibleData;
 
-    if(data == null) {
-        data = overviews[reference].data;
-    }
+    const maxLen = (overviews[prefix].numVisible > data.length)? data.length: overviews[prefix].numVisible;
 
-    for (var i = 0; i < data.length; i++) {
+    for (let i = overviews[prefix].numVisible - VISIBLE_ELEMENTS; i < maxLen; i++) {
         const item = data[i];
-        const itemDiv = document.createElement('div');
-        const itemImg = document.createElement('img');
-        const phaseLink = document.createElement('a');
-        const itemTextLink = document.createElement('a');
-        const itemText = document.createElement('p');
-        const countDiv = document.createElement('div');
-        const countLink = document.createElement('a');
-        const query = getLinkToQuery(reference, item);
-        const stringQuery = query.split('query=')[1].replaceAll('+', ' ')
-
-        countLink.href = query;
-        countLink.target = "_blank";
-        countLink.textContent = `${item.count}`;
-        itemText.textContent = `${item.name}`;
-        itemTextLink.href = query;
-        itemTextLink.style.textDecoration = "none";
-        itemTextLink.style.color = "inherit";
-        itemTextLink.target = "_blank";
-        let scale = Math.log10(item.count) / Math.log10(maxCount);
-        scale = (isNaN(scale)) ? 1 : scale; //scale can be NaN (div by 0) - set it to 1
-        countDiv.style.backgroundColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
-        countDiv.classList.add("count");
-        phaseLink.classList.add("phase");
-        itemTextLink.append(itemText);
-        itemDiv.append(itemTextLink);
-
-        countDiv.append(countLink);
-        itemDiv.append(countDiv);
-
-        if (item.max_phase_for_ind >= 0 && item.max_phase_for_ind != null) {
-            itemImg.src = url_chembl_phase + item.max_phase_for_ind + ".svg";
-            phaseLink.target = "_blank";
-            phaseLink.href = "https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:" + currentChemblID + "%20&&%20drug_indication.mesh_id:" + item.id.substring(5, item.id.length);
-            phaseLink.onclick = logChemblPhaseHref.bind(null, currentDrugName, item.name, item.id, stringQuery, item.max_phase_for_ind);
-            phaseLink.append(itemImg)
-            itemDiv.append(phaseLink);
-        } else if (item.max_phase_for_ind != null) {
-            itemImg.src = url_chembl_phase_new;
-            phaseLink.append(itemImg)
-            itemDiv.append(phaseLink);
+        if (item == null) {
+            break;
         }
 
-        //href Logging
-        let logFunction = logSubstanceHref.bind(null, currentDrugName, item.name, stringQuery);
-        itemTextLink.onclick = logFunction;
-        countLink.onclick = logFunction;
+        const itemDiv = document.createElement('div');
+        const query = getLinkToQuery(prefix, item);
+        const stringQuery = query.split('query=')[1].replaceAll('+', ' ').replaceAll('"', "&quot;");
+        let scale = Math.log10(item.count) / Math.log10(maxCount);
+        scale = (isNaN(scale)) ? 1 : scale; //scale can be NaN (div by 0) - set it to 1
+        const bgColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
 
+        let element =
+            `<a href=${query} style="text-decoration: none; color: inherit;" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')" target="_blank">
+                <p>${item.name}</p>
+            </a>
+            <div style="background-color: ${bgColor};" class="count">
+                <a href=${query} target="_blank" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')">${item.count}</a>
+            </div>`;
+
+        if (item.max_phase_for_ind != null) {
+            const imgSrc = (item.max_phase_for_ind >= 0) ? url_chembl_phase + item.max_phase_for_ind + ".svg" : url_chembl_phase_new;
+            element +=
+                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')"
+                   href="https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:${currentChemblID} && drug_indication.mesh_id:${item.id.substring(5, item.id.length)}">
+                   <img src="${imgSrc}" alt="Phase ${(item.max_phase_for_ind >= 0) ? item.max_phase_for_ind : "unknown"}">
+                </a>`;
+        }
+
+        itemDiv.innerHTML = element;
         searchbox.append(itemDiv);
     }
+    // console.log(overviews[prefix].numVisible, "items added to", prefix)
+    doneLoading(prefix);
 }
 
 function getLinkToQuery(reference, item) {
-    // return early if the prefix is not known
-    if(!(reference in overviews)) {
-        return "";
-    }
-
     const subject = currentDrugName.split(' ').join('+');
     const predicate = overviews[reference].predicate;
     const object = item.name.split("//")[0].split(' ').join('+');
@@ -551,6 +552,7 @@ function getLinkToQuery(reference, item) {
 }
 
 function clearSearchBox(reference) {
+    overviews[reference].numVisible = VISIBLE_ELEMENTS;
     const searchbox = document.getElementById(reference + "Content");
     searchbox.innerHTML = "";
 }
@@ -563,6 +565,29 @@ function startLoading(reference) {
 function doneLoading(reference) {
     document.getElementById(reference + "Content").style.display = "flex";
     document.getElementById(reference + "Loading").style.display = "none";
+}
+
+async function scrollUpdateElements(prefix) {
+    // return if the maximum of items is already visible
+    if (overviews[prefix].visibleData.length === overviews[prefix].numVisible) {
+        return;
+    }
+
+    const content = document.getElementById(prefix + "Content");
+    const posRel = (content.scrollTop + content.offsetHeight) / content.scrollHeight * 100;
+
+    // add
+    if (posRel >= 70) {
+        const newEndIdx = overviews[prefix].numVisible + VISIBLE_ELEMENTS;
+        const dataLen = overviews[prefix].visibleData.length;
+
+        if (dataLen >= newEndIdx) {
+            overviews[prefix].numVisible = overviews[prefix].numVisible +  VISIBLE_ELEMENTS;
+        } else {
+            overviews[prefix].numVisible = dataLen;
+        }
+        await fillSearchbox(prefix);
+    }
 }
 
 function fillNews(data) {
@@ -615,21 +640,10 @@ function hideDetail() {
     document.getElementById("newsPopup").style.display = "none";
 }
 
-function getDataByReference(reference) {
-    if(reference in overviews) {
-        return overviews[reference].data;
-    }
-    return null;
-}
-
 function colorInterpolation(r1, g1, b1, r2, g2, b2, scale) {
     var r = Math.trunc(r1 + (r2 - r1) * scale);
     var g = Math.trunc(g1 + (g2 - g1) * scale);
     var b = Math.trunc(b1 + (b2 - b1) * scale);
-    return "rgb(" + r + "," + g + "," + b + ")";
-}
-
-function rgb(r, g, b) {
     return "rgb(" + r + "," + g + "," + b + ")";
 }
 
@@ -784,7 +798,7 @@ function updateNetworkGraph(firstInit=false) {
 
     if(drawDiseases) {
         // disease treatments (first 10 elements)
-        overviews.indi.data.slice(0,topK).forEach((dis) => {
+        overviews.indi.fullData.slice(0,topK).forEach((dis) => {
             nodes.add({
                 id: idx,
                 label: `${dis.name} (${phaseMap[dis.max_phase_for_ind + 1]})`,
@@ -805,7 +819,7 @@ function updateNetworkGraph(firstInit=false) {
 
     if (drawTargets) {
         // target interactions (first 10 elements)
-        overviews.targInter.data.slice(0,topK).forEach((target) => {
+        overviews.targInter.fullData.slice(0,topK).forEach((target) => {
             const names = target.name.split("//");
 
             nodes.add({
@@ -829,7 +843,7 @@ function updateNetworkGraph(firstInit=false) {
 
     if (drawDrugs) {
         // associated drugs (first 10 elements)
-        overviews.drugAssoc.data.slice(0,topK).forEach((drug) => {
+        overviews.drugAssoc.fullData.slice(0,topK).forEach((drug) => {
             nodes.add({
                 id: idx,
                 label: drug.name,
