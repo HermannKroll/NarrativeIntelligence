@@ -136,6 +136,7 @@ select option:hover {
 .drug-structure {
   width: 15em;
   height: 15em;
+  transition: width 0.5s, height 0.5s;
 }
 
 /* CONTAINER CONTENT ALIGNMENT */
@@ -481,6 +482,8 @@ ul.cloud li:hover {
   .drug-structure:hover {
     width: 24em;
     height: 24em;
+    transition: width 0.5s, height 0.5s;
+    cursor: zoom-in;
   }
   .vh-90-sm {
     height: 90vh !important;
