@@ -265,7 +265,7 @@ function createDynamicOverviews() {
         const ov = overviews[prefix];
         const entry =
 `<div class="container border rounded mt-4 bg-dark-grey gx-0 p-1" id="${prefix}Overview">
-    <div class="row border-bottom border-dark pb-1 mb-1 mx-2 gx-5">
+    <div class="row pb-1 mx-2 gx-5">
         <h5 class="col-xl-6 my-auto fw-bolder gx-2">${ov.name}</h5>
         <div class="col-xl-6 g-0">
             <div class="input-group" id="${prefix}Options">
