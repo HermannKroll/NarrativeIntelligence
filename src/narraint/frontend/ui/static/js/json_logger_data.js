@@ -113,6 +113,7 @@ function load_performed_queries(data, prefix) {
         "t":"Today",
         "tw":"This week",
         "tm":"This month",
+        "lm":"Last month",
         "ty":"This year",
         "ly":"Last year"
     }
