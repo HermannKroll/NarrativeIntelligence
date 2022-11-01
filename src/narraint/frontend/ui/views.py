@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
+from sqlalchemy.exc import OperationalError
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
@@ -947,18 +948,23 @@ def post_report(request):
 def get_keywords(request):
     if request.GET.keys() & {"substance_id"}:
         substance_id = request.GET.get("substance_id", "")
-        try:
-            session = SessionExtended.get()
-            query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
-            result = query.first()
+        if substance_id.strip():
+            try:
+                session = SessionExtended.get()
+                query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
+                try:
+                    result = query.first()
 
-            keywords = ""
-            if result:
-                keywords = ast.literal_eval(result[0])
-            return JsonResponse(dict(keywords=keywords))
+                    keywords = ""
+                    if result:
+                        keywords = ast.literal_eval(result[0])
+                except OperationalError:
+                    pass
 
-        except Exception:
-            logging.debug(f"Could not retrieve keywords for {substance_id}")
+                return JsonResponse(dict(keywords=keywords))
+
+            except Exception:
+                logging.debug(f"Could not retrieve keywords for {substance_id}")
     return HttpResponse(status=500)
 
 
