@@ -734,7 +734,8 @@ function createNetworkGraph() {
             solver: "repulsion",//barnesHut,repulsion,hierarchicalRepulsion,forceAtlas2Based
         },
         interaction: {
-            hover: true
+            hover: true,
+            zoomView: false,
         },
         layout: {
             improvedLayout: true
