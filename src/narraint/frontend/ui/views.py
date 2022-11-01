@@ -13,6 +13,7 @@ from json import JSONDecodeError
 import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
@@ -1063,7 +1064,7 @@ class DrugOverviewIndexView(TemplateView):
     template_name = "ui/drug_overview_index.html"
 
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        return redirect("drug_overview")
 
 
 class DrugOverviewView(TemplateView):
