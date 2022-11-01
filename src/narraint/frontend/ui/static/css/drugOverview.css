@@ -24,6 +24,9 @@
 .h-graph {
   height: calc(100vw * 1.5);
 }
+.ms-md-10 {
+  margin-left: 5rem !important;
+}
 .dp-none {
   display: none;
 }
