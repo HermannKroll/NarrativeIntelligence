@@ -3,6 +3,7 @@ let network = null;
 let currentChemblID = null;
 let currentDrugName = null;
 let scrollUpdateTicking = false;
+let keywordToLog = null;
 const VISIBLE_ELEMENTS = 50;
 
 /**
@@ -55,9 +56,15 @@ function resetContainerLoading(keyword = null) {
 }
 
 async function buildSite() {
-    const search = window.location.search;
+    let search = window.location.search;
     if (search === "") {
-        window.location.search = "drug=Metformin";
+        search = "drug=Metformin";
+        keywordToLog = "Metformin (default)";
+        const url = new URL(window.location.href);
+        url.searchParams.set('drug', "Metformin");
+        window.history.pushState("Query", "", "/drug_overview/" + url.search.toString());
+    } else {
+        keywordToLog = null
     }
 
     createDynamicOverviews();
@@ -92,7 +99,7 @@ async function buildSite() {
                 return;
             }
 
-            logDrugSearch(keyword)
+            logDrugSearch(keywordToLog ? keywordToLog: keyword)
 
             currentDrugName = keyword;
             currentChemblID = chemblid;
