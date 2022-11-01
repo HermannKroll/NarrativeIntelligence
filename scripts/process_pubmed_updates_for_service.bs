@@ -13,6 +13,7 @@ UPDATED_IDS="/hdd2/datasets/pubmed_medline/pharmaceutical_relevant_ids.txt"
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
 
 
+
 # First get all PubMed Pubtator PMIDs
 wget https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/AvailablePMIDsinPubTator.txt -O $ALL_PUBTATOR_PMIDS
 

@@ -9,6 +9,7 @@ UPDATED_IDS="/hdd2/datasets/zbmed/updated_ids.txt"
 
 TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
 
+
 ## Load everything
 # curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2019-12-01||/M","lt":"2021-12-18"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' >  $ZBMED_JSON
 

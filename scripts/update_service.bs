@@ -47,3 +47,4 @@ python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_t
 # Execute Cleaning Rules for Tagging
 echo 'vacuum db tables...'
 psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $VACUUM_SQL
+
