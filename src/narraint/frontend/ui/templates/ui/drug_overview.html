@@ -46,7 +46,7 @@
             <!-- Searchbar -->
             <div class="row">
                 <div class="container my-2">
-                    <div class="row col-6 offset-3">
+                    <div class="col-6 offset-3 flex-row d-flex">
                         <div class="input-group">
                             <input type="text" class="form-control" id='drugInput' placeholder="Search for Drug...">
                             <button class="btn btn-primary" onclick="searchDrug()">
@@ -55,6 +55,9 @@
                                 </svg>
                             </button>
                         </div>
+                        <a href="https://youtu.be/iagphBPLokM" target="_blank" class="w-auto">
+                            <img src="{% static 'icons/help.png' %}" height="40px">
+                        </a>
                     </div>
                 </div>
             </div>
@@ -116,8 +119,11 @@
 
                     <!-- drug-target-disease-network -->
                     <div class="container border rounded bg-dark-grey mt-4" id="drugNetworkOverview">
-                        <div class="row border-bottom border-dark px-1 pt-1">
-                            <h5 class="col-12 gx-0 fw-bolder mt-1">Drug-Target-Disease Network</h5>
+                        <div class="row border-bottom border-dark px-1 pt-1 flex-row">
+                            <h5 class="gx-0 fw-bolder mt-1 w-auto">Drug-Target-Disease Network</h5>
+                            <a href="https://youtu.be/iagphBPLokM" target="_blank" class="w-auto">
+                                <img src="{% static 'icons/help.png' %}" height="40px">
+                            </a>
                         </div>
                         <div class="row vh-90-sm vh-fc bg-dark-grey" id="drugNetworkContainer">
                             <div class="d-flex flex-row g-0 p-1 h-fc mx-auto ms-sm-0 w-fc mt-auto">
