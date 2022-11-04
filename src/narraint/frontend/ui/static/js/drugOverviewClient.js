@@ -185,6 +185,9 @@ async function buildSite() {
                     let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + chemblid;
                     document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + chemblid + '</a>';
 
+                    let pubpharm_structure_search_link = "https://www.pubpharm.de/vufind/searchtools?name_param=" + keyword;
+                     document.getElementById('drug_structure_search').innerHTML = '<a href="' + pubpharm_structure_search_link + '" target="_blank">PubPharm</a>';
+
                 }).catch(e => {
                     document.getElementById('name').innerText = decodeURI(keyword);
                     document.getElementById('formular').innerText = "-";
