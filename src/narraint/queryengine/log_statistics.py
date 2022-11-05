@@ -91,19 +91,19 @@ def get_amount_of_occurrences(json_object):
     counter = {"t": 0, "tw": 0, "tm": 0, "lm": 0, "ty": 0, "ly": 0}
     for i in json_object:
         date_object = i["date_object"]
-        if date_object == today:
-            counter["t"] += 1
-        # Returns the calendar week
-        if date_object.isocalendar()[1] == today.isocalendar()[1]:
-            counter["tw"] += 1
-        if date_object.month == today.month and date_object.year == today.year:
-            counter["tm"] += 1
-        if date_object.month == today.month - 1 and date_object.year == today.year:
-            counter["lm"] += 1
-        if date_object.year == today.year:
-            counter["ty"] += 1
         if date_object.year == today.year - 1:
             counter["ly"] += 1
+        elif date_object.year == today.year:
+            counter["ty"] += 1
+            if date_object.month == today.month - 1 and date_object.year == today.year:
+                counter["lm"] += 1
+            elif date_object.month == today.month and date_object.year == today.year:
+                counter["tm"] += 1
+                # Returns the calendar week
+                if date_object.isocalendar()[1] == today.isocalendar()[1]:
+                    counter["tw"] += 1
+                    if date_object == today:
+                        counter["t"] += 1
     return counter
 
 
