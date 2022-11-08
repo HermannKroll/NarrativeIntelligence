@@ -24,9 +24,6 @@
 .h-graph {
   height: calc(100vw * 1.5);
 }
-.ms-md-10 {
-  margin-left: 5rem !important;
-}
 .dp-none {
   display: none;
 }
@@ -481,6 +478,7 @@ ul.cloud li:hover {
 }
 
 /* BOOTSTRAP STYLE WRAPPER */
+/* corresponds to >= medium (md) sized screen width */
 @media (min-width: 576px) {
   .drug-structure:hover {
     width: 24em;
@@ -500,6 +498,7 @@ ul.cloud li:hover {
     margin-right: 0.25rem;
   }
 }
+/* corresponds to >= large (lg) sized screen width */
 @media (min-width: 992px) {
   .wide-size-sidebar {
     position: fixed !important;
@@ -511,6 +510,9 @@ ul.cloud li:hover {
     /* 17% cause of 16.666% width of the fixed sidebar */
     margin-left: 18% !important;
     margin-right: auto !important;
+  }
+  .ms-lg-10 {
+    margin-left: 5rem !important;
   }
 }
 @media (min-width: 1650px) {
