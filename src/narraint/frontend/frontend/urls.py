@@ -19,7 +19,7 @@ from django.views.decorators.cache import never_cache
 
 from narraint.frontend.frontend.settings.base import INSTALLED_APPS, ADMIN_ENABLED
 from narraint.frontend.ui.views import StatsView, HelpView, DocumentView, DrugOverviewView, DrugOverviewIndexView, \
-    SearchView, SwaggerUIView, PoliticalSciencesView, LogsView, NewSearchView
+    SearchView, SwaggerUIView, PoliticalSciencesView, LogsView, NewSearchView, LongCovidView
 
 urlpatterns = [
     path(r'', include('ui.urls')),
@@ -28,6 +28,7 @@ urlpatterns = [
     path("help/", never_cache(HelpView.as_view()), name="help"),
     path("document/", never_cache(DocumentView.as_view()), name="document"),
     path('drug_overview/', DrugOverviewView.as_view(), name='drug_overview'),
+    path('long_covid/', LongCovidView.as_view(), name='long_covid'),
     path('drug_overview_index/', DrugOverviewIndexView.as_view(), name='drug_overview_index'),
     path("political_sciences/", never_cache(PoliticalSciencesView.as_view()), name="political_sciences"),
     path("new_search/", never_cache(NewSearchView.as_view()), name="new_search"),
