@@ -1073,6 +1073,9 @@ class DrugOverviewView(TemplateView):
 class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
 
+class CovidView(TemplateView):
+    template_name = "ui/covid.html"
+
 
 # invokes Django to compress the results
 @gzip_page
