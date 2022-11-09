@@ -69,7 +69,7 @@ def get_most_searched_parameter_per_time(top_k, json_object, parameter):
             if date_object == today:
                 counter_per_parameter["t"][parameter_value] += 1
             # Returns the calendar week
-            if date_object.isocalendar()[1] == today.isocalendar()[1]:
+            if date_object.isocalendar()[1] == today.isocalendar()[1] and date_object.year == today.year:
                 counter_per_parameter["tw"][parameter_value] += 1
             if date_object.month == today.month and date_object.year == today.year:
                 counter_per_parameter["tm"][parameter_value] += 1
@@ -95,15 +95,16 @@ def get_amount_of_occurrences(json_object):
             counter["ly"] += 1
         elif date_object.year == today.year:
             counter["ty"] += 1
-            if date_object.month == today.month - 1 and date_object.year == today.year:
+            if date_object.month == today.month - 1:
                 counter["lm"] += 1
-            elif date_object.month == today.month and date_object.year == today.year:
+            elif date_object.month == today.month:
                 counter["tm"] += 1
-                # Returns the calendar week
-                if date_object.isocalendar()[1] == today.isocalendar()[1]:
-                    counter["tw"] += 1
-                    if date_object == today:
-                        counter["t"] += 1
+            # Calendar week can range over a month
+            # Returns the calendar week
+            if date_object.isocalendar()[1] == today.isocalendar()[1]:
+                counter["tw"] += 1
+                if date_object == today:
+                    counter["t"] += 1
     return counter
 
 
