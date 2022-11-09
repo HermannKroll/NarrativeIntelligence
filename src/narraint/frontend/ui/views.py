@@ -14,7 +14,6 @@ import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
@@ -32,12 +31,11 @@ from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
+from narraint.queryengine.log_statistics import create_dictionary_of_logs
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
-from narrant.preprocessing.enttypes import DRUG
-from narraint.queryengine.log_statistics import create_dictionary_of_logs, get_date_of_today
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -1005,11 +1003,11 @@ class LogsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(LogsView.template_name)
-        if not LogsView.log_date or LogsView.log_date != get_date_of_today() or not LogsView.data_dict:
+        if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds < 3600 or not LogsView.data_dict:
             try:
                 logger.debug("Computing logs")
                 LogsView.data_dict = create_dictionary_of_logs()
-                LogsView.log_date = get_date_of_today()
+                LogsView.log_date = datetime.now()
                 logger.debug("Logs computed")
             except:
                 traceback.print_exc(file=sys.stdout)
@@ -1070,8 +1068,10 @@ class DrugOverviewIndexView(TemplateView):
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
 
+
 class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
+
 
 class CovidView(TemplateView):
     template_name = "ui/covid19.html"
