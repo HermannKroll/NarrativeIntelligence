@@ -1457,7 +1457,7 @@ function getVariableData() {
         ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
         ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
         ['Method', "common applied methods"],
-        ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
+        ['PlantFamily/Genus', "plant families, e.g. Digitalis, Cannabis"],
         ['Species', "target groups, e.g. human, rats, etc."],
         ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
         ["Vaccine", "used vaccines"]
