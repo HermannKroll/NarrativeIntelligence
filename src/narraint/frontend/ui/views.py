@@ -1074,7 +1074,7 @@ class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
 
 class CovidView(TemplateView):
-    template_name = "ui/covid.html"
+    template_name = "ui/covid19.html"
 
 
 # invokes Django to compress the results
