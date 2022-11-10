@@ -91,6 +91,7 @@ function resetContainerLoading(keyword = null) {
 
 async function buildSite() {
     createDynamicOverviews();
+    logDrugSearch("Covid 19 Overview");
     fetch(url_query_document_ids_for_entity + "?entity_id=MESH:C000711409&entity_type=Disease&data_source=PubMed")
         .then(response => response.json())
         .then(data => {
