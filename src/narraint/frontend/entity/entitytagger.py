@@ -14,8 +14,6 @@ from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
-
-
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
@@ -66,7 +64,8 @@ class EntityTagger:
         logging.info('Enhancing index...')
         terms = set(self.term2entity)
         for term in terms:
-            self.term2entity[term.replace('-', ' ')].update(self.term2entity[term])
+            if '-' in term:
+                self.term2entity[term.replace('-', ' ')].update(self.term2entity[term])
 
         logging.info(f'Index load ({len(self.term2entity)} different terms)')
 
