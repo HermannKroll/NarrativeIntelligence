@@ -1066,14 +1066,25 @@ class DrugOverviewIndexView(TemplateView):
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
 
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(DrugOverviewView.template_name)
+        return super().get(request, *args, **kwargs)
+
 
 class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(LongCovidView.template_name)
+        return super().get(request, *args, **kwargs)
 
 
 class CovidView19(TemplateView):
     template_name = "ui/covid19.html"
 
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(CovidView19.template_name)
+        return super().get(request, *args, **kwargs)
 
 # invokes Django to compress the results
 @gzip_page
@@ -1108,6 +1119,7 @@ class PoliticalSciencesView(TemplateView):
     template_name = "ui/political_sciences.html"
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(PoliticalSciencesView.template_name)
         return super().get(request, *args, **kwargs)
 
 
