@@ -16,6 +16,8 @@ from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
 from narrant.entity.entityresolver import EntityResolver
 
 # used to switch between table access and debugging console logging.infos
+from narrant.preprocessing.enttypes import DRUG
+
 ACCESS_ENTITY_KEYWORDS_TABLE = True
 
 MAX_NGRAM_WORD_SIZE = 1
@@ -133,7 +135,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    entity_type = "Drug"
+    entity_type = DRUG
     document_collection = "PubMed"
 
     set_stopword_list()
@@ -143,7 +145,7 @@ def main():
     if ACCESS_ENTITY_KEYWORDS_TABLE:
         # remove all previously stored drug keywords
         q = session.query(EntityKeywords)
-        q = q.filter(EntityKeywords.entity_type == "Drug")
+        q = q.filter(EntityKeywords.entity_type == DRUG)
         q = q.delete()
         logging.info(f"{q} previously stored DRUG keywords deleted")
         session.commit()
