@@ -11,7 +11,7 @@ from yake import KeywordExtractor
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, EntityKeywords
+from narraint.backend.models import TagInvertedIndex, EntityKeywords
 from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
 from narrant.entity.entityresolver import EntityResolver
 
@@ -149,8 +149,8 @@ def main():
         session.commit()
 
     # query all existing drug entities
-    q = session.query(PredicationInvertedIndex.subject_id)
-    q = q.filter(PredicationInvertedIndex.subject_type == entity_type)
+    q = session.query(TagInvertedIndex.subject_id)
+    q = q.filter(TagInvertedIndex.subject_type == entity_type)
     q = q.distinct()
 
     drugs: List[sqlalchemy.engine.row.Row] = q.all()  # first()#
