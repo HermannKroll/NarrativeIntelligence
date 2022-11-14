@@ -1,10 +1,10 @@
 let newsData = null;
 let network = null;
-let currentChemblID = null;
 let scrollUpdateTicking = false;
 const VISIBLE_ELEMENTS = 50;
 
 const LONG_COVID_ENTITY = "Long Covid";
+const LONG_COVID_ENTITY_ID = "MESH:C000711409";
 
 /**
  * Data structure of all overviews
@@ -510,14 +510,14 @@ function logSubstanceHref(drug, substance, query) {
 
 
 async function load_wordcloud() {
-    const data = await fetch(url_keywords + "?substance_id=" + currentChemblID)
+    const data = await fetch(url_keywords + "?substance_id=" + LONG_COVID_ENTITY_ID)
         .then(async (response) => {
             return await response.json().then((data) => {
                 return data["keywords"]
             })
         })
         .catch(() => {
-            console.log("No keywords for " + LONG_COVID_ENTITY + "available.");
+            console.log("No keywords for " + LONG_COVID_ENTITY_ID + "available.");
             return null;
         });
 
