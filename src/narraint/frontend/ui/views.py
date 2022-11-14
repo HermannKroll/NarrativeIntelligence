@@ -1001,7 +1001,7 @@ class LogsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(LogsView.template_name)
-        if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds < 3600 or not LogsView.data_dict:
+        if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds > 3600 or not LogsView.data_dict:
             try:
                 logger.debug("Computing logs")
                 LogsView.data_dict = create_dictionary_of_logs()
