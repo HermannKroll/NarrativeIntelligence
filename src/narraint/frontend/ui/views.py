@@ -355,16 +355,19 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     :return: a sub count list
     """
     aggregation_strategy = "overview"
-    cached_results = None
+    cached_sub_count_list = None
     if DO_CACHING:
         try:
             cached_sub_count_list = View.instance().cache.load_result_from_cache(document_collection, graph_query,
                                                                                  aggregation_name=aggregation_strategy)
-            logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
-            return cached_sub_count_list, True
+            if cached_sub_count_list:
+                logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
+                return cached_sub_count_list, True
+            else:
+                cached_sub_count_list = None
         except Exception:
             logging.error('Cannot load query result from cache...')
-    if not cached_results:
+    if not cached_sub_count_list:
         # run query
         # compute the query
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
