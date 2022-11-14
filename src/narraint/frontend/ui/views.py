@@ -1071,7 +1071,7 @@ class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
 
 
-class CovidView(TemplateView):
+class CovidView19(TemplateView):
     template_name = "ui/covid19.html"
 
 
