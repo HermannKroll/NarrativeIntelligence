@@ -45,19 +45,19 @@ const overviews = {
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["LabMethod"]
     },
-    species: {
-        name: "Species",
-        predicate: "associated",
-        object: "?X(Species)",
-        numVisible: VISIBLE_ELEMENTS,
-        color: typeColorMap["Species"]
-    },
     drugAssoc: {
         name: "Drug Associations",
         predicate: "associated",
         object: "?X(Drug)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Drug"]
+    },
+    species: {
+        name: "Species",
+        predicate: "associated",
+        object: "?X(Species)",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Species"]
     }
 }
 
