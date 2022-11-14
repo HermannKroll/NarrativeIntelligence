@@ -37,8 +37,6 @@ from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
 
-
-
 logger = logging.getLogger(__name__)
 DO_CACHING = True
 
@@ -349,6 +347,48 @@ def get_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
+def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collection: str):
+    aggregation_strategy = "overview"
+    cached_results = None
+    if DO_CACHING:
+        try:
+            cached_sub_count_list = View.instance().cache.load_result_from_cache(document_collection, graph_query,
+                                                                                 aggregation_name=aggregation_strategy)
+            logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
+            return cached_sub_count_list, True
+        except Exception:
+            logging.error('Cannot load query result from cache...')
+    if not cached_results:
+        # run query
+        # compute the query
+        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+
+        # next get the aggregation by var names
+        substitution_aggregation = ResultTreeAggregationBySubstitution()
+        results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
+
+        # generate a list of [(ent_id, ent_name, doc_count), ...]
+        sub_count_list = list()
+        # go through all aggregated results
+        for aggregate in results_ranked.results:
+            var2sub = aggregate.var2substitution
+            # get the first substitution
+            var_name, sub = next(iter(var2sub.items()))
+            sub_count_list.append(dict(id=sub.entity_id,
+                                       name=sub.entity_name,
+                                       count=aggregate.get_result_size()))
+
+        if DO_CACHING:
+            try:
+                View.instance().cache.add_result_to_cache(document_collection, graph_query,
+                                                          sub_count_list,
+                                                          aggregation_name=aggregation_strategy)
+            except Exception:
+                logging.error('Cannot store query result to cache...')
+
+        return sub_count_list, False
+
+
 @gzip_page
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
@@ -369,23 +409,8 @@ def get_query_sub_count(request):
             return JsonResponse(status=500, data=dict(answer="query must have one variable"))
 
         time_start = datetime.now()
-        # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
-
-        # next get the aggregation by var names
-        substitution_aggregation = ResultTreeAggregationBySubstitution()
-        results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
-
-        # generate a list of [(ent_id, ent_name, doc_count), ...]
-        sub_count_list = list()
-        # go through all aggregated results
-        for aggregate in results_ranked.results:
-            var2sub = aggregate.var2substitution
-            # get the first substitution
-            var_name, sub = next(iter(var2sub.items()))
-            sub_count_list.append(dict(id=sub.entity_id,
-                                       name=sub.entity_name,
-                                       count=aggregate.get_result_size()))
+        # Get sub count list via caching
+        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collection)
 
         View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
                                                     time_needed=datetime.now() - time_start)
@@ -1085,6 +1110,7 @@ class CovidView19(TemplateView):
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(CovidView19.template_name)
         return super().get(request, *args, **kwargs)
+
 
 # invokes Django to compress the results
 @gzip_page
