@@ -348,6 +348,12 @@ def get_narrative_documents(request):
 
 
 def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collection: str):
+    """
+    Does the query sub count processing with caching if activated
+    :param graph_query: a graph query object
+    :param document_collection: the document collection
+    :return: a sub count list
+    """
     aggregation_strategy = "overview"
     cached_results = None
     if DO_CACHING:
