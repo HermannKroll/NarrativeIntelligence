@@ -48,12 +48,15 @@ def main():
 
     covid_id = "MESH:D000086382"
     long_covid_id = "MESH:C000711409"
+    mecfs_id = "MESH:D015673"
 
-    p = Progress(total=2, text="Generating keyword clouds...")
+    ids_to_process = [covid_id, long_covid_id, mecfs_id]
+
+    p = Progress(total=len(ids_to_process), text="Generating keyword clouds...")
     p.start_time()
 
     skipped_drugs = 0
-    for i, entity_id in enumerate([covid_id, long_covid_id]):  # range(10):#
+    for i, entity_id in enumerate(ids_to_process):  
         q = session.query(TagInvertedIndex.document_ids)
         q = q.filter(TagInvertedIndex.document_collection == document_collection)
         q = q.filter(TagInvertedIndex.entity_id == entity_id)
