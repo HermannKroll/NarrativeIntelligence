@@ -1121,6 +1121,14 @@ class CovidView19(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
+class MECFSView(TemplateView):
+    template_name = "ui/mecfs.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(MECFSView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
 # invokes Django to compress the results
 @gzip_page
 def get_ps_query(request):
