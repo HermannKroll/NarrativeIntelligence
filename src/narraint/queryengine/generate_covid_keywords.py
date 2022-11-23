@@ -1,20 +1,14 @@
 import ast
 import logging
 import random
-from typing import List, Dict
 
-import sqlalchemy
-from nltk.stem.porter import PorterStemmer
 from sqlalchemy import and_
-from yake import KeywordExtractor
 
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex, EntityKeywords
-from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
-from narraint.queryengine.generate_drug_keywords import set_stopword_list, ACCESS_ENTITY_KEYWORDS_TABLE, \
-    generate_keywords, generate_stem_dict
+from narraint.queryengine.generate_drug_keywords import set_stopword_list, generate_keywords, generate_stem_dict
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import DISEASE
 
@@ -56,7 +50,7 @@ def main():
     p.start_time()
 
     skipped_drugs = 0
-    for i, entity_id in enumerate(ids_to_process):  
+    for i, entity_id in enumerate(ids_to_process):
         q = session.query(TagInvertedIndex.document_ids)
         q = q.filter(TagInvertedIndex.document_collection == document_collection)
         q = q.filter(TagInvertedIndex.entity_id == entity_id)
