@@ -67,7 +67,7 @@ async function buildSite() {
     currentDrugName = COVID_ENTITY;
     currentChemblID = COVID_ENTITY_ID;
 
-    loadPaperData("MESH:C000711409", "Disease")
+    loadPaperData(COVID_ENTITY_ID, "Disease")
     await loadWordcloud();
     await loadOverviewData()
         .then(() => createNetworkGraph())
