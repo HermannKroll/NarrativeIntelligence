@@ -5,21 +5,28 @@
     <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 {% endblock %}
 
-{% block title %}Statistics per Predicate and Extraction Type{% endblock %}
+{% block title %}Help{% endblock %}
 
 {% block content %}
 
 
     <div class="container margin-top">
+
+
+        <h2>Content</h2>
+        The service contains about 35 million publication abstracts from PubMed. In brief, everything that can be found by a PubMed search can also be found in our system.
+        In addition, we included about 50k COVID 19 pre-prints from the <a href="https://preview.zbmed.de">ZB MED Preview Service</a>.
         <!--<a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
         <br>
         <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a> -->
+        <h2>Interactions</h2>
+
         <div class="row">
             <div class="col">
                 <table id="help_table" class="table table-bordered">
                     <thead>
                     <tr>
-                        <th scope="col" data-sortable="true">Predicate</th>
+                        <th scope="col" data-sortable="true">Interaction</th>
                         <th scope="col" data-sortable="true">Explanation</th>
                     </tr>
                     </thead>
