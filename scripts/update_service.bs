@@ -4,7 +4,10 @@ VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
 MEDLINE_BASELINE="/hdd2/datasets/pubmed_medline/2021_12/"
 MEDLINE_UPDATES="/hdd2/datasets/pubmed_medline/2022_updates/"
 PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
-PREDICATION_MINIMUM_UPDATE_ID=481895067
+PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/NarrativeIntelligence/scripts/highest_predication_id.txt"
+PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
+
+echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
 
 cd $ROOT_DIR
 
@@ -48,3 +51,6 @@ python3 ~/NarrativeIntelligence/src/narraint/queryengine/compute_reverse_index_t
 echo 'vacuum db tables...'
 psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=tagginguser password=u3j4io1234u8-13!14" -f $VACUUM_SQL
 
+
+# Export the highest known id
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
