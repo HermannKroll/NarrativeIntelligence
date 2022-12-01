@@ -912,13 +912,6 @@ def post_drug_ov_search_log(request):
     return HttpResponse(status=500)
 
 
-def get_logs_data(request):
-    try:
-        return JsonResponse(LogsView.data_dict)
-    except:
-        return HttpResponse(status=500)
-
-
 def post_drug_ov_subst_href_log(request):
     data = None  # init needed for second evaluation step
     try:
@@ -1031,13 +1024,16 @@ class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
 
 
+
+
+
 class LogsView(TemplateView):
     template_name = "ui/logs.html"
     log_date = None
     data_dict = None
 
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(LogsView.template_name)
+    @staticmethod
+    def recompute_logs_if_necessary():
         if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds > 3600 or not LogsView.data_dict:
             try:
                 logger.debug("Computing logs")
@@ -1046,7 +1042,16 @@ class LogsView(TemplateView):
                 logger.debug("Logs computed")
             except:
                 traceback.print_exc(file=sys.stdout)
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(LogsView.template_name)
+        LogsView.recompute_logs_if_necessary()
         return super().get(request, *args, **kwargs)
+
+
+def get_logs_data(request):
+    LogsView.recompute_logs_if_necessary()
+    return JsonResponse(LogsView.data_dict)
 
 
 class StatsView(TemplateView):
