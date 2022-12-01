@@ -1,8 +1,7 @@
-import json
 import os
 from collections import defaultdict
-from datetime import datetime, timedelta
-import pandas as pd
+from datetime import datetime
+
 from narraint.config import LOG_DIR
 
 narrative_path = os.path.join(LOG_DIR + "/queries")
