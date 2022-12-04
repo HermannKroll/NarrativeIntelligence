@@ -12,4 +12,4 @@ Tstatement(E1,R,E2,C) :- statement(E1S,R,E2S,C), isEqual(E1S,E1), isEqual(E2S,E2
 Tstatement(E1,R,E2,C) :- statement(E1S,R,E2,C), isEqual(E1S,E1)
 Tstatement(E1,R,E2,C) :- statement(E1,R,E2S,C), isEqual(E2S,E2)
 
-q1(C):- statement(Drug_CHEMBL1431, treats, Disease_MESH:D003920, C).
+q1(C):- statement(Drug_CHEMBL1431, treats, Disease_MESH:D003920, C)
