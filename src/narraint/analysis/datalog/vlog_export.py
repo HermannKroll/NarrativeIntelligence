@@ -66,13 +66,17 @@ def export_database_to_edb_predicates(path: str):
     mesh = MeSHOntology.instance()
     logging.info(f'Writing subclasses...')
     ignored = set()
+    exported_subclasses = set()
     with open("subclass.csv", 'wt') as f:
         for e_type, e_id in entities_with_mesh:
             e_str = f'class_{e_type}_{e_id}'.replace('"', '')
             try:
                 for e_subclass, _ in mesh.retrieve_subdescriptors(e_id.replace('MESH:', '')):
                     e_subclass_str = f'class_{e_type}_MESH:{e_subclass}'.replace('"', '')
-                    f.write(f'"{e_subclass_str}","{e_str}"\n')
+                    key = (e_subclass_str, e_str)
+                    if key not in exported_subclasses:
+                        f.write(f'"{e_subclass_str}","{e_str}"\n')
+                        exported_subclasses.add(key)
             except KeyError:
                 ignored.add(e_id)
     if len(ignored) > 0:
@@ -88,13 +92,17 @@ def export_database_to_edb_predicates(path: str):
 
     logging.info('Retrieving statements and writing to file...')
     statement_query = session.query(Predication).yield_per(1000000)
+    exported_statements = set()
     with open("statement.csv", 'wt') as f:
         for r in statement_query:
             context = f'{r.document_collection}_{r.document_id}'
             sub = f'{r.subject_type}_{r.subject_id}'.replace('"', '')
             rel = r.relation
             obj = f'{r.object_type}_{r.object_id}'.replace('"', '')
-            f.write(f'"{sub}","{rel}","{obj}","{context}"\n')
+            key = (context, sub, rel, obj)
+            if key not in exported_statements:
+                f.write(f'"{sub}","{rel}","{obj}","{context}"\n')
+                exported_statements.add(key)
 
     logging.info('Finished')
 
