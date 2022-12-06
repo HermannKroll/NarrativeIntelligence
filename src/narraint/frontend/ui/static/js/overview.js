@@ -632,7 +632,7 @@ function updateNetworkGraph(firstInit=false) {
     for (const key in opt) {
         const entOpt = opt[key]
 
-        if (!entOpt.draw) {
+        if (!entOpt.draw || !overviews[networkData[key]].fullData) {
             continue;
         }
 
