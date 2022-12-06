@@ -12,7 +12,7 @@ const typeColorMap = {
     "ProteinMutation": "#b9ffcb",
     "DNAMutation": "#4aff78",
     "Variant": "#ffa981",
-    "CellLine": "#729e64",
+    "CellLine": "#00bc0f",
     "SNP": "#fd83ca",
     "DomainMotif": "#f383fd",
     "Plant": "#dcfd83",
