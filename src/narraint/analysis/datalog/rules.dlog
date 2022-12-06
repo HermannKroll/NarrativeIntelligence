@@ -3,13 +3,20 @@ Tsubclass(A,C) :- subclass(A,B),Tsubclass(B,C)
 
 isEqual(A,B) :- entitytoclass(A,AC), entitytoclass(B,BC), Tsubclass(AC,BC)
 
-Tstatement(E1,R,E2,C) :- statement(E2,R,E1,C), symmetricrelation(R)
-Tstatement(E1,R,E2,C) :- statement(E2,RH,E1,C), hierachicalrelation(R,RH)
-
 
 Tstatement(E1,R,E2,C) :- statement(E1,R,E2,C)
-Tstatement(E1,R,E2,C) :- statement(E1S,R,E2S,C), isEqual(E1S,E1), isEqual(E2S,E2)
-Tstatement(E1,R,E2,C) :- statement(E1S,R,E2,C), isEqual(E1S,E1)
-Tstatement(E1,R,E2,C) :- statement(E1,R,E2S,C), isEqual(E2S,E2)
+
+Tstatement(E1,R,E2,C) :- Tstatement(E1S,R,E2S,C), isEqual(E1S,E1), isEqual(E2S,E2)
+Tstatement(E1,R,E2,C) :- Tstatement(E1S,R,E2,C), isEqual(E1S,E1)
+Tstatement(E1,R,E2,C) :- Tstatement(E1,R,E2S,C), isEqual(E2S,E2)
+
+
+Tstatement(E1,R,E2,C) :- statement(E2,R,E1,C), symmetricrelation(R)
+Tstatement(E1,R,E2,C) :- Tstatement(E2,R,E1,C), symmetricrelation(R)
+
+Tstatement(E1,R,E2,C) :- statement(E2,RH,E1,C), hierachicalrelation(R,RH)
+Tstatement(E1,R,E2,C) :- Tstatement(E2,RH,E1,C), hierachicalrelation(R,RH)
+
+
 
 q1(C):- Tstatement(Drug_CHEMBL1431, treats, Disease_MESH:D003920, C)
