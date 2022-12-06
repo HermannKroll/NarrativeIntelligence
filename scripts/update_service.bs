@@ -4,7 +4,7 @@ VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
 MEDLINE_BASELINE="/data/pubmed/2021_12/"
 MEDLINE_UPDATES="/data/pubmed/2022_updates/"
 PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
-PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/NarrativeIntelligence/scripts/highest_predication_id.txt"
+PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/mining/NarrativeIntelligence/scripts/highest_predication_id.txt"
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
 echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
