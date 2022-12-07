@@ -174,7 +174,7 @@ def main():
     trans = QueryTranslationToGraph()
     for q in QUERIES:
         logging.info('==' * 60)
-        logging.info(f'Translating query: {q}')
+        logging.info(f'Translating query: "{q}"')
         graph_q = trans.translate_keyword_query(q)
         logging.info('==' * 60)
 
