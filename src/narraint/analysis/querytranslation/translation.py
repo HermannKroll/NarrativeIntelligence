@@ -1,7 +1,11 @@
+import itertools
 import logging
 from copy import copy
 from typing import Set
 
+from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
+from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
+from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.query import GraphQuery
@@ -27,9 +31,31 @@ class QueryTranslationToGraph:
     def __load_schema_graph(self):
         translation = QueryTranslation()
         self.entity_types = translation.variable_type_mappings
-        self.allowed_predicates = {k: k for k in translation.allowed_predicates}
         self.max_spaces_in_entity_types = max([len(t.split(' ')) - 1 for t in self.entity_types])
         logging.info(f'Longest entity type has {self.max_spaces_in_entity_types} spaces')
+        self.relation_vocab = RelationVocabulary()
+        self.relation_vocab.load_from_json(PHARM_RELATION_VOCABULARY)
+        logging.info(f'Relation vocab with {len(self.relation_vocab.relation_dict)} relations load')
+        self.relation_dict = {k: k for k in self.relation_vocab.relation_dict.keys()}
+
+        logging.info('Load relation constraint file...')
+        self.relation_type_constraints = RelationTypeConstraintStore()
+        self.relation_type_constraints.load_from_json(PHARM_RELATION_CONSTRAINTS)
+        self.relations = self.relation_dict.keys()
+
+    def __find_possible_relations_for_entity_types(self, subject_type, object_type):
+        allowed_relations = set()
+        for r in self.relations:
+            # If the relation is constrained, check the constraints
+            if r in self.relation_type_constraints.constraints:
+                s_const = subject_type in self.relation_type_constraints.get_subject_constraints(r)
+                o_const = object_type in self.relation_type_constraints.get_object_constraints(r)
+                if s_const and o_const:
+                    allowed_relations.add(r)
+            else:
+                # It is not constrained - so it does work
+                allowed_relations.add(r)
+        return allowed_relations
 
     def __greedy_find_dict_entries_in_keywords(self, keywords, lookup_dict):
         term2dictentries = list()
@@ -41,18 +67,18 @@ class QueryTranslationToGraph:
         return term2dictentries
 
     def __greedy_find_predicates_in_keywords(self, keywords):
-        term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.allowed_predicates)
+        term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.relation_dict)
         logging.info('Term2predicate mapping: ')
         for k, v in term2predicates:
             logging.info(f'    {k} -> {v}')
         return term2predicates
 
-    def __greedy_find_entity_types_in_keywords(self, keywords):
-        term2entitytypes = self.__greedy_find_dict_entries_in_keywords(keywords, self.entity_types)
-        logging.info('Term2EntityType mapping: ')
-        for k, v in term2entitytypes:
+    def __greedy_find_entity_types_variables_in_keywords(self, keywords):
+        term2variables = self.__greedy_find_dict_entries_in_keywords(keywords, self.entity_types)
+        logging.info('Term2EntityTypeVariable mapping: ')
+        for k, v in term2variables:
             logging.info(f'    {k} -> {v}')
-        return term2entitytypes
+        return term2variables
 
     def __greedy_find_entities_in_keywords(self, keywords):
         logging.debug('--' * 60)
@@ -121,11 +147,22 @@ class QueryTranslationToGraph:
         keyword_query = keyword_query.lower().strip()
         keywords = keyword_query.split(' ')
         term2predicates = self.__greedy_find_predicates_in_keywords(keywords)
-        term2entitytypes = self.__greedy_find_entity_types_in_keywords(keywords)
-        term2entities = self.__greedy_find_entities_in_keywords(keywords)
+        term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
+        term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
+        term2entity_types = list([(k, self.__unify_entity_types_in_entity_set(v)) for k, v in term2entities])
         logging.info('Unified Term2EntityType mapping: ')
-        for k, v in term2entities:
-            logging.info(f'    {k} -> {self.__unify_entity_types_in_entity_set(v)}')
+        for k, v in term2entity_types:
+            logging.info(f'    {k} -> {v}')
+
+        for idx, (_, et1list) in enumerate(term2entity_types):
+            for idx2, (_, et2list) in enumerate(term2entity_types):
+                if idx == idx2:
+                    continue
+                for et1 in et1list:
+                    for et2 in et2list:
+                        allowed_relations = self.__find_possible_relations_for_entity_types(et1, et2)
+                        logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
+
         return GraphQuery()
 
 
