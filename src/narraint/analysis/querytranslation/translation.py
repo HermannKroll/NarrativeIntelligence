@@ -1,10 +1,18 @@
+import ast
 import itertools
+import json
 import logging
+import os.path
+import pickle
+from collections import defaultdict
 from copy import copy
 from typing import Set
 
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
+from kgextractiontoolbox.progress import Progress
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -18,6 +26,80 @@ QUERY_4 = 'Mass Spectrometry method Simvastatin'
 QUERY_5 = "Simvastatin Rhabdomyolysis Target"
 QUERIES = [QUERY_1, QUERY_2, QUERY_3, QUERY_4, QUERY_5]
 
+DATA_GRAPH_CACHE = "/home/kroll/jcdl2023_datagraph.pkl"
+
+
+def get_document_ids_from_provenance_mappings(provenance_mapping):
+    if 'PubMed' in provenance_mapping:
+        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
+        return document_ids
+    else:
+        return {}
+
+
+def get_key_for_entity(entity_id: str, entity_type: str) -> str:
+    return f'{entity_type}_{entity_id}'
+
+
+class DataGraph:
+
+    def __init__(self):
+        self.graph_index = defaultdict(lambda: defaultdict(lambda: set()))
+        self.entity_index = defaultdict(lambda: set())
+
+    def get_document_ids_for_entity(self, entity_id, entity_type):
+        return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
+
+    def get_document_ids_for_statement(self, subject_id, subject_type, relation, object_id, object_type) -> Set[int]:
+        subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
+        object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
+        return self.graph_index[(subject_key, object_key)][relation]
+
+    def dump_data_graph(self, file):
+        pickle.dump((self.graph_index, self.entity_index), file)
+
+    def load_data_graph(self, file):
+        self.graph_index, self.entity_index = pickle.load(file)
+
+    def __create_graph_index(self, session):
+        logging.info('Creating graph index...')
+        # iterate over all extracted statements
+        total = session.query(PredicationInvertedIndex).count()
+        progress = Progress(total=total, print_every=1000)
+        progress.start_time()
+        q_stmt = session.query(PredicationInvertedIndex).yield_per(1000000)
+        for i, r in enumerate(q_stmt):
+            progress.print_progress(i)
+            subject_key = get_key_for_entity(entity_id=r.subject_id, entity_type=r.subject_type)
+            object_key = get_key_for_entity(entity_id=r.object_id, entity_type=r.object_type)
+            relation = r.relation
+            document_ids = get_document_ids_from_provenance_mappings(json.loads(r.provenance_mapping))
+            self.graph_index[(subject_key, object_key)][relation].update(document_ids)
+
+        progress.done()
+        logging.info(f'Graph index with {len(self.graph_index)} keys created')
+
+    def __create_entity_index(self, session):
+        logging.info('Creating entity index...')
+        # iterate over all extracted statements
+        total = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed').count()
+        progress = Progress(total=total, print_every=1000)
+        progress.start_time()
+        q_stmt = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed')
+        q_stmt = q_stmt.yield_per(1000000)
+        for i, r in enumerate(q_stmt):
+            progress.print_progress(i)
+            entity_key = get_key_for_entity(entity_id=r.entity_id, entity_type=r.entity_type)
+            document_ids = ast.literal_eval(r.document_ids)
+            self.entity_index[entity_key].update(document_ids)
+        progress.done()
+        logging.info(f'Entity index with {len(self.entity_index)} keys created')
+
+    def create_data_graph(self):
+        session = SessionExtended.get()
+        self.__create_graph_index(session)
+        self.__create_entity_index(session)
+
 
 class QueryTranslationToGraph:
 
@@ -25,7 +107,7 @@ class QueryTranslationToGraph:
         logging.info('Init query translation...')
         self.tagger = EntityTagger.instance()
         self.__load_schema_graph()
-        self.data_graph = None
+        self.data_graph: DataGraph = DataGraph()
         logging.info('Query translation ready')
 
     def __load_schema_graph(self):
@@ -42,6 +124,25 @@ class QueryTranslationToGraph:
         self.relation_type_constraints = RelationTypeConstraintStore()
         self.relation_type_constraints.load_from_json(PHARM_RELATION_CONSTRAINTS)
         self.relations = self.relation_dict.keys()
+
+        self.__load_data_graph()
+        logging.info('Finished')
+
+    def __load_data_graph(self):
+        if os.path.isfile(DATA_GRAPH_CACHE):
+            logging.info(f'Loading data graph from cache: {DATA_GRAPH_CACHE}')
+            with open(DATA_GRAPH_CACHE, 'rb') as f:
+                self.data_graph.load_data_graph(f)
+        else:
+            logging.info('Creating data graph...')
+            self.__create_data_graph()
+            logging.info(f'Storing data graph to cache: {DATA_GRAPH_CACHE}')
+            with open(DATA_GRAPH_CACHE, 'wb') as f:
+                self.data_graph.dump_data_graph(f)
+
+    def __create_data_graph(self):
+        self.data_graph = DataGraph()
+        self.data_graph.create_data_graph()
 
     def __find_possible_relations_for_entity_types(self, subject_type, object_type):
         allowed_relations = set()
