@@ -1,9 +1,9 @@
 #!/bin/bash
 ROOT_DIR="/data/pubmed/"
-VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
+VACUUM_SQL="/home/kroll/mining/NarrativeIntelligence/sql/vacuum_db.sql"
 MEDLINE_BASELINE="/data/pubmed/2021_12/"
 MEDLINE_UPDATES="/data/pubmed/2022_updates/"
-PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
+PREDICATION_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/sql/clean_predication.sql"
 PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/mining/NarrativeIntelligence/scripts/highest_predication_id.txt"
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
@@ -39,7 +39,7 @@ python3 ~/mining/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rule
 
 # Execute Cleaning Rules for Predications
 echo 'cleaning predication table with hand-written rules'
-psql ""host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>FAJL2ptVm)W" -f $PREDICATION_CLEANING_SQL
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>FAJL2ptVm)W" -f $PREDICATION_CLEANING_SQL
 
 
 # Finally compute the new metadata service table2
