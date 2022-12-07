@@ -55,7 +55,6 @@ async function buildSite() {
 async function setStructureImg() {
     //fill in the image via id using fetch to catch potential errors
     const structureImage = document.getElementById('structure');
-    let pubpharm_structure_search_link = '-'
     fetch(`https://www.ebi.ac.uk/chembl/api/data/image/${currentChemblID}`)
         .then((response) => {
             if (response.ok) {
@@ -65,13 +64,12 @@ async function setStructureImg() {
             } else {
                 return Promise.reject(); /* no img available */
             }
-            // set link to source image only if the structure is known
-            pubpharm_structure_search_link = "https://www.pubpharm.de/vufind/searchtools?name_param=" + currentDrugName;
-            pubpharm_structure_search_link = '<a href="' + pubpharm_structure_search_link + '" target="_blank">PubPharm</a>';
-        }).catch(() => structureImage.hidden = true)
-        .finally(() => {
-            document.getElementById('drug_structure_search').innerHTML = pubpharm_structure_search_link}
-        );
+        }).catch(() => structureImage.hidden = true);
+
+    // set link to source image even if the img does not exist.
+    let pubpharm_structure_search_link = "https://www.pubpharm.de/vufind/searchtools?name_param=" + currentDrugName;
+    pubpharm_structure_search_link = '<a href="' + pubpharm_structure_search_link + '" target="_blank">PubPharm</a>';
+    document.getElementById('drug_structure_search').innerHTML = pubpharm_structure_search_link;
 }
 
 /**
