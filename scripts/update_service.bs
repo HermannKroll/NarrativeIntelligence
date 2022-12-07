@@ -27,10 +27,6 @@ python3 ~/mining/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata
 # Load Baseline
 # python3 ~/mining/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
 
-# Execute Cleaning Rules for Predications
-# echo 'cleaning predication table with hand-written rules'
-# psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>FAJL2ptVm)W" -f $PREDICATION_CLEANING_SQL
-
 # Do the canonicalizing step
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
