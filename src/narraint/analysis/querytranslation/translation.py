@@ -124,15 +124,10 @@ class DataGraph:
         self.__create_entity_index(session)
 
 
-class QueryTranslationToGraph:
+class SchemaGraph:
 
     def __init__(self):
-        logging.info('Init query translation...')
-        self.tagger = EntityTagger.instance()
         self.__load_schema_graph()
-        self.data_graph: DataGraph = DataGraph()
-        self.__load_data_graph()
-        logging.info('Query translation ready')
 
     def __load_schema_graph(self):
         translation = QueryTranslation()
@@ -150,6 +145,31 @@ class QueryTranslationToGraph:
         self.relations = self.relation_dict.keys()
         logging.info('Finished')
 
+    def find_possible_relations_for_entity_types(self, subject_type, object_type):
+        allowed_relations = set()
+        for r in self.relations:
+            # If the relation is constrained, check the constraints
+            if r in self.relation_type_constraints.constraints:
+                s_const = subject_type in self.relation_type_constraints.get_subject_constraints(r)
+                o_const = object_type in self.relation_type_constraints.get_object_constraints(r)
+                if s_const and o_const:
+                    allowed_relations.add(r)
+            else:
+                # It is not constrained - so it does work
+                allowed_relations.add(r)
+        return allowed_relations
+
+
+class QueryTranslationToGraph:
+
+    def __init__(self):
+        logging.info('Init query translation...')
+        self.tagger = EntityTagger.instance()
+        self.schema_graph: SchemaGraph = SchemaGraph()
+        self.data_graph: DataGraph = DataGraph()
+        self.__load_data_graph()
+        logging.info('Query translation ready')
+
     def __load_data_graph(self):
         if os.path.isfile(DATA_GRAPH_CACHE):
             logging.info(f'Loading data graph from cache: {DATA_GRAPH_CACHE}')
@@ -166,23 +186,9 @@ class QueryTranslationToGraph:
         self.data_graph = DataGraph()
         self.data_graph.create_data_graph()
 
-    def __find_possible_relations_for_entity_types(self, subject_type, object_type):
-        allowed_relations = set()
-        for r in self.relations:
-            # If the relation is constrained, check the constraints
-            if r in self.relation_type_constraints.constraints:
-                s_const = subject_type in self.relation_type_constraints.get_subject_constraints(r)
-                o_const = object_type in self.relation_type_constraints.get_object_constraints(r)
-                if s_const and o_const:
-                    allowed_relations.add(r)
-            else:
-                # It is not constrained - so it does work
-                allowed_relations.add(r)
-        return allowed_relations
-
     def __greedy_find_dict_entries_in_keywords(self, keywords, lookup_dict):
         term2dictentries = {}
-        for i in range(self.max_spaces_in_entity_types, 0, -1):
+        for i in range(self.schema_graph.max_spaces_in_entity_types, 0, -1):
             for j in range(len(keywords)):
                 combined_word = ' '.join([k for k in keywords[j:j + i]])
                 if combined_word in lookup_dict:
@@ -193,14 +199,14 @@ class QueryTranslationToGraph:
         return term2dictentries
 
     def __greedy_find_predicates_in_keywords(self, keywords):
-        term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.relation_dict)
+        term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.relation_dict)
         logging.info('Term2predicate mapping: ')
         for k, v in term2predicates.items():
             logging.info(f'    {k} -> {v}')
         return term2predicates
 
     def __greedy_find_entity_types_variables_in_keywords(self, keywords):
-        term2variables = self.__greedy_find_dict_entries_in_keywords(keywords, self.entity_types)
+        term2variables = self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.entity_types)
         logging.info('Term2EntityTypeVariable mapping: ')
         for k, v in term2variables.items():
             logging.info(f'    {k} -> {v}')
@@ -293,7 +299,7 @@ class QueryTranslationToGraph:
 
                 for et1 in et1list:
                     for et2 in et2list:
-                        allowed_relations = self.__find_possible_relations_for_entity_types(et1, et2)
+                        allowed_relations = self.schema_graph.find_possible_relations_for_entity_types(et1, et2)
                         logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
                         for relation in allowed_relations:
                             # document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
