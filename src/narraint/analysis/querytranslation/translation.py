@@ -44,8 +44,8 @@ def get_key_for_entity(entity_id: str, entity_type: str) -> str:
 class DataGraph:
 
     def __init__(self):
-        self.graph_index = defaultdict(lambda: defaultdict(lambda: set()))
-        self.entity_index = defaultdict(lambda: set())
+        self.graph_index = {}
+        self.entity_index = {}
 
     def get_document_ids_for_entity(self, entity_id, entity_type):
         return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
@@ -55,8 +55,19 @@ class DataGraph:
         object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
         return self.graph_index[(subject_key, object_key)][relation]
 
+    def get_document_ids_for_statements(self, subject_ids, subject_types, relation, object_ids, object_types) -> Set[
+        int]:
+        document_ids = set()
+        for subject_id, subject_type in itertools.product(subject_ids, subject_types):
+            subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
+            for object_id, object_type in itertools.product(object_ids, object_types):
+                object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
+                document_ids.update(self.graph_index[(subject_key, object_key)][relation])
+        return document_ids
+
     def dump_data_graph(self, file):
-        pickle.dump((self.graph_index, self.entity_index), file)
+        obj_dump = (self.graph_index, self.entity_index)
+        pickle.dump(obj_dump, file)
 
     def load_data_graph(self, file):
         self.graph_index, self.entity_index = pickle.load(file)
@@ -74,7 +85,12 @@ class DataGraph:
             object_key = get_key_for_entity(entity_id=r.object_id, entity_type=r.object_type)
             relation = r.relation
             document_ids = get_document_ids_from_provenance_mappings(json.loads(r.provenance_mapping))
-            self.graph_index[(subject_key, object_key)][relation].update(document_ids)
+            key = (subject_key, object_key)
+            if key not in self.graph_index:
+                self.graph_index[key] = {}
+            if relation not in self.graph_index[key]:
+                self.graph_index[key][relation] = set()
+            self.graph_index[key][relation].update(document_ids)
 
         progress.done()
         logging.info(f'Graph index with {len(self.graph_index)} keys created')
@@ -91,6 +107,8 @@ class DataGraph:
             progress.print_progress(i)
             entity_key = get_key_for_entity(entity_id=r.entity_id, entity_type=r.entity_type)
             document_ids = ast.literal_eval(r.document_ids)
+            if entity_key not in self.entity_index:
+                self.entity_index[entity_key] = set()
             self.entity_index[entity_key].update(document_ids)
         progress.done()
         logging.info(f'Entity index with {len(self.entity_index)} keys created')
@@ -108,6 +126,7 @@ class QueryTranslationToGraph:
         self.tagger = EntityTagger.instance()
         self.__load_schema_graph()
         self.data_graph: DataGraph = DataGraph()
+        self.__load_data_graph()
         logging.info('Query translation ready')
 
     def __load_schema_graph(self):
@@ -124,8 +143,6 @@ class QueryTranslationToGraph:
         self.relation_type_constraints = RelationTypeConstraintStore()
         self.relation_type_constraints.load_from_json(PHARM_RELATION_CONSTRAINTS)
         self.relations = self.relation_dict.keys()
-
-        self.__load_data_graph()
         logging.info('Finished')
 
     def __load_data_graph(self):
@@ -159,25 +176,28 @@ class QueryTranslationToGraph:
         return allowed_relations
 
     def __greedy_find_dict_entries_in_keywords(self, keywords, lookup_dict):
-        term2dictentries = list()
+        term2dictentries = {}
         for i in range(self.max_spaces_in_entity_types, 0, -1):
             for j in range(len(keywords)):
                 combined_word = ' '.join([k for k in keywords[j:j + i]])
                 if combined_word in lookup_dict:
-                    term2dictentries.append((combined_word, lookup_dict[combined_word]))
+                    if combined_word in term2dictentries:
+                        raise ValueError(
+                            f'Current string {combined_word} was already mapped before (duplicated keyword?)')
+                    term2dictentries[combined_word] = lookup_dict[combined_word]
         return term2dictentries
 
     def __greedy_find_predicates_in_keywords(self, keywords):
         term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.relation_dict)
         logging.info('Term2predicate mapping: ')
-        for k, v in term2predicates:
+        for k, v in term2predicates.items():
             logging.info(f'    {k} -> {v}')
         return term2predicates
 
     def __greedy_find_entity_types_variables_in_keywords(self, keywords):
         term2variables = self.__greedy_find_dict_entries_in_keywords(keywords, self.entity_types)
         logging.info('Term2EntityTypeVariable mapping: ')
-        for k, v in term2variables:
+        for k, v in term2variables.items():
             logging.info(f'    {k} -> {v}')
         return term2variables
 
@@ -186,7 +206,7 @@ class QueryTranslationToGraph:
         logging.debug('--' * 60)
         keywords_remaining = copy(keywords)
         keywords_not_mapped = list()
-        term2entities = list()
+        term2entities = {}
         while keywords_remaining:
             found = False
             i = 0
@@ -195,7 +215,10 @@ class QueryTranslationToGraph:
                 # logging.debug(f'Checking query part: {current_part}')
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part)
-                    term2entities.append((current_part, entities_in_part))
+                    if current_part in term2entities:
+                        raise ValueError(
+                            f'Current string {current_part} was already mapped before (duplicated keyword?)')
+                    term2entities[current_part] = entities_in_part
                     # logging.debug(f'Found: {entities_in_part}')
                     found = True
                     break
@@ -217,7 +240,7 @@ class QueryTranslationToGraph:
         logging.debug(f'Found entities in part: {terms_mapped}')
         logging.debug(f'Cannot find entities in part: {keywords_not_mapped}')
         logging.info('Term2Entity mapping: ')
-        for k, v in term2entities:
+        for k, v in term2entities.items():
             logging.info(f'    {k} -> {v}')
 
         logging.debug('--' * 60)
@@ -250,20 +273,30 @@ class QueryTranslationToGraph:
         term2predicates = self.__greedy_find_predicates_in_keywords(keywords)
         term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
         term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
-        term2entity_types = list([(k, self.__unify_entity_types_in_entity_set(v)) for k, v in term2entities])
+        term2entity_types = {k: self.__unify_entity_types_in_entity_set(v) for k, v in term2entities.items()}
         logging.info('Unified Term2EntityType mapping: ')
-        for k, v in term2entity_types:
+        for k, v in term2entity_types.items():
             logging.info(f'    {k} -> {v}')
 
-        for idx, (_, et1list) in enumerate(term2entity_types):
-            for idx2, (_, et2list) in enumerate(term2entity_types):
+        possible_relations = list()
+        for idx, (term1, et1list) in enumerate(term2entity_types.items()):
+            for idx2, (term2, et2list) in enumerate(term2entity_types.items()):
                 if idx == idx2:
                     continue
+                subject_ids = term2entities[term1]
+                object_ids = term2entities[term2]
+
                 for et1 in et1list:
                     for et2 in et2list:
                         allowed_relations = self.__find_possible_relations_for_entity_types(et1, et2)
                         logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
-
+                        for relation in allowed_relations:
+                            #document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
+                            #                                                               subject_types=et1,
+                            #                                                               relation=relation,
+                            #                                                               object_ids=object_ids,
+                            #                                                               object_types=et2)
+                            logging.info(f'{len([])} support: {et1} x {relation} x {et2}')
         return GraphQuery()
 
 
