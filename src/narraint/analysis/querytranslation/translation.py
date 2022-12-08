@@ -4,7 +4,6 @@ import json
 import logging
 import os.path
 import pickle
-from collections import defaultdict
 from copy import copy
 from typing import Set
 
@@ -49,6 +48,12 @@ class DataGraph:
 
     def get_document_ids_for_entity(self, entity_id, entity_type):
         return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
+
+    def get_document_ids_for_entities(self, entity_ids, entity_types):
+        document_ids = set()
+        for e_id, e_type in itertools.product(entity_ids, entity_types):
+            document_ids.update(self.get_document_ids_for_entity(entity_id=e_id, entity_type=e_type))
+        return document_ids
 
     def get_document_ids_for_statement(self, subject_id, subject_type, relation, object_id, object_type) -> Set[int]:
         subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
@@ -291,7 +296,7 @@ class QueryTranslationToGraph:
                         allowed_relations = self.__find_possible_relations_for_entity_types(et1, et2)
                         logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
                         for relation in allowed_relations:
-                            #document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
+                            # document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
                             #                                                               subject_types=et1,
                             #                                                               relation=relation,
                             #                                                               object_ids=object_ids,
