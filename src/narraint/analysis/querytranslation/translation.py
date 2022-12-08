@@ -167,7 +167,7 @@ class QueryTranslationToGraph:
         self.tagger = EntityTagger.instance()
         self.schema_graph: SchemaGraph = SchemaGraph()
         self.data_graph: DataGraph = DataGraph()
-        self.__load_data_graph()
+        #   self.__load_data_graph()
         logging.info('Query translation ready')
 
     def __load_data_graph(self):
@@ -302,12 +302,13 @@ class QueryTranslationToGraph:
                         allowed_relations = self.schema_graph.find_possible_relations_for_entity_types(et1, et2)
                         logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
                         for relation in allowed_relations:
-                            # document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
+                            pass
+                            #document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
                             #                                                               subject_types=et1,
                             #                                                               relation=relation,
                             #                                                               object_ids=object_ids,
                             #                                                               object_types=et2)
-                            logging.info(f'{len([])} support: {et1} x {relation} x {et2}')
+                            #logging.info(f'{len(document_ids)} support: {et1} x {relation} x {et2}')
         return GraphQuery()
 
 
