@@ -52,12 +52,16 @@ class DataGraph:
     def get_document_ids_for_entities(self, entity_ids, entity_types):
         document_ids = set()
         for e_id, e_type in itertools.product(entity_ids, entity_types):
-            document_ids.update(self.get_document_ids_for_entity(entity_id=e_id, entity_type=e_type))
+            try:
+                document_ids.update(self.get_document_ids_for_entity(entity_id=e_id, entity_type=e_type))
+            except KeyError:
+                pass
         return document_ids
 
     def get_document_ids_for_statement(self, subject_id, subject_type, relation, object_id, object_type) -> Set[int]:
         subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
         object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
+        logging.debug(f'Checking with sub_key {subject_key} and obj_key {object_key}')
         return self.graph_index[(subject_key, object_key)][relation]
 
     def get_document_ids_for_statements(self, subject_ids, subject_types, relation, object_ids, object_types) -> Set[
@@ -66,8 +70,12 @@ class DataGraph:
         for subject_id, subject_type in itertools.product(subject_ids, subject_types):
             subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
             for object_id, object_type in itertools.product(object_ids, object_types):
-                object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
-                document_ids.update(self.graph_index[(subject_key, object_key)][relation])
+                try:
+                    object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
+                    logging.debug(f'Checking with sub_key {subject_key} and obj_key {object_key}')
+                    document_ids.update(self.graph_index[(subject_key, object_key)][relation])
+                except KeyError:
+                    pass
         return document_ids
 
     def dump_data_graph(self, file):
@@ -76,6 +84,8 @@ class DataGraph:
 
     def load_data_graph(self, file):
         self.graph_index, self.entity_index = pickle.load(file)
+        logging.info(f'Graph index with {len(self.graph_index)} keys loaded')
+        logging.info(f'Entity index with {len(self.entity_index)} keys loaded')
 
     def __create_graph_index(self, session):
         logging.info('Creating graph index...')
@@ -167,7 +177,7 @@ class QueryTranslationToGraph:
         self.tagger = EntityTagger.instance()
         self.schema_graph: SchemaGraph = SchemaGraph()
         self.data_graph: DataGraph = DataGraph()
-        #   self.__load_data_graph()
+        self.__load_data_graph()
         logging.info('Query translation ready')
 
     def __load_data_graph(self):
@@ -294,21 +304,23 @@ class QueryTranslationToGraph:
             for idx2, (term2, et2list) in enumerate(term2entity_types.items()):
                 if idx == idx2:
                     continue
-                subject_ids = term2entities[term1]
-                object_ids = term2entities[term2]
+                subject_ids = {s.entity_id for s in term2entities[term1]}
+                object_ids = {o.entity_id for o in term2entities[term2]}
 
                 for et1 in et1list:
                     for et2 in et2list:
                         allowed_relations = self.schema_graph.find_possible_relations_for_entity_types(et1, et2)
                         logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
                         for relation in allowed_relations:
-                            pass
-                            #document_ids = self.data_graph.get_document_ids_for_statements(subject_ids=subject_ids,
-                            #                                                               subject_types=et1,
-                            #                                                               relation=relation,
-                            #                                                               object_ids=object_ids,
-                            #                                                               object_types=et2)
-                            #logging.info(f'{len(document_ids)} support: {et1} x {relation} x {et2}')
+                            document_ids = self.data_graph.get_document_ids_for_statements(
+                                subject_ids=subject_ids,
+                                subject_types=[et1],
+                                relation=relation,
+                                object_ids=object_ids,
+                                object_types=[et2])
+                            logging.info(
+                                f'{len(document_ids)} support: {et1} x {relation} x {et2} '
+                                f'({subject_ids} x {relation} x {object_ids})')
         return GraphQuery()
 
 
