@@ -1,0 +1,12 @@
+#!/bin/bash
+# Script to do service related things
+
+# Update date in base.html
+python3 /home/kroll/NarrativeIntelligence/src/narraint/frontend/ui/update_date_in_basehtml.py /home/kroll/NarrativeIntelligence/src/narraint/frontend/templates/base.html
+
+# Remove cache
+rm -rf /home/kroll/NarrativeIntelligence/cache_old
+mv /home/kroll/NarrativeIntelligence/cache /home/kroll/NarrativeIntelligence/cache_old
+
+# Execute common queries
+python3 /home/kroll/NarrativeIntelligence/src/narraint/frontend/ui/execute_common_queries.py
