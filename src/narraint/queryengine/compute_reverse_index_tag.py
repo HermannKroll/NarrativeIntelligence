@@ -1,4 +1,5 @@
 import argparse
+import ast
 import json
 import logging
 from collections import defaultdict
@@ -46,7 +47,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
 
     query = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
     query = query.distinct()
-    query = query.yield_per(100*QUERY_YIELD_PER_K)
+    query = query.yield_per(QUERY_YIELD_PER_K)
     index = defaultdict(set)
     for idx, tag_row in enumerate(query):
         progress.print_progress(idx)
@@ -74,7 +75,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in index:
-                index[row_key].update([int(doc_id) for doc_id in json.loads(row.document_ids)])
+                index[row_key].update([int(doc_id) for doc_id in ast.literal_eval(row.document_ids)])
                 deleted_rows += 1
                 session.delete(row)
         p2.done()
