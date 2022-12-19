@@ -21,6 +21,7 @@ from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINT
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
 from narrant.entity.entity import Entity
 
 QUERY_1 = "Metformin Diabetes"
@@ -100,6 +101,14 @@ class DataGraph:
         logging.info(f'Graph index with {len(self.graph_index)} keys loaded')
         logging.info(f'Entity index with {len(self.entity_index)} keys loaded')
 
+    def __add_statement_to_index(self, subject_key, relation, object_key, document_ids):
+        key = (subject_key, object_key)
+        if key not in self.graph_index:
+            self.graph_index[key] = {}
+        if relation not in self.graph_index[key]:
+            self.graph_index[key][relation] = set()
+        self.graph_index[key][relation].update(document_ids)
+
     def __create_graph_index(self, session):
         logging.info('Creating graph index...')
         # iterate over all extracted statements
@@ -113,12 +122,22 @@ class DataGraph:
             object_key = get_key_for_entity(entity_id=r.object_id, entity_type=r.object_type)
             relation = r.relation
             document_ids = get_document_ids_from_provenance_mappings(json.loads(r.provenance_mapping))
-            key = (subject_key, object_key)
-            if key not in self.graph_index:
-                self.graph_index[key] = {}
-            if relation not in self.graph_index[key]:
-                self.graph_index[key][relation] = set()
-            self.graph_index[key][relation].update(document_ids)
+
+            self.__add_statement_to_index(subject_key=subject_key, relation=relation,
+                                          object_key=object_key, document_ids=document_ids)
+            # Swap subject and object im predicate is a symmetric one
+            if relation in SYMMETRIC_PREDICATES:
+                self.__add_statement_to_index(subject_key=object_key, relation=relation,
+                                              object_key=subject_key, document_ids=document_ids)
+            if relation in PREDICATE_EXPANSION:
+                for expanded_relation in PREDICATE_EXPANSION[relation]:
+                    # Expand statement to all of its relations
+                    self.__add_statement_to_index(subject_key=subject_key, relation=expanded_relation,
+                                                  object_key=object_key, document_ids=document_ids)
+                    # Is the relation symmetric again?
+                    if expanded_relation in SYMMETRIC_PREDICATES:
+                        self.__add_statement_to_index(subject_key=object_key, relation=expanded_relation,
+                                                      object_key=subject_key, document_ids=document_ids)
 
         progress.done()
         logging.info(f'Graph index with {len(self.graph_index)} keys created')
