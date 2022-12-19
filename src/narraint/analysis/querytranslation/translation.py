@@ -7,7 +7,7 @@ import pickle
 import re
 import string
 from copy import copy
-from typing import Set
+from typing import Set, List
 
 import nltk
 
@@ -23,6 +23,7 @@ from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
 from narrant.entity.entity import Entity
+from narrant.entity.meshontology import MeSHOntology
 
 QUERY_1 = "Metformin Diabetes"
 QUERY_2 = "Metformin treats Diabetes"
@@ -59,6 +60,20 @@ class DataGraph:
         self.graph_index = {}
         self.entity_index = {}
         self.term_index = {}
+        self.mesh_ontology = None
+
+    def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
+        if not self.mesh_ontology:
+            self.mesh_ontology = MeSHOntology.instance()
+
+        entities = {entity_id, entity_type}
+        # only MeSH has an ontology for now
+        if entity_id.startswith('MESH:D'):
+            mesh_desc = entity_id.replace('MESH:', '')
+            for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
+                entities.add(f'MESH:{super_entity}')
+            #logging.info(f'Expanded {entity_id} by {entities}')
+        return entities
 
     def get_document_ids_for_entity(self, entity_id, entity_type):
         return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
@@ -98,11 +113,12 @@ class DataGraph:
 
     def load_data_graph(self, file):
         self.graph_index, self.entity_index, self.term_index = pickle.load(file)
+        logging.info(f'Terms index with {len(self.term_index)} keys loaded')
         logging.info(f'Graph index with {len(self.graph_index)} keys loaded')
         logging.info(f'Entity index with {len(self.entity_index)} keys loaded')
 
-    def __add_statement_to_index(self, subject_key, relation, object_key, document_ids):
-        key = (subject_key, object_key)
+    def __add_statement_to_index(self, subject_id, relation, object_id, document_ids):
+        key = (subject_id, object_id)
         if key not in self.graph_index:
             self.graph_index[key] = {}
         if relation not in self.graph_index[key]:
@@ -118,26 +134,33 @@ class DataGraph:
         q_stmt = session.query(PredicationInvertedIndex).yield_per(1000000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
-            subject_key = get_key_for_entity(entity_id=r.subject_id, entity_type=r.subject_type)
-            object_key = get_key_for_entity(entity_id=r.object_id, entity_type=r.object_type)
+            subjects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.subject_id,
+                                                                           entity_type=r.subject_type)
+            objects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.object_id,
+                                                                          entity_type=r.object_type)
             relation = r.relation
             document_ids = get_document_ids_from_provenance_mappings(json.loads(r.provenance_mapping))
 
-            self.__add_statement_to_index(subject_key=subject_key, relation=relation,
-                                          object_key=object_key, document_ids=document_ids)
-            # Swap subject and object im predicate is a symmetric one
-            if relation in SYMMETRIC_PREDICATES:
-                self.__add_statement_to_index(subject_key=object_key, relation=relation,
-                                              object_key=subject_key, document_ids=document_ids)
-            if relation in PREDICATE_EXPANSION:
-                for expanded_relation in PREDICATE_EXPANSION[relation]:
-                    # Expand statement to all of its relations
-                    self.__add_statement_to_index(subject_key=subject_key, relation=expanded_relation,
-                                                  object_key=object_key, document_ids=document_ids)
-                    # Is the relation symmetric again?
-                    if expanded_relation in SYMMETRIC_PREDICATES:
-                        self.__add_statement_to_index(subject_key=object_key, relation=expanded_relation,
-                                                      object_key=subject_key, document_ids=document_ids)
+            # Cross product between all subjects and all objects
+            for subj, obj in itertools.product(subjects, objects):
+                self.__add_statement_to_index(subject_id=subj, relation=relation,
+                                              object_id=obj, document_ids=document_ids)
+                # Swap subject and object im predicate is a symmetric one
+                if relation in SYMMETRIC_PREDICATES:
+                    self.__add_statement_to_index(subject_id=obj, relation=relation,
+                                                  object_id=subj, document_ids=document_ids)
+                if relation in PREDICATE_EXPANSION:
+                    for expanded_relation in PREDICATE_EXPANSION[relation]:
+                        # Expand statement to all of its relations
+                        self.__add_statement_to_index(subject_id=subj, relation=expanded_relation,
+                                                      object_id=obj, document_ids=document_ids)
+                        # Is the relation symmetric again?
+                        if expanded_relation in SYMMETRIC_PREDICATES:
+                            self.__add_statement_to_index(subject_id=obj, relation=expanded_relation,
+                                                          object_id=subj, document_ids=document_ids)
+
+            if i > 1000:
+                break
 
         progress.done()
         logging.info(f'Graph index with {len(self.graph_index)} keys created')
@@ -152,11 +175,16 @@ class DataGraph:
         q_stmt = q_stmt.yield_per(1000000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
-            entity_key = get_key_for_entity(entity_id=r.entity_id, entity_type=r.entity_type)
-            document_ids = ast.literal_eval(r.document_ids)
-            if entity_key not in self.entity_index:
-                self.entity_index[entity_key] = set()
-            self.entity_index[entity_key].update(document_ids)
+            for entity in self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.entity_id,
+                                                                              entity_type=r.entity_type):
+                document_ids = ast.literal_eval(r.document_ids)
+                if entity not in self.entity_index:
+                    self.entity_index[entity] = set()
+                self.entity_index[entity].update(document_ids)
+
+            if i > 1000:
+                break
+
         progress.done()
         logging.info(f'Entity index with {len(self.entity_index)} keys created')
 
@@ -181,6 +209,9 @@ class DataGraph:
                 if term not in term_index_local:
                     term_index_local[term] = set()
                 term_index_local[term].add(doc.id)
+
+            if i > 1000:
+                break
 
         progress.done()
         logging.info('Computing how often each term was found')
@@ -413,6 +444,7 @@ def main():
                         level=logging.INFO)
 
     trans = QueryTranslationToGraph()
+    exit(0)
     for q in QUERIES:
         logging.info('==' * 60)
         logging.info(f'Translating query: "{q}"')
