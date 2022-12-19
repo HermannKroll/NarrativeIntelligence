@@ -63,6 +63,12 @@ class DataGraph:
         self.mesh_ontology = None
 
     def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
+        """
+        Expands an entity by all of its superclasses. The type will be integrated as an entity into the results
+        :param entity_id: entity id
+        :param entity_type: entity type
+        :return: a set of entities (no types, only strings)
+        """
         if not self.mesh_ontology:
             self.mesh_ontology = MeSHOntology.instance()
 
@@ -75,37 +81,14 @@ class DataGraph:
             # logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
-    def get_document_ids_for_entity(self, entity_id, entity_type):
-        return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
+    def get_document_ids_for_term(self, term: str) -> Set[int]:
+        return self.term_index[term]
 
-    def get_document_ids_for_entities(self, entity_ids, entity_types):
-        document_ids = set()
-        for e_id, e_type in itertools.product(entity_ids, entity_types):
-            try:
-                document_ids.update(self.get_document_ids_for_entity(entity_id=e_id, entity_type=e_type))
-            except KeyError:
-                pass
-        return document_ids
+    def get_document_ids_for_entity(self, entity_id) -> Set[int]:
+        return self.entity_index[entity_id]
 
-    def get_document_ids_for_statement(self, subject_id, subject_type, relation, object_id, object_type) -> Set[int]:
-        subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
-        object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
-        logging.debug(f'Checking with sub_key {subject_key} and obj_key {object_key}')
-        return self.graph_index[(subject_key, object_key)][relation]
-
-    def get_document_ids_for_statements(self, subject_ids, subject_types, relation, object_ids, object_types) -> Set[
-        int]:
-        document_ids = set()
-        for subject_id, subject_type in itertools.product(subject_ids, subject_types):
-            subject_key = get_key_for_entity(entity_id=subject_id, entity_type=subject_type)
-            for object_id, object_type in itertools.product(object_ids, object_types):
-                try:
-                    object_key = get_key_for_entity(entity_id=object_id, entity_type=object_type)
-                    logging.debug(f'Checking with sub_key {subject_key} and obj_key {object_key}')
-                    document_ids.update(self.graph_index[(subject_key, object_key)][relation])
-                except KeyError:
-                    pass
-        return document_ids
+    def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
+        return self.graph_index[(subject_id, object_id)][relation]
 
     def dump_data_graph(self, file):
         obj_dump = (self.graph_index, self.entity_index, self.term_index)
