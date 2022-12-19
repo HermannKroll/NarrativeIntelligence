@@ -15,6 +15,7 @@ from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_c
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.progress import Progress
+from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
@@ -61,6 +62,7 @@ class DataGraph:
         self.entity_index = {}
         self.term_index = {}
         self.mesh_ontology = None
+        self.atc_tree = None
 
     def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
         """
@@ -71,6 +73,7 @@ class DataGraph:
         """
         if not self.mesh_ontology:
             self.mesh_ontology = MeSHOntology.instance()
+            self.atc_tree = ATCTree.instance()
 
         entities = {entity_id, entity_type}
         # only MeSH has an ontology for now
@@ -79,6 +82,11 @@ class DataGraph:
             for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
                 entities.add(f'MESH:{super_entity}')
             # logging.info(f'Expanded {entity_id} by {entities}')
+        # Chembl Drugs
+        if entity_id.startswith('CHEMBL'):
+            for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
+                entities.add(chembl_class)
+            logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
@@ -217,9 +225,9 @@ class DataGraph:
 
     def create_data_graph(self):
         session = SessionExtended.get()
-        self.__create_term_index(session)
         self.__create_entity_index(session)
         self.__create_graph_index(session)
+        self.__create_term_index(session)
 
 
 class SchemaGraph:
