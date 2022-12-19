@@ -4,14 +4,19 @@ import json
 import logging
 import os.path
 import pickle
+import re
+import string
 from copy import copy
 from typing import Set
 
+import nltk
+
+from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex
+from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -25,7 +30,14 @@ QUERY_4 = 'Mass Spectrometry method Simvastatin'
 QUERY_5 = "Simvastatin Rhabdomyolysis Target"
 QUERIES = [QUERY_1, QUERY_2, QUERY_3, QUERY_4, QUERY_5]
 
+TERM_FREQUENCY_UPPER_BOUND = 0.99
+TERM_FREQUENCY_LOWER_BOUND = 0.001
+TERM_MIN_LENGTH = 3
+
 DATA_GRAPH_CACHE = "/home/kroll/jcdl2023_datagraph.pkl"
+
+
+# nltk.download('stopwords')
 
 
 def get_document_ids_from_provenance_mappings(provenance_mapping):
@@ -45,6 +57,7 @@ class DataGraph:
     def __init__(self):
         self.graph_index = {}
         self.entity_index = {}
+        self.term_index = {}
 
     def get_document_ids_for_entity(self, entity_id, entity_type):
         return self.entity_index[get_key_for_entity(entity_id=entity_id, entity_type=entity_type)]
@@ -79,11 +92,11 @@ class DataGraph:
         return document_ids
 
     def dump_data_graph(self, file):
-        obj_dump = (self.graph_index, self.entity_index)
+        obj_dump = (self.graph_index, self.entity_index, self.term_index)
         pickle.dump(obj_dump, file)
 
     def load_data_graph(self, file):
-        self.graph_index, self.entity_index = pickle.load(file)
+        self.graph_index, self.entity_index, self.term_index = pickle.load(file)
         logging.info(f'Graph index with {len(self.graph_index)} keys loaded')
         logging.info(f'Entity index with {len(self.entity_index)} keys loaded')
 
@@ -128,10 +141,61 @@ class DataGraph:
         progress.done()
         logging.info(f'Entity index with {len(self.entity_index)} keys created')
 
+    def __create_term_index(self, session):
+        logging.info('Creating term index...')
+        # iterate over all extracted statements
+        total = session.query(Document).filter(Document.collection == 'PubMed').count()
+        progress = Progress(total=total, print_every=1000)
+        progress.start_time()
+        stopwords = set(nltk.corpus.stopwords.words('english'))
+        translator = str.maketrans('', '', string.punctuation)
+        term_index_local = {}
+        for i, doc in enumerate(iterate_over_all_documents_in_collection(session=session, collection='PubMed')):
+            progress.print_progress(i)
+            # Make it lower + replace '-' by a space + remove all punctuation
+            doc_text = doc.get_text_content().strip().lower()
+            doc_text = doc_text.replace('-', ' ')
+            doc_text = doc_text.translate(translator)
+            for term in doc_text.split(' '):
+                if not term.strip() or len(term) <= TERM_MIN_LENGTH or term in stopwords:
+                    continue
+                if term not in term_index_local:
+                    term_index_local[term] = set()
+                term_index_local[term].add(doc.id)
+
+        progress.done()
+        logging.info('Computing how often each term was found')
+        term_frequency = list([(t, len(docs)) for t, docs in term_index_local.items()])
+        max_frequency = max(t[1] for t in term_frequency)
+        logging.info(f'Most frequent term appears in {max_frequency} documents')
+        upper_bound = max_frequency * TERM_FREQUENCY_UPPER_BOUND
+        lower_bound = max_frequency * TERM_FREQUENCY_LOWER_BOUND
+        logging.info(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
+        terms_to_keep = set()
+        lower_bound_hurt, upper_bound_hurt = 0, 0
+        for term, frequency in term_frequency:
+            if lower_bound > frequency:
+                lower_bound_hurt += 1
+                continue
+            if upper_bound < frequency:
+                upper_bound_hurt += 1
+                continue
+            terms_to_keep.add(term)
+        logging.info(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
+                     f'and {upper_bound_hurt} more than {upper_bound}')
+        logging.info(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
+        logging.info('Computing final index...')
+        for term, docs in term_index_local.items():
+            if term in terms_to_keep:
+                self.term_index[term] = docs
+
+        logging.info(f'Term index with {len(self.term_index)} keys created')
+
     def create_data_graph(self):
         session = SessionExtended.get()
-        self.__create_graph_index(session)
+        self.__create_term_index(session)
         self.__create_entity_index(session)
+        self.__create_graph_index(session)
 
 
 class SchemaGraph:
