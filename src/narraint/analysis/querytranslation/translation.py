@@ -20,11 +20,9 @@ from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
-from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
-from narrant.entity.entity import Entity
 from narrant.entity.meshontology import MeSHOntology
 
 QUERY_1 = "Metformin Diabetes"
@@ -54,6 +52,23 @@ def get_document_ids_from_provenance_mappings(provenance_mapping):
 
 def get_key_for_entity(entity_id: str, entity_type: str) -> str:
     return f'{entity_type}_{entity_id}'
+
+
+class Query:
+
+    def __init__(self):
+        self.terms = set()
+        self.entities = set()
+        self.statements = set()
+
+    def add_term(self, term):
+        self.terms.add(term)
+
+    def add_entity(self, entity_id):
+        self.entities.add(entity_id)
+
+    def add_statement(self, subject_id, relation, object_id):
+        self.statements.add((subject_id, relation, object_id))
 
 
 class DataGraph:
@@ -237,6 +252,30 @@ class DataGraph:
         self.__create_entity_index(session)
         self.__create_graph_index(session)
         self.__create_term_index(session)
+
+    def compute_query(self, query: Query):
+        document_ids = set()
+        for idx, (s, p, o) in enumerate(query.statements):
+            # for the first element, set all document ids as current set
+            if idx == 0:
+                document_ids = self.get_document_ids_for_statement(subject_id=s, relation=p, object_id=o)
+            else:
+                document_ids.intersection_update(
+                    self.get_document_ids_for_statement(subject_id=s, relation=p, object_id=o))
+            if len(document_ids) == 0:
+                return set()
+
+        for entity_id in query.entities:
+            document_ids.intersection_update(self.get_document_ids_for_entity(entity_id=entity_id))
+            if len(document_ids) == 0:
+                return set()
+
+        for term in query.terms:
+            document_ids.intersection_update(self.get_document_ids_for_term(term=term))
+            if len(document_ids) == 0:
+                return set()
+
+        return document_ids
 
 
 class SchemaGraph:
