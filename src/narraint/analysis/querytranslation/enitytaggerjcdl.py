@@ -2,23 +2,19 @@ import gzip
 import logging
 import os.path
 import pickle
-import string
 from collections import defaultdict
-from datetime import datetime
 from itertools import islice
 
-import datrie
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
-from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
 from narraint.config import TMP_DIR
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
-from narrant.preprocessing.enttypes import DISEASE
+from narrant.preprocessing.enttypes import DISEASE, ALL, PLANT_FAMILY_GENUS, GENE, TARGET
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
@@ -80,6 +76,16 @@ class EntityTaggerJCDL:
         resolver = EntityResolver.instance()
         for e_term, e_id in resolver.species.get_reverse_index().items():
             self._add_term_to_index(e_term, e_id)
+
+        # add all entity types
+        for entity_type in ALL:
+            self._add_term_to_index(entity_type, entity_type)
+        # add special rules
+        self._add_term_to_index(TARGET, GENE)
+        self._add_term_to_index("PlantGenus", PLANT_FAMILY_GENUS)
+        self._add_term_to_index("Plant Genus", PLANT_FAMILY_GENUS)
+        self._add_term_to_index("PlantGenera", PLANT_FAMILY_GENUS)
+        self._add_term_to_index("Plant Genera", PLANT_FAMILY_GENUS)
 
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
