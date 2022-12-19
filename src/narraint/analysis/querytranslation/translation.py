@@ -15,6 +15,7 @@ from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_c
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.progress import Progress
+from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document
@@ -86,7 +87,7 @@ class DataGraph:
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
-      #      logging.info(f'Expanded {entity_id} by {entities}')
+        #      logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
@@ -163,9 +164,9 @@ class DataGraph:
         q_stmt = q_stmt.yield_per(1000000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
+            document_ids = ast.literal_eval(r.document_ids)
             for entity in self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.entity_id,
                                                                               entity_type=r.entity_type):
-                document_ids = ast.literal_eval(r.document_ids)
                 if entity not in self.entity_index:
                     self.entity_index[entity] = set()
                 self.entity_index[entity].update(document_ids)
@@ -270,7 +271,7 @@ class QueryTranslationToGraph:
 
     def __init__(self):
         logging.info('Init query translation...')
-        self.tagger = EntityTagger.instance()
+        self.tagger = EntityTaggerJCDL.instance()
         self.schema_graph: SchemaGraph = SchemaGraph()
         self.data_graph: DataGraph = DataGraph()
         self.__load_data_graph()
@@ -331,7 +332,7 @@ class QueryTranslationToGraph:
                 current_part = ' '.join([k for k in keywords_remaining[:i]])
                 # logging.debug(f'Checking query part: {current_part}')
                 try:
-                    entities_in_part = self.tagger.tag_entity(current_part)
+                    entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=False)
                     if current_part in term2entities:
                         raise ValueError(
                             f'Current string {current_part} was already mapped before (duplicated keyword?)')
@@ -364,59 +365,25 @@ class QueryTranslationToGraph:
         logging.debug('--' * 60)
         return term2entities
 
-    def __unify_entity_types_in_entity_set(self, entity_set: Set[Entity]):
-        e_types = list(set([e.entity_type for e in entity_set]))
-        # only a single entity type - easy
-        if len(e_types) == 1:
-            return e_types
-        # What if the same entity id refers to multiple types? Can we resolve it?
-        type2id = {}
-        for t in e_types:
-            type2id[t] = {e.entity_id for e in entity_set if e.entity_type == t}
-
-        # If the length of entity ids is equal between all types, the entities must share the same type
-        # In that case both entity types are ok
-        if False not in [type2id[e_types[0]] == type2id[e_types[i]] for i in range(1, len(e_types))]:
-            # They agree easy
-            return e_types
-
-        # They do not agree
-        # Return the entity type that has the most found entities
-        return list([sorted([(t, len(v)) for t, v in type2id.items()], reverse=True, key=lambda x: x[1])[0][0]])
-
     def translate_keyword_query(self, keyword_query) -> GraphQuery:
         keyword_query = keyword_query.lower().strip()
         keywords = keyword_query.split(' ')
         term2predicates = self.__greedy_find_predicates_in_keywords(keywords)
         term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
         term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
-        term2entity_types = {k: self.__unify_entity_types_in_entity_set(v) for k, v in term2entities.items()}
-        logging.info('Unified Term2EntityType mapping: ')
-        for k, v in term2entity_types.items():
-            logging.info(f'    {k} -> {v}')
 
         possible_relations = list()
-        for idx, (term1, et1list) in enumerate(term2entity_types.items()):
-            for idx2, (term2, et2list) in enumerate(term2entity_types.items()):
-                if idx == idx2:
-                    continue
-                subject_ids = {s.entity_id for s in term2entities[term1]}
-                object_ids = {o.entity_id for o in term2entities[term2]}
+        subject_ids = {s for s in term2entities.values()}
+        object_ids = {o for o in term2entities.values()}
 
-                for et1 in et1list:
-                    for et2 in et2list:
-                        allowed_relations = self.schema_graph.find_possible_relations_for_entity_types(et1, et2)
-                        logging.info(f'Possible relations between "{et1}" and "{et2}" are: "{allowed_relations}"')
-                        for relation in allowed_relations:
-                            document_ids = self.data_graph.get_document_ids_for_statements(
-                                subject_ids=subject_ids,
-                                subject_types=[et1],
-                                relation=relation,
-                                object_ids=object_ids,
-                                object_types=[et2])
-                            logging.info(
-                                f'{len(document_ids)} support: {et1} x {relation} x {et2} '
-                                f'({subject_ids} x {relation} x {object_ids})')
+        for subject_id in subject_ids:
+            for object_id in object_ids:
+                for relation in self.schema_graph.relation_dict:
+                    document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
+                                                                                  relation=relation,
+                                                                                  object_id=object_id)
+                    logging.info(f'{len(document_ids)} support: {subject_ids} x {relation} x {object_id}')
+                    possible_relations.append((len(document_ids), subject_id, relation, object_id))
         return GraphQuery()
 
 
