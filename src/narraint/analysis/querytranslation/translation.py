@@ -86,7 +86,7 @@ class DataGraph:
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
-            logging.info(f'Expanded {entity_id} by {entities}')
+      #      logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
