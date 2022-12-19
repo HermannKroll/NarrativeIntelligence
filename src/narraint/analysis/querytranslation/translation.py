@@ -72,7 +72,7 @@ class DataGraph:
             mesh_desc = entity_id.replace('MESH:', '')
             for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
                 entities.add(f'MESH:{super_entity}')
-            #logging.info(f'Expanded {entity_id} by {entities}')
+            # logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_entity(self, entity_id, entity_type):
@@ -159,9 +159,6 @@ class DataGraph:
                             self.__add_statement_to_index(subject_id=obj, relation=expanded_relation,
                                                           object_id=subj, document_ids=document_ids)
 
-            if i > 1000:
-                break
-
         progress.done()
         logging.info(f'Graph index with {len(self.graph_index)} keys created')
 
@@ -181,9 +178,6 @@ class DataGraph:
                 if entity not in self.entity_index:
                     self.entity_index[entity] = set()
                 self.entity_index[entity].update(document_ids)
-
-            if i > 1000:
-                break
 
         progress.done()
         logging.info(f'Entity index with {len(self.entity_index)} keys created')
@@ -209,9 +203,6 @@ class DataGraph:
                 if term not in term_index_local:
                     term_index_local[term] = set()
                 term_index_local[term].add(doc.id)
-
-            if i > 1000:
-                break
 
         progress.done()
         logging.info('Computing how often each term was found')
