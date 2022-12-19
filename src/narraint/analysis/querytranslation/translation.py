@@ -91,12 +91,20 @@ class DataGraph:
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
+        if term not in self.term_index:
+            return set()
         return self.term_index[term]
 
     def get_document_ids_for_entity(self, entity_id) -> Set[int]:
+        if entity_id not in self.entity_index:
+            return set()
         return self.entity_index[entity_id]
 
     def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
+        if (subject_id, object_id) not in self.graph_index:
+            return set()
+        if relation not in self.graph_index[(subject_id, object_id)]:
+            return set()
         return self.graph_index[(subject_id, object_id)][relation]
 
     def dump_data_graph(self, file):
