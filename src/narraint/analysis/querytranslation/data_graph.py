@@ -81,12 +81,12 @@ class DataGraph:
             mesh_desc = entity_id.replace('MESH:', '')
             for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
                 entities.add(f'MESH:{super_entity}')
-            # print(f'Expanded {entity_id} by {entities}')
+            # logging.info(f'Expanded {entity_id} by {entities}')
         # Chembl Drugs
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
-        #      print(f'Expanded {entity_id} by {entities}')
+        #      logging.info(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
@@ -120,24 +120,19 @@ class DataGraph:
         return set()
 
     def __add_statement_to_index(self, subject_id, relation, object_id, document_ids):
-        key = (subject_id, object_id)
+        key = (subject_id, relation, object_id)
         if key not in self.graph_index:
-            self.graph_index[key] = {}
-        if relation not in self.graph_index[key]:
-            self.graph_index[key][relation] = set()
-        self.graph_index[key][relation].update(document_ids)
+            self.graph_index[key] = set()
+        self.graph_index[key].update(document_ids)
 
     def __create_graph_index(self, session):
-        print('Creating graph index...')
+        logging.info('Creating graph index...')
         # iterate over all extracted statements
         total = session.query(PredicationInvertedIndex).count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         q_stmt = session.query(PredicationInvertedIndex).yield_per(1000000)
         for i, r in enumerate(q_stmt):
-            if i > 10000:
-                break
-
             progress.print_progress(i)
             subjects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.subject_id,
                                                                            entity_type=r.subject_type)
@@ -175,10 +170,10 @@ class DataGraph:
                                                           object_id=subj, document_ids=document_ids)
 
         progress.done()
-        print(f'Graph index with {len(self.graph_index)} keys created')
+        logging.info(f'Graph index with {len(self.graph_index)} keys created')
 
     def __create_entity_index(self, session):
-        print('Creating entity index...')
+        logging.info('Creating entity index...')
         # iterate over all extracted statements
         total = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
@@ -194,14 +189,11 @@ class DataGraph:
                     self.entity_index[entity] = set()
                 self.entity_index[entity].update(document_ids)
 
-            if i > 10000:
-                break
-
         progress.done()
-        print(f'Entity index with {len(self.entity_index)} keys created')
+        logging.info(f'Entity index with {len(self.entity_index)} keys created')
 
     def __create_term_index(self, session):
-        print('Creating term index...')
+        logging.info('Creating term index...')
         # iterate over all extracted statements
         total = session.query(Document).filter(Document.collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
@@ -222,17 +214,14 @@ class DataGraph:
                     term_index_local[term] = set()
                 term_index_local[term].add(doc.id)
 
-            if i > 10000:
-                break
-
         progress.done()
-        print('Computing how often each term was found')
+        logging.info('Computing how often each term was found')
         term_frequency = list([(t, len(docs)) for t, docs in term_index_local.items()])
         max_frequency = max(t[1] for t in term_frequency)
-        print(f'Most frequent term appears in {max_frequency} documents')
+        logging.info(f'Most frequent term appears in {max_frequency} documents')
         upper_bound = max_frequency * TERM_FREQUENCY_UPPER_BOUND
         lower_bound = max_frequency * TERM_FREQUENCY_LOWER_BOUND
-        print(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
+        logging.info(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
         terms_to_keep = set()
         lower_bound_hurt, upper_bound_hurt = 0, 0
         for term, frequency in term_frequency:
@@ -243,15 +232,15 @@ class DataGraph:
                 upper_bound_hurt += 1
                 continue
             terms_to_keep.add(term)
-        print(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
+        logging.info(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
               f'and {upper_bound_hurt} more than {upper_bound}')
-        print(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
-        print('Computing final index...')
+        logging.info(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
+        logging.info('Computing final index...')
         for term, docs in term_index_local.items():
             if term in terms_to_keep:
                 self.term_index[term] = docs
 
-        print(f'Term index with {len(self.term_index)} keys created')
+        logging.info(f'Term index with {len(self.term_index)} keys created')
 
     def create_data_graph(self):
         logging.info('Creating data graph...')
@@ -281,20 +270,22 @@ class DataGraph:
         session.commit()
 
         logging.info('Storing inverted term index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=json.dumps(docs))
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=json.dumps(list(docs)))
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
         logging.info('Storing inverted entity index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(entity_id=e, document_ids=json.dumps(docs))
-                                                                      for e, docs in self.entity_index.items()],
-                                                            check_constraints=False)
+        JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
+                                                              [dict(entity_id=e, document_ids=json.dumps(list(docs)))
+                                                               for e, docs in self.entity_index.items()],
+                                                              check_constraints=False)
         logging.info('Storing inverted statement index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
-                                                                           relation=p,
-                                                                           object_id=o,
-                                                                           document_ids=json.dumps(docs))
-                                                                      for (s, p, o), docs in self.entity_index.items()],
-                                                            check_constraints=False)
+        JCDLInvertedStatementIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
+                                                                                relation=p,
+                                                                                object_id=o,
+                                                                                document_ids=json.dumps(list(docs)))
+                                                                           for (s, p, o), docs in
+                                                                           self.graph_index.items()],
+                                                                 check_constraints=False)
         logging.info('Finished')
 
     def compute_query(self, query: Query):
