@@ -96,9 +96,9 @@ def compute_inverted_index_for_tags(predication_id_min: int = None):
         if entity_type == GENE:
             gene_ids = set()
             if ';' in entity_id:
-                for g_id in entity_id.s_id.split(';'):
+                for g_id in entity_id.split(';'):
                     try:
-                        gene_ids.update(generesolver.gene_id_to_symbol(g_id).lower())
+                        gene_ids.update(generesolver.gene_id_to_symbol(g_id.strip()).lower())
                     except (KeyError, ValueError):
                         continue
             else:
