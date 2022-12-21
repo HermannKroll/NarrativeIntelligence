@@ -83,29 +83,12 @@ class SchemaGraph:
 
 class QueryTranslationToGraph:
 
-    def __init__(self):
-        logging.info('Init query translation...')
+    def __init__(self, data_graph: DataGraph, schema_graph: SchemaGraph):
+        print('Init query translation...')
         self.tagger = EntityTaggerJCDL.instance()
-        self.schema_graph: SchemaGraph = SchemaGraph()
-        self.data_graph: DataGraph = DataGraph()
-        self.__load_data_graph()
-        logging.info('Query translation ready')
-
-    def __load_data_graph(self):
-        if os.path.isfile(DATA_GRAPH_CACHE):
-            logging.info(f'Loading data graph from cache: {DATA_GRAPH_CACHE}')
-            with open(DATA_GRAPH_CACHE, 'rb') as f:
-                self.data_graph.load_data_graph(f)
-        else:
-            logging.info('Creating data graph...')
-            self.__create_data_graph()
-            logging.info(f'Storing data graph to cache: {DATA_GRAPH_CACHE}')
-            with open(DATA_GRAPH_CACHE, 'wb') as f:
-                self.data_graph.dump_data_graph(f)
-
-    def __create_data_graph(self):
-        self.data_graph = DataGraph()
-        self.data_graph.create_data_graph()
+        self.schema_graph: SchemaGraph = schema_graph
+        self.data_graph: DataGraph = data_graph
+        print('Query translation ready')
 
     def __greedy_find_dict_entries_in_keywords(self, keywords, lookup_dict):
         term2dictentries = {}
@@ -121,16 +104,16 @@ class QueryTranslationToGraph:
 
     def __greedy_find_predicates_in_keywords(self, keywords):
         term2predicates = self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.relation_dict)
-        logging.info('Term2predicate mapping: ')
+        print('Term2predicate mapping: ')
         for k, v in term2predicates.items():
-            logging.info(f'    {k} -> {v}')
+            print(f'    {k} -> {v}')
         return term2predicates
 
     def __greedy_find_entity_types_variables_in_keywords(self, keywords):
         term2variables = self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.entity_types)
-        logging.info('Term2EntityTypeVariable mapping: ')
+        print('Term2EntityTypeVariable mapping: ')
         for k, v in term2variables.items():
-            logging.info(f'    {k} -> {v}')
+            print(f'    {k} -> {v}')
         return term2variables
 
     def __greedy_find_entities_in_keywords(self, keywords):
@@ -171,9 +154,9 @@ class QueryTranslationToGraph:
         terms_mapped = ' '.join([t[0] for t in term2entities])
         logging.debug(f'Found entities in part: {terms_mapped}')
         logging.debug(f'Cannot find entities in part: {keywords_not_mapped}')
-        logging.info('Term2Entity mapping: ')
+        print('Term2Entity mapping: ')
         for k, v in term2entities.items():
-            logging.info(f'    {k} -> {v}')
+            print(f'    {k} -> {v}')
 
         logging.debug('--' * 60)
         logging.debug('--' * 60)
@@ -186,18 +169,43 @@ class QueryTranslationToGraph:
         term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
         term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
 
+        print(term2entities)
         possible_relations = list()
-        subject_ids = {s for s in term2entities.values()}
-        object_ids = {o for o in term2entities.values()}
 
-        for subject_id in subject_ids:
-            for object_id in object_ids:
-                for relation in self.schema_graph.relation_dict:
-                    document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
-                                                                                  relation=relation,
-                                                                                  object_id=object_id)
-                    logging.info(f'{len(document_ids)} support: {subject_ids} x {relation} x {object_id}')
-                    possible_relations.append((len(document_ids), subject_id, relation, object_id))
+        print('--' * 60)
+        print('Term support')
+        print('--' * 60)
+        for term in keywords:
+            document_ids = self.data_graph.get_document_ids_for_term(term=term)
+            print(f'{len(document_ids)} support: {term}')
+
+        print('--' * 60)
+        print('Entity support')
+        print('--' * 60)
+        for term, entities in term2entities.items():
+            for entity in entities:
+                document_ids = self.data_graph.get_document_ids_for_entity(entity_id=entity)
+                print(f'{len(document_ids)} support: {term} ---> {entity}')
+
+        print('--' * 60)
+        print('Statement support')
+        print('--' * 60)
+        for term1 in term2entities:
+            for term2 in term2entities:
+                if term1 == term2:
+                    continue
+                subject_ids = term2entities[term1]
+                object_ids = term2entities[term2]
+
+                for subject_id in subject_ids:
+                    for object_id in object_ids:
+                        for relation in self.schema_graph.relation_dict:
+                            document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
+                                                                                          relation=relation,
+                                                                                          object_id=object_id)
+                            if len(document_ids) > 0:
+                                print(f'{len(document_ids)} support: {subject_id} x {relation} x {object_id}')
+                                possible_relations.append((len(document_ids), subject_id, relation, object_id))
         return GraphQuery()
 
 
