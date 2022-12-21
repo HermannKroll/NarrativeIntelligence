@@ -201,6 +201,27 @@ class EntityKeywords(Extended, DatabaseTable):
 
     @staticmethod
     def insert_entity_keyword_data(session, entity_id: str, entity_type: str, keyword_data: str):
-        insert_stmt = insert(EntityKeywords).values(entity_id=entity_id, entity_type=entity_type, keyword_data=keyword_data)
+        insert_stmt = insert(EntityKeywords).values(entity_id=entity_id, entity_type=entity_type,
+                                                    keyword_data=keyword_data)
         session.execute(insert_stmt)
         session.commit()
+
+
+class JCDLInvertedTermIndex(Extended, DatabaseTable):
+    __tablename__ = "jcdl_inverted_term_index"
+    term = Column(String, primary_key=True)
+    document_ids = Column(String, nullable=False)
+
+
+class JCDLInvertedEntityIndex(Extended, DatabaseTable):
+    __tablename__ = "jcdl_inverted_entity_index"
+    entity_id = Column(String, primary_key=True)
+    document_ids = Column(String, nullable=False)
+
+
+class JCDLInvertedStatementIndex(Extended, DatabaseTable):
+    __tablename__ = "jcdl_inverted_statement_index"
+    subject_id = Column(String, primary_key=True)
+    relation = Column(String, primary_key=True)
+    object_id = Column(String, primary_key=True)
+    document_ids = Column(String, nullable=False)

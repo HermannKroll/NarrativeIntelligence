@@ -10,6 +10,7 @@ from copy import copy
 from typing import Set, List
 
 import nltk
+from sqlalchemy import delete
 
 from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
@@ -18,7 +19,8 @@ from kgextractiontoolbox.progress import Progress
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document
+from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document, JCDLInvertedTermIndex, \
+    JCDLInvertedEntityIndex, JCDLInvertedStatementIndex
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.queryengine.query import GraphQuery
@@ -33,10 +35,10 @@ QUERY_5 = "Simvastatin Rhabdomyolysis Target"
 QUERIES = [QUERY_1, QUERY_2, QUERY_3, QUERY_4, QUERY_5]
 
 TERM_FREQUENCY_UPPER_BOUND = 0.99
-TERM_FREQUENCY_LOWER_BOUND = 0.001
+TERM_FREQUENCY_LOWER_BOUND = 0
 TERM_MIN_LENGTH = 3
 
-DATA_GRAPH_CACHE = "/home/kroll/jcdl2023_datagraph.pkl"
+DATA_GRAPH_CACHE = "/home/kroll/jcdl2023_datagraph_improved.pkl"
 
 
 # nltk.download('stopwords')
@@ -71,12 +73,41 @@ class Query:
         self.statements.add((subject_id, relation, object_id))
 
 
-class DataGraph:
+def get_document_ids_from_provenance_mappings(provenance_mapping):
+    if 'PubMed' in provenance_mapping:
+        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
+        return document_ids
+    else:
+        return {}
+
+
+def get_key_for_entity(entity_id: str, entity_type: str) -> str:
+    return f'{entity_type}_{entity_id}'
+
+
+class Query:
 
     def __init__(self):
-        self.graph_index = {}
-        self.entity_index = {}
-        self.term_index = {}
+        self.terms = set()
+        self.entities = set()
+        self.statements = set()
+
+    def add_term(self, term):
+        self.terms.add(term)
+
+    def add_entity(self, entity_id):
+        self.entities.add(entity_id)
+
+    def add_statement(self, subject_id, relation, object_id):
+        self.statements.add((subject_id, relation, object_id))
+
+
+class DataGraph:
+
+    def __init__(self, graph_index={}, entity_index={}, term_index={}):
+        self.graph_index = graph_index
+        self.entity_index = entity_index
+        self.term_index = term_index
         self.mesh_ontology = None
         self.atc_tree = None
 
@@ -97,40 +128,43 @@ class DataGraph:
             mesh_desc = entity_id.replace('MESH:', '')
             for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
                 entities.add(f'MESH:{super_entity}')
-            # logging.info(f'Expanded {entity_id} by {entities}')
+            # print(f'Expanded {entity_id} by {entities}')
         # Chembl Drugs
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
-        #      logging.info(f'Expanded {entity_id} by {entities}')
+        #      print(f'Expanded {entity_id} by {entities}')
         return entities
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
-        if term not in self.term_index:
-            return set()
-        return self.term_index[term]
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term)
+        # if we have a result
+        for r in q:
+            return ast.literal_eval(r[0])
+        # otherwise empty set
+        return set()
 
     def get_document_ids_for_entity(self, entity_id) -> Set[int]:
-        if entity_id not in self.entity_index:
-            return set()
-        return self.entity_index[entity_id]
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedEntityIndex.document_ids).filter(JCDLInvertedEntityIndex.entity_id == entity_id)
+        # if we have a result
+        for r in q:
+            return ast.literal_eval(r[0])
+        # otherwise empty set
+        return set()
 
     def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
-        if (subject_id, object_id) not in self.graph_index:
-            return set()
-        if relation not in self.graph_index[(subject_id, object_id)]:
-            return set()
-        return self.graph_index[(subject_id, object_id)][relation]
-
-    def dump_data_graph(self, file):
-        obj_dump = (self.graph_index, self.entity_index, self.term_index)
-        pickle.dump(obj_dump, file)
-
-    def load_data_graph(self, file):
-        self.graph_index, self.entity_index, self.term_index = pickle.load(file)
-        logging.info(f'Terms index with {len(self.term_index)} keys loaded')
-        logging.info(f'Graph index with {len(self.graph_index)} keys loaded')
-        logging.info(f'Entity index with {len(self.entity_index)} keys loaded')
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedStatementIndex.document_ids)
+        q = q.filter(JCDLInvertedStatementIndex.subject_id == subject_id)
+        q = q.filter(JCDLInvertedStatementIndex.relation == relation)
+        q = q.filter(JCDLInvertedStatementIndex.object_id == object_id)
+        # if we have a result
+        for r in q:
+            return ast.literal_eval(r[0])
+        # otherwise empty set
+        return set()
 
     def __add_statement_to_index(self, subject_id, relation, object_id, document_ids):
         key = (subject_id, object_id)
@@ -141,13 +175,16 @@ class DataGraph:
         self.graph_index[key][relation].update(document_ids)
 
     def __create_graph_index(self, session):
-        logging.info('Creating graph index...')
+        print('Creating graph index...')
         # iterate over all extracted statements
         total = session.query(PredicationInvertedIndex).count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         q_stmt = session.query(PredicationInvertedIndex).yield_per(1000000)
         for i, r in enumerate(q_stmt):
+            if i > 10000:
+                break
+
             progress.print_progress(i)
             subjects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.subject_id,
                                                                            entity_type=r.subject_type)
@@ -160,10 +197,20 @@ class DataGraph:
             for subj, obj in itertools.product(subjects, objects):
                 self.__add_statement_to_index(subject_id=subj, relation=relation,
                                               object_id=obj, document_ids=document_ids)
+
+                # always add associated
+                if relation != "associated":
+                    self.__add_statement_to_index(subject_id=subj, relation="associated",
+                                                  object_id=obj, document_ids=document_ids)
                 # Swap subject and object im predicate is a symmetric one
                 if relation in SYMMETRIC_PREDICATES:
                     self.__add_statement_to_index(subject_id=obj, relation=relation,
                                                   object_id=subj, document_ids=document_ids)
+
+                    # always add associated
+                    if relation != "associated":
+                        self.__add_statement_to_index(subject_id=subj, relation="associated",
+                                                      object_id=obj, document_ids=document_ids)
                 if relation in PREDICATE_EXPANSION:
                     for expanded_relation in PREDICATE_EXPANSION[relation]:
                         # Expand statement to all of its relations
@@ -175,10 +222,10 @@ class DataGraph:
                                                           object_id=subj, document_ids=document_ids)
 
         progress.done()
-        logging.info(f'Graph index with {len(self.graph_index)} keys created')
+        print(f'Graph index with {len(self.graph_index)} keys created')
 
     def __create_entity_index(self, session):
-        logging.info('Creating entity index...')
+        print('Creating entity index...')
         # iterate over all extracted statements
         total = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
@@ -194,11 +241,14 @@ class DataGraph:
                     self.entity_index[entity] = set()
                 self.entity_index[entity].update(document_ids)
 
+            if i > 10000:
+                break
+
         progress.done()
-        logging.info(f'Entity index with {len(self.entity_index)} keys created')
+        print(f'Entity index with {len(self.entity_index)} keys created')
 
     def __create_term_index(self, session):
-        logging.info('Creating term index...')
+        print('Creating term index...')
         # iterate over all extracted statements
         total = session.query(Document).filter(Document.collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
@@ -219,14 +269,17 @@ class DataGraph:
                     term_index_local[term] = set()
                 term_index_local[term].add(doc.id)
 
+            if i > 10000:
+                break
+
         progress.done()
-        logging.info('Computing how often each term was found')
+        print('Computing how often each term was found')
         term_frequency = list([(t, len(docs)) for t, docs in term_index_local.items()])
         max_frequency = max(t[1] for t in term_frequency)
-        logging.info(f'Most frequent term appears in {max_frequency} documents')
+        print(f'Most frequent term appears in {max_frequency} documents')
         upper_bound = max_frequency * TERM_FREQUENCY_UPPER_BOUND
         lower_bound = max_frequency * TERM_FREQUENCY_LOWER_BOUND
-        logging.info(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
+        print(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
         terms_to_keep = set()
         lower_bound_hurt, upper_bound_hurt = 0, 0
         for term, frequency in term_frequency:
@@ -237,21 +290,59 @@ class DataGraph:
                 upper_bound_hurt += 1
                 continue
             terms_to_keep.add(term)
-        logging.info(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
-                     f'and {upper_bound_hurt} more than {upper_bound}')
-        logging.info(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
-        logging.info('Computing final index...')
+        print(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
+              f'and {upper_bound_hurt} more than {upper_bound}')
+        print(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
+        print('Computing final index...')
         for term, docs in term_index_local.items():
             if term in terms_to_keep:
                 self.term_index[term] = docs
 
-        logging.info(f'Term index with {len(self.term_index)} keys created')
+        print(f'Term index with {len(self.term_index)} keys created')
 
     def create_data_graph(self):
+        logging.info('Creating data graph...')
         session = SessionExtended.get()
         self.__create_entity_index(session)
         self.__create_graph_index(session)
         self.__create_term_index(session)
+
+        logging.info('=='*60)
+        logging.info('Index summary:')
+        logging.info(f'Terms index with {len(self.term_index)} keys created')
+        logging.info(f'Graph index with {len(self.graph_index)} keys created')
+        logging.info(f'Entity index with {len(self.entity_index)} keys created')
+        self.__store_data_graph()
+
+    def __store_data_graph(self):
+        logging.info('Dumping data graph to DB...')
+        session = SessionExtended.get()
+
+        logging.info('Deleting table entries: JCDLInvertedTermIndex ...')
+        session.execute(delete(JCDLInvertedTermIndex))
+        logging.info('Deleting table entries: JCDLInvertedEntityIndex ...')
+        session.execute(delete(JCDLInvertedEntityIndex))
+        logging.info('Deleting table entries: JCDLInvertedTermIndex ...')
+        session.execute(delete(JCDLInvertedStatementIndex))
+        logging.info('Committing...')
+        session.commit()
+
+        logging.info('Storing inverted term index values...')
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=json.dumps(docs))
+                                                                      for t, docs in self.term_index.items()],
+                                                            check_constraints=False)
+        logging.info('Storing inverted entity index values...')
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(entity_id=e, document_ids=json.dumps(docs))
+                                                                      for e, docs in self.entity_index.items()],
+                                                            check_constraints=False)
+        logging.info('Storing inverted statement index values...')
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
+                                                                           relation=p,
+                                                                           object_id=o,
+                                                                           document_ids=json.dumps(docs))
+                                                                      for (s, p, o), docs in self.entity_index.items()],
+                                                            check_constraints=False)
+        logging.info('Finished')
 
     def compute_query(self, query: Query):
         document_ids = set()
@@ -439,7 +530,9 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    trans = QueryTranslationToGraph()
+    data_graph = DataGraph()
+    data_graph.create_data_graph()
+#    trans = QueryTranslationToGraph()
     exit(0)
     for q in QUERIES:
         logging.info('==' * 60)
