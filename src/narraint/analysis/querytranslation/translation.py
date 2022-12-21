@@ -214,7 +214,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    trans = QueryTranslationToGraph()
+    trans = QueryTranslationToGraph(data_graph=DataGraph(), schema_graph=SchemaGraph())
     for q in QUERIES:
         logging.info('==' * 60)
         logging.info(f'Translating query: "{q}"')
