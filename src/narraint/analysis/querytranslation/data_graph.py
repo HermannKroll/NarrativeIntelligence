@@ -207,13 +207,13 @@ class DataGraph:
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         stopwords = set(nltk.corpus.stopwords.words('english'))
-        translator = str.maketrans('', '', string.punctuation)
+        trans_map = {p: ' ' for p in string.punctuation}
+        translator = str.maketrans(trans_map)
         term_index_local = {}
         for i, doc in enumerate(iterate_over_all_documents_in_collection(session=session, collection='PubMed')):
             progress.print_progress(i)
-            # Make it lower + replace '-' by a space + remove all punctuation
+            # Make it lower + replace all punctuation by ' '
             doc_text = doc.get_text_content().strip().lower()
-            doc_text = doc_text.replace('-', ' ')
             doc_text = doc_text.translate(translator)
             for term in doc_text.split(' '):
                 if not term.strip() or len(term) <= TERM_MIN_LENGTH or term in stopwords:
