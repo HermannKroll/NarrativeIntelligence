@@ -531,6 +531,8 @@ def get_query(request):
         else:
             year_sort_desc = True
 
+        # Todo: integrate two optional parameters -> year_start and year_end
+
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
         logging.info("Selected data source is {}".format(data_source))
@@ -565,6 +567,17 @@ def get_query(request):
             opt_query = QueryOptimizer.optimize_query(graph_query)
             View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
                                                          query, opt_query)
+
+            # Todo: If year start or year end is set
+            # Then filter result list if year in between
+            # results = list([r for r in results if year_start <= r.publication_year <= year_end])
+
+            # Todo: Iterate over all results and count how many documents appeared in which year
+            # Just access QueryDocumentResult (r.publication_year)
+            # Maybe check if year > 0
+            # year_aggregation
+            # Output: {1992: 10, 1993: 100, ... }
+
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultTreeAggregationBySubstitution()
@@ -581,6 +594,9 @@ def get_query(request):
 
         View.instance().query_logger.write_api_call(True, "get_query", str(request),
                                                     time_needed=datetime.now() - time_start)
+
+        # Todo: Send date dictionary as an additional result back
+        # key = year_aggregation
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
@@ -589,6 +605,7 @@ def get_query(request):
         View.instance().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
+        # Todo: Case of failure -> send empty year_aggregation
         return JsonResponse(
             dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
 
