@@ -172,7 +172,7 @@ class DataGraph:
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         q_stmt = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed')
-        q_stmt = q_stmt.yield_per(1000000)
+        q_stmt = q_stmt.yield_per(10000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
             document_ids = ast.literal_eval(r.document_ids)
