@@ -1075,7 +1075,8 @@ class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
 
 
-
+class TeamView(TemplateView):
+    template_name = "ui/team.html"
 
 
 class LogsView(TemplateView):
