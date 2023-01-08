@@ -1,4 +1,5 @@
 let latest_valid_query = '';
+let latest_query_translation = '';
 let DEFAULT_RESULT_DIVS_LIMIT = 500;
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
@@ -594,6 +595,11 @@ function initFromURLQueryParams() {
         lastQuery = query;
         example_search(query);
     }
+
+    if (params.has("year_start") && params.has("year_end")) {
+        document.querySelector('#fromSlider').value = params.get("year_start");
+        document.querySelector('#toSlider').value = params.get("year_end");
+    }
 }
 
 let currentMaxPage = 0;
@@ -662,6 +668,17 @@ const search = (event) => {
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
 
+    let fromSlider = document.querySelector("#fromSlider");
+    let toSlider = document.querySelector("#toSlider");
+    let year_start;
+    let year_end;
+    if (fromSlider.value != 50) {
+        year_start = fromSlider.value;
+    }
+    if (toSlider.value != 50) {
+        year_end = toSlider.value;
+    }
+
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
     console.log("Outer Ranking: " + outer_ranking)
@@ -670,6 +687,8 @@ const search = (event) => {
     console.log("Sorting by year (desc): " + year_sort_desc)
     console.log("Start position: " + start_pos)
     console.log("End position: " + end_pos)
+    console.log("Start year: " + year_start)
+    console.log("End year: " + year_end)
     setButtonSearching(true);
 
     const url = new URL(window.location.href);
@@ -680,6 +699,8 @@ const search = (event) => {
     url.searchParams.set("sort_year_desc", year_sort_desc);
     url.searchParams.set("start_pos", start_pos);
     //   url.searchParams.set("end_pos", end_pos);
+    url.searchParams.set("year_start", year_start);
+    url.searchParams.set("year_end", year_end);
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
     let request = $.ajax({
@@ -692,6 +713,8 @@ const search = (event) => {
             year_sort: year_sort_desc,
             start_pos: start_pos,
             end_pos: end_pos,
+            year_start: year_start,
+            year_end: year_end,
             /*,
             inner_ranking: inner_ranking*/
         }
@@ -759,6 +782,55 @@ const search = (event) => {
                     $('#modal_empty_result').modal("toggle");
                 }
             }
+
+            let year_aggregation = response["year_aggregation"];
+            const fromSlider = document.querySelector('#fromSlider');
+            const toSlider = document.querySelector('#toSlider');
+            let xValues = new Array();
+            let yValues = new Array();
+            for (const year in year_aggregation) {
+                xValues.push(year);
+                yValues.push(year_aggregation[year]);
+            }
+            if (latest_query_translation != query_trans_string) {
+                initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+                initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+            }
+            latest_query_translation = query_trans_string;
+            fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+            setToggleAccessible(toSlider, toSlider.min);
+            setValue(toSlider, 'rangeTo');
+            setValue(fromSlider, 'rangeFrom');
+            let barChart = new Chart("myChart", {
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: [],
+                        hoverBackgroundColor: '#0242b0',
+                        data: yValues,
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            display: false
+                            //gridLines: {
+                            //  display:false
+                            //}
+                        }],
+                        yAxes: [{
+                            display: false //this will remove all the x-axis grid lines
+                        }]
+                    },
+                    legend: {display: false},
+                }
+            });
+            updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+            fromSlider.oninput = () => controlFromSlider(barChart, fromSlider, toSlider);
+            toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
+            fromSlider.onchange = () => refreshSearch();
+            toSlider.onchange = () => refreshSearch();
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
@@ -1482,4 +1554,89 @@ function getVariableData() {
 
 function buildSelectionTrees() {
     queryAndBuildConceptTree();
+}
+
+function controlFromSlider(barChart, fromSlider, toSlider) {
+  const [from, to] = getParsed(fromSlider, toSlider);
+  fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+  if (from > to) {
+    fromSlider.value = to;
+  }
+  updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+  setValue(fromSlider, 'rangeFrom');
+}
+
+function controlToSlider(barChart, fromSlider, toSlider) {
+  const [from, to] = getParsed(fromSlider, toSlider);
+  fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+  setToggleAccessible(toSlider, toSlider.min);
+  if (from >= to) {
+    toSlider.zIndex = 1;
+    fromSlider.zIndex = 0;
+  } else {
+    toSlider.zIndex = 0;
+    fromSlider.zIndex = 1;
+  }
+  if (from <= to) {
+    toSlider.value = to;
+  } else {
+    toSlider.value = from;
+  }
+  updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+  setValue(toSlider, 'rangeTo');
+}
+
+function setValue(range, rangeValue) {
+  let rangeV = document.getElementById(rangeValue);
+  const newValue = Number((range.value - range.min) * 100 / (range.max - range.min));
+  const newPosition = 10 - (newValue * 0.2);
+  rangeV.innerHTML = `<span>${range.value}</span>`;
+  rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
+}
+
+function getParsed(currentFrom, currentTo) {
+  const from = parseInt(currentFrom.value, 10);
+  const to = parseInt(currentTo.value, 10);
+  return [from, to];
+}
+
+function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
+    const rangeDistance = to.max - to.min;
+    const fromPosition = from.value - to.min;
+    const toPosition = to.value - to.min;
+    controlSlider.style.background = `linear-gradient(
+      to right,
+      ${sliderColor} 0%,
+      ${sliderColor} ${(fromPosition)/(rangeDistance)*100}%,
+      ${rangeColor} ${((fromPosition)/(rangeDistance))*100}%,
+      ${rangeColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} 100%)`;
+}
+
+function setToggleAccessible(currentTarget, min) { //in case toSlider and fromSilder on 0 --> tSlider needs to Overlap fromSlider
+  const toSlider = document.querySelector('#toSlider');
+  if (Number(currentTarget.value) <= Number(min)) {
+    toSlider.style.zIndex = 2;
+  } else {
+    toSlider.style.zIndex = 0;
+  }
+}
+
+function updateBarChart(barChart, fromSlider, from, to) {
+    //const barChart = document.querySelector('#myChart');
+    for (let i = 0; i <= parseInt(fromSlider.max, 10) - parseInt(fromSlider.min, 10); i++) {
+        if (i >= from - parseInt(fromSlider.min, 10) && i <= to - parseInt(fromSlider.min, 10)) {
+            barChart.data.datasets[0].backgroundColor[i] = "#0d6def";
+        } else {
+            barChart.data.datasets[0].backgroundColor[i] = "#C6C6C6";
+        }
+    }
+    barChart.update();
+}
+
+function initializeValues(slider, value, min, max) {
+    slider.max = max;
+    slider.min = min;
+    slider.value = value;
 }

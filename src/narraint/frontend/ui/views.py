@@ -532,6 +532,23 @@ def get_query(request):
             year_sort_desc = True
 
         # Todo: integrate two optional parameters -> year_start and year_end
+        if "year_start" in request.GET:
+            year_start = str(request.GET.get("year_start", "").strip())
+            try:
+                year_start = int(year_start)
+            except ValueError:
+                year_start = None
+        else:
+            year_start = None
+
+        if "year_end" in request.GET:
+            year_end = str(request.GET.get("year_end", "").strip())
+            try:
+                year_end = int(year_end)
+            except ValueError:
+                year_end = None
+        else:
+            year_end = None
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
@@ -571,12 +588,28 @@ def get_query(request):
             # Todo: If year start or year end is set
             # Then filter result list if year in between
             # results = list([r for r in results if year_start <= r.publication_year <= year_end])
+            temp_results = results
+            if year_start and year_end:
+                results = list([r for r in results if year_start <= r.publication_year <= year_end])
 
             # Todo: Iterate over all results and count how many documents appeared in which year
             # Just access QueryDocumentResult (r.publication_year)
             # Maybe check if year > 0
             # year_aggregation
             # Output: {1992: 10, 1993: 100, ... }
+            year_aggregation = {}
+            for r in temp_results:
+                current_year = r.publication_year
+                if current_year > 0:
+                    if current_year in year_aggregation:
+                        year_aggregation.update({current_year: year_aggregation[current_year] + 1})
+                    else:
+                        year_aggregation.update({current_year: 1})
+            found_years = list(year_aggregation.keys())
+            found_years.sort()
+            all_years = list(range(found_years[0], found_years[-1] + 1))
+            for year in set(all_years) - set(found_years) & set(all_years):
+                year_aggregation.update({year: 0})
 
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
@@ -599,7 +632,7 @@ def get_query(request):
         # key = year_aggregation
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
-                 query_translation=query_trans_string,
+                 query_translation=query_trans_string, year_aggregation=year_aggregation,
                  query_limit_hit="False"))
     except Exception:
         View.instance().query_logger.write_api_call(False, "get_query", str(request))
@@ -607,7 +640,8 @@ def get_query(request):
         traceback.print_exc(file=sys.stdout)
         # Todo: Case of failure -> send empty year_aggregation
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                 query_limit_hit="False"))
 
 
 # invokes Django to compress the results
