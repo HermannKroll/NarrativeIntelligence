@@ -20,9 +20,10 @@ from narrant.entity.meshontology import MeSHOntology
 TERM_FREQUENCY_UPPER_BOUND = 0.99
 TERM_FREQUENCY_LOWER_BOUND = 0
 
-PUNCTUATION = string.punctuation # without - / +
-PUNCTUATION = PUNCTUATION.replace('-','')
+PUNCTUATION = string.punctuation  # without - / +
+PUNCTUATION = PUNCTUATION.replace('-', '')
 PUNCTUATION = PUNCTUATION.replace('+', '')
+
 
 def get_document_ids_from_provenance_mappings(provenance_mapping):
     if 'PubMed' in provenance_mapping:
@@ -102,9 +103,9 @@ class DataGraph:
         # if we have a result
         result = set()
         for r in q:
-            result = set(ast.literal_eval(r[0]))
+            result = ast.literal_eval(r[0])
 
-        self.__cache_term[term] = result.copy()  # we need a copy here for the cache
+        self.__cache_term[term] = result
         return result
 
     def get_document_ids_for_entity(self, entity_id) -> Set[int]:
@@ -116,9 +117,9 @@ class DataGraph:
         # if we have a result
         result = set()
         for r in q:
-            result = set(ast.literal_eval(r[0]))
+            result = ast.literal_eval(r[0])
 
-        self.__cache_entity[entity_id] = result.copy()  # we need a copy here for the cache
+        self.__cache_entity[entity_id] = result
         return result
 
     def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
@@ -134,9 +135,9 @@ class DataGraph:
         # if we have a result
         result = set()
         for r in q:
-            result = set(ast.literal_eval(r[0]))
+            result = ast.literal_eval(r[0])
 
-        self.__cache_statement[key] = result.copy()  # we need a copy here for the cache
+        self.__cache_statement[key] = result
         return result
 
     def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
@@ -316,19 +317,19 @@ class DataGraph:
         session.commit()
 
         print('Storing inverted term index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=json.dumps(list(docs)))
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=str(docs))
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
         print('Storing inverted entity index values...')
         JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
-                                                              [dict(entity_id=e, document_ids=json.dumps(list(docs)))
+                                                              [dict(entity_id=e, document_ids=str(docs))
                                                                for e, docs in self.entity_index.items()],
                                                               check_constraints=False)
         print('Storing inverted statement index values...')
         JCDLInvertedStatementIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
                                                                                 relation=p,
                                                                                 object_id=o,
-                                                                                document_ids=json.dumps(list(docs)))
+                                                                                document_ids=str(docs))
                                                                            for (s, p, o), docs in
                                                                            self.graph_index.items()],
                                                                  check_constraints=False)
