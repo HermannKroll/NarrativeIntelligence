@@ -290,29 +290,11 @@ class DataGraph:
         print(f'Term index with {len(self.term_index)} keys created')
 
     def create_data_graph(self):
-        print('Creating data graph...')
+        print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
-        self.__create_entity_index(session)
-        self.__create_graph_index(session)
         self.__create_term_index(session)
-
-        print('==' * 60)
-        print('Index summary:')
-        print(f'Terms index with {len(self.term_index)} keys created')
-        print(f'Graph index with {len(self.graph_index)} keys created')
-        print(f'Entity index with {len(self.entity_index)} keys created')
-        self.__store_data_graph()
-
-    def __store_data_graph(self):
-        print('Dumping data graph to DB...')
-        session = SessionExtended.get()
-
         print('Deleting table entries: JCDLInvertedTermIndex ...')
         session.execute(delete(JCDLInvertedTermIndex))
-        print('Deleting table entries: JCDLInvertedEntityIndex ...')
-        session.execute(delete(JCDLInvertedEntityIndex))
-        print('Deleting table entries: JCDLInvertedTermIndex ...')
-        session.execute(delete(JCDLInvertedStatementIndex))
         print('Committing...')
         session.commit()
 
@@ -320,11 +302,25 @@ class DataGraph:
         JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=str(docs))
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
+        self.term_index = {}
+
+        self.__create_entity_index(session)
+        print('Deleting table entries: JCDLInvertedEntityIndex ...')
+        session.execute(delete(JCDLInvertedEntityIndex))
+        print('Committing...')
+        session.commit()
         print('Storing inverted entity index values...')
         JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
                                                               [dict(entity_id=e, document_ids=str(docs))
                                                                for e, docs in self.entity_index.items()],
                                                               check_constraints=False)
+        self.entity_index = {}
+
+        print('Deleting table entries: JCDLInvertedTermIndex ...')
+        session.execute(delete(JCDLInvertedStatementIndex))
+        print('Committing...')
+        session.commit()
+        self.__create_graph_index(session)
         print('Storing inverted statement index values...')
         JCDLInvertedStatementIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
                                                                                 relation=p,
@@ -333,6 +329,7 @@ class DataGraph:
                                                                            for (s, p, o), docs in
                                                                            self.graph_index.items()],
                                                                  check_constraints=False)
+        self.graph_index = {}
         print('Finished')
 
     def compute_query(self, query: Query):
