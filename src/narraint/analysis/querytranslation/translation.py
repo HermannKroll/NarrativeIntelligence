@@ -16,7 +16,7 @@ from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_c
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.progress import Progress
-from narraint.analysis.querytranslation.data_graph import DataGraph
+from narraint.analysis.querytranslation.data_graph import DataGraph, PUNCTUATION, Query
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
@@ -88,6 +88,7 @@ class QueryTranslationToGraph:
         self.tagger = EntityTaggerJCDL.instance()
         self.schema_graph: SchemaGraph = schema_graph
         self.data_graph: DataGraph = data_graph
+        self.stopwords = set(nltk.corpus.stopwords.words('english'))
         print('Query translation ready')
 
     def __greedy_find_dict_entries_in_keywords(self, keywords, lookup_dict):
@@ -162,51 +163,205 @@ class QueryTranslationToGraph:
         logging.debug('--' * 60)
         return term2entities
 
-    def translate_keyword_query(self, keyword_query) -> GraphQuery:
-        keyword_query = keyword_query.lower().strip()
-        keywords = keyword_query.split(' ')
-        term2predicates = self.__greedy_find_predicates_in_keywords(keywords)
-        term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
-        term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
-
-        print(term2entities)
-        possible_relations = list()
-
-        print('--' * 60)
-        print('Term support')
-        print('--' * 60)
-        for term in keywords:
-            document_ids = self.data_graph.get_document_ids_for_term(term=term)
-            print(f'{len(document_ids)} support: {term}')
-
-        print('--' * 60)
-        print('Entity support')
-        print('--' * 60)
-        for term, entities in term2entities.items():
-            for entity in entities:
-                document_ids = self.data_graph.get_document_ids_for_entity(entity_id=entity)
-                print(f'{len(document_ids)} support: {term} ---> {entity}')
-
-        print('--' * 60)
-        print('Statement support')
-        print('--' * 60)
-        for term1 in term2entities:
-            for term2 in term2entities:
-                if term1 == term2:
+    def generate_possible_queries(self, possible_terms, possible_entities, possible_statements):
+        possible_queries = set()
+        # Compute all possibilities which entity mappings we could take, i.e.,
+        # [t1 -> e1, t2-> e2] => [[t1 -> e1, t2-> e2], [t1 -> e1], [t2 -> e2]]
+        # Bitmap: [[1, 1], [1, 0], [0, 1], [0,0]]
+        bitmap = list()
+        for i in range(len(possible_entities)):
+            bitmap.append([0, 1])
+        bitmap = list(itertools.product(*bitmap))
+        # print(bitmap)
+        # Then fill the qery with the remaining terms
+        for b_entry in bitmap:
+            query = Query()
+            terms_translated = list()
+            for idx, (_, span, entity) in enumerate(possible_entities):
+                # we should add this term 2 entity translation
+                if b_entry[idx] == 1:
+                    # The span could composed of multiple terms
+                    terms_translated.extend(span.split(' '))
+                    query.add_entity(entity)
+            # Now add all terms that are not translated
+            for _, term in possible_terms:
+                if term in terms_translated:
                     continue
-                subject_ids = term2entities[term1]
-                object_ids = term2entities[term2]
+                query.add_term(term)
 
-                for subject_id in subject_ids:
-                    for object_id in object_ids:
-                        for relation in self.schema_graph.relation_dict:
-                            document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
-                                                                                          relation=relation,
-                                                                                          object_id=object_id)
-                            if len(document_ids) > 0:
-                                print(f'{len(document_ids)} support: {subject_id} x {relation} x {object_id}')
-                                possible_relations.append((len(document_ids), subject_id, relation, object_id))
-        return GraphQuery()
+            possible_queries.add(query)
+
+        # Note: vector consisting only of 0 generates a term-based query only
+
+        # We generated all possible queries consisting of entities and term combinations
+        # Now extend these queries by adding statements between entities if possible
+        # We need to know which statements can be placed between two entities:
+        # Generate a structure like this
+        # [
+        # [(e1, r1, e2), (e1, r2, e2)],    << Possible statements between e1 and e2
+        # [(e2, r1, e3)]                   << Possible statements between e2 and e3
+        # ]
+        #
+        # Important: only place one relation between each entity pair!!
+        statement_groups = {}
+        for _, _, subject_id, relation, _, object_id in possible_statements:
+            # Ignore direction here and have an undirected key access
+            if subject_id < object_id:
+                key = (subject_id, object_id)
+            else:
+                key = (object_id, subject_id)
+
+            if key not in statement_groups:
+                statement_groups[key] = [(subject_id, relation, object_id)]
+            else:
+                statement_groups[key].append((subject_id, relation, object_id))
+
+        # We need a fixed order
+        statement_groups = list([(k, v) for k, v in statement_groups.items()])
+
+        # We now know which statements are possible between two entities
+        # We need to select every combination
+        # [
+        # [(e1, r1, e2), (e1, r2, e2)],    >> 3 choices possible (two options + do not select)
+        # [(e2, r1, e3)]                   >> 2 choices possible (one option + do not select)
+        # ]
+        bitmap = list()
+        for key, stmts in statement_groups:
+            bitmap.append(list(range(-1, len(stmts) - 1)))  # -1 means do not select
+        # Now generate a list of all possible selections
+        bitmap = list(itertools.product(*bitmap))
+
+        # Next, we need to copy each generated query and extend it with our selection
+        possible_queries_with_statements = set()  # we may produce duplicates - so use a set
+        for q in possible_queries:
+            # We need at least two entity mentions
+            if len(q.entities) < 2:
+                continue
+            # Now iterate over all possibilies
+            for b_entry in bitmap:
+                # Create a copy of the query
+                q_s = Query(query=q)
+
+                for idx, (key, stmts) in enumerate(statement_groups):
+                    subject_id, object_id = key
+                    if subject_id not in q_s.entities or object_id not in q_s.entities:
+                        # The required entities have not been translated - Statement group can be ignored
+                        continue
+                    # Entities must be included in the query - We can now add the selected statement from our bitmap
+                    selected_idx = b_entry[idx]
+                    if selected_idx != -1:  # -1 Means do not select
+                        s, p, o = stmts[selected_idx]
+                        q_s.add_statement(subject_id=s, relation=p, object_id=o)
+
+                # Add the newly generated query if it contains at least a single statement
+                if len(q_s.statements) > 0:
+                    # we may produce duplicates - so use a set
+                    possible_queries_with_statements.add(q_s)
+
+        # Add them finally to the result list
+        possible_queries.update(possible_queries_with_statements)
+        return possible_queries
+
+    def translate_keyword_query(self, keyword_query):
+        # Diabetes Melitus Metformin Type 2
+        # Compute all permutations
+        # Split by ' '
+        # 1. Test all variants of each permutation (of t he split list)
+        # 2. Take the permutation which has the longest entity mentions
+        # 3. Every keyword by its own
+        # Take the ntlk tokenizer
+        #   doc_text = doc.get_text_content().strip().lower()
+        #   doc_text = doc_text.replace('-', ' ')
+        #    doc_text = doc_text.replace('/', ' ')
+        #    doc_text = doc_text.translate(translator)
+        #    for term in doc_text.split(' '):
+
+        trans_map = {p: ' ' for p in PUNCTUATION}
+        translator = str.maketrans(trans_map)
+
+        keyword_query = keyword_query.lower().strip()
+        keyword_query = keyword_query.translate(translator)
+        possible_keywords = keyword_query.split(' ')
+        possible_keywords = list([k for k in possible_keywords if k not in self.stopwords])
+
+        keyword_generator = [possible_keywords]
+        # keyword_generator = itertools.permutations(possible_keywords)
+
+        possible_queries = list()
+        for keywords in keyword_generator:
+            print(f'Test keyword permutation: {keywords}')
+            term2predicates = self.__greedy_find_predicates_in_keywords(keywords)
+            term2variables = self.__greedy_find_entity_types_variables_in_keywords(keywords)
+            term2entities = self.__greedy_find_entities_in_keywords(keywords)  #
+
+            #  print(term2entities)
+            print('--' * 60)
+            print('Term support')
+            print('--' * 60)
+            possible_terms = list()
+            for term in keywords:
+                term = term.strip()
+                # We won't find smaller terms
+                if len(term) < TERM_MIN_LENGTH:
+                    continue
+                document_ids = self.data_graph.get_document_ids_for_term(term=term)
+                if len(document_ids) > 0:
+                    possible_terms.append((len(document_ids), term))
+                    print(f'{len(document_ids)} support: {term}')
+
+            print('--' * 60)
+            print('Entity support')
+            print('--' * 60)
+            possible_entities = list()
+            for term, entities in term2entities.items():
+                for entity in entities:
+                    document_ids = self.data_graph.get_document_ids_for_entity(entity_id=entity)
+                    if len(document_ids) > 0:
+                        possible_entities.append((len(document_ids), term, entity))
+                        print(f'{len(document_ids)} support: {term} ---> {entity}')
+
+            print('--' * 60)
+            print('Statement support')
+            print('--' * 60)
+            possible_statements = list()
+            for term1 in term2entities:
+                for term2 in term2entities:
+                    if term1 == term2:
+                        continue
+                    subject_ids = term2entities[term1]
+                    object_ids = term2entities[term2]
+
+                    for subject_id in subject_ids:
+                        for object_id in object_ids:
+                            for relation in self.schema_graph.relation_dict:
+                                document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
+                                                                                              relation=relation,
+                                                                                              object_id=object_id)
+                                if len(document_ids) > 0:
+                                    print(
+                                        f'{len(document_ids)} support: {subject_id} ({term1}) x {relation} x {object_id} ({term2})')
+                                    possible_statements.append(
+                                        (len(document_ids), term1, subject_id, relation, term2, object_id))
+
+            # Generate the actual queries
+            possible_queries.extend(list(self.generate_possible_queries(possible_terms=possible_terms,
+                                                                        possible_entities=possible_entities,
+                                                                        possible_statements=possible_statements)))
+            print('==' * 60)
+            print('Results')
+            print(
+                f'{len(possible_queries)} queries generated <== ({len(possible_terms)} possible terms / {len(possible_entities)} possible entities / {len(possible_statements)} possible statements)')
+
+        possible_queries.sort(key=lambda x: str(x), reverse=True)
+        for q in possible_queries:
+            # print(f'{q}' )
+            results = len(self.data_graph.compute_query(q))
+            if results > 0:
+                print(f'{results} hits for {q}')
+        print('==' * 60)
+        return possible_queries
+
+
 
 
 def main():

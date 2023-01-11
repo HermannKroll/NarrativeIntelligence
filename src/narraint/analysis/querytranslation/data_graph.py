@@ -19,7 +19,10 @@ from narrant.entity.meshontology import MeSHOntology
 
 TERM_FREQUENCY_UPPER_BOUND = 0.99
 TERM_FREQUENCY_LOWER_BOUND = 0
-TERM_MIN_LENGTH = 3
+
+PUNCTUATION = string.punctuation  # without - / +
+PUNCTUATION = PUNCTUATION.replace('-', '')
+PUNCTUATION = PUNCTUATION.replace('+', '')
 
 
 def get_document_ids_from_provenance_mappings(provenance_mapping):
@@ -32,19 +35,51 @@ def get_document_ids_from_provenance_mappings(provenance_mapping):
 
 class Query:
 
-    def __init__(self):
+    def __init__(self, query=None):
         self.terms = set()
         self.entities = set()
         self.statements = set()
 
+        if query:
+            self.terms = query.terms.copy()
+            self.entities = query.entities.copy()
+            self.statements = query.statements.copy()
+
     def add_term(self, term):
-        self.terms.add(term)
+        if term.strip():
+            self.terms.add(term)
 
     def add_entity(self, entity_id):
         self.entities.add(entity_id)
 
     def add_statement(self, subject_id, relation, object_id):
         self.statements.add((subject_id, relation, object_id))
+
+    def __str__(self):
+        return f'<Terms: {self.terms} AND Entities: {self.entities} AND Statements: {self.statements}>'
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def __eq__(self, other):
+        if len(self.terms) != len(other.terms) or len(self.entities) != len(other.entities) or len(
+                self.statements) != len(other.statements):
+            return False
+        if len(self.terms.intersection(other.terms)) != len(self.terms):
+            return False
+        if len(self.entities.intersection(other.entities)) != len(self.entities):
+            return False
+        if len(self.statements.intersection(other.statements)) != len(self.statements):
+            return False
+        return True
+
+    def __ge__(self, other):
+        if str(self) >= str(other):
+            return True
+        return False
 
 
 class DataGraph:
@@ -55,6 +90,55 @@ class DataGraph:
         self.term_index = term_index
         self.mesh_ontology = None
         self.atc_tree = None
+        self.__cache_term = {}
+        self.__cache_entity = {}
+        self.__cache_statement = {}
+
+    def get_document_ids_for_term(self, term: str) -> Set[int]:
+        if term in self.__cache_term:
+            return self.__cache_term[term]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term)
+        # if we have a result
+        result = set()
+        for r in q:
+            result = ast.literal_eval(r[0])
+
+        self.__cache_term[term] = result
+        return result
+
+    def get_document_ids_for_entity(self, entity_id) -> Set[int]:
+        if entity_id in self.__cache_entity:
+            return self.__cache_entity[entity_id]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedEntityIndex.document_ids).filter(JCDLInvertedEntityIndex.entity_id == entity_id)
+        # if we have a result
+        result = set()
+        for r in q:
+            result = ast.literal_eval(r[0])
+
+        self.__cache_entity[entity_id] = result
+        return result
+
+    def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
+        key = (subject_id, relation, object_id)
+        if key in self.__cache_statement:
+            return self.__cache_statement[key]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLInvertedStatementIndex.document_ids)
+        q = q.filter(JCDLInvertedStatementIndex.subject_id == subject_id)
+        q = q.filter(JCDLInvertedStatementIndex.relation == relation)
+        q = q.filter(JCDLInvertedStatementIndex.object_id == object_id)
+        # if we have a result
+        result = set()
+        for r in q:
+            result = ast.literal_eval(r[0])
+
+        self.__cache_statement[key] = result
+        return result
 
     def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
         """
@@ -73,43 +157,13 @@ class DataGraph:
             mesh_desc = entity_id.replace('MESH:', '')
             for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
                 entities.add(f'MESH:{super_entity}')
-            # logging.info(f'Expanded {entity_id} by {entities}')
+            # print(f'Expanded {entity_id} by {entities}')
         # Chembl Drugs
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
-        #      logging.info(f'Expanded {entity_id} by {entities}')
+        #      print(f'Expanded {entity_id} by {entities}')
         return entities
-
-    def get_document_ids_for_term(self, term: str) -> Set[int]:
-        session = SessionExtended.get()
-        q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term)
-        # if we have a result
-        for r in q:
-            return ast.literal_eval(r[0])
-        # otherwise empty set
-        return set()
-
-    def get_document_ids_for_entity(self, entity_id) -> Set[int]:
-        session = SessionExtended.get()
-        q = session.query(JCDLInvertedEntityIndex.document_ids).filter(JCDLInvertedEntityIndex.entity_id == entity_id)
-        # if we have a result
-        for r in q:
-            return ast.literal_eval(r[0])
-        # otherwise empty set
-        return set()
-
-    def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
-        session = SessionExtended.get()
-        q = session.query(JCDLInvertedStatementIndex.document_ids)
-        q = q.filter(JCDLInvertedStatementIndex.subject_id == subject_id)
-        q = q.filter(JCDLInvertedStatementIndex.relation == relation)
-        q = q.filter(JCDLInvertedStatementIndex.object_id == object_id)
-        # if we have a result
-        for r in q:
-            return ast.literal_eval(r[0])
-        # otherwise empty set
-        return set()
 
     def __add_statement_to_index(self, subject_id, relation, object_id, document_ids):
         key = (subject_id, relation, object_id)
@@ -118,7 +172,7 @@ class DataGraph:
         self.graph_index[key].update(document_ids)
 
     def __create_graph_index(self, session):
-        logging.info('Creating graph index...')
+        print('Creating graph index...')
         # iterate over all extracted statements
         total = session.query(PredicationInvertedIndex).count()
         progress = Progress(total=total, print_every=1000)
@@ -142,16 +196,15 @@ class DataGraph:
                 if relation != "associated":
                     self.__add_statement_to_index(subject_id=subj, relation="associated",
                                                   object_id=obj, document_ids=document_ids)
-
-                    # Always add swapped direction of associated
-                    self.__add_statement_to_index(subject_id=obj, relation="associated",
-                                                  object_id=subj, document_ids=document_ids)
-
                 # Swap subject and object im predicate is a symmetric one
                 if relation in SYMMETRIC_PREDICATES:
                     self.__add_statement_to_index(subject_id=obj, relation=relation,
                                                   object_id=subj, document_ids=document_ids)
 
+                    # always add associated
+                    if relation != "associated":
+                        self.__add_statement_to_index(subject_id=subj, relation="associated",
+                                                      object_id=obj, document_ids=document_ids)
                 if relation in PREDICATE_EXPANSION:
                     for expanded_relation in PREDICATE_EXPANSION[relation]:
                         # Expand statement to all of its relations
@@ -163,16 +216,16 @@ class DataGraph:
                                                           object_id=subj, document_ids=document_ids)
 
         progress.done()
-        logging.info(f'Graph index with {len(self.graph_index)} keys created')
+        print(f'Graph index with {len(self.graph_index)} keys created')
 
     def __create_entity_index(self, session):
-        logging.info('Creating entity index...')
+        print('Creating entity index...')
         # iterate over all extracted statements
         total = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         q_stmt = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed')
-        q_stmt = q_stmt.yield_per(10000)
+        q_stmt = q_stmt.yield_per(1000000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
             document_ids = ast.literal_eval(r.document_ids)
@@ -183,16 +236,16 @@ class DataGraph:
                 self.entity_index[entity].update(document_ids)
 
         progress.done()
-        logging.info(f'Entity index with {len(self.entity_index)} keys created')
+        print(f'Entity index with {len(self.entity_index)} keys created')
 
     def __create_term_index(self, session):
-        logging.info('Creating term index...')
+        print('Creating term index...')
         # iterate over all extracted statements
         total = session.query(Document).filter(Document.collection == 'PubMed').count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         stopwords = set(nltk.corpus.stopwords.words('english'))
-        trans_map = {p: ' ' for p in string.punctuation}
+        trans_map = {p: ' ' for p in PUNCTUATION}
         translator = str.maketrans(trans_map)
         term_index_local = {}
         for i, doc in enumerate(iterate_over_all_documents_in_collection(session=session, collection='PubMed')):
@@ -201,20 +254,21 @@ class DataGraph:
             doc_text = doc.get_text_content().strip().lower()
             doc_text = doc_text.translate(translator)
             for term in doc_text.split(' '):
-                if not term.strip() or len(term) <= TERM_MIN_LENGTH or term in stopwords:
+                term = term.strip()
+                if term in stopwords:
                     continue
                 if term not in term_index_local:
                     term_index_local[term] = set()
                 term_index_local[term].add(doc.id)
 
         progress.done()
-        logging.info('Computing how often each term was found')
+        print('Computing how often each term was found')
         term_frequency = list([(t, len(docs)) for t, docs in term_index_local.items()])
         max_frequency = max(t[1] for t in term_frequency)
-        logging.info(f'Most frequent term appears in {max_frequency} documents')
+        print(f'Most frequent term appears in {max_frequency} documents')
         upper_bound = max_frequency * TERM_FREQUENCY_UPPER_BOUND
         lower_bound = max_frequency * TERM_FREQUENCY_LOWER_BOUND
-        logging.info(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
+        print(f'Filtering terms by lower bound ({lower_bound}) and upper bound ({upper_bound}) for frequency')
         terms_to_keep = set()
         lower_bound_hurt, upper_bound_hurt = 0, 0
         for term, frequency in term_frequency:
@@ -225,61 +279,58 @@ class DataGraph:
                 upper_bound_hurt += 1
                 continue
             terms_to_keep.add(term)
-        logging.info(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
+        print(f'{lower_bound_hurt} appear less frequent than {lower_bound} '
               f'and {upper_bound_hurt} more than {upper_bound}')
-        logging.info(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
-        logging.info('Computing final index...')
+        print(f'Keeping only {len(terms_to_keep)} out of {len(term_frequency)} terms')
+        print('Computing final index...')
         for term, docs in term_index_local.items():
             if term in terms_to_keep:
                 self.term_index[term] = docs
 
-        logging.info(f'Term index with {len(self.term_index)} keys created')
+        print(f'Term index with {len(self.term_index)} keys created')
 
     def create_data_graph(self):
-        logging.info('Creating data graph...')
+        print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
-        self.__create_entity_index(session)
-        self.__create_graph_index(session)
         self.__create_term_index(session)
-
-        logging.info('==' * 60)
-        logging.info('Index summary:')
-        logging.info(f'Terms index with {len(self.term_index)} keys created')
-        logging.info(f'Graph index with {len(self.graph_index)} keys created')
-        logging.info(f'Entity index with {len(self.entity_index)} keys created')
-        self.__store_data_graph()
-
-    def __store_data_graph(self):
-        logging.info('Dumping data graph to DB...')
-        session = SessionExtended.get()
-
-        logging.info('Deleting table entries: JCDLInvertedTermIndex ...')
+        print('Deleting table entries: JCDLInvertedTermIndex ...')
         session.execute(delete(JCDLInvertedTermIndex))
-        logging.info('Deleting table entries: JCDLInvertedEntityIndex ...')
-        session.execute(delete(JCDLInvertedEntityIndex))
-        logging.info('Deleting table entries: JCDLInvertedTermIndex ...')
-        session.execute(delete(JCDLInvertedStatementIndex))
-        logging.info('Committing...')
+        print('Committing...')
         session.commit()
 
-        logging.info('Storing inverted term index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=json.dumps(list(docs)))
+        print('Storing inverted term index values...')
+        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=str(docs))
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
-        logging.info('Storing inverted entity index values...')
+        self.term_index = {}
+
+        self.__create_entity_index(session)
+        print('Deleting table entries: JCDLInvertedEntityIndex ...')
+        session.execute(delete(JCDLInvertedEntityIndex))
+        print('Committing...')
+        session.commit()
+        print('Storing inverted entity index values...')
         JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
-                                                              [dict(entity_id=e, document_ids=json.dumps(list(docs)))
+                                                              [dict(entity_id=e, document_ids=str(docs))
                                                                for e, docs in self.entity_index.items()],
                                                               check_constraints=False)
-        logging.info('Storing inverted statement index values...')
+        self.entity_index = {}
+
+        print('Deleting table entries: JCDLInvertedTermIndex ...')
+        session.execute(delete(JCDLInvertedStatementIndex))
+        print('Committing...')
+        session.commit()
+        self.__create_graph_index(session)
+        print('Storing inverted statement index values...')
         JCDLInvertedStatementIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
                                                                                 relation=p,
                                                                                 object_id=o,
-                                                                                document_ids=json.dumps(list(docs)))
+                                                                                document_ids=str(docs))
                                                                            for (s, p, o), docs in
                                                                            self.graph_index.items()],
                                                                  check_constraints=False)
-        logging.info('Finished')
+        self.graph_index = {}
+        print('Finished')
 
     def compute_query(self, query: Query):
         document_ids = set()
@@ -288,18 +339,26 @@ class DataGraph:
             if idx == 0:
                 document_ids = self.get_document_ids_for_statement(subject_id=s, relation=p, object_id=o)
             else:
-                document_ids.intersection_update(
+                document_ids = document_ids.intersection(
                     self.get_document_ids_for_statement(subject_id=s, relation=p, object_id=o))
             if len(document_ids) == 0:
                 return set()
 
-        for entity_id in query.entities:
-            document_ids.intersection_update(self.get_document_ids_for_entity(entity_id=entity_id))
+        for idx, entity_id in enumerate(query.entities):
+            # for the first element, set all document ids as current set
+            if len(query.statements) == 0 and idx == 0:
+                document_ids = self.get_document_ids_for_entity(entity_id=entity_id)
+            else:
+                document_ids = document_ids.intersection(self.get_document_ids_for_entity(entity_id=entity_id))
             if len(document_ids) == 0:
                 return set()
 
-        for term in query.terms:
-            document_ids.intersection_update(self.get_document_ids_for_term(term=term))
+        for idx, term in enumerate(query.terms):
+            # for the first element, set all document ids as current set
+            if len(query.statements) == 0 and len(query.entities) == 0 and idx == 0:
+                document_ids = self.get_document_ids_for_term(term=term)
+            else:
+                document_ids = document_ids.intersection(self.get_document_ids_for_term(term=term))
             if len(document_ids) == 0:
                 return set()
 
