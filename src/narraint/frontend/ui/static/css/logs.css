@@ -56,6 +56,24 @@ body {
   width: 100%;
 }
 
+.sliderticks {
+  font-size: 0.6em;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.sliderticks p {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  width: 1px;
+  height: 10px;
+  margin: 0;
+  white-space: nowrap;
+}
+
 .section input {
   width: 100%;
 }
