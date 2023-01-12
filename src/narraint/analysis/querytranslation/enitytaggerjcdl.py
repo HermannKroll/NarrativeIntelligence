@@ -67,9 +67,8 @@ class EntityTaggerJCDL:
         logging.info('Index stored')
 
     def _add_term_to_index(self, term: str, entity_id: str):
-        term_lower = term.strip().lower()
+        term_lower = term.strip().lower().replace('-', ' ').replace('+', ' ')
         self.term2entity[term_lower].add(entity_id)
-        self.term2entity[term.replace('-', ' ')].add(entity_id)
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
@@ -197,14 +196,14 @@ class EntityTaggerJCDL:
             for chid in chids:
                 self._add_term_to_index(term, chid)
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True):
+    def tag_entity(self, term: str, expand_search_by_prefix=False):
         """
         Tags an entity by given a string
         :param term: the entity term
         :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
         :return: a set of entities entity_id
         """
-        t_low = term.lower().strip().replace('-', ' ')
+        t_low = term.lower().strip().replace('-', ' ').replace('+', ' ')
         entities = set()
         if expand_search_by_prefix:
             if not self.autocompletion:
