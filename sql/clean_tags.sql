@@ -1,3 +1,6 @@
+-- Update Long Covid from MeSH Supplement to MeSH Descriptor
+UPDATE public.TAG as t SET t.end_it = 'MESH:D000094024' WHERE t.end_it = 'MESH:C000711409' and t.ent_type = 'Disease'
+
 -- Delete all Covid 19 Supplement Tags from TaggerOne
 DELETE FROM public.Tag as t where t.ent_id = 'MESH:C000657245' and t.ent_type = 'Disease';
 
