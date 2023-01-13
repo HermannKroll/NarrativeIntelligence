@@ -5,10 +5,11 @@ import pickle
 from collections import defaultdict
 from itertools import islice
 
-
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
+from kgextractiontoolbox.progress import Progress
 from narraint.atc.atc_tree import ATCTree
+from narraint.backend.models import JCDLInvertedEntityIndex
 from narraint.config import TMP_DIR
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
@@ -42,6 +43,7 @@ class EntityTaggerJCDL:
 
     def __init__(self, load_index=True):
         self.autocompletion = None
+        self.relevant_entity_ids = set()
         if EntityTaggerJCDL.__instance is not None:
             raise Exception('This class is a singleton - use EntityTaggerJCDL.instance()')
         else:
@@ -60,6 +62,18 @@ class EntityTaggerJCDL:
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX_JCDL):
         logging.info('Computing entity tagging index...')
+
+        logging.info('Querying relevant entity ids...')
+        session = Session.get()
+        count = session.query(JCDLInvertedEntityIndex).count()
+        progress = Progress(total=count, print_every=1000, text="Retrieving entities...")
+        progress.start_time()
+        for idx, r in enumerate(session.query(JCDLInvertedEntityIndex.entity_id).yield_per(1000)):
+            progress.print_progress(idx)
+            self.relevant_entity_ids.add(r[0])
+        progress.done()
+        logging.info(f'Load {len(self.relevant_entity_ids)} relevant entity ids from JCDL entity index...')
+
         self._create_reverse_index()
         logging.info(f'Storing index to {index_path}')
         with open(index_path, 'wb') as f:
@@ -67,9 +81,9 @@ class EntityTaggerJCDL:
         logging.info('Index stored')
 
     def _add_term_to_index(self, term: str, entity_id: str):
-        term_lower = term.strip().lower()
-        self.term2entity[term_lower].add(entity_id)
-        self.term2entity[term.replace('-', ' ')].add(entity_id)
+        if entity_id in self.relevant_entity_ids:
+            term_lower = term.strip().lower().replace('-', ' ').replace('+', ' ')
+            self.term2entity[term_lower].add(entity_id)
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
@@ -197,14 +211,14 @@ class EntityTaggerJCDL:
             for chid in chids:
                 self._add_term_to_index(term, chid)
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True):
+    def tag_entity(self, term: str, expand_search_by_prefix=False):
         """
         Tags an entity by given a string
         :param term: the entity term
         :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
         :return: a set of entities entity_id
         """
-        t_low = term.lower().strip().replace('-', ' ')
+        t_low = term.lower().strip().replace('-', ' ').replace('+', ' ')
         entities = set()
         if expand_search_by_prefix:
             if not self.autocompletion:
