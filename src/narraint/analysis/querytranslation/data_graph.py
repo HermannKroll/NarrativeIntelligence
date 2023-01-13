@@ -37,26 +37,71 @@ class Query:
 
     def __init__(self, query=None):
         self.terms = set()
+        self.term2support = {}
+        self.term_support = 0
+
         self.entities = set()
+        self.entity2support = {}
+        self.entity_support = 0
+
         self.statements = set()
+        self.statement2support = {}
+        self.statement_support = 0
+
+        self.relations = set()
 
         if query:
             self.terms = query.terms.copy()
-            self.entities = query.entities.copy()
-            self.statements = query.statements.copy()
+            self.term2support = query.term2support.copy()
+            self.term_support = query.term_support
 
-    def add_term(self, term):
+            self.entities = query.entities.copy()
+            self.entity2support = query.entity2support.copy()
+            self.entity_support = query.entity_support
+
+            self.statements = query.statements.copy()
+            self.statement2support = query.statement2support.copy()
+            self.statement_support = query.statement_support
+
+            self.relations = query.relations.copy()
+
+    def is_valid(self, verbose=False):
+        # Relation should be contained, but is not => not valid
+        if len(self.relations) > 0 and len(self.statements) == 0:
+            if verbose: print(f'{self} not valid')
+            return False
+        # Not all relations are contained => not valid
+        if len(self.relations) > 0 and len(self.relations.intersection({p for _, p, _ in self.statements})) != len(
+                self.relations):
+            if verbose: print(f'{self} not valid')
+            return False
+        # Otherwise valid
+        if verbose: print(f'{self} valid')
+        return True
+
+    def add_term(self, term, support=0):
         if term.strip():
             self.terms.add(term)
+            self.term2support[term] = support
+            self.term_support = sum([s for s in self.term2support.values()])
 
-    def add_entity(self, entity_id):
+    def add_entity(self, entity_id, support=0):
         self.entities.add(entity_id)
+        self.entity2support[entity_id] = support
+        self.entity_support = sum([s for s in self.entity2support.values()])
 
-    def add_statement(self, subject_id, relation, object_id):
-        self.statements.add((subject_id, relation, object_id))
+    def add_statement(self, subject_id, relation, object_id, support=0):
+        key = (subject_id, relation, object_id)
+        self.statements.add(key)
+        self.statement2support[key] = support
+        self.statement_support = sum([s for s in self.statement2support.values()])
+
+    def add_relation(self, relation):
+        self.relations.add(relation)
 
     def __str__(self):
-        return f'<Terms: {self.terms} AND Entities: {self.entities} AND Statements: {self.statements}>'
+        # term_str = '{' + f'{'), ('.join([str(term)  support for term, support in self.term2support.items()]}' + '}'
+        return f'<Terms: {self.term2support} AND Entities: {self.entity2support} AND Relations: {self.relations} AND Statements: {self.statement2support}>'
 
     def __repr__(self):
         return self.__str__()
@@ -66,7 +111,7 @@ class Query:
 
     def __eq__(self, other):
         if len(self.terms) != len(other.terms) or len(self.entities) != len(other.entities) or len(
-                self.statements) != len(other.statements):
+                self.statements) != len(other.statements) or len(self.relations) != len(other.relations):
             return False
         if len(self.terms.intersection(other.terms)) != len(self.terms):
             return False
@@ -74,6 +119,9 @@ class Query:
             return False
         if len(self.statements.intersection(other.statements)) != len(self.statements):
             return False
+        if len(self.relations.intersection(other.relations)) != len(self.relations):
+            return False
+
         return True
 
     def __ge__(self, other):
