@@ -672,10 +672,8 @@ const search = (event) => {
     let toSlider = document.querySelector("#toSlider");
     let year_start;
     let year_end;
-    if (fromSlider.value != 50) {
+    if (latest_query_translation === query) {
         year_start = fromSlider.value;
-    }
-    if (toSlider.value != 50) {
         year_end = toSlider.value;
     }
 
@@ -784,6 +782,8 @@ const search = (event) => {
             }
 
             let year_aggregation = response["year_aggregation"];
+            let year_filter_container = document.querySelector(".year_filter");
+            year_filter_container.style.display = "block";
             const fromSlider = document.querySelector('#fromSlider');
             const toSlider = document.querySelector('#toSlider');
             let xValues = new Array();
@@ -792,22 +792,33 @@ const search = (event) => {
                 xValues.push(year);
                 yValues.push(year_aggregation[year]);
             }
-            if (latest_query_translation != query_trans_string) {
+            if (latest_query_translation != query_trans_string.split("----->")[0].trim()) {
+
                 initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
                 initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+
             }
-            latest_query_translation = query_trans_string;
+            latest_query_translation = query_trans_string.split("----->")[0].trim();
             fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
             setToggleAccessible(toSlider, toSlider.min);
             setValue(toSlider, 'rangeTo');
             setValue(fromSlider, 'rangeFrom');
+            let chart = document.getElementById("myChart");
+            if (chart != undefined) {
+                let slider_control = document.querySelector(".sliders_control");
+                let chart_container = document.querySelector(".range_container")
+                chart.remove();
+                const new_chart = document.createElement("canvas");
+                new_chart.id = "myChart";
+                //chart_container.append(new_chart);
+                chart_container.insertBefore(new_chart, slider_control);
+            }
             let barChart = new Chart("myChart", {
                 type: "bar",
                 data: {
                     labels: xValues,
                     datasets: [{
                         backgroundColor: [],
-                        hoverBackgroundColor: '#0242b0',
                         data: yValues,
                     }]
                 },
@@ -1640,3 +1651,15 @@ function initializeValues(slider, value, min, max) {
     slider.min = min;
     slider.value = value;
 }
+
+$('#input_object').hover(function(){
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    console.log(object);
+  }, function(){
+});
+
+$('#input_subject').hover(function(){
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    console.log(subject);
+  }, function(){
+});
