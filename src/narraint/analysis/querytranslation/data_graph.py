@@ -404,8 +404,6 @@ class DataGraph:
                                                             check_constraints=False)
         self.term_index = {}
 
-        return
-
         self.__create_entity_index(session)
         print('Deleting table entries: JCDLInvertedEntityIndex ...')
         session.execute(delete(JCDLInvertedEntityIndex))
