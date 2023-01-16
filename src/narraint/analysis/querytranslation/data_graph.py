@@ -20,17 +20,7 @@ from narrant.entity.meshontology import MeSHOntology
 TERM_FREQUENCY_UPPER_BOUND = 0.99
 TERM_FREQUENCY_LOWER_BOUND = 0
 
-PUNCTUATION = string.punctuation  # without - / +
-PUNCTUATION = PUNCTUATION.replace('-', '')
-PUNCTUATION = PUNCTUATION.replace('+', '')
-
-
-def get_document_ids_from_provenance_mappings(provenance_mapping):
-    if 'PubMed' in provenance_mapping:
-        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
-        return document_ids
-    else:
-        return {}
+PUNCTUATION = string.punctuation
 
 
 class Query:
@@ -64,6 +54,59 @@ class Query:
             self.statement_support = query.statement_support
 
             self.relations = query.relations.copy()
+
+    @staticmethod
+    def relax_query(query, delete_operations: int):
+        if delete_operations == 0:
+            yield None
+
+        # Iterate over all terms and remove a term
+        for term in query.terms:
+            q_rel = Query(query)
+            q_rel.remove_term(term)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+        # Iterate over all enities and remove an entity
+        for entity in query.entities:
+            q_rel = Query(query)
+            q_rel.remove_entity(entity)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+        # Iterate over all statements and remove a statement
+        for statement in query.statements:
+            q_rel = Query(query)
+            q_rel.remove_statement(statement)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+    def remove_term(self, term):
+        self.terms.remove(term)
+        del self.term2support[term]
+        self.term_support = sum([s for s in self.term2support.values()])
+
+    def remove_entity(self, entity):
+        self.entities.remove(entity)
+        del self.entity2support[entity]
+        self.entity_support = sum([s for s in self.entity2support.values()])
+
+    def remove_statement(self, statement):
+        self.statements.remove(statement)
+        del self.statement2support[statement]
+        self.statement_support = sum([s for s in self.statement2support.values()])
 
     def is_valid(self, verbose=False):
         # Relation should be contained, but is not => not valid
@@ -128,6 +171,14 @@ class Query:
         if str(self) >= str(other):
             return True
         return False
+
+
+def get_document_ids_from_provenance_mappings(provenance_mapping):
+    if 'PubMed' in provenance_mapping:
+        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
+        return document_ids
+    else:
+        return {}
 
 
 class DataGraph:
@@ -300,10 +351,11 @@ class DataGraph:
             progress.print_progress(i)
             # Make it lower + replace all punctuation by ' '
             doc_text = doc.get_text_content().strip().lower()
-            doc_text = doc_text.translate(translator)
-            for term in doc_text.split(' '):
+            # To this with and without punctuation removal
+            doc_text_without_punctuation = doc_text.translate(translator)
+            for term in itertools.chain(doc_text.split(' '), doc_text_without_punctuation.split(' ')):
                 term = term.strip()
-                if term in stopwords:
+                if not term or term in stopwords:
                     continue
                 if term not in term_index_local:
                     term_index_local[term] = set()
@@ -351,6 +403,8 @@ class DataGraph:
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
         self.term_index = {}
+
+        return
 
         self.__create_entity_index(session)
         print('Deleting table entries: JCDLInvertedEntityIndex ...')
