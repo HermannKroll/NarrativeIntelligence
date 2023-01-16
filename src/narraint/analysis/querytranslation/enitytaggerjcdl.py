@@ -2,6 +2,7 @@ import gzip
 import logging
 import os.path
 import pickle
+import string
 from collections import defaultdict
 from itertools import islice
 
@@ -15,7 +16,8 @@ from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCA
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
-from narrant.preprocessing.enttypes import DISEASE, ALL, PLANT_FAMILY_GENUS, GENE, TARGET
+from narrant.preprocessing.enttypes import DISEASE, ALL, PLANT_FAMILY_GENUS, GENE, TARGET, SPECIES, DOSAGE_FORM, \
+    VACCINE, EXCIPIENT, DRUG, CHEMICAL
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
@@ -49,6 +51,7 @@ class EntityTaggerJCDL:
         else:
             logging.info('Initialize EntityTaggerJCDL...')
             self.term2entity = defaultdict(set)
+            self.entity_type2entities = {}
             self.mesh_ontology = MeSHOntology.instance()
             if load_index:
                 self._load_index()
@@ -57,7 +60,7 @@ class EntityTaggerJCDL:
     def _load_index(self, index_path=ENTITY_TAGGING_INDEX_JCDL):
         logging.info(f'Loading entity tagging index from {index_path}')
         with open(index_path, 'rb') as f:
-            self.term2entity = pickle.load(f)
+            self.term2entity, self.entity_type2entities = pickle.load(f)
         logging.info(f'Index load ({len(self.term2entity)} different terms)')
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX_JCDL):
@@ -77,29 +80,35 @@ class EntityTaggerJCDL:
         self._create_reverse_index()
         logging.info(f'Storing index to {index_path}')
         with open(index_path, 'wb') as f:
-            pickle.dump(self.term2entity, f)
+            pickle.dump((self.term2entity, self.entity_type2entities), f)
         logging.info('Index stored')
 
-    def _add_term_to_index(self, term: str, entity_id: str):
+    def _add_term_to_index(self, term: str, entity_id: str, entity_type: str):
         if entity_id in self.relevant_entity_ids:
             term_lower = term.strip().lower().replace('-', ' ').replace('+', ' ')
             self.term2entity[term_lower].add(entity_id)
+
+            if entity_type:
+                if entity_type not in self.entity_type2entities:
+                    self.entity_type2entities[entity_type] = set()
+                self.entity_type2entities[entity_type].add(entity_id)
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
         resolver = EntityResolver.instance()
         for e_term, e_id in resolver.species.get_reverse_index().items():
-            self._add_term_to_index(e_term, e_id)
+            self._add_term_to_index(e_term, e_id, SPECIES)
 
         # add all entity types
         for entity_type in ALL:
-            self._add_term_to_index(entity_type, entity_type)
+            self._add_term_to_index(entity_type, entity_type, entity_type)
         # add special rules
-        self._add_term_to_index(TARGET, GENE)
-        self._add_term_to_index("PlantGenus", PLANT_FAMILY_GENUS)
-        self._add_term_to_index("Plant Genus", PLANT_FAMILY_GENUS)
-        self._add_term_to_index("PlantGenera", PLANT_FAMILY_GENUS)
-        self._add_term_to_index("Plant Genera", PLANT_FAMILY_GENUS)
+        self._add_term_to_index(TARGET, GENE, GENE)
+        self._add_term_to_index(TARGET, GENE, TARGET)
+        self._add_term_to_index("PlantGenus", PLANT_FAMILY_GENUS, PLANT_FAMILY_GENUS)
+        self._add_term_to_index("Plant Genus", PLANT_FAMILY_GENUS, PLANT_FAMILY_GENUS)
+        self._add_term_to_index("PlantGenera", PLANT_FAMILY_GENUS, PLANT_FAMILY_GENUS)
+        self._add_term_to_index("Plant Genera", PLANT_FAMILY_GENUS, PLANT_FAMILY_GENUS)
 
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
@@ -121,7 +130,7 @@ class EntityTaggerJCDL:
 
         for term, ent_ids in dis_vocab.vocabularies[DISEASE].items():
             for ent_id in ent_ids:
-                self._add_term_to_index(term, ent_id)
+                self._add_term_to_index(term, ent_id, DISEASE)
 
     def _add_gene_terms(self, gene_input=GENE_FILE):
         gene_ids_in_db = get_gene_ids(Session.get())
@@ -134,10 +143,13 @@ class EntityTaggerJCDL:
                     gene_symbol = components[2].strip().lower()
                     synonyms = components[4]
                     description = components[8].strip().lower()
-                    self._add_term_to_index(gene_symbol, gene_symbol)
-                    self._add_term_to_index(description, gene_symbol)
+                    self._add_term_to_index(gene_symbol, gene_symbol, GENE)
+                    self._add_term_to_index(gene_symbol, gene_symbol, TARGET)
+                    self._add_term_to_index(description, gene_symbol, GENE)
+                    self._add_term_to_index(description, gene_symbol, TARGET)
                     for synonym in synonyms.split('|'):
-                        self._add_term_to_index(synonym, gene_symbol)
+                        self._add_term_to_index(synonym, gene_symbol, GENE)
+                        self._add_term_to_index(synonym, gene_symbol, TARGET)
         logging.info('Gene terms added')
 
     def _add_fid_dosageform_terms(self):
@@ -147,7 +159,7 @@ class EntityTaggerJCDL:
         """
         for term, df_ids in DosageFormVocabulary.create_dosage_form_vocabulary(expand_by_s_and_e=False).items():
             for df_id in df_ids:
-                self._add_term_to_index(term, df_id)
+                self._add_term_to_index(term, df_id, DOSAGE_FORM)
 
     def _add_vaccine_terms(self):
         """
@@ -156,7 +168,7 @@ class EntityTaggerJCDL:
         """
         for term, vaccine_ids in VaccineVocabulary.create_vaccine_vocabulary(expand_by_s_and_e=False).items():
             for vaccine_id in vaccine_ids:
-                self._add_term_to_index(term, vaccine_id)
+                self._add_term_to_index(term, vaccine_id, VACCINE)
 
     def _add_excipient_terms(self):
         """
@@ -164,7 +176,7 @@ class EntityTaggerJCDL:
         :return:
         """
         for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms=False):
-            self._add_term_to_index(excipient_name, excipient_name.capitalize())
+            self._add_term_to_index(excipient_name, excipient_name.capitalize(), EXCIPIENT)
 
     def _add_plant_families(self):
         """
@@ -172,7 +184,7 @@ class EntityTaggerJCDL:
         :return:
         """
         for family_name in PlantFamilyGenusVocabulary.read_plant_family_genus_vocabulary(expand_terms=False):
-            self._add_term_to_index(family_name, family_name.capitalize())
+            self._add_term_to_index(family_name, family_name.capitalize(), PLANT_FAMILY_GENUS)
 
     def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
@@ -180,9 +192,15 @@ class EntityTaggerJCDL:
         meshdb.load_xml(mesh_file)
         for desc in meshdb.get_all_descs():
             mesh_id, mesh_head = f'MESH:{desc.unique_id}', desc.heading
-            self._add_term_to_index(mesh_head, mesh_id)
-            for term in desc.terms:
-                self._add_term_to_index(term.string, mesh_id)
+            try:
+                for ent_type in self.mesh_ontology.get_entity_types_for_descriptor(desc.unique_id):
+                    self._add_term_to_index(mesh_head, mesh_id, ent_type)
+                    for term in desc.terms:
+                        self._add_term_to_index(term.string, mesh_id, ent_type)
+            except KeyError:
+                self._add_term_to_index(mesh_head, mesh_id, None)
+                for term in desc.terms:
+                    self._add_term_to_index(term.string, mesh_id, None)
 
     def _add_chembl_drugs(self):
         logging.info('Adding ChEMBL drugs...')
@@ -191,7 +209,7 @@ class EntityTaggerJCDL:
                                                                             expand_terms=False)
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
-                self._add_term_to_index(term, chid)
+                self._add_term_to_index(term, chid, DRUG)
 
     def _add_chembl_atc_classes(self):
         """
@@ -202,14 +220,14 @@ class EntityTaggerJCDL:
         atc_tree: ATCTree = ATCTree.instance()
         for atc_class, atc_class_name in atc_tree.atcclass2name.items():
             name = atc_class_name.strip().lower()
-            self._add_term_to_index(name, atc_class.upper())
+            self._add_term_to_index(name, atc_class.upper(), DRUG)
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
         drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
-                self._add_term_to_index(term, chid)
+                self._add_term_to_index(term, chid, CHEMICAL)
 
     def tag_entity(self, term: str, expand_search_by_prefix=False):
         """
