@@ -123,9 +123,6 @@ class QueryTranslationToGraph:
                 # logging.debug(f'Checking query part: {current_part}')
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=False)
-                    if current_part in term2entities:
-                        raise ValueError(
-                            f'Current string {current_part} was already mapped before (duplicated keyword?)')
                     term2entities[current_part] = entities_in_part
                     # logging.debug(f'Found: {entities_in_part}')
                     found = True
@@ -184,6 +181,7 @@ class QueryTranslationToGraph:
             selection_map.append(list(range(-1, len(mapping))))
 
         selection_map = list(itertools.product(*selection_map))
+        # print(f'Entity selection map entries: {len(selection_map)}')
         # print(term2mapping)
         # print(selection_map)
 
@@ -244,35 +242,44 @@ class QueryTranslationToGraph:
         # We need a fixed order
         statement_groups = list([(k, v) for k, v in statement_groups.items()])
 
-        # We now know which statements are possible between two entities
-        # We need to select every combination
-        # [
-        # [(e1, r1, e2), (e1, r2, e2)],    >> 3 choices possible (two options + do not select)
-        # [(e2, r1, e3)]                   >> 2 choices possible (one option + do not select)
-        # ]
-        bitmap = list()
-        for key, stmts in statement_groups:
-            bitmap.append(list(range(-1, len(stmts) - 1)))  # -1 means do not select
-        # Now generate a list of all possible selections
-        bitmap = list(itertools.product(*bitmap))
-
         # Next, we need to copy each generated query and extend it with our selection
         possible_queries_with_statements = set()  # we may produce duplicates - so use a set
         for q in possible_queries:
             # We need at least two entity mentions
             if len(q.entities) < 2:
                 continue
+            # if len(possible_queries_with_statements) > 1000000:
+            #    print(f'query generation limit hit for: {possible_terms}')
+            #    continue
+
+            # We now know which statements are possible between two entities
+            # We need to select every combination
+            # [
+            # [(e1, r1, e2), (e1, r2, e2)],    >> 3 choices possible (two options + do not select)
+            # [(e2, r1, e3)]                   >> 2 choices possible (one option + do not select)
+            # ]
+
+            # Select only those statements which subject and objects are in the queries entities
+            relevant_statement_groups = list([(key, stmts) for key, stmts in statement_groups
+                                              if key[0] in q.entities and key[1] in q.entities])
+
+            bitmap = list()
+            estimated_combinations = 1
+            for key, stmts in relevant_statement_groups:
+                estimated_combinations = estimated_combinations * (len(stmts) * 2)
+                bitmap.append(list(range(-1, len(stmts) - 1)))  # -1 means do not select
+
+            # print(f'Estimated combinations: {estimated_combinations}')
+
+            # Now generate a list of all possible selections
+            bitmap = list(itertools.product(*bitmap))
+
             # Now iterate over all possibilies
             for b_entry in bitmap:
                 # Create a copy of the query
                 q_s = Query(query=q)
 
-                for idx, (key, stmts) in enumerate(statement_groups):
-                    subject_id, object_id = key
-                    if subject_id not in q_s.entities or object_id not in q_s.entities:
-                        # The required entities have not been translated - Statement group can be ignored
-                        continue
-
+                for idx, (key, stmts) in enumerate(relevant_statement_groups):
                     # Entities must be included in the query - We can now add the selected statement from our bitmap
                     selected_idx = b_entry[idx]
                     if selected_idx != -1:  # -1 Means do not select
@@ -309,7 +316,7 @@ class QueryTranslationToGraph:
         #    doc_text = doc_text.translate(translator)
         #    for term in doc_text.split(' '):
 
-        trans_map = {p: ' ' for p in PUNCTUATION}
+        trans_map = {p: ' ' for p in '[]()?!'}  # PUNCTUATION}
         translator = str.maketrans(trans_map)
 
         keyword_query = keyword_query.lower().strip()
@@ -424,8 +431,8 @@ class QueryTranslationToGraph:
     def evaluate_queries(self, queries: [Query]):
         for q in queries:
             results = len(self.data_graph.compute_query(q))
-            # if results > 0:
-            print(f'{results} hits for {q}')
+            if results > 0:
+                print(f'{results} hits for {q}')
 
 
 def main():
