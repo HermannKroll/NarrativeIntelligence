@@ -124,10 +124,10 @@ class Query:
         q_copy = Query(query=self)
         var_names = {v.name for v in self.variables}
         for e in self.entities:
-            if e in var_names:
+            if isinstance(e, QueryVariable):
                 q_copy.remove_entity(entity=e)
         for (s, p, o) in self.statements:
-            if s in var_names or o in var_names:
+            if isinstance(s, QueryVariable) or isinstance(o, QueryVariable):
                 q_copy.remove_statement((s, p, o))
 
         return q_copy
@@ -139,10 +139,10 @@ class Query:
         q_copy = Query(query=self)
         var_names = {v.name for v in self.variables}
         for e in self.entities:
-            if e not in var_names:
+            if not isinstance(e, QueryVariable):
                 q_copy.remove_entity(entity=e)
         for (s, p, o) in self.statements:
-            if s not in var_names and o not in var_names:
+            if not isinstance(s, QueryVariable) and not isinstance(o, QueryVariable):
                 q_copy.remove_statement((s, p, o))
 
         return q_copy
@@ -183,11 +183,18 @@ class Query:
             self.term_support = sum([s for s in self.term2support.values()])
 
     def add_entity(self, entity_id, support=0):
+        if isinstance(entity_id, QueryVariable):
+            self.__add_variable(entity_id)
         self.entities.add(entity_id)
         self.entity2support[entity_id] = support
         self.entity_support = sum([s for s in self.entity2support.values()])
 
     def add_statement(self, subject_id, relation, object_id, support=0):
+        if isinstance(subject_id, QueryVariable):
+            self.__add_variable(subject_id)
+        if isinstance(object_id, QueryVariable):
+            self.__add_variable(object_id)
+
         key = (subject_id, relation, object_id)
         self.statements.add(key)
         self.statement2support[key] = support
@@ -196,7 +203,7 @@ class Query:
     def add_relation(self, relation):
         self.relations.add(relation)
 
-    def add_variable(self, variable: QueryVariable):
+    def __add_variable(self, variable: QueryVariable):
         self.variables.add(variable)
 
     def __str__(self):
@@ -229,7 +236,7 @@ class Query:
 
         return True
 
-    def is_non_empty(self):
+    def is_empty(self):
         if len(self.terms) > 0:
             return False
         if len(self.entities) > 0:
@@ -343,9 +350,9 @@ class DataGraph:
             varname2type[q_subject.name] = 'subject'
             q = q.filter(JCDLInvertedStatementIndex.subject_id.in_(allowed_subjects))
 
-        if isinstance(q_subject, str):
+        if isinstance(q_object, str):
             q = q.filter(JCDLInvertedStatementIndex.object_id == q_object)
-        elif isinstance(q_subject, QueryVariable):
+        elif isinstance(q_object, QueryVariable):
             allowed_objects = self.get_allowed_entities_for_entity_type(q_object.entity_type)
             varname2type[q_object.name] = 'object'
             q = q.filter(JCDLInvertedStatementIndex.object_id.in_(allowed_objects))
@@ -591,13 +598,18 @@ class DataGraph:
 
     @staticmethod
     def merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new):
+        varsub2docs_result = {}
         for v_name in var_names:
+            varsub2docs_result[v_name] = {}
             if v_name in varsub2docs_new:
-                shared_subs = set(varsub2docs[v_name].keys()).intersection(varsub2docs_new[v_name].keys())
+                shared_subs = set(varsub2docs[v_name].keys()).intersection(set(varsub2docs_new[v_name].keys()))
                 for sub in shared_subs:
-                    varsub2docs[v_name] = {sub: varsub2docs[v_name][sub].intersection(varsub2docs_new[v_name][sub])}
-
-        return varsub2docs
+                    varsub2docs_result[v_name][sub] = varsub2docs[v_name][sub].intersection(
+                        varsub2docs_new[v_name][sub])
+            else:
+                for sub in varsub2docs[v_name]:
+                    varsub2docs_result[v_name][sub] = varsub2docs[v_name][sub]
+        return varsub2docs_result
 
     def compute_query(self, query: Query):
         # easy and fast mode without variables
@@ -606,8 +618,10 @@ class DataGraph:
 
         # Compute the result ids for the query without variables
         qwo = query.get_query_part_without_variables()
+        print(qwo)
         document_ids = set()
-        if qwo.is_non_empty():
+        if not qwo.is_empty():
+            print('qwo non empty')
             document_ids = self.compute_query_without_variables(qwo)
             # Query does not yield results
             if len(document_ids) == 0:
@@ -615,8 +629,9 @@ class DataGraph:
 
         # Get the query part with variables
         q_w_v = query.get_query_part_with_variables()
+        print(q_w_v)
         # if is empty, we are finished
-        if not q_w_v.is_non_empty():
+        if q_w_v.is_empty():
             return document_ids
 
         # Either the qwo part is empty or has result in an non-empty document result
@@ -626,33 +641,35 @@ class DataGraph:
         varsub2docs = {}
         for idx, (s, p, o) in enumerate(query.statements):
             # Translate subject or object into a query variable if necessary
-            if s in varname2variable:
-                s = varname2variable[s]
-            if o in varname2variable:
-                o = varname2variable[o]
+            #  if s in varname2variable:
+            #      s = varname2variable[s]
+            #  if o in varname2variable:
+            #     o = varname2variable[o]
 
             # for the first element, set all document ids as current set
-            if not qwo.is_non_empty() and idx == 0:
+            if qwo.is_empty() and idx == 0:
                 varsub2docs = self.get_document_ids_for_statement_with_variable(q_subject=s, relation=p, q_object=o)
             else:
                 varsub2docs_new = self.get_document_ids_for_statement_with_variable(q_subject=s, relation=p, q_object=o)
-                DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
+                varsub2docs = DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
 
-        for idx, entity_id in enumerate(query.entities):
+        for idx, entity_var in enumerate(query.entities):
             # it must be a variable
-            variable = varname2variable[entity_id]
+            # variable = varname2variable[entity_id]
             # for the first element, set all document ids as current set
-            if qwo.is_non_empty() and len(query.statements) == 0 and idx == 0:
-                varsub2docs = self.get_document_ids_for_entity_with_variable(variable=variable)
+            if qwo.is_empty() and len(query.statements) == 0 and idx == 0:
+                varsub2docs = self.get_document_ids_for_entity_with_variable(variable=entity_var)
             else:
-                varsub2docs_new = self.get_document_ids_for_entity_with_variable(variable=variable)
-                DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
+                varsub2docs_new = self.get_document_ids_for_entity_with_variable(variable=entity_var)
+                varsub2docs = DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
 
         # Reduce all variable subs to the set of document ids
         final_document_results = set()
         for v_name in var_names:
             for sub in varsub2docs[v_name]:
-                varsub2docs[v_name][sub] = varsub2docs[v_name][sub].intersection(document_ids)
+                # If we do not have a filter
+                if len(document_ids) > 0:
+                    varsub2docs[v_name][sub] = varsub2docs[v_name][sub].intersection(document_ids)
                 final_document_results.update(varsub2docs[v_name][sub])
 
         return final_document_results
