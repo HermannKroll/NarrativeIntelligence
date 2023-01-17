@@ -1,6 +1,7 @@
 import functools
 
 from narraint.analysis.querytranslation.data_graph import Query
+from narraint.analysis.querytranslation.translation import SchemaGraph
 
 
 class QueryRanker:
@@ -154,7 +155,7 @@ class StatementFrequencyBasedRanker:
         return sorted(relevant_queries, key=functools.cmp_to_key(StatementFrequencyBasedRanker.compare_queries),
                       reverse=True)
 
-
+schema_graph = SchemaGraph()
 RELATION_RELEVANCE_SCORE = {r: 0 for r in schema_graph.relations}
 RELATION_RELEVANCE_SCORE["associated"] = -1
 
@@ -205,8 +206,32 @@ class MostSpecificQueryFirstRanker:
                             continue
 
                 # they are equally relevant
+                if q1.statement_support > q2.statement_support:
+                    return 1
+                elif q1.statement_support < q2.statement_support:
+                    return -1
                 return 0
 
     @staticmethod
     def rank_queries(queries: [Query]) -> [Query]:
         return sorted(queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries), reverse=True)
+
+
+class MostSpecificQueryFirstLimit1Ranker:
+    NAME = "MostSpecificQueryFirstLimit1Ranker"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        relevant_queries = {q for q in queries if len(q.statements) == 1}
+        return sorted(relevant_queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries),
+                      reverse=True)
+
+
+class MostSpecificQueryFirstLimit2Ranker:
+    NAME = "MostSpecificQueryFirstLimit2Ranker"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        relevant_queries = {q for q in queries if 0 < len(q.statements) <= 2}
+        return sorted(relevant_queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries),
+                      reverse=True)
