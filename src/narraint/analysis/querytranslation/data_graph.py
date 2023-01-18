@@ -10,6 +10,7 @@ from sqlalchemy import delete
 
 from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.progress import Progress
+from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document, JCDLInvertedTermIndex, \
@@ -20,17 +21,28 @@ from narrant.entity.meshontology import MeSHOntology
 TERM_FREQUENCY_UPPER_BOUND = 0.99
 TERM_FREQUENCY_LOWER_BOUND = 0
 
-PUNCTUATION = string.punctuation  # without - / +
-PUNCTUATION = PUNCTUATION.replace('-', '')
-PUNCTUATION = PUNCTUATION.replace('+', '')
+PUNCTUATION = string.punctuation
 
 
-def get_document_ids_from_provenance_mappings(provenance_mapping):
-    if 'PubMed' in provenance_mapping:
-        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
-        return document_ids
-    else:
-        return {}
+class QueryVariable:
+
+    def __init__(self, name, entity_type):
+        self.name = name
+        self.entity_type = entity_type
+
+    def __str__(self):
+        return f'?{self.name}({self.entity_type})'
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def __eq__(self, other):
+        if self.name == other.name and self.entity_type == other.entity_type:
+            return True
+        return False
 
 
 class Query:
@@ -49,6 +61,7 @@ class Query:
         self.statement_support = 0
 
         self.relations = set()
+        self.variables = set()
 
         if query:
             self.terms = query.terms.copy()
@@ -64,6 +77,90 @@ class Query:
             self.statement_support = query.statement_support
 
             self.relations = query.relations.copy()
+            self.variables = query.variables.copy()
+
+    @staticmethod
+    def relax_query(query, delete_operations: int):
+        if delete_operations == 0:
+            yield None
+
+        # Iterate over all terms and remove a term
+        for term in query.terms:
+            q_rel = Query(query)
+            q_rel.remove_term(term)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+        # Iterate over all enities and remove an entity
+        for entity in query.entities:
+            q_rel = Query(query)
+            q_rel.remove_entity(entity)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+        # Iterate over all statements and remove a statement
+        for statement in query.statements:
+            q_rel = Query(query)
+            q_rel.remove_statement(statement)
+            # if we have a single delete operation -> just yield the removed query
+            if delete_operations == 1:
+                yield q_rel
+            # Otherwise recursively call the method again to produce all options
+            elif delete_operations > 1:
+                yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
+
+    def get_query_part_without_variables(self):
+        if len(self.variables) == 0:
+            return Query(query=self)
+
+        q_copy = Query(query=self)
+        var_names = {v.name for v in self.variables}
+        for e in self.entities:
+            if isinstance(e, QueryVariable):
+                q_copy.remove_entity(entity=e)
+        for (s, p, o) in self.statements:
+            if isinstance(s, QueryVariable) or isinstance(o, QueryVariable):
+                q_copy.remove_statement((s, p, o))
+
+        return q_copy
+
+    def get_query_part_with_variables(self):
+        if len(self.variables) == 0:
+            return Query(query=self)
+
+        q_copy = Query(query=self)
+        var_names = {v.name for v in self.variables}
+        for e in self.entities:
+            if not isinstance(e, QueryVariable):
+                q_copy.remove_entity(entity=e)
+        for (s, p, o) in self.statements:
+            if not isinstance(s, QueryVariable) and not isinstance(o, QueryVariable):
+                q_copy.remove_statement((s, p, o))
+
+        return q_copy
+
+    def remove_term(self, term):
+        self.terms.remove(term)
+        del self.term2support[term]
+        self.term_support = sum([s for s in self.term2support.values()])
+
+    def remove_entity(self, entity):
+        self.entities.remove(entity)
+        del self.entity2support[entity]
+        self.entity_support = sum([s for s in self.entity2support.values()])
+
+    def remove_statement(self, statement):
+        self.statements.remove(statement)
+        del self.statement2support[statement]
+        self.statement_support = sum([s for s in self.statement2support.values()])
 
     def is_valid(self, verbose=False):
         # Relation should be contained, but is not => not valid
@@ -86,11 +183,18 @@ class Query:
             self.term_support = sum([s for s in self.term2support.values()])
 
     def add_entity(self, entity_id, support=0):
+        if isinstance(entity_id, QueryVariable):
+            self.__add_variable(entity_id)
         self.entities.add(entity_id)
         self.entity2support[entity_id] = support
         self.entity_support = sum([s for s in self.entity2support.values()])
 
     def add_statement(self, subject_id, relation, object_id, support=0):
+        if isinstance(subject_id, QueryVariable):
+            self.__add_variable(subject_id)
+        if isinstance(object_id, QueryVariable):
+            self.__add_variable(object_id)
+
         key = (subject_id, relation, object_id)
         self.statements.add(key)
         self.statement2support[key] = support
@@ -99,9 +203,13 @@ class Query:
     def add_relation(self, relation):
         self.relations.add(relation)
 
+    def __add_variable(self, variable: QueryVariable):
+        self.variables.add(variable)
+
     def __str__(self):
         # term_str = '{' + f'{'), ('.join([str(term)  support for term, support in self.term2support.items()]}' + '}'
-        return f'<Terms: {self.term2support} AND Entities: {self.entity2support} AND Relations: {self.relations} AND Statements: {self.statement2support}>'
+        return f'<Terms: {self.term2support} AND Entities: {self.entity2support} AND Relations: {self.relations} ' \
+               f'AND Variables: {self.variables} AND Statements: {self.statement2support}>'
 
     def __repr__(self):
         return self.__str__()
@@ -113,6 +221,8 @@ class Query:
         if len(self.terms) != len(other.terms) or len(self.entities) != len(other.entities) or len(
                 self.statements) != len(other.statements) or len(self.relations) != len(other.relations):
             return False
+        if len(self.variables) != len(other.variables):
+            return False
         if len(self.terms.intersection(other.terms)) != len(self.terms):
             return False
         if len(self.entities.intersection(other.entities)) != len(self.entities):
@@ -121,7 +231,18 @@ class Query:
             return False
         if len(self.relations.intersection(other.relations)) != len(self.relations):
             return False
+        if len(self.variables.intersection(other.variables)) != len(self.variables):
+            return False
 
+        return True
+
+    def is_empty(self):
+        if len(self.terms) > 0:
+            return False
+        if len(self.entities) > 0:
+            return False
+        if len(self.statements) > 0:
+            return False
         return True
 
     def __ge__(self, other):
@@ -130,12 +251,21 @@ class Query:
         return False
 
 
+def get_document_ids_from_provenance_mappings(provenance_mapping):
+    if 'PubMed' in provenance_mapping:
+        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
+        return document_ids
+    else:
+        return {}
+
+
 class DataGraph:
 
     def __init__(self, graph_index={}, entity_index={}, term_index={}):
         self.graph_index = graph_index
         self.entity_index = entity_index
         self.term_index = term_index
+        self.entity_tagger = EntityTaggerJCDL.instance()
         self.mesh_ontology = None
         self.atc_tree = None
         self.__cache_term = {}
@@ -170,6 +300,19 @@ class DataGraph:
         self.__cache_entity[entity_id] = result
         return result
 
+    def get_document_ids_for_entity_with_variable(self, variable: QueryVariable):
+        session = SessionExtended.get()
+        allowed_entities = self.get_allowed_entities_for_entity_type(variable.entity_type)
+
+        q = session.query(JCDLInvertedEntityIndex.document_ids, JCDLInvertedEntityIndex.entity_id)
+        q = q.filter(JCDLInvertedEntityIndex.entity_id.in_(allowed_entities))
+
+        varsub2docs = {variable.name: {}}
+        for r in q:
+            result, entity_id = ast.literal_eval(r[0]), r[1]
+            varsub2docs[variable.name][entity_id] = result
+        return varsub2docs
+
     def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
         key = (subject_id, relation, object_id)
         if key in self.__cache_statement:
@@ -187,6 +330,46 @@ class DataGraph:
 
         self.__cache_statement[key] = result
         return result
+
+    def get_allowed_entities_for_entity_type(self, entity_type):
+        return self.entity_tagger.entity_type2entities[entity_type]
+
+    def get_document_ids_for_statement_with_variable(self, q_subject, relation, q_object):
+        session = SessionExtended.get()
+
+        q = session.query(JCDLInvertedStatementIndex.document_ids,
+                          JCDLInvertedStatementIndex.subject_id,
+                          JCDLInvertedStatementIndex.object_id)
+
+        q = q.filter(JCDLInvertedStatementIndex.relation == relation)
+        varname2type = {}
+        if isinstance(q_subject, str):
+            q = q.filter(JCDLInvertedStatementIndex.subject_id == q_subject)
+        elif isinstance(q_subject, QueryVariable):
+            allowed_subjects = self.get_allowed_entities_for_entity_type(q_subject.entity_type)
+            varname2type[q_subject.name] = 'subject'
+            q = q.filter(JCDLInvertedStatementIndex.subject_id.in_(allowed_subjects))
+
+        if isinstance(q_object, str):
+            q = q.filter(JCDLInvertedStatementIndex.object_id == q_object)
+        elif isinstance(q_object, QueryVariable):
+            allowed_objects = self.get_allowed_entities_for_entity_type(q_object.entity_type)
+            varname2type[q_object.name] = 'object'
+            q = q.filter(JCDLInvertedStatementIndex.object_id.in_(allowed_objects))
+
+        varsub2result = {}
+        for var_name in varname2type:
+            varsub2result[var_name] = {}
+        for r in q:
+            result, subject_id, object_id = ast.literal_eval(r[0]), r[1], r[2]
+
+            for var_name, so_type in varname2type.items():
+                if so_type == 'subject':
+                    varsub2result[var_name].update({subject_id: result})
+                elif so_type == 'object':
+                    varsub2result[var_name].update({object_id: result})
+
+        return varsub2result
 
     def resolve_type_and_expand_entity_by_superclasses(self, entity_id: str, entity_type: str) -> Set[str]:
         """
@@ -300,10 +483,11 @@ class DataGraph:
             progress.print_progress(i)
             # Make it lower + replace all punctuation by ' '
             doc_text = doc.get_text_content().strip().lower()
-            doc_text = doc_text.translate(translator)
-            for term in doc_text.split(' '):
+            # To this with and without punctuation removal
+            doc_text_without_punctuation = doc_text.translate(translator)
+            for term in itertools.chain(doc_text.split(' '), doc_text_without_punctuation.split(' ')):
                 term = term.strip()
-                if term in stopwords:
+                if not term or term in stopwords:
                     continue
                 if term not in term_index_local:
                     term_index_local[term] = set()
@@ -380,7 +564,7 @@ class DataGraph:
         self.graph_index = {}
         print('Finished')
 
-    def compute_query(self, query: Query):
+    def compute_query_without_variables(self, query: Query):
         document_ids = set()
         for idx, (s, p, o) in enumerate(query.statements):
             # for the first element, set all document ids as current set
@@ -411,6 +595,84 @@ class DataGraph:
                 return set()
 
         return document_ids
+
+    @staticmethod
+    def merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new):
+        varsub2docs_result = {}
+        for v_name in var_names:
+            varsub2docs_result[v_name] = {}
+            if v_name in varsub2docs_new:
+                shared_subs = set(varsub2docs[v_name].keys()).intersection(set(varsub2docs_new[v_name].keys()))
+                for sub in shared_subs:
+                    varsub2docs_result[v_name][sub] = varsub2docs[v_name][sub].intersection(
+                        varsub2docs_new[v_name][sub])
+            else:
+                for sub in varsub2docs[v_name]:
+                    varsub2docs_result[v_name][sub] = varsub2docs[v_name][sub]
+        return varsub2docs_result
+
+    def compute_query(self, query: Query):
+        # easy and fast mode without variables
+        if len(query.variables) == 0:
+            return self.compute_query_without_variables(query)
+
+        # Compute the result ids for the query without variables
+        qwo = query.get_query_part_without_variables()
+        print(qwo)
+        document_ids = set()
+        if not qwo.is_empty():
+            print('qwo non empty')
+            document_ids = self.compute_query_without_variables(qwo)
+            # Query does not yield results
+            if len(document_ids) == 0:
+                return {}
+
+        # Get the query part with variables
+        q_w_v = query.get_query_part_with_variables()
+        print(q_w_v)
+        # if is empty, we are finished
+        if q_w_v.is_empty():
+            return document_ids
+
+        # Either the qwo part is empty or has result in an non-empty document result
+        var_names = {v.name for v in query.variables}
+        varname2variable = {v.name: v for v in query.variables}
+        document_ids = set()
+        varsub2docs = {}
+        for idx, (s, p, o) in enumerate(query.statements):
+            # Translate subject or object into a query variable if necessary
+            #  if s in varname2variable:
+            #      s = varname2variable[s]
+            #  if o in varname2variable:
+            #     o = varname2variable[o]
+
+            # for the first element, set all document ids as current set
+            if qwo.is_empty() and idx == 0:
+                varsub2docs = self.get_document_ids_for_statement_with_variable(q_subject=s, relation=p, q_object=o)
+            else:
+                varsub2docs_new = self.get_document_ids_for_statement_with_variable(q_subject=s, relation=p, q_object=o)
+                varsub2docs = DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
+
+        for idx, entity_var in enumerate(query.entities):
+            # it must be a variable
+            # variable = varname2variable[entity_id]
+            # for the first element, set all document ids as current set
+            if qwo.is_empty() and len(query.statements) == 0 and idx == 0:
+                varsub2docs = self.get_document_ids_for_entity_with_variable(variable=entity_var)
+            else:
+                varsub2docs_new = self.get_document_ids_for_entity_with_variable(variable=entity_var)
+                varsub2docs = DataGraph.merge_variable_substitutions(var_names, varsub2docs, varsub2docs_new)
+
+        # Reduce all variable subs to the set of document ids
+        final_document_results = set()
+        for v_name in var_names:
+            for sub in varsub2docs[v_name]:
+                # If we do not have a filter
+                if len(document_ids) > 0:
+                    varsub2docs[v_name][sub] = varsub2docs[v_name][sub].intersection(document_ids)
+                final_document_results.update(varsub2docs[v_name][sub])
+
+        return final_document_results
 
 
 def main():
