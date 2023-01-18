@@ -607,7 +607,10 @@ def get_query(request):
                         year_aggregation.update({current_year: 1})
             found_years = list(year_aggregation.keys())
             found_years.sort()
-            all_years = list(range(found_years[0], found_years[-1] + 1))
+            try:
+                all_years = list(range(found_years[0], found_years[-1] + 1))
+            except:
+                all_years = found_years
             for year in set(all_years) - set(found_years) & set(all_years):
                 year_aggregation.update({year: 0})
 

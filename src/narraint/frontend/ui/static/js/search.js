@@ -780,10 +780,14 @@ const search = (event) => {
                     $('#modal_empty_result').modal("toggle");
                 }
             }
-
             let year_aggregation = response["year_aggregation"];
+
             let year_filter_container = document.querySelector(".year_filter");
-            year_filter_container.style.display = "block";
+            if (JSON.stringify(year_aggregation) !== '{}') {
+                year_filter_container.style.display = "block";
+            } else {
+                year_filter_container.style.display = "none";
+            }
             const fromSlider = document.querySelector('#fromSlider');
             const toSlider = document.querySelector('#toSlider');
             let xValues = new Array();
