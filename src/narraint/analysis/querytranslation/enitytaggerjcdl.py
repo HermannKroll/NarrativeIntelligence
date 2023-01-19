@@ -147,9 +147,9 @@ class EntityTaggerJCDL:
                     self._add_term_to_index(gene_symbol, gene_symbol, TARGET)
                     self._add_term_to_index(description, gene_symbol, GENE)
                     self._add_term_to_index(description, gene_symbol, TARGET)
-                    for synonym in synonyms.split('|'):
-                        self._add_term_to_index(synonym, gene_symbol, GENE)
-                        self._add_term_to_index(synonym, gene_symbol, TARGET)
+                #    for synonym in synonyms.split('|'):
+                 #       self._add_term_to_index(synonym, gene_symbol, GENE)
+                  #      self._add_term_to_index(synonym, gene_symbol, TARGET)
         logging.info('Gene terms added')
 
     def _add_fid_dosageform_terms(self):
