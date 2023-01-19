@@ -32,6 +32,14 @@ class TagInvertedIndex(Extended, DatabaseTable):
     document_ids = Column(String, nullable=False)
 
 
+class TermInvertedIndex(Extended, DatabaseTable):
+    __tablename__ = "term_inverted_index"
+
+    term = Column(String, nullable=False, index=True, primary_key=True)
+    document_collection = Column(String, nullable=False, index=True, primary_key=True)
+    document_ids = Column(String, nullable=False)
+
+
 class Tagger(models.Tagger):
     pass
 
