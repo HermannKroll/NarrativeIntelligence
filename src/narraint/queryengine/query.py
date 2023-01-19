@@ -85,7 +85,14 @@ class GraphQuery:
         else:
             self.fact_patterns = fact_patterns
 
-        self.additional_entities = list()
+        self.entity_sets = list()
+        self.terms = set()
+
+    def has_terms(self):
+        return len(self.terms) > 0
+
+    def has_entities(self) -> bool:
+        return len(self.entity_sets) > 0
 
     def has_entity(self):
         for fp in self.fact_patterns:
@@ -96,11 +103,11 @@ class GraphQuery:
     def add_fact_pattern(self, fact_pattern: FactPattern):
         self.fact_patterns.append(fact_pattern)
 
-    def add_additional_entities(self, entity_ids):
-        self.additional_entities.append(list(entity_ids))
+    def add_entity(self, entity_ids):
+        self.entity_sets.append(list(entity_ids))
 
-    def has_additional_entities(self) -> bool:
-        return len(self.additional_entities) > 0
+    def add_term(self, term):
+        self.terms.add(term.lower().strip())
 
     def __iter__(self):
         for fp in self.fact_patterns:
@@ -111,7 +118,12 @@ class GraphQuery:
             yield fp
 
     def __str__(self):
-        return '. '.join([str(fp) for fp in self.fact_patterns])
+        query_str = ["<Statements: ", ' AND '.join([str(fp) for fp in self.fact_patterns]), '>']
+        if self.has_entities():
+            query_str.extend([' <Entities:', ' AND '.join([str(e) for e in self.entity_sets]), '>'])
+        if self.has_terms():
+            query_str.extend([' <Terms:', ' AND '.join([str(t) for t in self.terms]), '>'])
+        return ' '.join([str(p) for p in query_str])
 
     def get_unique_key(self):
         parts = []
@@ -120,8 +132,10 @@ class GraphQuery:
             parts.append(fp.predicate)
             parts.extend(sorted([o.entity_id for o in fp.objects]))
 
-        for ae in self.additional_entities:
+        for ae in self.entity_sets:
             parts.extend(sorted([e.entity_id for e in ae]))
+        if self.has_terms():
+            parts.extend(sorted([t for t in self.terms]))
         return '_'.join(parts)
 
     def get_var_names_in_order(self):
@@ -133,4 +147,6 @@ class GraphQuery:
         return var_names
 
     def to_dict(self):
-        return dict(fact_patterns=[fp.to_dict() for fp in self.fact_patterns])
+        return dict(fact_patterns=[fp.to_dict() for fp in self.fact_patterns],
+                    entities=list([str(e) for e in self.entity_sets]),
+                    terms=list(self.terms))
