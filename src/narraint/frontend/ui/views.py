@@ -663,13 +663,21 @@ def get_new_query(request):
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
+        logging.debug(request)
         query = str(request.GET.get("query", "").strip())
         data_source = str(request.GET.get("data_source", "").strip())
 
+        req_entities = []
         if "entities" in request.GET:
-            req_entities = str(request.GET.get("entities", "").strip()).split(";")
-        else:
-            req_entities = None
+            req_ent_str = str(request.GET.get("entities", "").strip())
+            if req_ent_str:
+                req_entities = req_ent_str.split(";")
+
+        req_terms = []
+        if "terms" in request.GET:
+            req_term_str = str(request.GET.get("terms", "").strip())
+            if req_term_str:
+                req_terms = req_term_str.split(";")
 
         if "outer_ranking" in request.GET:
             outer_ranking = str(request.GET.get("outer_ranking", "").strip())
@@ -739,14 +747,15 @@ def get_new_query(request):
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
             # search for all documents containing all additional entities
-            if req_entities is not None:
-                for re in req_entities:
-                    try:
-                        entity_ids = View.instance().translation.convert_text_to_entity(re)
-                        graph_query.add_additional_entities(list(entity_ids))
-                    except ValueError:
-                        logging.debug(f'No conversion found for {re}')
-                        continue
+            for re in req_entities:
+                try:
+                    entities = View.instance().translation.convert_text_to_entity(re)
+                    graph_query.add_entity(list(entities))
+                except ValueError:
+                    logging.debug(f'No conversion found for {re}')
+
+            for term in req_terms:
+                graph_query.add_term(term)
 
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
