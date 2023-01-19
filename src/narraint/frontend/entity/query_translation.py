@@ -213,7 +213,7 @@ class QueryTranslation:
             for entity in json_obj["entities"]:
                 try:
                     entity_ids = self.convert_text_to_entity(entity)
-                    graph_query.add_additional_entities(entity_ids)
+                    graph_query.add_entity(entity_ids)
                     explanation_str += f'({entity_ids})\n'
                 except ValueError:
                     logging.debug(f'No conversion found for {entity}')
