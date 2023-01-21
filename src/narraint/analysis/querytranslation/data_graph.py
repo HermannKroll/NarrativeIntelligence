@@ -274,8 +274,30 @@ class DataGraph:
         self.mesh_ontology = None
         self.atc_tree = None
         self.__cache_term = {}
+        self.__cache_term_support = {}
         self.__cache_entity = {}
+        self.__cache_entity_support = {}
         self.__cache_statement = {}
+        self.__cache_statement_support = {}
+
+    def get_support_for_term(self, term: str) -> int:
+        if term in self.__cache_term_support:
+            return self.__cache_term_support[term]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLTermSupport.support).filter(JCDLTermSupport.term == term)
+        # if we have a result
+        support = 0
+        for r in q:
+            support = int(r[0])
+
+        if len(term) > 3 and term[-1] == 's':
+            q = session.query(JCDLTermSupport.support).filter(JCDLTermSupport.term == term[:-1])
+            for r in q:
+                support += r[0]
+
+        self.__cache_term_support[term] = support
+        return support
 
     def get_document_ids_for_term(self, term: str) -> Set[int]:
         if term in self.__cache_term:
@@ -295,6 +317,19 @@ class DataGraph:
 
         self.__cache_term[term] = result
         return result
+
+    def get_support_for_entity(self, entity_id) -> int:
+        if entity_id in self.__cache_entity_support:
+            return self.__cache_entity_support[entity_id]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLEntitySupport.support).filter(JCDLEntitySupport.entity_id == entity_id)
+        support = 0
+        for r in q:
+            support = int(r[0])
+
+        self.__cache_entity_support[entity_id] = support
+        return support
 
     def get_document_ids_for_entity(self, entity_id) -> Set[int]:
         if entity_id in self.__cache_entity:
@@ -322,6 +357,24 @@ class DataGraph:
             result, entity_id = ast.literal_eval(r[0]), r[1]
             varsub2docs[variable.name][entity_id] = result
         return varsub2docs
+
+    def get_support_for_statement(self, subject_id, relation, object_id) -> int:
+        key = (subject_id, relation, object_id)
+        if key in self.__cache_statement_support:
+            return self.__cache_statement_support[key]
+
+        session = SessionExtended.get()
+        q = session.query(JCDLStatementSupport.support)
+        q = q.filter(JCDLStatementSupport.subject_id == subject_id)
+        q = q.filter(JCDLStatementSupport.relation == relation)
+        q = q.filter(JCDLStatementSupport.object_id == object_id)
+        # if we have a result
+        support = 0
+        for r in q:
+            support = int(r[0])
+
+        self.__cache_statement_support[key] = support
+        return support
 
     def get_document_ids_for_statement(self, subject_id, relation, object_id) -> Set[int]:
         key = (subject_id, relation, object_id)
