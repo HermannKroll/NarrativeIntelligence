@@ -14,7 +14,7 @@ from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document, JCDLInvertedTermIndex, \
-    JCDLInvertedEntityIndex, JCDLInvertedStatementIndex
+    JCDLInvertedEntityIndex, JCDLInvertedStatementIndex, JCDLStatementSupport, JCDLEntitySupport, JCDLTermSupport
 from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
 from narrant.entity.meshontology import MeSHOntology
 
@@ -99,6 +99,11 @@ class Query:
         for entity in query.entities:
             q_rel = Query(query)
             q_rel.remove_entity(entity)
+            # We have to remove all statements with that entity
+            for s, p, o in query.statements:
+                if s == entity or o == entity:
+                    q_rel.remove_statement((s, p, o))
+
             # if we have a single delete operation -> just yield the removed query
             if delete_operations == 1:
                 yield q_rel
@@ -282,6 +287,11 @@ class DataGraph:
         result = set()
         for r in q:
             result = ast.literal_eval(r[0])
+
+        if len(term) > 3 and term[-1] == 's':
+            q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term[:-1])
+            for r in q:
+                result.update(ast.literal_eval(r[0]))
 
         self.__cache_term[term] = result
         return result
@@ -525,7 +535,8 @@ class DataGraph:
         print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
         self.__create_term_index(session)
-        print('Deleting table entries: JCDLInvertedTermIndex ...')
+        print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
+        session.execute(delete(JCDLInvertedTermIndex))
         session.execute(delete(JCDLInvertedTermIndex))
         print('Committing...')
         session.commit()
@@ -534,11 +545,16 @@ class DataGraph:
         JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=str(docs))
                                                                       for t, docs in self.term_index.items()],
                                                             check_constraints=False)
-        self.term_index = {}
 
+        JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, support=len(docs))
+                                                                for t, docs in self.term_index.items()],
+                                                      check_constraints=False)
+
+        self.term_index = {}
         self.__create_entity_index(session)
-        print('Deleting table entries: JCDLInvertedEntityIndex ...')
+        print('Deleting table entries: JCDLInvertedEntityIndex and JCDLEntitySupport...')
         session.execute(delete(JCDLInvertedEntityIndex))
+        session.execute(delete(JCDLEntitySupport))
         print('Committing...')
         session.commit()
         print('Storing inverted entity index values...')
@@ -546,10 +562,16 @@ class DataGraph:
                                                               [dict(entity_id=e, document_ids=str(docs))
                                                                for e, docs in self.entity_index.items()],
                                                               check_constraints=False)
+
+        JCDLEntitySupport.bulk_insert_values_into_table(session,
+                                                        [dict(entity_id=e, support=len(docs))
+                                                         for e, docs in self.entity_index.items()],
+                                                        check_constraints=False)
         self.entity_index = {}
 
-        print('Deleting table entries: JCDLInvertedTermIndex ...')
+        print('Deleting table entries: JCDLInvertedTermIndex and JCDLStatementSupport ...')
         session.execute(delete(JCDLInvertedStatementIndex))
+        session.execute(delete(JCDLStatementSupport))
         print('Committing...')
         session.commit()
         self.__create_graph_index(session)
@@ -561,6 +583,15 @@ class DataGraph:
                                                                            for (s, p, o), docs in
                                                                            self.graph_index.items()],
                                                                  check_constraints=False)
+
+        JCDLStatementSupport.bulk_insert_values_into_table(session, [dict(subject_id=s,
+                                                                          relation=p,
+                                                                          object_id=o,
+                                                                          support=len(docs))
+                                                                     for (s, p, o), docs in
+                                                                     self.graph_index.items()],
+                                                           check_constraints=False)
+
         self.graph_index = {}
         print('Finished')
 

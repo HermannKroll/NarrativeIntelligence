@@ -233,3 +233,23 @@ class JCDLInvertedStatementIndex(Extended, DatabaseTable):
     relation = Column(String, primary_key=True)
     object_id = Column(String, primary_key=True)
     document_ids = Column(String, nullable=False)
+
+
+class JCDLTermSupport(Extended, DatabaseTable):
+    __tablename__ = "jcdl_term_support"
+    term = Column(String, primary_key=True)
+    support = Column(Integer)
+
+
+class JCDLEntitySupport(Extended, DatabaseTable):
+    __tablename__ = "jcdl_entity_support"
+    entity_id = Column(String, primary_key=True)
+    support = Column(Integer)
+
+
+class JCDLStatementSupport(Extended, DatabaseTable):
+    __tablename__ = "jcdl_statement_support"
+    subject_id = Column(String, primary_key=True)
+    relation = Column(String, primary_key=True)
+    object_id = Column(String, primary_key=True)
+    support = Column(Integer)
