@@ -727,17 +727,19 @@ def get_new_query(request):
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
 
-        graph_query, query_trans_string = View.instance().translation \
-            .convert_query_text_to_fact_patterns(query)
+        graph_query = GraphQuery()
+        try:
+            graph_query, query_trans_string = View.instance().translation \
+                .convert_query_text_to_fact_patterns(query)
+        except:
+            pass
+
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
         elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
             query_trans_string = "Outer ranking strategy is unknown"
-            logger.error('parsing error')
-        elif not graph_query or len(graph_query.fact_patterns) == 0:
-            results_converted = []
             logger.error('parsing error')
         elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
                 graph_query) > 1:
@@ -746,6 +748,9 @@ def get_new_query(request):
             query_trans_string = "Do not support multiple variables in an ontology-based ranking"
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
+            if not graph_query:
+                graph_query = GraphQuery()
+
             # search for all documents containing all additional entities
             for re in req_entities:
                 try:

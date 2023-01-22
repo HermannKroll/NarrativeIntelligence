@@ -88,6 +88,9 @@ class GraphQuery:
         self.entity_sets = list()
         self.terms = set()
 
+    def has_statements(self):
+        return len(self.fact_patterns) > 0
+
     def has_terms(self):
         return len(self.terms) > 0
 
@@ -118,7 +121,9 @@ class GraphQuery:
             yield fp
 
     def __str__(self):
-        query_str = ["<Statements: ", ' AND '.join([str(fp) for fp in self.fact_patterns]), '>']
+        query_str = []
+        if self.has_statements():
+            query_str = ["<Statements: ", ' AND '.join([str(fp) for fp in self.fact_patterns]), '>']
         if self.has_entities():
             query_str.extend([' <Entities:', ' AND '.join([str(e) for e in self.entity_sets]), '>'])
         if self.has_terms():
