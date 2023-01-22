@@ -1,32 +1,16 @@
-import ast
 import itertools
-import json
 import logging
-import os.path
-import pickle
-import re
-import string
 from copy import copy
-from typing import Set, List
 
 import nltk
-from sqlalchemy import delete
 
-from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
-from kgextractiontoolbox.progress import Progress
-from narraint.analysis.querytranslation.data_graph import DataGraph, PUNCTUATION, Query
+from narraint.analysis.querytranslation.data_graph import DataGraph, Query
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
-from narraint.atc.atc_tree import ATCTree
-from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document, JCDLInvertedTermIndex, \
-    JCDLInvertedEntityIndex, JCDLInvertedStatementIndex
 from narraint.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.queryengine.query import GraphQuery
-from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
-from narrant.entity.meshontology import MeSHOntology
+from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES
 
 QUERY_1 = "Metformin Diabetes"
 QUERY_2 = "Metformin treats Diabetes"
@@ -44,7 +28,6 @@ DATA_GRAPH_CACHE = "/home/kroll/jcdl2023_datagraph_improved.pkl"
 
 # nltk.download('stopwords')
 
-
 class SchemaGraph:
 
     def __init__(self):
@@ -53,18 +36,24 @@ class SchemaGraph:
     def __load_schema_graph(self):
         translation = QueryTranslation()
         self.entity_types = translation.variable_type_mappings
+        print(self.entity_types)
         self.max_spaces_in_entity_types = max([len(t.split(' ')) - 1 for t in self.entity_types])
-        logging.info(f'Longest entity type has {self.max_spaces_in_entity_types} spaces')
+        print(f'Longest entity type has {self.max_spaces_in_entity_types} spaces')
         self.relation_vocab = RelationVocabulary()
         self.relation_vocab.load_from_json(PHARM_RELATION_VOCABULARY)
-        logging.info(f'Relation vocab with {len(self.relation_vocab.relation_dict)} relations load')
+        print(f'Relation vocab with {len(self.relation_vocab.relation_dict)} relations load')
         self.relation_dict = {k: k for k in self.relation_vocab.relation_dict.keys()}
+        self.relation_dict.update({syn: k for k, synonyms in self.relation_vocab.relation_dict.items()
+                                   for syn in synonyms})
+        print(self.relation_dict)
 
-        logging.info('Load relation constraint file...')
+        print('Load relation constraint file...')
         self.relation_type_constraints = RelationTypeConstraintStore()
         self.relation_type_constraints.load_from_json(PHARM_RELATION_CONSTRAINTS)
         self.relations = self.relation_dict.keys()
-        logging.info('Finished')
+
+        self.symmetric_relations = SYMMETRIC_PREDICATES
+        print('Finished')
 
     def find_possible_relations_for_entity_types(self, subject_type, object_type):
         allowed_relations = set()
