@@ -26,15 +26,24 @@ def entity_to_str(entity):
     if isinstance(entity, QueryVariable):
         return str(entity.entity_type).capitalize()
     else:
-        return entity_resolver.get_name_for_var_ent_id(entity)
+        name = entity_resolver.get_name_for_var_ent_id(entity)
+        if name[0].islower():
+            name = name.capitalize()
+        if '//' in name:
+            name = name.split('//')[1]
+        return name
 
 
 def query_to_json(q: Query):
     result = {"terms": [t for t in sorted(q.terms)],
-              "entities": [entity_to_str(e) for e in q.entities],
               "statements": []}
+    entities_in_statements = set()
     for s, p, o in q.statements:
+        entities_in_statements.add(s)
+        entities_in_statements.add(o)
         result["statements"].append((entity_to_str(s), p, entity_to_str(o)))
+    # only add entities that are not already in the statement
+    result["entities"] = [entity_to_str(e) for e in q.entities if e not in entities_in_statements]
 
     return result
 
