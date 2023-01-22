@@ -349,7 +349,7 @@ class QueryEngine:
             collection2valid_doc_ids = entity_collection2ids
 
         # now intersect the term document sets with entity ids
-        if len(graph_query.entity_sets) > 0:
+        if graph_query.has_terms() and graph_query.has_entities():
             for d_col, d_ids in entity_collection2ids.items():
                 if d_col in entity_collection2ids:
                     d_ids.intersection_update(entity_collection2ids[d_col])

@@ -718,6 +718,7 @@ def get_new_query(request):
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
 
         logging.info(f'Additional entities are {req_entities}')
+        logging.info(f'Additional terms are {req_entities}')
         logging.info("Selected data source is {}".format(data_source))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
