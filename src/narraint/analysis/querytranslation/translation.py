@@ -47,7 +47,20 @@ class QueryTranslationToGraph:
         return term2dictentries
 
     def __greedy_find_predicates_in_keywords(self, keywords):
-        return self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.relation_dict)
+        term2predicates = {}
+        for r_entry, relation in self.schema_graph.relation_dict.items():
+            for keyword in keywords:
+                if r_entry.startswith('*') and r_entry.endswith('*') and r_entry[1:-1] in keyword:
+                    term2predicates[keyword] = relation
+                    continue
+                if r_entry.startswith('*') and keyword.endswith(r_entry[1:]):
+                    term2predicates[keyword] = relation
+                    continue
+                if r_entry.endswith('*') and keyword.startswith(r_entry[:-1]):
+                    term2predicates[keyword] = relation
+                    continue
+        return term2predicates
+        # return self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.relation_dict)
 
     def __greedy_find_entity_types_variables_in_keywords(self, keywords):
         return self.__greedy_find_dict_entries_in_keywords(keywords, self.schema_graph.entity_types)
@@ -63,14 +76,15 @@ class QueryTranslationToGraph:
             i = 0
             for i in range(len(keywords_remaining), 0, -1):
                 current_part = ' '.join([k for k in keywords_remaining[:i]])
-                # logging.debug(f'Checking query part: {current_part}')
+
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=False)
                     term2entities[current_part] = entities_in_part
-                    # logging.debug(f'Found: {entities_in_part}')
+                    # print(f'Found {entities_in_part} in query part: {current_part}')
                     found = True
                     break
                 except KeyError:
+                    # print(f'No match for query part: {current_part}')
                     pass
             # Have we found an entity?
             if found:
@@ -299,11 +313,11 @@ class QueryTranslationToGraph:
                 # We won't find smaller terms
                 if not term:
                     continue
-                document_ids = self.data_graph.get_document_ids_for_term(term=term)
-                if len(document_ids) > 0:
-                    possible_terms.append((len(document_ids), term))
+                support = self.data_graph.get_support_for_term(term=term)
+                if support > 0:
+                    possible_terms.append((support, term))
                     if verbose:
-                        print(f'{len(document_ids)} support: {term}')
+                        print(f'{support} support: {term}')
 
             if verbose:
                 print('--' * 60)
@@ -312,11 +326,11 @@ class QueryTranslationToGraph:
             possible_entities = list()
             for term, entities in term2entities.items():
                 for entity in entities:
-                    document_ids = self.data_graph.get_document_ids_for_entity(entity_id=entity)
-                    if len(document_ids) > 0:
-                        possible_entities.append((len(document_ids), term, entity))
+                    support = self.data_graph.get_support_for_entity(entity_id=entity)
+                    if support > 0:
+                        possible_entities.append((support, term, entity))
                         if verbose:
-                            print(f'{len(document_ids)} support: {term} ---> {entity}')
+                            print(f'{support} support: {term} ---> {entity}')
 
             if verbose:
                 print('--' * 60)
@@ -338,15 +352,15 @@ class QueryTranslationToGraph:
                                     if subject_id > object_id:
                                         continue
 
-                                document_ids = self.data_graph.get_document_ids_for_statement(subject_id=subject_id,
-                                                                                              relation=relation,
-                                                                                              object_id=object_id)
-                                if len(document_ids) > 0:
+                                support = self.data_graph.get_support_for_statement(subject_id=subject_id,
+                                                                                    relation=relation,
+                                                                                    object_id=object_id)
+                                if support > 0:
                                     if verbose:
                                         print(
-                                            f'{len(document_ids)} support: {subject_id} ({term1}) x {relation} x {object_id} ({term2})')
+                                            f'{support} support: {subject_id} ({term1}) x {relation} x {object_id} ({term2})')
                                     possible_statements.append(
-                                        (len(document_ids), term1, subject_id, relation, term2, object_id))
+                                        (support, term1, subject_id, relation, term2, object_id))
 
             if verbose:
                 print('--' * 60)
@@ -377,19 +391,3 @@ class QueryTranslationToGraph:
             if results > 0:
                 print(f'{results} hits for {q}')
 
-
-def main():
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.INFO)
-
-    trans = QueryTranslationToGraph(data_graph=DataGraph(), schema_graph=SchemaGraph())
-    for q in QUERIES:
-        logging.info('==' * 60)
-        logging.info(f'Translating query: "{q}"')
-        graph_q = trans.translate_keyword_query(q)
-        logging.info('==' * 60)
-
-
-if __name__ == "__main__":
-    main()
