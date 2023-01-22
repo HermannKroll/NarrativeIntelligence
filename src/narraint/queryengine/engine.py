@@ -16,6 +16,7 @@ from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
+from narrant.preprocessing.enttypes import ALL
 
 QUERY_DOCUMENT_LIMIT = 1500000
 
@@ -300,7 +301,15 @@ class QueryEngine:
                 q = q.filter(TagInvertedIndex.document_collection.in_(document_collection_filter))
 
             if len(entity_ids) == 1:
-                q = q.filter(TagInvertedIndex.entity_id == entity_ids[0])
+                # Check if we search with a variable
+                if not entity_ids[0].startswith('?'):
+                    q = q.filter(TagInvertedIndex.entity_id == entity_ids[0])
+                else:
+                    var_type = VAR_TYPE.search(entity_ids[0])
+                    if var_type:
+                        var_type = var_type.group(1)
+                        logging.debug(f'Found variable for entity querying. Type is: {var_type}')
+                        entity_types = [var_type]
             else:
                 q = q.filter(TagInvertedIndex.entity_id.in_(entity_ids))
 
