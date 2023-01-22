@@ -335,6 +335,42 @@ class QueryEngine:
         return doc_col2valid_ids
 
     @staticmethod
+    def process_query_without_statements(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
+            -> List[QueryDocumentResult]:
+        logging.debug('Process query without statements...')
+        collection2valid_doc_ids = {}
+        # Query for terms and entities
+        term_collection2ids = QueryEngine.query_for_terms_in_query(graph_query, document_collection_filter)
+        if len(graph_query.terms) > 0:
+            collection2valid_doc_ids = term_collection2ids
+
+        entity_collection2ids = QueryEngine.query_for_entities_in_query(graph_query, document_collection_filter)
+        if len(graph_query.terms) == 0:
+            collection2valid_doc_ids = entity_collection2ids
+
+        # now intersect the term document sets with entity ids
+        if len(graph_query.entity_sets) > 0:
+            for d_col, d_ids in entity_collection2ids.items():
+                if d_col in entity_collection2ids:
+                    d_ids.intersection_update(entity_collection2ids[d_col])
+                else:
+                    # no entity collection match
+                    d_ids = set()
+                logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
+
+        # No variables are used in the query
+        query_results = []
+        for d_col, d_ids in collection2valid_doc_ids.items():
+            doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+            for d_id in d_ids:
+                title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
+                                                         {}, 0.0, {}, org_document_id=org_id, doi=doi,
+                                                         document_collection=d_col))
+        logging.debug(f'{len(query_results)} results computed')
+        return query_results
+
+    @staticmethod
     def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
             -> List[QueryDocumentResult]:
         """
@@ -349,6 +385,9 @@ class QueryEngine:
         if not graph_query:
             logging.debug('Query will not yield results - returning empty list')
             return []
+
+        if len(graph_query.fact_patterns) == 0 and (len(graph_query.terms) > 0 or len(graph_query.entity_sets) > 0):
+            return QueryEngine.process_query_without_statements(graph_query)
 
         collection2valid_doc_ids = defaultdict(set)
         collection2valid_subs = {}
