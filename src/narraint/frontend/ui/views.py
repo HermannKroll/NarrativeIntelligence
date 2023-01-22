@@ -655,16 +655,12 @@ def get_new_query(request):
     valid_query = False
     query_limit_hit = False
     query_trans_string = ""
-    if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
-        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
         View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
         logging.debug(request)
-        query = str(request.GET.get("query", "").strip())
         data_source = str(request.GET.get("data_source", "").strip())
 
         req_entities = []
@@ -720,7 +716,7 @@ def get_new_query(request):
             year_sort_desc = True
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
-        logging.info(f'Query string is: {query}')
+
         logging.info(f'Additional entities are {req_entities}')
         logging.info("Selected data source is {}".format(data_source))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
@@ -728,11 +724,15 @@ def get_new_query(request):
         time_start = datetime.now()
 
         graph_query = GraphQuery()
-        try:
-            graph_query, query_trans_string = View.instance().translation \
-                .convert_query_text_to_fact_patterns(query)
-        except:
-            pass
+        query = ""
+        if "query" in request.GET:
+            query = str(request.GET.get("query", "").strip())
+            logging.info(f'Query string is: {query}')
+            try:
+                graph_query, query_trans_string = View.instance().translation \
+                    .convert_query_text_to_fact_patterns(query)
+            except:
+                pass
 
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
@@ -786,14 +786,14 @@ def get_new_query(request):
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
 
-        View.instance().query_logger.write_api_call(True, "get_query", str(request),
+        View.instance().query_logger.write_api_call(True, "get_new_query", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
                  query_limit_hit="False"))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
