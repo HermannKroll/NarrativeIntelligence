@@ -4,6 +4,8 @@ from flask import Flask, url_for, request, abort
 
 from narraint.analysis.querytranslation.data_graph import DataGraph, Query, QueryVariable
 from narraint.analysis.querytranslation.entityresolverjcdl import EntityResolverJCDL
+from narraint.analysis.querytranslation.ranker import MostSpecificQueryWithResults, AssociatedRankerWithQueryResults, \
+    MostSupportedQuery, QueryRanker
 from narraint.analysis.querytranslation.translation import SchemaGraph, QueryTranslationToGraph
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -15,7 +17,7 @@ schema_graph = SchemaGraph()
 translation = QueryTranslationToGraph(data_graph=data_graph, schema_graph=schema_graph)
 entity_resolver = EntityResolverJCDL.instance()
 
-ranker_strategies = []
+ranker_strategies: [QueryRanker] = [MostSpecificQueryWithResults, AssociatedRankerWithQueryResults, MostSupportedQuery]
 
 app = Flask(__name__)
 
@@ -54,15 +56,15 @@ def query():
     try:
         graph_queries = translation.translate_keyword_query(keyword_query=keywords, verbose=False)
         results = {}
-        for ranker in ranker_strategies:
-            results[ranker.name] = {}
+        for idx, ranker in enumerate(ranker_strategies):
+            results[idx] = {}
 
-            ranked_queries = ranker.rank_queries(graph_queries)
+            ranked_queries = ranker.rank_queries_with_data_graph(graph_queries, data_graph=data_graph)
             if len(ranked_queries) > 0:
                 best = ranked_queries[0]
-                results[ranker.name] = query_to_json(best)
+                results[idx] = query_to_json(best)
             else:
-                results[ranker.name] = None
+                results[idx] = None
         return results
 
     except:
