@@ -1251,5 +1251,28 @@ class PoliticalSciencesView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
+class KeywordSearchView(TemplateView):
+    template_name = "ui/keyword_search.html"
+
+
+def get_keyword_search_request(request):
+    if request.GET.keys() & {"keywords"}:
+        keywords = request.GET.get("keywords", "")
+        if keywords.strip():
+            try:
+                logging.debug('Generating graph queries for "{}"'.format(keywords))
+
+                nd_result = requests.get(
+                    f"http://127.0.0.1:5000//query?keywords={keywords}")
+                # return dict{terms: list[str], entities: list[str], statements: list[(str, str, str)]}
+                json_data = nd_result.json()
+                if nd_result.status_code == 200:
+                    return JsonResponse(status=200, data=dict(query_graphs=json_data))
+
+            except Exception:
+                logging.debug(f'Could generate graph queries for "{keywords}"')
+    return HttpResponse(status=500)
+
+
 logging.info('Initialize view')
 View.instance()

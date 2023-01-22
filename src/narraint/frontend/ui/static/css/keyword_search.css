@@ -1,0 +1,247 @@
+:root {
+    --color-ge: #ffffff;
+    --color_qg_bg: #eeeeee;
+
+    --grey_border: #ced4da;
+    --grey_accent: #616161;
+    --grey_dark1: #dbdbdb;
+}
+
+.stop-scrolling {
+    height: 100%;
+    overflow: hidden;
+}
+
+.z-idx-1000 {
+    z-index: 1000;
+}
+
+.bg-op-50 {
+    opacity: 50%;
+}
+
+.bg-qg {
+    background-color: var(--color_qg_bg, #ffffff);
+}
+
+.h-250px {
+    height: 250px;
+}
+
+.h-25px {
+    height: 25px;
+}
+
+.h-100px {
+    height: 100px;
+}
+
+.br-0_25rem {
+    /* bottom right 0.25rem */
+    right: 0.25rem;
+    bottom: 0.25rem;
+}
+
+.w-4rem {
+    width: 4rem;
+}
+
+.w-100-4rem {
+    width: calc(100% - 4rem);
+}
+
+.mh-2_25rem {
+    min-height: 2.25rem;
+}
+
+.pc_baseline {
+    place-content: baseline;
+}
+
+.shadow-hov:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+    cursor: pointer;
+}
+
+.fs-15px {
+    font-size: 15px;
+}
+
+@media (min-width: 768px) {
+    .w-32 {
+        width: 32% !important;
+    }
+
+    .m-05 {
+        margin-left: 0.5% !important;
+        margin-right: 0.5% !important;
+    }
+}
+
+/*====================================================================================================================*/
+/*====================================================================================================================*/
+/* CURRENTLY COPIED FROM DEFAULT SEARCH -> ui.css                                                                     */
+/*====================================================================================================================*/
+/*====================================================================================================================*/
+.popupButton {
+    cursor: pointer;
+    border: 1px solid var(--grey_border);
+    border-radius: 0.3em;
+    padding: 0.15em;
+
+}
+
+.popupButton img {
+    border-radius: 0.45em;
+}
+
+.popupButton:hover {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.09);
+}
+
+/* Paper-view styles */
+.popup {
+    display: none;
+    position: fixed;
+    overflow-scrolling: touch;
+    top: 0;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.4);
+    width: 100%;
+    height: 100%;
+}
+.newsdetail {
+    height: 90%;
+    background-color: white;
+    margin: 2% 2% 2% 2%;
+    padding: 1em;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.09);
+}
+.newsdetail .top {
+    display: flex;
+    place-content: space-between;
+    align-items: center;
+    height: 1.5em;
+}
+.newsdetail .top a img {
+    height: 1.5em;
+    width: 1.5em;
+}
+.newsdetail .top div {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    border-radius: 1em;
+}
+.newsdetail .top div img {
+    height: 1.5em;
+    width: 1.5em;
+}
+.newsdetail .top div:hover {
+    background-color: var(--grey_dark1);
+}
+.newsdetail .bottom {
+    display: flex;
+    height: 95%;
+    margin-top: 1em;
+    border-top: 1px solid var(--grey_accent);
+}
+.newsdetail .bottom .checkbox {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    width: 10%;
+    padding: 0.75em;
+}
+.newsdetail .bottom .checkbox div {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.17), 0 2px 3px 0 rgba(0, 0, 0, 0.15);
+    border-radius: 0.33em;
+    margin-bottom: 0.75em;
+    padding: 0.2em;
+}
+.newsdetail .bottom .checkbox div input {
+    height: 1.5em;
+    width: 1.5em;
+    cursor: pointer;
+}
+.newsdetail .bottom .checkbox div label {
+    margin-left: 0.33em;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.newsdetail .bottom .paper {
+    overflow-y: scroll;
+    width: 47%;
+    padding: 0.75em 1.5em 0.75em 1.5em;
+}
+.newsdetail .bottom .paper a:link, .newsdetail .bottom .paper a:visited {
+    border-radius: 0.33em;
+    text-decoration: none;
+    color: black;
+}
+.newsdetail .bottom .paper h2 {
+    font-size: 22px;
+    margin: 0;
+}
+.newsdetail .bottom .paper .author {
+    margin-top: 0.75em;
+    font-size: 15px;
+}
+.newsdetail .bottom .paper .journal {
+    border-top: 1px solid var(--grey_accent);
+    margin-top: 1em;
+    font-size: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+.newsdetail .bottom .paper .date {
+    margin-top: 0.5em;
+    font-size: 15px;
+    font-style: italic;
+    border-bottom: 1px solid var(--grey_accent);
+    text-align: center;
+}
+.newsdetail .bottom .paper .abstract {
+    font-size: 16px;
+    margin-top: 1em;
+}
+.newsdetail .bottom .graph {
+    background-color: #eeeeee;
+    border: 1px solid var(--grey_accent);
+    border-top: 0;
+    margin: 0 0.75em 0.75em 0;
+    height: 100%;
+    width: 43%;
+}
+
+.subgroupLinkImg {
+    display: flex;
+    align-items: center;
+    margin-right: 2px;
+    margin-left: 2px;
+    padding-top: 2px;
+}
+
+.subgroupHeader {
+    width: 90%;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.subgroupRatingImg {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.subgroupRatingDiv {
+    width: 10%;
+    align-items: center;
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+}

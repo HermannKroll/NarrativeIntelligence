@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/keyword_search.css' %}">
+{% endblock %}
+
+{% block title %}Keyword Search{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="mt-5">
+            <div class="input-group">
+                <input type="text" class="form-control" aria-label="Keywords" id="search_input"
+                       placeholder="Enter Keywords - e.g. metformin diabetes mellitus injection" >
+                <button class="btn btn-primary" type="button" id="search_submit" onclick="search()">
+                    <span class="spinner-border spinner-border-sm d-none" id="search_spinner" role="status"></span>
+                    Search
+                </button>
+            </div>
+            <div class="container alert alert-danger d-none" role="alert" id="input_alert">
+                Empty input. Provide keywords to search!
+            </div>
+        </div>
+
+        <div class="mt-3 py-2">
+            <!-- search input -->
+            <h3 class="mb-0">Queries:</h3>
+            <em id="info_text" class="d-none fs-15px">Click on one query to search.</em>
+            <!-- result query graphs -->
+            <div class="row d-flex flex-wrap px-1" id="query_graphs"></div>
+        </div>
+
+        <!-- RESULTS -->
+
+        <div class="mt-3 py-2 mb-3" id="result_div">
+            <div class="row">
+                <div class="col d-flex">
+                    <h3>Results:</h3>
+                </div>
+
+                <div class="container alert alert-danger d-none" role="alert" id="result_alert">
+                    Keyword query cannot be converted (syntax error)
+                </div>
+
+                <div class="col-md-auto d-none" id="div_input_page">
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text">Page: </span>
+                        <input class="form-control" type="number" size="1" id="input_page_no" step="1" value="1"/>
+                        <span class="input-group-text" id="label_max_page"> of PG</span>
+                    </div>
+                </div>
+
+                <div class="col-md-auto d-none">
+                    <select class="form-select" id="select_sorting_year">
+                        <option selected value="True">Latest Publications First</option>
+                        <option value="False">Oldest Publications First</option>
+                    </select>
+                </div>
+                <div class="col-md-auto d-none">
+                    <select class="form-select" id="select_sorting_freq">
+                        <option selected value="True">Most Frequent Substitutions First</option>
+                        <option value="False">Unusual Substitutions First</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="div_documents"></div>
+            </div>
+
+        </div>
+
+        <!-- TOOLTIP DIV -->
+        <div class="d-none position-absolute bg-light border rounded p-1" id="tooltip" style=""></div>
+
+        <!-- LOADING SCREEN -->
+        <div class="position-absolute start-0 top-0 w-100 h-100 bg-dark bg-op-50 z-idx-1000 d-flex d-none" id="loading_screen">
+            <div class="spinner-border text-primary m-auto" role="status" id="result_spinner">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAPER POPUP -->
+    <div class="popup" id="newsPopup">
+        <div class="newsdetail">
+            <div class="top">
+                <a id="paperLink">View Paper</a>
+                <a id="paperTab">Open in a new tab
+                    <img src="{% static 'assets/searchicon.svg' %}">
+                </a>
+                <div onclick="hidePaperView()">
+                    <img src="{% static 'assets/close.svg' %}">
+                </div>
+            </div>
+            <div class="bottom">
+                <div class="checkbox" id="newsCheckbox"></div>
+                <div class="paper">
+                    <h2 id="paperTitle"></h2>
+                    <p class="author" id="paperAuthor"></p>
+                    <p class="journal" id="paperJournal"></p>
+                    <p class="date" id="paperDate"></p>
+                    <p class="abstract" id="paperAbstract"></p>
+
+                    <div id="classifications">
+                        <h2 id="classificationHeader">Classifications</h2>
+                        <div id="classificationDiv"></div>
+                        <p id="classificationInfo"
+                           style="margin-top: 10px; font-size:15px;">
+                            <em>(1,10) means text passage 1-10</em></p>
+                    </div>
+                </div>
+                <div class="graph" id="paperGraph"></div>
+            </div>
+        </div>
+    </div>
+
+    {% csrf_token %}
+
+{% endblock %}
+
+{% block javascript %}
+    <!-- internal scripts -->
+    <script src="{% static 'js/keyword_search.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=1" type="text/javascript"></script>
+    <!-- external scripts -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- used for paper view popup -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+
+
+    <!-- global variables -->
+    <script type="text/javascript">
+        // IMAGES
+        const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png' %}";
+        const url_graph_preview = "{% static 'graph_preview.png' %}";
+        const ok_symbol_url = "{% static 'ok.png' %}";
+        const cancel_symbol_url = "{% static 'cancel.png' %}";
+        const search_icon_url = "{% static 'assets/searchicon.svg' %}"
+
+        // URLS
+        const url_keyword_search_request = "{% url 'keyword_search_request' %}";
+        const url_default_query = "{% url 'new_query' %}"
+        const url_provenance = "{% url 'provenance' %}";
+        const url_document_graph = "{% url 'document_graph' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+        const url_paper_view_log = "{% url 'paper_view_log' %}";
+
+        const feedback_url = "{% url 'feedback' %}";
+        const subgroup_feedback_url = "{% url 'subgroup_feedback' %}";
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    </script>
+{% endblock %}
