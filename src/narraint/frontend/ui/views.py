@@ -756,7 +756,14 @@ def get_new_query(request):
             for re in req_entities:
                 try:
                     entities = View.instance().translation.convert_text_to_entity(re)
-                    graph_query.add_entity(list(entities))
+                    should_add = True
+                    for e in entities:
+                        if e.entity_id.startswith('?'):
+                            logging.debug('Variable detected in entities - not supported at the moment (ignoring)')
+                            should_add = False
+                            break
+                    if should_add:
+                        graph_query.add_entity(list(entities))
                 except ValueError:
                     logging.debug(f'No conversion found for {re}')
 
