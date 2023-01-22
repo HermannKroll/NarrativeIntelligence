@@ -24,7 +24,7 @@ app = Flask(__name__)
 
 def entity_to_str(entity):
     if isinstance(entity, QueryVariable):
-        return str(entity.entity_type)
+        return str(entity.entity_type).capitalize()
     else:
         return entity_resolver.get_name_for_var_ent_id(entity)
 
@@ -34,10 +34,7 @@ def query_to_json(q: Query):
               "entities": [entity_to_str(e) for e in q.entities],
               "statements": []}
     for s, p, o in q.statements:
-        result["statements"].append({
-            "subject": entity_to_str(s),
-            "relation": p,
-            "object": entity_to_str(o)})
+        result["statements"].append((entity_to_str(s), p, entity_to_str(o)))
 
     return result
 
@@ -54,8 +51,12 @@ def query():
     if not keywords:
         abort(404)
     try:
+        print(f'Received keywords: {keywords}')
+        print(f'Translating keywords...')
         graph_queries = translation.translate_keyword_query(keyword_query=keywords, verbose=False)
+        print(f'{len(graph_queries)} possible queries generated')
         results = {}
+        print(f'Sorting...')
         for idx, ranker in enumerate(ranker_strategies):
             results[idx] = {}
 
@@ -65,6 +66,7 @@ def query():
                 results[idx] = query_to_json(best)
             else:
                 results[idx] = None
+        print('Sending results')
         return results
 
     except:
