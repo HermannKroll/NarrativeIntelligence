@@ -247,8 +247,9 @@ class QueryEngine:
         session = SessionExtended.get()
         doc_col2valid_ids = {}
         for idx, term in enumerate(graph_query.terms):
+            term_lower = term.lower().strip()
             q = session.query(TermInvertedIndex.document_collection, TermInvertedIndex.document_ids)
-            q = q.filter(TermInvertedIndex.term == term)
+            q = q.filter(TermInvertedIndex.term == term_lower)
 
             if document_collection_filter and len(document_collection_filter) == 1:
                 q = q.filter(TermInvertedIndex.document_collection == list(document_collection_filter)[0])
@@ -260,7 +261,7 @@ class QueryEngine:
             for row in q:
                 found_result = True
                 # interpret the string from db as a python string list
-                if row.document_collection not in doc_col2valid_ids:
+                if row.document_collection not in collection2term_ids:
                     collection2term_ids[row.document_collection] = ast.literal_eval(row.document_ids)
                 else:
                     collection2term_ids[row.document_collection].update(ast.literal_eval(row.document_ids))
