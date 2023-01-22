@@ -22,6 +22,8 @@ let networkOptions = {
     }
 };
 
+let graphs = []
+
 async function search() {
     const keywords = document.getElementById('search_input').value;
     if (keywords === "") {
@@ -72,6 +74,8 @@ function createQueryGraph(qg, parent_div) {
 
     const [container, graphDiv, tDiv] = createQGContainer();
     parent_div.appendChild(container);
+
+    graphs.push(container);
 
     addQGTerms(terms, tDiv);
     addQGClickEvent(terms, entts, stmts, container);
@@ -174,7 +178,11 @@ function showResults(response, query) {
     // }
 }
 
-
+function resetBorders() {
+    graphs.forEach((container) => {
+        container.classList.remove('border-danger');
+    })
+}
 
 function addQGClickEvent(terms, entts, stmts, container) {
     const params = qgUrlParams(terms, entts, stmts);
@@ -184,6 +192,8 @@ function addQGClickEvent(terms, entts, stmts, container) {
         if (latest_valid_query === params) {
             return;
         }
+
+        resetBorders();
         latest_valid_query = params;
 
         toggleLoadingScreen();
@@ -192,6 +202,8 @@ function addQGClickEvent(terms, entts, stmts, container) {
             .then((data) => showResults(data, params))
             .catch((e) => console.log(e))
         toggleLoadingScreen();
+
+        container.classList.add('border-danger');
     }
 }
 
