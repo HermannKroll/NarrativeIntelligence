@@ -776,10 +776,10 @@ def get_new_query(request):
 
             results, cache_hit, time_needed = \
                 do_query_processing_with_caching(graph_query, document_collection)
-            result_ids = {r.document_id for r in results}
-            opt_query = QueryOptimizer.optimize_query(graph_query)
-            View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                         query, opt_query)
+            #  result_ids = {r.document_id for r in results}
+            # opt_query = QueryOptimizer.optimize_query(graph_query)
+            #   View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+            #                                                query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultTreeAggregationBySubstitution()
