@@ -1,7 +1,8 @@
+from narraint.analysis.querytranslation.data_graph import Query, DataGraph
+
 import functools
 
-from narraint.analysis.querytranslation.data_graph import Query
-from narraint.analysis.querytranslation.translation import SchemaGraph
+from narraint.analysis.querytranslation.schema_graph import SchemaGraph
 
 
 class QueryRanker:
@@ -13,6 +14,10 @@ class QueryRanker:
     @staticmethod
     def rank_queries(queries: [Query]) -> [Query]:
         pass
+
+    @staticmethod
+    def rank_queries_with_data_graph(queries: [Query], data_graph: DataGraph) -> [Query]:
+        return QueryRanker.rank_queries(queries)
 
 
 class TermBasedRanker:
@@ -155,6 +160,7 @@ class StatementFrequencyBasedRanker:
         return sorted(relevant_queries, key=functools.cmp_to_key(StatementFrequencyBasedRanker.compare_queries),
                       reverse=True)
 
+
 schema_graph = SchemaGraph()
 RELATION_RELEVANCE_SCORE = {r: 0 for r in schema_graph.relations}
 RELATION_RELEVANCE_SCORE["associated"] = -1
@@ -235,3 +241,80 @@ class MostSpecificQueryFirstLimit2Ranker:
         relevant_queries = {q for q in queries if 0 < len(q.statements) <= 2}
         return sorted(relevant_queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries),
                       reverse=True)
+
+
+class TreatsRanker:
+    NAME = "TreatsRanker"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            if len(q.statements) == 1 and 'treats' in {r for _, r, _ in q.statements} and len(q.entities) == 2:
+                relevant_queries.add(q)
+        return sorted(relevant_queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries),
+                      reverse=True)
+
+
+class AssociatedRanker:
+    NAME = "AssociatedRanker"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            if len(q.statements) == 1 and 'associated' in {r for _, r, _ in q.statements} and len(q.entities) == 2:
+                relevant_queries.add(q)
+        return sorted(relevant_queries, key=lambda x: x.get_minimum_support(), reverse=True)
+
+
+class MostSupportedQuery:
+    NAME = "MostSupportedQuery"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        return NotImplemented
+
+    @staticmethod
+    def rank_queries_with_data_graph(queries: [Query], data_graph: DataGraph) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            supp = len(data_graph.compute_query(q))
+            if supp > 0:
+                relevant_queries.add(q)
+        return sorted(relevant_queries, key=lambda x: len(data_graph.compute_query(x)), reverse=True)
+
+
+class MostSpecificQueryWithResults:
+    NAME = "MostSpecificQueryWithResults"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        return NotImplemented
+
+    @staticmethod
+    def rank_queries_with_data_graph(queries: [Query], data_graph: DataGraph) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            # if len(q.statements) == 1 and 'associated' in {r for _, r, _ in q.statements} and len(q.entities) == 2:
+            if len(q.statements) >= 1 and 'associated' not in {r for _, r, _ in q.statements} and len(
+                    data_graph.compute_query(q)) > 0:
+                relevant_queries.add(q)
+        return sorted(relevant_queries, key=lambda x: len(data_graph.compute_query(x)), reverse=True)
+
+
+class AssociatedRankerWithQueryResults:
+    NAME = "AssociatedRankerWithQueryResults"
+
+    @staticmethod
+    def rank_queries(queries: [Query]) -> [Query]:
+        return NotImplemented
+
+    @staticmethod
+    def rank_queries_with_data_graph(queries: [Query], data_graph: DataGraph) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            # if len(q.statements) == 1 and 'associated' in {r for _, r, _ in q.statements} and len(q.entities) == 2:
+            if 'associated' in {r for _, r, _ in q.statements} and len(data_graph.compute_query(q)) > 0:
+                relevant_queries.add(q)
+        return sorted(relevant_queries, key=lambda x: len(data_graph.compute_query(x)), reverse=True)
