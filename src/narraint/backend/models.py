@@ -218,12 +218,14 @@ class EntityKeywords(Extended, DatabaseTable):
 class JCDLInvertedTermIndex(Extended, DatabaseTable):
     __tablename__ = "jcdl_inverted_term_index"
     term = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     document_ids = Column(String, nullable=False)
 
 
 class JCDLInvertedEntityIndex(Extended, DatabaseTable):
     __tablename__ = "jcdl_inverted_entity_index"
     entity_id = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     document_ids = Column(String, nullable=False)
 
 
@@ -232,18 +234,21 @@ class JCDLInvertedStatementIndex(Extended, DatabaseTable):
     subject_id = Column(String, primary_key=True)
     relation = Column(String, primary_key=True)
     object_id = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     document_ids = Column(String, nullable=False)
 
 
 class JCDLTermSupport(Extended, DatabaseTable):
     __tablename__ = "jcdl_term_support"
     term = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     support = Column(Integer)
 
 
 class JCDLEntitySupport(Extended, DatabaseTable):
     __tablename__ = "jcdl_entity_support"
     entity_id = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     support = Column(Integer)
 
 
@@ -252,4 +257,5 @@ class JCDLStatementSupport(Extended, DatabaseTable):
     subject_id = Column(String, primary_key=True)
     relation = Column(String, primary_key=True)
     object_id = Column(String, primary_key=True)
+    document_collection = Column(String, primary_key=True)
     support = Column(Integer)

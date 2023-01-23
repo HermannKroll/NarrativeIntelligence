@@ -256,14 +256,6 @@ class Query:
         return False
 
 
-def get_document_ids_from_provenance_mappings(provenance_mapping):
-    if 'PubMed' in provenance_mapping:
-        document_ids = set({int(i) for i in provenance_mapping['PubMed'].keys()})
-        return document_ids
-    else:
-        return {}
-
-
 class DataGraph:
 
     def __init__(self, graph_index={}, entity_index={}, term_index={}):
@@ -459,8 +451,8 @@ class DataGraph:
         #      print(f'Expanded {entity_id} by {entities}')
         return entities
 
-    def __add_statement_to_index(self, subject_id, relation, object_id, document_ids):
-        key = (subject_id, relation, object_id)
+    def __add_statement_to_index(self, subject_id, relation, object_id, document_collection, document_ids):
+        key = (subject_id, relation, object_id, document_collection)
         if key not in self.graph_index:
             self.graph_index[key] = set()
         self.graph_index[key].update(document_ids)
@@ -479,47 +471,56 @@ class DataGraph:
             objects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.object_id,
                                                                           entity_type=r.object_type)
             relation = r.relation
-            document_ids = get_document_ids_from_provenance_mappings(json.loads(r.provenance_mapping))
 
-            # Cross product between all subjects and all objects
-            for subj, obj in itertools.product(subjects, objects):
-                self.__add_statement_to_index(subject_id=subj, relation=relation,
-                                              object_id=obj, document_ids=document_ids)
-
-                # always add associated
-                if relation != "associated":
-                    self.__add_statement_to_index(subject_id=subj, relation="associated",
-                                                  object_id=obj, document_ids=document_ids)
-                # Swap subject and object im predicate is a symmetric one
-                if relation in SYMMETRIC_PREDICATES:
-                    self.__add_statement_to_index(subject_id=obj, relation=relation,
-                                                  object_id=subj, document_ids=document_ids)
+            provenance_mapping = json.loads(r.provenance_mapping)
+            for collection in provenance_mapping:
+                document_ids = set({int(i) for i in provenance_mapping[collection].keys()})
+                # Cross product between all subjects and all objects
+                for subj, obj in itertools.product(subjects, objects):
+                    self.__add_statement_to_index(subject_id=subj, relation=relation,
+                                                  object_id=obj, document_collection=collection,
+                                                  document_ids=document_ids)
 
                     # always add associated
                     if relation != "associated":
                         self.__add_statement_to_index(subject_id=subj, relation="associated",
-                                                      object_id=obj, document_ids=document_ids)
-                if relation in PREDICATE_EXPANSION:
-                    for expanded_relation in PREDICATE_EXPANSION[relation]:
-                        # Expand statement to all of its relations
-                        self.__add_statement_to_index(subject_id=subj, relation=expanded_relation,
-                                                      object_id=obj, document_ids=document_ids)
-                        # Is the relation symmetric again?
-                        if expanded_relation in SYMMETRIC_PREDICATES:
-                            self.__add_statement_to_index(subject_id=obj, relation=expanded_relation,
-                                                          object_id=subj, document_ids=document_ids)
+                                                      object_id=obj, document_collection=collection,
+                                                      document_ids=document_ids)
+                    # Swap subject and object im predicate is a symmetric one
+                    if relation in SYMMETRIC_PREDICATES:
+                        self.__add_statement_to_index(subject_id=obj, relation=relation,
+                                                      object_id=subj, document_collection=collection,
+                                                      document_ids=document_ids)
+
+                        # always add associated
+                        if relation != "associated":
+                            self.__add_statement_to_index(subject_id=subj, relation="associated",
+                                                          object_id=obj, document_collection=collection,
+                                                          document_ids=document_ids)
+                    if relation in PREDICATE_EXPANSION:
+                        for expanded_relation in PREDICATE_EXPANSION[relation]:
+                            # Expand statement to all of its relations
+                            self.__add_statement_to_index(subject_id=subj, relation=expanded_relation,
+                                                          object_id=obj, document_collection=collection,
+                                                          document_ids=document_ids)
+                            # Is the relation symmetric again?
+                            if expanded_relation in SYMMETRIC_PREDICATES:
+                                self.__add_statement_to_index(subject_id=obj, relation=expanded_relation,
+                                                              object_id=subj, document_collection=collection,
+                                                              document_ids=document_ids)
 
         progress.done()
         print(f'Graph index with {len(self.graph_index)} keys created')
 
-    def __create_entity_index(self, session):
+    def __create_entity_index(self, session, document_collection):
         print('Creating entity index...')
         # iterate over all extracted statements
-        total = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed').count()
+        total = session.query(TagInvertedIndex).filter(
+            TagInvertedIndex.document_collection == document_collection).count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
-        q_stmt = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == 'PubMed')
-        q_stmt = q_stmt.yield_per(1000000)
+        q_stmt = session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == document_collection)
+        q_stmt = q_stmt.yield_per(100000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
             document_ids = ast.literal_eval(r.document_ids)
@@ -530,22 +531,25 @@ class DataGraph:
                 self.entity_index[entity].update(document_ids)
 
         progress.done()
-        print(f'Entity index with {len(self.entity_index)} keys created')
+        print(f'Entity index with {len(self.entity_index)} keys created (collection = {document_collection})')
 
-    def __create_term_index(self, session):
+    def __create_term_index(self, session, document_collection: str):
         print('Creating term index...')
         # iterate over all extracted statements
-        total = session.query(Document).filter(Document.collection == 'PubMed').count()
+        total = session.query(Document).filter(Document.collection == document_collection).count()
         progress = Progress(total=total, print_every=1000)
         progress.start_time()
         stopwords = set(nltk.corpus.stopwords.words('english'))
         trans_map = {p: ' ' for p in PUNCTUATION}
         translator = str.maketrans(trans_map)
         term_index_local = {}
-        for i, doc in enumerate(iterate_over_all_documents_in_collection(session=session, collection='PubMed')):
+        for i, doc in enumerate(
+                iterate_over_all_documents_in_collection(session=session, collection=document_collection,
+                                                         consider_sections=True)):
+
             progress.print_progress(i)
             # Make it lower + replace all punctuation by ' '
-            doc_text = doc.get_text_content().strip().lower()
+            doc_text = doc.get_text_content(sections=True).strip().lower()
             # To this with and without punctuation removal
             doc_text_without_punctuation = doc_text.translate(translator)
             for term in itertools.chain(doc_text.split(' '), doc_text_without_punctuation.split(' ')):
@@ -587,42 +591,54 @@ class DataGraph:
     def create_data_graph(self):
         print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
-        self.__create_term_index(session)
         print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
         session.execute(delete(JCDLInvertedTermIndex))
         session.execute(delete(JCDLTermSupport))
         print('Committing...')
         session.commit()
 
-        print('Storing inverted term index values...')
-        JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_ids=str(docs))
-                                                                      for t, docs in self.term_index.items()],
-                                                            check_constraints=False)
+        logging.info('\nComputing document collections...')
+        document_collections = set([r[0] for r in session.query(Document.collection).distinct()])
+        logging.info(f'Iterate over the following collections: {document_collections}')
 
-        JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, support=len(docs))
-                                                                for t, docs in self.term_index.items()],
-                                                      check_constraints=False)
+        for collection in document_collections:
+            print(f'Computing term index for: {collection}')
+            self.__create_term_index(session, document_collection=collection)
+            print('Storing inverted term index values...')
+            JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+                                                                               document_ids=str(docs))
+                                                                          for t, docs in self.term_index.items()])
 
-        self.term_index = {}
-        self.__create_entity_index(session)
-        print('Deleting table entries: JCDLInvertedEntityIndex and JCDLEntitySupport...')
+            JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+                                                                         support=len(docs))
+                                                                    for t, docs in self.term_index.items()])
+
+            self.term_index = {}
+
+        print('\nDeleting table entries: JCDLInvertedEntityIndex and JCDLEntitySupport...')
         session.execute(delete(JCDLInvertedEntityIndex))
         session.execute(delete(JCDLEntitySupport))
         print('Committing...')
         session.commit()
-        print('Storing inverted entity index values...')
-        JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
-                                                              [dict(entity_id=e, document_ids=str(docs))
-                                                               for e, docs in self.entity_index.items()],
-                                                              check_constraints=False)
 
-        JCDLEntitySupport.bulk_insert_values_into_table(session,
-                                                        [dict(entity_id=e, support=len(docs))
-                                                         for e, docs in self.entity_index.items()],
-                                                        check_constraints=False)
-        self.entity_index = {}
+        for collection in document_collections:
+            print(f'Computing entity index for: {collection}')
+            self.__create_entity_index(session, document_collection=collection)
+            print('Storing inverted entity index values...')
+            JCDLInvertedEntityIndex.bulk_insert_values_into_table(session,
+                                                                  [dict(entity_id=e, document_collection=collection,
+                                                                        document_ids=str(docs))
+                                                                   for e, docs in self.entity_index.items()],
+                                                                  check_constraints=False)
 
-        print('Deleting table entries: JCDLInvertedTermIndex and JCDLStatementSupport ...')
+            JCDLEntitySupport.bulk_insert_values_into_table(session,
+                                                            [dict(entity_id=e, document_collection=collection,
+                                                                  support=len(docs))
+                                                             for e, docs in self.entity_index.items()],
+                                                            check_constraints=False)
+            self.entity_index = {}
+
+        print('\nDeleting table entries: JCDLInvertedTermIndex and JCDLStatementSupport ...')
         session.execute(delete(JCDLInvertedStatementIndex))
         session.execute(delete(JCDLStatementSupport))
         print('Committing...')
@@ -632,16 +648,18 @@ class DataGraph:
         JCDLInvertedStatementIndex.bulk_insert_values_into_table(session, [dict(subject_id=s,
                                                                                 relation=p,
                                                                                 object_id=o,
+                                                                                document_collection=col,
                                                                                 document_ids=str(docs))
-                                                                           for (s, p, o), docs in
+                                                                           for (s, p, o, col), docs in
                                                                            self.graph_index.items()],
                                                                  check_constraints=False)
 
         JCDLStatementSupport.bulk_insert_values_into_table(session, [dict(subject_id=s,
                                                                           relation=p,
                                                                           object_id=o,
+                                                                          document_collection=col,
                                                                           support=len(docs))
-                                                                     for (s, p, o), docs in
+                                                                     for (s, p, o, col), docs in
                                                                      self.graph_index.items()],
                                                            check_constraints=False)
 
