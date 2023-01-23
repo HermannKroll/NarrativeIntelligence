@@ -9,9 +9,12 @@ from xml.etree import ElementTree
 import pytrec_eval
 from tqdm import tqdm
 
-from narraint.analysis.querytranslation.data_graph import DataGraph
+from narraint.analysis.querytranslation.data_graph import DataGraph, Query
+from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.analysis.querytranslation.ranker import EntityFrequencyBasedRanker, TermBasedRanker, EntityBasedRanker, \
-    StatementBasedRanker, StatementFrequencyBasedRanker, MostSpecificQueryFirstRanker
+    StatementBasedRanker, StatementFrequencyBasedRanker, MostSpecificQueryFirstRanker, \
+    MostSpecificQueryFirstLimit1Ranker, MostSpecificQueryFirstLimit2Ranker, AssociatedRanker, MostSupportedQuery, \
+    MostSpecificQueryWithResults, AssociatedRankerWithQueryResults, TreatsRanker
 from narraint.analysis.querytranslation.translation import QueryTranslationToGraph, SchemaGraph
 
 translation = QueryTranslationToGraph(data_graph=DataGraph(), schema_graph=SchemaGraph())
@@ -26,10 +29,12 @@ TREC_GENOMICS_DIR = os.path.join(RESOURCES_DIR, 'trec_genomics')
 
 # BENCHMARKS = ['precision-med']
 BENCHMARKS = [
-    'trec-genomics']  # ['precision-med', 'trec-genomics'] #['trec-covid-abstract', 'precision-med', 'trec-genomics', 'all'] # 'trec-covid-fulltext',
+    'precision-med']  # , 'trec-genomics'] #['trec-covid-abstract', 'precision-med', 'trec-genomics', 'all'] # 'trec-covid-fulltext',
 USED_RANKING_STRATEGIES = [TermBasedRanker, EntityBasedRanker, EntityFrequencyBasedRanker, StatementBasedRanker,
                            StatementFrequencyBasedRanker, MostSpecificQueryFirstRanker,
-                           MostSpecificQueryFirstLimit1Ranker, MostSpecificQueryFirstLimit2Ranker]
+                           MostSpecificQueryFirstLimit1Ranker, MostSpecificQueryFirstLimit2Ranker, TreatsRanker,
+                           AssociatedRanker,
+                           MostSupportedQuery, MostSpecificQueryWithResults, AssociatedRankerWithQueryResults]
 ALLOWED_DELETE_OPERATIONS = [1, 2]
 
 
@@ -90,6 +95,7 @@ class PrecisionMedTopic(Topic):
         return f'[{self.number:02d}] disease: {self.disease}; gene: {self.gene}; treatment: {self.treatment}'
 
     def get_test_data(self) -> str:
+        # return f'{self.gene} {self.treatment}'
         return f'{self.disease} {self.gene} {self.treatment}'
 
     def get_result_data(self) -> str:
@@ -132,6 +138,8 @@ class Benchmark(ABC):
         for topic in self.qrels:
             qrels_avg[topic] = {}
             for doc_id, ratings in self.qrels[topic].items():
+                if len(ratings) > 1:
+                    print(f'{len(ratings)} ratings for doc: {doc_id}')
                 qrels_avg[topic][doc_id] = int(sum(ratings) / len(ratings))
 
         self.qrels = qrels_avg
@@ -200,7 +208,8 @@ class Benchmark(ABC):
         bm_results = {}
         bm_results_relaxed = {}
         # TODO: service request with appropriate data (check for each bm the best way to send data)
-        enum_topics = enumerate([t for t in self.topics if str(t.number) in self.qrels])
+        enum_topics = enumerate(
+            sorted([t for t in self.topics if str(t.number) in self.qrels], key=lambda x: int(x.number)))
         if not verbose:
             enum_topics = tqdm(enum_topics, total=len(self.qrels))
 
@@ -209,8 +218,8 @@ class Benchmark(ABC):
             # if str(topic.number) not in self.qrels:
             #     if verbose: print(f'Topic {topic.number} not relevant for benchmark')
             #     continue
-            if str(topic.number) == '2':
-                continue
+            # if str(topic.number) == '2':
+            #    continue
             query_str = topic.get_test_data()
             # Todo: hack
             # query_str = query_str.replace('coronavirus', 'covid-19')
@@ -218,11 +227,11 @@ class Benchmark(ABC):
             if verbose:
                 print('--' * 60)
                 print(f'Topic {str(topic.number)}: {query_str} \n')
-            # print(topic, query_str)
+            # print(f'Topic {str(topic.number)}: {query_str} \n')
             queries = translation.translate_keyword_query(query_str, verbose=False)
 
             # search best query
-            best_prec, best_recall, best_f1 = 0.0, 0.0, 0.0
+            best_prec, best_recall, best_f1 = -1, -1, -1
             for q in queries:
                 q_document_ids = {str(d) for d in
                                   translation.data_graph.compute_query(q)}  # convert doc ids to strings here
@@ -260,12 +269,14 @@ class Benchmark(ABC):
             for rank in USED_RANKING_STRATEGIES:
                 # Get the most relevant query
                 qr = rank.rank_queries(queries)
-                if len(qr) == 0:
-                    continue
-                q = qr[0]
+                if len(qr) > 0:
+                    q = qr[0]
+                    q_document_ids = {str(d) for d in
+                                      translation.data_graph.compute_query(q)}  # convert doc ids to strings here
+                else:
+                    q = Query()
+                    q_document_ids = set()  # no hits because no query was returned
 
-                q_document_ids = {str(d) for d in
-                                  translation.data_graph.compute_query(q)}  # convert doc ids to strings here
                 found_in_dg = len(q_document_ids)
                 # Restrict document ids to benchmark relevant ids
                 q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
@@ -297,10 +308,10 @@ class Benchmark(ABC):
                 bm_results[rank.NAME][topic.number]["query_org"] = query_str
                 if verbose: print(bm_results[rank.NAME][topic.number]['metrics'])
 
-                for alllowed_operations in ALLOWED_DELETE_OPERATIONS:
+                for allowed_operations in ALLOWED_DELETE_OPERATIONS:
                     q_rel_document_ids = set()
                     # set to remove duplicated relaxed queries
-                    rel_queries = list(set(Query.relax_query(q, delete_operations=alllowed_operations)))
+                    rel_queries = list(set(Query.relax_query(q, delete_operations=allowed_operations)))
                     for r_q in rel_queries:
                         q_rel_document_ids.update({str(d) for d in translation.data_graph.compute_query(r_q)})
 
@@ -316,28 +327,68 @@ class Benchmark(ABC):
 
                     if rank.NAME not in bm_results_relaxed:
                         bm_results_relaxed[rank.NAME] = {}
-                    if alllowed_operations not in bm_results_relaxed[rank.NAME]:
-                        bm_results_relaxed[rank.NAME][alllowed_operations] = {}
+                    if allowed_operations not in bm_results_relaxed[rank.NAME]:
+                        bm_results_relaxed[rank.NAME][allowed_operations] = {}
 
                     prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_rel_combined,
                                                                       gold=doc_ids_relevant_for_topic)
 
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number] = {}
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number] = {}
 
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['no_queries'] = no_queries
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['metrics'] = \
-                        evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['metrics']["precision"] = prec
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['metrics']["recall"] = recall
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['metrics']["f1"] = f1
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]["query"] = ' OR '.join(
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['no_queries'] = no_queries
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics'] = \
+                    evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["precision"] = prec
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["recall"] = recall
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["f1"] = f1
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["query"] = ' OR '.join(
                         [str(q_r) for q_r in rel_queries])
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]["query_org"] = query_str
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]["doc_ids_retrieved"] = len(
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["query_org"] = query_str
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["doc_ids_retrieved"] = len(
                         q_rel_combined)
-                    bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]["doc_ids_relevant"] = len(
+                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["doc_ids_relevant"] = len(
                         doc_ids_relevant_for_topic)
-                    if verbose: print(bm_results_relaxed[rank.NAME][alllowed_operations][topic.number]['metrics'])
+                    if verbose: print(bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics'])
+
+                    # search best relaxed query
+                    best_prec, best_recall, best_f1 = -1, -1, -1
+                    for q in rel_queries:
+                        q_document_ids = {str(d) for d in
+                                          translation.data_graph.compute_query(q)}  # convert doc ids to strings here
+                        q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
+                        doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
+                        prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
+                                                                          gold=doc_ids_relevant_for_topic)
+
+                        best_strategy_found = []
+                        if prec > best_prec:
+                            best_prec = prec
+                            best_strategy_found.append("best_precision")
+                        if recall > best_recall:
+                            best_recall = recall
+                            best_strategy_found.append("best_recall")
+                        if f1 > best_f1:
+                            best_f1 = f1
+                            best_strategy_found.append("best_f1")
+
+                        for s in best_strategy_found:
+                            if s not in bm_results_relaxed:
+                                bm_results_relaxed[s] = {}
+                            if allowed_operations not in bm_results_relaxed[s]:
+                                bm_results_relaxed[s][allowed_operations] = {}
+                            if topic.number not in bm_results_relaxed[s][allowed_operations]:
+                                bm_results_relaxed[s][allowed_operations][topic.number] = {}
+
+                            bm_results_relaxed[s][allowed_operations][topic.number]["doc_ids_retrieved"] = len(
+                                q_document_ids)
+                            bm_results_relaxed[s][allowed_operations][topic.number]["doc_ids_relevant"] = len(
+                                doc_ids_relevant_for_topic)
+                            bm_results_relaxed[s][allowed_operations][topic.number]["query"] = str(q)
+                            bm_results_relaxed[s][allowed_operations][topic.number]["query_org"] = query_str
+                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics'] = {}
+                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["precision"] = prec
+                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["recall"] = recall
+                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["f1"] = f1
                 # print(result[str(topic.number)])
 
         # TODO normalize received data
@@ -349,6 +400,9 @@ class Benchmark(ABC):
 
     def __str__(self):
         return f'[{self.__class__.__name__}] topics({len(self.topics)}) qrels({len(self.qrels.keys())})'
+
+    def analyze(self, path):
+        pass
 
 
 class TRECGenomicsBenchmark(Benchmark):
@@ -435,6 +489,38 @@ class PrecisionMedBenchmark(Benchmark):
 
             self.topics.append(PrecisionMedTopic(number, disease, gene, treatment))
 
+    def analyze(self, path):
+        entity_tagger = EntityTaggerJCDL.instance()
+        results = {}
+
+        def tag_or_none(entity_id):
+            try:
+                return list(entity_tagger.tag_entity(entity_id))
+            except KeyError:
+                return None
+
+        topic_count = 0
+        type_counter = [0, 0, 0]
+        for topic in self.topics:
+            if str(topic.number) in self.qrels:
+                topic_count += 1
+                results[topic.number] = {}
+                for idx, entity in enumerate([topic.disease, topic.treatment, topic.gene]):
+                    entity_ids = tag_or_none(entity)
+                    results[topic.number][entity] = entity_ids
+                    if entity_ids:
+                        type_counter[idx] += 1
+
+        results["summary"] = {}
+        results["summary"]["topic_count"] = topic_count
+        results["summary"]["mapped_diseases"] = type_counter[0]
+        results["summary"]["mapped_treatments"] = type_counter[1]
+        results["summary"]["mapped_genes"] = type_counter[2]
+
+        file = os.path.join(path, f'analyse_{self.name}.json')
+        with open(file, 'wt') as f:
+            f.write(json.dumps(results))
+
 
 class BenchmarkRunner:
     def __init__(self, bm_list: list[str], path, measures):
@@ -460,19 +546,41 @@ class BenchmarkRunner:
     def add_summary_to_metric_dict(bm_result):
         # compute summary per ranking strategy
         for ranking in bm_result:
-            summary_dict = {}
+            summary_dict = {"topics_answered": [], "topics_not_answered": [], "sum_all": {}, "sum_answered": {}}
+            answered, not_answered = 0, 0
             for topic, topic_dict in bm_result[ranking].items():
+                if topic_dict['doc_ids_retrieved'] > 0:
+                    summary_dict["topics_answered"].append(topic_dict['query_org'])
+                    answered += 1
+                else:
+                    summary_dict["topics_not_answered"].append(topic_dict['query_org'])
+                    not_answered += 1
+
                 for metric in topic_dict['metrics']:
-                    if metric not in summary_dict:
-                        summary_dict[metric] = topic_dict['metrics'][metric]
+                    if metric not in summary_dict["sum_all"]:
+                        summary_dict["sum_all"][metric] = topic_dict['metrics'][metric]
                     else:
-                        summary_dict[metric] += topic_dict['metrics'][metric]
+                        summary_dict["sum_all"][metric] += topic_dict['metrics'][metric]
+
+                if topic_dict['doc_ids_retrieved'] > 0:
+                    for metric in topic_dict['metrics']:
+                        if metric not in summary_dict['sum_answered']:
+                            summary_dict['sum_answered'][metric] = topic_dict['metrics'][metric]
+                        else:
+                            summary_dict['sum_answered'][metric] += topic_dict['metrics'][metric]
 
             # Normalize result
             total_topics = len(bm_result[ranking])
-            for metric in summary_dict:
-                summary_dict[metric] /= total_topics
+            for metric in summary_dict["sum_all"]:
+                summary_dict["sum_all"][metric] /= total_topics
+
+            # Normalize result
+            for metric in summary_dict['sum_answered']:
+                summary_dict['sum_answered'][metric] /= answered
+
             bm_result[ranking]['summary'] = summary_dict
+            bm_result[ranking]['summary']["answered"] = answered
+            bm_result[ranking]['summary']["not answered"] = not_answered
 
     def run(self):
         print("Evaluation".center(50, '='))
@@ -481,6 +589,8 @@ class BenchmarkRunner:
         result = list()
         for bm in self.benchmarks:
             bm.initialize()
+            if self.path:
+                bm.analyze(self.path)
             print(bm)
             bm_result, bm_result_relaxed = bm.evaluate(self.measures, verbose=False)
             BenchmarkRunner.add_summary_to_metric_dict(bm_result)
