@@ -258,13 +258,14 @@ class Query:
 
 class DataGraph:
 
-    def __init__(self, graph_index={}, entity_index={}, term_index={}):
+    def __init__(self, graph_index={}, entity_index={}, term_index={}, document_collection=None):
         self.graph_index = graph_index
         self.entity_index = entity_index
         self.term_index = term_index
         self.entity_tagger = EntityTaggerJCDL.instance()
         self.mesh_ontology = None
         self.atc_tree = None
+        self.document_collection = document_collection
         self.__cache_term = {}
         self.__cache_term_support = {}
         self.__cache_entity = {}
@@ -278,6 +279,8 @@ class DataGraph:
 
         session = SessionExtended.get()
         q = session.query(JCDLTermSupport.support).filter(JCDLTermSupport.term == term)
+        if self.document_collection:
+            q = q.filter(JCDLTermSupport.document_collection == self.document_collection)
         # if we have a result
         support = 0
         for r in q:
@@ -285,6 +288,8 @@ class DataGraph:
 
         if len(term) > 3 and term[-1] == 's':
             q = session.query(JCDLTermSupport.support).filter(JCDLTermSupport.term == term[:-1])
+            if self.document_collection:
+                q = q.filter(JCDLTermSupport.document_collection == self.document_collection)
             for r in q:
                 support += r[0]
 
@@ -297,6 +302,8 @@ class DataGraph:
 
         session = SessionExtended.get()
         q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term)
+        if self.document_collection:
+            q = q.filter(JCDLInvertedTermIndex.document_collection == self.document_collection)
         # if we have a result
         result = set()
         for r in q:
@@ -304,6 +311,8 @@ class DataGraph:
 
         if len(term) > 3 and term[-1] == 's':
             q = session.query(JCDLInvertedTermIndex.document_ids).filter(JCDLInvertedTermIndex.term == term[:-1])
+            if self.document_collection:
+                q = q.filter(JCDLInvertedTermIndex.document_collection == self.document_collection)
             for r in q:
                 result.update(ast.literal_eval(r[0]))
 
@@ -316,6 +325,8 @@ class DataGraph:
 
         session = SessionExtended.get()
         q = session.query(JCDLEntitySupport.support).filter(JCDLEntitySupport.entity_id == entity_id)
+        if self.document_collection:
+            q = q.filter(JCDLEntitySupport.document_collection == self.document_collection)
         support = 0
         for r in q:
             support = int(r[0])
@@ -329,6 +340,8 @@ class DataGraph:
 
         session = SessionExtended.get()
         q = session.query(JCDLInvertedEntityIndex.document_ids).filter(JCDLInvertedEntityIndex.entity_id == entity_id)
+        if self.document_collection:
+            q = q.filter(JCDLInvertedEntityIndex.document_collection == self.document_collection)
         # if we have a result
         result = set()
         for r in q:
@@ -343,6 +356,8 @@ class DataGraph:
 
         q = session.query(JCDLInvertedEntityIndex.document_ids, JCDLInvertedEntityIndex.entity_id)
         q = q.filter(JCDLInvertedEntityIndex.entity_id.in_(allowed_entities))
+        if self.document_collection:
+            q = q.filter(JCDLInvertedEntityIndex.document_collection == self.document_collection)
 
         varsub2docs = {variable.name: {}}
         for r in q:
@@ -360,6 +375,8 @@ class DataGraph:
         q = q.filter(JCDLStatementSupport.subject_id == subject_id)
         q = q.filter(JCDLStatementSupport.relation == relation)
         q = q.filter(JCDLStatementSupport.object_id == object_id)
+        if self.document_collection:
+            q = q.filter(JCDLStatementSupport.document_collection == self.document_collection)
         # if we have a result
         support = 0
         for r in q:
@@ -378,6 +395,8 @@ class DataGraph:
         q = q.filter(JCDLInvertedStatementIndex.subject_id == subject_id)
         q = q.filter(JCDLInvertedStatementIndex.relation == relation)
         q = q.filter(JCDLInvertedStatementIndex.object_id == object_id)
+        if self.document_collection:
+            q = q.filter(JCDLInvertedStatementIndex.document_collection == self.document_collection)
         # if we have a result
         result = set()
         for r in q:
@@ -397,6 +416,9 @@ class DataGraph:
                           JCDLInvertedStatementIndex.object_id)
 
         q = q.filter(JCDLInvertedStatementIndex.relation == relation)
+        if self.document_collection:
+            q = q.filter(JCDLInvertedStatementIndex.document_collection == self.document_collection)
+
         varname2type = {}
         if isinstance(q_subject, str):
             q = q.filter(JCDLInvertedStatementIndex.subject_id == q_subject)
@@ -782,7 +804,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    data_graph = DataGraph()
+    data_graph = DataGraph(document_collection=None) # we just want to create
     data_graph.create_data_graph()
 
 
