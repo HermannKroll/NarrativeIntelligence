@@ -590,7 +590,7 @@ class DataGraph:
         self.__create_term_index(session)
         print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
         session.execute(delete(JCDLInvertedTermIndex))
-        session.execute(delete(JCDLInvertedTermIndex))
+        session.execute(delete(JCDLTermSupport))
         print('Committing...')
         session.commit()
 
