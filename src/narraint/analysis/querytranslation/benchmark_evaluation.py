@@ -18,7 +18,11 @@ from narraint.analysis.querytranslation.ranker import EntityFrequencyBasedRanker
     MostSpecificQueryWithResults, AssociatedRankerWithQueryResults, TreatsRanker
 from narraint.analysis.querytranslation.translation import QueryTranslationToGraph, SchemaGraph
 
-translation = QueryTranslationToGraph(data_graph=DataGraph(), schema_graph=SchemaGraph())
+pubmed_graph = DataGraph(document_collection="PubMed")
+translation = QueryTranslationToGraph(data_graph=pubmed_graph, schema_graph=SchemaGraph())
+
+covid19_abstract_graph = DataGraph(document_collection="TREC_COVID_ABSTRACTS")
+covid19_fulltext_graph = DataGraph(document_collection="TREC_COVID_FULLTEXTS")
 
 ROOT_DIR = '/home/kroll/jupyter/JCDL2023/'
 RESOURCES_DIR = os.path.join(ROOT_DIR, 'resources')
@@ -97,7 +101,6 @@ class PrecisionMedTopic(Topic):
         return f'[{self.number:02d}] disease: {self.disease}; gene: {self.gene}; treatment: {self.treatment}'
 
     def get_test_data(self) -> str:
-        # return f'{self.gene} {self.treatment}'
         return f'{self.disease} {self.gene} {self.treatment}'
 
     def get_result_data(self) -> str:
@@ -127,6 +130,7 @@ class Benchmark(ABC):
         self.relevant_document_ids = set()
         self.topic2doc_ids = defaultdict(set)
         self.name = name
+        self.evaluation_graph = pubmed_graph
 
     @abstractmethod
     def parse_topics(self):
@@ -248,7 +252,7 @@ class Benchmark(ABC):
             best_prec, best_recall, best_f1 = -1, -1, -1
             for q in queries:
                 q_document_ids = {str(d) for d in
-                                  translation.data_graph.compute_query(q)}  # convert doc ids to strings here
+                                  self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
                 q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
                 doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
                 prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids, gold=doc_ids_relevant_for_topic)
@@ -286,7 +290,7 @@ class Benchmark(ABC):
                 if len(qr) > 0:
                     q = qr[0]
                     q_document_ids = {str(d) for d in
-                                      translation.data_graph.compute_query(q)}  # convert doc ids to strings here
+                                      self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
                 else:
                     q = Query()
                     q_document_ids = set()  # no hits because no query was returned
@@ -327,7 +331,7 @@ class Benchmark(ABC):
                     # set to remove duplicated relaxed queries
                     rel_queries = list(set(Query.relax_query(q, delete_operations=allowed_operations)))
                     for r_q in rel_queries:
-                        q_rel_document_ids.update({str(d) for d in translation.data_graph.compute_query(r_q)})
+                        q_rel_document_ids.update({str(d) for d in self.evaluation_graph.compute_query(r_q)})
 
                     # Restrict document ids to benchmark relevant ids
                     q_rel_document_ids = q_rel_document_ids.intersection(self.relevant_document_ids)
@@ -368,7 +372,7 @@ class Benchmark(ABC):
                     best_prec, best_recall, best_f1 = -1, -1, -1
                     for q in rel_queries:
                         q_document_ids = {str(d) for d in
-                                          translation.data_graph.compute_query(q)}  # convert doc ids to strings here
+                                          self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
                         q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
                         doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
                         prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
@@ -458,7 +462,10 @@ class TRECCovidBenchmark(Benchmark):
     def __init__(self, topics_file, qrel_file, use_fulltext=False):
         name = "TREC_Covid"
         if use_fulltext:
+            self.evaluation_graph = covid19_fulltext_graph
             name = name + "_fulltext"
+        else:
+            self.evaluation_graph = covid19_abstract_graph
 
         super().__init__(TREC_COVID_DIR, topics_file, qrel_file, name=name)
         self.use_fulltext = use_fulltext
