@@ -558,6 +558,7 @@ def get_query(request):
         time_start = datetime.now()
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
+        year_aggregation = {}
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
@@ -723,7 +724,7 @@ def get_new_query(request):
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
-
+        year_aggregation = {}
         graph_query = GraphQuery()
         query = ""
         if "query" in request.GET:
