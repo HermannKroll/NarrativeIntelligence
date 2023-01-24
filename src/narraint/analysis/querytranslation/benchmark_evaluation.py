@@ -167,10 +167,6 @@ class Benchmark(ABC):
                 if avg_rating >= 1:
                     self.topic2doc_ids[str(topic)].add(doc_id)
 
-        # print(f'Found {len(self.relevant_document_ids.intersection(document_ids_in_db_title))} with title out of {len(self.relevant_document_ids)} in DB')
-
-    # print(f'Found {len(self.relevant_document_ids.intersection(document_ids_in_db_abstract))} with abstract out of {len(self.relevant_document_ids)} in DB')
-
     def initialize(self):
         self.parse_topics()
         self.parse_qrels()
@@ -225,7 +221,6 @@ class Benchmark(ABC):
         if verbose: print(f'Benchmark has {len(self.relevant_document_ids)} documents')
         bm_results = {}
         bm_results_relaxed = {}
-        # TODO: service request with appropriate data (check for each bm the best way to send data)
         enum_topics = enumerate(
             sorted([t for t in self.topics if str(t.number) in self.qrels], key=lambda x: int(x.number)))
         if not verbose:
@@ -355,7 +350,7 @@ class Benchmark(ABC):
 
                     bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['no_queries'] = no_queries
                     bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics'] = \
-                    evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
+                        evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
                     bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["precision"] = prec
                     bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["recall"] = recall
                     bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["f1"] = f1
