@@ -540,7 +540,7 @@ class PrecisionMedBenchmark(Benchmark):
 
 class TripClickBenchmark(Benchmark):
     def __init__(self, topics_file, qrel_file):
-        super().__init__(PRECISION_MED_DIR, topics_file, qrel_file, name="TripClick")
+        super().__init__(TRIP_CLICK_DIR, topics_file, qrel_file, name="TripClick")
 
     def parse_topics(self):
         top_pattern = re.compile(r"(?s)<top>\n*(.*?)\n*</top>")
