@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 from abc import abstractmethod, ABC
 from collections import defaultdict
 from datetime import datetime
@@ -26,6 +27,7 @@ RESOURCES_DIR = os.path.join(ROOT_DIR, 'resources')
 TREC_COVID_DIR = os.path.join(RESOURCES_DIR, 'trec_covid')
 PRECISION_MED_DIR = os.path.join(RESOURCES_DIR, 'precision_medicine')
 TREC_GENOMICS_DIR = os.path.join(RESOURCES_DIR, 'trec_genomics')
+TRIP_CLICK_DIR = os.path.join(RESOURCES_DIR, 'trip_click')
 
 # BENCHMARKS = ['precision-med']
 BENCHMARKS = [
@@ -101,6 +103,18 @@ class PrecisionMedTopic(Topic):
     def get_result_data(self) -> str:
         # TODO what is the result? Nothing given?
         pass
+
+
+class TripClickTopic(Topic):
+    def __init__(self, number, keywords):
+        super().__init__(number)
+        self.keywords = keywords
+
+    def __str__(self):
+        return f'[{self.number}:02d] keywords: {self.keywords}'
+
+    def get_test_data(self) -> str:
+        return self.keywords
 
 
 class Benchmark(ABC):
@@ -522,6 +536,63 @@ class PrecisionMedBenchmark(Benchmark):
             f.write(json.dumps(results))
 
 
+class TripClickBenchmark(Benchmark):
+    def __init__(self, topics_file, qrel_file):
+        super().__init__(PRECISION_MED_DIR, topics_file, qrel_file, name="TripClick")
+
+    def parse_topics(self):
+        top_pattern = re.compile(r"(?s)<top>\n*(.*?)\n*</top>")
+
+        for topics_file in self.topics_file:
+            path = os.path.join(self.path, topics_file)
+            with open(path) as file:
+                # structure
+                # <top>
+                #   <num> Number: 8
+                #   <title> acute appendicitis
+                #   <desc> Descrption:
+                #   <narr> Narrative:
+                # </top>
+
+                # ignoring "desc"- and "narr"-tags (they are most likely empty)
+                topics_raw = re.findall(top_pattern, file.read())
+                topics_cleaned = [[int(t[0].split(':')[-1].strip()), t[1].split('> ')[-1].strip()]
+                                  for t in [x.split('\n') for x in topics_raw]]
+                self.topics.extend([TripClickTopic(*t) for t in topics_cleaned])
+
+    def parse_qrels(self):
+        for qrel_file in self.qrel_file:
+            path = os.path.join(self.path, qrel_file)
+            with open(path) as file:
+                for line in file.readlines():
+                    topic_num, _, doc_id, judgement = line.split()
+                    doc_id = str(doc_id)
+
+                    self.relevant_document_ids.add(doc_id)
+
+                    if topic_num not in self.qrels:
+                        self.qrels[topic_num] = {}
+                    if doc_id not in self.qrels[topic_num]:
+                        self.qrels[topic_num][doc_id] = []
+                    self.qrels[topic_num][doc_id].append(int(judgement))
+
+        qrels_avg = {}
+        # Average the ratings
+        for topic in self.qrels:
+            qrels_avg[topic] = {}
+            for doc_id, ratings in self.qrels[topic].items():
+                if len(ratings) > 1:
+                    print(f'{len(ratings)} ratings for doc: {doc_id}')
+                qrels_avg[topic][doc_id] = int(sum(ratings) / len(ratings))
+
+        self.qrels = qrels_avg
+
+        for topic in self.qrels:
+            for doc_id, avg_rating in self.qrels[topic].items():
+                if avg_rating >= 1:
+                    self.topic2doc_ids[str(topic)].add(doc_id)
+
+
 class BenchmarkRunner:
     def __init__(self, bm_list: list[str], path, measures):
         self.benchmarks: list[Benchmark] = list()
@@ -541,6 +612,9 @@ class BenchmarkRunner:
             self.benchmarks.append(PrecisionMedBenchmark('topics2020.xml', 'qrels-reduced-phase1-treceval-2020.txt'))
         if 'trec-genomics' in bm_list:
             self.benchmarks.append(TRECGenomicsBenchmark('2007topics.txt', 'trecgen2007.all.judgments.tsv.txt'))
+        if 'trip-click' in bm_list:
+            self.benchmarks.append(TripClickBenchmark(['topics.head.test.txt', 'topics.head.val.txt'],
+                                                      ['qrels.raw.head.test.txt', 'qrels.raw.head.val.txt']))
 
     @staticmethod
     def add_summary_to_metric_dict(bm_result):
