@@ -26,8 +26,10 @@ translation = QueryTranslationToGraph(data_graph=pubmed_graph, schema_graph=Sche
 session = SessionExtended.get()
 covid19_abstract_graph = DataGraph(document_collection="TREC_COVID_ABSTRACTS")
 covid19_abstract_doc2source = DocumentTranslation.get_document_id_2_source_id_mapping(session, "TREC_COVID_ABSTRACTS")
+print(f'Found {len(covid19_abstract_doc2source)} mappings for TREC_COVID_ABSTRACTS')
 covid19_fulltext_graph = DataGraph(document_collection="TREC_COVID_FULLTEXTS")
 covid19_fulltext_doc2source = DocumentTranslation.get_document_id_2_source_id_mapping(session, "TREC_COVID_FULLTEXTS")
+print(f'Found {len(covid19_fulltext_doc2source)} mappings for TREC_COVID_FULLTEXTS')
 
 ROOT_DIR = '/home/kroll/jupyter/JCDL2023/'
 RESOURCES_DIR = os.path.join(ROOT_DIR, 'resources')
