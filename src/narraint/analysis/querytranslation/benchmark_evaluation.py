@@ -10,6 +10,7 @@ from xml.etree import ElementTree
 import pytrec_eval
 from tqdm import tqdm
 
+from kgextractiontoolbox.backend.models import DocumentTranslation
 from narraint.analysis.querytranslation.data_graph import DataGraph, Query
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.analysis.querytranslation.ranker import EntityFrequencyBasedRanker, TermBasedRanker, EntityBasedRanker, \
@@ -17,12 +18,16 @@ from narraint.analysis.querytranslation.ranker import EntityFrequencyBasedRanker
     MostSpecificQueryFirstLimit1Ranker, MostSpecificQueryFirstLimit2Ranker, AssociatedRanker, MostSupportedQuery, \
     MostSpecificQueryWithResults, AssociatedRankerWithQueryResults, TreatsRanker
 from narraint.analysis.querytranslation.translation import QueryTranslationToGraph, SchemaGraph
+from narraint.backend.database import SessionExtended
 
 pubmed_graph = DataGraph(document_collection="PubMed")
 translation = QueryTranslationToGraph(data_graph=pubmed_graph, schema_graph=SchemaGraph())
 
+session = SessionExtended.get()
 covid19_abstract_graph = DataGraph(document_collection="TREC_COVID_ABSTRACTS")
+covid19_abstract_doc2source = DocumentTranslation.get_document_id_2_source_id_mapping(session, "TREC_COVID_ABSTRACTS")
 covid19_fulltext_graph = DataGraph(document_collection="TREC_COVID_FULLTEXTS")
+covid19_fulltext_doc2source = DocumentTranslation.get_document_id_2_source_id_mapping(session, "TREC_COVID_FULLTEXTS")
 
 ROOT_DIR = '/home/kroll/jupyter/JCDL2023/'
 RESOURCES_DIR = os.path.join(ROOT_DIR, 'resources')
@@ -136,6 +141,9 @@ class Benchmark(ABC):
     def parse_topics(self):
         pass
 
+    def translate_document_id(self, document_id):
+        return str(document_id)
+
     def parse_qrels(self):
         path = os.path.join(self.path, self.qrel_file)
         with open(path) as file:
@@ -246,7 +254,7 @@ class Benchmark(ABC):
             # search best query
             best_prec, best_recall, best_f1 = -1, -1, -1
             for q in queries:
-                q_document_ids = {str(d) for d in
+                q_document_ids = {self.translate_document_id(d) for d in
                                   self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
                 q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
                 doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
@@ -284,7 +292,7 @@ class Benchmark(ABC):
                 qr = rank.rank_queries(queries)
                 if len(qr) > 0:
                     q = qr[0]
-                    q_document_ids = {str(d) for d in
+                    q_document_ids = {self.translate_document_id(d) for d in
                                       self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
                 else:
                     q = Query()
@@ -326,7 +334,8 @@ class Benchmark(ABC):
                     # set to remove duplicated relaxed queries
                     rel_queries = list(set(Query.relax_query(q, delete_operations=allowed_operations)))
                     for r_q in rel_queries:
-                        q_rel_document_ids.update({str(d) for d in self.evaluation_graph.compute_query(r_q)})
+                        q_rel_document_ids.update({self.translate_document_id(d)
+                                                   for d in self.evaluation_graph.compute_query(r_q)})
 
                     # Restrict document ids to benchmark relevant ids
                     q_rel_document_ids = q_rel_document_ids.intersection(self.relevant_document_ids)
@@ -366,8 +375,8 @@ class Benchmark(ABC):
                     # search best relaxed query
                     best_prec, best_recall, best_f1 = -1, -1, -1
                     for q in rel_queries:
-                        q_document_ids = {str(d) for d in
-                                          self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
+                        # convert doc ids to strings here
+                        q_document_ids = {self.translate_document_id(d) for d in self.evaluation_graph.compute_query(q)}
                         q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
                         doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
                         prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
@@ -449,6 +458,7 @@ class TRECGenomicsBenchmark(Benchmark):
 class TRECCovidBenchmark(Benchmark):
     def __init__(self, topics_file, qrel_file, use_fulltext=False):
         name = "TREC_Covid"
+        self.use_fulltext = use_fulltext
         if use_fulltext:
             self.evaluation_graph = covid19_fulltext_graph
             name = name + "_fulltext"
@@ -457,6 +467,12 @@ class TRECCovidBenchmark(Benchmark):
 
         super().__init__(TREC_COVID_DIR, topics_file, qrel_file, name=name)
         self.use_fulltext = use_fulltext
+
+    def translate_document_id(self, document_id):
+        if self.use_fulltext:
+            return covid19_fulltext_doc2source[int(document_id)]
+        else:
+            return covid19_abstract_doc2source[int(document_id)]
 
     def parse_topics(self):
         path = os.path.join(self.path, self.topics_file)
