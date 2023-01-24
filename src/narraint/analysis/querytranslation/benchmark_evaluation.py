@@ -214,7 +214,7 @@ class Benchmark(ABC):
             f1 = 0
         return precision, recall, f1
 
-    def evaluate(self, measures, verbose=True) -> dict:
+    def evaluate(self, measures, verbose=True) -> [dict, dict]:
         result = dict()
         evaluator = pytrec_eval.RelevanceEvaluator(self.qrels, measures)
 
@@ -402,14 +402,10 @@ class Benchmark(ABC):
                             bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["precision"] = prec
                             bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["recall"] = recall
                             bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["f1"] = f1
-                # print(result[str(topic.number)])
 
         # TODO normalize received data
         # TODO evaluate and return
-        # scores = evaluator.evaluate(result)
-        # for q in scores:
-        #    print(f'{q} => {scores[q]}\n\n')
-        return bm_results, bm_results_relaxed  # result)
+        return bm_results, bm_results_relaxed
 
     def __str__(self):
         return f'[{self.__class__.__name__}] topics({len(self.topics)}) qrels({len(self.qrels.keys())})'
@@ -448,9 +444,6 @@ class TRECGenomicsBenchmark(Benchmark):
                     self.qrels[topic_num] = {pubmed_id: judge_dict[judgement]}
                 else:
                     self.qrels[topic_num][pubmed_id] = judge_dict[judgement]
-
-    # print(f'Found {len(self.relevant_document_ids.intersection(document_ids_in_db_title))} with title out of {len(self.relevant_document_ids)} in DB')
-    # print(f'Found {len(self.relevant_document_ids.intersection(document_ids_in_db_abstract))} with abstract out of {len(self.relevant_document_ids)} in DB')
 
 
 class TRECCovidBenchmark(Benchmark):
