@@ -94,7 +94,9 @@ class TRECCovidTopic(Topic):
         return f'[{self.number:02d}] query: {self.query}; question: {self.question}; narrative: {self.narrative}\n'
 
     def get_test_data(self) -> str:
-        return str(self.query)
+        query_str = str(self.query)
+        query_str = query_str.replace('coronavirus', 'covid-19')
+        return query_str
 
 
 class PrecisionMedTopic(Topic):
@@ -225,6 +227,8 @@ class Benchmark(ABC):
         return precision, recall, f1
 
     def evaluate(self, measures, verbose=True) -> [dict, dict]:
+        print(f'The evaluation graph will use the document collection: {self.evaluation_graph.document_collection}')
+        print(f'{len(self.relevant_document_ids)} documents are included in this benchmark')
         result = dict()
         evaluator = pytrec_eval.RelevanceEvaluator(self.qrels, measures)
 
@@ -291,7 +295,7 @@ class Benchmark(ABC):
             no_queries = len(queries)
             for rank in USED_RANKING_STRATEGIES:
                 # Get the most relevant query
-                qr = rank.rank_queries(queries)
+                qr = rank.rank_queries(queries, data_graph=self.evaluation_graph)
                 if len(qr) > 0:
                     q = qr[0]
                     q_document_ids = {self.translate_document_id(d) for d in
@@ -462,13 +466,14 @@ class TRECCovidBenchmark(Benchmark):
         name = "TREC_Covid"
         self.use_fulltext = use_fulltext
         if use_fulltext:
-            self.evaluation_graph = covid19_fulltext_graph
+            local_evaluation_graph = covid19_fulltext_graph
             name = name + "_fulltext"
         else:
-            self.evaluation_graph = covid19_abstract_graph
+            local_evaluation_graph = covid19_abstract_graph
 
         super().__init__(TREC_COVID_DIR, topics_file, qrel_file, name=name)
         self.use_fulltext = use_fulltext
+        self.evaluation_graph = local_evaluation_graph
 
     def translate_document_id(self, document_id):
         if self.use_fulltext:
