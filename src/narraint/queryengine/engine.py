@@ -350,23 +350,26 @@ class QueryEngine:
         logging.debug('Process query without statements...')
         collection2valid_doc_ids = {}
         # Query for terms and entities
-        term_collection2ids = QueryEngine.query_for_terms_in_query(graph_query, document_collection_filter)
         if graph_query.has_terms():
+            logging.debug(f'Compute document ids for terms: {graph_query.terms}')
+            term_collection2ids = QueryEngine.query_for_terms_in_query(graph_query, document_collection_filter)
             collection2valid_doc_ids = term_collection2ids
 
-        entity_collection2ids = QueryEngine.query_for_entities_in_query(graph_query, document_collection_filter)
-        if not graph_query.has_terms():
-            collection2valid_doc_ids = entity_collection2ids
-
-        # now intersect the term document sets with entity ids
-        if graph_query.has_terms() and graph_query.has_entities():
-            for d_col, d_ids in entity_collection2ids.items():
-                if d_col in entity_collection2ids:
-                    d_ids.intersection_update(entity_collection2ids[d_col])
-                else:
-                    # no entity collection match
-                    d_ids = set()
-                logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
+        if graph_query.has_entities():
+            logging.debug(f'Compute document ids for entities: {graph_query.entity_sets}')
+            entity_collection2ids = QueryEngine.query_for_entities_in_query(graph_query, document_collection_filter)
+            if not graph_query.has_terms():
+                collection2valid_doc_ids = entity_collection2ids
+            else:
+                # we know that the query has entities and terms
+                # now intersect the term document sets with entity ids
+                for d_col, d_ids in collection2valid_doc_ids.items():
+                    if d_col in entity_collection2ids:
+                        d_ids.intersection_update(entity_collection2ids[d_col])
+                    else:
+                        # no entity collection match
+                        d_ids = set()
+                    logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
 
         # No variables are used in the query
         query_results = []
