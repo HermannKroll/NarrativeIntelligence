@@ -122,6 +122,9 @@ class Query:
             elif delete_operations > 1:
                 yield from Query.relax_query(q_rel, delete_operations=delete_operations - 1)
 
+    def get_minimum_support(self):
+        return min([self.term_support, self.entity_support, self.statement_support])
+
     def get_query_part_without_variables(self):
         if len(self.variables) == 0:
             return Query(query=self)
@@ -272,6 +275,8 @@ class DataGraph:
         self.__cache_entity_support = {}
         self.__cache_statement = {}
         self.__cache_statement_support = {}
+        self.__entity_index_missing_entity_ids = set()
+        self.__entity_index_cache = {}
 
     def get_support_for_term(self, term: str) -> int:
         if term in self.__cache_term_support:
@@ -459,18 +464,28 @@ class DataGraph:
             self.mesh_ontology = MeSHOntology.instance()
             self.atc_tree = ATCTree.instance()
 
+        key = (entity_id, entity_type)
+        if key in self.__entity_index_cache:
+            return self.__entity_index_cache[key]
+
         entities = {entity_id, entity_type}
+
         # only MeSH has an ontology for now
         if entity_id.startswith('MESH:D'):
             mesh_desc = entity_id.replace('MESH:', '')
-            for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
-                entities.add(f'MESH:{super_entity}')
+            try:
+                for super_entity, _ in self.mesh_ontology.retrieve_superdescriptors(mesh_desc):
+                    entities.add(f'MESH:{super_entity}')
+            except KeyError:
+                self.__entity_index_missing_entity_ids.add(mesh_desc)
+                pass
             # print(f'Expanded {entity_id} by {entities}')
         # Chembl Drugs
         if entity_id.startswith('CHEMBL'):
             for chembl_class in self.atc_tree.get_classes_for_chembl_id(entity_id):
                 entities.add(chembl_class)
         #      print(f'Expanded {entity_id} by {entities}')
+        self.__entity_index_cache[key] = entities
         return entities
 
     def __add_statement_to_index(self, subject_id, relation, object_id, document_collection, document_ids):
@@ -553,6 +568,8 @@ class DataGraph:
                 self.entity_index[entity].update(document_ids)
 
         progress.done()
+        if len(self.__entity_index_missing_entity_ids) > 0:
+            print(f'Could not find supertypes for MeSH Descriptors: {self.__entity_index_missing_entity_ids}')
         print(f'Entity index with {len(self.entity_index)} keys created (collection = {document_collection})')
 
     def __create_term_index(self, session, document_collection: str):
@@ -613,29 +630,29 @@ class DataGraph:
     def create_data_graph(self):
         print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
-        print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
-        session.execute(delete(JCDLInvertedTermIndex))
-        session.execute(delete(JCDLTermSupport))
-        print('Committing...')
+        # print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
+        # session.execute(delete(JCDLInvertedTermIndex))
+        # session.execute(delete(JCDLTermSupport))
+        # print('Committing...')
         session.commit()
 
         logging.info('\nComputing document collections...')
         document_collections = set([r[0] for r in session.query(Document.collection).distinct()])
         logging.info(f'Iterate over the following collections: {document_collections}')
 
-        for collection in document_collections:
-            print(f'Computing term index for: {collection}')
-            self.__create_term_index(session, document_collection=collection)
-            print('Storing inverted term index values...')
-            JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
-                                                                               document_ids=str(docs))
-                                                                          for t, docs in self.term_index.items()])
+        # for collection in document_collections:
+        #   print(f'Computing term index for: {collection}')
+        #  self.__create_term_index(session, document_collection=collection)
+        #   print('Storing inverted term index values...')
+        #  JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+        #                                                                    document_ids=str(docs))
+        #                                                              for t, docs in self.term_index.items()])
 
-            JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
-                                                                         support=len(docs))
-                                                                    for t, docs in self.term_index.items()])
+        # JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+        #                                                             support=len(docs))
+        #                                                       for t, docs in self.term_index.items()])
 
-            self.term_index = {}
+        # self.term_index = {}
 
         print('\nDeleting table entries: JCDLInvertedEntityIndex and JCDLEntitySupport...')
         session.execute(delete(JCDLInvertedEntityIndex))
@@ -804,7 +821,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
 
-    data_graph = DataGraph(document_collection=None) # we just want to create
+    data_graph = DataGraph(document_collection=None)  # we just want to create
     data_graph.create_data_graph()
 
 
