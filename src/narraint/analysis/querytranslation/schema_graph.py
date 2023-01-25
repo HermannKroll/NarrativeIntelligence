@@ -13,7 +13,7 @@ class SchemaGraph:
     def __load_schema_graph(self):
         translation = QueryTranslation()
         self.entity_types = translation.variable_type_mappings
-        print(self.entity_types)
+        # print(self.entity_types)
         self.max_spaces_in_entity_types = max([len(t.split(' ')) - 1 for t in self.entity_types])
         print(f'Longest entity type has {self.max_spaces_in_entity_types} spaces')
         self.relation_vocab = RelationVocabulary()
@@ -22,7 +22,7 @@ class SchemaGraph:
         self.relation_dict = {k: k for k in self.relation_vocab.relation_dict.keys()}
         self.relation_dict.update({syn: k for k, synonyms in self.relation_vocab.relation_dict.items()
                                    for syn in synonyms})
-        print(self.relation_dict)
+        # print(self.relation_dict)
 
         print('Load relation constraint file...')
         self.relation_type_constraints = RelationTypeConstraintStore()
@@ -45,4 +45,3 @@ class SchemaGraph:
                 # It is not constrained - so it does work
                 allowed_relations.add(r)
         return allowed_relations
-
