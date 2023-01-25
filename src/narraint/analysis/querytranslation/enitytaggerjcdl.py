@@ -17,12 +17,14 @@ from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import DISEASE, ALL, PLANT_FAMILY_GENUS, GENE, TARGET, SPECIES, DOSAGE_FORM, \
-    VACCINE, EXCIPIENT, DRUG, CHEMICAL
+    VACCINE, EXCIPIENT, DRUG, CHEMICAL, ORGANISM
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
+from narrant.vocabularies.organism_vocabulary import OrganismVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
+from narrant.vocabularies.target_vocabulary import TargetVocabulary
 from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 ENTITY_TAGGING_INDEX_JCDL = os.path.join(TMP_DIR, "entity_tagger_index_jcdl.pkl")
@@ -113,6 +115,8 @@ class EntityTaggerJCDL:
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
+        self._add_chembl_targets()
+        self._add_chembl_organisms()
         self._add_additional_diseases()
         self._add_gene_terms()
         self._add_excipient_terms()
@@ -228,6 +232,20 @@ class EntityTaggerJCDL:
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
                 self._add_term_to_index(term, chid, CHEMICAL)
+
+    def _add_chembl_targets(self):
+        logging.info('Adding ChEMBL targets...')
+        terms2id = TargetVocabulary.create_target_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self._add_term_to_index(term, chid, TARGET)
+
+    def _add_chembl_organisms(self):
+        logging.info('Adding ChEMBL organism...')
+        terms2id = OrganismVocabulary.create_organism_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self._add_term_to_index(term, chid, ORGANISM)
 
     def tag_entity(self, term: str, expand_search_by_prefix=False):
         """
