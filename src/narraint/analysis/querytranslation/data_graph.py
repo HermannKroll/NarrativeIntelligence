@@ -630,29 +630,29 @@ class DataGraph:
     def create_data_graph(self):
         print('Creating data graph and dumping it to DB...')
         session = SessionExtended.get()
-        # print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
-        # session.execute(delete(JCDLInvertedTermIndex))
-        # session.execute(delete(JCDLTermSupport))
-        # print('Committing...')
+        print('Deleting table entries: JCDLInvertedTermIndex and JCDLTermSupport...')
+        session.execute(delete(JCDLInvertedTermIndex))
+        session.execute(delete(JCDLTermSupport))
+        print('Committing...')
         session.commit()
 
         logging.info('\nComputing document collections...')
         document_collections = set([r[0] for r in session.query(Document.collection).distinct()])
         logging.info(f'Iterate over the following collections: {document_collections}')
 
-        # for collection in document_collections:
-        #   print(f'Computing term index for: {collection}')
-        #  self.__create_term_index(session, document_collection=collection)
-        #   print('Storing inverted term index values...')
-        #  JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
-        #                                                                    document_ids=str(docs))
-        #                                                              for t, docs in self.term_index.items()])
+        for collection in document_collections:
+            print(f'Computing term index for: {collection}')
+            self.__create_term_index(session, document_collection=collection)
+            print('Storing inverted term index values...')
+            JCDLInvertedTermIndex.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+                                                                               document_ids=str(docs))
+                                                                          for t, docs in self.term_index.items()])
 
-        # JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
-        #                                                             support=len(docs))
-        #                                                       for t, docs in self.term_index.items()])
+            JCDLTermSupport.bulk_insert_values_into_table(session, [dict(term=t, document_collection=collection,
+                                                                         support=len(docs))
+                                                                    for t, docs in self.term_index.items()])
 
-        # self.term_index = {}
+            self.term_index = {}
 
         print('\nDeleting table entries: JCDLInvertedEntityIndex and JCDLEntitySupport...')
         session.execute(delete(JCDLInvertedEntityIndex))
