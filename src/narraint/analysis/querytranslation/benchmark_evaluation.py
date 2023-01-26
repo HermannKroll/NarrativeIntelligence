@@ -39,6 +39,7 @@ TREC_COVID_DIR = os.path.join(RESOURCES_DIR, 'trec_covid')
 PRECISION_MED_DIR = os.path.join(RESOURCES_DIR, 'precision_medicine')
 TREC_GENOMICS_DIR = os.path.join(RESOURCES_DIR, 'trec_genomics')
 TRIP_CLICK_DIR = os.path.join(RESOURCES_DIR, 'trip_click')
+TRIP_JUDGE_DIR = os.path.join(RESOURCES_DIR, 'trip_judge')
 
 # BENCHMARKS = ['precision-med']
 BENCHMARKS = [
@@ -611,6 +612,11 @@ class TripClickBenchmark(Benchmark):
                     self.topic2doc_ids[str(topic)].add(doc_id)
 
 
+class TripJudgeBenchmark(TripClickBenchmark):
+    def __init__(self, topics_files, qrel_files):
+        super(Benchmark, self).__init__(TRIP_JUDGE_DIR, topics_files, qrel_files, name="TripJudge")
+
+
 class BenchmarkRunner:
     def __init__(self, bm_list: list[str], path, measures):
         self.benchmarks: list[Benchmark] = list()
@@ -633,6 +639,8 @@ class BenchmarkRunner:
         if 'trip-click' in bm_list:
             self.benchmarks.append(TripClickBenchmark(['topics.head.test.txt', 'topics.head.val.txt'],
                                                       ['qrels.raw.head.test.txt', 'qrels.raw.head.val.txt']))
+        if 'trip-judge' in bm_list:
+            self.benchmarks.append(TripJudgeBenchmark(['topics.head.test.txt'], ['qrels_2class.txt']))
 
     @staticmethod
     def add_summary_to_metric_dict(bm_result):
