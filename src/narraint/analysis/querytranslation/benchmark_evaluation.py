@@ -2,12 +2,14 @@ import csv
 import json
 import os
 import re
+import time
 from abc import abstractmethod, ABC
 from collections import defaultdict
 from datetime import datetime
 from xml.etree import ElementTree
 
 import pytrec_eval
+import requests
 from tqdm import tqdm
 
 from kgextractiontoolbox.backend.models import DocumentTranslation
@@ -128,6 +130,20 @@ class TripClickTopic(Topic):
 
     def get_test_data(self) -> str:
         return self.keywords
+
+
+class PubMedRequest:
+    _URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax=9999&term="
+
+    @staticmethod
+    def api_search(term):
+        if ' ' in term:
+            term = term.replace(' ', '+')
+        term = '"{}"'.format(term)
+
+        r = requests.get(PubMedRequest._URL + term)
+        results = r.json()['esearchresult']['idlist']
+        return results
 
 
 class Benchmark(ABC):
@@ -422,6 +438,64 @@ class Benchmark(ABC):
         # TODO normalize received data
         # TODO evaluate and return
         return bm_results, bm_results_relaxed
+
+    def evaluate_pubmed(self, measures, verbose=True) -> dict:
+        print(f'The evaluation graph will use the document collection: {self.evaluation_graph.document_collection}')
+        print(f'{len(self.relevant_document_ids)} documents are included in this benchmark')
+        evaluator = pytrec_eval.RelevanceEvaluator(self.qrels, measures)
+
+        pm = 'pubmed'
+        if verbose:
+            print(f'Benchmark has {len(self.relevant_document_ids)} documents')
+        bm_results = {}
+        enum_topics = enumerate(
+            sorted([t for t in self.topics if str(t.number) in self.qrels], key=lambda x: int(x.number)))
+        if not verbose:
+            enum_topics = tqdm(enum_topics, total=len(self.qrels))
+
+        for idx, topic in enum_topics:
+            # skip not relevant topics
+            # if str(topic.number) not in self.qrels:
+            #     if verbose: print(f'Topic {topic.number} not relevant for benchmark')
+            #     continue
+            # if str(topic.number) == '2':
+            #    continue
+            query_str = topic.get_test_data()
+            # Todo: hack
+            # query_str = query_str.replace('coronavirus', 'covid-19')
+
+            if verbose:
+                print('--' * 60)
+                print(f'Topic {str(topic.number)}: {query_str} \n')
+
+            # pubmed api request.
+            results = PubMedRequest.api_search(query_str)
+            time.sleep(0.5)
+
+            # evaluate the result documents
+            q_document_ids = {self.translate_document_id(d) for d in results}  # convert doc ids to strings here
+            q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
+            doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
+            topic_res = {d: 2.0 for d in q_document_ids}
+            prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids, gold=doc_ids_relevant_for_topic)
+
+            if pm not in bm_results:
+                bm_results[pm] = {}
+            if topic.number not in bm_results[pm]:
+                bm_results[pm][topic.number] = {}
+
+            bm_results[pm][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
+            bm_results[pm][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
+            bm_results[pm][topic.number]["query_org"] = query_str
+            bm_results[pm][topic.number]['metrics'] = {}
+            bm_results[pm][topic.number]['metrics'] = evaluator.evaluate({str(topic.number): topic_res})[str(topic.number)]
+            bm_results[pm][topic.number]['metrics']["precision"] = prec
+            bm_results[pm][topic.number]['metrics']["recall"] = recall
+            bm_results[pm][topic.number]['metrics']["f1"] = f1
+
+            if verbose:
+                print(bm_results[pm][topic.number]['metrics'])
+        return bm_results
 
     def __str__(self):
         return f'[{self.__class__.__name__}] topics({len(self.topics)}) qrels({len(self.qrels.keys())})'
