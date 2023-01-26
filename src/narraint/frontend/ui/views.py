@@ -1072,6 +1072,26 @@ def get_keywords(request):
     return HttpResponse(status=500)
 
 
+def get_explain_translation(request):
+    if "concept" in request.GET:
+        try:
+            concept = str(request.GET["concept"]).strip()
+            entities = View.instance().entity_tagger.tag_entity(concept)
+            headings = []
+            for entity in entities:
+                heading = View.instance().resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type, resolve_gene_by_id=False)
+                if heading not in headings:
+                    headings.append(heading)
+            return JsonResponse(dict(headings=headings))
+        except Exception:
+            View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    else:
+        View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+        return HttpResponse(status=500)
+
+
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 

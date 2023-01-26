@@ -1656,14 +1656,53 @@ function initializeValues(slider, value, min, max) {
     slider.value = value;
 }
 
-$('#input_object').hover(function(){
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    console.log(object);
-  }, function(){
-});
+function getSynonyms(element_id, ev) {
+    let concept = getTextOrPlaceholderFromElement(element_id);
+    if (concept !== "") {
+        let request = $.ajax({
+            url: explain_translation_url,
+            data: {
+                concept: concept,
+            }
+        });
+        request.done(function (response) {
+            tt.classList.remove('d-none');
+            tt.innerHTML = response['headings'].join('<br>'); // anzuzeigender String (auch HTML styled möglich)
+            // horizontales Offset
+            tt.style.top = ev.pageY + "px";
+            // vertikales Offset (habe es noch nicht geschafft, dass das Fenster tatsächlich rechts oberhalb vom Zeiger angezeigt wird :/ ))
+            tt.style.left = (ev.pageX + 10) + "px";
+        });
+    }
+}
 
-$('#input_subject').hover(function(){
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    console.log(subject);
-  }, function(){
-});
+const tt = document.getElementById('tooltip');
+
+let sub = document.querySelector('#input_subject');
+sub.onmouseenter = (ev) => {
+    getSynonyms('input_subject', ev);
+};
+
+sub.onmousemove = (ev) => {
+    tt.style.top = ev.pageY + "px";
+    tt.style.left = (ev.pageX + 10) + "px";
+};
+
+sub.onmouseleave = () => {
+    tt.classList.add('d-none');
+};
+
+let obj = document.querySelector('#input_object');
+obj.onmouseenter = (ev) => {
+    getSynonyms('input_object', ev);
+};
+
+obj.onmousemove = (ev) => {
+    tt.style.top = ev.pageY + "px";
+    tt.style.left = (ev.pageX + 10) + "px";
+};
+
+obj.onmouseleave = () => {
+    tt.classList.add('d-none');
+};
+
