@@ -252,24 +252,23 @@ class QueryEngine:
             q = session.query(TermInvertedIndex.document_collection, TermInvertedIndex.document_ids)
             q = q.filter(TermInvertedIndex.term == term_lower)
 
-            if document_collection_filter and len(document_collection_filter) == 1:
-                q = q.filter(TermInvertedIndex.document_collection == list(document_collection_filter)[0])
-            else:
-                q = q.filter(TermInvertedIndex.document_collection.in_(document_collection_filter))
+            if document_collection_filter:
+                if len(document_collection_filter) == 1:
+                    q = q.filter(TermInvertedIndex.document_collection == list(document_collection_filter)[0])
+                else:
+                    q = q.filter(TermInvertedIndex.document_collection.in_(document_collection_filter))
 
             collection2term_ids = {}
-            found_result = False
             for row in q:
-                found_result = True
                 # interpret the string from db as a python string list
                 if row.document_collection not in collection2term_ids:
                     collection2term_ids[row.document_collection] = ast.literal_eval(row.document_ids)
                 else:
                     collection2term_ids[row.document_collection].update(ast.literal_eval(row.document_ids))
-            # no result means no document ids
-            if not found_result:
-                for collection in document_collection_filter:
-                    collection2term_ids[collection] = set()
+
+            for c in collection2term_ids:
+                logging.debug(f'{len(collection2term_ids[c])} document ids for collection: "{c}" and term "{term}"')
+
             if idx == 0:
                 # we are fine for now. First entity set resulted in doc_col2valid_ids
                 doc_col2valid_ids = collection2term_ids
@@ -277,8 +276,11 @@ class QueryEngine:
                 # we are in the section iteration and must intersect the doc sets for the different terms
                 for col, doc_ids in doc_col2valid_ids.items():
                     # only if the collection has at least a single document
-                    if col not in collection2term_ids:
+                    if col in collection2term_ids:
                         doc_col2valid_ids[col].intersection_update(collection2term_ids[col])
+                    else:
+                        # no hits there
+                        doc_col2valid_ids[col] = set()
 
         return doc_col2valid_ids
 
@@ -295,10 +297,11 @@ class QueryEngine:
             entity_types = list(set([en.entity_type for en in entity_set]))
 
             q = session.query(TagInvertedIndex.document_collection, TagInvertedIndex.document_ids)
-            if document_collection_filter and len(document_collection_filter) == 1:
-                q = q.filter(TagInvertedIndex.document_collection == list(document_collection_filter)[0])
-            else:
-                q = q.filter(TagInvertedIndex.document_collection.in_(document_collection_filter))
+            if document_collection_filter:
+                if len(document_collection_filter) == 1:
+                    q = q.filter(TagInvertedIndex.document_collection == list(document_collection_filter)[0])
+                else:
+                    q = q.filter(TagInvertedIndex.document_collection.in_(document_collection_filter))
 
             if len(entity_ids) == 1:
                 # Check if we search with a variable
@@ -319,18 +322,12 @@ class QueryEngine:
                 q = q.filter(TagInvertedIndex.entity_type.in_(entity_types))
 
             e_doc_col2valid_ids = {}
-            found_result = False
             for row in q:
-                found_result = True
                 # interpret the string from db as a python string list
                 if row.document_collection not in e_doc_col2valid_ids:
                     e_doc_col2valid_ids[row.document_collection] = set(ast.literal_eval(row.document_ids))
                 else:
                     e_doc_col2valid_ids[row.document_collection].update(set(ast.literal_eval(row.document_ids)))
-            # no result means no document ids
-            if not found_result:
-                for collection in document_collection_filter:
-                    e_doc_col2valid_ids[collection] = set()
 
             if idx == 0:
                 # we are fine for now. First entity set resulted in doc_col2valid_ids
@@ -338,9 +335,11 @@ class QueryEngine:
             else:
                 # we are in the section iteration and must intersect the doc sets for the different entity sets
                 for col, doc_ids in doc_col2valid_ids.items():
-                    # only if the collection has at least a single document
-                    if col not in e_doc_col2valid_ids:
+                    if col in e_doc_col2valid_ids:
                         doc_col2valid_ids[col].intersection_update(e_doc_col2valid_ids[col])
+                    else:
+                        # no hits there
+                        doc_col2valid_ids[col] = set()
 
         return doc_col2valid_ids
 
@@ -371,9 +370,11 @@ class QueryEngine:
                         d_ids = set()
                     logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
 
+
         # No variables are used in the query
         query_results = []
         for d_col, d_ids in collection2valid_doc_ids.items():
+            logging.debug(f'{len(d_ids)} ids for collection {d_col} computed. Search for metadata...')
             doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
             for d_id in d_ids:
                 if int(d_id) in doc2metadata:
