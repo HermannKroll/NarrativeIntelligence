@@ -43,9 +43,9 @@ TREC_GENOMICS_DIR = os.path.join(RESOURCES_DIR, 'trec_genomics')
 TRIP_CLICK_DIR = os.path.join(RESOURCES_DIR, 'trip_click')
 TRIP_JUDGE_DIR = os.path.join(RESOURCES_DIR, 'trip_judge')
 
-# BENCHMARKS = ['precision-med']
+# BENCHMARKS = ['prec-med-2020']
 BENCHMARKS = [
-    'precision-med']  # , 'trec-genomics'] #['trec-covid-abstract', 'precision-med', 'trec-genomics', 'all'] # 'trec-covid-fulltext',
+    'prec-med-2020']  # , 'trec-genomics'] #['trec-covid-abstract', 'prec-med-2020', 'trec-genomics', 'all'] # 'trec-covid-fulltext',
 USED_RANKING_STRATEGIES = [TermBasedRanker, EntityBasedRanker, EntityFrequencyBasedRanker, StatementBasedRanker,
                            StatementFrequencyBasedRanker, MostSpecificQueryFirstRanker,
                            MostSpecificQueryFirstLimit1Ranker, MostSpecificQueryFirstLimit2Ranker, TreatsRanker,
@@ -102,7 +102,7 @@ class TRECCovidTopic(Topic):
         return query_str
 
 
-class PrecisionMedTopic(Topic):
+class PrecMed2020Topic(Topic):
     def __init__(self, number, disease, gene, treatment):
         super().__init__(number)
         self.disease = disease
@@ -579,7 +579,7 @@ class TRECCovidBenchmark(Benchmark):
         return f'{super().__str__()} using {"fulltext" if self.use_fulltext else "abstracts"}'
 
 
-class PrecisionMedBenchmark(Benchmark):
+class PrecMed2020Benchmark(Benchmark):
     def __init__(self, topics_file, qrel_file):
         super().__init__(PRECISION_MED_DIR, topics_file, qrel_file, name="PM2020")
 
@@ -597,7 +597,7 @@ class PrecisionMedBenchmark(Benchmark):
             gene = topic.find('gene').text.strip()
             treatment = topic.find('treatment').text.strip()
 
-            self.topics.append(PrecisionMedTopic(number, disease, gene, treatment))
+            self.topics.append(PrecMed2020Topic(number, disease, gene, treatment))
 
     def analyze(self, path):
         entity_tagger = EntityTaggerJCDL.instance()
@@ -695,8 +695,8 @@ class BenchmarkRunner:
             self.benchmarks.append(TRECCovidBenchmark('topics-rnd5.xml', 'qrels-covid_d5_j4.5-5.txt'))
         if 'trec-covid-fulltext' in bm_list:
             self.benchmarks.append(TRECCovidBenchmark('topics-rnd5.xml', 'qrels-covid_d5_j4.5-5.txt', True))
-        if 'precision-med' in bm_list:
-            self.benchmarks.append(PrecisionMedBenchmark('topics2020.xml', 'qrels-reduced-phase1-treceval-2020.txt'))
+        if 'prec-med-2020' in bm_list:
+            self.benchmarks.append(PrecMed2020Benchmark('topics2020.xml', 'qrels-reduced-phase1-treceval-2020.txt'))
         if 'trec-genomics' in bm_list:
             self.benchmarks.append(TRECGenomicsBenchmark('2007topics.txt', 'trecgen2007.all.judgments.tsv.txt'))
         if 'trip-click' in bm_list:
