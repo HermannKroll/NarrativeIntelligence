@@ -223,7 +223,12 @@ class Query:
         return self.__str__()
 
     def __hash__(self):
-        return hash(self.__str__())
+        unique_str = f'<Terms: {sorted([t for t in self.term2support])}' \
+                     f' AND Entities: {sorted([et for et in self.entity2support])}' \
+                     f' AND Relations: {sorted([r for r in self.relations])}' \
+                     f' AND Variables: {sorted([v for v in self.variables])}' \
+                     f' AND Statements: {sorted([s for s in self.statement2support])}>'
+        return hash(unique_str)
 
     def __eq__(self, other):
         if len(self.terms) != len(other.terms) or len(self.entities) != len(other.entities) or len(
