@@ -43,12 +43,12 @@ PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, PLAN
                                 {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS}),
                     'decreases': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS},
                                   {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS}),
-                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET},
-                                  {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET}),
-                    'metabolises': ({GENE, TARGET},
+                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET, 'ArabidopsisGene'},
+                                  {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET, 'ArabidopsisGene'}),
+                    'metabolises': ({GENE, TARGET, 'ArabidopsisGene'},
                                     {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, PLANT_FAMILY_GENUS}),
                     'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, PLANT_FAMILY_GENUS},
-                                 {GENE, TARGET}),
+                                 {GENE, TARGET, 'ArabidopsisGene'}),
                     }
 
 
