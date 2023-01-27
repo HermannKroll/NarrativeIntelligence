@@ -50,10 +50,6 @@ class EntityResolverJCDL:
         if entity_id.startswith('MESH:'):
             return self.mesh.descriptor_to_heading(entity_id)
         try:
-            return self.gene.gene_locus_to_description(entity_id)
-        except KeyError:
-            pass
-        try:
             return self.species.species_id_to_name(entity_id)
         except KeyError:
             pass
@@ -64,6 +60,10 @@ class EntityResolverJCDL:
             pass
         try:
             return self.vaccine.vaccine_to_heading(entity_id)
+        except KeyError:
+            pass
+        try:
+            return self.gene.gene_locus_to_description(entity_id)
         except KeyError:
             pass
 
