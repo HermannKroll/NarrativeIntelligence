@@ -8,6 +8,7 @@ from collections import defaultdict
 from datetime import datetime
 from xml.etree import ElementTree
 
+import ir_datasets
 import pytrec_eval
 import requests
 from tqdm import tqdm
@@ -118,6 +119,39 @@ class PrecMed2020Topic(Topic):
     def get_result_data(self) -> str:
         # TODO what is the result? Nothing given?
         pass
+
+
+class PrecMed2019Topic(Topic):
+    def __init__(self, number, disease, gene, demographic):
+        super().__init__(number)
+        self.disease = disease
+        self.gene = gene
+        self.demographic = demographic
+
+    def __str__(self):
+        return f'[{self.number:02d}] disease: {self.disease}; gene: {self.gene}; demographic: {self.demographic}'
+
+    def get_test_data(self) -> str:
+        return f'{self.disease} {self.gene} {self.demographic}'
+
+
+class PrecMed2018Topic(PrecMed2019Topic):
+    pass
+
+
+class PrecMed2017Topic(Topic):
+    def __init__(self, number, disease, gene, demographic, other):
+        super().__init__(number)
+        self.disease = disease
+        self.gene = gene
+        self.demographic = demographic
+        self.other = other
+
+    def __str__(self):
+        return f'[{self.number:02d}] disease: {self.disease}; gene: {self.gene}; demographic: {self.demographic}; other: {self.other}'
+
+    def get_test_data(self) -> str:
+        return f'{self.disease} {self.gene} {self.demographic} {self.other}'
 
 
 class TripClickTopic(Topic):
@@ -630,6 +664,45 @@ class PrecMed2020Benchmark(Benchmark):
         file = os.path.join(path, f'analyse_{self.name}.json')
         with open(file, 'wt') as f:
             f.write(json.dumps(results))
+
+
+class PrecMed2019Benchmark(Benchmark):
+    def __init__(self, name="PM2019"):
+        super().__init__("", "", "", name)
+        self.dataset = ir_datasets.load("clinicaltrials/2019/trec-pm-2019")
+
+    def parse_topics(self):
+        for topic in self.dataset.queries_iter():
+            self.topics.append(PrecMed2019Topic(*topic))
+
+    def parse_qrels(self):
+        for topic_num, doc_id, relevance, _ in self.dataset.qrels_iter():
+            if topic_num not in self.qrels:
+                self.qrels[topic_num] = {}
+            if doc_id not in self.qrels[topic_num]:
+                self.qrels[topic_num][doc_id] = []
+            self.qrels[topic_num][doc_id].append(int(relevance))
+        self.average_qrels()
+
+
+class PrecMed2018Benchmark(PrecMed2019Benchmark):
+    def __init__(self, name="PM2018"):
+        super().__init__(name)
+        self.dataset = ir_datasets.load("clinicaltrials/2017/trec-pm-2018")
+
+    def parse_topics(self):
+        for topic in self.dataset.queries_iter():
+            self.topics.append(PrecMed2018Topic(*topic))
+
+
+class PrecMed2017Benchmark(PrecMed2019Benchmark):
+    def __init__(self, name="PM2017"):
+        super().__init__(name)
+        self.dataset = ir_datasets.load("clinicaltrials/2017/trec-pm-2017")
+
+    def parse_topics(self):
+        for topic in self.dataset.queries_iter():
+            self.topics.append(PrecMed2017Topic(*topic))
 
 
 class TripClickBenchmark(Benchmark):
