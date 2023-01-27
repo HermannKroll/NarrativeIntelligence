@@ -180,21 +180,7 @@ class Benchmark(ABC):
                     self.qrels[topic_num][doc_id] = []
                 self.qrels[topic_num][doc_id].append(int(judgement))
 
-        # Average the ratings
-        qrels_avg = {}
-        for topic in self.qrels:
-            qrels_avg[topic] = {}
-            for doc_id, ratings in self.qrels[topic].items():
-                if len(ratings) > 1:
-                    print(f'{len(ratings)} ratings for doc: {doc_id}')
-                qrels_avg[topic][doc_id] = int(sum(ratings) / len(ratings))
-
-        self.qrels = qrels_avg
-
-        for topic in self.qrels:
-            for doc_id, avg_rating in self.qrels[topic].items():
-                if avg_rating >= 1:
-                    self.topic2doc_ids[str(topic)].add(doc_id)
+        self.average_qrels()
 
     def initialize(self):
         self.parse_topics()
@@ -212,6 +198,23 @@ class Benchmark(ABC):
             topic_res[documents[doc]] = i / num_docs * 2  # normalize to [0;2]
             i -= 1
         return topic_res
+
+    def average_qrels(self):
+        qrels_avg = {}
+        # Average the ratings
+        for topic in self.qrels:
+            qrels_avg[topic] = {}
+            for doc_id, ratings in self.qrels[topic].items():
+                if len(ratings) > 1:
+                    print(f'{len(ratings)} ratings for doc: {doc_id}')
+                qrels_avg[topic][doc_id] = int(sum(ratings) / len(ratings))
+
+        self.qrels = qrels_avg
+
+        for topic in self.qrels:
+            for doc_id, avg_rating in self.qrels[topic].items():
+                if avg_rating >= 1:
+                    self.topic2doc_ids[str(topic)].add(doc_id)
 
     @staticmethod
     def evaluate_own_metrics(found, gold):
@@ -669,21 +672,7 @@ class TripClickBenchmark(Benchmark):
                         self.qrels[topic_num][doc_id] = []
                     self.qrels[topic_num][doc_id].append(int(judgement))
 
-        qrels_avg = {}
-        # Average the ratings
-        for topic in self.qrels:
-            qrels_avg[topic] = {}
-            for doc_id, ratings in self.qrels[topic].items():
-                if len(ratings) > 1:
-                    print(f'{len(ratings)} ratings for doc: {doc_id}')
-                qrels_avg[topic][doc_id] = int(sum(ratings) / len(ratings))
-
-        self.qrels = qrels_avg
-
-        for topic in self.qrels:
-            for doc_id, avg_rating in self.qrels[topic].items():
-                if avg_rating >= 1:
-                    self.topic2doc_ids[str(topic)].add(doc_id)
+        self.average_qrels()
 
 
 class TripJudgeBenchmark(TripClickBenchmark):
