@@ -792,8 +792,8 @@ class PrecMed2017Benchmark(PrecMed2019Benchmark):
 
 
 class TripClickBenchmark(Benchmark):
-    def __init__(self, topics_file, qrel_file):
-        super().__init__(TRIP_CLICK_DIR, topics_file, qrel_file, name="TripClick")
+    def __init__(self, topics_file, qrel_file, path=TRIP_CLICK_DIR, name="TripClick"):
+        super().__init__(path, topics_file, qrel_file, name=name)
 
     def parse_topics(self):
         top_pattern = re.compile(r"(?s)<top>\n*(.*?)\n*</top>")
@@ -836,7 +836,7 @@ class TripClickBenchmark(Benchmark):
 
 class TripJudgeBenchmark(TripClickBenchmark):
     def __init__(self, topics_files, qrel_files):
-        super(Benchmark, self).__init__(TRIP_JUDGE_DIR, topics_files, qrel_files, name="TripJudge")
+        super().__init__(topics_file=topics_files, qrel_file=qrel_files, path=TRIP_JUDGE_DIR, name="TripJudge")
 
 
 class BenchmarkRunner:
