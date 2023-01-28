@@ -287,194 +287,279 @@ class Benchmark(ABC):
         evaluator = pytrec_eval.RelevanceEvaluator(self.qrels, measures)
 
         if verbose: print(f'Benchmark has {len(self.relevant_document_ids)} documents')
+
         bm_results = {}
         bm_results_relaxed = {}
-        enum_topics = enumerate(
-            sorted([t for t in self.topics if str(t.number) in self.qrels], key=lambda x: int(x.number)))
-        if not verbose:
-            enum_topics = tqdm(enum_topics, total=len(self.qrels))
+        for min_keywords in range(0, 1):
+            print(f'Forcing queries to have: {min_keywords} keywords')
+            bm_results[min_keywords] = {}
+            bm_results_relaxed[min_keywords] = {}
 
-        for idx, topic in enum_topics:
-            # skip not relevant topics
-            # if str(topic.number) not in self.qrels:
-            #     if verbose: print(f'Topic {topic.number} not relevant for benchmark')
-            #     continue
-            # if str(topic.number) == '2':
-            #    continue
-            query_str = topic.get_test_data()
-            # Todo: hack
-            # query_str = query_str.replace('coronavirus', 'covid-19')
+            enum_topics = enumerate(
+                sorted([t for t in self.topics if str(t.number) in self.qrels], key=lambda x: int(x.number)))
+            if not verbose:
+                enum_topics = tqdm(enum_topics, total=len(self.qrels))
+            for idx, topic in enum_topics:
+                # skip not relevant topics
+                # if str(topic.number) not in self.qrels:
+                #     if verbose: print(f'Topic {topic.number} not relevant for benchmark')
+                #     continue
+                # if str(topic.number) == '2':
+                #    continue
+                query_str = topic.get_test_data()
+                no_keywords = len(query_str.strip().split(' '))
 
-            if verbose:
-                print('--' * 60)
-                print(f'Topic {str(topic.number)}: {query_str} \n')
-            # print(f'Topic {str(topic.number)}: {query_str} \n')
-            queries = translation.translate_keyword_query(query_str, verbose=False)
+                # skip all topics with to less keywords
+                if no_keywords < min_keywords:
+                    continue
 
-            # search best query
-            best_prec, best_recall, best_f1 = -1, -1, -1
-            for q in queries:
-                q_document_ids = {self.translate_document_id(d) for d in
-                                  self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
-                q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
-                doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
-                prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids, gold=doc_ids_relevant_for_topic)
+                # Todo: hack
+                # query_str = query_str.replace('coronavirus', 'covid-19')
 
-                best_strategy_found = []
-                if prec > best_prec:
-                    best_prec = prec
-                    best_strategy_found.append("best_precision")
-                if recall > best_recall:
-                    best_recall = recall
-                    best_strategy_found.append("best_recall")
-                if f1 > best_f1:
-                    best_f1 = f1
-                    best_strategy_found.append("best_f1")
+                if verbose:
+                    print('--' * 60)
+                    print(f'Topic {str(topic.number)}: {query_str} \n')
+                # print(f'Topic {str(topic.number)}: {query_str} \n')
+                queries = translation.translate_keyword_query(query_str, verbose=False)
 
-                for s in best_strategy_found:
-                    if s not in bm_results:
-                        bm_results[s] = {}
-                    if topic.number not in bm_results[s]:
-                        bm_results[s][topic.number] = {}
-
-                    bm_results[s][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
-                    bm_results[s][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
-                    bm_results[s][topic.number]["query"] = str(q)
-                    bm_results[s][topic.number]["query_org"] = query_str
-                    bm_results[s][topic.number]['metrics'] = {}
-                    bm_results[s][topic.number]['metrics']["precision"] = prec
-                    bm_results[s][topic.number]['metrics']["recall"] = recall
-                    bm_results[s][topic.number]['metrics']["f1"] = f1
-
-            no_queries = len(queries)
-            for rank in USED_RANKING_STRATEGIES:
-                # Get the most relevant query
-                qr = rank.rank_queries(queries, data_graph=self.evaluation_graph)
-                if len(qr) > 0:
-                    q = qr[0]
+                # search best query
+                best_prec, best_recall, best_f1 = -1, -1, -1
+                for q in queries:
                     q_document_ids = {self.translate_document_id(d) for d in
                                       self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
-                else:
-                    q = Query()
-                    q_document_ids = set()  # no hits because no query was returned
-
-                found_in_dg = len(q_document_ids)
-                # Restrict document ids to benchmark relevant ids
-                q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
-
-                doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
-                if verbose: print(
-                    f'{len(q_document_ids)} / {len(doc_ids_relevant_for_topic)} relevant document ids for query: {q} (found {found_in_dg} matches in DB) ')
-                topic_res = {d: 2.0 for d in q_document_ids}
-
-                result[str(topic.number)] = topic_res  # self._normalize_data(topic_res)
-                if verbose: print('\nResults:')
-
-                if rank.NAME not in bm_results:
-                    bm_results[rank.NAME] = {}
-
-                prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
-                                                                  gold=doc_ids_relevant_for_topic)
-
-                bm_results[rank.NAME][topic.number] = {}
-                bm_results[rank.NAME][topic.number]['no_queries'] = no_queries
-                bm_results[rank.NAME][topic.number]['metrics'] = evaluator.evaluate({str(topic.number): topic_res})[
-                    str(topic.number)]
-                bm_results[rank.NAME][topic.number]['metrics']["precision"] = prec
-                bm_results[rank.NAME][topic.number]['metrics']["recall"] = recall
-                bm_results[rank.NAME][topic.number]['metrics']["f1"] = f1
-                bm_results[rank.NAME][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
-                bm_results[rank.NAME][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
-                bm_results[rank.NAME][topic.number]["query"] = str(q)
-                bm_results[rank.NAME][topic.number]["query_org"] = query_str
-                if verbose: print(bm_results[rank.NAME][topic.number]['metrics'])
-
-                for allowed_operations in ALLOWED_DELETE_OPERATIONS:
-                    q_rel_document_ids = set()
-                    # set to remove duplicated relaxed queries
-                    rel_queries = list(set(Query.relax_query(q, delete_operations=allowed_operations)))
-                    for r_q in rel_queries:
-                        q_rel_document_ids.update({self.translate_document_id(d)
-                                                   for d in self.evaluation_graph.compute_query(r_q)})
-
-                    # Restrict document ids to benchmark relevant ids
-                    q_rel_document_ids = q_rel_document_ids.intersection(self.relevant_document_ids)
-                    if verbose: print(f'\nComputed {len(rel_queries)} relaxed queries resulting in:')
-                    q_rel_combined = q_rel_document_ids.union(q_document_ids)
-                    if verbose: print(
-                        f'{len(q_rel_document_ids)} / {len(doc_ids_relevant_for_topic)} relevant document ids for relaxed queries. ')
-                    topic_res_relaxed = {d: 2.0 for d in q_document_ids}
-                    # and add all relaxed results with a relevance score of 1
-                    topic_res_relaxed.update({d: 1.0 for d in q_rel_document_ids})
-
-                    if rank.NAME not in bm_results_relaxed:
-                        bm_results_relaxed[rank.NAME] = {}
-                    if allowed_operations not in bm_results_relaxed[rank.NAME]:
-                        bm_results_relaxed[rank.NAME][allowed_operations] = {}
-
-                    prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_rel_combined,
+                    q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
+                    doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
+                    prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
                                                                       gold=doc_ids_relevant_for_topic)
 
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number] = {}
+                    best_strategy_found = []
+                    if prec >= best_prec:
+                        best_prec = prec
+                        best_strategy_found.append("best_precision")
+                    if recall >= best_recall:
+                        best_recall = recall
+                        best_strategy_found.append("best_recall")
+                    if f1 >= best_f1:
+                        best_f1 = f1
+                        best_strategy_found.append("best_f1")
 
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['no_queries'] = no_queries
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics'] = \
-                        evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["precision"] = prec
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["recall"] = recall
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics']["f1"] = f1
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["query"] = ' OR '.join(
-                        [str(q_r) for q_r in rel_queries])
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["query_org"] = query_str
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["doc_ids_retrieved"] = len(
-                        q_rel_combined)
-                    bm_results_relaxed[rank.NAME][allowed_operations][topic.number]["doc_ids_relevant"] = len(
+                    for s in best_strategy_found:
+                        if s not in bm_results[min_keywords]:
+                            bm_results[min_keywords][s] = {}
+                        if topic.number not in bm_results[min_keywords][s]:
+                            bm_results[min_keywords][s][topic.number] = {}
+                            bm_results[min_keywords][s][topic.number]["queries"] = []
+
+                        bm_results[min_keywords][s][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
+                        bm_results[min_keywords][s][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
+                        bm_results[min_keywords][s][topic.number]["query"] = str(q)
+
+                        bm_results[min_keywords][s][topic.number]["query_org"] = query_str
+
+                        if 'metrics' not in bm_results[min_keywords][s][topic.number]:
+                            bm_results[min_keywords][s][topic.number]['metrics'] = {}
+                        else:
+                            # Is the old result similar good?
+                            if s == 'best_precision':
+                                v1 = bm_results[min_keywords][s][topic.number]['metrics']["precision"]
+                                v2 = best_prec
+                            if s == 'best_recall':
+                                v1 = bm_results[min_keywords][s][topic.number]['metrics']["recall"]
+                                v2 = best_recall
+                            if s == 'best_f1':
+                                v1 = bm_results[min_keywords][s][topic.number]['metrics']["f1"]
+                                v2 = best_f1
+                            if abs(v2 - v1) <= 0.0001:
+                                bm_results[min_keywords][s][topic.number]["queries"].append(str(q))
+                            else:
+                                # query is better
+                                bm_results[min_keywords][s][topic.number]["queries"] = [str(q)]
+
+                        bm_results[min_keywords][s][topic.number]['metrics']["precision"] = prec
+                        bm_results[min_keywords][s][topic.number]['metrics']["recall"] = recall
+                        bm_results[min_keywords][s][topic.number]['metrics']["f1"] = f1
+
+                no_queries = len(queries)
+                for rank in USED_RANKING_STRATEGIES:
+                    # Get the most relevant query
+                    qr = rank.rank_queries(queries, data_graph=self.evaluation_graph)
+                    if len(qr) > 0:
+                        q = qr[0]
+                        q_document_ids = {self.translate_document_id(d) for d in
+                                          self.evaluation_graph.compute_query(q)}  # convert doc ids to strings here
+                    else:
+                        q = Query()
+                        q_document_ids = set()  # no hits because no query was returned
+
+                    found_in_dg = len(q_document_ids)
+                    # Restrict document ids to benchmark relevant ids
+                    q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
+
+                    doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
+                    if verbose: print(
+                        f'{len(q_document_ids)} / {len(doc_ids_relevant_for_topic)} relevant document ids for query: {q} (found {found_in_dg} matches in DB) ')
+                    topic_res = {d: 2.0 for d in q_document_ids}
+
+                    result[str(topic.number)] = topic_res  # self._normalize_data(topic_res)
+                    if verbose: print('\nResults:')
+
+                    if rank.NAME not in bm_results[min_keywords]:
+                        bm_results[min_keywords][rank.NAME] = {}
+
+                    prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
+                                                                      gold=doc_ids_relevant_for_topic)
+
+                    bm_results[min_keywords][rank.NAME][topic.number] = {}
+                    bm_results[min_keywords][rank.NAME][topic.number]['no_queries'] = no_queries
+                    bm_results[min_keywords][rank.NAME][topic.number]['metrics'] = \
+                    evaluator.evaluate({str(topic.number): topic_res})[
+                        str(topic.number)]
+                    bm_results[min_keywords][rank.NAME][topic.number]['metrics']["precision"] = prec
+                    bm_results[min_keywords][rank.NAME][topic.number]['metrics']["recall"] = recall
+                    bm_results[min_keywords][rank.NAME][topic.number]['metrics']["f1"] = f1
+                    bm_results[min_keywords][rank.NAME][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
+                    bm_results[min_keywords][rank.NAME][topic.number]["doc_ids_relevant"] = len(
                         doc_ids_relevant_for_topic)
-                    if verbose: print(bm_results_relaxed[rank.NAME][allowed_operations][topic.number]['metrics'])
+                    bm_results[min_keywords][rank.NAME][topic.number]["query"] = str(q)
+                    bm_results[min_keywords][rank.NAME][topic.number]["query_org"] = query_str
+                    if verbose: print(bm_results[min_keywords][rank.NAME][topic.number]['metrics'])
 
-                    # search best relaxed query
-                    best_prec, best_recall, best_f1 = -1, -1, -1
-                    for q in rel_queries:
-                        # convert doc ids to strings here
-                        q_document_ids = {self.translate_document_id(d) for d in self.evaluation_graph.compute_query(q)}
-                        q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
-                        doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
-                        prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
+                    for allowed_operations in ALLOWED_DELETE_OPERATIONS:
+                        q_rel_document_ids = set()
+                        # set to remove duplicated relaxed queries
+                        rel_queries = list(set(Query.relax_query(q, delete_operations=allowed_operations)))
+                        for r_q in rel_queries:
+                            q_rel_document_ids.update({self.translate_document_id(d)
+                                                       for d in self.evaluation_graph.compute_query(r_q)})
+
+                        # Restrict document ids to benchmark relevant ids
+                        q_rel_document_ids = q_rel_document_ids.intersection(self.relevant_document_ids)
+                        if verbose: print(f'\nComputed {len(rel_queries)} relaxed queries resulting in:')
+                        q_rel_combined = q_rel_document_ids.union(q_document_ids)
+                        if verbose: print(
+                            f'{len(q_rel_document_ids)} / {len(doc_ids_relevant_for_topic)} relevant document ids for relaxed queries. ')
+                        topic_res_relaxed = {d: 2.0 for d in q_document_ids}
+                        # and add all relaxed results with a relevance score of 1
+                        topic_res_relaxed.update({d: 1.0 for d in q_rel_document_ids})
+
+                        if rank.NAME not in bm_results_relaxed[min_keywords]:
+                            bm_results_relaxed[min_keywords][rank.NAME] = {}
+                        if allowed_operations not in bm_results_relaxed[min_keywords][rank.NAME]:
+                            bm_results_relaxed[min_keywords][rank.NAME][allowed_operations] = {}
+
+                        prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_rel_combined,
                                                                           gold=doc_ids_relevant_for_topic)
 
-                        best_strategy_found = []
-                        if prec > best_prec:
-                            best_prec = prec
-                            best_strategy_found.append("best_precision")
-                        if recall > best_recall:
-                            best_recall = recall
-                            best_strategy_found.append("best_recall")
-                        if f1 > best_f1:
-                            best_f1 = f1
-                            best_strategy_found.append("best_f1")
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number] = {}
 
-                        for s in best_strategy_found:
-                            if s not in bm_results_relaxed:
-                                bm_results_relaxed[s] = {}
-                            if allowed_operations not in bm_results_relaxed[s]:
-                                bm_results_relaxed[s][allowed_operations] = {}
-                            if topic.number not in bm_results_relaxed[s][allowed_operations]:
-                                bm_results_relaxed[s][allowed_operations][topic.number] = {}
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number][
+                            'no_queries'] = no_queries
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number]['metrics'] = \
+                            evaluator.evaluate({str(topic.number): topic_res_relaxed})[str(topic.number)]
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number]['metrics'][
+                            "precision"] = prec
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number]['metrics'][
+                            "recall"] = recall
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number]['metrics'][
+                            "f1"] = f1
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number][
+                            "query"] = ' OR '.join(
+                            [str(q_r) for q_r in rel_queries])
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number][
+                            "query_org"] = query_str
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number][
+                            "doc_ids_retrieved"] = len(
+                            q_rel_combined)
+                        bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number][
+                            "doc_ids_relevant"] = len(
+                            doc_ids_relevant_for_topic)
+                        if verbose: print(
+                            bm_results_relaxed[min_keywords][rank.NAME][allowed_operations][topic.number]['metrics'])
 
-                            bm_results_relaxed[s][allowed_operations][topic.number]["doc_ids_retrieved"] = len(
-                                q_document_ids)
-                            bm_results_relaxed[s][allowed_operations][topic.number]["doc_ids_relevant"] = len(
-                                doc_ids_relevant_for_topic)
-                            bm_results_relaxed[s][allowed_operations][topic.number]["query"] = str(q)
-                            bm_results_relaxed[s][allowed_operations][topic.number]["query_org"] = query_str
-                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics'] = {}
-                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["precision"] = prec
-                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["recall"] = recall
-                            bm_results_relaxed[s][allowed_operations][topic.number]['metrics']["f1"] = f1
+                        # search best relaxed query
+                        best_prec, best_recall, best_f1 = -1, -1, -1
+                        for q in rel_queries:
+                            # convert doc ids to strings here
+                            q_document_ids = {self.translate_document_id(d) for d in
+                                              self.evaluation_graph.compute_query(q)}
+                            q_document_ids = q_document_ids.intersection(self.relevant_document_ids)
+                            doc_ids_relevant_for_topic = self.topic2doc_ids[str(topic.number)]
+                            prec, recall, f1 = Benchmark.evaluate_own_metrics(found=q_document_ids,
+                                                                              gold=doc_ids_relevant_for_topic)
+
+                            best_strategy_found = []
+                            if prec >= best_prec:
+                                best_prec = prec
+                                best_strategy_found.append("best_precision")
+                            if recall >= best_recall:
+                                best_recall = recall
+                                best_strategy_found.append("best_recall")
+                            if f1 >= best_f1:
+                                best_f1 = f1
+                                best_strategy_found.append("best_f1")
+
+                            for s in best_strategy_found:
+                                if s not in bm_results_relaxed[min_keywords]:
+                                    bm_results_relaxed[min_keywords][s] = {}
+                                if allowed_operations not in bm_results_relaxed[min_keywords][s]:
+                                    bm_results_relaxed[min_keywords][s][allowed_operations] = {}
+                                if topic.number not in bm_results_relaxed[min_keywords][s][allowed_operations]:
+                                    bm_results_relaxed[min_keywords][s][allowed_operations][topic.number] = {}
+                                    bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                        "queries"] = []
+
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                    "doc_ids_retrieved"] = len(
+                                    q_document_ids)
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                    "doc_ids_relevant"] = len(
+                                    doc_ids_relevant_for_topic)
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number]["query"] = str(q)
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                    "query_org"] = query_str
+
+                                if 'metrics' not in bm_results_relaxed[min_keywords][s][allowed_operations][
+                                    topic.number]:
+                                    bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                        'metrics'] = {}
+                                else:
+                                    # Is the old result similar good?
+                                    if s == 'best_precision':
+                                        v1 = bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                            'metrics']["precision"]
+                                        v2 = best_prec
+                                    if s == 'best_recall':
+                                        v1 = bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                            'metrics']["recall"]
+                                        v2 = best_recall
+                                    if s == 'best_f1':
+                                        v1 = bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                            'metrics']["f1"]
+                                        v2 = best_f1
+                                    if abs(v2 - v1) <= 0.0001:
+                                        bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                            "queries"].append(str(q))
+                                    else:
+                                        # query is better
+                                        bm_results_relaxed[min_keywords][s][allowed_operations][topic.number][
+                                            "queries"] = [str(q)]
+
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number]['metrics'][
+                                    "precision"] = prec
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number]['metrics'][
+                                    "recall"] = recall
+                                bm_results_relaxed[min_keywords][s][allowed_operations][topic.number]['metrics'][
+                                    "f1"] = f1
 
         # TODO normalize received data
         # TODO evaluate and return
         return bm_results, bm_results_relaxed
+
+    def __str__(self):
+        return f'[{self.__class__.__name__}] topics({len(self.topics)}) qrels({len(self.qrels.keys())})'
+
+    def analyze(self, path):
+        pass
 
     def evaluate_pubmed(self, measures, verbose=True) -> dict:
         print(f'The evaluation graph will use the document collection: {self.evaluation_graph.document_collection}')
