@@ -4,6 +4,10 @@ UPDATE public.Tag SET ent_id = 'MESH:D000094024' WHERE ent_id = 'MESH:C000711409
 -- Delete all Covid 19 Supplement Tags from TaggerOne
 DELETE FROM public.Tag as t where t.ent_id = 'MESH:C000657245' and t.ent_type = 'Disease';
 
+-- Delete problematic targets (they are learned abbreviations, we can't change this at the moment)
+DELETE FROM TAG where ent_type = 'Target' and ent_str IN ('in', 'or');
+DELETE FROM TAG where ent_type = 'Target' and ent_str = 'state';
+
 -- Delete far too general Disease Descriptor
 DELETE FROM public.Tag as t WHERE t.ent_id = 'MESH:D004194' and t.ent_type = 'Disease';
 
