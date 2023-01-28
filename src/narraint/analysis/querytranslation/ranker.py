@@ -293,6 +293,19 @@ class MostSpecificQueryWithResults:
         return sorted(relevant_queries, key=lambda x: len(data_graph.compute_query(x)), reverse=True)
 
 
+class MostSpecificQueryWithResultsSpecificFirst:
+    NAME = "MostSpecificQueryWithResultsSpecificFirst"
+
+    @staticmethod
+    def rank_queries(queries: [Query], data_graph: DataGraph = None) -> [Query]:
+        relevant_queries = set()
+        for q in queries:
+            # if len(q.statements) == 1 and 'associated' in {r for _, r, _ in q.statements} and len(q.entities) == 2:
+            if len(q.statements) >= 1 and len(data_graph.compute_query(q)) > 0:
+                relevant_queries.add(q)
+        return sorted(queries, key=functools.cmp_to_key(MostSpecificQueryFirstRanker.compare_queries), reverse=True)
+
+
 class AssociatedRankerWithQueryResults:
     NAME = "AssociatedRankerWithQueryResults"
 
