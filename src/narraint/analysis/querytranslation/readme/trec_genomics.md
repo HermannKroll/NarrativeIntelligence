@@ -8,19 +8,19 @@ cd /home/kroll/jupyter/JCDL2023/
 
 ## Load Everything
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py trec_genomics_2007_documents.json -c TREC_GENOMICS_FULLTEXTS --artificial_document_ids
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py trec_genomics_2007_documents.json -c TREC_GENOMICS_FULLTEXTS
 ```
 
 
 
 # Next, tag the documents with our PharmDictTagger
 ```
-python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c TREC_GENOMICS_FULLTEXTS --workers 15
+python3 ~/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c TREC_GENOMICS_FULLTEXTS --workers 15
 ```
 
 # Next, tag the documents with GNormPlus
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/biomedical_entity_linking.py trec_genomics_2007_documents.json -c TREC_GENOMICS_FULLTEXTS --skip-load --workers 10 --gnormplus
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/biomedical_entity_linking.py trec_genomics_2007_documents.json -c TREC_GENOMICS_FULLTEXTS --skip-load --workers 10 --gnormplus
 ```
 
 
@@ -57,12 +57,12 @@ DELETE FROM public.tag as t WHERE t.ent_type = 'Chemical' and t.ent_id like 'MES
 
 # Extract Statements
 ```
-python3 ~/mining/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c TREC_GENOMICS_FULLTEXTS -et PathIE --workers 32 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json -bs 50000
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c TREC_GENOMICS_FULLTEXTS -et PathIE --workers 32 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json -bs 50000
 ```
 
 # Clean & Apply Rules
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TREC_GENOMICS_FULLTEXTS --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TREC_GENOMICS_FULLTEXTS --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
-python3 ~/mining/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TREC_GENOMICS_FULLTEXTS
+python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TREC_GENOMICS_FULLTEXTS
 ```
