@@ -412,8 +412,8 @@ class Benchmark(ABC):
                     bm_results[min_keywords][rank.NAME][topic.number] = {}
                     bm_results[min_keywords][rank.NAME][topic.number]['no_queries'] = no_queries
                     bm_results[min_keywords][rank.NAME][topic.number]['metrics'] = \
-                    evaluator.evaluate({str(topic.number): topic_res})[
-                        str(topic.number)]
+                        evaluator.evaluate({str(topic.number): topic_res})[
+                            str(topic.number)]
                     bm_results[min_keywords][rank.NAME][topic.number]['metrics']["precision"] = prec
                     bm_results[min_keywords][rank.NAME][topic.number]['metrics']["recall"] = recall
                     bm_results[min_keywords][rank.NAME][topic.number]['metrics']["f1"] = f1
@@ -610,7 +610,8 @@ class Benchmark(ABC):
             bm_results[pm][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
             bm_results[pm][topic.number]["query_org"] = query_str
             bm_results[pm][topic.number]['metrics'] = {}
-            bm_results[pm][topic.number]['metrics'] = evaluator.evaluate({str(topic.number): topic_res})[str(topic.number)]
+            bm_results[pm][topic.number]['metrics'] = evaluator.evaluate({str(topic.number): topic_res})[
+                str(topic.number)]
             bm_results[pm][topic.number]['metrics']["precision"] = prec
             bm_results[pm][topic.number]['metrics']["recall"] = recall
             bm_results[pm][topic.number]['metrics']["f1"] = f1
