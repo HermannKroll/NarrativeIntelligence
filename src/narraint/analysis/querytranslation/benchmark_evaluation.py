@@ -8,7 +8,7 @@ from collections import defaultdict
 from datetime import datetime
 from xml.etree import ElementTree
 
-import ir_datasets
+# import ir_datasets
 import pytrec_eval
 import requests
 from tqdm import tqdm
@@ -873,42 +873,43 @@ class BenchmarkRunner:
     @staticmethod
     def add_summary_to_metric_dict(bm_result):
         # compute summary per ranking strategy
-        for ranking in bm_result:
-            summary_dict = {"topics_answered": [], "topics_not_answered": [], "sum_all": {}, "sum_answered": {}}
-            answered, not_answered = 0, 0
-            for topic, topic_dict in bm_result[ranking].items():
-                if topic_dict['doc_ids_retrieved'] > 0:
-                    summary_dict["topics_answered"].append(topic_dict['query_org'])
-                    answered += 1
-                else:
-                    summary_dict["topics_not_answered"].append(topic_dict['query_org'])
-                    not_answered += 1
-
-                for metric in topic_dict['metrics']:
-                    if metric not in summary_dict["sum_all"]:
-                        summary_dict["sum_all"][metric] = topic_dict['metrics'][metric]
+        for min_keyword in bm_result:
+            for ranking in bm_result[min_keyword]:
+                summary_dict = {"topics_answered": [], "topics_not_answered": [], "sum_all": {}, "sum_answered": {}}
+                answered, not_answered = 0, 0
+                for topic, topic_dict in bm_result[min_keyword][ranking].items():
+                    if topic_dict['doc_ids_retrieved'] > 0:
+                        summary_dict["topics_answered"].append(topic_dict['query_org'])
+                        answered += 1
                     else:
-                        summary_dict["sum_all"][metric] += topic_dict['metrics'][metric]
+                        summary_dict["topics_not_answered"].append(topic_dict['query_org'])
+                        not_answered += 1
 
-                if topic_dict['doc_ids_retrieved'] > 0:
                     for metric in topic_dict['metrics']:
-                        if metric not in summary_dict['sum_answered']:
-                            summary_dict['sum_answered'][metric] = topic_dict['metrics'][metric]
+                        if metric not in summary_dict["sum_all"]:
+                            summary_dict["sum_all"][metric] = topic_dict['metrics'][metric]
                         else:
-                            summary_dict['sum_answered'][metric] += topic_dict['metrics'][metric]
+                            summary_dict["sum_all"][metric] += topic_dict['metrics'][metric]
 
-            # Normalize result
-            total_topics = len(bm_result[ranking])
-            for metric in summary_dict["sum_all"]:
-                summary_dict["sum_all"][metric] /= total_topics
+                    if topic_dict['doc_ids_retrieved'] > 0:
+                        for metric in topic_dict['metrics']:
+                            if metric not in summary_dict['sum_answered']:
+                                summary_dict['sum_answered'][metric] = topic_dict['metrics'][metric]
+                            else:
+                                summary_dict['sum_answered'][metric] += topic_dict['metrics'][metric]
 
-            # Normalize result
-            for metric in summary_dict['sum_answered']:
-                summary_dict['sum_answered'][metric] /= answered
+                # Normalize result
+                total_topics = len(bm_result[min_keyword][ranking])
+                for metric in summary_dict["sum_all"]:
+                    summary_dict["sum_all"][metric] /= total_topics
 
-            bm_result[ranking]['summary'] = summary_dict
-            bm_result[ranking]['summary']["answered"] = answered
-            bm_result[ranking]['summary']["not answered"] = not_answered
+                # Normalize result
+                for metric in summary_dict['sum_answered']:
+                    summary_dict['sum_answered'][metric] /= answered
+
+                bm_result[min_keyword][ranking]['summary'] = summary_dict
+                bm_result[min_keyword][ranking]['summary']["answered"] = answered
+                bm_result[min_keyword][ranking]['summary']["not answered"] = not_answered
 
     def run(self):
         print("Evaluation".center(50, '='))
