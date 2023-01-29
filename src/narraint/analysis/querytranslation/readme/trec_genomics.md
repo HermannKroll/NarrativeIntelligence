@@ -62,7 +62,7 @@ python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.
 
 # Clean & Apply Rules
 ```
-python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TREC_GENOMICS_FULLTEXTS --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TREC_GENOMICS_FULLTEXTS --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TREC_GENOMICS_FULLTEXTS
 ```

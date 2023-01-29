@@ -55,12 +55,12 @@ DELETE FROM public.tag as t WHERE t.ent_type = 'Chemical' and t.ent_id like 'MES
 
 # Extract Statements
 ```
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c TRIP_CLICK -et PathIE --workers 32 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json -bs 50000
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c TRIP_CLICK -et PathIE --workers 32 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
 ```
 
 # Clean & Apply Rules
 ```
-python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TRIP_CLICK --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --collection TRIP_CLICK --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TRIP_CLICK
 ```
