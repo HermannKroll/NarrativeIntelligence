@@ -64,3 +64,8 @@ python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/
 
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TRIP_CLICK
 ```
+
+# Update Data Graph
+```
+python3 ~/NarrativeIntelligence/src/narraint/analysis/querytranslation/data_graph.py --collections TRIP_CLICK
+```

@@ -66,3 +66,8 @@ python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/
 
 python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --collection TREC_GENOMICS_FULLTEXTS
 ```
+
+# Update Data Graph
+```
+python3 ~/NarrativeIntelligence/src/narraint/analysis/querytranslation/data_graph.py --collections TREC_GENOMICS_FULLTEXTS
+```
