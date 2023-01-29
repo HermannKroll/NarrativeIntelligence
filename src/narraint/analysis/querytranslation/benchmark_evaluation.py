@@ -290,7 +290,7 @@ class Benchmark(ABC):
 
         bm_results = {}
         bm_results_relaxed = {}
-        for min_keywords in range(0, 1):
+        for min_keywords in range(0, 10):
             print(f'Forcing queries to have: {min_keywords} keywords')
             bm_results[min_keywords] = {}
             bm_results_relaxed[min_keywords] = {}
@@ -300,6 +300,8 @@ class Benchmark(ABC):
             if not verbose:
                 enum_topics = tqdm(enum_topics, total=len(self.qrels))
             for idx, topic in enum_topics:
+                # if idx > 10:
+                #    break
                 # skip not relevant topics
                 # if str(topic.number) not in self.qrels:
                 #     if verbose: print(f'Topic {topic.number} not relevant for benchmark')
@@ -351,7 +353,11 @@ class Benchmark(ABC):
                             bm_results[min_keywords][s][topic.number]["queries"] = []
 
                         bm_results[min_keywords][s][topic.number]["doc_ids_retrieved"] = len(q_document_ids)
+                        bm_results[min_keywords][s][topic.number]["doc_ids_retrieved_data"] = sorted(
+                            list(q_document_ids))
                         bm_results[min_keywords][s][topic.number]["doc_ids_relevant"] = len(doc_ids_relevant_for_topic)
+                        bm_results[min_keywords][s][topic.number]["doc_ids_relevant_data"] = sorted(
+                            list(doc_ids_relevant_for_topic))
                         bm_results[min_keywords][s][topic.number]["query"] = str(q)
 
                         bm_results[min_keywords][s][topic.number]["query_org"] = query_str
@@ -922,7 +928,7 @@ class BenchmarkRunner:
             if self.path is not None:
                 benchmark_name = bm.name
                 date = datetime.now()
-                filename = f'{benchmark_name}_results_{date.year}.{date.month}.{date.day}.json'
+                filename = f'{benchmark_name}_results.json'
                 filename = os.path.join(self.path, filename)
 
                 print(f'Writing results to {filename}')
