@@ -41,8 +41,7 @@ class QueryTranslationToGraph:
                 combined_word = ' '.join([k for k in keywords[j:j + i]])
                 if combined_word in lookup_dict:
                     if combined_word in term2dictentries:
-                        raise ValueError(
-                            f'Current string {combined_word} was already mapped before (duplicated keyword?)')
+                        print( f'Current string {combined_word} was already mapped before (duplicated keyword?)')
                     term2dictentries[combined_word] = lookup_dict[combined_word]
         return term2dictentries
 
@@ -252,6 +251,14 @@ class QueryTranslationToGraph:
                     # we may produce duplicates - so use a set
                     possible_queries_with_statements.add(q_s)
 
+                if len(possible_queries_with_statements) > 1000000:
+                    print('1. Iteration Too many queries generated - stop here')
+                    break
+
+            if len(possible_queries_with_statements) > 1000000:
+                print('2. Iteration Too many queries generated - stop here')
+                break
+                
         # Add them finally to the result list
         possible_queries.update(possible_queries_with_statements)
 
