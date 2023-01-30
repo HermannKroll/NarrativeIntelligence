@@ -34,6 +34,11 @@ covid19_fulltext_graph = DataGraph(document_collection="TREC_COVID_FULLTEXTS")
 covid19_fulltext_doc2source = DocumentTranslation.get_document_id_2_source_id_mapping(session, "TREC_COVID_FULLTEXTS")
 print(f'Found {len(covid19_fulltext_doc2source)} mappings for TREC_COVID_FULLTEXTS')
 
+
+trip_click_graph = DataGraph(document_collection='TRIP_CLICK')
+trec_genomics_fulltext_graph = DataGraph(document_collection='TREC_GENOMICS_FULLTEXTS')
+
+
 ROOT_DIR = '/home/kroll/jupyter/JCDL2023/'
 RESOURCES_DIR = os.path.join(ROOT_DIR, 'resources')
 
@@ -634,8 +639,15 @@ class Benchmark(ABC):
 
 
 class TRECGenomicsBenchmark(Benchmark):
-    def __init__(self, topics_file, qrel_file):
-        super().__init__(TREC_GENOMICS_DIR, topics_file, qrel_file, name="TREC_Genomics")
+    def __init__(self, topics_file, qrel_file, use_fulltext=False):
+        name = "TREC_Genomics"
+        self.use_fulltext = use_fulltext
+        if use_fulltext:
+            name = name + '_fulltext'
+
+        super().__init__(TREC_GENOMICS_DIR, topics_file, qrel_file, name=name)
+        if use_fulltext:
+            self.evaluation_graph = trec_genomics_fulltext_graph
 
     def parse_topics(self):
         path = os.path.join(self.path, self.topics_file)
@@ -800,6 +812,7 @@ class PrecMed2017Benchmark(PrecMed2019Benchmark):
 class TripClickBenchmark(Benchmark):
     def __init__(self, topics_file, qrel_file, path=TRIP_CLICK_DIR, name="TripClick"):
         super().__init__(path, topics_file, qrel_file, name=name)
+        self.evaluation_graph = trip_click_graph
 
     def parse_topics(self):
         top_pattern = re.compile(r"(?s)<top>\n*(.*?)\n*</top>")
@@ -860,10 +873,12 @@ class BenchmarkRunner:
             self.benchmarks.append(TRECCovidBenchmark('topics-rnd5.xml', 'qrels-covid_d5_j4.5-5.txt'))
         if 'trec-covid-fulltext' in bm_list:
             self.benchmarks.append(TRECCovidBenchmark('topics-rnd5.xml', 'qrels-covid_d5_j4.5-5.txt', True))
-        if 'prec-med-2020' in bm_list:
+        if 'precision-med' in bm_list:
             self.benchmarks.append(PrecMed2020Benchmark('topics2020.xml', 'qrels-reduced-phase1-treceval-2020.txt'))
         if 'trec-genomics' in bm_list:
             self.benchmarks.append(TRECGenomicsBenchmark('2007topics.txt', 'trecgen2007.all.judgments.tsv.txt'))
+        if 'trec-genomics-fulltext' in bm_list:
+            self.benchmarks.append(TRECGenomicsBenchmark('2007topics.txt', 'trecgen2007.all.judgments.tsv.txt', True))
         if 'trip-click' in bm_list:
             self.benchmarks.append(TripClickBenchmark(['topics.head.test.txt', 'topics.head.val.txt'],
                                                       ['qrels.raw.head.test.txt', 'qrels.raw.head.val.txt']))
