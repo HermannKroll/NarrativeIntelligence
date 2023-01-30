@@ -6,6 +6,7 @@ import string
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
+from typing import Set
 
 import datrie
 
@@ -20,12 +21,14 @@ from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
-    VACCINE, DISEASE
+    VACCINE, DISEASE, TARGET, ORGANISM
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
+from narrant.vocabularies.organism_vocabulary import OrganismVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
+from narrant.vocabularies.target_vocabulary import TargetVocabulary
 from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
@@ -93,6 +96,8 @@ class EntityTagger:
         self._add_fid_dosageform_terms()
         self._add_vaccine_terms()
         self._add_plant_families()
+        self._add_chembl_targets()
+        self._add_chembl_organisms()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def _add_additional_diseases(self):
@@ -231,7 +236,21 @@ class EntityTagger:
             for chid in chids:
                 self.term2entity[term.lower()].add(Entity(chid, CHEMICAL))
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True):
+    def _add_chembl_targets(self):
+        logging.info('Adding ChEMBL targets...')
+        terms2id = TargetVocabulary.create_target_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self.term2entity[term.lower()].add(Entity(chid, TARGET))
+
+    def _add_chembl_organisms(self):
+        logging.info('Adding ChEMBL organism...')
+        terms2id = OrganismVocabulary.create_organism_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self.term2entity[term.lower()].add(Entity(chid, ORGANISM))
+
+    def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
         """
         Tags an entity by given a string
         :param term: the entity term
