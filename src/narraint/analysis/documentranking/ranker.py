@@ -7,6 +7,7 @@ from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.backend.database import SessionExtended
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.document.narrative_document import NarrativeDocument
+from narraint.frontend.entity.entitytagger import EntityTagger
 
 stopwords = set(nltk.corpus.stopwords.words('english'))
 trans_map = {p: ' ' for p in '[]()?!'}  # PUNCTUATION}
@@ -23,7 +24,7 @@ class AnalyzedQuery:
         self.keyword_query = keyword_query
         self.keywords = list([k for k in possible_keywords if k and k not in stopwords])
         self.concepts = set()
-        self.tagger = EntityTaggerJCDL.instance()
+        self.tagger = EntityTagger.instance()
         self.__greedy_find_concepts_in_keywords()
 
     def __greedy_find_concepts_in_keywords(self):
@@ -32,8 +33,9 @@ class AnalyzedQuery:
             for i in range(len(keywords_iteration), 0, -1):
                 current_part = ' '.join([k for k in keywords_iteration])
                 try:
-                    entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=False)
-                    self.concepts.update(entities_in_part)
+                    entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
+                    self.concepts.update({e.entity_id for e in entities_in_part})
+                    self.concepts.update({e.entity_type for e in entities_in_part})
                     # print(f'Found {entities_in_part} in query part: {current_part}')
                     break
                 except KeyError:
@@ -46,12 +48,17 @@ class AnalyzedNarrativeDocument:
     def __init__(self, doc: NarrativeDocument):
         self.document = doc
         self.concept_ids = set([t.ent_id for t in doc.tags])
+        self.concept_ids.update({t.ent_type for t in doc.tags})
         self.concept2frequency = {}
         for t in doc.tags:
             if t.ent_id not in self.concept2frequency:
                 self.concept2frequency[t.ent_id] = 1
             else:
                 self.concept2frequency[t.ent_id] += 1
+            if t.ent_type not in self.concept2frequency:
+                self.concept2frequency[t.ent_type] = 1
+            else:
+                self.concept2frequency[t.ent_type] += 1
 
         self.subject_ids = set([s.subject_id for s in doc.extracted_statements])
         self.object_ids = set([s.object_id for s in doc.extracted_statements])
