@@ -538,7 +538,7 @@ class DataGraph:
         q_stmt = session.query(Predication)
         q_stmt = q_stmt.filter(Predication.document_collection == document_collection)
         q_stmt = q_stmt.filter(Predication.relation != None)
-        q_stmt = q_stmt.yield_per(1000000)
+        q_stmt = q_stmt.yield_per(10000000)
         for i, r in enumerate(q_stmt):
             progress.print_progress(i)
             subjects = self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.subject_id,
@@ -602,8 +602,8 @@ class DataGraph:
 
         for i, r in enumerate(query):
             progress.print_progress(i)
-            for entity in self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.entity_id,
-                                                                              entity_type=r.entity_type):
+            for entity in self.resolve_type_and_expand_entity_by_superclasses(entity_id=r.ent_id,
+                                                                              entity_type=r.ent_type):
                 if entity not in self.entity_index:
                     self.entity_index[entity] = set()
                 self.entity_index[entity].add(int(r.document_id))
