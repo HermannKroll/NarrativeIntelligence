@@ -57,6 +57,8 @@ class AnalyzedNarrativeDocument:
         self.object_ids = set([s.object_id for s in doc.extracted_statements])
         self.statement_concepts = set([(s.subject_id, s.object_id) for s in doc.extracted_statements])
 
+    def get_text(self):
+        return self.document.get_text_content(sections=True)
 
 class DocumentRetriever:
 
