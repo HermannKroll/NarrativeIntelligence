@@ -936,7 +936,7 @@ class BenchmarkRunner:
                 with open(filename, 'w') as file:
                     file.write(json.dumps(bm_result))
 
-                filename_relaxed = f'{benchmark_name}_relaxed_results_{date.year}.{date.month}.{date.day}.json'
+                filename_relaxed = f'{benchmark_name}_relaxed_results.json'
                 filename_relaxed = os.path.join(self.path, filename_relaxed)
                 print(f'Writing relaxed results to {filename_relaxed}')
                 with open(filename_relaxed, 'w') as file:
