@@ -30,19 +30,33 @@ class AnalyzedQuery:
         self.__greedy_find_concepts_in_keywords()
 
     def __greedy_find_concepts_in_keywords(self):
+
+        # perform a backward search
         for j in range(0, len(self.keywords), 1):
             keywords_iteration = self.keywords[j:]
             for i in range(len(keywords_iteration), 0, -1):
                 current_part = ' '.join([k for k in keywords_iteration])
+          #      print(current_part)
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
                     self.concepts.update({e.entity_id for e in entities_in_part})
                     self.concepts.update({e.entity_type for e in entities_in_part})
-                    # print(f'Found {entities_in_part} in query part: {current_part}')
-                    break
                 except KeyError:
-                    # print(f'No match for query part: {current_part}')
                     pass
+        # Perform a forward search
+        for j in range(1, len(self.keywords) + 1, 1):
+            current_part = ' '.join([k for k in self.keywords[:j]])
+       #     print(current_part)
+            try:
+                entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
+                self.concepts.update({e.entity_id for e in entities_in_part})
+                self.concepts.update({e.entity_type for e in entities_in_part})
+            except KeyError:
+                pass
+
+    def to_dict(self):
+        return {"keywords": str(self.keywords),
+                "concepts": str(self.concepts)}
 
 
 class AnalyzedNarrativeDocument:
@@ -68,6 +82,11 @@ class AnalyzedNarrativeDocument:
 
     def get_text(self):
         return self.document.get_text_content(sections=True)
+
+    def to_dict(self):
+        return {"document": self.document.to_dict(),
+                "concepts": str(self.concept_ids),
+                "concept2frequency": self.concept2frequency}
 
 
 class DocumentRetriever:
@@ -133,7 +152,7 @@ class EqualDocumentRanker(AbstractDocumentRanker):
         super().__init__(name="EqualDocumentRanker")
 
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
-        return list([d.document.id for d in narrative_documents])
+        return list([(d.document.id, 2.0) for d in narrative_documents])
 
 
 class ConceptDocumentRanker(AbstractDocumentRanker):
@@ -146,7 +165,7 @@ class ConceptDocumentRanker(AbstractDocumentRanker):
         for d in narrative_documents:
             doc_scores.append((d.document.id, len(query.concepts.intersection(d.concept_ids))))
 
-        return list([res[0] for res in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class ConceptFrequencyDocumentRanker(AbstractDocumentRanker):
@@ -160,7 +179,7 @@ class ConceptFrequencyDocumentRanker(AbstractDocumentRanker):
             concept_frequency = sum([d.concept2frequency[c] for c in query.concepts if c in d.concept2frequency])
             doc_scores.append((d.document.id, concept_frequency))
 
-        return list([res[0] for res in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class StatementPartialOverlapDocumentRanker(AbstractDocumentRanker):
@@ -174,7 +193,7 @@ class StatementPartialOverlapDocumentRanker(AbstractDocumentRanker):
             score = len(query.concepts.intersection(d.subject_ids)) + len(query.concepts.intersection(d.object_ids))
             doc_scores.append((d.document.id, score))
 
-        return list([res[0] for res in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class StatementOverlapDocumentRanker(AbstractDocumentRanker):
@@ -192,7 +211,7 @@ class StatementOverlapDocumentRanker(AbstractDocumentRanker):
                         score += 1
             doc_scores.append((d.document.id, score))
 
-        return list([res[0] for res in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class GraphConnectivityDocumentRanker:
@@ -213,8 +232,8 @@ class TagFrequencyRanker(AbstractDocumentRanker):
         for doc in narrative_documents:
             concepts: set[str] = doc.concept_ids.intersection(query.concepts)
             score: float = sum([doc.concept2frequency[c] for c in concepts if c in doc.concept2frequency])
-            doc_scores.append((doc, score))
-        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+            doc_scores.append((doc.document.id, score))
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class StatementFrequencyRanker(AbstractDocumentRanker):
@@ -225,8 +244,8 @@ class StatementFrequencyRanker(AbstractDocumentRanker):
         doc_scores = []
         for doc in narrative_documents:
             score = len(self._relevant_statements(query, doc))
-            doc_scores.append((doc, score))
-        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+            doc_scores.append((doc.document.id, score))
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
     @staticmethod
     def _relevant_statements(query: AnalyzedQuery, narrative_document: AnalyzedNarrativeDocument):
@@ -249,8 +268,8 @@ class ConfidenceStatementFrequencyRanker(StatementFrequencyRanker):
         doc_scores = []
         for doc in narrative_documents:
             score = sum([s.confidence for s in self._relevant_statements(query, doc)])
-            doc_scores.append((doc, score))
-        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+            doc_scores.append((doc.document.id, score))
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
 
 class PathFrequencyRanker(AbstractDocumentRanker):
@@ -262,10 +281,12 @@ class PathFrequencyRanker(AbstractDocumentRanker):
 
         for doc in narrative_documents:
             graph = self._document_graph(doc)
-            stmts = self._concept_product(query, doc)
+            stmts = list(self._concept_product(query, doc))
             paths = 0
-
             for subj, obj in stmts:
+                # do not search for self combinations
+                if subj == obj:
+                    continue
                 # skip if one of the values does not exist as a node
                 if subj not in graph or obj not in graph:
                     continue
@@ -275,9 +296,9 @@ class PathFrequencyRanker(AbstractDocumentRanker):
                     for i in range(len(shortest_path) - 1):
                         graph.remove_edge(shortest_path[i], shortest_path[i + 1])
                     paths += self._evaluate_path_score(doc, shortest_path)
-            doc_scores.append((doc, paths))
+            doc_scores.append((doc.document.id, paths))
 
-        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
     @staticmethod
     def _evaluate_path_score(doc: AnalyzedNarrativeDocument, shortest_path: list[str]) -> float:
@@ -293,7 +314,7 @@ class PathFrequencyRanker(AbstractDocumentRanker):
     @staticmethod
     def _concept_product(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument):
         concepts: set[str] = doc.concept_ids.intersection(query.concepts)
-        return itertools.product(concepts, repeat=1)
+        return itertools.product(concepts, concepts)
 
 
 class ConfidencePathFrequencyRanker(PathFrequencyRanker):
@@ -326,11 +347,12 @@ class AdjacentEdgesRanker(PathFrequencyRanker):
         for doc in narrative_documents:
             graph = self._document_graph(doc)
             score = self._evaluate_confidence_score(query, doc, graph)
-            doc_scores.append((doc, score))
-        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+            doc_scores.append((doc.document.id, score))
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
     @staticmethod
-    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument, graph: networkx.MultiGraph) -> float:
+    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument,
+                                   graph: networkx.MultiGraph) -> float:
         return sum((len(graph.edges(c)) for c in query.concepts))
 
 
@@ -339,7 +361,8 @@ class ConfidenceAdjacentEdgesRanker(AdjacentEdgesRanker):
         super().__init__(name="ConfidenceAdjacentEdgesRanker")
 
     @staticmethod
-    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument, graph: networkx.MultiGraph) -> float:
+    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument,
+                                   graph: networkx.MultiGraph) -> float:
         score: float = 0
         for concept in query.concepts:
             edges = graph.edges(concept)
@@ -349,4 +372,3 @@ class ConfidenceAdjacentEdgesRanker(AdjacentEdgesRanker):
                                and (stmt.object_type == o or stmt.object_id == o))
                 score += sum(confidences)
         return score
-
