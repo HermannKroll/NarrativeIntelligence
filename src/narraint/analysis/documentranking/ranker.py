@@ -1,5 +1,7 @@
+import itertools
 from typing import List
 
+import networkx
 import nltk
 
 from narraint.analysis.querytranslation.data_graph import Query, DataGraph
@@ -66,6 +68,7 @@ class AnalyzedNarrativeDocument:
 
     def get_text(self):
         return self.document.get_text_content(sections=True)
+
 
 class DocumentRetriever:
 
@@ -199,3 +202,151 @@ class GraphConnectivityDocumentRanker:
 
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
         pass
+
+
+class TagFrequencyRanker(AbstractDocumentRanker):
+    def __init__(self):
+        super().__init__(name="TagFrequencyRanker")
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+        doc_scores = []
+        for doc in narrative_documents:
+            concepts: set[str] = doc.concept_ids.intersection(query.concepts)
+            score: float = sum([doc.concept2frequency[c] for c in concepts if c in doc.concept2frequency])
+            doc_scores.append((doc, score))
+        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+
+
+class StatementFrequencyRanker(AbstractDocumentRanker):
+    def __init__(self, name="StatementFrequencyRanker"):
+        super().__init__(name=name)
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+        doc_scores = []
+        for doc in narrative_documents:
+            score = len(self._relevant_statements(query, doc))
+            doc_scores.append((doc, score))
+        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+
+    @staticmethod
+    def _relevant_statements(query: AnalyzedQuery, narrative_document: AnalyzedNarrativeDocument):
+        rev_stmts = set()
+        for stmt in narrative_document.document.extracted_statements:
+            if all(c in query.concepts for c in {stmt.subject_id, stmt.object_id}) \
+                    or all(c in query.concepts for c in {stmt.subject_id, stmt.object_type}) \
+                    or all(c in query.concepts for c in {stmt.subject_type, stmt.object_id}) \
+                    or all(c in query.concepts for c in {stmt.subject_type, stmt.object_type}):
+                rev_stmts.add(stmt)
+
+        return rev_stmts
+
+
+class ConfidenceStatementFrequencyRanker(StatementFrequencyRanker):
+    def __init__(self):
+        super().__init__(name="ConfidenceStatementFrequencyRanker")
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+        doc_scores = []
+        for doc in narrative_documents:
+            score = sum([s.confidence for s in self._relevant_statements(query, doc)])
+            doc_scores.append((doc, score))
+        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+
+
+class PathFrequencyRanker(AbstractDocumentRanker):
+    def __init__(self, name="PathFrequencyRanker"):
+        super().__init__(name=name)
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+        doc_scores = []
+
+        for doc in narrative_documents:
+            graph = self._document_graph(doc)
+            stmts = self._concept_product(query, doc)
+            paths = 0
+
+            for subj, obj in stmts:
+                # skip if one of the values does not exist as a node
+                if subj not in graph or obj not in graph:
+                    continue
+                # count existing paths for a statement and remove them lengthwise starting with the shortest possible.
+                while networkx.has_path(graph, subj, obj):
+                    shortest_path = networkx.shortest_path(graph, subj, obj)
+                    for i in range(len(shortest_path) - 1):
+                        graph.remove_edge(shortest_path[i], shortest_path[i + 1])
+                    paths += self._evaluate_path_score(doc, shortest_path)
+            doc_scores.append((doc, paths))
+
+        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+
+    @staticmethod
+    def _evaluate_path_score(doc: AnalyzedNarrativeDocument, shortest_path: list[str]) -> float:
+        return len(shortest_path)
+
+    @staticmethod
+    def _document_graph(doc: AnalyzedNarrativeDocument) -> networkx.MultiGraph:
+        graph: networkx.MultiGraph = networkx.MultiGraph()
+        for stmt in doc.document.extracted_statements:
+            graph.add_edge(stmt.subject_id, stmt.object_id)
+        return graph
+
+    @staticmethod
+    def _concept_product(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument):
+        concepts: set[str] = doc.concept_ids.intersection(query.concepts)
+        return itertools.product(concepts, repeat=1)
+
+
+class ConfidencePathFrequencyRanker(PathFrequencyRanker):
+    def __init__(self):
+        super().__init__(name="ConfidencePathFrequencyRanker")
+
+    @staticmethod
+    def _evaluate_path_score(doc: AnalyzedNarrativeDocument, path: list[str]) -> float:
+        score = 0
+
+        for i in range(len(path) - 1):
+            subj = path[i]
+            obj = path[i + 1]
+
+            for stmt in doc.document.extracted_statements:
+                if stmt.subject_type == subj and stmt.object_type == obj \
+                        or stmt.subject_type == subj and stmt.object_id == obj \
+                        or stmt.subject_id == subj and stmt.object_type == obj \
+                        or stmt.subject_id == subj and stmt.object_id == obj:
+                    score += stmt.confidence
+        return score
+
+
+class AdjacentEdgesRanker(PathFrequencyRanker):
+    def __init__(self, name="AdjacentEdgesRanker"):
+        super().__init__(name=name)
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+        doc_scores = []
+        for doc in narrative_documents:
+            graph = self._document_graph(doc)
+            score = self._evaluate_confidence_score(query, doc, graph)
+            doc_scores.append((doc, score))
+        return list([d[0] for d in sorted(doc_scores, key=lambda x: x[1], reverse=True)])
+
+    @staticmethod
+    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument, graph: networkx.MultiGraph) -> float:
+        return sum((len(graph.edges(c)) for c in query.concepts))
+
+
+class ConfidenceAdjacentEdgesRanker(AdjacentEdgesRanker):
+    def __init__(self):
+        super().__init__(name="ConfidenceAdjacentEdgesRanker")
+
+    @staticmethod
+    def _evaluate_confidence_score(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument, graph: networkx.MultiGraph) -> float:
+        score: float = 0
+        for concept in query.concepts:
+            edges = graph.edges(concept)
+            for s, o in edges:
+                confidences = (stmt.confidence for stmt in doc.document.extracted_statements
+                               if (stmt.subject_type == s or stmt.subject_id == s)
+                               and (stmt.object_type == o or stmt.object_id == o))
+                score += sum(confidences)
+        return score
+
