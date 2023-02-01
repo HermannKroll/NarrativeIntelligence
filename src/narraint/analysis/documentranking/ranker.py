@@ -4,12 +4,15 @@ from typing import List
 import networkx
 import nltk
 
+from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.analysis.querytranslation.data_graph import Query, DataGraph
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.backend.database import SessionExtended
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.document.narrative_document import NarrativeDocument
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narrant.entity.entityresolver import GeneResolver
+from narrant.preprocessing.enttypes import GENE
 
 stopwords = set(nltk.corpus.stopwords.words('english'))
 trans_map = {p: ' ' for p in '[]()?!'}  # PUNCTUATION}
@@ -94,6 +97,8 @@ class DocumentRetriever:
     def __init__(self):
         self.__cache = {}
         self.session = SessionExtended.get()
+        self.generesolver = GeneResolver()
+        self.generesolver.load_index()
 
     def retrieve_narrative_documents(self, document_ids: [int], document_collection: str) -> List[
         AnalyzedNarrativeDocument]:
@@ -119,6 +124,37 @@ class DocumentRetriever:
         narrative_documents_queried = retrieve_narrative_documents_from_database(session=self.session,
                                                                                  document_ids=document_ids,
                                                                                  document_collection=document_collection)
+
+
+        for doc in narrative_documents:
+            translated_gene_ids = []
+            for tag in doc.document.tags:
+                # Gene IDs need a special handling
+                if tag.ent_type == GENE:
+                    if ';' in tag.ent_id:
+                        for g_id in tag.ent_id.split(';'):
+                            try:
+                                symbol = self.generesolver.gene_id_to_symbol(g_id.strip()).lower()
+                                translated_gene_ids.append(TaggedEntity(document=tag.document,
+                                                                        start=tag.start,
+                                                                        end=tag.end,
+                                                                        text=tag.text,
+                                                                        ent_id=symbol,
+                                                                        ent_type=GENE))
+                            except (KeyError, ValueError):
+                                continue
+                    else:
+                        try:
+                            symbol = self.generesolver.gene_id_to_symbol(tag.ent_id).lower()
+                            translated_gene_ids.append(TaggedEntity(document=tag.document,
+                                                                    start=tag.start,
+                                                                    end=tag.end,
+                                                                    text=tag.text,
+                                                                    ent_id=symbol,
+                                                                    ent_type=GENE))
+                        except (KeyError, ValueError):
+                            pass
+            doc.document.tags.extend(translated_gene_ids)
 
         narrative_documents_queried = [AnalyzedNarrativeDocument(d) for d in narrative_documents_queried]
 
