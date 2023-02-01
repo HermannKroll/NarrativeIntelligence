@@ -15,7 +15,7 @@ class IndexRanker(AbstractDocumentRanker):
 
     @staticmethod
     def index_documents(narrative_documents: List[AnalyzedNarrativeDocument]):
-        df = pd.concat([pd.DataFrame([[d.document.id, d.get_text()]],
+        df = pd.concat([pd.DataFrame([[str(d.document.id), d.get_text()]],
                                      columns=["docno", "text"]) for d in narrative_documents], ignore_index=True)
         indexer = pt.DFIndexer(index_path='', type=pt.index.IndexingType.MEMORY)
         index_ref = indexer.index(df["text"], df)
