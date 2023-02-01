@@ -3,10 +3,11 @@ from typing import List
 
 import networkx
 import nltk
+from numpy import log as ln
 
+from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.analysis.querytranslation.data_graph import Query, DataGraph
-from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
 from narraint.backend.database import SessionExtended
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.document.narrative_document import NarrativeDocument
@@ -39,7 +40,7 @@ class AnalyzedQuery:
             keywords_iteration = self.keywords[j:]
             for i in range(len(keywords_iteration), 0, -1):
                 current_part = ' '.join([k for k in keywords_iteration])
-          #      print(current_part)
+                #      print(current_part)
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
                     self.concepts.update({e.entity_id for e in entities_in_part})
@@ -49,7 +50,7 @@ class AnalyzedQuery:
         # Perform a forward search
         for j in range(1, len(self.keywords) + 1, 1):
             current_part = ' '.join([k for k in self.keywords[:j]])
-       #     print(current_part)
+            #     print(current_part)
             try:
                 entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
                 self.concepts.update({e.entity_id for e in entities_in_part})
@@ -66,8 +67,8 @@ class AnalyzedNarrativeDocument:
 
     def __init__(self, doc: NarrativeDocument):
         self.document = doc
-        self.concept_ids = set([t.ent_id for t in doc.tags])
-        self.concept_ids.update({t.ent_type for t in doc.tags})
+        self.concepts = set([t.ent_id for t in doc.tags])
+        self.concepts.update({t.ent_type for t in doc.tags})
         self.concept2frequency = {}
         for t in doc.tags:
             if t.ent_id not in self.concept2frequency:
@@ -79,17 +80,59 @@ class AnalyzedNarrativeDocument:
             else:
                 self.concept2frequency[t.ent_type] += 1
 
-        self.subject_ids = set([s.subject_id for s in doc.extracted_statements])
-        self.object_ids = set([s.object_id for s in doc.extracted_statements])
+        self.subjects = set([s.subject_id for s in doc.extracted_statements])
+        self.subjects.update([s.subject_type for s in doc.extracted_statements])
+        self.objects = set([s.object_id for s in doc.extracted_statements])
+        self.objects.update([s.object_type for s in doc.extracted_statements])
         self.statement_concepts = set([(s.subject_id, s.object_id) for s in doc.extracted_statements])
+
+    def get_length_in_words(self):
+        text = self.get_text()
+        return len(text.split(' '))
+
+    def get_length_in_concepts(self):
+        count = 0
+        for c, freq in self.concept2frequency.items():
+            count += freq
+        return count
+
+    def get_concept_frequency(self, concept):
+        if concept in self.concept2frequency:
+            return self.concept2frequency[concept]
+        else:
+            return 0
 
     def get_text(self):
         return self.document.get_text_content(sections=True)
 
     def to_dict(self):
         return {"document": self.document.to_dict(),
-                "concepts": str(self.concept_ids),
+                "concepts": str(self.concepts),
                 "concept2frequency": self.concept2frequency}
+
+
+class DocumentCorpus:
+
+    def __init__(self, documents: [AnalyzedNarrativeDocument]):
+        self.documents = documents
+        self.document_count = len(documents)
+        self.concept2docs = {}
+        for doc in documents:
+            for c in doc.concepts:
+                if c not in self.concept2docs:
+                    self.concept2docs[c] = 0
+                else:
+                    self.concept2docs[c] += 1
+
+    def get_document_count_for_concept(self, concept):
+        if concept in self.concept2docs:
+            return self.concept2docs[concept]
+        return 0
+
+    def idf_concept(self, concept: str):
+        a = self.document_count - self.get_document_count_for_concept(concept) + 0.5
+        b = self.get_document_count_for_concept(concept) + 0.5
+        return ln((a / b) + 1)
 
 
 class DocumentRetriever:
@@ -99,6 +142,14 @@ class DocumentRetriever:
         self.session = SessionExtended.get()
         self.generesolver = GeneResolver()
         self.generesolver.load_index()
+
+    def retrieve_document_ids_for_collection(self, document_collection: str):
+        session = SessionExtended.get()
+        q = session.query(Document.id).filter(Document.collection == document_collection)
+        doc_ids = set()
+        for d in q:
+            doc_ids.add(d[0])
+        return doc_ids
 
     def retrieve_narrative_documents(self, document_ids: [int], document_collection: str) -> List[
         AnalyzedNarrativeDocument]:
@@ -124,7 +175,6 @@ class DocumentRetriever:
         narrative_documents_queried = retrieve_narrative_documents_from_database(session=self.session,
                                                                                  document_ids=document_ids,
                                                                                  document_collection=document_collection)
-
 
         for doc in narrative_documents:
             translated_gene_ids = []
@@ -178,7 +228,8 @@ class AbstractDocumentRanker:
     def __init__(self, name):
         self.name = name
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         pass
 
 
@@ -187,7 +238,8 @@ class EqualDocumentRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="EqualDocumentRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         return list([(d.document.id, 2.0) for d in narrative_documents])
 
 
@@ -196,10 +248,11 @@ class ConceptDocumentRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="ConceptDocumentRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for d in narrative_documents:
-            doc_scores.append((d.document.id, len(query.concepts.intersection(d.concept_ids))))
+            doc_scores.append((d.document.id, len(query.concepts.intersection(d.concepts))))
 
         return sorted(doc_scores, key=lambda x: x[1], reverse=True)
 
@@ -209,7 +262,8 @@ class ConceptFrequencyDocumentRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="ConceptFrequencyDocumentRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for d in narrative_documents:
             concept_frequency = sum([d.concept2frequency[c] for c in query.concepts if c in d.concept2frequency])
@@ -223,10 +277,11 @@ class StatementPartialOverlapDocumentRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="StatementPartialOverlapDocumentRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for d in narrative_documents:
-            score = len(query.concepts.intersection(d.subject_ids)) + len(query.concepts.intersection(d.object_ids))
+            score = len(query.concepts.intersection(d.subjects)) + len(query.concepts.intersection(d.objects))
             doc_scores.append((d.document.id, score))
 
         return sorted(doc_scores, key=lambda x: x[1], reverse=True)
@@ -237,7 +292,8 @@ class StatementOverlapDocumentRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="StatementOverlapDocumentRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for d in narrative_documents:
             score = 0
@@ -255,7 +311,8 @@ class GraphConnectivityDocumentRanker:
     def __init__(self):
         pass
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         pass
 
 
@@ -263,10 +320,11 @@ class TagFrequencyRanker(AbstractDocumentRanker):
     def __init__(self):
         super().__init__(name="TagFrequencyRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for doc in narrative_documents:
-            concepts: set[str] = doc.concept_ids.intersection(query.concepts)
+            concepts: set[str] = doc.concepts.intersection(query.concepts)
             score: float = sum([doc.concept2frequency[c] for c in concepts if c in doc.concept2frequency])
             doc_scores.append((doc.document.id, score))
         return sorted(doc_scores, key=lambda x: x[1], reverse=True)
@@ -276,7 +334,8 @@ class StatementFrequencyRanker(AbstractDocumentRanker):
     def __init__(self, name="StatementFrequencyRanker"):
         super().__init__(name=name)
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for doc in narrative_documents:
             score = len(self._relevant_statements(query, doc))
@@ -300,7 +359,8 @@ class ConfidenceStatementFrequencyRanker(StatementFrequencyRanker):
     def __init__(self):
         super().__init__(name="ConfidenceStatementFrequencyRanker")
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for doc in narrative_documents:
             score = sum([s.confidence for s in self._relevant_statements(query, doc)])
@@ -312,7 +372,8 @@ class PathFrequencyRanker(AbstractDocumentRanker):
     def __init__(self, name="PathFrequencyRanker"):
         super().__init__(name=name)
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
 
         for doc in narrative_documents:
@@ -349,7 +410,7 @@ class PathFrequencyRanker(AbstractDocumentRanker):
 
     @staticmethod
     def _concept_product(query: AnalyzedQuery, doc: AnalyzedNarrativeDocument):
-        concepts: set[str] = doc.concept_ids.intersection(query.concepts)
+        concepts: set[str] = doc.concepts.intersection(query.concepts)
         return itertools.product(concepts, concepts)
 
 
@@ -378,7 +439,8 @@ class AdjacentEdgesRanker(PathFrequencyRanker):
     def __init__(self, name="AdjacentEdgesRanker"):
         super().__init__(name=name)
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
         doc_scores = []
         for doc in narrative_documents:
             graph = self._document_graph(doc)
@@ -408,3 +470,24 @@ class ConfidenceAdjacentEdgesRanker(AdjacentEdgesRanker):
                                and (stmt.object_type == o or stmt.object_id == o))
                 score += sum(confidences)
         return score
+
+
+class BM25Tag(AbstractDocumentRanker):
+
+    def __init__(self):
+        self.k = 2.0
+        self.b = 0.75
+        super().__init__(name="BM25Tag")
+
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+                       corpus: DocumentCorpus):
+        doc_scores = []
+        for doc in narrative_documents:
+            score = 0
+            for c in query.concepts:
+                a = corpus.idf_concept(c) * (doc.get_concept_frequency(c) * (self.k + 1))
+                b = doc.get_concept_frequency(c) + self.k * (1 - self.b + self.b * doc.get_length_in_concepts())
+                score = a / b
+            doc_scores.append((doc.document.id, score))
+
+        return sorted(doc_scores, key=lambda x: x[1], reverse=True)
