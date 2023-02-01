@@ -34,7 +34,7 @@ class BM25Ranker(IndexRanker):
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
         index = super().index_documents(narrative_documents)
         br = pt.BatchRetrieve(index, wmodel="BM25")
-        return br.search(query.keyword_query).loc[:, "docno"].tolist()
+        return list(br.search(query.keyword_query)[['docno', 'score']].to_records(index=False))
 
 
 class TFIDFRanker(IndexRanker):
@@ -45,7 +45,7 @@ class TFIDFRanker(IndexRanker):
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument]):
         index = super().index_documents(narrative_documents)
         br = pt.BatchRetrieve(index, wmodel="TF_IDF")
-        return br.search(query.keyword_query).loc[:, "docno"].tolist()
+        return list(br.search(query.keyword_query)[['docno', 'score']].to_records(index=False))
 
 
 class OpenNIRRanker(IndexRanker):
@@ -60,4 +60,4 @@ class OpenNIRRanker(IndexRanker):
         vbert = onir_pt.reranker.from_checkpoint('https://macavaney.us/scibert-medmarco.tar.gz', text_field='text',
                                                  expected_md5="854966d0b61543ffffa44cea627ab63b")
         pipeline = br >> pt.text.get_text(index, 'text') >> vbert
-        return pipeline.search(query.keyword_query).loc[:, "docno"].tolist()
+        return list(pipeline.search(query.keyword_query)[['docno', 'score']].to_records(index=False))
