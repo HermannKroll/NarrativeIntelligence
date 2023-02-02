@@ -6,6 +6,7 @@ import nltk
 from numpy import log as ln
 
 from kgextractiontoolbox.backend.models import Document
+from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.analysis.querytranslation.data_graph import Query, DataGraph
 from narraint.backend.database import SessionExtended
@@ -19,6 +20,7 @@ stopwords = set(nltk.corpus.stopwords.words('english'))
 trans_map = {p: ' ' for p in '[]()?!'}  # PUNCTUATION}
 translator = str.maketrans(trans_map)
 
+print('New Version!')
 
 class AnalyzedQuery:
 
@@ -44,7 +46,7 @@ class AnalyzedQuery:
                 try:
                     entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
                     self.concepts.update({e.entity_id for e in entities_in_part})
-                    self.concepts.update({e.entity_type for e in entities_in_part})
+                   # self.concepts.update({e.entity_type for e in entities_in_part})
                 except KeyError:
                     pass
         # Perform a forward search
@@ -54,7 +56,7 @@ class AnalyzedQuery:
             try:
                 entities_in_part = self.tagger.tag_entity(current_part, expand_search_by_prefix=True)
                 self.concepts.update({e.entity_id for e in entities_in_part})
-                self.concepts.update({e.entity_type for e in entities_in_part})
+                #self.concepts.update({e.entity_type for e in entities_in_part})
             except KeyError:
                 pass
 
@@ -68,22 +70,22 @@ class AnalyzedNarrativeDocument:
     def __init__(self, doc: NarrativeDocument):
         self.document = doc
         self.concepts = set([t.ent_id for t in doc.tags])
-        self.concepts.update({t.ent_type for t in doc.tags})
+    #    self.concepts.update({t.ent_type for t in doc.tags})
         self.concept2frequency = {}
         for t in doc.tags:
             if t.ent_id not in self.concept2frequency:
                 self.concept2frequency[t.ent_id] = 1
             else:
                 self.concept2frequency[t.ent_id] += 1
-            if t.ent_type not in self.concept2frequency:
-                self.concept2frequency[t.ent_type] = 1
-            else:
-                self.concept2frequency[t.ent_type] += 1
+   #         if t.ent_type not in self.concept2frequency:
+   #             self.concept2frequency[t.ent_type] = 1
+   #         else:
+   #             self.concept2frequency[t.ent_type] += 1
 
         self.subjects = set([s.subject_id for s in doc.extracted_statements])
-        self.subjects.update([s.subject_type for s in doc.extracted_statements])
+#        self.subjects.update([s.subject_type for s in doc.extracted_statements])
         self.objects = set([s.object_id for s in doc.extracted_statements])
-        self.objects.update([s.object_type for s in doc.extracted_statements])
+ #       self.objects.update([s.object_type for s in doc.extracted_statements])
         self.statement_concepts = set([(s.subject_id, s.object_id) for s in doc.extracted_statements])
 
     def get_length_in_words(self):
@@ -150,6 +152,15 @@ class DocumentRetriever:
         for d in q:
             doc_ids.add(d[0])
         return doc_ids
+
+    def retrieve_documents_text(self,  document_ids: [int], document_collection: str):
+        session = SessionExtended.get()
+        doc_texts = []
+        for doc in iterate_over_all_documents_in_collection(session, document_ids=document_ids,
+                                                            collection=document_collection,
+                                                            consider_sections=True):
+            doc_texts.append((doc.id, doc.get_text_content(sections=True)))
+        return doc_texts
 
     def retrieve_narrative_documents(self, document_ids: [int], document_collection: str) -> List[
         AnalyzedNarrativeDocument]:
