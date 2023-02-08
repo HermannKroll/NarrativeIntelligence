@@ -27,6 +27,7 @@ from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
@@ -532,23 +533,21 @@ def get_query(request):
             year_sort_desc = True
 
         # Todo: integrate two optional parameters -> year_start and year_end
+        year_start = None
         if "year_start" in request.GET:
             year_start = str(request.GET.get("year_start", "").strip())
             try:
                 year_start = int(year_start)
             except ValueError:
                 year_start = None
-        else:
-            year_start = None
 
+        year_end = None
         if "year_end" in request.GET:
             year_end = str(request.GET.get("year_end", "").strip())
             try:
                 year_end = int(year_end)
             except ValueError:
                 year_end = None
-        else:
-            year_end = None
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
@@ -586,34 +585,8 @@ def get_query(request):
             View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
                                                          query, opt_query)
 
-            # Todo: If year start or year end is set
-            # Then filter result list if year in between
-            # results = list([r for r in results if year_start <= r.publication_year <= year_end])
-            temp_results = results
-            if year_start and year_end:
-                results = list([r for r in results if year_start <= r.publication_year <= year_end])
-
-            # Todo: Iterate over all results and count how many documents appeared in which year
-            # Just access QueryDocumentResult (r.publication_year)
-            # Maybe check if year > 0
-            # year_aggregation
-            # Output: {1992: 10, 1993: 100, ... }
-            year_aggregation = {}
-            for r in temp_results:
-                current_year = r.publication_year
-                if current_year > 0:
-                    if current_year in year_aggregation:
-                        year_aggregation.update({current_year: year_aggregation[current_year] + 1})
-                    else:
-                        year_aggregation.update({current_year: 1})
-            found_years = list(year_aggregation.keys())
-            found_years.sort()
-            try:
-                all_years = list(range(found_years[0], found_years[-1] + 1))
-            except:
-                all_years = found_years
-            for year in set(all_years) - set(found_years) & set(all_years):
-                year_aggregation.update({year: 0})
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
@@ -632,8 +605,6 @@ def get_query(request):
         View.instance().query_logger.write_api_call(True, "get_query", str(request),
                                                     time_needed=datetime.now() - time_start)
 
-        # Todo: Send date dictionary as an additional result back
-        # key = year_aggregation
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string, year_aggregation=year_aggregation,
@@ -642,7 +613,6 @@ def get_query(request):
         View.instance().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
-        # Todo: Case of failure -> send empty year_aggregation
         return JsonResponse(
             dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
                  query_limit_hit="False"))
@@ -1079,7 +1049,8 @@ def get_explain_translation(request):
             entities = View.instance().entity_tagger.tag_entity(concept)
             headings = []
             for entity in entities:
-                heading = View.instance().resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type, resolve_gene_by_id=False)
+                heading = View.instance().resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type,
+                                                                           resolve_gene_by_id=False)
                 if heading not in headings:
                     headings.append(heading)
             return JsonResponse(dict(headings=headings))
