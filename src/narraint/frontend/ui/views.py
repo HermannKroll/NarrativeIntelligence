@@ -28,6 +28,7 @@ from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.time_filter import TimeFilter
+from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
@@ -532,7 +533,6 @@ def get_query(request):
         else:
             year_sort_desc = True
 
-        # Todo: integrate two optional parameters -> year_start and year_end
         year_start = None
         if "year_start" in request.GET:
             year_start = str(request.GET.get("year_start", "").strip())
@@ -548,6 +548,10 @@ def get_query(request):
                 year_end = int(year_end)
             except ValueError:
                 year_end = None
+
+        title_filter = None
+        if "title_filter" in request.GET:
+            title_filter = str(request.GET.get("title_filter", "").strip())
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
@@ -585,6 +589,7 @@ def get_query(request):
             View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
                                                          query, opt_query)
 
+            results = TitleFilter.filter_documents(results, title_filter)
             year_aggregation = TimeFilter.aggregate_years(results)
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 

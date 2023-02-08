@@ -23,3 +23,5 @@ scipy~=1.9.3
 Pillow~=9.3.0
 git+https://github.com/LIAAD/yake
 scikit-learn~=1.1.3
+eldar~=0.0.8
+unidecode~=1.2.0
