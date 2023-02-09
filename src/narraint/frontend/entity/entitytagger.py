@@ -259,7 +259,7 @@ class EntityTagger:
     def __find_entities(self, term: str) -> Set[Entity]:
         if term not in self.term2entity:
             return set()
-        return {Entity(entity_id=e_id, entity_type=e_type) for e_id, e_type in self.term2entity[term]}
+        return self.term2entity[term]
 
     def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
         """
