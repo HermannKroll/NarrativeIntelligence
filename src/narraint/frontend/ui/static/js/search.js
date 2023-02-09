@@ -26,42 +26,42 @@ let CYTOSCAPE_STYLE = [
 
 // dictionary used to translate shortened urls into specific query links
 const short_urls = {
-    'q1':'&quot;post-acute COVID-19 syndrome&quot; associated Disease',
-    'q2':'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
-    'q3':'Drug treats Covid19',
-    'q4':'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
-    'q5':'Disease associated Covid19',
-    'q6':'Covid19 associated Target',
-    'q7':'Covid19 associated Human _AND_ Disease associated Human',
-    'q8':'Covid19 associated Vaccine',
-    'q9':'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
-    'q10':'&quot;Mass Spectrometry&quot; method Simvastatin',
-    'q11':'?X(Method) method Simvastatin',
-    'q12':'?X(LabMethod) method Simvastatin',
-    'q13':'Metformin treats &quot;Diabetes Mellitus&quot;',
-    'q14':'Simvastatin treats Hypercholesterolemia',
-    'q15':'Metformin treats ?X(Disease)',
-    'q16':'Metformin treats ?X(Species)',
-    'q17':'Vinca associated ?Y(Disease)',
-    'q18':'Digitalis associated ?Y(Disease)',
-    'q19':'?X(PlantFamily) associated ?Y(Disease)',
-    'q20':'Metformin administered ?X(DosageForm)',
-    'q21':'Metformin administered Injections',
-    'q22':'Lidocaine administered ?X(DosageForm)',
-    'q23':'?X(Drug) administered liposomes',
-    'q24':'?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
-    'q25':'Metformin inhibits mtor',
-    'q26':'Metformin inhibits ?X(Target)',
-    'q27':'?X(Drug) inhibits cyp3a4',
-    'q28':'cyp3a4 metabolises Simvastatin',
-    'q29':'Simvastatin induces Rhabdomyolysis',
-    'q30':'Simvastatin induces &quot;Muscular Diseases&quot;',
-    'q31':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
-    'q32':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
-    'q33':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
-    'q34':'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
-    'q35':'?Drug(Drug) treats ?Dis(Disease)',
-    'q36':'?Drug(Drug) administered ?Form(DosageForm)',
+    'q1': '&quot;post-acute COVID-19 syndrome&quot; associated Disease',
+    'q2': 'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
+    'q3': 'Drug treats Covid19',
+    'q4': 'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
+    'q5': 'Disease associated Covid19',
+    'q6': 'Covid19 associated Target',
+    'q7': 'Covid19 associated Human _AND_ Disease associated Human',
+    'q8': 'Covid19 associated Vaccine',
+    'q9': 'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
+    'q10': '&quot;Mass Spectrometry&quot; method Simvastatin',
+    'q11': '?X(Method) method Simvastatin',
+    'q12': '?X(LabMethod) method Simvastatin',
+    'q13': 'Metformin treats &quot;Diabetes Mellitus&quot;',
+    'q14': 'Simvastatin treats Hypercholesterolemia',
+    'q15': 'Metformin treats ?X(Disease)',
+    'q16': 'Metformin treats ?X(Species)',
+    'q17': 'Vinca associated ?Y(Disease)',
+    'q18': 'Digitalis associated ?Y(Disease)',
+    'q19': '?X(PlantFamily) associated ?Y(Disease)',
+    'q20': 'Metformin administered ?X(DosageForm)',
+    'q21': 'Metformin administered Injections',
+    'q22': 'Lidocaine administered ?X(DosageForm)',
+    'q23': '?X(Drug) administered liposomes',
+    'q24': '?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
+    'q25': 'Metformin inhibits mtor',
+    'q26': 'Metformin inhibits ?X(Target)',
+    'q27': '?X(Drug) inhibits cyp3a4',
+    'q28': 'cyp3a4 metabolises Simvastatin',
+    'q29': 'Simvastatin induces Rhabdomyolysis',
+    'q30': 'Simvastatin induces &quot;Muscular Diseases&quot;',
+    'q31': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
+    'q32': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
+    'q33': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
+    'q34': 'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
+    'q35': '?Drug(Drug) treats ?Dis(Disease)',
+    'q36': '?Drug(Drug) administered ?Form(DosageForm)',
 };
 
 function uuidv4() {
@@ -273,16 +273,16 @@ let optionMapping = {
 }
 
 function tryDecodeShortURL(query) {
-    if(query in short_urls) {
+    if (query in short_urls) {
         //Known query abbreviation. Decode html escape sequences.
-        lastQuery = $('<div>'+ short_urls[query] + '</div>').text();
+        lastQuery = $('<div>' + short_urls[query] + '</div>').text();
         return true;
     }
     return false;
 }
 
 function example_search(search_str) {
-    if(tryDecodeShortURL(search_str)) {
+    if (tryDecodeShortURL(search_str)) {
         search_str = lastQuery;
     }
 
@@ -465,6 +465,13 @@ $(document).on('keydown', function (e) {
 
 $(document).ready(function () {
 
+
+    $("#input_title_filter").on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            search(e);
+        }
+    });
+
     buildSelectionTrees();
 
     $("#search_form").submit(search);
@@ -589,17 +596,20 @@ function initFromURLQueryParams() {
     if (params.has("start_pos")) {
         setCurrentPage(parseInt(params.get("start_pos")))
     }
-
+    if (params.has("year_start") && params.has("year_end")) {
+        document.querySelector('#fromSlider').value = params.get("year_start");
+        document.querySelector('#toSlider').value = params.get("year_end");
+    }
+    if (params.has("title_filter")) {
+        document.getElementById("input_title_filter").value = params.get("title_filter");
+    }
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
         example_search(query);
     }
 
-    if (params.has("year_start") && params.has("year_end")) {
-        document.querySelector('#fromSlider').value = params.get("year_start");
-        document.querySelector('#toSlider').value = params.get("year_end");
-    }
+
 }
 
 let currentMaxPage = 0;
@@ -651,6 +661,7 @@ const search = (event) => {
     let start_pos = getStartPositionBasedOnCurrentPage();
     // consider start pos only if query isn't changed
     if (lastQuery !== query) {
+        document.getElementById("input_title_filter").value = "";
         start_pos = 0;
         setCurrentPage(0);
         lastQuery = query;
@@ -665,6 +676,7 @@ const search = (event) => {
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
+    let title_filter = document.getElementById("input_title_filter").value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
 
@@ -687,6 +699,7 @@ const search = (event) => {
     console.log("End position: " + end_pos)
     console.log("Start year: " + year_start)
     console.log("End year: " + year_end)
+    console.log("Title filter: " + title_filter)
     setButtonSearching(true);
 
     const url = new URL(window.location.href);
@@ -697,8 +710,16 @@ const search = (event) => {
     url.searchParams.set("sort_year_desc", year_sort_desc);
     url.searchParams.set("start_pos", start_pos);
     //   url.searchParams.set("end_pos", end_pos);
-    url.searchParams.set("year_start", year_start);
-    url.searchParams.set("year_end", year_end);
+    if (year_start !== null && year_start !== "undefined") {
+        url.searchParams.set("year_start", year_start);
+    }
+    if (year_end !== null && year_end !== "undefined") {
+        url.searchParams.set("year_end", year_end);
+    }
+
+    if (title_filter.length > 0) {
+        url.searchParams.set("title_filter", title_filter);
+    }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
     let request = $.ajax({
@@ -713,6 +734,7 @@ const search = (event) => {
             end_pos: end_pos,
             year_start: year_start,
             year_end: year_end,
+            title_filter: title_filter
             /*,
             inner_ranking: inner_ranking*/
         }
@@ -766,6 +788,8 @@ const search = (event) => {
                 document_header_appendix = " (Truncated)"
             }
             if (result_size !== 0) {
+                document.getElementById("input_title_filter").style.display = "block";
+
                 documents_header.html(result_size + " Documents" + document_header_appendix)
                 // scroll to results
                 document.getElementById("resultdiv").scrollIntoView();
@@ -850,6 +874,7 @@ const search = (event) => {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
             document.getElementById("div_input_page").style.display = "none";
+            document.getElementById("input_title_filter").style.display = "none";
             let query_trans_string = response["query_translation"];
             console.log('translation error:' + query_trans_string)
             $('#alert_translation').text(query_trans_string);
@@ -1125,7 +1150,9 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
         'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
 
-    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection)})
+    divDoc_DocumentGraph.click(() => {
+        showPaperView(art_doc_id, collection)
+    })
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
@@ -1321,7 +1348,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divH2.append(btn)
 
     //check if an url is used
-    if(url_str) {
+    if (url_str) {
         const link = ('<a class="subgroupLinkImg" href=' + url_str + ' target="_blank"' +
             ' onclick="event.stopPropagation()">' +
             '<img height="18px" src=' + search_icon_url + '></a>')
@@ -1572,47 +1599,47 @@ function buildSelectionTrees() {
 }
 
 function controlFromSlider(barChart, fromSlider, toSlider) {
-  const [from, to] = getParsed(fromSlider, toSlider);
-  fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
-  if (from > to) {
-    fromSlider.value = to;
-  }
-  updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
-  setValue(fromSlider, 'rangeFrom');
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+    if (from > to) {
+        fromSlider.value = to;
+    }
+    updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+    setValue(fromSlider, 'rangeFrom');
 }
 
 function controlToSlider(barChart, fromSlider, toSlider) {
-  const [from, to] = getParsed(fromSlider, toSlider);
-  fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
-  setToggleAccessible(toSlider, toSlider.min);
-  if (from >= to) {
-    toSlider.zIndex = 1;
-    fromSlider.zIndex = 0;
-  } else {
-    toSlider.zIndex = 0;
-    fromSlider.zIndex = 1;
-  }
-  if (from <= to) {
-    toSlider.value = to;
-  } else {
-    toSlider.value = from;
-  }
-  updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
-  setValue(toSlider, 'rangeTo');
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+    setToggleAccessible(toSlider, toSlider.min);
+    if (from >= to) {
+        toSlider.zIndex = 1;
+        fromSlider.zIndex = 0;
+    } else {
+        toSlider.zIndex = 0;
+        fromSlider.zIndex = 1;
+    }
+    if (from <= to) {
+        toSlider.value = to;
+    } else {
+        toSlider.value = from;
+    }
+    updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+    setValue(toSlider, 'rangeTo');
 }
 
 function setValue(range, rangeValue) {
-  let rangeV = document.getElementById(rangeValue);
-  const newValue = Number((range.value - range.min) * 100 / (range.max - range.min));
-  const newPosition = 10 - (newValue * 0.2);
-  rangeV.innerHTML = `<span>${range.value}</span>`;
-  rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
+    let rangeV = document.getElementById(rangeValue);
+    const newValue = Number((range.value - range.min) * 100 / (range.max - range.min));
+    const newPosition = 10 - (newValue * 0.2);
+    rangeV.innerHTML = `<span>${range.value}</span>`;
+    rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
 }
 
 function getParsed(currentFrom, currentTo) {
-  const from = parseInt(currentFrom.value, 10);
-  const to = parseInt(currentTo.value, 10);
-  return [from, to];
+    const from = parseInt(currentFrom.value, 10);
+    const to = parseInt(currentTo.value, 10);
+    return [from, to];
 }
 
 function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
@@ -1622,20 +1649,20 @@ function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
     controlSlider.style.background = `linear-gradient(
       to right,
       ${sliderColor} 0%,
-      ${sliderColor} ${(fromPosition)/(rangeDistance)*100}%,
-      ${rangeColor} ${((fromPosition)/(rangeDistance))*100}%,
-      ${rangeColor} ${(toPosition)/(rangeDistance)*100}%, 
-      ${sliderColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} ${(fromPosition) / (rangeDistance) * 100}%,
+      ${rangeColor} ${((fromPosition) / (rangeDistance)) * 100}%,
+      ${rangeColor} ${(toPosition) / (rangeDistance) * 100}%, 
+      ${sliderColor} ${(toPosition) / (rangeDistance) * 100}%, 
       ${sliderColor} 100%)`;
 }
 
 function setToggleAccessible(currentTarget, min) { //in case toSlider and fromSilder on 0 --> tSlider needs to Overlap fromSlider
-  const toSlider = document.querySelector('#toSlider');
-  if (Number(currentTarget.value) <= Number(min)) {
-    toSlider.style.zIndex = 2;
-  } else {
-    toSlider.style.zIndex = 0;
-  }
+    const toSlider = document.querySelector('#toSlider');
+    if (Number(currentTarget.value) <= Number(min)) {
+        toSlider.style.zIndex = 2;
+    } else {
+        toSlider.style.zIndex = 0;
+    }
 }
 
 function updateBarChart(barChart, fromSlider, from, to) {
