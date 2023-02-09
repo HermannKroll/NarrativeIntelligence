@@ -708,13 +708,22 @@ const search = (event) => {
     url.searchParams.set("visualization", outer_ranking);
     url.searchParams.set("sort_frequency_desc", freq_sort_desc);
     url.searchParams.set("sort_year_desc", year_sort_desc);
-    url.searchParams.set("start_pos", start_pos);
-    //   url.searchParams.set("end_pos", end_pos);
-    if (year_start !== null && year_start !== "undefined") {
-        url.searchParams.set("year_start", year_start);
+    if (start_pos !== 0){
+        url.searchParams.set("start_pos", start_pos);
+    } else {
+        url.searchParams.delete("start_pos");
     }
-    if (year_end !== null && year_end !== "undefined") {
+
+    //   url.searchParams.set("end_pos", end_pos);
+    if (year_start !== undefined && year_start !== "undefined" && year_start !== fromSlider.min) {
+        url.searchParams.set("year_start", year_start);
+    } else {
+        url.searchParams.delete("year_start");
+    }
+    if (year_end !== undefined && year_end !== "undefined" && year_end !== toSlider.max) {
         url.searchParams.set("year_end", year_end);
+    } else {
+        url.searchParams.delete("year_end");
     }
 
     if (title_filter.length > 0) {
