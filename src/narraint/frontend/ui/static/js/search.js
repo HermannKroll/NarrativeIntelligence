@@ -706,9 +706,19 @@ const search = (event) => {
     url.searchParams.set('query', query);
     url.searchParams.set("data_source", data_source);
     url.searchParams.set("visualization", outer_ranking);
-    url.searchParams.set("sort_frequency_desc", freq_sort_desc);
-    url.searchParams.set("sort_year_desc", year_sort_desc);
-    if (start_pos !== 0){
+    if (freq_sort_desc !== "True") {
+        url.searchParams.set("sort_frequency_desc", freq_sort_desc);
+    } else {
+        url.searchParams.delete("sort_frequency_desc");
+    }
+
+    if (year_sort_desc !== "True") {
+        url.searchParams.set("sort_year_desc", year_sort_desc);
+    } else {
+        url.searchParams.delete("sort_year_desc");
+    }
+
+    if (start_pos !== 0) {
         url.searchParams.set("start_pos", start_pos);
     } else {
         url.searchParams.delete("start_pos");
