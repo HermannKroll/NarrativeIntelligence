@@ -261,13 +261,7 @@ class EntityTagger:
             return set()
         return self.term2entity[term]
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
-        """
-        Tags an entity by given a string
-        :param term: the entity term
-        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
-        :return: a list of entities (entity_id, entity_type)
-        """
+    def __tag_entity_recursive(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
         # Lower, strip and remove all punctuation
         t_low = term.lower().translate(self.__translator).strip()
         entities = set()
@@ -278,10 +272,8 @@ class EntityTagger:
             expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
             logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
             for term in expanded_terms:
-                entities.update(self.tag_entity(term, expand_search_by_prefix=False))
+                entities.update(self.__tag_entity_recursive(term, expand_search_by_prefix=False))
 
-        if not t_low:
-            raise KeyError('Does not know an entity for empty term: {}'.format(term))
         # check direct string
         entities.update(self.__find_entities(t_low))
         # also add plural if possible
@@ -290,10 +282,18 @@ class EntityTagger:
         # check singular form
         if t_low[-1] == 's':
             entities.update(self.__find_entities(t_low[:-1]))
+        return entities
 
+    def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
+        """
+        Tags an entity by given a string
+        :param term: the entity term
+        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
+        :return: a list of entities (entity_id, entity_type)
+        """
+        entities = self.__tag_entity_recursive(term, expand_search_by_prefix=expand_search_by_prefix)
         if len(entities) == 0:
             raise KeyError('Does not know an entity for term: {}'.format(term))
-
         return entities
 
 
