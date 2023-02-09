@@ -569,6 +569,7 @@ function initFromURLQueryParams() {
             document.getElementById('radio_outer_ranking_b').checked = true;
         }
     }
+
     if (params.has("sort_frequency_desc")) {
         let sort_frequency = params.get("sort_frequency_desc");
         document.getElementById('select_sorting_freq').value = sort_frequency;
@@ -705,7 +706,12 @@ const search = (event) => {
     const url = new URL(window.location.href);
     url.searchParams.set('query', query);
     url.searchParams.set("data_source", data_source);
-    url.searchParams.set("visualization", outer_ranking);
+    if (outer_ranking !== "outer_ranking_substitution"){
+        url.searchParams.set("visualization", outer_ranking);
+    } else {
+        url.searchParams.delete("visualization");
+    }
+
     if (freq_sort_desc !== "True") {
         url.searchParams.set("sort_frequency_desc", freq_sort_desc);
     } else {
