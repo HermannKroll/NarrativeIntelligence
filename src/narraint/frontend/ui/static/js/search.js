@@ -706,7 +706,7 @@ const search = (event) => {
     const url = new URL(window.location.href);
     url.searchParams.set('query', query);
     url.searchParams.set("data_source", data_source);
-    if (outer_ranking !== "outer_ranking_substitution"){
+    if (outer_ranking !== "outer_ranking_substitution") {
         url.searchParams.set("visualization", outer_ranking);
     } else {
         url.searchParams.delete("visualization");
@@ -814,6 +814,7 @@ const search = (event) => {
             }
             if (result_size !== 0) {
                 document.getElementById("input_title_filter").style.display = "block";
+                document.getElementById("input_title_filter_label").style.display = "block";
 
                 documents_header.html(result_size + " Documents" + document_header_appendix)
                 // scroll to results
@@ -900,6 +901,7 @@ const search = (event) => {
             document.getElementById("select_sorting_freq").style.display = "none";
             document.getElementById("div_input_page").style.display = "none";
             document.getElementById("input_title_filter").style.display = "none";
+            document.getElementById("input_title_filter_label").style.display = "none";
             let query_trans_string = response["query_translation"];
             console.log('translation error:' + query_trans_string)
             $('#alert_translation').text(query_trans_string);
