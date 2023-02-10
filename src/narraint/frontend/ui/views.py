@@ -1058,6 +1058,11 @@ def get_explain_translation(request):
                                                                            resolve_gene_by_id=False)
                 if heading not in headings:
                     headings.append(heading)
+            headings.sort()
+            heading_len = len(headings)
+            if heading_len > 25:
+                headings = headings[:25]
+                headings.append(f"and {heading_len-25} more")
             return JsonResponse(dict(headings=headings))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
