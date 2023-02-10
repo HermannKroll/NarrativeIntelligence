@@ -69,7 +69,7 @@ def query():
         for idx, ranker in enumerate(ranker_strategies):
             results[idx] = {}
 
-            ranked_queries = ranker.rank_queries_with_data_graph(graph_queries, data_graph=data_graph)
+            ranked_queries = ranker.rank_queries(graph_queries, data_graph=data_graph)
             if len(ranked_queries) > 0:
                 best = ranked_queries[0]
                 results[idx] = query_to_json(best)
