@@ -744,6 +744,8 @@ const search = (event) => {
 
     if (title_filter.length > 0) {
         url.searchParams.set("title_filter", title_filter);
+    } else {
+        url.searchParams.delete("title_filter");
     }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
@@ -1759,4 +1761,5 @@ obj.onmousemove = (ev) => {
 obj.onmouseleave = () => {
     tt.classList.add('d-none');
 };
+
 
