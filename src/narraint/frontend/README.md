@@ -16,8 +16,6 @@ Django-Projekt `frontend`:
 - JavaScript: `ui/static/js/search.js`
 - Logik und LibraryGraph-Initialisierung: `ui/views.py`
 
-Der Index der MeSHDB befindet sich im `data`-Verzeichnis, sofern er erstellt wurde.
-
 ### Gunicorn
 
 Gunicorn wird mit dem Parameter ``--timeout 90`` gestartet, um den Timeout auf 90 Sekunden zu setzen, da die Berechnung
@@ -46,13 +44,21 @@ bis zu einer Minute dauern kann.
 ## Server neu starten
 
 Nach einem Server-Neustart muss der Gunicorn Server manuell gestartet werden.
+```
+ screen
+ conda activate venv
+ export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
+ export PYTHONPATH="/home/kroll/NarrativeIntelligence/src/:/home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/kroll/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+ cd ~/NarrativeIntelligence/src/narraint/frontend
+ gunicorn -b 127.0.0.1:8080 --timeout 500 frontend.wsgi -w 10 --preload 2> ~/run_2023_02_10.txt
+```
+## Mining
 
-	screen
-	source ~/NarrativeIntelligence/venv/bin/activate
-	export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
-	export PYTHONPATH="/home/kroll/NarrativeIntelligence/src:/home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/src"
-	cd ~/NarrativeIntelligence/src/narraint/frontend
-	gunicorn -b 127.0.0.1:8080 --timeout 90 frontend.wsgi
+Set mining path
+```
+export PYTHONPATH="/home/kroll/mining/NarrativeIntelligence/src/:/home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/kroll/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+```
+
 
 ## Projekt aktualisieren
 
@@ -60,20 +66,13 @@ Das Projekt kann mit `git pull` aktualisiert werden. Damit die Änderungen wirks
 neugestartet werden. Falls die Deskriptoren aktualisiert wurden, muss der Index neu aufgebaut werden. Mehr dazu unter: *
 Index aufbauen*.
 
-	  # Projekt aktualisieren
-	  cd ~/NarrativeIntelligence
-	  git pull
-
-	 # Dateien kopieren (falls html oder js verändert)
-	  cd frontend/
-	  sudo chmod -R 777 /var/www
-	  python manage.py collectstatic
-	  sudo chmod -R 775 /var/www	  
-
-	  # Server neustarten
-	  screen -r
-	  CTRL + C
-	  gunicorn -b 127.0.0.1:8080 --timeout 90 frontend.wsgi
+```
+# Dateien kopieren (falls html oder js verändert)
+cd frontend/
+sudo chmod -R 777 /var/www
+python manage.py collectstatic
+sudo chmod -R 775 /var/www	  
+```
 
 
 # PyCharm Configuration
