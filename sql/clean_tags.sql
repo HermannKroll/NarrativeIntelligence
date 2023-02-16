@@ -11,7 +11,8 @@ DELETE FROM TAG where ent_type = 'Target' and ent_str IN ('in', 'or', 'state', '
 -- (heading == term). Targets are identified by their heading
 DELETE
 FROM Tag
-WHERE ent_type = 'Target' and lower(ent_str) <> lower(ent_id)
+WHERE ent_type = 'Target' and (lower(ent_str) <> lower(ent_id) and
+							   lower(ent_str) <> lower(ent_id || 's'))
       and ent_str IN
 (
 		SELECT t1.ent_str
@@ -22,10 +23,12 @@ WHERE ent_type = 'Target' and lower(ent_str) <> lower(ent_id)
 			WHERE ent_type = 'Target'
 		) AS t1
 		-- Only consider ent_str that would directly map to an target heading (ent_id)
+		-- or entity id + 's'
 		WHERE lower(t1.ent_str) IN
 					(SELECT distinct lower(ent_str)
 					FROM Tag
-					WHERE ent_type = 'Target' and lower(ent_str) = lower(ent_id))
+					WHERE ent_type = 'Target' and (lower(ent_str) = lower(ent_id)
+					                               OR lower(ent_str) = lower(ent_id || 's')))
 		-- Now group them and ensure that the term was linked to several targets
 		-- Although we already know that the there would be a perfect match
 		GROUP BY t1.ent_str
