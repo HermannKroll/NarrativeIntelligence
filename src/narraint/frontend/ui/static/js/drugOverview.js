@@ -258,7 +258,7 @@ async function indiDataCallback() {
     for(let idx in data) {
         let entity = chemblData.find((e) => e["mesh_id"] === data[idx]["id"].split(":")[1]);
         if(entity) {
-            data[idx].max_phase_for_ind = entity.max_phase_for_ind;
+            data[idx].max_phase_for_ind = Number.parseInt(entity.max_phase_for_ind);
         } else {
             data[idx].max_phase_for_ind = -1;
         }
