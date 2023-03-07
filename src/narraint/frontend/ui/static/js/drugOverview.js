@@ -247,12 +247,22 @@ function adveCreateCallback() {
 async function indiDataCallback() {
     const prefix = "indi";
     const data = overviews[prefix].fullData;
+    const chemblData = [];
 
-    const chemblData = await fetch(`https://www.ebi.ac.uk/chembl/api/data/drug_indication?molecule_chembl_id=${currentChemblID}&limit=2500&format=json`)
-        .then((result) => {
-            return result.json();
-        })
-        .then((data) => {return data["drug_indications"]});
+    const baseUrl = "https://www.ebi.ac.uk"
+    let urlPath = `/chembl/api/data/drug_indication.json?molecule_chembl_id=${currentChemblID}&limit=1000`
+
+    while(urlPath !== null) {
+        await fetch(baseUrl + urlPath)
+            .then((result) => {
+                return result.json();
+            })
+            .then((data) => {
+                chemblData.push(...data["drug_indications"]);
+                // api returns null if no more data is available
+                urlPath = data["page_meta"]["next"];
+            });
+    }
 
     // match equivalent entities and add chembl phase
     for(let idx in data) {
