@@ -221,7 +221,7 @@ def associated_rule(document_collection=None, predicate_id_minimum=None):
     logging.info('Applying Method rule...')
     session = SessionExtended.get()
     logging.info(f'{document_collection}: updating predicate to "{ASSOCIATED_PREDICATE_UNSURE}" where relation is null')
-    stmt_1 = update(Predication).where(Predication.relation.isnot(None))
+    stmt_1 = update(Predication).where(Predication.relation.is_(None))
     if document_collection:
         stmt_1 = stmt_1.where(Predication.document_collection == document_collection)
     if predicate_id_minimum:
