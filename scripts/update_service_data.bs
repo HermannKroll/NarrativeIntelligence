@@ -18,9 +18,6 @@ mkdir $MEDLINE_UPDATES
 # wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
 # Download the latest updates via
 wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
-cp $MEDLINE_UPDATES/ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/*.* $MEDLINE_UPDATES/.
-# Unzip everything
-gunzip -f $MEDLINE_UPDATES/*.gz
 
 # Load Updates
 python3 ~/mining/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
