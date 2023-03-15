@@ -6,6 +6,7 @@ const typeColorMap = {
     "LabMethod": "#9eb8ff",
     "Chemical": "#fff38c",
     "Gene": "#87e7ff",
+    "Target": "#1fe7ff",
     "Method": "#7897ff",
     "DosageForm": "#9189ff",
     "Mutation": "#8cffa9",
@@ -17,7 +18,8 @@ const typeColorMap = {
     "DomainMotif": "#f383fd",
     "Plant": "#dcfd83",
     "Strain": "#75c4c7",
-    "Vaccine": "#c7767d"
+    "Vaccine": "#c7767d",
+    "HealthStatus": "#bbaabb"
 }
 
 
