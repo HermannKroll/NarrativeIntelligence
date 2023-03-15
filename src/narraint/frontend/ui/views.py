@@ -201,6 +201,12 @@ def get_term_to_entity(request):
         try:
             entities = View.instance().translation.convert_text_to_entity(term,
                                                                           expand_search_by_prefix=expand_by_prefix)
+            resolver = EntityResolver.instance()
+            for e in entities:
+                try:
+                    e.entity_name = resolver.get_name_for_var_ent_id(e.entity_id, e.entity_type)
+                except KeyError:
+                    e.entity_name = ""
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
@@ -1062,7 +1068,7 @@ def get_explain_translation(request):
             heading_len = len(headings)
             if heading_len > 25:
                 headings = headings[:25]
-                headings.append(f"and {heading_len-25} more")
+                headings.append(f"and {heading_len - 25} more")
             return JsonResponse(dict(headings=headings))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
