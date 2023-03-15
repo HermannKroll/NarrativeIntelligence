@@ -27,19 +27,20 @@ async function buildSite() {
     const keyword = search.split("=")[1];
     document.getElementById('drugInput').value = decodeURI(keyword);
 
-    const chemblid = await translateToDrugId(keyword);
-    if (!chemblid) {
+    const chembl_data = await translateToDrugId(keyword);
+
+    if (!chembl_data) {
         resetContainerLoading(keyword)
         return
     }
 
     logDrugSearch(keywordToLog ? keywordToLog: keyword)
     currentDrugName = decodeURI(keyword);
-    currentChemblID = chemblid;
+    currentChemblID = chembl_data.chemblid;
 
     loadPaperData();
     setStructureImg();
-    setDrugData();
+    setDrugData(chembl_data.entity_name);
 
     await loadWordcloud();
     await loadOverviewData()
@@ -89,6 +90,7 @@ async function translateToDrugId(keyword) {
                 return null;
             }
             let chemblid = null;
+            let entity_name = null;
             let entities = data["entity"];
             entities.forEach(entity => {
                 if (entity.entity_type === 'Drug') {
@@ -96,10 +98,15 @@ async function translateToDrugId(keyword) {
                     if (chemblid == null || entity.entity_id.length < chemblid.length ||
                         (entity.entity_id < chemblid && entity.entity_id.length === chemblid.length)) {
                         chemblid = entity.entity_id;
+                        entity_name = entity.entity_name;
                     }
                 }
             });
-            return chemblid
+
+            return {
+                chemblid: chemblid,
+                entity_name: entity_name
+            }
         });
 }
 
@@ -126,7 +133,7 @@ async function getSearchParam() {
  * The functions fetch the drug data of ebi.ac.uk and inserts the corresponding values into the page.
  * @returns {Promise<void>}
  */
-async function setDrugData() {
+async function setDrugData(entity_name) {
     //get drug information via id
     fetch('https://www.ebi.ac.uk/chembl/api/data/drug/' + currentChemblID + '.json')
         .then(response => response.json())
@@ -134,7 +141,7 @@ async function setDrugData() {
             document.getElementById('formular').innerText = data2.molecule_properties.full_molformula;
             document.getElementById('mass').innerText = data2.molecule_properties.full_mwt;
             //synonym seems to be correct
-            document.getElementById('name').innerText = data2.synonyms[0].split(" ")[0];
+            document.getElementById('name').innerText = entity_name;
 
             if (data2.molecule_properties.alogp) {
                 document.getElementById('drug_alogp').innerText = data2.molecule_properties.alogp;
