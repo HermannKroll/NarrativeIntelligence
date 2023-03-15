@@ -674,6 +674,8 @@ const search = (event) => {
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
 
+    const use_classification = document.getElementById("checkbox_classification").checked;
+
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
@@ -701,6 +703,7 @@ const search = (event) => {
     console.log("Start year: " + year_start)
     console.log("End year: " + year_end)
     console.log("Title filter: " + title_filter)
+    console.log("Classification: " + use_classification)
     setButtonSearching(true);
 
     const url = new URL(window.location.href);
@@ -747,6 +750,13 @@ const search = (event) => {
     } else {
         url.searchParams.delete("title_filter");
     }
+
+    if (use_classification) {
+        url.searchParams.set("classification", "pharmaceutical technology");
+    } else {
+        url.searchParams.delete("classification");
+    }
+
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
     let request = $.ajax({
