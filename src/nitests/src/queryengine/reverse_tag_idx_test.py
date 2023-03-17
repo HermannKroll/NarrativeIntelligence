@@ -6,7 +6,7 @@ from sqlalchemy import delete
 from kgextractiontoolbox.backend.models import Document, Sentence, Predication, Tag
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex
-from narraint.queryengine.compute_reverse_index_tag import compute_inverted_index_for_tags
+from narraint.queryengine.index.compute_reverse_index_tag import compute_inverted_index_for_tags
 
 
 class ReverseTagIdxTest(TestCase):
