@@ -1,7 +1,0 @@
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --skip-load &> stanza_gpu_run1.txt
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --skip-load &> stanza_gpu_run2.txt
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --skip-load &> stanza_gpu_run3.txt
-
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --cpu --skip-load  &> stanza_cpu_run1.txt
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --cpu --skip-load  &> stanza_cpu_run2.txt
-python3 /home/kroll/NarrativeIntelligence/narraint/preprocessing/stanza_ner.py /home/kroll/NarrativeIntelligence/data/performance/performance_evaluation_sample_10k.pubtator -c PubMed --cpu --skip-load  &> stanza_cpu_run3.txt
