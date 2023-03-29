@@ -78,10 +78,14 @@ class QueryEngine:
             title, authors, journals, year, month, doi, org_id = r.title, r.authors, r.journals, r.publication_year, \
                                                                  r.publication_month, r.publication_doi, \
                                                                  r.document_id_original
+            doc_classes = None
+            if r.document_classifications:
+                doc_classes = ast.literal_eval(r.document_classifications)
+
             if len(title) > 500:
                 logging.debug('Large title detected: {}'.format(r.title))
                 title = title[0:500]
-            doc2metadata[int(r.document_id)] = (title, authors, journals, year, month, doi, org_id)
+            doc2metadata[int(r.document_id)] = (title, authors, journals, year, month, doi, org_id, doc_classes)
 
         return doc2metadata
 
@@ -370,7 +374,6 @@ class QueryEngine:
                         d_ids = set()
                     logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
 
-
         # No variables are used in the query
         query_results = []
         for d_col, d_ids in collection2valid_doc_ids.items():
@@ -378,10 +381,10 @@ class QueryEngine:
             doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
             for d_id in d_ids:
                 if int(d_id) in doc2metadata:
-                    title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
                     query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                              {}, 0.0, {}, org_document_id=org_id, doi=doi,
-                                                             document_collection=d_col))
+                                                             document_collection=d_col, document_classes=doc_classes))
         logging.debug(f'{len(query_results)} results computed')
         return query_results
 
@@ -520,13 +523,13 @@ class QueryEngine:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
                     query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                              {}, 0.0, fp2prov, org_document_id=org_id, doi=doi,
-                                                             document_collection=d_col))
+                                                             document_collection=d_col, document_classes=doc_classes))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 # Todo: Hack
@@ -562,7 +565,7 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
@@ -577,7 +580,8 @@ class QueryEngine:
                         query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                                  var2sub_for_doc, 0.0, fp2prov,
                                                                  org_document_id=org_id, doi=doi,
-                                                                 document_collection=d_col))
+                                                                 document_collection=d_col,
+                                                                 document_classes=doc_classes))
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
         return query_results
