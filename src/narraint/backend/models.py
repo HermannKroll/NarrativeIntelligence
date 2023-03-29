@@ -85,6 +85,7 @@ class DocumentMetadataService(Extended, DatabaseTable):
     publication_year = Column(Integer, nullable=True)
     publication_month = Column(Integer, nullable=True)
     publication_doi = Column(String, nullable=True)
+    document_classifications = Column(String, nullable=True)
 
 
 class Predication(models.Predication):

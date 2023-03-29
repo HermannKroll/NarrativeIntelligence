@@ -4,7 +4,8 @@ import logging
 from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document
+from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document, \
+    DocumentClassification
 
 BULK_QUERY_CURSOR_COUNT = 500000
 
@@ -42,7 +43,6 @@ def compute_document_metadata_service_table(rebuild=False):
             relevant_doc_ids.add(row[0])
         logging.info(f'Found {len(relevant_doc_ids)} relevant document ids in predication table...')
 
-
         logging.info('Querying document ids that have metadata in DocumentMetadataService table...')
         aq = session.query(DocumentMetadataService.document_id)
         aq = aq.filter(DocumentMetadataService.document_collection == d_col)
@@ -74,6 +74,17 @@ def compute_document_metadata_service_table(rebuild=False):
                                                r.document_id_original, r.publication_doi)
         logging.info(f'{len(doc2metadata)} document metadata were found')
 
+        logging.info(f'Querying classifications for collection: {d_col}')
+        class_query = session.query(DocumentClassification).filter(
+            DocumentClassification.document_collection == d_col).yield_per(
+            BULK_QUERY_CURSOR_COUNT)
+        doc2classes = {}
+        for r in class_query:
+            if r.document_id in relevant_doc_ids:
+                if r.document_id not in doc2classes:
+                    doc2classes[r.document_id] = []
+                doc2classes[r.document_id].append(r.classification)
+
         logging.info('Preparing insert....')
         # prepare insert
         insert_values = []
@@ -81,21 +92,24 @@ def compute_document_metadata_service_table(rebuild=False):
             title = doc2titles[d_id]
             if d_id in doc2metadata:
                 authors, journals, publication_year, publication_month, document_id_original, doi = doc2metadata[d_id]
-
                 # test how many authors are there
                 authors_comps = authors.split(' | ')
                 if len(authors_comps) > 5:
                     authors = ' | '.join(authors_comps[:5]) + f' | {len(authors_comps) - 5}+'
 
             else:
-                # skip documents that does not have this information avialbe
+                # skip documents that does not have this information available
                 continue
             if publication_year == 0 or not publication_year:
                 continue
+
+            document_classes = None
+            if d_id in doc2classes:
+                document_classes = str(doc2classes[d_id])
             insert_values.append(dict(document_id=d_id, document_collection=d_col, title=title,
                                       authors=authors, journals=journals, publication_year=publication_year,
                                       publication_month=publication_month, document_id_original=document_id_original,
-                                      publication_doi=doi))
+                                      publication_doi=doi, document_classifications=document_classes))
 
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
         DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=True)
