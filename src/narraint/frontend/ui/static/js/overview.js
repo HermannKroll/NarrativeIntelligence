@@ -718,8 +718,10 @@ const networkSelectNode = async (e) => {
     const nodeId = e.nodes[0];
     const node = networkNodes.get(nodeId);
     if (!node.assocEdges) {
+        startLoading("drugNetwork");
         await retrieveAdditionalEdges(node.id, node.type);
         node.assocEdges = true;
+        doneLoading("drugNetwork");
     }
 
     const adjEdges = network.getConnectedEdges(nodeId)
@@ -737,7 +739,7 @@ const networkSelectNode = async (e) => {
             networkEdges.update(edge);
         }
     });
-    network.fit();
+    centerNetwork(network);
     network.unselectAll();
 }
 
