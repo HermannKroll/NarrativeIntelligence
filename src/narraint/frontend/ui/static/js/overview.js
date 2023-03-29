@@ -1,5 +1,7 @@
 let newsData = null;
 let network = null;
+let networkNodes = null;
+let networkEdges = null;
 let currentChemblID = null;
 let currentDrugName = null;
 let scrollUpdateTicking = false;
@@ -581,122 +583,234 @@ function createNetworkGraph() {
 
     const networkContainer = document.getElementById("drugNetworkContent");
     network = new vis.Network(networkContainer, {}, options)
-    network.on("selectEdge", (e) => networkSelectEdgeCallback(e, network));
-    updateNetworkGraph(true);
+    network.on("click", networkOnClick);
+    initializeNetworkGraph();
 }
 
 /**
- * The function fills the nodes and edges of the graph.
- * @param firstInit {boolean}
+ * This function initializes the network by creating all possible nodes and the default edges between them.
+ * Therefore, the global vis.DataSet list networkNodes and networkEdges get created and filled.
  */
-function updateNetworkGraph(firstInit=false) {
+function initializeNetworkGraph() {
+    const maxEntities = 20;
     const phaseMap = ["?", "0", "I", "II", "III", "IV"];
-
-    if (!firstInit) {
-        startLoading("drugNetwork");
-        network.physics.physicsEnabled = true;
-    }
-
-    let opt = {
-        drug:{
-            group:"drugAssociationNode",
-            edgeLen:375,
-            i: 2
-        },
-        target:{
-            group:"targetInteractionNode",
-            edgeLen:250,
-            i: 1
-        },
-        disease:{
-            group:"indicationNode",
-            edgeLen:500,
-            i: 0
-        },
+    const options = {
+        drug: { group: "drugAssociationNode", edgeLen: 200 },
+        target: { group: "targetInteractionNode", edgeLen: 50 },
+        disease: { group: "indicationNode", edgeLen: 400 },
     };
 
-    const topK = document.getElementById("drugNetworkSlider").value;
-    opt.disease.draw = document.getElementById("drugNetworkCheckboxDisease").checked;
-    opt.target.draw = document.getElementById("drugNetworkCheckboxTarget").checked;
-    opt.drug.draw = document.getElementById("drugNetworkCheckboxDrug").checked;
-
-    document.getElementById("drugNetworkAmount").innerText = `Top ${topK}`;
-
-    const nodes = new vis.DataSet();
-    const edges = new vis.DataSet();
-    let idx = 2;
+    networkNodes = new vis.DataSet();
+    networkEdges = new vis.DataSet();
 
     // root node
-    nodes.add({id: 1, label: currentDrugName, group: "drugAssociationNode"})
+    let rect =  document.getElementById("drugNetworkContent").getBoundingClientRect();
+    const currentDrug = currentDrugName[0].toUpperCase() + currentDrugName.slice(1);
+    networkNodes.add({
+        id: currentDrugName,
+        label: currentDrug,
+        group: options.drug.group,
+        x: rect.x / 2, y: rect.y / 2,
+        fixed: {x: true, y: true},
+        assocEdges: true
+    });
 
-    for (const key in opt) {
-        const entOpt = opt[key]
+    for (const entType in options) {
+        const entTypeTl = networkData[entType];
+        const entTypeObj = overviews[entTypeTl];
 
-        if (!entOpt.draw || !overviews[networkData[key]].fullData) {
+        // skip if no data is available
+        if (!entTypeObj || !entTypeObj["fullData"]) {
             continue;
         }
 
-        const showPhase = (networkData.phase && entOpt.i === 0);
-        overviews[networkData[key]].fullData.slice(0,topK).forEach((ent) => {
-            let node = {
-                id: idx,
-                group: entOpt.group,
-                predicate: overviews[networkData[key]].predicate
-            }
-            if (entOpt.i === 1) { // name changes for enzymes
-                const names = ent.name.split("//");
-                node.label = (names.length > 1) ? names[1]: names[0];
-                node.title = (names.length > 1) ? names[0]: false;
-                node.object = (names.length > 1) ? names[1]: names[0];
-            } else {
-                node.label = ent.name;
-                node.object = ent.name;
-                if (showPhase) {
-                    node.label += ` (${phaseMap[ent.max_phase_for_ind + 1]})`;
-                }
-            }
-            nodes.add(node);
-            edges.add({
-                from: idx, to: 1,
-                label: `${ent.count}`,
-                title: `${ent.count}`,
-                font: { color: "#000", strokeWidth: 0 },
-                length: entOpt.edgeLen
-            });
-            ++idx;
-        });
-    }
+        const endIdx = (entTypeObj.fullData.length < maxEntities) ? entTypeObj.fullData.length: maxEntities;
+        for (let i = 0; i < endIdx; ++i) {
+            const entity = entTypeObj.fullData[i];
 
-    network.setData({ nodes: nodes, edges: edges });
-    doneLoading("drugNetwork");
+            // prevent same nodes visible twice
+            if (networkNodes.get(entity.name) != null) {
+                continue;
+            }
+            networkNodes.add({
+                id: entity.name,
+                idx: i,
+                type: entType,
+                group: options[entType].group,
+                predicate: entTypeObj.predicate,
+                assocEdges: false,
+                label: entity.name.concat((entity.max_phase_for_ind) ?
+                    ` (${phaseMap[entity.max_phase_for_ind + 1]})`: ""),
+            });
+
+            networkEdges.add({
+                from: entity.name, to: currentDrugName,
+                label: `${entity.count}`,
+                title: `${entity.count}`,
+                font: { color: "#000", strokeWidth: 0 },
+                length: options[entType].edgeLen,
+                rootNode: true,
+            });
+        }
+    }
     network.physics.physicsEnabled = false;
+    network.setData({ nodes: networkNodes, edges: networkEdges });
+    updateNetworkGraph();
 }
 
 /**
- * Callback function for the drug overview network edges. The function openes a new tab which shows the
- * corresponding query of the edge.
- * @param e
- * @param network
+ * The function updates the visibility of each non-adjacent edge based on the state of
+ * the checkboxes above the graph and the input slider below.
  */
-const networkSelectEdgeCallback = (e, network) => {
-    // return early if the root node is selected
-    if (e.nodes.length >= 1 && e.nodes[0] === 1) {
-        network.unselectAll();
-        return;
+function updateNetworkGraph() {
+    startLoading("drugNetwork");
+    const options = {
+        disease: document.getElementById("drugNetworkCheckboxDisease").checked,
+        target: document.getElementById("drugNetworkCheckboxTarget").checked ,
+        drug: document.getElementById("drugNetworkCheckboxDrug").checked
+    };
+
+    const topK = document.getElementById("drugNetworkSlider").value;
+    document.getElementById("drugNetworkAmount").innerText = `Top ${topK}`;
+
+    networkNodes.forEach(function (node) {
+        if (!node.type) {
+            return;
+        }
+
+        if (options[node.type] && node.hidden && node.idx < topK) {
+            node.hidden = false;
+            node.physics = true;
+            networkNodes.update(node);
+        } else if ((!options[node.type] || node.idx >= topK) && !node.hidden) {
+            node.hidden = true;
+            node.physics = false;
+            networkNodes.update(node);
+        }
+    });
+
+    network.stabilize(100);
+    network.physics.physicsEnabled = false;
+    doneLoading("drugNetwork");
+    centerNetwork(network);
+}
+
+/**
+ * Click event callback for the DTD-network which calls the appropriate function based on
+ * the given data in the event object.
+ * @param e {object} event
+ */
+const networkOnClick = async (e) => {
+    // check if either a node or an edge is selected
+    if (e.nodes.length > 0) {
+        await networkSelectNode(e);
+    } else if (e.edges.length > 0) {
+        networkSelectEdge(e);
+    }
+}
+
+/**
+ * Callback function for the drug overview network nodes. The function shows all adjacent edges
+ * to the selected node and hide all others.
+ * @param e {object} vis event
+ */
+const networkSelectNode = async (e) => {
+    const nodeId = e.nodes[0];
+    const node = networkNodes.get(nodeId);
+    if (!node.assocEdges) {
+        await retrieveAdditionalEdges(node.id, node.type);
+        node.assocEdges = true;
     }
 
-    // retrieve the adjacent nodes (have to be 2)
+    const adjEdges = network.getConnectedEdges(nodeId)
+    networkEdges.forEach((edge) => {
+        // skip edges adjacent to the root
+        if (edge.to === currentDrugName)
+            return;
+        // is adjacent and directed away from the node
+        const visible = adjEdges.includes(edge.id) && (edge.from === nodeId || edge.rootNode);
+        if (visible && edge.hidden) {
+            edge.hidden = false;
+            networkEdges.update(edge);
+        } else if (!visible && !edge.hidden) {
+            edge.hidden = true;
+            networkEdges.update(edge);
+        }
+    });
+    network.fit();
+    network.unselectAll();
+}
+
+/**
+ * The function retrieves additional edge data for the selected node. Therefore,
+ * depending on the type of the node, one or two API-request are made.
+ *
+ * @param entity {String}
+ * @param type {String}
+ */
+async function retrieveAdditionalEdges(entity, type) {
+    const startTime = Date.now()
+    let entities = []
+    if (type === "drug") {
+        let result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Target&data_source=PubMed`)
+            .then((response) => {
+                return response.json();
+            }).catch((e) => console.log(e));
+        entities.push(...result["sub_count_list"]);
+
+        result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Disease&data_source=PubMed`)
+            .then((response) => {
+                return response.json();
+            }).catch((e) => console.log(e));
+        entities.push(...result["sub_count_list"]);
+
+    } else { // target or disease
+        const predicate = (type === "target") ? "interacts": "induces"; // TODO use this? then use it above too!
+        let result = await fetch(`${url_query_sub_count}?query=Drug+associated+${entity}&data_source=PubMed`)
+            .then((response) => {
+                return response.json();
+            }).catch((e) => console.log(e));
+        entities.push(...result["sub_count_list"]);
+    }
+
+    for (const i in entities) {
+        // is the entity no part of the network or the root
+        if (networkNodes.get(entities[i].name) == null
+            || entities[i].name === currentDrugName) {
+            continue;
+        }
+
+        networkEdges.add({
+            from: entity, to: entities[i].name,
+            label: `${entities[i].count}`,
+            title: `${entities[i].count}`,
+            font: { color: "#000000", strokeWidth: 0},
+            color: { color: "#565656", opacity: 0.4 },
+            physics: false,
+            smooth: { enabled: false },
+        });
+    }
+    console.log("Elapsed time:", Date.now() - startTime, "ms")
+}
+
+/**
+ * Callback function for the drug overview network edges. The function opens a new tab which shows the
+ * corresponding query of the edge.
+ * @param e event
+ */
+const networkSelectEdge = (e) => {
     const nodes = network.getConnectedNodes(e.edges[0]);
-    if(nodes.length !== 2) {
+    // return early if the root node is selected or there are not exactly 2 adjacent nodes
+    if ((e.nodes.length >= 1 && e.nodes[0] === 1) || nodes.length !== 2) {
         network.unselectAll();
         return;
     }
 
-    const idx = nodes[0];
-    const object = network.body.nodes[idx].options.object;
-    const predicate = network.body.nodes[idx].options.predicate;
+    const subject = network.body.nodes[nodes[1]].options.id;
+    const predicate = network.body.nodes[nodes[0]].options.predicate;
+    const object = network.body.nodes[nodes[0]].options.id;
 
     // open the corresponding query in a new tab
-    window.open(`/?query="${currentDrugName}"+${predicate}+"${object}"`, '_blank');
+    window.open(`/?query="${subject}"+${predicate}+"${object}"`, '_blank');
     network.unselectAll();
 }
