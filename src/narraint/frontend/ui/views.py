@@ -27,6 +27,7 @@ from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
@@ -559,6 +560,14 @@ def get_query(request):
         if "title_filter" in request.GET:
             title_filter = str(request.GET.get("title_filter", "").strip())
 
+        classification_filter = None
+        if "classification_filter" in request.GET:
+            classification_filter = str(request.GET.get("classification_filter", "").strip())
+            if classification_filter:
+                classification_filter = classification_filter.split(';')
+            else:
+                classification_filter = None
+
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
         logging.info("Selected data source is {}".format(data_source))
@@ -598,6 +607,9 @@ def get_query(request):
             results = TitleFilter.filter_documents(results, title_filter)
             year_aggregation = TimeFilter.aggregate_years(results)
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
 
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':

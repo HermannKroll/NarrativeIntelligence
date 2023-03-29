@@ -604,11 +604,15 @@ function initFromURLQueryParams() {
     if (params.has("title_filter")) {
         document.getElementById("input_title_filter").value = params.get("title_filter");
     }
+    if (params.has("classification_filter")) {
+        document.getElementById("checkbox_classification").checked = true;
+    }
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
         example_search(query);
     }
+
 
 
 }
@@ -673,8 +677,7 @@ const search = (event) => {
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
-
-    const use_classification = document.getElementById("checkbox_classification").checked;
+    let use_classification = document.getElementById("checkbox_classification").checked;
 
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
@@ -691,6 +694,7 @@ const search = (event) => {
         year_start = fromSlider.value;
         year_end = toSlider.value;
     }
+    let classification_filter = null;
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
@@ -752,9 +756,10 @@ const search = (event) => {
     }
 
     if (use_classification) {
-        url.searchParams.set("classification", "pharmaceutical technology");
+        url.searchParams.set("classification_filter", "PharmaceuticalTechnology");
+        classification_filter = "PharmaceuticalTechnology";
     } else {
-        url.searchParams.delete("classification");
+        url.searchParams.delete("classification_filter");
     }
 
     window.history.pushState("Query", "Title", "/" + url.search.toString());
@@ -771,7 +776,8 @@ const search = (event) => {
             end_pos: end_pos,
             year_start: year_start,
             year_end: year_end,
-            title_filter: title_filter
+            title_filter: title_filter,
+            classification_filter: classification_filter
             /*,
             inner_ranking: inner_ranking*/
         }
