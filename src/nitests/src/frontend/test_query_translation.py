@@ -60,7 +60,7 @@ class QueryTranslationTestCase(TestCase):
         graph_query, text = self.translation.convert_json_to_fact_patterns(json)
 
         self.assertIsNotNone(graph_query)
-        self.assertFalse(graph_query.has_additional_entities())
+        self.assertFalse(graph_query.has_entities())
         self.assertEqual(len(graph_query.to_dict()["fact_patterns"]), 2)
 
         # Object missing in query pattern
