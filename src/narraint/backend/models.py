@@ -85,6 +85,7 @@ class DocumentMetadataService(Extended, DatabaseTable):
     publication_year = Column(Integer, nullable=True)
     publication_month = Column(Integer, nullable=True)
     publication_doi = Column(String, nullable=True)
+    document_classifications = Column(String, nullable=True)
 
 
 class Predication(models.Predication):
@@ -213,49 +214,3 @@ class EntityKeywords(Extended, DatabaseTable):
                                                     keyword_data=keyword_data)
         session.execute(insert_stmt)
         session.commit()
-
-
-class JCDLInvertedTermIndex(Extended, DatabaseTable):
-    __tablename__ = "jcdl_inverted_term_index"
-    term = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    document_ids = Column(String, nullable=False)
-
-
-class JCDLInvertedEntityIndex(Extended, DatabaseTable):
-    __tablename__ = "jcdl_inverted_entity_index"
-    entity_id = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    document_ids = Column(String, nullable=False)
-
-
-class JCDLInvertedStatementIndex(Extended, DatabaseTable):
-    __tablename__ = "jcdl_inverted_statement_index"
-    subject_id = Column(String, primary_key=True)
-    relation = Column(String, primary_key=True)
-    object_id = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    document_ids = Column(String, nullable=False)
-
-
-class JCDLTermSupport(Extended, DatabaseTable):
-    __tablename__ = "jcdl_term_support"
-    term = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    support = Column(Integer)
-
-
-class JCDLEntitySupport(Extended, DatabaseTable):
-    __tablename__ = "jcdl_entity_support"
-    entity_id = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    support = Column(Integer)
-
-
-class JCDLStatementSupport(Extended, DatabaseTable):
-    __tablename__ = "jcdl_statement_support"
-    subject_id = Column(String, primary_key=True)
-    relation = Column(String, primary_key=True)
-    object_id = Column(String, primary_key=True)
-    document_collection = Column(String, primary_key=True)
-    support = Column(Integer)
