@@ -84,6 +84,7 @@ def compute_document_metadata_service_table(rebuild=False):
                 if r.document_id not in doc2classes:
                     doc2classes[r.document_id] = []
                 doc2classes[r.document_id].append(r.classification)
+        logging.info(f'{len(doc2classes)} document classes were found')
 
         logging.info('Preparing insert....')
         # prepare insert
@@ -110,7 +111,7 @@ def compute_document_metadata_service_table(rebuild=False):
                                       authors=authors, journals=journals, publication_year=publication_year,
                                       publication_month=publication_month, document_id_original=document_id_original,
                                       publication_doi=doi, document_classifications=document_classes))
-
+            
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
         DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=True)
         logging.info('Finished')
