@@ -652,14 +652,18 @@ function initializeNetworkGraph() {
                 assocEdges: false,
                 label: getEntityNameForNetwork(entity.name, entity),
             }
+            let nodeName = entity.name;
             if (entity.name.includes("//")) {
-                node.title = entity.name.split('//')[0];
+                let names = entity.name.split('//');
+                node.title = names[0];
+                node.id = names[1];
+                nodeName = names[1];
             }
             networkNodes.add(node);
 
 
             networkEdges.add({
-                from: entity.name, to: currentDrugName,
+                from: nodeName, to: currentDrugName,
                 label: `${entity.count}`,
                 title: `${entity.count}`,
                 font: {color: "#000", strokeWidth: 0},
