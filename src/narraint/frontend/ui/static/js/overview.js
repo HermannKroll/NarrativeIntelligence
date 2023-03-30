@@ -77,8 +77,8 @@ function createDynamicOverviews() {
  * Fetches the paper data from the service and creates the corresponding paper elements.
  * @returns {Promise<void>}
  */
-async function loadPaperData(chemblid = currentChemblID, enttype="Drug") {
-    fetch(url_query_document_ids_for_entity + "?entity_id=" + chemblid + "&entity_type="+ enttype +"&data_source=PubMed")
+async function loadPaperData(chemblid = currentChemblID, enttype = "Drug") {
+    fetch(url_query_document_ids_for_entity + "?entity_id=" + chemblid + "&entity_type=" + enttype + "&data_source=PubMed")
         .then(response => response.json())
         .then(data => {
             if (data.document_ids !== undefined) {
@@ -146,7 +146,7 @@ async function loadOverviewData() {
         document.getElementById(prefix + "Link").innerText = length;
 
         //manipulate data if needed
-        if(ov.dataCallback) {
+        if (ov.dataCallback) {
             await ov.dataCallback();
         }
 
@@ -178,10 +178,10 @@ const scrollHandler = (prefix) => {
  * @param element_id
  * @param smooth
  */
-function scrollToElement(element_id, smooth=true) {
+function scrollToElement(element_id, smooth = true) {
     const pos = document.getElementById(element_id)
         .getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({top: pos, behavior: ((smooth) ? "smooth": "instant")})
+    window.scrollTo({top: pos, behavior: ((smooth) ? "smooth" : "instant")})
 }
 
 /**
@@ -283,7 +283,7 @@ async function fillSearchbox(prefix) {
     const maxCount = overviews[prefix].count;
     const data = overviews[prefix].visibleData;
 
-    const maxLen = (overviews[prefix].numVisible > data.length)? data.length: overviews[prefix].numVisible;
+    const maxLen = (overviews[prefix].numVisible > data.length) ? data.length : overviews[prefix].numVisible;
 
     for (let i = overviews[prefix].numVisible - VISIBLE_ELEMENTS; i < maxLen; i++) {
         const item = data[i];
@@ -404,7 +404,7 @@ async function scrollUpdateElements(prefix) {
         const dataLen = overviews[prefix].visibleData.length;
 
         if (dataLen >= newEndIdx) {
-            overviews[prefix].numVisible = overviews[prefix].numVisible +  VISIBLE_ELEMENTS;
+            overviews[prefix].numVisible = overviews[prefix].numVisible + VISIBLE_ELEMENTS;
         } else {
             overviews[prefix].numVisible = dataLen;
         }
@@ -587,28 +587,38 @@ function createNetworkGraph() {
     initializeNetworkGraph();
 }
 
+function getEntityNameForNetwork(entity_name, entity) {
+    const phaseMap = ["?", "0", "I", "II", "III", "IV"];
+    if (entity_name.includes("//")) {
+        return entity_name.split("//")[1];
+    } else if (entity !== null && entity.max_phase_for_ind) {
+        return entity_name.concat(` (${phaseMap[entity.max_phase_for_ind + 1]})`);
+    } else {
+        return entity_name;
+    }
+}
+
 /**
  * This function initializes the network by creating all possible nodes and the default edges between them.
  * Therefore, the global vis.DataSet list networkNodes and networkEdges get created and filled.
  */
 function initializeNetworkGraph() {
     const maxEntities = 20;
-    const phaseMap = ["?", "0", "I", "II", "III", "IV"];
     const options = {
-        drug: { group: "drugAssociationNode", edgeLen: 200 },
-        target: { group: "targetInteractionNode", edgeLen: 50 },
-        disease: { group: "indicationNode", edgeLen: 400 },
+        drug: {group: "drugAssociationNode", edgeLen: 200},
+        target: {group: "targetInteractionNode", edgeLen: 50},
+        disease: {group: "indicationNode", edgeLen: 400},
     };
 
     networkNodes = new vis.DataSet();
     networkEdges = new vis.DataSet();
 
     // root node
-    let rect =  document.getElementById("drugNetworkContent").getBoundingClientRect();
+    let rect = document.getElementById("drugNetworkContent").getBoundingClientRect();
     const currentDrug = currentDrugName[0].toUpperCase() + currentDrugName.slice(1);
     networkNodes.add({
         id: currentDrugName,
-        label: currentDrug,
+        label: getEntityNameForNetwork(currentDrug, null),
         group: options.drug.group,
         x: rect.x / 2, y: rect.y / 2,
         fixed: {x: true, y: true},
@@ -624,7 +634,7 @@ function initializeNetworkGraph() {
             continue;
         }
 
-        const endIdx = (entTypeObj.fullData.length < maxEntities) ? entTypeObj.fullData.length: maxEntities;
+        const endIdx = (entTypeObj.fullData.length < maxEntities) ? entTypeObj.fullData.length : maxEntities;
         for (let i = 0; i < endIdx; ++i) {
             const entity = entTypeObj.fullData[i];
 
@@ -632,29 +642,34 @@ function initializeNetworkGraph() {
             if (networkNodes.get(entity.name) != null) {
                 continue;
             }
-            networkNodes.add({
+
+            let node = {
                 id: entity.name,
                 idx: i,
                 type: entType,
                 group: options[entType].group,
                 predicate: entTypeObj.predicate,
                 assocEdges: false,
-                label: entity.name.concat((entity.max_phase_for_ind) ?
-                    ` (${phaseMap[entity.max_phase_for_ind + 1]})`: ""),
-            });
+                label: getEntityNameForNetwork(entity.name, entity),
+            }
+            if (entity.name.includes("//")) {
+                node.title = entity.name.split('//')[0];
+            }
+            networkNodes.add(node);
+
 
             networkEdges.add({
                 from: entity.name, to: currentDrugName,
                 label: `${entity.count}`,
                 title: `${entity.count}`,
-                font: { color: "#000", strokeWidth: 0 },
+                font: {color: "#000", strokeWidth: 0},
                 length: options[entType].edgeLen,
                 rootNode: true,
             });
         }
     }
     network.physics.physicsEnabled = false;
-    network.setData({ nodes: networkNodes, edges: networkEdges });
+    network.setData({nodes: networkNodes, edges: networkEdges});
     updateNetworkGraph();
 }
 
@@ -666,7 +681,7 @@ function updateNetworkGraph() {
     startLoading("drugNetwork");
     const options = {
         disease: document.getElementById("drugNetworkCheckboxDisease").checked,
-        target: document.getElementById("drugNetworkCheckboxTarget").checked ,
+        target: document.getElementById("drugNetworkCheckboxTarget").checked,
         drug: document.getElementById("drugNetworkCheckboxDrug").checked
     };
 
@@ -767,7 +782,7 @@ async function retrieveAdditionalEdges(entity, type) {
         entities.push(...result["sub_count_list"]);
 
     } else { // target or disease
-        const predicate = (type === "target") ? "interacts": "induces"; // TODO use this? then use it above too!
+        const predicate = (type === "target") ? "interacts" : "induces"; // TODO use this? then use it above too!
         let result = await fetch(`${url_query_sub_count}?query=Drug+associated+${entity}&data_source=PubMed`)
             .then((response) => {
                 return response.json();
@@ -786,10 +801,10 @@ async function retrieveAdditionalEdges(entity, type) {
             from: entity, to: entities[i].name,
             label: `${entities[i].count}`,
             title: `${entities[i].count}`,
-            font: { color: "#000000", strokeWidth: 0},
-            color: { color: "#565656", opacity: 0.4 },
+            font: {color: "#000000", strokeWidth: 0},
+            color: {color: "#565656", opacity: 0.4},
             physics: false,
-            smooth: { enabled: false },
+            smooth: {enabled: false},
         });
     }
     console.log("Elapsed time:", Date.now() - startTime, "ms")
