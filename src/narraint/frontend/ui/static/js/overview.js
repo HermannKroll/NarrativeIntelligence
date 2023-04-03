@@ -668,6 +668,7 @@ function initializeNetworkGraph() {
                 title: `${entity.count}`,
                 font: {color: "#000", strokeWidth: 0},
                 length: options[entType].edgeLen,
+                width: 2.0,
                 rootNode: true,
             });
         }
@@ -773,7 +774,7 @@ async function retrieveAdditionalEdges(entity, type) {
     const startTime = Date.now()
     let entities = []
     if (type === "drug") {
-        let result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Target&data_source=PubMed`)
+        let result = await fetch(`${url_query_sub_count}?query=${entity}+interacts+Target&data_source=PubMed`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -786,8 +787,8 @@ async function retrieveAdditionalEdges(entity, type) {
         entities.push(...result["sub_count_list"]);
 
     } else { // target or disease
-        const predicate = (type === "target") ? "interacts" : "induces"; // TODO use this? then use it above too!
-        let result = await fetch(`${url_query_sub_count}?query=Drug+associated+${entity}&data_source=PubMed`)
+        const predicate = (type === "target") ? "interacts" : "associated"; // TODO use this? then use it above too!
+        let result = await fetch(`${url_query_sub_count}?query=Drug+${predicate}+${entity}&data_source=PubMed`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -806,7 +807,8 @@ async function retrieveAdditionalEdges(entity, type) {
             label: `${entities[i].count}`,
             title: `${entities[i].count}`,
             font: {color: "#000000", strokeWidth: 0},
-            color: {color: "#565656", opacity: 0.4},
+            color: {color: "#565656", opacity: 0.6},
+            width: 1.5,
             physics: false,
             smooth: {enabled: false},
         });
