@@ -108,6 +108,13 @@
                                     <!--text setzen-->
                                 </tr>
                                 <tr>
+                                    <td class="fw-lighter" style="font-size: 0.75rem">*CX = computed value</td>
+                                </tr>
+                                <tr>
+                                    <td>InChI-Key</td>
+                                    <td id="drug_inchi_key"></td>
+                                </tr>
+                                <tr>
                                     <td>See ChEMBL:</td>
                                     <td id="drug_chemblid"></td>
                                     <!--text setzen-->
@@ -299,6 +306,11 @@
     </div>
 
     <noscript>
+        <style>
+            body {
+                overflow: hidden;
+            }
+        </style>
         <div class="noscript">
             <div>
                 This website requires JavaScript enabled to function properly.
@@ -345,7 +357,7 @@
 
     <script src="{% static 'js/paper.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/overview.js' %}?version=3" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverview.js' %}?version=4" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverview.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=6" type="text/javascript"></script>
 {% endblock %}
