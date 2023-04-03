@@ -69,7 +69,7 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
     # export them with their tags
     logging.info(f'Exporting documents to: {document_export_file}')
     export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
-           content=True, export_sections=consider_sections, export_format="json")
+           content=True, export_sections=consider_sections, export_format="json", export_classififcation=False)
 
     time_exported = datetime.now()
 
