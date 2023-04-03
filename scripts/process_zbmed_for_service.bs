@@ -29,6 +29,7 @@ psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>
 # Perform classification
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/classification/apply_svm.py -c ZBMed /home/kroll/pharmaceutical_technology_articles_svm.pkl --cls PharmaceuticalTechnology --workers 2
 
 # Export the document content
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d $ZBMED_PUBTATOR --collection ZBMed --format json
