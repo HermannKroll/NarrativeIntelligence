@@ -1614,11 +1614,14 @@ function getVariableData() {
         ['DosageForm', "dosage form/delivery form, e.g. tablet or injection"],
         ['Drug', "active ingredients, e.g. Metformin or Simvastatin"],
         ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
+        ['HealthStatus', "information about target groups, e.g. women, man, children, etc."],
         ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
         ['Method', "common applied methods"],
         ['PlantFamily/Genus', "plant families, e.g. Digitalis, Cannabis"],
-        ['Species', "target groups, e.g. human, rats, etc."],
-        ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
+        ["Organism", "organisms, e.g. bacterias and viruses"],
+        ['Species', "target groups, e.g. human and rats"],
+        ['Target', "gene/enzyme, e.g. cyp3a4 and mtor"],
+        ['Tissue', "tissues, e.g. muscle and membranes"],
         ["Vaccine", "used vaccines"]
     ];
 
