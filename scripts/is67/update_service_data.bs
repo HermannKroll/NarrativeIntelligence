@@ -26,15 +26,13 @@ mkdir $MEDLINE_UPDATES
 
 
 # Do the canonicalizing step
-python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json
-# --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
 # Apply the rules
-python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py
-# --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
 # Execute Cleaning Rules for Predications
-echo 'cleaning predication table with hand-written rules'
+# echo 'cleaning predication table with hand-written rules'
 psql "host=127.0.0.1 port=5432 dbname=fidpharmazie2023 user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 
 
@@ -42,10 +40,8 @@ psql "host=127.0.0.1 port=5432 dbname=fidpharmazie2023 user=tagginguser password
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
 
 # Compute reverse indexes
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py
-# --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py
-# --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_term.py
 
 # Finally vacuum all tables
