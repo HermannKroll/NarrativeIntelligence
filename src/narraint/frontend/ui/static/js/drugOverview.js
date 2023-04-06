@@ -175,10 +175,10 @@ async function setDrugData(entity_name) {
                 document.getElementById('drug_cx_logd').innerText = "-";
             }
 
-            if (data2.molecule_structures.standard_inchi_key) {
-                document.getElementById('drug_inchi_key').innerText = data2.molecule_structures.standard_inchi_key;
+            if (data2.molecule_structures.standard_inchi) {
+                document.getElementById('drug_inchi').innerText = data2.molecule_structures.standard_inchi;
             } else {
-                document.getElementById('drug_inchi_key').innerText = "-";
+                document.getElementById('drug_inchi').innerText = "-";
             }
 
             let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
