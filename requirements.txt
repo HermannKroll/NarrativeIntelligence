@@ -6,7 +6,7 @@ pytest~=6.2.1
 datrie~=0.8.2
 asgiref
 SQLAlchemy==1.4.23
-nltk==3.6.6
+nltk~=3.8.1
 networkx==2.6.2
 lxml~=4.9.1
 psycopg2-binary==2.9.1
