@@ -16,24 +16,22 @@ To use this project, clone this project and its submodules via:
 git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
+# Create a virtual environment
+We recommend to use at least Python 3.8
+```
+conda create -n narraint python=3.8
+```
+
+Activate the environment
+```
+conda activate narraint
+```
+
 # Getting Started
 Install all Python requirements:
 ```
 pip install -r requirements.txt
 ```
-
-# SSH Server Interpreter
-Check out the latest version of the project. 
-Next open the project in PyCharm.
-
-Create a virtual environment on the server.
-```
-conda create --n env python=3.8 anaconda
-```
-
-Accept installing all packages. 
-Next, configure the SSH Interpreter in PyCharm. 
-Python Interpreter can be found in the local conda directory (.conda/...)
 
 
 # Download Additional Data
@@ -120,4 +118,19 @@ The projects core, the `narraint` package, consists of several Python packages a
 
 ## Narrative Service Database Schema
 ![DB Scheme](./docs/dbdiagram_service.png)
+
+
+# Development 
+## SSH Server Interpreter
+Check out the latest version of the project. 
+Next open the project in PyCharm.
+
+Create a virtual environment on the server.
+```
+conda create --n env python=3.8 anaconda
+```
+
+Accept installing all packages. 
+Next, configure the SSH Interpreter in PyCharm. 
+Python Interpreter can be found in the local conda directory (.conda/...)
 
