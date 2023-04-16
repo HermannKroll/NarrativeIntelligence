@@ -1,5 +1,5 @@
 const LONG_COVID_ENTITY = "Long Covid";
-const LONG_COVID_ENTITY_ID = "MESH:C000711409";
+const LONG_COVID_ENTITY_ID = "MESH:D000094024";
 
 /**
  * Data structure of all overviews
