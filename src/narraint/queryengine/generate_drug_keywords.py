@@ -151,8 +151,8 @@ def main():
         session.commit()
 
     # query all existing drug entities
-    q = session.query(TagInvertedIndex.subject_id)
-    q = q.filter(TagInvertedIndex.subject_type == entity_type)
+    q = session.query(TagInvertedIndex.entity_id)
+    q = q.filter(TagInvertedIndex.entity_type == entity_type)
     q = q.distinct()
 
     drugs: List[sqlalchemy.engine.row.Row] = q.all()  # first()#
@@ -168,7 +168,7 @@ def main():
     skipped_drugs = 0
     for i in range(len(drugs)):  # range(10):#
         # retrieve all document_ids for one drug
-        entity_id = dict(drugs[i])["subject_id"]
+        entity_id = dict(drugs[i])["entity_id"]
         q = session.query(TagInvertedIndex.document_ids)
         q = q.filter(TagInvertedIndex.document_collection == document_collection)
         q = q.filter(TagInvertedIndex.entity_id == entity_id)
