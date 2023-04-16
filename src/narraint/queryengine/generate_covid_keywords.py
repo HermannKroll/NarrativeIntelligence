@@ -41,7 +41,7 @@ def main():
     session.commit()
 
     covid_id = "MESH:D000086382"
-    long_covid_id = "MESH:C000711409"
+    long_covid_id = "MESH:D000094024"
     mecfs_id = "MESH:D015673"
 
     ids_to_process = [covid_id, long_covid_id, mecfs_id]
