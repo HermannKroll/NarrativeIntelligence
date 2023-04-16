@@ -103,7 +103,8 @@ class EntityTagger:
         self._add_fid_dosageform_terms()
         self._add_vaccine_terms()
         self._add_plant_families()
-        self._add_chembl_targets()
+        # Targets are deactivated at the moment
+        # self._add_chembl_targets()
         self._add_chembl_organisms()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
