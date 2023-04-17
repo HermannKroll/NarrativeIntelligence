@@ -180,10 +180,6 @@ async function setDrugData(entity_name) {
             } else {
                 document.getElementById('drug_inchi').innerText = "-";
             }
-
-            let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
-            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + currentChemblID + '</a>';
-
         }).catch(e => {
             document.getElementById('name').innerText = decodeURI(currentDrugName);
             document.getElementById('formular').innerText = "-";
@@ -193,10 +189,12 @@ async function setDrugData(entity_name) {
             document.getElementById('drug_cx_acid_pka').innerText = "-";
             document.getElementById('drug_cx_basic_pka').innerText = "-";
             document.getElementById('drug_cx_logd').innerText = "-";
-
+            document.getElementById('drug_inchi').innerText = "-";
+        })
+        .finally(() => {
             let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
             document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + currentChemblID + '</a>';
-        });//just give something to the user, so we can proceed
+        })
 }
 
 /**
