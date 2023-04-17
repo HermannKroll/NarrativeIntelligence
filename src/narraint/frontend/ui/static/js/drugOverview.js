@@ -176,7 +176,8 @@ async function setDrugData(entity_name) {
             }
 
             if (data2.molecule_structures.standard_inchi) {
-                document.getElementById('drug_inchi').innerText = data2.molecule_structures.standard_inchi;
+                document.getElementById('drug_inchi').innerText =
+                    data2.molecule_structures.standard_inchi.replace('InChI=', '');
             } else {
                 document.getElementById('drug_inchi').innerText = "-";
             }
