@@ -53,6 +53,13 @@ const overviews = {
         object: "?X(Species)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Species"]
+    },
+    healthstatuts: {
+        name: "HealthStatus",
+        predicate: "associated",
+        object: "HealthStatus",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["HealthStatus"]
     }
 }
 
