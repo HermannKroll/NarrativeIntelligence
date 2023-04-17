@@ -6,7 +6,7 @@ const overviews = {
     targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Gene"]},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["LabMethod"]},
     species: {name: "Species", predicate: "associated", object: "?X(Species)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Species"]},
-    healthstatus: {name: "HealthStatus", predicate: "associated", object: "?X(HealthStatus)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Species"]},
+    healthstatus: {name: "HealthStatus", predicate: "treats", object: "?X(HealthStatus)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Species"]},
     drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback},
