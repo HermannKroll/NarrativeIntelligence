@@ -19,7 +19,9 @@ const typeColorMap = {
     "Plant": "#dcfd83",
     "Strain": "#75c4c7",
     "Vaccine": "#c7767d",
-    "HealthStatus": "#bbaabb"
+    "HealthStatus": "#bbaabb",
+    "Organism": "#00bc0f",
+    "Tissue": "#dc8cff"
 }
 
 
