@@ -23,7 +23,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON
+from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
@@ -1292,6 +1292,21 @@ def get_keyword_search_request(request):
             except Exception:
                 logging.debug(f'Could generate graph queries for "{keywords}"')
     return HttpResponse(status=500)
+
+
+class NewsView(TemplateView):
+    template_name = "ui/news.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(NewsView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+def get_news_data(request):
+    person = request.GET.get("person", "")
+    with open(os.path.join(RESOURCE_DIR, f"news/summarized_{person}.json")) as f:
+        data = json.load(f)
+    return JsonResponse(data=data)
 
 
 logging.info('Initialize view')
