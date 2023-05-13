@@ -27,6 +27,7 @@ from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.entity.util import explain_concept_translation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
@@ -1069,18 +1070,7 @@ def get_explain_translation(request):
     if "concept" in request.GET:
         try:
             concept = str(request.GET["concept"]).strip()
-            entities = View.instance().entity_tagger.tag_entity(concept)
-            headings = []
-            for entity in entities:
-                heading = View.instance().resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type,
-                                                                           resolve_gene_by_id=False)
-                if heading not in headings:
-                    headings.append(heading)
-            headings.sort()
-            heading_len = len(headings)
-            if heading_len > 25:
-                headings = headings[:25]
-                headings.append(f"and {heading_len - 25} more")
+            headings = explain_concept_translation(concept)
             return JsonResponse(dict(headings=headings))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
