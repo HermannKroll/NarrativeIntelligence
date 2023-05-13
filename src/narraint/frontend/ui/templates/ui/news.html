@@ -161,8 +161,8 @@
                             <div class="card h-100 news-article" onclick="window.open('{{ this.url }}', '_blank')">
                                 <div class="card-body pt-2">
                                     <h6 class="small text-wide p-b-2">{{ this.newspaper }}</h6>
-                                    <h4>{{ this.headline }}</h4>
-                                    <h5>{{ this.text }}</h5>
+                                    <h5>{{this.headline}}</h5>
+                                    <h6>Fragment: <br> [...]{{this.text}}[...]</h6>
                                 </div>
                             </div>
                             {{/each}}
@@ -175,8 +175,8 @@
                             <div class="card h-100 news-article" onclick="window.open('{{ this.url }}', '_blank')">
                                 <div class="card-body pt-2">
                                     <h6 class="small text-wide p-b-2">{{ this.newspaper }}</h6>
-                                    <h4>{{ this.headline }}</h4>
-                                    <h5>{{ this.text }}</h5>
+                                    <h5>{{this.headline}}</h5>
+                                    <h6>Fragment: <br> [...]{{this.text}}[...]</h6>
                                 </div>
                             </div>
                             {{/each}}
