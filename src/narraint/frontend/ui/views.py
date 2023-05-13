@@ -1072,6 +1072,8 @@ def get_explain_translation(request):
             concept = str(request.GET["concept"]).strip()
             headings = explain_concept_translation(concept)
             return JsonResponse(dict(headings=headings))
+        except KeyError:
+            return JsonResponse(dict(headings=["Not known yet"]))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
             traceback.print_exc(file=sys.stdout)
