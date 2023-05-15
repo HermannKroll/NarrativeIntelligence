@@ -33,7 +33,7 @@
     <!--Navbar-->
     {% verbatim %}
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">News Summary</a>
+        <a class="navbar-brand" href="#">Nieuws Samenvatting</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -44,7 +44,7 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                        data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
-                        Role
+                        Rol
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="role-dropdown">
                         {{#each roles}}
@@ -62,7 +62,7 @@
                 <a class="nav-link dropdown-toggle" href="#" id="person-drop-button" role="button"
                    data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    Select Person
+                    Kies een Persoon
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown"
                      id="person-dropdown">
@@ -126,7 +126,7 @@
         <div class="card text-white bg-dark">
             <div class="card-header">{{ title }}</div>
             <div class="card-body">
-                <p class="card-text">{{ text }}<br><br><br>{{ text_nl }}</p>
+                <p class="card-text">{{text_nl}}</p>
             </div>
             <section class="carousel slide" data-interval="false" data-ride="carousel">
 
