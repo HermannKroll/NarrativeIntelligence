@@ -98,12 +98,12 @@ function setRolesEventListener(roles) {
             document.getElementById(stringToLowerWithoutSpaces(role.name)).click();
         });
         document.getElementById(stringToLowerWithoutSpaces(role.name)).addEventListener("click", function () {
-            if (!document.getElementById(roleButtonId(role.name)).checked) {
+            //if (!document.getElementById(roleButtonId(role.name)).checked) {
                 const relevant_section_data = role.section_data;
                 let sectionTemplate = Handlebars.compile($('#sections-template').html());
                 $('#sections').html(sectionTemplate({sections: refactorSections(relevant_section_data)}));
 
-            }
+            //}
         });
     })
 }
