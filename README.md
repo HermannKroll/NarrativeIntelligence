@@ -134,3 +134,31 @@ Accept installing all packages.
 Next, configure the SSH Interpreter in PyCharm. 
 Python Interpreter can be found in the local conda directory (.conda/...)
 
+
+# Database
+
+Create a new postgres database. 
+Log in first.
+```
+psql -h localhost -U postgres -W
+```
+
+Create the database.
+```
+CREATE DATABASE fidpharmazie;
+```
+
+
+Edit the following file
+```
+nano /etc/postgresql/14/main/pg_hba.conf
+```
+by adding the line
+``` 
+host    fidpharmazie    all             127.0.0.1/32            md5
+```
+
+Now restore the database dump
+``` 
+pg_restore -h 127.0.0.1 -O -U postgres -W -d fidpharmazie fidpharmazie_2023_06_12.dump
+``` 
