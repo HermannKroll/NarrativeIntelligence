@@ -93,6 +93,11 @@ conda activate narraint
 ```
 
 ## Getting Started
+Switch to repository.
+```
+cd ~/NarrativeIntelligence/
+```
+
 Install all Python requirements:
 ```
 pip install -r requirements.txt
@@ -136,6 +141,11 @@ Make always be sure that if you run any of our scripts, you activated your conda
 ```
 conda activate narraint
 export PYTHONPATH="/home/USER/NarrativeIntelligence/src/:/home/USER/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/USER/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+```
+
+Switch to repository.
+```
+cd ~/NarrativeIntelligence/
 ```
 
 ## Setup NLP 
