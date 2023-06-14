@@ -149,7 +149,7 @@ This may take a while.
 # Web Server Deployment
 The project builds upon Django which uses gunicorn as a local web server. 
 However, gunicorn should not be used as a live web service. 
-That is why a reverse proxy should be used to serve the data. 
+That is why a reverse proxy should be used to serve the static data and forward request to the local gunicorn. 
 
 ## Deploy a reverse proxy
 We used nginx. 
