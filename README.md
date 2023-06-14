@@ -16,6 +16,10 @@ To use this project, clone this project and its submodules via:
 git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
+For development purposes, dev should be cloned:
+```
+git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
+```
 
 # Database Setup
 The narrative service requires a Postgres database that contains processed documents. 
