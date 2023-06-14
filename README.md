@@ -353,6 +353,10 @@ Switch into a screen session for the following commands.
 ```
 screen
 ```
+or get your screen back
+```
+screen -ar
+```
 
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
