@@ -28,7 +28,7 @@
         </a>
 
         <span class="collapse navbar-collapse navbar-text text-nowrap">
-            Last updated 10.06.2022
+            Last updated 10.02.2023
         </span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -42,7 +42,11 @@
                     <a class="nav-link" href="{% url 'search' %}">Search</a>
                 </li>
                 <li class="nav-item" id="nav_item_overview">
-                    <a class="nav-link" href="{% url 'drug_overview_index' %}">Drug Overviews</a>
+                    <a class="nav-link" href="{% url 'drug_overview' %}">Drug Overviews</a>
+                </li>
+
+                <li class="nav-item" id="nav_item_overview">
+                    <a class="nav-link" href="{% url 'long_covid' %}">Long COVID Overview</a>
                 </li>
           <!--      <li class="nav-item" id="nav_item_stats">
                     <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
@@ -54,10 +58,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="https://blogs.tu-braunschweig.de/pubpharm/impressum/">Impressum</a>
                 </li>
+<!--                <li class="nav-item" id="nav_item_help">
+                    <a class="nav-link" href="{% url 'team' %}">Team</a>
+                </li>-->
             </ul>
         </div>
-        <a href="https://www.pubpharm.de"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo"></a>
-        <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"/></a>
+        <div class="mx-auto mx-md-0 d-flex flex-nowrap">
+            <a href="https://www.pubpharm.de" class="me-1"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo"></a>
+            <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"/></a>
+        </div>
     </div>
 </nav>
 
@@ -105,6 +114,7 @@
         crossorigin="anonymous"></script>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
 <script>
     let nav_bar_bottom = $("#nav_bar_bottom");

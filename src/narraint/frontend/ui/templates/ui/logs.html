@@ -10,9 +10,165 @@
     src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 </script>
 <body>
-    <div id="dashboard">
+    <div id="top" class="container">
+        <div class="title">
+            <h1>Narrative Service</h1>
+        </div>
+
+        <div class="panel_container">
+            <div class="section">
+                <h2>Top 100 searched queries</h2>
+                <label >
+                    <input id="narrative_input_top_hundred" class="slider"
+                           type="range"
+                           min="0" max="4" step="1" value="4">
+                    <div class="sliderticks">
+                        <p>Today</p>
+                        <p>This week</p>
+                        <p>This month</p>
+                        <p>This year</p>
+                        <p>Overall</p>
+                    </div>
+{#                    <input id="narrative_input_top_hundred" class="slider"#}
+{#                           type="range" list="tickmarks"#}
+{#                           min="0" max="4" step="1" value="4">#}
+{#                    <datalist id="tickmarks">#}
+{#                        <option value="0" label="Today"></option>#}
+{#                        <option value="1" label="This week"></option>#}
+{#                        <option value="2" label="This month"></option>#}
+{#                        <option value="3" label="This year"></option>#}
+{#                        <option value="4" label="Overall"></option>#}
+{#                    </datalist>#}
+                </label>
+                <div class="tableFixHead">
+                    <table class="queryTable">
+                        <thead>
+                            <tr><th>Query</th><th>Number</th></tr>
+                        </thead>
+                        <tbody id="narrative_table_top_hundred"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Performed Queries</h2>
+                <div class="tableFixHead">
+                    <table class="queryTable">
+                        <thead>
+                            <tr><th>Time</th><th>Number</th></tr>
+                        </thead>
+                        <tbody id="narrative_table_perf_queries"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Last Usage</h2>
+                <label>
+                    <input id="narrative_graph_input" class="slider"
+                           type="range"
+                           min="0" max="3" step="1" value="3">
+                    <div class="sliderticks">
+                        <p>7 days</p>
+                        <p>31 days</p>
+                        <p>182 days</p>
+                        <p>365 days</p>
+                    </div>
+{#                    <input id="narrative_graph_input" class="slider"#}
+{#                           type="range" list="tickmarks"#}
+{#                           min="0" max="3" step="1" value="3">#}
+{#                    <datalist>#}
+{#                        <option value="0" label="7 days"></option>#}
+{#                        <option value="1" label="31 days"></option>#}
+{#                        <option value="2" label="182 days"></option>#}
+{#                        <option value="3" label="365 days"></option>#}
+{#                    </datalist>#}
+                </label>
+                <div id="narrative_graph_container">
+
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="{% static 'js/json_logger_data.js' %}?version=1"></script>
+    <div id="bottom" class="container">
+        <div class="title">
+            <h1>Drug Overviews</h1>
+        </div>
+        <div class="panel_container">
+            <div class="section">
+                <h2>Top 100 searched queries</h2>
+                <label >
+                    <input id="overview_input_top_hundred" class="slider"
+                           type="range"
+                           min="0" max="4" step="1" value="4">
+                    <div class="sliderticks">
+                        <p>Today</p>
+                        <p>This week</p>
+                        <p>This month</p>
+                        <p>This year</p>
+                        <p>Overall</p>
+                    </div>
+{#                    <input id="overview_input_top_hundred" class="slider"#}
+{#                           type="range" list="tickmarks"#}
+{#                           min="0" max="4" step="1" value="4">#}
+{#                    <datalist id="tickmarks">#}
+{#                        <option value="0" label="Today"></option>#}
+{#                        <option value="1" label="This week"></option>#}
+{#                        <option value="2" label="This month"></option>#}
+{#                        <option value="3" label="This year"></option>#}
+{#                        <option value="4" label="Overall"></option>#}
+{#                    </datalist>#}
+                </label>
+                <div class="tableFixHead">
+                    <table class="queryTable">
+                        <thead>
+                            <tr><th>Query</th><th>Number</th></tr>
+                        </thead>
+                        <tbody id="overview_table_top_hundred"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Performed Queries</h2>
+                <div class="tableFixHead">
+                    <table class="queryTable">
+                        <thead>
+                            <tr><th>Time</th><th>Number</th></tr>
+                        </thead>
+                        <tbody id="overview_table_perf_queries"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Last Usage</h2>
+                <label>
+                    <input id="overview_graph_input" class="slider"
+                           type="range"
+                           min="0" max="3" step="1" value="3">
+                    <div class="sliderticks">
+                        <p>7 days</p>
+                        <p>31 days</p>
+                        <p>182 days</p>
+                        <p>365 days</p>
+                    </div>
+{#                    <input id="overview_graph_input" class="slider"#}
+{#                           type="range" list="tickmarks"#}
+{#                           min="0" max="3" step="1" value="3">#}
+{#                    <datalist>#}
+{#                        <option value="0" label="7 days"></option>#}
+{#                        <option value="1" label="31 days"></option>#}
+{#                        <option value="2" label="182 days"></option>#}
+{#                        <option value="3" label="365 days"></option>#}
+{#                    </datalist>#}
+                </label>
+                <div id="overview_graph_container">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard"></div>
+
+    <script src="{% static 'js/json_logger_data.js' %}?version=4"></script>
     <script type="text/javascript">
         const logs_url = "{% url 'logs' %}";
     </script>

@@ -35,7 +35,16 @@ class ATCTree:
 
             if load_index:
                 self.load_atc_tree()
+
+            self.chembl2atcclass = defaultdict(set)
+            for atc_class, chembl_ids in self.atcclass2chembl.items():
+                for chembl in chembl_ids:
+                    self.chembl2atcclass[chembl].add(atc_class.upper())
+
             ATCTree.__instance = self
+
+    def get_classes_for_chembl_id(self, chembl_id: str) -> Set[str]:
+        return self.chembl2atcclass[chembl_id]
 
     def get_drugs_for_atc_class(self, atc_class: str) -> Set[str]:
         return self.atcclass2chembl[atc_class.strip().lower()]

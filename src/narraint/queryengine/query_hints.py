@@ -3,7 +3,7 @@ import re
 from narrant.entity.entity import Entity
 from narrant.preprocessing.enttypes import DISEASE, GENE, CHEMICAL, DOSAGE_FORM, EXCIPIENT, DRUG, CHEMBL_CHEMICAL, \
     SPECIES, \
-    PLANT_FAMILY_GENUS, LAB_METHOD, METHOD
+    PLANT_FAMILY_GENUS, LAB_METHOD, METHOD, HEALTH_STATUS, TARGET
 
 QUERY_LIMIT = 50000
 VAR_NAME = re.compile(r'(\?\w+)')
@@ -21,7 +21,8 @@ DO_NOT_CARE_PREDICATE = PREDICATE_ASSOCIATED
 
 ENTITY_TYPE_EXPANSION = dict(
     Chemical=[CHEMICAL, EXCIPIENT, DRUG],
-    Method=[METHOD, LAB_METHOD]
+    Method=[METHOD, LAB_METHOD],
+    Target=[TARGET, GENE]
 )
 
 PREDICATE_EXPANSION = dict(
@@ -32,7 +33,7 @@ PREDICATE_EXPANSION = dict(
 SYMMETRIC_PREDICATES = {"interacts", "associated", "induces", "decreases", "administered", "method"}
 
 PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, PLANT_FAMILY_GENUS},
-                               {DISEASE, SPECIES}),
+                               {DISEASE, SPECIES, HEALTH_STATUS}),
      #               'administered': ({DOSAGE_FORM},
      #                                {SPECIES, DISEASE, CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT,
      #                                 PLANT_FAMILY_GENUS, DOSAGE_FORM, LAB_METHOD, METHOD}),
@@ -43,12 +44,12 @@ PREDICATE_TYPING = {'treats': ({CHEMICAL, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, PLAN
                                 {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS}),
                     'decreases': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS},
                                   {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, DISEASE, PLANT_FAMILY_GENUS}),
-                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS},
-                                  {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS}),
-                    'metabolises': ({GENE},
+                    'interacts': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET, 'ArabidopsisGene'},
+                                  {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, GENE, PLANT_FAMILY_GENUS, TARGET, 'ArabidopsisGene'}),
+                    'metabolises': ({GENE, TARGET, 'ArabidopsisGene'},
                                     {CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, PLANT_FAMILY_GENUS}),
                     'inhibits': ({CHEMICAL, DRUG, EXCIPIENT, CHEMBL_CHEMICAL, PLANT_FAMILY_GENUS},
-                                 {GENE}),
+                                 {GENE, TARGET, 'ArabidopsisGene'}),
                     }
 
 

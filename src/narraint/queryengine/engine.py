@@ -8,7 +8,7 @@ from typing import Set, Dict, List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, \
-    PredicationInvertedIndex, DocumentMetadataService, TagInvertedIndex
+    PredicationInvertedIndex, DocumentMetadataService, TagInvertedIndex, TermInvertedIndex
 from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
@@ -16,6 +16,7 @@ from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
+from narrant.preprocessing.enttypes import ALL
 
 QUERY_DOCUMENT_LIMIT = 1500000
 
@@ -77,10 +78,14 @@ class QueryEngine:
             title, authors, journals, year, month, doi, org_id = r.title, r.authors, r.journals, r.publication_year, \
                                                                  r.publication_month, r.publication_doi, \
                                                                  r.document_id_original
+            doc_classes = None
+            if r.document_classifications:
+                doc_classes = ast.literal_eval(r.document_classifications)
+
             if len(title) > 500:
                 logging.debug('Large title detected: {}'.format(r.title))
                 title = title[0:500]
-            doc2metadata[int(r.document_id)] = (title, authors, journals, year, month, doi, org_id)
+            doc2metadata[int(r.document_id)] = (title, authors, journals, year, month, doi, org_id, doc_classes)
 
         return doc2metadata
 
@@ -211,10 +216,14 @@ class QueryEngine:
                 # only continue with prov mappings that are not empty
                 if not prov_mapping or len(prov_mapping) == 0:
                     continue
+            # convert every document id to an integer for speed
+            for doc_col in prov_mapping:
+                prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping[doc_col].items()}
+
             # Compute the hash dictionaries and indexes to the data
             provenance_mappings.append(prov_mapping)
             for doc_col, docids2prov in prov_mapping.items():
-                doc_ids = docids2prov.keys()
+                doc_ids = set(docids2prov.keys())
                 for var_name, position in var_names_in_query:
                     sub_id, sub_type = None, None
                     if position == 'subject':
@@ -235,6 +244,151 @@ class QueryEngine:
                     var2subs[var_name][doc_col][sub_key].update(doc_ids)
 
     @staticmethod
+    def query_for_terms_in_query(graph_query: GraphQuery, document_collection_filter) -> {str: int}:
+        # no entities -> no document filter
+        if not graph_query.has_terms():
+            return None
+
+        session = SessionExtended.get()
+        doc_col2valid_ids = {}
+        for idx, term in enumerate(graph_query.terms):
+            term_lower = term.lower().strip()
+            q = session.query(TermInvertedIndex.document_collection, TermInvertedIndex.document_ids)
+            q = q.filter(TermInvertedIndex.term == term_lower)
+
+            if document_collection_filter:
+                if len(document_collection_filter) == 1:
+                    q = q.filter(TermInvertedIndex.document_collection == list(document_collection_filter)[0])
+                else:
+                    q = q.filter(TermInvertedIndex.document_collection.in_(document_collection_filter))
+
+            collection2term_ids = {}
+            for row in q:
+                # interpret the string from db as a python string list
+                if row.document_collection not in collection2term_ids:
+                    collection2term_ids[row.document_collection] = ast.literal_eval(row.document_ids)
+                else:
+                    collection2term_ids[row.document_collection].update(ast.literal_eval(row.document_ids))
+
+            for c in collection2term_ids:
+                logging.debug(f'{len(collection2term_ids[c])} document ids for collection: "{c}" and term "{term}"')
+
+            if idx == 0:
+                # we are fine for now. First entity set resulted in doc_col2valid_ids
+                doc_col2valid_ids = collection2term_ids
+            else:
+                # we are in the section iteration and must intersect the doc sets for the different terms
+                for col, doc_ids in doc_col2valid_ids.items():
+                    # only if the collection has at least a single document
+                    if col in collection2term_ids:
+                        doc_col2valid_ids[col].intersection_update(collection2term_ids[col])
+                    else:
+                        # no hits there
+                        doc_col2valid_ids[col] = set()
+
+        return doc_col2valid_ids
+
+    @staticmethod
+    def query_for_entities_in_query(graph_query: GraphQuery, document_collection_filter) -> {str: int}:
+        # no entities -> no document filter
+        if not graph_query.has_entities():
+            return None
+
+        session = SessionExtended.get()
+        doc_col2valid_ids = {}
+        for idx, entity_set in enumerate(graph_query.entity_sets):
+            entity_ids = list([en.entity_id for en in entity_set])
+            entity_types = list(set([en.entity_type for en in entity_set]))
+
+            q = session.query(TagInvertedIndex.document_collection, TagInvertedIndex.document_ids)
+            if document_collection_filter:
+                if len(document_collection_filter) == 1:
+                    q = q.filter(TagInvertedIndex.document_collection == list(document_collection_filter)[0])
+                else:
+                    q = q.filter(TagInvertedIndex.document_collection.in_(document_collection_filter))
+
+            if len(entity_ids) == 1:
+                # Check if we search with a variable
+                if not entity_ids[0].startswith('?'):
+                    q = q.filter(TagInvertedIndex.entity_id == entity_ids[0])
+                else:
+                    var_type = VAR_TYPE.search(entity_ids[0])
+                    if var_type:
+                        var_type = var_type.group(1)
+                        logging.debug(f'Found variable for entity querying. Type is: {var_type}')
+                        entity_types = [var_type]
+            else:
+                q = q.filter(TagInvertedIndex.entity_id.in_(entity_ids))
+
+            if len(entity_types) == 1:
+                q = q.filter(TagInvertedIndex.entity_type == entity_types[0])
+            else:
+                q = q.filter(TagInvertedIndex.entity_type.in_(entity_types))
+
+            e_doc_col2valid_ids = {}
+            for row in q:
+                # interpret the string from db as a python string list
+                if row.document_collection not in e_doc_col2valid_ids:
+                    e_doc_col2valid_ids[row.document_collection] = set(ast.literal_eval(row.document_ids))
+                else:
+                    e_doc_col2valid_ids[row.document_collection].update(set(ast.literal_eval(row.document_ids)))
+
+            if idx == 0:
+                # we are fine for now. First entity set resulted in doc_col2valid_ids
+                doc_col2valid_ids = e_doc_col2valid_ids
+            else:
+                # we are in the section iteration and must intersect the doc sets for the different entity sets
+                for col, doc_ids in doc_col2valid_ids.items():
+                    if col in e_doc_col2valid_ids:
+                        doc_col2valid_ids[col].intersection_update(e_doc_col2valid_ids[col])
+                    else:
+                        # no hits there
+                        doc_col2valid_ids[col] = set()
+
+        return doc_col2valid_ids
+
+    @staticmethod
+    def process_query_without_statements(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
+            -> List[QueryDocumentResult]:
+        logging.debug('Process query without statements...')
+        collection2valid_doc_ids = {}
+        # Query for terms and entities
+        if graph_query.has_terms():
+            logging.debug(f'Compute document ids for terms: {graph_query.terms}')
+            term_collection2ids = QueryEngine.query_for_terms_in_query(graph_query, document_collection_filter)
+            collection2valid_doc_ids = term_collection2ids
+
+        if graph_query.has_entities():
+            logging.debug(f'Compute document ids for entities: {graph_query.entity_sets}')
+            entity_collection2ids = QueryEngine.query_for_entities_in_query(graph_query, document_collection_filter)
+            if not graph_query.has_terms():
+                collection2valid_doc_ids = entity_collection2ids
+            else:
+                # we know that the query has entities and terms
+                # now intersect the term document sets with entity ids
+                for d_col, d_ids in collection2valid_doc_ids.items():
+                    if d_col in entity_collection2ids:
+                        d_ids.intersection_update(entity_collection2ids[d_col])
+                    else:
+                        # no entity collection match
+                        d_ids = set()
+                    logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
+
+        # No variables are used in the query
+        query_results = []
+        for d_col, d_ids in collection2valid_doc_ids.items():
+            logging.debug(f'{len(d_ids)} ids for collection {d_col} computed. Search for metadata...')
+            doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+            for d_id in d_ids:
+                if int(d_id) in doc2metadata:
+                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
+                                                             {}, 0.0, {}, org_document_id=org_id, doi=doi,
+                                                             document_collection=d_col, document_classes=doc_classes))
+        logging.debug(f'{len(query_results)} results computed')
+        return query_results
+
+    @staticmethod
     def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
             -> List[QueryDocumentResult]:
         """
@@ -245,53 +399,14 @@ class QueryEngine:
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
+
+        if not graph_query.has_statements() and (graph_query.has_entities() or graph_query.has_terms()):
+            return QueryEngine.process_query_without_statements(graph_query, document_collection_filter)
+
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
             logging.debug('Query will not yield results - returning empty list')
             return []
-        # calculate document_ids for additional entities if needed
-        if graph_query.has_additional_entities():
-            valid_document_ids = set()
-            session = SessionExtended.get()
-
-            for entities in graph_query.additional_entities:
-                entity_docs = set()
-
-                entity_ids = [en.entity_id for en in entities]
-                entity_types = list(set([en.entity_type for en in entities]))
-
-                q = session.query(TagInvertedIndex.document_ids)
-                if len(document_collection_filter) == 1:
-                    q = q.filter(TagInvertedIndex.document_collection ==
-                        list(document_collection_filter)[0])
-                else:
-                    q = q.filter(TagInvertedIndex.document_collection.
-                                 in_(document_collection_filter))
-
-                if len(entity_ids) == 1:
-                    q = q.filter(TagInvertedIndex.entity_id == entity_ids[0])
-                else:
-                    q = q.filter(TagInvertedIndex.entity_id.in_(entity_ids))
-
-                if len(entity_types) == 1:
-                    q = q.filter(TagInvertedIndex.entity_type == entity_types[0])
-                else:
-                    q = q.filter(TagInvertedIndex.entity_type.in_(entity_types))
-
-                for row in q:
-                    # interpret the string from db as a python string list
-                    entity_docs.update([str(x) for x in ast.literal_eval(row[0])])
-
-                logging.debug(f"{len(entity_docs)}")
-                if len(valid_document_ids) == 0:
-                    valid_document_ids.update(entity_docs)
-                elif len(entity_docs) > 0:
-                    valid_document_ids.intersection_update(entity_docs)
-
-            session.remove()
-            logging.debug(f'Result count document_ids {len(valid_document_ids)}')
-        else:
-            valid_document_ids = None
 
         collection2valid_doc_ids = defaultdict(set)
         collection2valid_subs = {}
@@ -378,31 +493,45 @@ class QueryEngine:
         # query document titles
         query_results = []
 
+        et_query_start = datetime.now()
+        # Query for terms and entities
+        term_collection2ids = QueryEngine.query_for_terms_in_query(graph_query, document_collection_filter)
+        entity_collection2ids = QueryEngine.query_for_entities_in_query(graph_query, document_collection_filter)
+        # Apply filter
+        if term_collection2ids:
+            for d_col, d_ids in collection2valid_doc_ids.items():
+                if d_col in term_collection2ids:
+                    d_ids.intersection_update(term_collection2ids[d_col])
+                else:
+                    # no term collection match
+                    d_ids = set()
+                logging.debug(f'After filtering with terms: {len(d_ids)} doc_ids left')
+        # Apply filter
+        if entity_collection2ids:
+            for d_col, d_ids in collection2valid_doc_ids.items():
+                if d_col in entity_collection2ids:
+                    d_ids.intersection_update(entity_collection2ids[d_col])
+                else:
+                    # no entity collection match
+                    d_ids = set()
+                logging.debug(f'After filtering with entities: {len(d_ids)} doc_ids left')
+
+        logging.debug(f'Entity and term filter computed in {datetime.now() - et_query_start}s')
+
         # No variables are used in the query
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
-                # only allow documents containing additional entities
-                if valid_document_ids:
-                    d_ids.intersection_update(valid_document_ids)
-                    logging.debug(f'Additional entities left {len(d_ids)} doc_ids')
-
                 doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
                     query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                              {}, 0.0, fp2prov, org_document_id=org_id, doi=doi,
-                                                             document_collection=d_col))
+                                                             document_collection=d_col, document_classes=doc_classes))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
-
-                # only allow documents containing additional entities
-                if valid_document_ids:
-                    d_ids.intersection_update(valid_document_ids)
-                    logging.debug(f'Additional entities left {len(d_ids)} doc_ids')
-
                 # Todo: Hack
                 if len(d_ids) > QUERY_DOCUMENT_LIMIT:
                     logging.warning(f'Query limit was hit: {len(d_ids)} (Limit: {QUERY_DOCUMENT_LIMIT}')
@@ -436,7 +565,7 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        title, authors, journals, year, month, doi, org_id = doc2metadata[int(d_id)]
+                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
@@ -451,7 +580,8 @@ class QueryEngine:
                         query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
                                                                  var2sub_for_doc, 0.0, fp2prov,
                                                                  org_document_id=org_id, doi=doi,
-                                                                 document_collection=d_col))
+                                                                 document_collection=d_col,
+                                                                 document_classes=doc_classes))
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
         return query_results

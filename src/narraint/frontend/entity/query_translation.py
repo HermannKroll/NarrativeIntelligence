@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 
@@ -7,7 +8,7 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS, DRUG
+from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS, DRUG, TARGET
 
 
 class QueryTranslation:
@@ -30,8 +31,8 @@ class QueryTranslation:
         self.variable_type_mappings["plant genus"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["plant genera"] = PLANT_FAMILY_GENUS
         self.variable_type_mappings["lab method"] = LAB_METHOD
-        self.variable_type_mappings["target"] = GENE
-        self.variable_type_mappings["targets"] = GENE
+        self.variable_type_mappings["target"] = TARGET
+        self.variable_type_mappings["targets"] = TARGET
         self.entity_tagger = EntityTagger.instance()
 
         relation_vocab = RelationVocabulary()
@@ -158,6 +159,65 @@ class QueryTranslation:
             explanation_str += '{}\t----->\t({}, {}, {})\n'.format(fact_txt.strip(), s, p, o)
             graph_query.add_fact_pattern(FactPattern(s, p, o))
 
+        return graph_query, explanation_str
+
+    def convert_json_to_fact_patterns(self, json_str: str) -> (GraphQuery, str):
+        try:
+            json_obj = json.JSONDecoder().decode(json_str)
+        except ValueError as e:
+            error_msg = 'JSON decode: {}'.format(e)
+            self.logger.error(error_msg)
+            return None, error_msg
+
+        if "fact_patterns" not in json_obj.keys():
+            return None, "Missing fact patterns in JSON structure"
+
+        graph_query = GraphQuery()
+        explanation_str = ""
+
+        for fact_pattern in json_obj["fact_patterns"]:
+            if not {"subject", "predicate", "object"} & fact_pattern.keys():
+                return None, "Invalid fact pattern in JSON"
+
+            try:
+                s = self.convert_text_to_entity(fact_pattern["subject"])
+            except (ValueError, KeyError) as e:
+                error_msg = 'Subject: {}'.format(e)
+                self.logger.error(error_msg)
+                return None, error_msg
+
+            try:
+                o = self.convert_text_to_entity(fact_pattern["object"])
+            except (ValueError, KeyError) as e:
+                error_msg = 'Object: {}'.format(e)
+                self.logger.error(error_msg)
+                return None, error_msg
+
+            try:
+                p = fact_pattern["predicate"].lower()
+            except KeyError as e:
+                error_msg = 'Relation: {}'.format(e)
+                self.logger.error(error_msg)
+                return None, error_msg
+
+            if p not in self.allowed_predicates:
+                error_msg = "Relation: {}".format(p)
+                self.logger.error(error_msg)
+                return None, error_msg
+
+            graph_query.add_fact_pattern(FactPattern(s, p, o))
+            explanation_str += f'({s}, {p}, {o})\n'
+
+        if {"entities"} & json_obj.keys():
+            explanation_str += 'additional entities\n'
+            for entity in json_obj["entities"]:
+                try:
+                    entity_ids = self.convert_text_to_entity(entity)
+                    graph_query.add_entity(entity_ids)
+                    explanation_str += f'({entity_ids})\n'
+                except ValueError:
+                    logging.debug(f'No conversion found for {entity}')
+                    continue
         return graph_query, explanation_str
 
     def convert_graph_patterns_to_nt(self, query_txt):

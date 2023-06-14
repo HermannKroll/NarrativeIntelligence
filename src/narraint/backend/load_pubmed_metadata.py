@@ -1,15 +1,16 @@
+import glob
+import gzip
 import logging
-import os
 from argparse import ArgumentParser
 from datetime import datetime
 from typing import Set, Dict, List
 
 from lxml import etree
 
-from narraint.backend.database import SessionExtended
-from narraint.backend.models import DocumentMetadata
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import print_progress_with_eta
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import DocumentMetadata
 
 month_dict = {
     "1": "1", "01": "1", "Jan": "1", "January": "1",
@@ -37,8 +38,12 @@ def pubmed_medline_load_document_metadata(filename: str, document_ids: Set[int],
     :param document_collection: the corresponding document collection
     :return: A list of dictionaries corresponding to DocumentMetadata, a list of processed document ids
     """
-    with open(filename) as f:
-        tree = etree.parse(f)
+    if filename.endswith('.xml'):
+        with open(filename) as f:
+            tree = etree.parse(f)
+    elif filename.endswith('.xml.gz'):
+        with gzip.open(filename) as f:
+            tree = etree.parse(f)
 
     metadata_to_insert = []
     pmids_processed = set()
@@ -158,7 +163,10 @@ def pubmed_medline_load_metadata_from_dictionary(directory, document_collection=
     logging.info(f'{len(document_id_processed)} documents have already metadata...')
     document_ids = document_ids - document_id_processed
     logging.info(f'{len(document_ids)} document ids remaining...')
-    files = [os.path.join(directory, fn) for fn in os.listdir(directory) if fn.endswith(".xml")]
+
+    if directory[-1] == '/':
+        directory = directory[:-1]
+    files = glob.glob(f'{directory}/**/*.xml.gz', recursive=True) + glob.glob(f'{directory}/**/*.xml', recursive=True)
     start = datetime.now()
     for idx, fn in enumerate(files):
         print_progress_with_eta("Loading PubMed Medline metadata", idx, len(files), start, 1)

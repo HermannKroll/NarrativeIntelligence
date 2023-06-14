@@ -8,7 +8,8 @@ import datrie
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE
+    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE, ORGANISM, TARGET, TISSUE, \
+    HEALTH_STATUS
 from kgextractiontoolbox.progress import print_progress_with_eta
 
 
@@ -25,10 +26,12 @@ class AutocompletionUtil:
         if AutocompletionUtil.__instance is not None:
             raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
         else:
-            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target", "PlantGenus", "PlantGenera",
-                                   SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG,
-                                   CHEMBL_CHEMICAL, METHOD, LAB_METHOD, VACCINE}
+            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target",
+                                   SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG, CHEMBL_CHEMICAL, METHOD,
+                                   LAB_METHOD, VACCINE, TARGET, ORGANISM, TISSUE, HEALTH_STATUS}
             self.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
+            self.other_terms = list(["PlantGenus", "PlantGenera"])
+            self.variable_types = sorted(list(self.variable_types))
 
             self.logger = logger
             self.known_terms = set()
@@ -59,6 +62,7 @@ class AutocompletionUtil:
         # allow entity types as strings
         self.known_terms.add("target")
         self.known_terms.update([t for t in self.variable_types])
+        self.known_terms.update([t for t in self.other_terms])
 
         self.trie = self.__build_trie_structure(known_terms=self.known_terms)
         self.drug_trie = self.__build_trie_structure(known_terms=self.known_drug_terms)
@@ -141,6 +145,8 @@ class AutocompletionUtil:
             for h in hits:
                 if h.lower().startswith(relevant_term):
                     completions.append(h)
+            # Var Names are already sorted (sorting by shortest completion does not apply here)
+            return completions
         # search for entity
         else:
             try:

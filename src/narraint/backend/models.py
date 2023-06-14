@@ -32,6 +32,14 @@ class TagInvertedIndex(Extended, DatabaseTable):
     document_ids = Column(String, nullable=False)
 
 
+class TermInvertedIndex(Extended, DatabaseTable):
+    __tablename__ = "term_inverted_index"
+
+    term = Column(String, nullable=False, index=True, primary_key=True)
+    document_collection = Column(String, nullable=False, index=True, primary_key=True)
+    document_ids = Column(String, nullable=False)
+
+
 class Tagger(models.Tagger):
     pass
 
@@ -77,6 +85,7 @@ class DocumentMetadataService(Extended, DatabaseTable):
     publication_year = Column(Integer, nullable=True)
     publication_month = Column(Integer, nullable=True)
     publication_doi = Column(String, nullable=True)
+    document_classifications = Column(String, nullable=True)
 
 
 class Predication(models.Predication):
@@ -201,6 +210,7 @@ class EntityKeywords(Extended, DatabaseTable):
 
     @staticmethod
     def insert_entity_keyword_data(session, entity_id: str, entity_type: str, keyword_data: str):
-        insert_stmt = insert(EntityKeywords).values(entity_id=entity_id, entity_type=entity_type, keyword_data=keyword_data)
+        insert_stmt = insert(EntityKeywords).values(entity_id=entity_id, entity_type=entity_type,
+                                                    keyword_data=keyword_data)
         session.execute(insert_stmt)
         session.commit()

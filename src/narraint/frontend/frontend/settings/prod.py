@@ -20,4 +20,9 @@ ALLOWED_HOSTS = [
     "narrative.pubpharm.de"
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://narrative.pubpharm.de',
+    'https://www.narrative.pubpharm.de'
+]
+
 STATIC_ROOT = "/var/www/static"

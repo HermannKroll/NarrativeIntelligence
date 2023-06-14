@@ -149,7 +149,8 @@ class QueryDocumentResult(QueryResultBase):
 
     def __init__(self, document_id: int, title: str, authors: str, journals: str, publication_year: int,
                  publication_month: int, var2substitution, confidence, position2provenance_ids: Dict[int, Set[int]],
-                 org_document_id: str = None, doi: str = None, document_collection: str = None):
+                 org_document_id: str = None, doi: str = None, document_collection: str = None,
+                 document_classes: [str] = None):
         self.document_id = document_id
         self.title = title
         self.journals = journals
@@ -162,6 +163,7 @@ class QueryDocumentResult(QueryResultBase):
         self.org_document_id = org_document_id
         self.doi = doi
         self.document_collection = document_collection
+        self.document_classes = document_classes
 
     def to_dict(self):
         return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,

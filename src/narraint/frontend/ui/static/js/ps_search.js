@@ -29,7 +29,7 @@ const ps_search = (event) => {
     console.log('Search invoked')
     setButtonSearching(true);
 
-
+    let statement = document.getElementById("id_statement").value;
     let query = document.getElementById("id_query").value;
     let confidence = document.getElementById("confidence_range").value;
     let wikipedia = $('#wikipedia').is(':checked');
@@ -43,6 +43,7 @@ const ps_search = (event) => {
     if (europarl === true){
         sources.push("europarl");
     }
+    console.log('Statement : ' + statement)
     console.log('Query     : ' + query);
     console.log('Confidence: ' + confidence);
     console.log('Wikipedia : ' + wikipedia);
@@ -51,6 +52,7 @@ const ps_search = (event) => {
     let request = $.ajax({
         url: ps_search_url,
         data: {
+            statement: statement,
             query: query,
             confidence: confidence,
             sources: sources.join(';')

@@ -9,6 +9,7 @@ from typing import Set
 
 from spacy.lang.en import English
 
+from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from kgextractiontoolbox.config import NLP_CONFIG
 from kgextractiontoolbox.document.count import count_documents
@@ -55,7 +56,7 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
 
     time_start = datetime.now()
     working_dir = tempfile.mkdtemp()
-    document_export_file = os.path.join(working_dir, 'document_export.pubtator')
+    document_export_file = os.path.join(working_dir, 'document_export.json')
     ie_input_dir = os.path.join(working_dir, 'ie')
     ie_filelist_file = os.path.join(working_dir, 'ie_filelist.txt')
     ie_output_file = os.path.join(working_dir, 'ie.output')
@@ -66,8 +67,10 @@ def process_documents_ids_in_pipeline(ids_to_process: Set[int], document_collect
 
     logging.info('Process will work in: {}'.format(working_dir))
     # export them with their tags
+    logging.info(f'Exporting documents to: {document_export_file}')
     export(document_export_file, export_tags=True, document_ids=ids_to_process, collection=document_collection,
-           content=True)
+           content=True, export_sections=consider_sections, export_format="json", export_classififcation=False)
+
     time_exported = datetime.now()
 
     logging.info('Counting documents...')
@@ -174,6 +177,8 @@ def main():
         logging.info(f'{len(document_ids)} were found in db')
     document_ids_to_process = retrieve_document_ids_to_process(args.collection, args.extraction_type,
                                                                document_id_filter=document_ids)
+    logging.info('Sorting document ids...')
+    document_ids_to_process = sorted(list(document_ids_to_process))
     num_of_chunks = int(len(document_ids_to_process) / args.batch_size) + 1
     logging.info(f'Splitting task into {num_of_chunks} chunks...')
     for idx, batch_ids in enumerate(chunks(list(document_ids_to_process), args.batch_size)):

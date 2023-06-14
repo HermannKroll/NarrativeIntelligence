@@ -6,6 +6,7 @@ import string
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
+from typing import Set
 
 import datrie
 
@@ -14,20 +15,20 @@ from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
-
-
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
-    VACCINE, DISEASE
+    VACCINE, DISEASE, TARGET, ORGANISM
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
+from narrant.vocabularies.organism_vocabulary import OrganismVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
+from narrant.vocabularies.target_vocabulary import TargetVocabulary
 from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
@@ -53,7 +54,10 @@ class EntityTagger:
         else:
             logging.info('Initialize EntityTagger...')
             self.term2entity = defaultdict(set)
+            self.known_terms = set()
             self.mesh_ontology = MeSHOntology.instance()
+            trans_map = {p: '' for p in string.punctuation}
+            self.__translator = str.maketrans(trans_map)
             if load_index:
                 self._load_index()
             EntityTagger.__instance = self
@@ -61,13 +65,7 @@ class EntityTagger:
     def _load_index(self, index_path=ENTITY_TAGGING_INDEX):
         logging.info(f'Loading entity tagging index from {index_path}')
         with open(index_path, 'rb') as f:
-            self.term2entity = pickle.load(f)
-
-        logging.info('Enhancing index...')
-        terms = set(self.term2entity)
-        for term in terms:
-            self.term2entity[term.replace('-', ' ')].update(self.term2entity[term])
-
+            self.known_terms, self.term2entity = pickle.load(f)
         logging.info(f'Index load ({len(self.term2entity)} different terms)')
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX):
@@ -75,14 +73,25 @@ class EntityTagger:
         self._create_reverse_index()
         logging.info(f'Storing index to {index_path}')
         with open(index_path, 'wb') as f:
-            pickle.dump(self.term2entity, f)
+            pickle.dump((self.known_terms, self.term2entity), f)
         logging.info('Index stored')
+
+    def __add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
+        term_lower = term.strip().lower()
+        self.known_terms.add(term_lower)
+
+        term_wo_punctuation = term_lower.translate(self.__translator).strip()
+        if entity_class:
+            self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type,
+                                                             entity_class=entity_class))
+        else:
+            self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type))
 
     def _create_reverse_index(self):
         self.term2entity = defaultdict(set)
         resolver = EntityResolver.instance()
         for e_term, e_id in resolver.species.get_reverse_index().items():
-            self.term2entity[e_term.strip().lower()].add(Entity(e_id, SPECIES))
+            self.__add_term(e_term, e_id, SPECIES)
 
         self._add_additional_diseases()
         self._add_gene_terms()
@@ -94,6 +103,9 @@ class EntityTagger:
         self._add_fid_dosageform_terms()
         self._add_vaccine_terms()
         self._add_plant_families()
+        # Targets are deactivated at the moment
+        # self._add_chembl_targets()
+        self._add_chembl_organisms()
         logging.info('{} different terms map to entities'.format(len(self.term2entity)))
 
     def _add_additional_diseases(self):
@@ -104,7 +116,7 @@ class EntityTagger:
 
         for term, ent_ids in dis_vocab.vocabularies[DISEASE].items():
             for ent_id in ent_ids:
-                self.term2entity[term.lower().strip()].add(Entity(ent_id, DISEASE))
+                self.__add_term(term, ent_id, DISEASE)
 
     def _add_gene_terms(self, gene_input=GENE_FILE):
         gene_ids_in_db = get_gene_ids(Session.get())
@@ -117,10 +129,10 @@ class EntityTagger:
                     gene_symbol = components[2].strip().lower()
                     synonyms = components[4]
                     description = components[8].strip().lower()
-                    self.term2entity[gene_symbol].add(Entity(gene_symbol, GENE))
-                    self.term2entity[description].add(Entity(gene_symbol, GENE))
+                    self.__add_term(gene_symbol, gene_symbol, GENE)
+                    self.__add_term(description, gene_symbol, GENE)
                     for synonym in synonyms.split('|'):
-                        self.term2entity[synonym.strip().lower()].add(Entity(gene_symbol, GENE))
+                        self.__add_term(synonym, gene_symbol, GENE)
         logging.info('Gene terms added')
 
     def _add_fid_dosageform_terms(self):
@@ -130,7 +142,7 @@ class EntityTagger:
         """
         for term, df_ids in DosageFormVocabulary.create_dosage_form_vocabulary(expand_by_s_and_e=False).items():
             for df_id in df_ids:
-                self.term2entity[term].add(Entity(df_id, DOSAGE_FORM))
+                self.__add_term(term, df_id, DOSAGE_FORM)
 
     def _add_vaccine_terms(self):
         """
@@ -139,7 +151,7 @@ class EntityTagger:
         """
         for term, vaccine_ids in VaccineVocabulary.create_vaccine_vocabulary(expand_by_s_and_e=False).items():
             for vaccine_id in vaccine_ids:
-                self.term2entity[term].add(Entity(vaccine_id, VACCINE))
+                self.__add_term(term, vaccine_id, VACCINE)
 
     def _add_excipient_terms(self):
         """
@@ -147,7 +159,7 @@ class EntityTagger:
         :return:
         """
         for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms=False):
-            self.term2entity[excipient_name.lower()].add(Entity(excipient_name.capitalize(), EXCIPIENT))
+            self.__add_term(excipient_name, excipient_name.capitalize(), EXCIPIENT)
 
     def _add_plant_families(self):
         """
@@ -155,7 +167,7 @@ class EntityTagger:
         :return:
         """
         for family_name in PlantFamilyGenusVocabulary.read_plant_family_genus_vocabulary(expand_terms=False):
-            self.term2entity[family_name.strip().lower()].add(Entity(family_name.capitalize(), PLANT_FAMILY_GENUS))
+            self.__add_term(family_name, family_name.capitalize(), PLANT_FAMILY_GENUS)
 
     def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
@@ -196,10 +208,9 @@ class EntityTagger:
                             sub_descs = mesh_trie.keys(tn.lower())
                             for mesh_term in mesh_terms:
                                 term = mesh_term.lower()
-                                self.term2entity[term].add(Entity(f'MESH:{mesh_id}', ent_type))
-                                self.term2entity[term].update([Entity(f'MESH:{s.split(":")[1]}', ent_type)
-                                                               for s in sub_descs if s != mesh_id])
-
+                                self.__add_term(term, f'MESH:{mesh_id}', ent_type)
+                                for sub_d in sub_descs:
+                                    self.__add_term(term, f'MESH:{sub_d.split(":")[1]}', ent_type)
                     except KeyError:
                         continue
             except KeyError:
@@ -212,7 +223,7 @@ class EntityTagger:
                                                                             expand_terms=False)
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
-                self.term2entity[term.lower()].add(Entity(chid, DRUG))
+                self.__add_term(term, chid, DRUG)
 
     def _add_chembl_atc_classes(self):
         """
@@ -223,23 +234,37 @@ class EntityTagger:
         atc_tree: ATCTree = ATCTree.instance()
         for atc_class_name, chembl_ids in atc_tree.atcclassname2chembl.items():
             for chid in chembl_ids:
-                self.term2entity[atc_class_name].add(Entity(chid, DRUG, entity_class=atc_class_name))
+                self.__add_term(atc_class_name, chid, DRUG, entity_class=atc_class_name)
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
         drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
-                self.term2entity[term.lower()].add(Entity(chid, CHEMICAL))
+                self.__add_term(term, chid, CHEMICAL)
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True):
-        """
-        Tags an entity by given a string
-        :param term: the entity term
-        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
-        :return: a list of entities (entity_id, entity_type)
-        """
-        t_low = term.lower().strip().replace('-', ' ')
+    def _add_chembl_targets(self):
+        logging.info('Adding ChEMBL targets...')
+        terms2id = TargetVocabulary.create_target_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self.__add_term(term, chid, TARGET)
+
+    def _add_chembl_organisms(self):
+        logging.info('Adding ChEMBL organism...')
+        terms2id = OrganismVocabulary.create_organism_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self.__add_term(term, chid, ORGANISM)
+
+    def __find_entities(self, term: str) -> Set[Entity]:
+        if term not in self.term2entity:
+            return set()
+        return self.term2entity[term]
+
+    def __tag_entity_recursive(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
+        # Lower, strip and remove all punctuation
+        t_low = term.lower().translate(self.__translator).strip()
         entities = set()
         if expand_search_by_prefix:
             if not self.autocompletion:
@@ -248,23 +273,28 @@ class EntityTagger:
             expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
             logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
             for term in expanded_terms:
-                entities.update(self.tag_entity(term, expand_search_by_prefix=False))
+                entities.update(self.__tag_entity_recursive(term, expand_search_by_prefix=False))
 
-        if not t_low:
-            raise KeyError('Does not know an entity for empty term: {}'.format(term))
         # check direct string
-        if t_low in self.term2entity:
-            entities.update(self.term2entity[t_low])
+        entities.update(self.__find_entities(t_low))
         # also add plural if possible
-        if t_low[-1] != 's' and f'{t_low}s' in self.term2entity:
-            entities.update(self.term2entity[f'{t_low}s'])
+        if t_low[-1] != 's':
+            entities.update(self.__find_entities(f'{t_low}s'))
         # check singular form
-        if t_low[-1] == 's' and t_low[:-1] in self.term2entity:
-            entities.update(self.term2entity[t_low[:-1]])
+        if t_low[-1] == 's':
+            entities.update(self.__find_entities(t_low[:-1]))
+        return entities
 
+    def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
+        """
+        Tags an entity by given a string
+        :param term: the entity term
+        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
+        :return: a list of entities (entity_id, entity_type)
+        """
+        entities = self.__tag_entity_recursive(term, expand_search_by_prefix=expand_search_by_prefix)
         if len(entities) == 0:
             raise KeyError('Does not know an entity for term: {}'.format(term))
-
         return entities
 
 

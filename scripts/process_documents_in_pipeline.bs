@@ -16,23 +16,17 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py 
 # Next, tag the documents with our PharmDictTagger
 python3 ~/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c $2 --skip-load --workers 15
 
+# Run GNormPlus
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/biomedical_entity_linking.py $1 -c $2 --skip-load --workers 3 --gnormplus
+
 # Execute Cleaning Rules for Tagging
 echo 'cleaning Tag table with hand-written rules'
-psql "host=127.0.0.1 port=5432 dbname=taggingdbtest user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
+psql "host=127.0.0.1 port=5432 dbname=cikm2023 user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
 
 # Perform pharmaceutical classification
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c $2 -r /home/kroll/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c $2 -r /home/kroll/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
 
-# Run GNormPlus
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $1 -c $2 --skip-load --workers 3 --gnormplus
-# Run TaggerOne
-python3 ~/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $1 -c $2 --skip-load --workers 2 --tagger-one
-
-
-# Execute Cleaning Rules for Tagging
-echo 'cleaning Tag table with hand-written rules'
-psql "host=127.0.0.1 port=5432 dbname=taggingdbtest user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
 
 # Do the statement extraction for all $2 documents via our Pipeline
 python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c $2 -et PathIE --workers 26 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
@@ -45,7 +39,7 @@ python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c
 
 # Execute Cleaning Rules for Predications
 echo 'cleaning predication table with hand-written rules'
-psql "host=127.0.0.1 port=5432 dbname=taggingdbtest user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
+psql "host=127.0.0.1 port=5432 dbname=cikm2023 user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
 
 
 python3 ~/NarrativeIntelligence/src/narraint/backend/export.py $3 --collection $2

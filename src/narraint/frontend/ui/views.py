@@ -10,38 +10,40 @@ from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
 
-import psycopg2
 import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
+from sqlalchemy.exc import OperationalError
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
 from narraint.backend.retrieve import retrieve_narrative_documents_from_database
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, BACKEND_CONFIG
+from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.frontend.entity.util import explain_concept_translation
+from narraint.frontend.filter.classification_filter import ClassificationFilter
+from narraint.frontend.filter.time_filter import TimeFilter
+from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
+from narraint.queryengine.log_statistics import create_dictionary_of_logs
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
 from narrant.entity.entityresolver import EntityResolver
-from narrant.preprocessing.enttypes import DRUG
-from narraint.queryengine.log_statistics import create_dictionary_of_logs, get_date_of_today
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
-                    level=logging.DEBUG)
-
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 DO_CACHING = True
 
@@ -73,51 +75,6 @@ class View:
             cls.translation = QueryTranslation()
 
         return cls._instance
-
-
-def get_chembl_indication(request):
-    if "drug" not in request.GET:
-        return JsonResponse(status=500, data=dict(answer="Drug parameter is missing"))
-
-    try:
-        drug_str = str(request.GET['drug']).strip().lower()
-
-        try:
-            drug_ids = View.instance().entity_tagger.tag_entity(drug_str)
-            drug_ids = list([e.entity_id for e in drug_ids if e.entity_type == DRUG])
-            if len(drug_ids) == 0:
-                return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
-            with open(BACKEND_CONFIG, 'rt') as f:
-                config = json.load(f)
-            connection = psycopg2.connect(user=config["POSTGRES_USER"],
-                                          password=config["POSTGRES_PW"],
-                                          host=config["POSTGRES_HOST"],
-                                          port=config["POSTGRES_PORT"],
-                                          database="chembldb")
-            cursor = connection.cursor()
-            # CHEMBL_QUERY = "select mesh_id, max_phase_for_ind from drug_indication where molregno in ((select molregno from molecule_synonyms where synonyms ilike 'Simvastatin') union (select molregno from molecule_dictionary where pref_name ilike 'Simvastatin'))"
-            if len(drug_ids) > 1:
-                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
-                                        (select molregno from molecule_dictionary where chembl_id in %(drugs)s)"
-            else:
-                query = "select mesh_id, max_phase_for_ind from drug_indication where molregno in \
-                                                        (select molregno from molecule_dictionary where chembl_id = %(drugs)s)"
-            cursor.execute(query, {"drugs": tuple(drug_ids)})
-            records = cursor.fetchall()
-
-            results = []
-            for row in records:
-                results.append(dict(mesh_id='MESH:' + row[0],
-                                    max_phase_for_ind=row[1]))
-            connection.close()
-            return JsonResponse(dict(results=results))
-
-        except KeyError:
-            return JsonResponse(status=500, data=dict(answer=f"No drug ids found for term: {drug_str}"))
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
-    return HttpResponse(status=500)
 
 
 def get_document_graph(request):
@@ -246,6 +203,12 @@ def get_term_to_entity(request):
         try:
             entities = View.instance().translation.convert_text_to_entity(term,
                                                                           expand_search_by_prefix=expand_by_prefix)
+            resolver = EntityResolver.instance()
+            for e in entities:
+                try:
+                    e.entity_name = resolver.get_name_for_var_ent_id(e.entity_id, e.entity_type)
+                except KeyError:
+                    e.entity_name = ""
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
@@ -397,6 +360,57 @@ def get_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
+def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collection: str):
+    """
+    Does the query sub count processing with caching if activated
+    :param graph_query: a graph query object
+    :param document_collection: the document collection
+    :return: a sub count list
+    """
+    aggregation_strategy = "overview"
+    cached_sub_count_list = None
+    if DO_CACHING:
+        try:
+            cached_sub_count_list = View.instance().cache.load_result_from_cache(document_collection, graph_query,
+                                                                                 aggregation_name=aggregation_strategy)
+            if cached_sub_count_list:
+                logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
+                return cached_sub_count_list, True
+            else:
+                cached_sub_count_list = None
+        except Exception:
+            logging.error('Cannot load query result from cache...')
+    if not cached_sub_count_list:
+        # run query
+        # compute the query
+        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+
+        # next get the aggregation by var names
+        substitution_aggregation = ResultTreeAggregationBySubstitution()
+        results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
+
+        # generate a list of [(ent_id, ent_name, doc_count), ...]
+        sub_count_list = list()
+        # go through all aggregated results
+        for aggregate in results_ranked.results:
+            var2sub = aggregate.var2substitution
+            # get the first substitution
+            var_name, sub = next(iter(var2sub.items()))
+            sub_count_list.append(dict(id=sub.entity_id,
+                                       name=sub.entity_name,
+                                       count=aggregate.get_result_size()))
+
+        if DO_CACHING:
+            try:
+                View.instance().cache.add_result_to_cache(document_collection, graph_query,
+                                                          sub_count_list,
+                                                          aggregation_name=aggregation_strategy)
+            except Exception:
+                logging.error('Cannot store query result to cache...')
+
+        return sub_count_list, False
+
+
 @gzip_page
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
@@ -417,23 +431,8 @@ def get_query_sub_count(request):
             return JsonResponse(status=500, data=dict(answer="query must have one variable"))
 
         time_start = datetime.now()
-        # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
-
-        # next get the aggregation by var names
-        substitution_aggregation = ResultTreeAggregationBySubstitution()
-        results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
-
-        # generate a list of [(ent_id, ent_name, doc_count), ...]
-        sub_count_list = list()
-        # go through all aggregated results
-        for aggregate in results_ranked.results:
-            var2sub = aggregate.var2substitution
-            # get the first substitution
-            var_name, sub = next(iter(var2sub.items()))
-            sub_count_list.append(dict(id=sub.entity_id,
-                                       name=sub.entity_name,
-                                       count=aggregate.get_result_size()))
+        # Get sub count list via caching
+        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collection)
 
         View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
                                                     time_needed=datetime.now() - time_start)
@@ -542,6 +541,34 @@ def get_query(request):
         else:
             year_sort_desc = True
 
+        year_start = None
+        if "year_start" in request.GET:
+            year_start = str(request.GET.get("year_start", "").strip())
+            try:
+                year_start = int(year_start)
+            except ValueError:
+                year_start = None
+
+        year_end = None
+        if "year_end" in request.GET:
+            year_end = str(request.GET.get("year_end", "").strip())
+            try:
+                year_end = int(year_end)
+            except ValueError:
+                year_end = None
+
+        title_filter = None
+        if "title_filter" in request.GET:
+            title_filter = str(request.GET.get("title_filter", "").strip())
+
+        classification_filter = None
+        if "classification_filter" in request.GET:
+            classification_filter = str(request.GET.get("classification_filter", "").strip())
+            if classification_filter:
+                classification_filter = classification_filter.split(';')
+            else:
+                classification_filter = None
+
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
         logging.info("Selected data source is {}".format(data_source))
@@ -550,6 +577,7 @@ def get_query(request):
         time_start = datetime.now()
         graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
             query)
+        year_aggregation = {}
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
@@ -576,6 +604,14 @@ def get_query(request):
             opt_query = QueryOptimizer.optimize_query(graph_query)
             View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
                                                          query, opt_query)
+
+            results = TitleFilter.filter_documents(results, title_filter)
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultTreeAggregationBySubstitution()
@@ -592,16 +628,18 @@ def get_query(request):
 
         View.instance().query_logger.write_api_call(True, "get_query", str(request),
                                                     time_needed=datetime.now() - time_start)
+
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
-                 query_translation=query_trans_string,
+                 query_translation=query_trans_string, year_aggregation=year_aggregation,
                  query_limit_hit="False"))
     except Exception:
         View.instance().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
+            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                 query_limit_hit="False"))
 
 
 # invokes Django to compress the results
@@ -612,21 +650,25 @@ def get_new_query(request):
     valid_query = False
     query_limit_hit = False
     query_trans_string = ""
-    if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
-        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
         View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
-        query = str(request.GET.get("query", "").strip())
+        logging.debug(request)
         data_source = str(request.GET.get("data_source", "").strip())
 
+        req_entities = []
         if "entities" in request.GET:
-            req_entities = str(request.GET.get("entities", "").strip()).split(";")
-        else:
-            req_entities = None
+            req_ent_str = str(request.GET.get("entities", "").strip())
+            if req_ent_str:
+                req_entities = req_ent_str.split(";")
+
+        req_terms = []
+        if "terms" in request.GET:
+            req_term_str = str(request.GET.get("terms", "").strip())
+            if req_term_str:
+                req_terms = req_term_str.split(";")
 
         if "outer_ranking" in request.GET:
             outer_ranking = str(request.GET.get("outer_ranking", "").strip())
@@ -669,24 +711,31 @@ def get_new_query(request):
             year_sort_desc = True
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
-        logging.info(f'Query string is: {query}')
+
         logging.info(f'Additional entities are {req_entities}')
+        logging.info(f'Additional terms are {req_terms}')
         logging.info("Selected data source is {}".format(data_source))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
+        year_aggregation = {}
+        graph_query = GraphQuery()
+        query = ""
+        if "query" in request.GET:
+            query = str(request.GET.get("query", "").strip())
+            logging.info(f'Query string is: {query}')
+            try:
+                graph_query, query_trans_string = View.instance().translation \
+                    .convert_query_text_to_fact_patterns(query)
+            except:
+                pass
 
-        graph_query, query_trans_string = View.instance().translation\
-            .convert_query_text_to_fact_patterns(query)
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
         elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
             query_trans_string = "Outer ranking strategy is unknown"
-            logger.error('parsing error')
-        elif not graph_query or len(graph_query.fact_patterns) == 0:
-            results_converted = []
             logger.error('parsing error')
         elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
                 graph_query) > 1:
@@ -695,15 +744,26 @@ def get_new_query(request):
             query_trans_string = "Do not support multiple variables in an ontology-based ranking"
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
+            if not graph_query:
+                graph_query = GraphQuery()
+
             # search for all documents containing all additional entities
-            if req_entities is not None:
-                for re in req_entities:
-                    try:
-                        entity_ids = View.instance().translation.convert_text_to_entity(re)
-                        graph_query.add_additional_entities(list(entity_ids))
-                    except ValueError:
-                        logging.debug(f'No conversion found for {re}')
-                        continue
+            for re in req_entities:
+                try:
+                    entities = View.instance().translation.convert_text_to_entity(re)
+                    should_add = True
+                    for e in entities:
+                        if e.entity_id.startswith('?'):
+                            logging.debug('Variable detected in entities - not supported at the moment (ignoring)')
+                            should_add = False
+                            break
+                    if should_add:
+                        graph_query.add_entity(list(entities))
+                except ValueError:
+                    logging.debug(f'No conversion found for {re}')
+
+            for term in req_terms:
+                graph_query.add_term(term)
 
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
@@ -711,10 +771,10 @@ def get_new_query(request):
 
             results, cache_hit, time_needed = \
                 do_query_processing_with_caching(graph_query, document_collection)
-            result_ids = {r.document_id for r in results}
-            opt_query = QueryOptimizer.optimize_query(graph_query)
-            View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                         query, opt_query)
+            #  result_ids = {r.document_id for r in results}
+            # opt_query = QueryOptimizer.optimize_query(graph_query)
+            #   View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+            #                                                query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
                 substitution_aggregation = ResultTreeAggregationBySubstitution()
@@ -729,14 +789,14 @@ def get_new_query(request):
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
 
-        View.instance().query_logger.write_api_call(True, "get_query", str(request),
+        View.instance().query_logger.write_api_call(True, "get_new_query", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
                  query_limit_hit="False"))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
@@ -923,13 +983,6 @@ def post_drug_ov_search_log(request):
     return HttpResponse(status=500)
 
 
-def get_logs_data(request):
-    try:
-        return JsonResponse(LogsView.data_dict)
-    except:
-        return HttpResponse(status=500)
-
-
 def post_drug_ov_subst_href_log(request):
     data = None  # init needed for second evaluation step
     try:
@@ -993,19 +1046,41 @@ def post_report(request):
 def get_keywords(request):
     if request.GET.keys() & {"substance_id"}:
         substance_id = request.GET.get("substance_id", "")
-        try:
-            session = SessionExtended.get()
-            query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
-            result = query.first()
+        if substance_id.strip():
+            try:
+                session = SessionExtended.get()
+                query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
+                try:
+                    result = query.first()
 
-            keywords = ""
-            if result:
-                keywords = ast.literal_eval(result[0])
-            return JsonResponse(dict(keywords=keywords))
+                    keywords = ""
+                    if result:
+                        keywords = ast.literal_eval(result[0])
+                except OperationalError:
+                    pass
 
-        except Exception:
-            logging.debug(f"Could not retrieve keywords for {substance_id}")
+                return JsonResponse(dict(keywords=keywords))
+
+            except Exception:
+                logging.debug(f"Could not retrieve keywords for {substance_id}")
     return HttpResponse(status=500)
+
+
+def get_explain_translation(request):
+    if "concept" in request.GET:
+        try:
+            concept = str(request.GET["concept"]).strip()
+            headings = explain_concept_translation(concept)
+            return JsonResponse(dict(headings=headings))
+        except KeyError:
+            return JsonResponse(dict(headings=["Not known yet"]))
+        except Exception:
+            View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    else:
+        View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+        return HttpResponse(status=500)
 
 
 class SearchView(TemplateView):
@@ -1037,21 +1112,35 @@ class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
 
 
+class TeamView(TemplateView):
+    template_name = "ui/team.html"
+
+
 class LogsView(TemplateView):
     template_name = "ui/logs.html"
     log_date = None
     data_dict = None
 
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(LogsView.template_name)
-        if not LogsView.log_date or LogsView.log_date != get_date_of_today() or not LogsView.data_dict:
+    @staticmethod
+    def recompute_logs_if_necessary():
+        if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds > 3600 or not LogsView.data_dict:
             try:
-                logger.debug("hi")
+                logger.debug("Computing logs")
                 LogsView.data_dict = create_dictionary_of_logs()
-                LogsView.log_date = get_date_of_today()
+                LogsView.log_date = datetime.now()
+                logger.debug("Logs computed")
             except:
                 traceback.print_exc(file=sys.stdout)
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(LogsView.template_name)
+        LogsView.recompute_logs_if_necessary()
         return super().get(request, *args, **kwargs)
+
+
+def get_logs_data(request):
+    LogsView.recompute_logs_if_necessary()
+    return JsonResponse(LogsView.data_dict)
 
 
 class StatsView(TemplateView):
@@ -1102,11 +1191,39 @@ class DrugOverviewIndexView(TemplateView):
     template_name = "ui/drug_overview_index.html"
 
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        return redirect("drug_overview")
 
 
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(DrugOverviewView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+class LongCovidView(TemplateView):
+    template_name = "ui/long_covid.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(LongCovidView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+class CovidView19(TemplateView):
+    template_name = "ui/covid19.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(CovidView19.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+class MECFSView(TemplateView):
+    template_name = "ui/mecfs.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(MECFSView.template_name)
+        return super().get(request, *args, **kwargs)
 
 
 # invokes Django to compress the results
@@ -1116,12 +1233,19 @@ def get_ps_query(request):
         query = request.GET["query"].strip()
         confidence = request.GET["confidence"]
         sources = request.GET["sources"]
+        if "statement" in request.GET:
+            statement = request.GET["statement"]
+        else:
+            statement = None
         try:
             confidence = float(confidence)
             logging.info('Received political sciences query...')
             logging.info(f'Search with conf. {confidence} for query: {query}')
+            if statement:
+                logging.info(f'Use statement "{statement}"')
             logging.info(f'Sources: {sources}')
-            nd_result = requests.get(f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}")
+            nd_result = requests.get(
+                f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}&statement={statement}")
             json_data = nd_result.json()
             if nd_result.status_code == 200:
                 return JsonResponse(status=200, data=json_data)
@@ -1135,7 +1259,46 @@ class PoliticalSciencesView(TemplateView):
     template_name = "ui/political_sciences.html"
 
     def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(PoliticalSciencesView.template_name)
         return super().get(request, *args, **kwargs)
+
+
+class KeywordSearchView(TemplateView):
+    template_name = "ui/keyword_search.html"
+
+
+def get_keyword_search_request(request):
+    if request.GET.keys() & {"keywords"}:
+        keywords = request.GET.get("keywords", "")
+        if keywords.strip():
+            try:
+                logging.debug('Generating graph queries for "{}"'.format(keywords))
+
+                nd_result = requests.get(
+                    f"http://127.0.0.1:5000//query?keywords={keywords}")
+                # return dict{terms: list[str], entities: list[str], statements: list[(str, str, str)]}
+                json_data = nd_result.json()
+                if nd_result.status_code == 200:
+                    return JsonResponse(status=200, data=dict(query_graphs=json_data))
+
+            except Exception:
+                logging.debug(f'Could generate graph queries for "{keywords}"')
+    return HttpResponse(status=500)
+
+
+class NewsView(TemplateView):
+    template_name = "ui/news.html"
+
+    def get(self, request, *args, **kwargs):
+        View.instance().query_logger.write_page_view_log(NewsView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+def get_news_data(request):
+    person = request.GET.get("person", "")
+    with open(os.path.join(RESOURCE_DIR, f"news/summarized_{person}.json")) as f:
+        data = json.load(f)
+    return JsonResponse(data=data)
 
 
 logging.info('Initialize view')

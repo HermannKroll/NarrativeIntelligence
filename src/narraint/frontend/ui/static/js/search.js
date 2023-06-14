@@ -1,4 +1,5 @@
 let latest_valid_query = '';
+let latest_query_translation = '';
 let DEFAULT_RESULT_DIVS_LIMIT = 500;
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
@@ -25,42 +26,42 @@ let CYTOSCAPE_STYLE = [
 
 // dictionary used to translate shortened urls into specific query links
 const short_urls = {
-    'q1':'&quot;post-acute COVID-19 syndrome&quot; associated Disease',
-    'q2':'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
-    'q3':'Drug treats Covid19',
-    'q4':'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
-    'q5':'Disease associated Covid19',
-    'q6':'Covid19 associated Target',
-    'q7':'Covid19 associated Human _AND_ Disease associated Human',
-    'q8':'Covid19 associated Vaccine',
-    'q9':'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
-    'q10':'&quot;Mass Spectrometry&quot; method Simvastatin',
-    'q11':'?X(Method) method Simvastatin',
-    'q12':'?X(LabMethod) method Simvastatin',
-    'q13':'Metformin treats &quot;Diabetes Mellitus&quot;',
-    'q14':'Simvastatin treats Hypercholesterolemia',
-    'q15':'Metformin treats ?X(Disease)',
-    'q16':'Metformin treats ?X(Species)',
-    'q17':'Vinca associated ?Y(Disease)',
-    'q18':'Digitalis associated ?Y(Disease)',
-    'q19':'?X(PlantFamily) associated ?Y(Disease)',
-    'q20':'Metformin administered ?X(DosageForm)',
-    'q21':'Metformin administered Injections',
-    'q22':'Lidocaine administered ?X(DosageForm)',
-    'q23':'?X(Drug) administered liposomes',
-    'q24':'?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
-    'q25':'Metformin inhibits mtor',
-    'q26':'Metformin inhibits ?X(Target)',
-    'q27':'?X(Drug) inhibits cyp3a4',
-    'q28':'cyp3a4 metabolises Simvastatin',
-    'q29':'Simvastatin induces Rhabdomyolysis',
-    'q30':'Simvastatin induces &quot;Muscular Diseases&quot;',
-    'q31':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
-    'q32':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
-    'q33':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
-    'q34':'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
-    'q35':'?Drug(Drug) treats ?Dis(Disease)',
-    'q36':'?Drug(Drug) administered ?Form(DosageForm)',
+    'q1': '&quot;post-acute COVID-19 syndrome&quot; associated Disease',
+    'q2': 'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
+    'q3': 'Drug treats Covid19',
+    'q4': 'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
+    'q5': 'Disease associated Covid19',
+    'q6': 'Covid19 associated Target',
+    'q7': 'Covid19 associated Human _AND_ Disease associated Human',
+    'q8': 'Covid19 associated Vaccine',
+    'q9': 'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
+    'q10': '&quot;Mass Spectrometry&quot; method Simvastatin',
+    'q11': '?X(Method) method Simvastatin',
+    'q12': '?X(LabMethod) method Simvastatin',
+    'q13': 'Metformin treats &quot;Diabetes Mellitus&quot;',
+    'q14': 'Simvastatin treats Hypercholesterolemia',
+    'q15': 'Metformin treats ?X(Disease)',
+    'q16': 'Metformin treats ?X(Species)',
+    'q17': 'Vinca associated ?Y(Disease)',
+    'q18': 'Digitalis associated ?Y(Disease)',
+    'q19': '?X(PlantFamily) associated ?Y(Disease)',
+    'q20': 'Metformin administered ?X(DosageForm)',
+    'q21': 'Metformin administered Injections',
+    'q22': 'Lidocaine administered ?X(DosageForm)',
+    'q23': '?X(Drug) administered liposomes',
+    'q24': '?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
+    'q25': 'Metformin inhibits mtor',
+    'q26': 'Metformin inhibits ?X(Target)',
+    'q27': '?X(Drug) inhibits cyp3a4',
+    'q28': 'cyp3a4 metabolises Simvastatin',
+    'q29': 'Simvastatin induces Rhabdomyolysis',
+    'q30': 'Simvastatin induces &quot;Muscular Diseases&quot;',
+    'q31': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
+    'q32': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
+    'q33': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
+    'q34': 'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
+    'q35': '?Drug(Drug) treats ?Dis(Disease)',
+    'q36': '?Drug(Drug) administered ?Form(DosageForm)',
 };
 
 function uuidv4() {
@@ -272,16 +273,16 @@ let optionMapping = {
 }
 
 function tryDecodeShortURL(query) {
-    if(query in short_urls) {
+    if (query in short_urls) {
         //Known query abbreviation. Decode html escape sequences.
-        lastQuery = $('<div>'+ short_urls[query] + '</div>').text();
+        lastQuery = $('<div>' + short_urls[query] + '</div>').text();
         return true;
     }
     return false;
 }
 
 function example_search(search_str) {
-    if(tryDecodeShortURL(search_str)) {
+    if (tryDecodeShortURL(search_str)) {
         search_str = lastQuery;
     }
 
@@ -464,6 +465,13 @@ $(document).on('keydown', function (e) {
 
 $(document).ready(function () {
 
+
+    $("#input_title_filter").on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            search(e);
+        }
+    });
+
     buildSelectionTrees();
 
     $("#search_form").submit(search);
@@ -561,6 +569,7 @@ function initFromURLQueryParams() {
             document.getElementById('radio_outer_ranking_b').checked = true;
         }
     }
+
     if (params.has("sort_frequency_desc")) {
         let sort_frequency = params.get("sort_frequency_desc");
         document.getElementById('select_sorting_freq').value = sort_frequency;
@@ -588,12 +597,24 @@ function initFromURLQueryParams() {
     if (params.has("start_pos")) {
         setCurrentPage(parseInt(params.get("start_pos")))
     }
-
+    if (params.has("year_start") && params.has("year_end")) {
+        document.querySelector('#fromSlider').value = params.get("year_start");
+        document.querySelector('#toSlider').value = params.get("year_end");
+    }
+    if (params.has("title_filter")) {
+        document.getElementById("input_title_filter").value = params.get("title_filter");
+    }
+    if (params.has("classification_filter")) {
+        document.getElementById("checkbox_classification").checked = true;
+    }
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
         example_search(query);
     }
+
+
+
 }
 
 let currentMaxPage = 0;
@@ -645,6 +666,7 @@ const search = (event) => {
     let start_pos = getStartPositionBasedOnCurrentPage();
     // consider start pos only if query isn't changed
     if (lastQuery !== query) {
+        document.getElementById("input_title_filter").value = "";
         start_pos = 0;
         setCurrentPage(0);
         lastQuery = query;
@@ -655,12 +677,24 @@ const search = (event) => {
     let freq_sort_desc = freq_element.value;
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
+    let use_classification = document.getElementById("checkbox_classification").checked;
 
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
+    let title_filter = document.getElementById("input_title_filter").value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
+
+    let fromSlider = document.querySelector("#fromSlider");
+    let toSlider = document.querySelector("#toSlider");
+    let year_start;
+    let year_end;
+    if (latest_query_translation === query) {
+        year_start = fromSlider.value;
+        year_end = toSlider.value;
+    }
+    let classification_filter = null;
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
@@ -670,16 +704,64 @@ const search = (event) => {
     console.log("Sorting by year (desc): " + year_sort_desc)
     console.log("Start position: " + start_pos)
     console.log("End position: " + end_pos)
+    console.log("Start year: " + year_start)
+    console.log("End year: " + year_end)
+    console.log("Title filter: " + title_filter)
+    console.log("Classification: " + use_classification)
     setButtonSearching(true);
 
     const url = new URL(window.location.href);
     url.searchParams.set('query', query);
     url.searchParams.set("data_source", data_source);
-    url.searchParams.set("visualization", outer_ranking);
-    url.searchParams.set("sort_frequency_desc", freq_sort_desc);
-    url.searchParams.set("sort_year_desc", year_sort_desc);
-    url.searchParams.set("start_pos", start_pos);
+    if (outer_ranking !== "outer_ranking_substitution") {
+        url.searchParams.set("visualization", outer_ranking);
+    } else {
+        url.searchParams.delete("visualization");
+    }
+
+    if (freq_sort_desc !== "True") {
+        url.searchParams.set("sort_frequency_desc", freq_sort_desc);
+    } else {
+        url.searchParams.delete("sort_frequency_desc");
+    }
+
+    if (year_sort_desc !== "True") {
+        url.searchParams.set("sort_year_desc", year_sort_desc);
+    } else {
+        url.searchParams.delete("sort_year_desc");
+    }
+
+    if (start_pos !== 0) {
+        url.searchParams.set("start_pos", start_pos);
+    } else {
+        url.searchParams.delete("start_pos");
+    }
+
     //   url.searchParams.set("end_pos", end_pos);
+    if (year_start !== undefined && year_start !== "undefined" && year_start !== fromSlider.min) {
+        url.searchParams.set("year_start", year_start);
+    } else {
+        url.searchParams.delete("year_start");
+    }
+    if (year_end !== undefined && year_end !== "undefined" && year_end !== toSlider.max) {
+        url.searchParams.set("year_end", year_end);
+    } else {
+        url.searchParams.delete("year_end");
+    }
+
+    if (title_filter.length > 0) {
+        url.searchParams.set("title_filter", title_filter);
+    } else {
+        url.searchParams.delete("title_filter");
+    }
+
+    if (use_classification) {
+        url.searchParams.set("classification_filter", "PharmaceuticalTechnology");
+        classification_filter = "PharmaceuticalTechnology";
+    } else {
+        url.searchParams.delete("classification_filter");
+    }
+
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 
     let request = $.ajax({
@@ -692,6 +774,10 @@ const search = (event) => {
             year_sort: year_sort_desc,
             start_pos: start_pos,
             end_pos: end_pos,
+            year_start: year_start,
+            year_end: year_end,
+            title_filter: title_filter,
+            classification_filter: classification_filter
             /*,
             inner_ranking: inner_ranking*/
         }
@@ -745,6 +831,9 @@ const search = (event) => {
                 document_header_appendix = " (Truncated)"
             }
             if (result_size !== 0) {
+                document.getElementById("input_title_filter").style.display = "block";
+                document.getElementById("input_title_filter_label").style.display = "block";
+
                 documents_header.html(result_size + " Documents" + document_header_appendix)
                 // scroll to results
                 document.getElementById("resultdiv").scrollIntoView();
@@ -759,10 +848,78 @@ const search = (event) => {
                     $('#modal_empty_result').modal("toggle");
                 }
             }
+            let year_aggregation = response["year_aggregation"];
+
+            let year_filter_container = document.querySelector(".year_filter");
+            if (JSON.stringify(year_aggregation) !== '{}') {
+                year_filter_container.style.display = "block";
+            } else {
+                year_filter_container.style.display = "none";
+            }
+            const fromSlider = document.querySelector('#fromSlider');
+            const toSlider = document.querySelector('#toSlider');
+            let xValues = new Array();
+            let yValues = new Array();
+            for (const year in year_aggregation) {
+                xValues.push(year);
+                yValues.push(year_aggregation[year]);
+            }
+            if (latest_query_translation != query_trans_string.split("----->")[0].trim()) {
+
+                initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+                initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+
+            }
+            latest_query_translation = query_trans_string.split("----->")[0].trim();
+            fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+            setToggleAccessible(toSlider, toSlider.min);
+            setValue(toSlider, 'rangeTo');
+            setValue(fromSlider, 'rangeFrom');
+            let chart = document.getElementById("myChart");
+            if (chart != undefined) {
+                let slider_control = document.querySelector(".sliders_control");
+                let chart_container = document.querySelector(".range_container")
+                chart.remove();
+                const new_chart = document.createElement("canvas");
+                new_chart.id = "myChart";
+                //chart_container.append(new_chart);
+                chart_container.insertBefore(new_chart, slider_control);
+            }
+            let barChart = new Chart("myChart", {
+                type: "bar",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: [],
+                        data: yValues,
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            display: false
+                            //gridLines: {
+                            //  display:false
+                            //}
+                        }],
+                        yAxes: [{
+                            display: false //this will remove all the x-axis grid lines
+                        }]
+                    },
+                    legend: {display: false},
+                }
+            });
+            updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+            fromSlider.oninput = () => controlFromSlider(barChart, fromSlider, toSlider);
+            toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
+            fromSlider.onchange = () => refreshSearch();
+            toSlider.onchange = () => refreshSearch();
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
             document.getElementById("div_input_page").style.display = "none";
+            document.getElementById("input_title_filter").style.display = "none";
+            document.getElementById("input_title_filter_label").style.display = "none";
             let query_trans_string = response["query_translation"];
             console.log('translation error:' + query_trans_string)
             $('#alert_translation').text(query_trans_string);
@@ -1038,7 +1195,9 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
         'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
 
-    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection)})
+    divDoc_DocumentGraph.click(() => {
+        showPaperView(art_doc_id, collection)
+    })
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
@@ -1234,7 +1393,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divH2.append(btn)
 
     //check if an url is used
-    if(url_str) {
+    if (url_str) {
         const link = ('<a class="subgroupLinkImg" href=' + url_str + ' target="_blank"' +
             ' onclick="event.stopPropagation()">' +
             '<img height="18px" src=' + search_icon_url + '></a>')
@@ -1455,11 +1614,14 @@ function getVariableData() {
         ['DosageForm', "dosage form/delivery form, e.g. tablet or injection"],
         ['Drug', "active ingredients, e.g. Metformin or Simvastatin"],
         ['Excipient', "transport/carrier substances, e.g. methyl cellulose"],
+        ['HealthStatus', "information about target groups, e.g. women, man, children, etc."],
         ['LabMethod', "more specific labor methods, e.g. mass spectrometry"],
         ['Method', "common applied methods"],
-        ['PlantFamily', "plant families, e.g. Digitalis, Cannabis"],
-        ['Species', "target groups, e.g. human, rats, etc."],
-        ['Target', "gene/enzyme, e.g. cyp3a4, mtor"],
+        ['PlantFamily/Genus', "plant families, e.g. Digitalis, Cannabis"],
+        ["Organism", "organisms, e.g. bacterias and viruses"],
+        ['Species', "target groups, e.g. human and rats"],
+        ['Target', "gene/enzyme, e.g. cyp3a4 and mtor"],
+        ['Tissue', "tissues, e.g. muscle and membranes"],
         ["Vaccine", "used vaccines"]
     ];
 
@@ -1483,3 +1645,140 @@ function getVariableData() {
 function buildSelectionTrees() {
     queryAndBuildConceptTree();
 }
+
+function controlFromSlider(barChart, fromSlider, toSlider) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+    if (from > to) {
+        fromSlider.value = to;
+    }
+    updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+    setValue(fromSlider, 'rangeFrom');
+}
+
+function controlToSlider(barChart, fromSlider, toSlider) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+    setToggleAccessible(toSlider, toSlider.min);
+    if (from >= to) {
+        toSlider.zIndex = 1;
+        fromSlider.zIndex = 0;
+    } else {
+        toSlider.zIndex = 0;
+        fromSlider.zIndex = 1;
+    }
+    if (from <= to) {
+        toSlider.value = to;
+    } else {
+        toSlider.value = from;
+    }
+    updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+    setValue(toSlider, 'rangeTo');
+}
+
+function setValue(range, rangeValue) {
+    let rangeV = document.getElementById(rangeValue);
+    const newValue = Number((range.value - range.min) * 100 / (range.max - range.min));
+    const newPosition = 10 - (newValue * 0.2);
+    rangeV.innerHTML = `<span>${range.value}</span>`;
+    rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
+}
+
+function getParsed(currentFrom, currentTo) {
+    const from = parseInt(currentFrom.value, 10);
+    const to = parseInt(currentTo.value, 10);
+    return [from, to];
+}
+
+function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
+    const rangeDistance = to.max - to.min;
+    const fromPosition = from.value - to.min;
+    const toPosition = to.value - to.min;
+    controlSlider.style.background = `linear-gradient(
+      to right,
+      ${sliderColor} 0%,
+      ${sliderColor} ${(fromPosition) / (rangeDistance) * 100}%,
+      ${rangeColor} ${((fromPosition) / (rangeDistance)) * 100}%,
+      ${rangeColor} ${(toPosition) / (rangeDistance) * 100}%, 
+      ${sliderColor} ${(toPosition) / (rangeDistance) * 100}%, 
+      ${sliderColor} 100%)`;
+}
+
+function setToggleAccessible(currentTarget, min) { //in case toSlider and fromSilder on 0 --> tSlider needs to Overlap fromSlider
+    const toSlider = document.querySelector('#toSlider');
+    if (Number(currentTarget.value) <= Number(min)) {
+        toSlider.style.zIndex = 2;
+    } else {
+        toSlider.style.zIndex = 0;
+    }
+}
+
+function updateBarChart(barChart, fromSlider, from, to) {
+    //const barChart = document.querySelector('#myChart');
+    for (let i = 0; i <= parseInt(fromSlider.max, 10) - parseInt(fromSlider.min, 10); i++) {
+        if (i >= from - parseInt(fromSlider.min, 10) && i <= to - parseInt(fromSlider.min, 10)) {
+            barChart.data.datasets[0].backgroundColor[i] = "#0d6def";
+        } else {
+            barChart.data.datasets[0].backgroundColor[i] = "#C6C6C6";
+        }
+    }
+    barChart.update();
+}
+
+function initializeValues(slider, value, min, max) {
+    slider.max = max;
+    slider.min = min;
+    slider.value = value;
+}
+
+function getSynonyms(element_id, ev) {
+    let concept = getTextOrPlaceholderFromElement(element_id);
+    if (concept !== "") {
+        let request = $.ajax({
+            url: explain_translation_url,
+            data: {
+                concept: concept,
+            }
+        });
+        request.done(function (response) {
+            tt.classList.remove('d-none');
+            tt.innerHTML = response['headings'].join('<br>'); // anzuzeigender String (auch HTML styled möglich)
+            // horizontales Offset
+            tt.style.top = ev.pageY + "px";
+            // vertikales Offset (habe es noch nicht geschafft, dass das Fenster tatsächlich rechts oberhalb vom Zeiger angezeigt wird :/ ))
+            tt.style.left = (ev.pageX + 10) + "px";
+        });
+    }
+}
+
+const tt = document.getElementById('tooltip');
+
+let sub = document.querySelector('#input_subject');
+sub.onmouseenter = (ev) => {
+    getSynonyms('input_subject', ev);
+};
+
+sub.onmousemove = (ev) => {
+    tt.style.top = ev.pageY + "px";
+    tt.style.left = (ev.pageX + 10) + "px";
+};
+
+sub.onmouseleave = () => {
+    tt.classList.add('d-none');
+};
+
+let obj = document.querySelector('#input_object');
+obj.onmouseenter = (ev) => {
+    getSynonyms('input_object', ev);
+};
+
+obj.onmousemove = (ev) => {
+    tt.style.top = ev.pageY + "px";
+    tt.style.left = (ev.pageX + 10) + "px";
+};
+
+obj.onmouseleave = () => {
+    tt.classList.add('d-none');
+};
+
+

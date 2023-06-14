@@ -1,0 +1,42 @@
+#!/bin/bash
+
+ZBMED_JSON="/ssd2/datasets/zbmed/zbmed_updates.json"
+# Default : START_CRAWL_DATA="2019-12-01"
+START_CRAWL_DATA="2021-12-01"
+STOP_CRAWL_DATA="2021-12-05"
+ZBMED_PUBTATOR="/ssd2/datasets/zbmed/zbmed.json"
+UPDATED_IDS="/ssd2/datasets/zbmed/updated_ids.txt"
+
+TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
+
+
+## Load everything
+# curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":70000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2019-12-01||/M"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' >  $ZBMED_JSON
+
+# First curl the updates since 01.01.2023
+curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":70000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2023-01-01||/M"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' > $ZBMED_JSON
+
+# Load everything
+python3 ~/NarrativeIntelligence/src/narraint/backend/load_zbmed_json.py $ZBMED_JSON -c ZBMed
+
+# Next, tag the documents with our PharmDictTagger
+python3 ~/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c ZBMed --skip-load --workers 32
+
+# Execute Cleaning Rules for Tagging
+# echo 'cleaning Tag table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie2023 user=tagginguser password=u3j4io1234u8-13!14" -f $TAG_CLEANING_SQL
+
+# Perform classification
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/pharmaceutical_classification_rules.txt --cls Pharmaceutical -w 15 --skip-load
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py -c ZBMed -r /home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
+python3 ~/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/classification/apply_svm.py -c ZBMed /home/kroll/pharmaceutical_technology_articles_svm.pkl --cls PharmaceuticalTechnology --workers 32
+
+# Export the document content
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/export.py -d $ZBMED_PUBTATOR --collection ZBMed --format json
+
+# Run GNormPlus
+python3 ~/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/preprocessing/preprocess.py $ZBMED_PUBTATOR -c ZBMed --skip-load --workers 5 --gnormplus
+
+# Do the statement extraction for all ZBMed documents via our Pipeline
+python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 32 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
+

@@ -7,10 +7,11 @@ VACUUM FULL public.document_translation;
 VACUUM FULL public.document_metadata;
 VACUUM FULL public.document_metadata_service;
 VACUUM FULL public.predication;
-VACUUM FULL public.predication_inverted_index;
 VACUUM FULL public.predication_rating;
 VACUUM FULL public.predication_to_delete;
 VACUUM FULL public.sentence;
 VACUUM FULL public.doc_processed_by_ie;
+VACUUM FULL public.predication_inverted_index;
 VACUUM FULL public.tag_inverted_index;
+VACUUM FULL public.term_inverted_index;
 

@@ -1,23 +1,17 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Narrative Service</title>
-    <link rel="stylesheet" href="{% static 'css/drugOverviewStyle.css' %}">
-</head>
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
+{% endblock %}
 
-<body>
-    <div class="topbar">
-        <div id="impressum"><a href="https://blogs.tu-braunschweig.de/pubpharm/impressum/" target="_blank" >Impressum</a></div>
-        <a href="https://www.pubpharm.de" style="margin: 0 1% 0 auto" target="_blank"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo" target="_blank"></a>
-        <a href="http://www.ifis.cs.tu-bs.de/" style="margin-right: 1%" target="_blank"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"></a>
-    </div>
+{% block title %}
+Narrative Service
+{% endblock %}
 
-    <div class="content main_page">
+{% block content %}
+
+    <div class="main_page">
         <h1>Drug Overviews</h1>
         <div class="searchbar">
             <input type="text" id='drugInput' placeholder="Search for Drug...">
@@ -42,17 +36,19 @@
             </div>
         </div>
     </noscript>
-    
+{% endblock %}
+
+{% block javascript %}
     <script>
-        const autocompletion_url = "{% url 'autocompletion' %}";
-        const drugOverview_url = "{% url 'drug_overview' %}";
-        function searchDrug() {
-            var keyword = document.getElementById('drugInput').value;
-            if (keyword == "") {
-                return;
-            }
-            window.location = drugOverview_url + "?drug=" + keyword;
-        }
+    const autocompletion_url = "{% url 'autocompletion' %}";
+    const drugOverview_url = "{% url 'drug_overview' %}";
+    function searchDrug() {
+    var keyword = document.getElementById('drugInput').value;
+    if (keyword == "") {
+    return;
+    }
+    window.location = drugOverview_url + "?drug=" + keyword;
+    }
     </script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=4" type="text/javascript"></script>
-</body>
+{% endblock %}

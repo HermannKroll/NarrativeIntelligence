@@ -1,11 +1,12 @@
 import argparse
 import logging
 
-from kgextractiontoolbox.backend.database import Session
+from sqlalchemy import delete
+
 from kgextractiontoolbox.backend.delete_collection import delete_document_collection_from_database
 from kgextractiontoolbox.backend.models import Document
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import DocumentMetadata, TagInvertedIndex, DocumentMetadataService
+from narraint.backend.models import DocumentMetadata, TagInvertedIndex, DocumentMetadataService, TermInvertedIndex
 
 
 def delete_document_collection_from_database_enhanced(document_collection: str):
@@ -13,14 +14,17 @@ def delete_document_collection_from_database_enhanced(document_collection: str):
     session = SessionExtended.get()
 
     logging.info('Deleting document_metadata_service entries...')
-    session.query(DocumentMetadataService).filter(
-        DocumentMetadataService.document_collection == document_collection).delete()
+    session.execute(
+        delete(DocumentMetadataService).where(DocumentMetadataService.document_collection == document_collection))
 
     logging.info('Deleting document_metadata entries...')
-    session.query(DocumentMetadata).filter(DocumentMetadata.document_collection == document_collection).delete()
+    session.execute(delete(DocumentMetadata).where(DocumentMetadata.document_collection == document_collection))
 
     logging.info('Deleting tag_inverted_index entries...')
-    session.query(TagInvertedIndex).filter(TagInvertedIndex.document_collection == document_collection).delete()
+    session.execute(delete(TagInvertedIndex).where(TagInvertedIndex.document_collection == document_collection))
+
+    logging.info('Deleting term_inverted_index entries...')
+    session.execute(delete(TermInvertedIndex).where(TermInvertedIndex.document_collection == document_collection))
 
     logging.info('Begin commit...')
     session.commit()
@@ -41,7 +45,7 @@ def main():
 
     collection = args.collection
     logging.info('Counting documents for collection: {}'.format(collection))
-    session = Session.get()
+    session = SessionExtended.get()
     doc_count = session.query(Document.id.distinct()).filter(Document.collection == collection).count()
     logging.info('{} documents found'.format(doc_count))
     answer = None

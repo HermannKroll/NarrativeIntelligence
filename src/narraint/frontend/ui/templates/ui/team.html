@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/team.css' %}">
+{% endblock %}
+
+{% block title %}Team{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    <div class="container margin-top">
+        <div class="row">
+            <div class="accordion">
+                <div class="card mb-3">
+                    <div class="card-header text-center">
+                        <h2 class="mb-0 title_con">Team and Collaborators</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Hermann Kroll <br>
+                        PROJECT MANAGER <br>
+                        <a class="mail" href="mailto:kroll@ifis.cs.tu-bs.de">kroll@ifis.cs.tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Johannes Ruthmann <br>
+                        RESEARCH ASSISTANT <br>
+                        <a class="mail" href="mailto:kroll@ifis.cs.tu-bs.de">kroll@ifis.cs.tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Morris Kunz <br>
+                        RESEARCH ASSISTANT <br>
+                        <a class="mail" href="mailto:kroll@ifis.cs.tu-bs.de">kroll@ifis.cs.tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Pascal Sackhoff <br>
+                        RESEARCH ASSISTANT <br>
+                        <a class="mail" href="mailto:p.sackhoff@tu-bs.de">p.sackhoff@tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Bill Matthias Thang <br>
+                        RESEARCH ASSISTANT <br>
+                        <a class="mail" href="mailto:m.thang@tu-bs.de">m.thang@tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Stefan Wulle <br>
+                        PHARMACIST <br>
+                        <a class="mail" href="mailto:kroll@ifis.cs.tu-bs.de">kroll@ifis.cs.tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="img_container">
+                <img class="image" src="../../static/assets/team/img_avatar.png" alt="Avatar">
+                <div class="overlay">
+                    <div class="text">
+                        Christina Draheim <br>
+                        PHARMACIST <br>
+                        <a class="mail" href="mailto:kroll@ifis.cs.tu-bs.de">kroll@ifis.cs.tu-bs.de</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -6,18 +6,22 @@ const typeColorMap = {
     "LabMethod": "#9eb8ff",
     "Chemical": "#fff38c",
     "Gene": "#87e7ff",
+    "Target": "#1fe7ff",
     "Method": "#7897ff",
     "DosageForm": "#9189ff",
     "Mutation": "#8cffa9",
     "ProteinMutation": "#b9ffcb",
     "DNAMutation": "#4aff78",
     "Variant": "#ffa981",
-    "CellLine": "#729e64",
+    "CellLine": "#00bc0f",
     "SNP": "#fd83ca",
     "DomainMotif": "#f383fd",
     "Plant": "#dcfd83",
     "Strain": "#75c4c7",
-    "Vaccine": "#c7767d"
+    "Vaccine": "#c7767d",
+    "HealthStatus": "#bbaabb",
+    "Organism": "#00bc0f",
+    "Tissue": "#dc8cff"
 }
 
 
@@ -26,6 +30,7 @@ var tagsArray = null;
 var activeTypeMap = null;
 var document_graph = null;
 let documentCollection = null;
+let papernetwork = null;
 
 function queryGraph(document_id) {
     const query = url_document_graph + "?document=" + document_id + "&data_source=" + documentCollection;
@@ -50,7 +55,7 @@ function queryAndFilterPaperDetail(document_id, document_collection) {
     ], function (err, result) {
         fillPaperDetail(result[0].results[0]);
 
-        document.getElementById("newsPopup").style.display = "flex";
+        document.getElementById("newsPopup").style.setProperty("display", "flex", "important");
         document.body.style.overflowY = "hidden";
     });
 
@@ -350,7 +355,7 @@ function visualize_document_graph(container) {
     };
 
     // initialize your network!
-    var network = new vis.Network(container, data, options);
+    papernetwork = new vis.Network(container, data, options);
     /* this would stop the physics engine once and for all, so dragging only drags one node aswell
     network.on("stabilizationIterationsDone", function () {
         network.setOptions( { physics: false } );
@@ -358,3 +363,35 @@ function visualize_document_graph(container) {
     */
 }
 
+function toggleFullscreenNetworkGraph(prefix, closeOnly=false) {
+    const networkDiv = document.getElementById(`${prefix}Container`);
+    if (!networkDiv)
+        return;
+
+    if (document.fullscreenElement?.id !== `${prefix}Container` && !closeOnly) {
+        const reqFullscreen = networkDiv.requestFullscreen || networkDiv.webkitRequestFullScreen || networkDiv.msRequestFullScreen;
+        reqFullscreen.call(networkDiv)
+            .then(() => {
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Close";
+                currentFullscreenPrefix = prefix;
+            })
+            .catch((e) => console.log(e));
+    } else if (document.fullscreenElement?.id === `${prefix}Container` || closeOnly) {
+        const closeFullScreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        closeFullScreen.call(document)
+            .catch((e) => {}/* potential TypeError: Not in fullscreen mode */)
+            .finally(() => {
+                // use finally to close the fullscreen even if the user closed the
+                // fullscreen mode by clicking F11 earlier
+                document.getElementById(`${prefix}Fullscreen`).innerText = "Fullscreen";
+                currentFullscreenPrefix = null;
+            });
+    }
+    setTimeout(centerNetwork, 250, (prefix === "drugNetwork")? network: papernetwork);
+}
+
+function centerNetwork(network) {
+    network.fit({
+        animation: true
+    })
+}

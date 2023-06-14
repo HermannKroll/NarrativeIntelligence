@@ -3,8 +3,9 @@ from django.urls import path
 from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_query, post_feedback, \
     post_report, get_provenance, get_document_graph, get_tree_info, get_query_sub_count, post_document_link_clicked, \
     get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity, \
-    get_chembl_indication, get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
-    post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, get_ps_query, get_keywords, get_logs_data, get_new_query
+    get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
+    post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, get_ps_query, \
+    get_keywords, get_logs_data, get_new_query, get_keyword_search_request, get_explain_translation, get_news_data
 
 urlpatterns = [
     path("query", get_query, name="query"),
@@ -23,13 +24,15 @@ urlpatterns = [
     path("query_narrative_documents", get_query_narrative_documents, name="query_narrative_documents"),
     path("narrative_documents", get_narrative_documents, name="narrative_documents"),
     path("document_ids_for_entity", get_document_ids_for_entity, name="document_ids_for_entity"),
-    path("chembl_indication", get_chembl_indication, name="chembl_indication"),
-    path("query_document_ids", get_query_document_ids,  name="query_document_ids"),
+    path("query_document_ids", get_query_document_ids, name="query_document_ids"),
     path("paper_view_log", post_paper_view_log, name="paper_view_log"),
     path("drug_search_log", post_drug_ov_search_log, name="drug_search_log"),
     path("drug_substance_forward_log", post_drug_ov_subst_href_log, name="drug_substance_forward_log"),
     path("drug_chembl_phase_log", post_drug_ov_chembl_phase_href_log, name="drug_chembl_phase_log"),
     path("keywords", get_keywords, name="keywords"),
     path("ps_query", get_ps_query, name="ps_query"),
-    path("logs_data", get_logs_data, name="logs_data")
+    path("logs_data", get_logs_data, name="logs_data"),
+    path("keyword_search_request", get_keyword_search_request, name="keyword_search_request"),
+    path("explain_translation", get_explain_translation, name="explain_translation"),
+    path("get_news_data", get_news_data, name="get_news_data")
 ]

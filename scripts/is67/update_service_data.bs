@@ -1,0 +1,54 @@
+#!/bin/bash
+ROOT_DIR="/data/pubmed/"
+VACUUM_SQL="/home/kroll/NarrativeIntelligence/sql/vacuum_db.sql"
+MEDLINE_BASELINE="/ssd2/datasets/pubmed_medline/2022/"
+MEDLINE_UPDATES="/ssd2/datasets/pubmed_medline/2023_updates/"
+PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
+PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/NarrativeIntelligence/scripts/highest_predication_id.txt"
+PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
+
+echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
+
+cd $ROOT_DIR
+mkdir $MEDLINE_BASELINE
+mkdir $MEDLINE_UPDATES
+
+# Load the Metadata
+# Donwload the latest medline via
+# wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/ -P $MEDLINE_BASELINE
+# Download the latest updates via
+# wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
+
+# Load Updates
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
+# Load Baseline
+# python3 ~/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
+
+
+# Do the canonicalizing step
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+
+# Apply the rules
+# python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+
+# Execute Cleaning Rules for Predications
+# echo 'cleaning predication table with hand-written rules'
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie2023 user=tagginguser password=u3j4io1234u8-13!14" -f $PREDICATION_CLEANING_SQL
+
+
+# Finally compute the new metadata service table2
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+
+# Compute reverse indexes
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_term.py
+
+# Finally vacuum all tables
+# Execute Cleaning Rules for Tagging
+# echo 'vacuum db tables...'
+# psql "host=127.0.0.1 port=5432 dbname=fidpharmazie2023 user=tagginguser password=u3j4io1234u8-13!14" -f $VACUUM_SQL
+
+
+# Export the highest known id
+python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE

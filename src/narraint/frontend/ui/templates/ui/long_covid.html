@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}">
+{% endblock %}
+
+{% block title %}Narrative Service{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+
+    <div class="d-flex flex-row overflow-scroll">
+        <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
+            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm"
+                 onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="background-color: lightgrey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85">
+                    Drug
+                </div>
+            </div>
+
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm"
+                 onclick="scrollToElement('drugNetworkOverview')" style="background-color: darkgrey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85">
+                    DTD Network
+                </div>
+            </div>
+
+            <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="scrollToElement('KeywordCloud')"
+                 style="background-color: grey">
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85">
+                    Keywords
+                </div>
+            </div>
+
+            <div class="" id="sidebar_entries"></div>
+
+            <div class="row rounded border mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm"
+                 onclick="scrollToElement('RecentPapers')">
+                <div class="col-8 text-nowrap text-truncate overflow-hidden text-nowrap fs-0-85">
+                    Recent Papers
+                </div>
+                <span class="badge rounded-pill bg-transparent text-dark w-auto fs-0-75" id="linkRecentPapers"></span>
+            </div>
+        </div>
+
+        <!-- Main page -->
+        <div class="container-xl col-12 col-lg-10 px-2 px-sm-0 px-lg-5 mb-5 ms-lg-0 mx-xxl-auto wide-size-content">
+            <!-- Content -->
+            <div class="row">
+                <div class="container" id="drugContent">
+                    <h2 id="name" class="fw-bolder" style="text-align: center">Long COVID Overview
+                       <a href="https://youtu.be/ZOOf_07BXI8" target="_blank" class="w-auto">
+                                <img src="{% static 'icons/help.png' %}" height="40px">
+                          </a>
+                    </h2>
+                    <p class="d-flex justify-content-center">
+                        <a>Click here for the:&nbsp</a>
+                        <a href="/covid19" target="_blank" class="w-auto">
+                              COVID 19 Overview
+                        </a>
+                       <a>&nbspor&nbsp</a>
+                         <a href="/mecfs" target="_blank" class="w-auto">
+                               ME/CFS Overview
+                        </a>
+                    </p>
+
+                    <!-- drug-target-disease-network -->
+                    <div class="container border rounded bg-dark-grey mt-4" id="drugNetworkOverview">
+                        <div class="row border-bottom border-dark px-1 pt-1 flex-row">
+                            <h5 class="gx-0 fw-bolder mt-1 w-auto">Drug-Target-Disease Network</h5>
+                            <a href="https://youtu.be/iLMelMXAXFw" target="_blank" class="w-auto">
+                                <img src="{% static 'icons/help.png' %}" height="40px">
+                            </a>
+                        </div>
+                        <div class="row vh-90-sm vh-fc bg-dark-grey" id="drugNetworkContainer">
+                            <div class="d-flex flex-row g-0 p-1 h-fc mx-auto ms-sm-0 w-fc mt-auto">
+                                <div class="bg-drug rounded p-1 d-flex me-1 align-items-center">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap"
+                                           id="drugNetworkCheckboxDrug" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxDrug">Drug</label>
+                                </div>
+                                <div class="bg-target rounded p-1 d-flex me-1 d-flex align-items-center">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap"
+                                           id="drugNetworkCheckboxTarget" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxTarget">Target</label>
+                                </div>
+                                <div class="bg-disease rounded p-1 d-flex me-1 d-flex align-items-center me-1">
+                                    <input type="checkbox" class="mx-1 form-check-input-wrap"
+                                           id="drugNetworkCheckboxDisease" onchange="updateNetworkGraph()" checked>
+                                    <label class="" for="drugNetworkCheckboxDisease">Disease</label>
+                                </div>
+                            </div>
+                            <div class="row p-0 g-0 h-graph align-items-center" id="drugNetworkLoading">
+                                <div class="spinner-border mx-auto my-auto" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="row p-0 g-0 bg-light-grey h-graph dp-none" id="drugNetworkContent"></div>
+                            <div class="input-group mx-auto mb-auto me-sm-0 w-auto p-1 h-fc">
+                                <span class="input-group-text ml-auto" id="drugNetworkAmount">Top 6</span>
+                                <div class="input-group-text">
+                                    <input type="range" class="form-range mx-0 mx-sm-0" id="drugNetworkSlider" min="5"
+                                           max="20" value="6" step="1" oninput="updateNetworkGraph()">
+                                </div>
+                                <button class="btn btn-secondary" onclick="centerNetwork(network)">
+                                    Center
+                                </button>
+                                <button class="btn btn-secondary d-flex align-items-center"
+                                        onclick="toggleFullscreenNetworkGraph('drugNetwork')">
+                                    <svg class="me-1" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                              d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                                    </svg>
+                                    <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container border rounded bg-dark-grey mt-4" id="KeywordCloud">
+                        <div class="row border-bottom border-dark px-1 pt-1 mb-1">
+                            <h5 class="col-12 mt-1 fw-bolder gx-0">Keyword Cloud</h5>
+                        </div>
+                        <div class="row my-5 align-items-center" id="wordCloudLoading">
+                            <div class="spinner-border mx-auto my-auto" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <ul class="cloud" id="wordCloudContent"></ul>
+                    </div>
+
+                    <div id="overview_entries"></div>
+
+                    <div class="container border bg-dark-grey rounded mt-4" id="RecentPapers">
+                        <div class="row border-bottom border-dark px-1 pt-1 mb-1">
+                            <h5 class="col-12 gx-0 fw-bolder mt-1">Recent Papers</h5>
+                        </div>
+                        <div class="row my-5 align-items-center" id="newsLoading">
+                            <div class="spinner-border mx-auto my-auto" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="row news_bottom bg-light-grey" id="newsContent"></div>
+
+                        <a class="row border-top ps-2 py-1 gx-5" id="morePaperRef" style="display: none"
+                           target="_blank">
+                            More paper
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="newsPopup">
+        <div class="newsdetail">
+            <div class="top">
+                <a id="paperLink">View Paper</a>
+                <a id="paperTab">Open in a new tab
+                    <img src="{% static 'assets/searchicon.svg' %}">
+                </a>
+                <div onclick="hideDetail()">
+                    <img src="{% static 'assets/close.svg' %}">
+                </div>
+            </div>
+            <div class="bottom">
+                <div class="checkbox" id="newsCheckbox"></div>
+                <div class="paper">
+                    <h2 id="paperTitle"></h2>
+                    <p class="author" id="paperAuthor"></p>
+                    <p class="journal" id="paperJournal"></p>
+                    <p class="date" id="paperDate"></p>
+                    <p class="abstract" id="paperAbstract"></p>
+
+                    <div id="classifications">
+                        <h2 id="classificationHeader">Classifications</h2>
+                        <div id="classificationDiv"></div>
+                        <p id="classificationInfo"
+                           style="margin-top: 10px; font-size:15px;">
+                            <em>(1,10) means text passage 1-10</em></p>
+                    </div>
+                </div>
+                <div class="graphContainer" id="graphContainer">
+                    <div class="graphNetwork" id="paperGraph"></div>
+                    <div class="graphFooter">
+                        <button class="btn btn-secondary me-1 ms-auto" onclick="centerNetwork(papernetwork)">
+                            Center
+                        </button>
+                        <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('graph')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                      d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                            </svg>
+                            <span type="button" id="graphFullscreen">Fullscreen</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- feedback elements -->
+    <button type="button" class="btn btn-primary feedbackbtn d-none d-lg-inline-block" id="feedback_button"
+            onclick="openFeedback()" data-html2canvas-ignore="true" style="z-index: 4">
+        <span id="feedbackbtn_text">Feedback</span>
+        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status" style="display: none"></span>
+    </button>
+
+    <div class="modal" tabindex="-1" role="dialog" id="feedbackPopup">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send feedback with screenshot</h5>
+                    <button type="button" class="btn-close"
+                            onclick="closeFeedback()" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <div class="outsideWrapper">
+                                <div class="insideWrapper" id="screenshotContainer">
+                                    <img src="null" id="screenshot"
+                                         class="img-fluid coveredImage border border-primary">
+                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-secondary" onclick="resetCanvas()">Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>Please mark the problematic section on the image above and/or describe the problem you have
+                        encountered:</p>
+                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                        Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <noscript>
+        <div class="noscript">
+            <div>
+                This website requires JavaScript enabled to function properly.
+            </div>
+        </div>
+    </noscript>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const url_query = "/";
+        const url_query_sub_count = "{% url 'query_sub_count' %}";
+        const url_query_document_ids_for_entity = "{% url 'document_ids_for_entity' %}";
+        const url_term_2_entity = "{% url 'term_to_entity' %}";
+        const url_document_graph = "{% url 'document_graph' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+        const url_chembl_phase = "{% static 'assets/chembl_phase_' %}";
+        const url_chembl_phase_new = "{% static 'assets/verification_new.svg' %}";
+        const url_loading_gif = "{% static 'assets/loading.gif' %}";
+        const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
+        const url_feedback_report = "{% url 'report' %}";
+        const url_keywords = "{% url 'keywords' %}";
+        const url_paper_view_log = "{% url 'paper_view_log' %}";
+
+        const url_drug_search = "{% url 'drug_search_log' %}";
+        const url_substance_href = "{% url 'drug_substance_forward_log' %}";
+        const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
+
+        let currentFullscreenPrefix = null;
+        // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
+        const fsCloseAction = () => {
+            if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix, true)
+        }
+        document.onfullscreenchange = fsCloseAction;
+        document.onwebkitfullscreenchange = fsCloseAction;
+        document.onmsfullscreenchange = fsCloseAction;
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    </script>
+
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.3/async.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script src="{% static 'js/paper.js' %}?version=8" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?version=3" type="text/javascript"></script>
+    <script src="{% static 'js/longcovid.js' %}?version=7" type="text/javascript"></script>
+    <script src="{% static 'js/feedback.js' %}?version=6" type="text/javascript"></script>
+{% endblock %}

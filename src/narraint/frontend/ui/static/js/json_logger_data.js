@@ -1,116 +1,63 @@
-function init() {
-    fetch("/logs ").then((json) => {
-            console.log(json)
+const nt_prefix = "narrative"
+const ov_prefix = "overview"
 
-        })
+function init() {
     fetch("/logs_data").then((json) => {
             json.json().then(r => load_data(r))
-        })
+        }).catch((e) => console.log(e))
 }
 
 function load_data(data) {
-    let narrative = data["narrative"];
-    let overview = data["overview"];
-    load_title("Narrative Service");
-    load_top_querystring(narrative["topTenQueries"], "Top 100 searched queries");
-    load_performed_queries(narrative["amountQueries"], "Performed Queries");
-    load_usage_graph(narrative['graphInput'], "performed queries");
-    load_title("Drug Overviews");
-    load_top_querystring(overview["topTenQueries"], "Top 100 searches");
-    load_performed_queries(overview["amountQueries"], "Performed searches");
-    load_usage_graph(overview['graphInput'], "performed searches");
+    const narrative = data[nt_prefix];
+    const overview = data[ov_prefix];
+    load_top_querystring(narrative["topQueries"], nt_prefix);
+    load_performed_queries(narrative["amountQueries"], nt_prefix);
+    load_usage_graph(narrative['graphInput'], "performed queries", nt_prefix);
+    load_top_querystring(overview["topQueries"], ov_prefix);
+    load_performed_queries(overview["amountQueries"], ov_prefix);
+    load_usage_graph(overview['graphInput'], "performed queries",ov_prefix);
 }
 
-function load_title(title) {
-    let db = document.getElementById("dashboard");
-    let titleDiv = document.createElement("div");
-    titleDiv.className = "title";
-    let text = document.createElement("h1");
-    text.innerHTML = title;
-    titleDiv.appendChild(text);
-    db.appendChild(titleDiv);
-}
-
-function load_usage_graph(data, y_label) {
-    let db = document.getElementById("dashboard");
-    let usage = document.createElement("div");
-    usage.className = "section";
-    let titleUG = document.createElement("h2");
-    titleUG.innerHTML = "Usage in the last";
-    let graphInput = document.createElement("input");
-    graphInput.className = "slider";
-    graphInput.setAttribute("type", "range");
-    graphInput.setAttribute("list", "tickmarks");
-    graphInput.setAttribute("min", "0");
-    graphInput.setAttribute("max", "30");
-    let timesList = document.createElement("datalist");
-    timesList.setAttribute("id", "tickmarks")
-    let elementS = document.createElement("option");
-    elementS.setAttribute("value", "0");
-    elementS.setAttribute("label", "7 days");
-    let elementTO = document.createElement("option");
-    elementTO.setAttribute("value", "10");
-    elementTO.setAttribute("label", "31 days");
-    let elementHE = document.createElement("option");
-    elementHE.setAttribute("value", "20");
-    elementHE.setAttribute("label", "182 days");
-    let elementTSF = document.createElement("option");
-    elementTSF.setAttribute("value", "30");
-    elementTSF.setAttribute("label", "365 days");
-    timesList.appendChild(elementS);
-    timesList.appendChild(elementTO);
-    timesList.appendChild(elementHE);
-    timesList.appendChild(elementTSF);
-    usage.appendChild(titleUG);
-    usage.appendChild(graphInput);
-    usage.appendChild(timesList);
+function load_usage_graph(data, y_label, prefix) {
+    const graphInput = document.getElementById(prefix+"_graph_input")
+    const container = document.getElementById(prefix+"_graph_container")
     let chartDiv = document.createElement("div");
     let canvas = document.createElement("canvas");
     canvas.setAttribute("id", "myChart");
     chartDiv.appendChild(canvas);
     let values = getValues(data["365"]);
     createGraph(values[0], values[1], canvas, y_label);
-    usage.appendChild(chartDiv);
+    container.appendChild(chartDiv);
     graphInput.oninput = function() {
-        if (this.value % 10 !== 0 && this.value != 0){
-            let counter_plus = 0;
-            let counter_minus = 0;
-            let currentValue = parseInt(this.value, 10);
-            while (currentValue % 10 != 0 && currentValue != 0) {
-                counter_plus = counter_plus + 1;
-                currentValue = currentValue + 1;
-            }
-            currentValue = currentValue - counter_plus;
-            while (currentValue % 10 != 0 && currentValue != 0) {
-                counter_minus = counter_minus + 1;
-                currentValue = currentValue - 1;
-            }
-            if (counter_minus > counter_plus) {
-                this.value = parseInt(this.value, 10) + counter_plus;
-            } else {
-                this.value= parseInt(this.value, 10) - counter_minus;
-            }
-        }
-        removeAllChildNodes(chartDiv);
+        chartDiv.innerHTML = ""
+
         let canvas = document.createElement("canvas");
         canvas.setAttribute("id", "myChart");
         chartDiv.appendChild(canvas);
-        if (this.value == 0) {
-            let values = getValues(data["7"]);
-            createGraph(values[0], values[1], canvas, y_label);
-        } else if (this.value == 10) {
-            let values = getValues(data["31"]);
-            createGraph(values[0], values[1], canvas, y_label);
-        } else if (this.value == 20) {
-            let values = getValues(data["182"]);
-            createGraph(values[0], values[1], canvas, y_label);
-        } else if (this.value == 30) {
-            let values = getValues(data["365"]);
-            createGraph(values[0], values[1], canvas, y_label);
+
+        let values;
+
+        switch (graphInput.value) {
+            case "0":
+                values = getValues(data["7"]);
+                createGraph(values[0], values[1], canvas, y_label);
+                break;
+            case "1":
+                values = getValues(data["31"]);
+                createGraph(values[0], values[1], canvas, y_label);
+                break;
+            case "2":
+                values = getValues(data["182"]);
+                createGraph(values[0], values[1], canvas, y_label);
+                break;
+            case "3":
+                values = getValues(data["365"]);
+                createGraph(values[0], values[1], canvas, y_label);
+                break;
+            default:
+                break;
         }
-        usage.appendChild(chartDiv);
     }
-    db.appendChild(usage);
 }
 
 function createGraph(x_values, y_values, canvas, y_label) {
@@ -161,155 +108,64 @@ function getValues(data) {
     return values
 }
 
-function load_performed_queries(data,title) {
-    let db = document.getElementById("dashboard");
-    let performedQueries = document.createElement("div");
-    performedQueries.className = "section";
-    let titlePQ = document.createElement("h2");
-    titlePQ.innerHTML = title;
-    let fixTableHeads = document.createElement("div");
-    fixTableHeads.className = "tableFixHead";
-    let amountTable = document.createElement("table");
-    amountTable.className = "queryTable";
-    let tHeader = document.createElement("thead");
-    let tableHeader = document.createElement("tr");
-    let queryHeaderName = document.createElement("th");
-    queryHeaderName.innerHTML = "Time";
-    let queryHeaderAmount = document.createElement("th");
-    queryHeaderAmount.innerHTML = "Number";
-    tableHeader.appendChild(queryHeaderName);
-    tableHeader.appendChild(queryHeaderAmount);
-    tHeader.appendChild(tableHeader);
-    amountTable.appendChild(tHeader);
-    let tbody = document.createElement("tbody");
+function load_performed_queries(data, prefix) {
+    const time_map = {
+        "t":"Today",
+        "tw":"This week",
+        "tm":"This month",
+        "lm":"Last month",
+        "ty":"This year",
+        "ly":"Last year"
+    }
+
+    let tbody = document.getElementById(prefix+"_table_perf_queries");
     for (let obj in data) {
         let tableLine = document.createElement("tr");
         let queryName = document.createElement("td");
         let queryAmount = document.createElement("td");
-        let time = "";
-        if (obj == "t") {
-            time = "Today";
-        } else if (obj == "tw") {
-            time = "This week";
-        } else if (obj == "tm") {
-            time = "This month";
-        } else if (obj == "lm") {
-            time = "Last Month";
-        } else if (obj == "ty") {
-            time = "This year";
-        } else if (obj == "ly") {
-            time = "Last year";
-        }
-        queryName.innerHTML = time;
+        queryName.innerHTML = time_map[obj];
         queryAmount.innerHTML = data[obj];
         tableLine.appendChild(queryName);
         tableLine.appendChild(queryAmount);
         tbody.appendChild(tableLine);
     }
-    amountTable.appendChild(tbody);
-    performedQueries.appendChild(titlePQ);
-    fixTableHeads.appendChild(amountTable)
-    performedQueries.appendChild(fixTableHeads);
-    db.appendChild(performedQueries);
 }
 
-function load_top_querystring(data, title) {
-    let db = document.getElementById("dashboard");
-    let topTenQueries = document.createElement("div");
-    topTenQueries.className = "section";
-    let titleTFQ = document.createElement("h2");
-    titleTFQ.innerHTML = title;
-    let input = document.createElement("input");
-    input.className = "slider";
-    input.setAttribute("type", "range");
-    input.setAttribute("list", "tickmarks");
-    input.setAttribute("min", "0");
-    input.setAttribute("max", "40");
-    let timesList = document.createElement("datalist");
-    timesList.setAttribute("id", "tickmarks")
-    let elementToday = document.createElement("option");
-    elementToday.setAttribute("value", "0");
-    elementToday.setAttribute("label", "Today");
-    let elementWeek = document.createElement("option");
-    elementWeek.setAttribute("value", "10");
-    elementWeek.setAttribute("label", "This week");
-    let elementMonth = document.createElement("option");
-    elementMonth.setAttribute("value", "20");
-    elementMonth.setAttribute("label", "This month");
-    let elementYear = document.createElement("option");
-    elementYear.setAttribute("value", "30");
-    elementYear.setAttribute("label", "This year");
-    let elementAll = document.createElement("option");
-    elementAll.setAttribute("value", "40");
-    elementAll.setAttribute("label", "Overall");
-    timesList.appendChild(elementToday);
-    timesList.appendChild(elementWeek);
-    timesList.appendChild(elementMonth);
-    timesList.appendChild(elementYear);
-    timesList.appendChild(elementAll);
-    topTenQueries.appendChild(titleTFQ);
-    topTenQueries.appendChild(input);
-    topTenQueries.appendChild(timesList);
-    let fixTableHeads = document.createElement("div");
-    fixTableHeads.className = "tableFixHead";
-    let queryTable = document.createElement("table");
-    queryTable.className = "queryTable";
-    let theader = document.createElement("thead");
-    let tableHeader = document.createElement("tr");
-    let queryHeaderName = document.createElement("th");
-    queryHeaderName.innerHTML = "Query";
-    let queryHeaderAmount = document.createElement("th");
-    queryHeaderAmount.innerHTML = "Number";
-    tableHeader.appendChild(queryHeaderName);
-    tableHeader.appendChild(queryHeaderAmount);
-    theader.appendChild(tableHeader);
-    queryTable.appendChild(theader);
-    let tbody = document.createElement("tbody");
-    tbody.setAttribute("id", "tbody");
-    iterateThroughData(data, "a", tbody);
-    queryTable.appendChild(tbody);
-    input.oninput = function() {
-        if(this.value % 10 != 0 && this.value != 0){
-            let counter_plus = 0;
-            let counter_minus = 0;
-            let currentValue = parseInt(this.value, 10);
-            while (currentValue % 10 != 0 && currentValue != 0) {
-                counter_plus = counter_plus + 1;
-                currentValue = currentValue + 1;
-            }
-            currentValue = currentValue - counter_plus;
-            while (currentValue % 10 != 0 && currentValue != 0) {
-                counter_minus = counter_minus + 1;
-                currentValue = currentValue - 1;
-            }
-            if (counter_minus > counter_plus) {
-                this.value = parseInt(this.value, 10) + counter_plus;
-            } else {
-                this.value= parseInt(this.value, 10) - counter_minus;
-            }
-        }
-        removeAllChildNodes(tbody);
-        if (this.value == 0) {
 
+function change_table_data(prefix, suffix, data) {
+    const input = document.getElementById(prefix+"_input_"+suffix);
+    let tbody = document.getElementById(prefix+"_table_"+suffix);
+
+    tbody.innerHTML = "";
+
+    switch (input.value) {
+        case "0":
             iterateThroughData(data, "t", tbody);
-        } else if (this.value == 10) {
-
+            break;
+        case "1":
             iterateThroughData(data, "tw", tbody);
-        } else if (this.value == 20) {
-
+            break;
+        case "2":
             iterateThroughData(data, "tm", tbody);
-        } else if (this.value == 30) {
-
+            break;
+        case "3":
             iterateThroughData(data, "ty", tbody);
-        } else if (this.value == 40) {
-
+            break;
+        case "4":
             iterateThroughData(data, "a", tbody);
-        }
-        queryTable.appendChild(tbody);
+            break;
+        default:
+            break;
     }
-    fixTableHeads.appendChild(queryTable);
-    topTenQueries.appendChild(fixTableHeads);
-    db.appendChild(topTenQueries);
+}
+
+
+function load_top_querystring(data, prefix) {
+    let tbody = document.getElementById(prefix+"_table_top_hundred");
+    iterateThroughData(data, "a", tbody);
+
+    let input = document.getElementById(prefix+"_input_top_hundred");
+    input.oninput = () => change_table_data(prefix, "top_hundred", data);
 }
 
 function iterateThroughData(data, time, element) {
@@ -325,10 +181,4 @@ function iterateThroughData(data, time, element) {
     }
 }
 
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
-}
-
-init();
+document.body.onload = () => init();

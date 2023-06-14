@@ -5,7 +5,7 @@ from sqlalchemy import delete
 from kgextractiontoolbox.backend.models import Document, Sentence, Predication
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import PredicationInvertedIndex
-from narraint.queryengine.compute_reverse_index_predication import denormalize_predication_table
+from narraint.queryengine.index.compute_reverse_index_predication import denormalize_predication_table
 
 
 class ReversePredicationIdxText(TestCase):

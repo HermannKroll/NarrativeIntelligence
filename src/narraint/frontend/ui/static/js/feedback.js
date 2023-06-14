@@ -4,15 +4,23 @@ document.getElementById("screenshot").addEventListener('load', (e) => {
 });
 
 async function openFeedback() {
-    console.log("click")
-
-    const feedbackBtnTxt = document.getElementById("feedbackbtn_text");
-    feedbackBtnTxt.innerText = "Generating Screenshot (may take a while)";
-    document.getElementById("feedbackText").value = "";
+    const spinner = document.getElementById("reportSpinner");
+    const buttonText = document.getElementById("feedbackbtn_text");
+    const button = document.getElementById("feedback_button");
+    buttonText.innerText = "Generating Screenshot (may take a while)";
+    spinner.style.display = "inline-block";
+    button.classList.add("disabled");
 
     await new Promise(r => setTimeout(r, 10));
 
     let canvas = await html2canvas(document.body, {scrollX: 0, scrollY: 0, logging:false})
+        .catch((e) => console.log(e));
+    if (!canvas) {
+        buttonText.innerText = "Feedback";
+        spinner.style.display = "none";
+        button.classList.remove("disabled");
+        return;
+    }
 
     const base64image = canvas.toDataURL("image/png");
     const screenshot = document.getElementById("screenshot");
@@ -23,12 +31,15 @@ async function openFeedback() {
     const popup = document.getElementById("feedbackPopup");
     popup.style.display = "block"
 
-    feedbackBtnTxt.innerText = "Feedback";
+    buttonText.innerText = "Feedback";
+    spinner.style.display = "none";
+    button.classList.remove("disabled");
 
     document.getElementById("screenshotCanvas").remove();
 
     let screenshotCanvas = document.createElement("canvas");
     screenshotCanvas.id = "screenshotCanvas";
+    screenshotCanvas.classList.add("coveringCanvas");
     document.getElementById("screenshotContainer").append(screenshotCanvas);
 
     screenshotCanvas.setAttribute('width', canvas.width);
@@ -91,6 +102,8 @@ async function closeFeedback(send = false) {
     };
     const options = {
         method: 'POST',
+        headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+        mode: 'same-origin',
         body: JSON.stringify(params)
     };
     await fetch(url_feedback_report, options).then(response => {

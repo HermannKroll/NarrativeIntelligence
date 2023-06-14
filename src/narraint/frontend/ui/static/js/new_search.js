@@ -25,42 +25,42 @@ let CYTOSCAPE_STYLE = [
 
 // dictionary used to translate shortened urls into specific query links
 const short_urls = {
-    'q1':'&quot;post-acute COVID-19 syndrome&quot; associated Disease',
-    'q2':'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
-    'q3':'Drug treats Covid19',
-    'q4':'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
-    'q5':'Disease associated Covid19',
-    'q6':'Covid19 associated Target',
-    'q7':'Covid19 associated Human _AND_ Disease associated Human',
-    'q8':'Covid19 associated Vaccine',
-    'q9':'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
-    'q10':'&quot;Mass Spectrometry&quot; method Simvastatin',
-    'q11':'?X(Method) method Simvastatin',
-    'q12':'?X(LabMethod) method Simvastatin',
-    'q13':'Metformin treats &quot;Diabetes Mellitus&quot;',
-    'q14':'Simvastatin treats Hypercholesterolemia',
-    'q15':'Metformin treats ?X(Disease)',
-    'q16':'Metformin treats ?X(Species)',
-    'q17':'Vinca associated ?Y(Disease)',
-    'q18':'Digitalis associated ?Y(Disease)',
-    'q19':'?X(PlantFamily) associated ?Y(Disease)',
-    'q20':'Metformin administered ?X(DosageForm)',
-    'q21':'Metformin administered Injections',
-    'q22':'Lidocaine administered ?X(DosageForm)',
-    'q23':'?X(Drug) administered liposomes',
-    'q24':'?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
-    'q25':'Metformin inhibits mtor',
-    'q26':'Metformin inhibits ?X(Target)',
-    'q27':'?X(Drug) inhibits cyp3a4',
-    'q28':'cyp3a4 metabolises Simvastatin',
-    'q29':'Simvastatin induces Rhabdomyolysis',
-    'q30':'Simvastatin induces &quot;Muscular Diseases&quot;',
-    'q31':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
-    'q32':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
-    'q33':'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
-    'q34':'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
-    'q35':'?Drug(Drug) treats ?Dis(Disease)',
-    'q36':'?Drug(Drug) administered ?Form(DosageForm)',
+    'q1': '&quot;post-acute COVID-19 syndrome&quot; associated Disease',
+    'q2': 'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
+    'q3': 'Drug treats Covid19',
+    'q4': 'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
+    'q5': 'Disease associated Covid19',
+    'q6': 'Covid19 associated Target',
+    'q7': 'Covid19 associated Human _AND_ Disease associated Human',
+    'q8': 'Covid19 associated Vaccine',
+    'q9': 'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
+    'q10': '&quot;Mass Spectrometry&quot; method Simvastatin',
+    'q11': '?X(Method) method Simvastatin',
+    'q12': '?X(LabMethod) method Simvastatin',
+    'q13': 'Metformin treats &quot;Diabetes Mellitus&quot;',
+    'q14': 'Simvastatin treats Hypercholesterolemia',
+    'q15': 'Metformin treats ?X(Disease)',
+    'q16': 'Metformin treats ?X(Species)',
+    'q17': 'Vinca associated ?Y(Disease)',
+    'q18': 'Digitalis associated ?Y(Disease)',
+    'q19': '?X(PlantFamily) associated ?Y(Disease)',
+    'q20': 'Metformin administered ?X(DosageForm)',
+    'q21': 'Metformin administered Injections',
+    'q22': 'Lidocaine administered ?X(DosageForm)',
+    'q23': '?X(Drug) administered liposomes',
+    'q24': '?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
+    'q25': 'Metformin inhibits mtor',
+    'q26': 'Metformin inhibits ?X(Target)',
+    'q27': '?X(Drug) inhibits cyp3a4',
+    'q28': 'cyp3a4 metabolises Simvastatin',
+    'q29': 'Simvastatin induces Rhabdomyolysis',
+    'q30': 'Simvastatin induces &quot;Muscular Diseases&quot;',
+    'q31': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
+    'q32': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
+    'q33': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
+    'q34': 'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
+    'q35': '?Drug(Drug) treats ?Dis(Disease)',
+    'q36': '?Drug(Drug) administered ?Form(DosageForm)',
 };
 
 function uuidv4() {
@@ -272,16 +272,16 @@ let optionMapping = {
 }
 
 function tryDecodeShortURL(query) {
-    if(query in short_urls) {
+    if (query in short_urls) {
         //Known query abbreviation. Decode html escape sequences.
-        lastQuery = $('<div>'+ short_urls[query] + '</div>').text();
+        lastQuery = $('<div>' + short_urls[query] + '</div>').text();
         return true;
     }
     return false;
 }
 
 function example_search(search_str) {
-    if(tryDecodeShortURL(search_str)) {
+    if (tryDecodeShortURL(search_str)) {
         search_str = lastQuery;
     }
 
@@ -546,7 +546,7 @@ $(document).ready(function () {
             const relevantTerm = entities[entities.length - 1].trim();
 
             // check if term is empty
-            if(relevantTerm.replaceAll(" ", "").length === 0) {
+            if (relevantTerm.replaceAll(" ", "").length === 0) {
                 return;
             }
 
@@ -572,8 +572,8 @@ $(document).ready(function () {
             const values = this.value.split(";");
 
             this.value = ""
-            for(const i in values) {
-                if(i < values.length - 1) {
+            for (const i in values) {
+                if (i < values.length - 1) {
                     this.value += values[i] + ";"
                 }
             }
@@ -641,8 +641,10 @@ function initFromURLQueryParams() {
     }
 
     if (params.has("entities")) {
-        document.getElementById("input_entities").value
-            = params.get("entities");
+        document.getElementById("input_entities").value = params.get("entities");
+    }
+    if (params.has("terms")) {
+        document.getElementById("input_terms").value = params.get("terms");
     }
 
     if (params.has("query")) {
@@ -708,6 +710,7 @@ const search = (event) => {
     let end_pos = start_pos + DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 
     const entities = document.getElementById("input_entities").value;
+    const terms = document.getElementById("input_terms").value;
 
     let freq_element = document.getElementById("select_sorting_freq");
     let freq_sort_desc = freq_element.value;
@@ -733,7 +736,12 @@ const search = (event) => {
 
     const url = new URL(window.location.href);
     url.searchParams.set('query', query);
-    url.searchParams.set("entities", entities);
+    if (entities.trim().length > 0) {
+        url.searchParams.set("entities", entities);
+    }
+    if (terms.trim().length > 0) {
+        url.searchParams.set("terms", terms);
+    }
     url.searchParams.set("data_source", data_source);
     url.searchParams.set("visualization", outer_ranking);
     url.searchParams.set("sort_frequency_desc", freq_sort_desc);
@@ -742,11 +750,13 @@ const search = (event) => {
     //   url.searchParams.set("end_pos", end_pos);
     window.history.pushState("Query", "Title", "/new_search" + url.search.toString());
 
+
     let request = $.ajax({
         url: new_search_url,
         data: {
             query: query,
             entities: entities,
+            terms: terms,
             data_source: data_source,
             outer_ranking: outer_ranking,
             freq_sort: freq_sort_desc,
@@ -1099,7 +1109,9 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     let divDoc_DocumentGraph = $('<div class="float-end popupButton">' +
         'Document Content' + '<br><img src="' + url_graph_preview + '" height="100px"/>' + '</div>');
 
-    divDoc_DocumentGraph.click(() => {showPaperView(art_doc_id, collection)})
+    divDoc_DocumentGraph.click(() => {
+        showPaperView(art_doc_id, collection)
+    })
 
     /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
     divDoc_DocumentGraph.click(function () {
@@ -1295,7 +1307,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divH2.append(btn)
 
     //check if an url is used
-    if(url_str) {
+    if (url_str) {
         const link = ('<a class="subgroupLinkImg" href=' + url_str + ' target="_blank"' +
             ' onclick="event.stopPropagation()">' +
             '<img height="18px" src=' + search_icon_url + '></a>')

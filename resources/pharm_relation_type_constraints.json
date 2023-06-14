@@ -8,7 +8,8 @@
     ],
     "objects": [
       "Disease",
-      "Species"
+      "Species",
+      "HealthStatus"
     ]
   },
   "administered": {
@@ -68,6 +69,7 @@
       "Drug",
       "Excipient",
       "Gene",
+      "Target",
       "PlantFamily/Genus"
     ],
     "objects": [
@@ -75,12 +77,14 @@
       "Drug",
       "Excipient",
       "Gene",
+      "Target",
       "PlantFamily/Genus"
     ]
   },
   "metabolises": {
     "subjects": [
-      "Gene"
+      "Gene",
+      "Target"
     ],
     "objects": [
       "Chemical",
@@ -97,7 +101,8 @@
       "PlantFamily/Genus"
     ],
     "objects": [
-      "Gene"
+      "Gene",
+      "Target"
     ]
   }
 }

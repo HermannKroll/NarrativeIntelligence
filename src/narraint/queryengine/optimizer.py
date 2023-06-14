@@ -198,5 +198,6 @@ class QueryOptimizer:
         optimized = QueryOptimizer.optimize_symmetric_predicate(optimized, and_mod)
         # copy already existing additional entities if needed
         if optimized:
-            optimized.additional_entities = graph_query.additional_entities
+            optimized.entity_sets = graph_query.entity_sets
+            optimized.terms = graph_query.terms
         return optimized
