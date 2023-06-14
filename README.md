@@ -103,13 +103,11 @@ cd ../../
 *All* configuration lives inside the `config` directory. 
 The `*.example.json` files show the structure of the corresponding configuration file. 
 Copy the example file and remove the `.example` from the filename.
-
+To run the service, only backend.json is required. 
 The database can be configured with the file ``backend.json`` and using environment variables. 
 The environment variables are favoured over the `json`-configuration. 
 
-
-Next, configure your database connection. 
-The latest version should look like:
+Next, configure your database connection in ``backend.json``:
 ```
 {
   "use_SQLite": false,
