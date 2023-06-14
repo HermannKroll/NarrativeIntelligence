@@ -44,6 +44,27 @@ Put the public key into your GitHub account which was granted access to this rep
 The narrative service requires a Postgres database that contains processed documents. 
 So first please setup a Postgres database by following the official instructions. 
 We used V14. 
+
+## Configure Postgres
+
+```
+sudo nano /etc/postgresql/14/main
+```
+
+Change the following settings. 
+More memory is better.
+```
+shared_buffers = 10GB	
+work_mem = 2GB			
+```
+
+Restart Postgres Server.
+```
+sudo systemctl restart postgresql
+```
+
+## Configure fidpharmazie database
+
 Create a new postgres database. 
 Log in first.
 ```
