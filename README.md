@@ -10,6 +10,10 @@ It requires two subprojects:
 - [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
 - [KGExtractionToolbox](https://github.com/HermannKroll/KGExtractionToolbox): Basic entity linking methods / information extraction / pipelines for automatisation
 
+We configured the Narrative Service on Ubuntu LTS 22.04. 
+The following documentation for shell commands and path is designed for Ubuntu.
+
+
 The project does not need root privileges. 
 So for running the service, create a dedicated user, e.g., pubpharm on your server. 
 ```
@@ -28,6 +32,13 @@ For development purposes, dev should be cloned:
 ```
 git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
+
+## Cloning a private repository
+When cloning a private repository of GitHub, you need to create private public key pair for your account.
+```
+ssh-keygen
+```
+Put the public key into your GitHub account which was granted access to this repository. 
 
 # Database Setup
 The narrative service requires a Postgres database that contains processed documents. 
@@ -82,7 +93,7 @@ Ratings must be inserted. For all other tables, read access is sufficient for th
 ### Backup the Database
 The database can be backuped via the following command:
 ```
-g_dump  -h 127.0.0.1 -O -U postgres -W -d fidpharmazie --format custom  --file fidpharmazie_2023_06_12.dump
+pg_dump  -h 127.0.0.1 -O -U postgres -W -d fidpharmazie --format custom  --file fidpharmazie_2023_06_12.dump
 ```
 
 # Narrative Service Setup
@@ -90,6 +101,29 @@ The narrative service is written in Python.
 We need to create a suitable interpreter first.
 
 ## Create a virtual environment
+
+### Install Anaconda
+Make sure that conda (with Python 3 support) is installed.
+If not, install it via:
+
+```
+curl https://repo.anaconda.com/archive/Anaconda3-2021.11-Linux-x86_64.sh --output anaconda.sh
+bash anaconda.sh
+```
+
+It is a good idea to perform conda init, so that conda commands are available in your shell. 
+By default, anaconda will be installed to
+```
+/home/USER/anaconda3
+```
+
+If you did not run conda init, then run:
+```
+eval "$(/home/pubpharm/anaconda3/bin/conda shell.bash hook)"
+conda init
+```
+
+### Environment Setup
 We tested and used Python 3.8 and Conda. 
 ```
 conda create -n narraint python=3.8
@@ -104,6 +138,11 @@ conda activate narraint
 Switch to repository.
 ```
 cd ~/NarrativeIntelligence/
+```
+
+Make sure that gcc is installed. 
+```
+sudo apt-get install gcc python3-dev
 ```
 
 Install all Python requirements:
