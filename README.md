@@ -13,7 +13,7 @@ It requires two subprojects:
 
 To use this project, clone this project and its submodules via:
 ```
-git clone --recurse-submodules --branch main git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
 
