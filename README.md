@@ -149,6 +149,14 @@ The project builds upon Django which uses gunicorn as a local web server.
 However, gunicorn should not be used as a live web service. 
 That is why a reverse proxy should be used to serve the static data and forward request to the local gunicorn. 
 
+
+First, create a static www directory to store all static web files:
+```
+sudo mkdir /var/www/static
+sudo chgrp -R www-data /var/www 
+sudo chmod -R 775 /var/www
+```
+
 ## Deploy a reverse proxy
 We used nginx. 
 Please install nginx.
@@ -162,7 +170,7 @@ We used the following configuration:
 - Gzip is required to shrink down large results
 - HTTP is forwarded to HTTPS
 - Proxy Headers are set to that gunicorn accepts the forwarded messages.
-- We assume that gunicorn and Django will run on port 8080. This port must NOT be rachable from outside. 
+- We assume that gunicorn and Django will run on port 8080. This port must NOT be reachable from outside. 
 ```
 user www-data;
 worker_processes auto;
