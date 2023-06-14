@@ -13,7 +13,7 @@ It requires two subprojects:
 
 To use this project, clone this project and its submodules via:
 ```
-git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules --branch main git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
 
@@ -66,6 +66,12 @@ GRANT INSERT ON TABLE public.PREDICATION_RATING TO servicero;
 GRANT INSERT ON TABLE public.SUBSTITUTION_GROUP_RATING TO servicero;
 ```
 Ratings must be inserted. For all other tables, read access is sufficient for the service to run. 
+
+### Backup the Database
+The database can be backuped via the following command:
+```
+g_dump  -h 127.0.0.1 -O -U postgres -W -d fidpharmazie --format custom  --file fidpharmazie_2023_06_12.dump
+```
 
 # Narrative Service Setup
 The narrative service is written in Python. 
@@ -249,7 +255,7 @@ After configuring nginx, please restart it via:
 sudo service nginx restart 
 ```
 
-## Setup DJango and gunicorn
+## Setup Django and gunicorn
 
 Switch into a screen session for the following commands.
 ```
@@ -291,7 +297,26 @@ That is why we redirect the output to a file.
 - timeout specifies when a long request will be stopped and the corresponding worker is rebooted
 
 
-# Updating the Service Data
+# Updating the Service 
+Switch to screen session and stop service.
+Then pull updates from GitHub.
+Note that we have to update three repositories.
+```
+cd ~/NarrativeIntelligence/
+git pull --recurse-submodules
+```
+
+Collect changes and update static www data.
+```
+cd ~/NarrativeIntelligence/src/narraint/frontend/
+sudo chmod -R 777 /var/www
+python manage.py collectstatic
+sudo chmod -R 775 /var/www	  
+```
+
+Start the service again.
+
+# Data Mining (Update Service Data)
 
 
 # Development
