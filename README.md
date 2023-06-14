@@ -10,11 +10,19 @@ It requires two subprojects:
 - [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
 - [KGExtractionToolbox](https://github.com/HermannKroll/KGExtractionToolbox): Basic entity linking methods / information extraction / pipelines for automatisation
 
+The project does not need root privileges. 
+So for running the service, create a dedicated user, e.g., pubpharm on your server. 
+```
+adduser pubpharm
+su pubpharm
+```
+
 
 To use this project, clone this project and its submodules via:
 ```
 git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
+
 
 For development purposes, dev should be cloned:
 ```
