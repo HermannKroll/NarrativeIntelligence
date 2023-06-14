@@ -114,7 +114,7 @@ bash anaconda.sh
 It is a good idea to perform conda init, so that conda commands are available in your shell. 
 By default, anaconda will be installed to
 ```
-/home/USER/anaconda3
+/home/pubpharm/anaconda3
 ```
 
 If you did not run conda init, then run:
@@ -169,6 +169,12 @@ To run the service, only backend.json is required.
 The database can be configured with the file ``backend.json`` and using environment variables. 
 The environment variables are favoured over the `json`-configuration. 
 
+```
+cd ~/NarrativeIntelligence/config
+cp backend.prod.json backend.json
+nano backend.json
+```
+
 Next, configure your database connection in ``backend.json``:
 ```
 {
@@ -182,12 +188,13 @@ Next, configure your database connection in ``backend.json``:
   "POSTGRES_SCHEMA": "public"
 }
 ```
+Save and exit.
 
 ## Python Path
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
 conda activate narraint
-export PYTHONPATH="/home/USER/NarrativeIntelligence/src/:/home/USER/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/USER/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 ```
 
 Switch to repository.
@@ -198,7 +205,7 @@ cd ~/NarrativeIntelligence/
 ## Setup NLP 
 Execute NLTK stuff.
 ```
-python src/narraint/setup_nltk.py
+python src/narraint/nltk_setup.py
 ```
 
 ## Build Required indexes 
@@ -217,16 +224,19 @@ However, gunicorn should not be used as a live web service.
 That is why a reverse proxy should be used to serve the static data and forward request to the local gunicorn. 
 
 
+## Deploy a reverse proxy
+We used nginx. 
+Please install nginx.
+```
+apt-get install nginx
+```
+
 First, create a static www directory to store all static web files:
 ```
 sudo mkdir /var/www/static
 sudo chgrp -R www-data /var/www 
 sudo chmod -R 775 /var/www
 ```
-
-## Deploy a reverse proxy
-We used nginx. 
-Please install nginx.
 
 Configure it via:
 ```
@@ -326,7 +336,7 @@ screen
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
 conda activate narraint
-export PYTHONPATH="/home/USER/NarrativeIntelligence/src/:/home/USER/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/USER/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 ```
 
 The productive settings must be set for Django via:
