@@ -16,6 +16,16 @@
 {% block content %}
 
     <!-- own development starts here:  -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 text-center">
+                <p class="mt-0">
+                    If you want to cite our system or are interested in more information, see
+                    <a href="https://doi.org/10.1007/s00799-023-00356-3">10.1007/s00799-023-00356-3</a>
+                </p>
+            </div>
+        </div>
+    </div>
     <div class="container margin-top">
         <form action="{% url 'search' %}" id="search_form">
             {% csrf_token %}

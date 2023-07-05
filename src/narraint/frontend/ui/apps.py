@@ -4,7 +4,7 @@ from django.apps import AppConfig
 
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.entity.entityresolver import EntityResolver
-
+from narraint.logging_config import configure_logging
 
 class UiConfig(AppConfig):
     name = 'ui'
@@ -12,11 +12,7 @@ class UiConfig(AppConfig):
     entity_tagger = None
 
     def ready(self):
-        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                            datefmt='%Y-%m-%d:%H:%M:%S',
-                            level=logging.DEBUG)
-
-
+        configure_logging()
         logging.info('Initializing entity tagger & entity resolver once...')
         UiConfig.resolver = EntityResolver.instance()
         UiConfig.entity_tagger = EntityTagger.instance()
