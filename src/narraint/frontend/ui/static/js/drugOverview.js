@@ -275,6 +275,11 @@ async function indiDataCallback() {
                 chemblData.push(...data["drug_indications"]);
                 // api returns null if no more data is available
                 urlPath = data["page_meta"]["next"];
+            })
+            .catch(() => {
+                // interrupt the retrieval process instantly
+                console.log("unable to retrieve chembl clinical phase data");
+                urlPath = null;
             });
     }
 
