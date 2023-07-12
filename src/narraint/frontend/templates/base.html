@@ -22,7 +22,11 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'search' %}">Narrative Service</a>
+        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <a class="navbar-brand" href="{% url 'search' %}" style="text-align: center;">Narrative Service</a>
+            <a href="https://www.pubpharm.de"><img src="{% static 'pubpharm_home.png' %}" height="auto" width="112px" alt="Pubpharm" class="home-pub"></a>
+        </div>
+
         <a href="https://youtu.be/YDvUzrJdfm4" target="_blank">
           <img src="{% static 'icons/help.png' %}" height="40px">
         </a>
