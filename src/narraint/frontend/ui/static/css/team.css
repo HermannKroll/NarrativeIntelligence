@@ -13,35 +13,30 @@
   border-radius: 4px;
 }
 
-.flex {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
-}
-.img_container {
-  display: flex;
-  flex-direction: column;
-  min-width: 15rem;
-  margin: 1rem;
-  border-radius: 0.5rem;
-  overflow: clip;
+.team-member {
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
-.mail {
-  color: white;
+.team-member img {
+  border-radius: 50%;
+  width: 128px;
+  height: 128px;
+  margin-bottom: 10px;
+
 }
 
-.mail:hover {
-  color:darkgrey;
+.team-member p {
+  margin-bottom: 5px;
 }
 
-.overlay {
-  background-color: #0d6efdcc;
-  padding: 0.25rem 0.5rem;
+.team-member a {
+  text-decoration: none;
+  color: #007bff;
 }
 
-.text {
-  color: white;
-  font-size: 16px;
+.name-text {
+  font-weight: bold;
+  font-size: 19px;
 }
