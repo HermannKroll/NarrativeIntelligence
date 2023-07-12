@@ -662,7 +662,7 @@ const search = (event) => {
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
-
+    console.log(query);
     let start_pos = getStartPositionBasedOnCurrentPage();
     // consider start pos only if query isn't changed
     if (lastQuery !== query) {
@@ -695,6 +695,10 @@ const search = (event) => {
         year_end = toSlider.value;
     }
     let classification_filter = null;
+
+    if (!checkQuery()) {
+        return;
+    }
 
     console.log("Query: " + query);
     console.log("Data source: " + data_source)
@@ -1781,4 +1785,26 @@ obj.onmouseleave = () => {
     tt.classList.add('d-none');
 };
 
+function checkQuery() {
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    let predicate_input = document.getElementById('input_predicate');
+    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    let query_text = subject + ' ' + predicate + ' ' + object;
 
+    if (subject.length === 0 && object.length === 0) {
+        return true;
+    }
+
+    if (subject.length === 0) {
+        $('#alert_translation').text('Subject is empty');
+        $('#alert_translation').fadeIn();
+        return false;
+    }
+    if (object.length === 0) {
+        $('#alert_translation').text('Object is empty');
+        $('#alert_translation').fadeIn();
+        return false;
+    }
+    return true;
+}
