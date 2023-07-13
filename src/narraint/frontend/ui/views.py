@@ -813,8 +813,6 @@ def get_provenance(request):
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
             result = QueryEngine.query_provenance_information(fp2prov_ids)
-            result_dict = result.to_dict()
-            result_dict['exp'][0]['conf'] = round(result_dict['exp'][0]['conf'], 2)
             time_needed = datetime.now() - start
             predication_ids = set()
             for _, pred_ids in fp2prov_ids.items():
@@ -827,7 +825,7 @@ def get_provenance(request):
 
             View.instance().query_logger.write_api_call(True, "get_provenance", str(request),
                                                         time_needed=datetime.now() - start)
-            return JsonResponse(dict(result=result_dict))
+            return JsonResponse(dict(result=result.to_dict()))
         except Exception:
             View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
             traceback.print_exc(file=sys.stdout)
