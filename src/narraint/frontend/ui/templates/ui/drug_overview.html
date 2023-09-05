@@ -44,8 +44,8 @@
         <!-- Main page -->
         <div class="container-xl col-12 col-lg-10 px-2 px-sm-0 px-lg-5 mb-5 ms-lg-0 mx-xxl-auto wide-size-content">
             <!-- Searchbar -->
-            <div class="row">
-                <div class="container my-2">
+            <div class="row justify-content-center">
+                <div class="container mt-2">
                     <div class="col-6 offset-3 flex-row d-flex">
                         <div class="input-group">
                             <input type="text" class="form-control" id='drugInput' placeholder="Search for Drug...">
@@ -59,6 +59,10 @@
                             <img src="{% static 'icons/help.png' %}" height="40px">
                         </a>
                     </div>
+                </div>
+                            <!-- drug suggestion link -->
+                <div class="row w-auto">
+                    <a href="javascript: openDrugSuggestion()">Suggest a drug</a>
                 </div>
             </div>
             <!-- Content -->
@@ -305,6 +309,31 @@
         </div>
     </div>
 
+    <!-- recommendation elements -->
+
+    <div class="modal" tabindex="-1" role="dialog" id="suggested_drug_popup">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recommend an unavailable drug</h5>
+                    <button type="button" class="btn-close"
+                            onclick="closeDrugSuggestion()" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="suggested_drug">Drug name:</label><input class="form-control" id="suggested_drug" type="text">
+                    <p>Optional: Please describe briefly the missing drug you would suggest to add to the service:</p>
+                    <textarea class="form-control" id="suggested_drug_text" rows="10"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeDrugSuggestion()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeDrugSuggestion(true)" id="sendReport">Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <noscript>
         <style>
             body {
@@ -333,6 +362,7 @@
         const url_loading_gif = "{% static 'assets/loading.gif' %}";
         const url_drug_overview_idx = "{% url 'drug_overview_index' %}"
         const url_feedback_report = "{% url 'report' %}";
+        const url_suggest_drug_report = "{% url 'suggest_drug' %}";
         const url_keywords = "{% url 'keywords' %}";
         const url_paper_view_log = "{% url 'paper_view_log' %}";
 
