@@ -915,6 +915,38 @@ def post_subgroup_feedback(request):
     return HttpResponse(status=500)
 
 
+def post_drug_suggestion(request):
+    data = None
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"drug", "description"}:
+        try:
+            time_start = datetime.now()
+            drug = data["drug"]
+            description = data["description"]
+
+            logging.info(f'received new drug suggestion {drug}')
+            try:
+                View.instance().query_logger.write_drug_suggestion(drug, description)
+            except IOError:
+                logging.debug('Could not write drug suggestion log file')
+            View.instance().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
+                                                        time_needed=datetime.now() - time_start)
+            return HttpResponse(status=200)
+
+        except IOError:
+            View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+
+    View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
+    return HttpResponse(status=500)
+
+
 def post_document_link_clicked(request):
     data = None
     try:
