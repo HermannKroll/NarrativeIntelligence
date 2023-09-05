@@ -231,6 +231,7 @@ function resetContainerLoading(keyword = null) {
         return;
     }
     text.innerText = `Drug '${keyword}' is unknown`;
+    openDrugSuggestion();
 }
 
 /**
@@ -371,4 +372,47 @@ function logChemblPhaseHref(drug, disease_name, disease_id, query, phase) {
         }
     );
     fetch(request).catch(e => console.log(e))
+}
+
+function openDrugSuggestion() {
+    document.querySelector("#drug_suggest_button")?.classList.toggle("disabled");
+
+    document.body.style.overflowY = "hidden";
+    document.querySelector("#suggested_drug_popup").style.display = "block"
+    document.querySelector("#suggested_drug").value = document.querySelector("#drugInput")?.value;
+}
+
+async function closeDrugSuggestion(send = false) {
+    const suggestedDrugPopup = document.getElementById("suggested_drug_popup");
+
+    if (send) {
+        const drugName = document.querySelector("#suggested_drug")?.value;
+        const drugDescription = document.querySelector("#suggested_drug_text")?.value;
+
+        const params = {
+            drug: drugName,
+            description: drugDescription
+        };
+        const options = {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify(params)
+        };
+        await fetch(url_suggest_drug_report, options).then(response => {
+                if (response.ok) {
+                    alert("Suggestion successfully sent!");
+                    return;
+                }
+                alert("Suggestion recommendation has failed!");
+            }
+        )
+    }
+
+    suggestedDrugPopup.style.display = "none";
+    document.body.style.overflowY = "auto";
+    document.querySelector("#drug_suggest_button")?.classList.toggle("disabled", false);
+
+    document.querySelector("#suggested_drug").value = "";
+    document.querySelector("#suggested_drug_text").value = "";
 }

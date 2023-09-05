@@ -48,6 +48,7 @@ class QueryLogger:
         self.log_dir_views = os.path.join(log_dir, 'views')
         self.log_rating = os.path.join(log_dir, 'ratings')
         self.log_subgroup_rating = os.path.join(log_dir, 'subgroup_ratings')
+        self.log_drug_suggestion = os.path.join(log_dir, 'drug_suggestion')
         self.log_dir_document_clicks = os.path.join(log_dir, "document_links")
         self.log_dir_api_calls = os.path.join(log_dir, "api_calls")
         self.log_dir_paper_view = os.path.join(log_dir, 'paper_view')
@@ -68,6 +69,8 @@ class QueryLogger:
             os.mkdir(self.log_rating)
         if not os.path.isdir(self.log_subgroup_rating):
             os.mkdir(self.log_subgroup_rating)
+        if not os.path.isdir(self.log_drug_suggestion):
+            os.mkdir(self.log_drug_suggestion)
         if not os.path.isdir(self.log_dir_document_clicks):
             os.mkdir(self.log_dir_document_clicks)
         if not os.path.isdir(self.log_dir_api_calls):
@@ -87,6 +90,7 @@ class QueryLogger:
         self.page_view_header = 'timestamp\tpage'
         self.rating_header = 'timestamp\tquery\tuser id\tprovenance ids'
         self.subgroup_rating_header = 'timestamp\tquery\tuser id\tvariable name\tentity name\tentity id\tentity type'
+        self.drug_suggestion_header = 'timestamp\tdrug\tdescription'
         self.document_click_header = 'timestamp\tquery\tdocument collection\tdocument id\tlink'
         self.api_call_header = 'timestamp\ttime needed\tsuccess\troute\tcall'
         self.paper_view_header = 'timestamp\tdoc id\tdoc collection'
@@ -141,6 +145,11 @@ class QueryLogger:
         log_entry = f'{query}\t{user_id}\t{variable_name}\t{entity_name}\t{entity_id}\t{entity_type}'
 
         write_entry(log_entry, log_file_name, self.subgroup_rating_header, "subgroup rating")
+
+    def write_drug_suggestion(self, drug: str, description: str):
+        log_file_name = os.path.join(self.log_drug_suggestion, f'{time.strftime("%Y-%m-%d")}-drug-suggestion.log')
+        log_entry = f'{drug}\t{description}'
+        write_entry(log_entry, log_file_name, self.drug_suggestion_header, "drug suggestion")
 
     def write_document_link_clicked(self, query: str, document_collection: str,
                                     document_id: str, link: str):
