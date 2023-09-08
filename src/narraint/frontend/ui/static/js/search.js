@@ -882,7 +882,7 @@ const search = (event) => {
             let chart = document.getElementById("myChart");
             if (chart != undefined) {
                 let slider_control = document.querySelector(".sliders_control");
-                let chart_container = document.querySelector(".range_container")
+                let chart_container = document.querySelector("#range_container")
                 chart.remove();
                 const new_chart = document.createElement("canvas");
                 new_chart.id = "myChart";
