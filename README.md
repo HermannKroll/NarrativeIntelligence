@@ -10,21 +10,61 @@ It requires two subprojects:
 - [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
 - [KGExtractionToolbox](https://github.com/HermannKroll/KGExtractionToolbox): Basic entity linking methods / information extraction / pipelines for automatisation
 
+We configured the Narrative Service on Ubuntu LTS 22.04. 
+The following documentation for shell commands and path is designed for Ubuntu.
+
+
+The project does not need root privileges. 
+So for running the service, create a dedicated user, e.g., pubpharm on your server. 
+```
+adduser pubpharm
+su pubpharm
+```
+
 
 To use this project, clone this project and its submodules via:
 ```
 git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
+
 For development purposes, dev should be cloned:
 ```
 git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
+## Cloning a private repository
+When cloning a private repository of GitHub, you need to create private public key pair for your account.
+```
+ssh-keygen
+```
+Put the public key into your GitHub account which was granted access to this repository. 
+
 # Database Setup
 The narrative service requires a Postgres database that contains processed documents. 
 So first please setup a Postgres database by following the official instructions. 
 We used V14. 
+
+## Configure Postgres
+
+```
+sudo nano /etc/postgresql/14/main
+```
+
+Change the following settings. 
+More memory is better.
+```
+shared_buffers = 10GB	
+work_mem = 2GB			
+```
+
+Restart Postgres Server.
+```
+sudo systemctl restart postgresql
+```
+
+## Configure fidpharmazie database
+
 Create a new postgres database. 
 Log in first.
 ```
@@ -74,7 +114,7 @@ Ratings must be inserted. For all other tables, read access is sufficient for th
 ### Backup the Database
 The database can be backuped via the following command:
 ```
-g_dump  -h 127.0.0.1 -O -U postgres -W -d fidpharmazie --format custom  --file fidpharmazie_2023_06_12.dump
+pg_dump  -h 127.0.0.1 -O -U postgres -W -d fidpharmazie --format custom  --file fidpharmazie_2023_06_12.dump
 ```
 
 # Narrative Service Setup
@@ -82,6 +122,29 @@ The narrative service is written in Python.
 We need to create a suitable interpreter first.
 
 ## Create a virtual environment
+
+### Install Anaconda
+Make sure that conda (with Python 3 support) is installed.
+If not, install it via:
+
+```
+curl https://repo.anaconda.com/archive/Anaconda3-2021.11-Linux-x86_64.sh --output anaconda.sh
+bash anaconda.sh
+```
+
+It is a good idea to perform conda init, so that conda commands are available in your shell. 
+By default, anaconda will be installed to
+```
+/home/pubpharm/anaconda3
+```
+
+If you did not run conda init, then run:
+```
+eval "$(/home/pubpharm/anaconda3/bin/conda shell.bash hook)"
+conda init
+```
+
+### Environment Setup
 We tested and used Python 3.8 and Conda. 
 ```
 conda create -n narraint python=3.8
@@ -96,6 +159,11 @@ conda activate narraint
 Switch to repository.
 ```
 cd ~/NarrativeIntelligence/
+```
+
+Make sure that gcc is installed. 
+```
+sudo apt-get install gcc python3-dev
 ```
 
 Install all Python requirements:
@@ -122,6 +190,12 @@ To run the service, only backend.json is required.
 The database can be configured with the file ``backend.json`` and using environment variables. 
 The environment variables are favoured over the `json`-configuration. 
 
+```
+cd ~/NarrativeIntelligence/config
+cp backend.prod.json backend.json
+nano backend.json
+```
+
 Next, configure your database connection in ``backend.json``:
 ```
 {
@@ -135,12 +209,13 @@ Next, configure your database connection in ``backend.json``:
   "POSTGRES_SCHEMA": "public"
 }
 ```
+Save and exit.
 
 ## Python Path
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
 conda activate narraint
-export PYTHONPATH="/home/USER/NarrativeIntelligence/src/:/home/USER/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/USER/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 ```
 
 Switch to repository.
@@ -151,7 +226,7 @@ cd ~/NarrativeIntelligence/
 ## Setup NLP 
 Execute NLTK stuff.
 ```
-python src/narraint/setup_nltk.py
+python src/narraint/nltk_setup.py
 ```
 
 ## Build Required indexes 
@@ -170,16 +245,19 @@ However, gunicorn should not be used as a live web service.
 That is why a reverse proxy should be used to serve the static data and forward request to the local gunicorn. 
 
 
+## Deploy a reverse proxy
+We used nginx. 
+Please install nginx.
+```
+apt-get install nginx
+```
+
 First, create a static www directory to store all static web files:
 ```
 sudo mkdir /var/www/static
 sudo chgrp -R www-data /var/www 
 sudo chmod -R 775 /var/www
 ```
-
-## Deploy a reverse proxy
-We used nginx. 
-Please install nginx.
 
 Configure it via:
 ```
@@ -275,11 +353,15 @@ Switch into a screen session for the following commands.
 ```
 screen
 ```
+or get your screen back
+```
+screen -ar
+```
 
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
 conda activate narraint
-export PYTHONPATH="/home/USER/NarrativeIntelligence/src/:/home/USER/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/USER/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 ```
 
 The productive settings must be set for Django via:

@@ -22,13 +22,17 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'search' %}">Narrative Service</a>
+        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <a class="navbar-brand" href="{% url 'search' %}" style="text-align: center;">Narrative Service</a>
+            <a href="https://www.pubpharm.de"><img src="{% static 'pubpharm_home.png' %}" height="auto" width="112px" alt="Pubpharm" class="home-pub"></a>
+        </div>
+
         <a href="https://youtu.be/YDvUzrJdfm4" target="_blank">
           <img src="{% static 'icons/help.png' %}" height="40px">
         </a>
 
         <span class="collapse navbar-collapse navbar-text text-nowrap">
-            Last updated 10.02.2023
+            Last updated 27.05.2023
         </span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -58,9 +62,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="https://blogs.tu-braunschweig.de/pubpharm/impressum/">Impressum</a>
                 </li>
-<!--                <li class="nav-item" id="nav_item_help">
-                    <a class="nav-link" href="{% url 'team' %}">Team</a>
-                </li>-->
             </ul>
         </div>
         <div class="mx-auto mx-md-0 d-flex flex-nowrap">
@@ -104,7 +105,7 @@
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
         crossorigin="anonymous" type="text/javascript"></script>

@@ -69,7 +69,7 @@ async function buildSite() {
     networkData = {drug: "drugAssoc", target: "targInter", disease: "adve", phase: false}
 
     createDynamicOverviews();
-    logDrugSearch("Covid 19 Overview");
+    logDrugSearch("Long COVID Overview");
 
     currentDrugName = LONG_COVID_ENTITY;
     currentChemblID = LONG_COVID_ENTITY_ID;

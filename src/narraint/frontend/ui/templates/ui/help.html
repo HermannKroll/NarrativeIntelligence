@@ -3,6 +3,7 @@
 
 {% block css %}
     <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/help.css' %}">
 {% endblock %}
 
 {% block title %}Help{% endblock %}
@@ -11,91 +12,261 @@
 
 
     <div class="container margin-top">
-
-
-    <h2>Content</h2>
-    The service contains about 35 million publication abstracts from PubMed. In brief, everything that can be found by a
-    PubMed search can also be found in our system.
-    In addition, we included about 50k COVID 19 pre-prints from the
-    <a href="https://preview.zbmed.de">ZB MED Preview Service</a>.
-    <!--<a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
-        <br>
-        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a> -->
-    <h2>Interactions</h2>
-
-    <div class="row">
-        <div class="col">
-            <table id="help_table" class="table table-bordered">
-                <thead>
-                <tr>
-                    <th scope="col" data-sortable="true">Interaction</th>
-                    <th scope="col" data-sortable="true">Explanation</th>
-                </tr>
-                </thead>
-                <tbody id="help_table_body">
-                <tr>
-                    <td>associated</td>
-                    <td>The general relation associated describes that two concepts are mentioned within the same
-                        sentence and connected via a verb/keyword.
-                    </td>
-                </tr>
-                <tr>
-                    <td>administered</td>
-                    <td>Administered describes that some substance (Chemical, Drug, Excipient or Plant Family) is
-                        given in a dosage dorm (tablet, injection, etc.).
-                    </td>
-                </tr>
-                <tr>
-                    <td>compares</td>
-                    <td>Compares describes that some concepts are compared.</td>
-                </tr>
-                <tr>
-                    <td>decreases</td>
-                    <td>Decreases describes that some effect is lowered, e.g., a drug might lower the expression of
-                        some target. A search for decreases also includes searches for the inhibits relation.
-                    </td>
-                </tr>
-                <tr>
-                    <td>induces</td>
-                    <td>Induces describes that some effect / expression is increased, e.g., a drug might increase
-                        the expression of a disease. Induces may be used to search for side effects.
-                    </td>
-                </tr>
-                <tr>
-                    <td>interacts</td>
-                    <td>Interacts describe an interaction between concepts (drugs, targets, etc.). A search for
-                        interacts
-                        also includes searches for metabolises and inhibits.
-                    </td>
-                </tr>
-                <tr>
-                    <td>inhibits</td>
-                    <td>Inhibits describes an inhibition of some target, e.g., a drug might inhibit some target.
-                    </td>
-                </tr>
-                <tr>
-                    <td>metabolises</td>
-                    <td>Metabolises describes that a target is metabolised by some substance, e.g., a drug might be
-                        metabolised by a target.
-                    </td>
-                </tr>
-                <tr>
-                    <td>method</td>
-                    <td>Method describes a relation that involves a method or lab method, e.g., a drug might be
-                        analysed via a method.
-                    </td>
-                </tr>
-                <tr>
-                    <td>treats</td>
-                    <td>Treats describe that some disease or species is treated with a substance (Chemical, Drug,
-                        Excipient), e.g., a drug might prevent or lower the expression of some disease.
-                    </td>
-                </tr>
-
-                </tbody>
-            </table>
+        <h2>Team and Collaborators</h2>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/hermann.png" alt="Hermann Kroll">
+                        <div class="description">
+                            <p class="name-text">Hermann Kroll</p>
+                            <p>Computer Scientist</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/tilo.png" alt="Prof. Dr. Wolf-Tilo Balke">
+                        <div class="description">
+                            <p class="name-text">Wolf-Tilo Balke</p>
+                            <p>Professor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/christina.jpg" alt="Christina Draheim">
+                        <div class="description">
+                            <p class="name-text">Christina Draheim</p>
+                            <p>Pharmacist</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/stefan.jpg" alt="Stefan Wulle">
+                        <div class="description">
+                            <p class="name-text">Stefan Wulle</p>
+                            <p>Pharmacist</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/johannes.png" alt="Johannes Ruthmann">
+                        <div class="description">
+                            <p class="name-text">Johannes Ruthmann</p>
+                            <p>Research Assistant</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/user.png" alt="Jan Pirklbauer">
+                        <div class="description">
+                            <p class="name-text">Jan Pirklbauer</p>
+                            <p>Research Assistant</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/morris.jpg" alt="Morris Kunz">
+                        <div class="description">
+                            <p class="name-text">Morris Kunz</p>
+                            <p>Research Assistant</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/pascal.png" alt="Pascal Sackhoff">
+                        <div class="description">
+                            <p class="name-text">Pascal Sackhoff</p>
+                            <p>Research Assistant</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <img src="../../static/assets/team/matthias.png" alt="Bill Matthias Thang">
+                        <div class="description">
+                            <p class="name-text">Bill Matthias Thang</p>
+                            <p>Research Assistant</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <h2>Content</h2>
+        The service contains about 35 million publication abstracts from PubMed. In brief, everything that can be found
+        by a
+        PubMed search can also be found in our system.
+        In addition, we included about 50k COVID 19 pre-prints from the
+        <a href="https://preview.zbmed.de">ZB MED Preview Service</a>.
+        <!--<a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
+        <br>
+        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a> -->
+        <h2>Content</h2>
+
+        <div class="row">
+            <div class="col">
+                <table id="help_table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col" data-sortable="true">Concept Type</th>
+                        <th scope="col" data-sortable="true">Source</th>
+                        <th scope="col" data-sortable="true">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody id="help_table_body">
+                    <tr>
+                        <td>Chemical</td>
+                        <td><a href="https://www.ebi.ac.uk/chembl/">ChEMBL</a>
+                        </td>
+                        <td>general chemicals</td>
+                    </tr>
+                    <tr>
+                        <td>Drug</td>
+                        <td><a href="https://www.ebi.ac.uk/chembl/">ChEMBL</a>
+                        </td>
+                        <td>active ingredients/drug/substances (no trade names)</td>
+                    </tr>
+                    <tr>
+                        <td>Disease</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a></td>
+                        <td>diseases, symptoms, side effects</td>
+                    </tr>
+                    <tr>
+                        <td>Dosage Form</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a> + Custom
+                        </td>
+                        <td>forms in which a drug is administered / bound</td>
+                    </tr>
+                    <tr>
+                        <td>Excipient</td>
+                        <td>Custom
+                        </td>
+                        <td>ingredients / chemicals that are used in dosage forms</td>
+                    </tr>
+                    <tr>
+                        <td>HealthStatus</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a>
+                        </td>
+                        <td>Status for patients (women, men, alcoholics, ...)</td>
+                    </tr>
+                    <tr>
+                        <td>Method</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a>
+                        </td>
+                        <td>general methods for investigation</td>
+                    </tr>
+                    <tr>
+                        <td>LabMethod</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a>
+                        </td>
+                        <td>manually selected subset of Methods that are classfied as labor relevant methods</td>
+                    </tr>
+                    <tr>
+                        <td>PlantFamiliy/Genus	</td>
+                        <td><a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Wikidata</a>
+                        </td>
+                        <td>Plants (Families, Genus). Additional Cleaning is performed.</td>
+                    </tr>
+                    <tr>
+                        <td>Target</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/gene">NCBI Genes</a>
+                        </td>
+                        <td>Pharmaceutical Targets (proteases, lactamase, ...)</td>
+                    </tr>
+                    <tr>
+                        <td>Vaccine</td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/mesh/">MeSH</a>
+                        </td>
+                        <td>Vaccines for different diseases</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h2>Interactions</h2>
+
+        <div class="row">
+            <div class="col">
+                <table id="help_table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col" data-sortable="true">Interaction</th>
+                        <th scope="col" data-sortable="true">Explanation</th>
+                    </tr>
+                    </thead>
+                    <tbody id="help_table_body">
+                    <tr>
+                        <td>associated</td>
+                        <td>The general relation associated describes that two concepts are mentioned within the same
+                            sentence and connected via a verb/keyword.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>administered</td>
+                        <td>Administered describes that some substance (Chemical, Drug, Excipient or Plant Family) is
+                            given in a dosage dorm (tablet, injection, etc.).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>compares</td>
+                        <td>Compares describes that some concepts are compared.</td>
+                    </tr>
+                    <tr>
+                        <td>decreases</td>
+                        <td>Decreases describes that some effect is lowered, e.g., a drug might lower the expression of
+                            some target. A search for decreases also includes searches for the inhibits relation.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>induces</td>
+                        <td>Induces describes that some effect / expression is increased, e.g., a drug might increase
+                            the expression of a disease. Induces may be used to search for side effects.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>interacts</td>
+                        <td>Interacts describe an interaction between concepts (drugs, targets, etc.). A search for
+                            interacts
+                            also includes searches for metabolises and inhibits.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>inhibits</td>
+                        <td>Inhibits describes an inhibition of some target, e.g., a drug might inhibit some target.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>metabolises</td>
+                        <td>Metabolises describes that a target is metabolised by some substance, e.g., a drug might be
+                            metabolised by a target.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>method</td>
+                        <td>Method describes a relation that involves a method or lab method, e.g., a drug might be
+                            analysed via a method.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>treats</td>
+                        <td>Treats describe that some disease or species is treated with a substance (Chemical, Drug,
+                            Excipient), e.g., a drug might prevent or lower the expression of some disease.
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <h2>Synonyms for Interactions</h2>
         <p>
@@ -174,50 +345,50 @@
                     </tbody>
                 </table>
             </div>
-
-            <h2>Interaction Hierarchy</h2>
-            <p>
-                The following hierarchy displays how interactions are expanded in our system, e.g., associated is
-                expanded to
-                any other relation or interacts is expanded to interacts.
-            </p>
-
-            <ul>
-                <li>
-                    associated
-                    <ul>
-                        <li>
-                            administered
-                        </li>
-                        <li>
-                            compares
-                        </li>
-                        <li>
-                            decreases
-                            <ul>
-                                <li>inhibits</li>
-                            </ul>
-                        </li>
-                        <li>
-                            induces
-                        </li>
-                        <li>
-                            interacts
-                            <ul>
-                                <li>inhibits</li>
-                                <li>metabolises</li>
-                            </ul>
-                        </li>
-                        <li>
-                            treats
-                        </li>
-                        <li>
-                            method
-                        </li>
-                    </ul>
-                </li>
-            </ul>
         </div>
+
+        <h2>Interaction Hierarchy</h2>
+        <p>
+            The following hierarchy displays how interactions are expanded in our system, e.g., associated is
+            expanded to
+            any other relation or interacts is expanded to interacts.
+        </p>
+
+        <ul>
+            <li>
+                associated
+                <ul>
+                    <li>
+                        administered
+                    </li>
+                    <li>
+                        compares
+                    </li>
+                    <li>
+                        decreases
+                        <ul>
+                            <li>inhibits</li>
+                        </ul>
+                    </li>
+                    <li>
+                        induces
+                    </li>
+                    <li>
+                        interacts
+                        <ul>
+                            <li>inhibits</li>
+                            <li>metabolises</li>
+                        </ul>
+                    </li>
+                    <li>
+                        treats
+                    </li>
+                    <li>
+                        method
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
 
 {% endblock %}

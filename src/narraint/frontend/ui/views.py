@@ -813,7 +813,6 @@ def get_provenance(request):
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
             result = QueryEngine.query_provenance_information(fp2prov_ids)
-
             time_needed = datetime.now() - start
             predication_ids = set()
             for _, pred_ids in fp2prov_ids.items():
@@ -913,6 +912,38 @@ def post_subgroup_feedback(request):
             return HttpResponse(status=500)
 
     View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+    return HttpResponse(status=500)
+
+
+def post_drug_suggestion(request):
+    data = None
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"drug", "description"}:
+        try:
+            time_start = datetime.now()
+            drug = data["drug"]
+            description = data["description"]
+
+            logging.info(f'received new drug suggestion {drug}')
+            try:
+                View.instance().query_logger.write_drug_suggestion(drug, description)
+            except IOError:
+                logging.debug('Could not write drug suggestion log file')
+            View.instance().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
+                                                        time_needed=datetime.now() - time_start)
+            return HttpResponse(status=200)
+
+        except IOError:
+            View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+
+    View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
     return HttpResponse(status=500)
 
 
@@ -1110,10 +1141,6 @@ class NewSearchView(TemplateView):
 
 class SwaggerUIView(TemplateView):
     template_name = "ui/swagger-ui.html"
-
-
-class TeamView(TemplateView):
-    template_name = "ui/team.html"
 
 
 class LogsView(TemplateView):

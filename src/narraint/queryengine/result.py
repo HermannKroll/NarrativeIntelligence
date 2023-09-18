@@ -75,7 +75,7 @@ class QueryFactExplanation:
         self.relation = relation
         self.subject_str = subject_str
         self.object_str = object_str
-        self.confidence = confidence
+        self.confidence = round(confidence, 2)
         self.predication_ids = {predication_id}
 
     def __str__(self):
