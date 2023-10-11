@@ -16,7 +16,7 @@ def build_entity_list(output):
 
 
 def build_predicate_list(output):
-    predicates = QueryEngine.query_predicates_cleaned()
+    predicates = QueryEngine.query_predicates()
     with open(output, 'w') as f:
         for idx, predicate in enumerate(predicates):
             if idx == 0:
