@@ -1,7 +1,6 @@
 import argparse
 import ast
 import itertools
-import json
 import logging
 import string
 from typing import Set
@@ -13,9 +12,9 @@ from kgextractiontoolbox.backend.models import Tag
 from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
 from kgextractiontoolbox.progress import Progress
 from narraint.analysis.querytranslation.enitytaggerjcdl import EntityTaggerJCDL
-from narraint.atc.atc_tree import ATCTree
+from narrant.atc.atc_tree import ATCTree
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, Document, JCDLInvertedTermIndex, \
+from narraint.backend.models import Document, JCDLInvertedTermIndex, \
     JCDLInvertedEntityIndex, JCDLInvertedStatementIndex, JCDLStatementSupport, JCDLEntitySupport, JCDLTermSupport, \
     Predication
 from narraint.config import QUERY_YIELD_PER_K
