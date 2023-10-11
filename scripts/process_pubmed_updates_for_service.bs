@@ -61,7 +61,7 @@ python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/backe
 python3 ~/mining/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # Do the statement extraction via our Pipeline
-python3 ~/mining/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -bs 50000 --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py -bs 50000 --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 
 

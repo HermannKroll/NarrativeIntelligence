@@ -24,4 +24,4 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classificati
 
 
 # Do the statement extraction for all $DOCUMENT_COLLECTION documents via our Pipeline
-python3 ~/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py --sections -c $DOCUMENT_COLLECTION -et PathIE --workers 26 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py --sections -c $DOCUMENT_COLLECTION -et PathIE --workers 26 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json

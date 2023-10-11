@@ -38,5 +38,5 @@ python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiont
 python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/biomedical_entity_linking.py $ZBMED_PUBTATOR -c ZBMed --skip-load --workers 1 --gnormplus
 
 # Do the statement extraction for all ZBMed documents via our Pipeline
-python3 ~/mining/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
