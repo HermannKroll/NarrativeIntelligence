@@ -1,6 +1,6 @@
 from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeConstraintStore
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
-from narraint.config import PHARM_RELATION_CONSTRAINTS, PHARM_RELATION_VOCABULARY
+from narrant.config import PHARM_RELATION_VOCABULARY, PHARM_RELATION_CONSTRAINTS
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES
 
