@@ -19,7 +19,7 @@ from narraint.backend.models import PredicationInvertedIndex, TagInvertedIndex, 
     JCDLInvertedEntityIndex, JCDLInvertedStatementIndex, JCDLStatementSupport, JCDLEntitySupport, JCDLTermSupport, \
     Predication
 from narraint.config import QUERY_YIELD_PER_K
-from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES, PREDICATE_EXPANSION
+from narrant.cleaning.pharmaceutical_vocabulary import PREDICATE_EXPANSION, SYMMETRIC_PREDICATES
 from narrant.entity.entityresolver import GeneResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.preprocessing.enttypes import GENE

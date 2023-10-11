@@ -2,7 +2,7 @@ from kgextractiontoolbox.cleaning.relation_type_constraints import RelationTypeC
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from narraint.config import PHARM_RELATION_CONSTRAINTS, PHARM_RELATION_VOCABULARY
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.queryengine.query_hints import SYMMETRIC_PREDICATES
+from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES
 
 
 class SchemaGraph:

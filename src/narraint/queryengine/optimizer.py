@@ -1,8 +1,10 @@
 from typing import List, Set
 
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, PREDICATE_TYPING, VAR_TYPE, MESH_ONTOLOGY, \
-    SYMMETRIC_PREDICATES, PREDICATE_ASSOCIATED, have_entities_correct_order
+from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, VAR_TYPE, MESH_ONTOLOGY, \
+    PREDICATE_ASSOCIATED
+from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
+    have_entities_correct_order
 from narrant.entity.entity import Entity
 from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 
