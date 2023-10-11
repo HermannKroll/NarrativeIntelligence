@@ -7,7 +7,7 @@ STOP_CRAWL_DATA="2021-12-05"
 ZBMED_PUBTATOR="/data/zbmed/zbmed.json"
 UPDATED_IDS="/data/zbmed/updated_ids.txt"
 
-TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/sql/clean_tags.sql"
+TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/sql/clean_tags.sql"
 
 
 ## Load everything

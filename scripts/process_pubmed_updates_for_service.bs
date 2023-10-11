@@ -11,7 +11,7 @@ LONGCOVID_ID_FILE="/data/pubmed/long_covid_ids.tsv"
 UPDATES_PUBTATOR="/data/pubmed/pubtator_updates.pubtator"
 UPDATED_IDS="/data/pubmed/pharmaceutical_relevant_ids.txt"
 
-TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/sql/clean_tags.sql"
+TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/sql/clean_tags.sql"
 
 
 

@@ -3,8 +3,8 @@
 # $2 - document collection
 # $3 - entity export
 # $4 - relation export
-TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_tags.sql"
-PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/sql/clean_predication.sql"
+TAG_CLEANING_SQL="/home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/sql/clean_tags.sql"
+PREDICATION_CLEANING_SQL="/home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/sql/clean_predication.sql"
 
 echo $1
 echo $2
