@@ -32,7 +32,7 @@ python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classificati
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py -c $2 -et PathIE --workers 26 --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
 
 # Do the canonicalizing step
-python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c $2 --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab /home/kroll/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c $2 --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab /home/kroll/NarrativeIntelligence/lib/NarrativeAnnotation/resources/pharm_relation_vocab.json
 
 # Apply the rules
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/cleaning/pharmaceutical_rules.py -c $2
