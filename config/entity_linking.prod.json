@@ -1,0 +1,30 @@
+{
+  "pmcid2pmid": "/home/kroll/tools/pmcid2pmid.tsv",
+  "pmc_dir": "/hdd2/datasets/pubmed_central",
+  "taggerOne": {
+    "root": "/home/kroll/tools/tagger/TaggerOne-0.2.1",
+    "model": "models/model_BC5CDRJ_011.bin",
+    "batchSize": 10000,
+    "timeout": 10,
+    "max_retries": 1
+  },
+  "gnormPlus": {
+    "root": "/home/kroll/tools/tagger/GNormPlusJava",
+    "javaArgs": "-Xmx100G -Xms30G",
+    "timeout": 10
+  },
+  "dnorm": "/home/kroll/tools/tagger/DNorm-0.0.7",
+  "tmchem": "/home/kroll/tools/tagger/tmChemM1-0.0.2",
+   "dict": {
+    "max_words": 5,
+    "check_abbreviation": "true",
+    "custom_abbreviations": "true",
+    "min_full_tag_len": 5
+  },
+  "drug": {
+    "check_products" : 0,
+    "max_per_product": 2,
+    "min_name_length": 3,
+    "ignore_excipient_terms": 1
+  }
+}
