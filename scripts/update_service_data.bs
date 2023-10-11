@@ -28,7 +28,7 @@ python3 ~/mining/NarrativeIntelligence/src/narraint/backend/load_pubmed_metadata
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py --word2vec_model /data/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
 # Apply the rules
-python3 ~/mining/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/cleaning/pharmaceutical_rules.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 
 # Execute Cleaning Rules for Predications
 echo 'cleaning predication table with hand-written rules'

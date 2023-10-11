@@ -35,7 +35,7 @@ python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extra
 python3 ~/KGExtractionToolbox/src/kgextractiontoolbox/cleaning/canonicalize_predicates.py -c $2 --word2vec_model /home/kroll/workingdir/BioWordVec_PubMed_MIMICIII_d200.bin --relation_vocab ~/NarrativeIntelligence/resources/pha$
 
 # Apply the rules
-python3 ~/NarrativeIntelligence/src/narraint/cleaning/pharmaceutical_rules.py -c $2
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/cleaning/pharmaceutical_rules.py -c $2
 
 # Execute Cleaning Rules for Predications
 echo 'cleaning predication table with hand-written rules'
