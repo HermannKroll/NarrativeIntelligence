@@ -2,9 +2,9 @@ import copy
 import unittest
 
 from kgextractiontoolbox.backend.database import Session
-from narraint.backend.retrieve import retrieve_narrative_documents_from_database
-from narraint.document.load_narrative_documents import narrative_document_bulk_load
-from narraint.document.narrative_document import NarrativeDocument
+from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
+from kgextractiontoolbox.document.load_narrative_documents import narrative_document_bulk_load
+from narrant.document import NarrativeDocument
 from nitests import util
 
 

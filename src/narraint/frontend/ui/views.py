@@ -22,7 +22,7 @@ from sqlalchemy.exc import OperationalError
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
-from narraint.backend.retrieve import retrieve_narrative_documents_from_database
+from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entitytagger import EntityTagger

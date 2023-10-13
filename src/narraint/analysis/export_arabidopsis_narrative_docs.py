@@ -4,7 +4,7 @@ import logging
 
 from kgextractiontoolbox.backend.models import Tag
 from narraint.backend.database import SessionExtended
-from narraint.backend.retrieve import retrieve_narrative_documents_from_database
+from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 
 
 def main(args=None):
