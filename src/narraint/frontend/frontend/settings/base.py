@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(DJANGO_PROJ_DIR, ...)
 # noinspection PyUnresolvedReferences
-from narraint.config import DATA_DIR, SEMMEDDB_CONFIG, LOG_DIR
+from narraint.config import DATA_DIR, LOG_DIR
 
 DJANGO_PROJ_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

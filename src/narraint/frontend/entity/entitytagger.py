@@ -13,7 +13,7 @@ import datrie
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
-from narraint.atc.atc_tree import ATCTree
+from narrant.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
 from narrant.entity.entity import Entity

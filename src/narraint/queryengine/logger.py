@@ -148,6 +148,7 @@ class QueryLogger:
 
     def write_drug_suggestion(self, drug: str, description: str):
         log_file_name = os.path.join(self.log_drug_suggestion, f'{time.strftime("%Y-%m-%d")}-drug-suggestion.log')
+        description = description.replace("\n", " ").replace("\r", " ").replace("\t", " ")
         log_entry = f'{drug}\t{description}'
         write_entry(log_entry, log_file_name, self.drug_suggestion_header, "drug suggestion")
 

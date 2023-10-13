@@ -2,7 +2,7 @@ import itertools
 from typing import List
 
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import PREDICATE_EXPANSION, SYMMETRIC_PREDICATES, ENTITY_TYPE_EXPANSION
+from narrant.cleaning.pharmaceutical_vocabulary import ENTITY_TYPE_EXPANSION, PREDICATE_EXPANSION, SYMMETRIC_PREDICATES
 
 
 class QueryExpander:

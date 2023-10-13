@@ -8,7 +8,7 @@ from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex, EntityKeywords
-from narraint.queryengine.generate_drug_keywords import set_stopword_list, generate_keywords, generate_stem_dict
+from narraint.keywords.generate_drug_keywords import set_stopword_list, generate_keywords, generate_stem_dict
 from narrant.entity.entityresolver import EntityResolver
 from narrant.preprocessing.enttypes import DISEASE
 

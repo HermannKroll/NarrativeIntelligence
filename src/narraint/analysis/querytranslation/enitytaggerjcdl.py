@@ -2,14 +2,13 @@ import gzip
 import logging
 import os.path
 import pickle
-import string
 from collections import defaultdict
 from itertools import islice
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import Progress
-from narraint.atc.atc_tree import ATCTree
+from narrant.atc.atc_tree import ATCTree
 from narraint.backend.models import JCDLInvertedEntityIndex
 from narraint.config import TMP_DIR
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY

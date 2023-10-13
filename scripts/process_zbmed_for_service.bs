@@ -7,7 +7,7 @@ STOP_CRAWL_DATA="2021-12-05"
 ZBMED_PUBTATOR="/data/zbmed/zbmed.json"
 UPDATED_IDS="/data/zbmed/updated_ids.txt"
 
-TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/sql/clean_tags.sql"
+TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/sql/clean_tags.sql"
 
 
 ## Load everything
@@ -17,7 +17,7 @@ TAG_CLEANING_SQL="/home/kroll/mining/NarrativeIntelligence/sql/clean_tags.sql"
 curl 'https://preview.zbmed.de/api/documents/' -X 'POST' -H 'Content-Type: application/json' -H 'Accept: application/json' --data-binary '{"size":40000,"from":0,"query":{"bool":{"must":[{"range":{"date":{"gte":"2022-09-01||/M"}}}]}},"sort":[{"_score":{"order":"asc"}}],"track_total_hits":true}' > $ZBMED_JSON
 
 # Load everything
-python3 ~/mining/NarrativeIntelligence/src/narraint/backend/load_zbmed_json.py $ZBMED_JSON -c ZBMed
+python3 ~/mining/NarrativeIntelligence/src/narraint/document/load_zbmed_json.py $ZBMED_JSON -c ZBMed
 
 # Next, tag the documents with our PharmDictTagger
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/preprocessing/dictpreprocess.py -c ZBMed --skip-load --workers 5
@@ -38,5 +38,5 @@ python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiont
 python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/biomedical_entity_linking.py $ZBMED_PUBTATOR -c ZBMed --skip-load --workers 1 --gnormplus
 
 # Do the statement extraction for all ZBMed documents via our Pipeline
-python3 ~/mining/NarrativeIntelligence/src/narraint/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/resources/pharm_relation_vocab.json
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py -c ZBMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/pharm_relation_vocab.json
 
