@@ -2,9 +2,9 @@ Django~=4.2
 gunicorn~=20.1.0
 sphinx~=2.3.1
 pandas~=1.1.4
-pytest~=6.2.1
+pytest~=6.2.5
 datrie~=0.8.2
-asgiref
+asgiref~=3.6.0
 SQLAlchemy~=1.4.23
 nltk~=3.8.1
 lxml~=4.9.1
@@ -16,3 +16,4 @@ click~=7.1.2
 Pillow~=9.3.0
 eldar~=0.0.8
 unidecode~=1.2.0
+git+https://github.com/LIAAD/yake
