@@ -52,21 +52,8 @@ class DocumentTranslation(models.DocumentTranslation):
     pass
 
 
-class DocumentMetadata(Extended, DatabaseTable):
-    __tablename__ = 'document_metadata'
-    __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
-    )
-
-    document_id = Column(BigInteger, nullable=False, index=True)
-    document_collection = Column(String, nullable=False, index=True)
-    document_id_original = Column(String, nullable=True)
-    authors = Column(String, nullable=True)
-    journals = Column(String, nullable=True)
-    publication_year = Column(Integer, nullable=True)
-    publication_month = Column(Integer, nullable=True)
-    publication_doi = Column(String, nullable=True)
+class DocumentMetadata(models.DocumentMetadata):
+    pass
 
 
 class DocumentMetadataService(Extended, DatabaseTable):
