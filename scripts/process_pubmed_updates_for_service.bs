@@ -44,9 +44,8 @@ python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiont
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/entitylinking/classification.py  -i $UPDATES_PUBTATOR -c PubMed -r /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/plant_specific_rules.txt --cls PlantSpecific -w 15 --skip-load
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/classification/apply_svm.py -i $UPDATES_PUBTATOR -c PubMed /home/kroll/pharmaceutical_technology_articles_svm.pkl --cls PharmaceuticalTechnology --workers 2
 
-
 # Load Pharmaceutical Journals as Pharmaceutical Technology
-python3 ~/mining/NarrativeIntelligence/src/narraint/backend/export_articles_from_journals.py /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/pharmaceutical_technology_journals.txt $PHARM_TECH_IDS -c PubMed
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/backend/export_articles_from_journals.py /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/classification/pharmaceutical_technology_journals.txt $PHARM_TECH_IDS -c PubMed
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py  $PHARM_TECH_IDS PharmaceuticalTechnology -c PubMed
 
 
@@ -58,7 +57,7 @@ python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/backe
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/backend/load_classification_for_documents.py $LONGCOVID_ID_FILE LongCovid -c PubMed
 
 # Finally, all files have been tagged
-python3 ~/mining/NarrativeIntelligence/src/narraint/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/narrant/analysis/export_relevant_pharmaceutical_documents.py $UPDATED_IDS -c PubMed
 
 # Do the statement extraction via our Pipeline
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/extraction/pharmaceutical_pipeline.py -bs 50000 --idfile $UPDATED_IDS -c PubMed -et PathIE --workers 2 --relation_vocab /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/pharm_relation_vocab.json
