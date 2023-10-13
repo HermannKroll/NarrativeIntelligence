@@ -13,7 +13,7 @@ psutil~=5.7.3
 ijson~=3.1.4
 requests~=2.31.0
 click~=7.1.2
-Pillow~=9.3.0
+Pillow~=10.0.1
 eldar~=0.0.8
 unidecode~=1.2.0
 git+https://github.com/LIAAD/yake
