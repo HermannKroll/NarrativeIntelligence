@@ -12,7 +12,15 @@ class TitleFilter:
         else:
             # match word will have the same effect
             search_str = search_str.replace('*', '')
-            eldar_q = Query(search_str, match_word=False)
+            search_str = search_str.strip()
+
+            # only replace space by and if boolean operators are not explicitly searched
+            if ' and ' not in search_str and ' or ' not in search_str:
+                search_str = search_str.replace(' ', ' and ')
+
+            search_str = search_str.replace('+', ' ')
+            search_str = search_str.strip()
+            eldar_q = Query(search_str, match_word=False, ignore_case=True)
             return list([r for r in results if eldar_q(r.title)])
 
 

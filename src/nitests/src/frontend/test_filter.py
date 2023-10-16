@@ -17,6 +17,8 @@ class FilterTestCase(TestCase):
             QueryDocumentResult(5, "Hello", "", "", 2024, 10, {}, 0, {}, "", document_classes=["a", "b"])]
 
     def test_title_filter(self):
+        self.assertEqual(3, len(TitleFilter.filter_documents(self.results, "Test")))
+        self.assertEqual(3, len(TitleFilter.filter_documents(self.results, "TesT")))
         self.assertEqual(3, len(TitleFilter.filter_documents(self.results, "test")))
         self.assertEqual(3, len(TitleFilter.filter_documents(self.results, "te*")))
         self.assertEqual(3, len(TitleFilter.filter_documents(self.results, "*es*")))
@@ -25,6 +27,15 @@ class FilterTestCase(TestCase):
         self.assertEqual(4, len(TitleFilter.filter_documents(self.results, "test or a")))
         self.assertEqual(5, len(TitleFilter.filter_documents(self.results, "(test or a) or hello")))
         self.assertEqual(0, len(TitleFilter.filter_documents(self.results, "(test or a) and hello")))
+
+        dsys = QueryDocumentResult(5, "This is a syStematic about review  bla", "", "", 2024, 10, {}, 0, {}, "")
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systemat")))
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systematIC")))
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systemat review")))
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systemat* review")))
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systemat* revi*")))
+        self.assertEqual(1, len(TitleFilter.filter_documents([dsys], "systematic review")))
+        self.assertEqual(0, len(TitleFilter.filter_documents([dsys], "systematic+review")))
 
     def test_time_filter(self):
         self.assertEqual(5, len(TimeFilter.filter_documents_by_year(self.results, year_start=2018, year_end=0)))
