@@ -109,6 +109,9 @@ class EntityTaggerTestCase(TestCase):
             found_ids = set([t.entity_id for t in self.entity_tagger.tag_entity(nt)])
             self.assertGreaterEqual(len(found_ids.intersection(valid_neoplasms_ids)), len(valid_neoplasms_ids))
 
+    def test_mesh_supplement_entries(self):
+        self.assertIn('MESH:C535563', [t.entity_id for t in self.entity_tagger.tag_entity('Absence of Tibia')])
+
     def test_plant_families(self):
         """
         Tests whether plant family names can be tagged correctly

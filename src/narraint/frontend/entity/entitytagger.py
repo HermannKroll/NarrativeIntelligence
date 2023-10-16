@@ -13,13 +13,15 @@ import datrie
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
+from narraint.backend.models import Tag
 from narrant.atc.atc_tree import ATCTree
 from narraint.config import ENTITY_TAGGING_INDEX
-from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY
+from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY, MESH_SUPPLEMENTARY_FILE
 from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
+from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE, TARGET, ORGANISM
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
@@ -97,6 +99,7 @@ class EntityTagger:
         self._add_gene_terms()
         self._add_excipient_terms()
         self._add_mesh_tags()
+        self._add_mesh_supplements()
         self._add_chembl_atc_classes()
         self._add_chembl_drugs()
         self._add_chembl_chemicals()
@@ -215,6 +218,33 @@ class EntityTagger:
                         continue
             except KeyError:
                 continue
+
+    def _add_mesh_supplements(self, mesh_supplement_file=MESH_SUPPLEMENTARY_FILE):
+        # All MeSH supplements are Diseases in our database
+        # However, loading all supplements into the index will be too large
+        # That is why we query all tagged MeSH supplements first and use them to build the index
+        logging.info(f'Reading MeSH supplement file: {mesh_supplement_file}')
+        mesh_supp = MeSHDBSupplementary()
+        mesh_supp.load_xml(filename=mesh_supplement_file, prefetch_all=True)
+
+        logging.info('Query all MeSH supplements from Tag table...')
+        session = Session.get()
+        q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_id.like('MESH:C%'))
+        used_supplements_records = set()
+        for r in q:
+            used_supplements_records.add(r[0])
+
+        logging.info(f'{len(used_supplements_records)} supplement records found in DB. Extracting terms...')
+        for record in used_supplements_records:
+            r_id = record.replace('MESH:', '')
+            try:
+                supp_record = mesh_supp.record_by_id(r_id)
+                self.__add_term(supp_record.name.lower(), record, DISEASE)
+                for term in supp_record.terms:
+                    term_str = term.string.lower()
+                    self.__add_term(term_str, record, DISEASE)
+            except ValueError:
+                pass
 
     def _add_chembl_drugs(self):
         logging.info('Adding ChEMBL drugs...')
