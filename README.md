@@ -448,9 +448,6 @@ Connect via an SFTP client or download the zip via scp.
 
 # Development
 
-## Setting up the Test Suite
-Just execute src/nitests folder via pytests.
-
 
 ## Project structure
 The projects core, the `narraint` package, consists of several Python packages and modules with do a certain job:
@@ -458,15 +455,13 @@ The projects core, the `narraint` package, consists of several Python packages a
 | Package       | Task                                                                                          |
 |---------------|-----------------------------------------------------------------------------------------------|
 | `analysis`    | Python scripts to compute database statistics and research stuff                              |
-| `atc`         | ATC Drug Classification stuff                                                                 |
 | `backend`     | Connection to database, loading and exporting                                                 |
-| `cleaning`    | Extraction DB cleaning (predicate cleaning and integrity constraints)                         |
-| `extraction`  | Pharmaceutical extraction pipeline                                                            |
-| `document`    | Narrative Document Class                                                                      |
 | `frontend`    | Narrative Service Web Service                                                                 |
-| `pubmedutils` | Wrapper classes for PubTator documents as well as useful functionality for PubTator documents |
 | `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (retrieval)        
 
+
+## Setting up the Test Suite
+Just execute src/nitests folder via pytests.
 
 ## SSH Server Interpreter
 Check out the latest version of the project. 
