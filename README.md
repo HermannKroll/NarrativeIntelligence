@@ -307,19 +307,6 @@ http {
         return 301 https://narrative.pubpharm.de$request_uri;
     }
     
-    # Redirect every www* response because our certificate has no wildcard
-    server {
-        server_name www.narrative.pubpharm.de;
-        listen 443 ssl;
-
-                ssl_certificate  /etc/nginx/narrative.pubpharm.de.pem;
-        ssl_certificate_key /etc/nginx/narrative.pubpharm.de.key;
-        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers         HIGH:!aNULL:!MD5;
-
-        return 301 https://narrative.pubpharm.de$request_uri;
-    }
-
     server {
         # Running port
         listen 443 ssl;
