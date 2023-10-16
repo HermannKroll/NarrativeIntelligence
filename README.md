@@ -425,6 +425,24 @@ sudo chmod -R 775 /var/www
 
 Start the service again.
 
+
+# Export User Ratings and Log Files
+First export ratings from the database. 
+Make sure that the virtual environment narraint is activated and that your Python path is configured properly. 
+```
+python ~/NarrativeIntelligence/src/narraint/backend/export_predication_ratings.py ~/ratings_2023_10_16.json
+python ~/NarrativeIntelligence/src/narraint/backend/export_subgroup_ratings.py ~/subgroup_ratings_2023_10_16.json
+```
+
+Next zip log files + ratings:
+```
+cd ~
+zip -r logs_2023_10_16.zip subgroup_ratings_* run_* ratings* NarrativeIntelligence/logs/* NarrativeIntelligence/reports/* *.json
+```
+
+Connect via an SFTP client or download the zip via scp. 
+
+
 # Data Mining (Update Service Data)
 
 
