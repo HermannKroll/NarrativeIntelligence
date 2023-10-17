@@ -432,10 +432,14 @@ Connect via an SFTP client or download the zip via scp.
 
 # Data Mining (Update Service Data)
 
+## Vocabularies Updates
+If the vocabularies have been updated, the service requires new indexes to translate strings to entity ids.
+Make sure, that you are connected to the fidpharmazie database.
+Run:
 ```
-
+python src/narraint/build_all_indexes.py
 ```
-
+Indexes should now be up-to-date.
 
 
 # Development
