@@ -16,6 +16,8 @@ from kgextractiontoolbox.progress import print_progress_with_eta
 class AutocompletionUtil:
     __instance = None
 
+    VERSION = 1
+
     @staticmethod
     def instance(load_index=True):
         if AutocompletionUtil.__instance is None:
@@ -38,8 +40,13 @@ class AutocompletionUtil:
             self.known_drug_terms = set()
             self.trie = None
             self.drug_trie = None
+            self.version = None
             if load_index:
-                self.load_autocompletion_index()
+                try:
+                    self.load_autocompletion_index()
+                except ValueError:
+                    logging.info('Autocompletion index is outdated. Creating a new one...')
+                    self.build_autocompletion_index()
             AutocompletionUtil.__instance = self
 
     def __build_trie_structure(self, known_terms):
@@ -68,14 +75,18 @@ class AutocompletionUtil:
         self.drug_trie = self.__build_trie_structure(known_terms=self.known_drug_terms)
 
         self.logger.info(f'Storing index structure to: {index_path}')
+        self.version = AutocompletionUtil.VERSION
         with open(index_path, 'wb') as f:
-            pickle.dump((self.trie, self.drug_trie), f)
+            pickle.dump((self.version, self.trie, self.drug_trie), f)
 
     def load_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
         if os.path.isfile(index_path):
             self.logger.info('Loading autocompletion index...')
             with open(index_path, 'rb') as f:
-                self.trie, self.drug_trie = pickle.load(f)
+                self.version, self.trie, self.drug_trie = pickle.load(f)
+
+                if self.version != AutocompletionUtil.VERSION:
+                    raise ValueError('Autocompletion index is outdated.')
         else:
             self.logger.info(f'Autocompletion index does not exists: {index_path}')
 

@@ -43,6 +43,8 @@ class EntityTagger:
     """
     __instance = None
 
+    VERSION = 1
+
     @staticmethod
     def instance(load_index=True):
         if EntityTagger.__instance is None:
@@ -60,22 +62,33 @@ class EntityTagger:
             self.mesh_ontology = MeSHOntology.instance()
             trans_map = {p: '' for p in string.punctuation}
             self.__translator = str.maketrans(trans_map)
+            self.version = None
             if load_index:
-                self._load_index()
+                try:
+                    self._load_index()
+                except ValueError:
+                    # The index has been outdated or is old - create a new one
+                    logging.info('Index is outdated. Creating a new one...')
+                    self.store_index()
             EntityTagger.__instance = self
 
     def _load_index(self, index_path=ENTITY_TAGGING_INDEX):
         logging.info(f'Loading entity tagging index from {index_path}')
         with open(index_path, 'rb') as f:
-            self.known_terms, self.term2entity = pickle.load(f)
+            self.version, self.known_terms, self.term2entity = pickle.load(f)
+
+            if self.version != EntityTagger.VERSION:
+                raise ValueError('Entitytagging index is outdated.')
+
         logging.info(f'Index load ({len(self.term2entity)} different terms)')
 
     def store_index(self, index_path=ENTITY_TAGGING_INDEX):
+        self.version = EntityTagger.VERSION
         logging.info('Computing entity tagging index...')
         self._create_reverse_index()
         logging.info(f'Storing index to {index_path}')
         with open(index_path, 'wb') as f:
-            pickle.dump((self.known_terms, self.term2entity), f)
+            pickle.dump((self.version, self.known_terms, self.term2entity), f)
         logging.info('Index stored')
 
     def __add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
