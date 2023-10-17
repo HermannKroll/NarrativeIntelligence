@@ -444,12 +444,12 @@ Connect via an SFTP client or download the zip via scp.
 ## Project structure
 The projects core, the `narraint` package, consists of several Python packages and modules with do a certain job:
 
-| Package       | Task                                                                                          |
-|---------------|-----------------------------------------------------------------------------------------------|
-| `analysis`    | Python scripts to compute database statistics and research stuff                              |
-| `backend`     | Connection to database, loading and exporting                                                 |
-| `frontend`    | Narrative Service Web Service                                                                 |
-| `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (retrieval)        
+| Package       | Task                                                                                   |
+|---------------|----------------------------------------------------------------------------------------|
+| `analysis`    | Scripts to analyse things + Research staff                                             |
+| `backend`     | Connection to database, loading and exporting                                          |
+| `frontend`    | Narrative Service Web Service                                                          |
+| `queryengine` | Engine to match graph queries (basic graph patterns) to our database facts (retrieval) 
 
 
 ## Setting up the Test Suite
