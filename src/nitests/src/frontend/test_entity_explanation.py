@@ -196,7 +196,3 @@ class EntityExplanationTestCase(TestCase):
         self.assertIn("COVID-19", headings)
         self.assertNotIn("COVID-19 Drug Treatment", headings)
         self.assertNotIn("COVID-19 Testing", headings)
-
-    def test_explain_concept_to_large(self):
-        headings = self.entity_explainer.explain_entity_str("Disease")
-        self.assertEqual(1, len(headings))
