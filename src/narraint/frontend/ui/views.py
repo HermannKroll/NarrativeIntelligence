@@ -25,9 +25,9 @@ from narraint.backend.models import Predication, PredicationRating, \
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.frontend.entity.util import explain_concept_translation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
@@ -54,6 +54,7 @@ class View:
     """
     entity_tagger = None
     cache = None
+    explainer = None
 
     _instance = None
     initialized = False
@@ -73,6 +74,7 @@ class View:
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil.instance()
             cls.translation = QueryTranslation()
+            cls.explainer = EntityExplainer.instance()
 
         return cls._instance
 
@@ -1098,10 +1100,24 @@ def get_keywords(request):
 
 
 def get_explain_translation(request):
-    if "concept" in request.GET:
+    if "concept" in request.GET and 'query' in request.GET:
         try:
             concept = str(request.GET["concept"]).strip()
-            headings = explain_concept_translation(concept)
+            search_string = str(request.GET.get("query", "").strip())
+            logging.info(f'checking query: {search_string}')
+            query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+                search_string)
+
+            if not query_fact_patterns:
+                return JsonResponse(dict(headings=["Please complete query first"]))
+
+            # If the search string starts with the concepts,
+            if search_string.startswith(concept):
+                entities = query_fact_patterns.fact_patterns[0].subjects
+            else:
+                entities = query_fact_patterns.fact_patterns[0].objects
+
+            headings = View.explainer.explain_entities(entities)
             return JsonResponse(dict(headings=headings))
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))

@@ -1737,11 +1737,17 @@ function initializeValues(slider, value, min, max) {
 
 function getSynonyms(element_id, ev) {
     let concept = getTextOrPlaceholderFromElement(element_id);
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    let predicate_input = document.getElementById('input_predicate');
+    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    let query_text = subject + ' ' + predicate + ' ' + object;
     if (concept !== "") {
         let request = $.ajax({
             url: explain_translation_url,
             data: {
                 concept: concept,
+                query: query_text
             }
         });
         request.done(function (response) {
