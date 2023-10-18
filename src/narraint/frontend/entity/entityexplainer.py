@@ -85,15 +85,6 @@ class EntityExplainer(EntityIndexBase):
             known_prefixes.add(h.translate(self.__translator).lower())
             selected_headings.append(h)
 
-        #       for p in selected_prefixes:
-        # we already selected that prefix
-        #          if self.is_name_prefix(p, h):
-        #             already_selected = True
-        #            break
-        #   if not already_selected:
-        # We did not consider it yet - take it
-        #      selected_prefixes.append(h)
-
         return selected_headings
 
     def explain_entities(self, entities, truncate_at_k=25):
