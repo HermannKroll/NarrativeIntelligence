@@ -1,12 +1,10 @@
 import gzip
 import logging
 import os.path
-import pickle
 import string
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
-from typing import Set
 
 import datrie
 
@@ -15,9 +13,7 @@ from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.backend.models import Tag
 from narrant.atc.atc_tree import ATCTree
-from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY, MESH_SUPPLEMENTARY_FILE
-from narrant.entity.entity import Entity
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
@@ -81,7 +77,7 @@ class EntityIndexBase:
                 components = str(line).strip().split('\t')
                 gene_id = int(components[1])
                 if gene_id in gene_ids_in_db:
-                    gene_symbol = components[2].strip()
+                    gene_symbol = components[2].strip().lower()
                     synonyms = components[4]
                     description = components[8].strip()
                     self._add_term(gene_symbol, gene_symbol, GENE)
