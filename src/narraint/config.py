@@ -36,6 +36,9 @@ MESH_DISEASE_TREE_JSON = os.path.join(RESOURCE_DIR, "mesh_disease_tree.json")
 # Entity Tagging index
 ENTITY_TAGGING_INDEX = os.path.join(TMP_DIR, 'entity_tagging_index.pkl')
 
+# Entity Explainer Index
+ENTITY_EXPLAINER_INDEX = os.path.join(TMP_DIR, 'entity_explainer_index.pkl')
+
 # Autocompletion Index
 AUTOCOMPLETION_TMP_INDEX = os.path.join(TMP_DIR, 'autocompletion.pkl')
 
