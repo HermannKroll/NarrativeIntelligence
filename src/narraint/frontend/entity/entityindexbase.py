@@ -78,7 +78,7 @@ class EntityIndexBase:
         logging.info('Reading gene input file: {}'.format(gene_input))
         with gzip.open(gene_input, 'rt') as f:
             for line in islice(f, 1, None):
-                components = line.strip().split('\t')
+                components = str(line).strip().split('\t')
                 gene_id = int(components[1])
                 if gene_id in gene_ids_in_db:
                     gene_symbol = components[2].strip()
