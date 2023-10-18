@@ -185,3 +185,18 @@ class EntityExplanationTestCase(TestCase):
             terms = [t for t in self.entity_explainer.explain_entity_str(n1, truncate_at_k=1000)]
             for n2 in names:
                 self.assertIn(n2, terms)
+
+    def test_explain_concept_prefix_filter(self):
+        headings = self.entity_explainer.explain_entity_str("Diabetes", truncate_at_k=10000)
+        self.assertIn("Diabetes Mellitus", headings)
+        self.assertNotIn("Diabetes Mellitus Type 1", headings)
+        self.assertNotIn("Diabetes Mellitus Type 2", headings)
+
+        headings = self.entity_explainer.explain_entity_str("Covid 19", truncate_at_k=10000)
+        self.assertIn("COVID-19", headings)
+        self.assertNotIn("COVID-19 Drug Treatment", headings)
+        self.assertNotIn("COVID-19 Testing", headings)
+
+    def test_explain_concept_to_large(self):
+        headings = self.entity_explainer.explain_entity_str("Disease")
+        self.assertEqual(1, len(headings))
