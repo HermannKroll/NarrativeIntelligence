@@ -1,6 +1,4 @@
 #!/bin/bash
-VACUUM_SQL="/home/kroll/mining/NarrativeIntelligence/sql/vacuum_db.sql"
-
 PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/mining/NarrativeIntelligence/scripts/highest_predication_id.txt"
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
@@ -14,12 +12,6 @@ python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_re
 python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 # Not required at the moment
 # python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_term.py
-
-# Finally vacuum all tables
-# Execute Cleaning Rules for Tagging
-# echo 'vacuum db tables...'
-# psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>FAJL2ptVm)W" -f $VACUUM_SQL
-
 
 # Export the highest known id
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
