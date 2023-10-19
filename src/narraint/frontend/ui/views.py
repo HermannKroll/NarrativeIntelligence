@@ -10,10 +10,8 @@ from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
 
-import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
@@ -1230,13 +1228,6 @@ class DocumentView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class DrugOverviewIndexView(TemplateView):
-    template_name = "ui/drug_overview_index.html"
-
-    def get(self, request, *args, **kwargs):
-        return redirect("drug_overview")
-
-
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
 
@@ -1266,43 +1257,6 @@ class MECFSView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(MECFSView.template_name)
-        return super().get(request, *args, **kwargs)
-
-
-# invokes Django to compress the results
-@gzip_page
-def get_ps_query(request):
-    if request.GET.keys() & {"query", "confidence", "sources"}:
-        query = request.GET["query"].strip()
-        confidence = request.GET["confidence"]
-        sources = request.GET["sources"]
-        if "statement" in request.GET:
-            statement = request.GET["statement"]
-        else:
-            statement = None
-        try:
-            confidence = float(confidence)
-            logging.info('Received political sciences query...')
-            logging.info(f'Search with conf. {confidence} for query: {query}')
-            if statement:
-                logging.info(f'Use statement "{statement}"')
-            logging.info(f'Sources: {sources}')
-            nd_result = requests.get(
-                f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}&statement={statement}")
-            json_data = nd_result.json()
-            if nd_result.status_code == 200:
-                return JsonResponse(status=200, data=json_data)
-        except ValueError:
-            return JsonResponse(status=500, data=dict(reason=f"confidence must be a float (not {confidence}"))
-    else:
-        return JsonResponse(status=500, data=dict(reason="query or confidence are missing"))
-
-
-class PoliticalSciencesView(TemplateView):
-    template_name = "ui/political_sciences.html"
-
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(PoliticalSciencesView.template_name)
         return super().get(request, *args, **kwargs)
 
 
