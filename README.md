@@ -500,6 +500,23 @@ Then run the bash script. This may take a while.
 bash scripts/update_service_data.bs
 ```
 
+## Vacuum Database tables
+The service database might degenerate over time if too many updates happen. 
+It might be a good idea then to vacuum full every database table (rewrite + recreate indexes). 
+Therefore, we prepared a set of SQL statements in[vacuum_db.sql](sql/vacuum_db.sql).
+
+Either log in your postgres user, open a psql shell and paste the statements manually:
+```
+sudo su postgres
+psql
+```
+
+Or execute them via psql and an explict user login:
+```
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=USER password=PW" -f $VACUUM_SQL
+```
+The user needs to have write access on the database tables.
+
 
 ## Vocabularies Updates
 If the vocabularies have been updated, the service requires new indexes to translate strings to entity ids.
