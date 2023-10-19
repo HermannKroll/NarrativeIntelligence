@@ -1,10 +1,24 @@
 # Narrative Service
-Caution: This project includes research software and is still in development.
-The project is mainly used for research.
+This repository contains the code and scripts for PubPharm's [Narrative Service](www.narrative.pubpharm.de). 
+[PubPharm](www.pubpharm.de) is a platform of the specialized information service for pharmacy (Fachinformationsdient Pharmazie). 
 
-It covers:
-- The [narrative service](https://www.narrative.pubpharm.de) 
-- Research/evaluation/brain storming scripts in the [analysis package](src/narraint/analysis)
+If you want to know details about the service, we refer the reader to [our following paper](https://doi.org/10.1007/s00799-023-00356-3):
+```
+@article{kroll2023discovery,
+  title={A discovery system for narrative query graphs: entity-interaction-aware document retrieval},
+  author={Kroll, Hermann and Pirklbauer, Jan and Kalo, Jan-Christoph and Kunz, Morris and Ruthmann, Johannes and Balke, Wolf-Tilo},
+  journal={International Journal on Digital Libraries},
+  pages={1--22},
+  year={2023},
+  publisher={Springer},
+  doi={10.1007/s00799-023-00356-3}
+}
+```
+If you use our service for your own research, please cite the previous paper. 
+Thank you.
+
+
+# Getting Started
 
 It requires two subprojects:
 - [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
@@ -33,7 +47,7 @@ For development purposes, dev should be cloned:
 git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
-## Cloning a private repository
+## Cloning a private repository (deprecated)
 When cloning a private repository of GitHub, you need to create private public key pair for your account.
 ```
 ssh-keygen
