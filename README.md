@@ -481,6 +481,7 @@ Replace $PREDICATION_MINIMUM_UPDATE_ID_FILE by a concrete path.
 ## Update Automation Script
 We wrote a script to automate the whole service update procedure. 
 The script can be found in [scripts/update_service_data.bs](scripts/update_service_data.bs).
+
 Make sure that +x is set for the script:
 ```
 chmod +x scripts/update_service_data.bs
