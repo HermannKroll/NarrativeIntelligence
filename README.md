@@ -1,10 +1,24 @@
 # Narrative Service
-Caution: This project includes research software and is still in development.
-The project is mainly used for research.
+This repository contains the code and scripts for PubPharm's [Narrative Service](www.narrative.pubpharm.de). 
+[PubPharm](www.pubpharm.de) is a platform of the specialized information service for pharmacy (Fachinformationsdient Pharmazie). 
 
-It covers:
-- The [narrative service](https://www.narrative.pubpharm.de) 
-- Research/evaluation/brain storming scripts in the [analysis package](src/narraint/analysis)
+If you want to know details about the service, we refer the reader to [our following paper](https://doi.org/10.1007/s00799-023-00356-3):
+```
+@article{kroll2023discovery,
+  title={A discovery system for narrative query graphs: entity-interaction-aware document retrieval},
+  author={Kroll, Hermann and Pirklbauer, Jan and Kalo, Jan-Christoph and Kunz, Morris and Ruthmann, Johannes and Balke, Wolf-Tilo},
+  journal={International Journal on Digital Libraries},
+  pages={1--22},
+  year={2023},
+  publisher={Springer},
+  doi={10.1007/s00799-023-00356-3}
+}
+```
+If you use our service for your own research, please cite the previous paper. 
+Thank you.
+
+
+# Getting Started
 
 It requires two subprojects:
 - [Narrative Annotation](https://github.com/HermannKroll/NarrativeAnnotation): Pharmaceutical entity linking, entity handling, entity resolving (name to id)
@@ -33,7 +47,7 @@ For development purposes, dev should be cloned:
 git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
 ```
 
-## Cloning a private repository
+## Cloning a private repository (deprecated)
 When cloning a private repository of GitHub, you need to create private public key pair for your account.
 ```
 ssh-keygen
@@ -393,7 +407,7 @@ That is why we redirect the output to a file.
 - timeout specifies when a long request will be stopped and the corresponding worker is rebooted
 
 
-# Updating the Service 
+# Updating the Service (Code)
 Switch to screen session and stop service.
 Then pull updates from GitHub.
 Note that we have to update three repositories.
@@ -431,6 +445,93 @@ Connect via an SFTP client or download the zip via scp.
 
 
 # Data Mining (Update Service Data)
+The service uses our database model. 
+However, the data mining (entity linking and statement extraction) is implemented in the NarrativeAnnotation package.
+So, please read the instructions of our [NarrativeAnnotation GitHub Page](https://github.com/HermannKroll/NarrativeAnnotation/blob/main/README.md). 
+NarrativeAnnotation contains all scripts to transform biomedical documents into graphs.
+
+
+## Update Service Reverse Indexes
+As soon as the database is updated, the service requires an update of tables for reverse indexes and metadata. 
+
+The following script will join the Document, DocumentMetadata and Predication table to update the DocumentMetadataService table. 
+The DocumentMetadataService table stores title and metadata of documents that are relevant for the service, i.e., at least a single statement was extracted from them. 
+Otherwise the document will not appear in any query result in the service and is thus not relevant for the service.
+
+Make sure that the virtual environment narraint is activated and that your Python path is configured properly. 
+Please run the following script:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
+```
+
+Next, the reverse index tables for statements and detected entities must be updated. 
+Briefly, these indexes map a statement/entity to a set of documents, from which it was extracted/detected. 
+We support two options: 
+First, the whole index can be recreated (this will take time and consumes memory).
+Therefore, run:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py 
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py
+```
+
+There is an alternative to recreating the whole index. 
+We support to specify the minimum predication id. 
+The idea is that only documents are updated in the index which are new since the last index update.
+Therefore, all predication entries are queried that have an id greater equal the minimum predication id.
+This mode is way faster and less memory intensive than recreating the whole index.
+Run: 
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
+```
+
+You can export the latest predication id via:
+```
+python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
+```
+Replace $PREDICATION_MINIMUM_UPDATE_ID_FILE by a concrete path. 
+
+
+## Update Automation Script
+We wrote a script to automate the whole service update procedure. 
+The script can be found in [scripts/update_service_data.bs](scripts/update_service_data.bs).
+
+Make sure that +x is set for the script:
+```
+chmod +x scripts/update_service_data.bs
+```
+
+You may have to open the script and adjusts paths (e.g., where to store the latest predication id).
+```
+nano scripts/update_service_data.bsh
+```
+
+**Make sure** that the file $PREDICATION_MINIMUM_UPDATE_ID_FILE exists and stores the latest predication id.
+
+
+Make sure that the virtual environment narraint is activated and that your Python path is configured properly. 
+Then run the bash script. This may take a while.
+```
+bash scripts/update_service_data.bs
+```
+
+## Vacuum Database tables
+The service database might degenerate over time if too many updates happen. 
+It might be a good idea then to vacuum full every database table (rewrite + recreate indexes). 
+Therefore, we prepared a set of SQL statements in[vacuum_db.sql](sql/vacuum_db.sql).
+
+Either log in your postgres user, open a psql shell and paste the statements manually:
+```
+sudo su postgres
+psql
+```
+
+Or execute them via psql and an explict user login:
+```
+psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=USER password=PW" -f $VACUUM_SQL
+```
+The user needs to have write access on the database tables.
+
 
 ## Vocabularies Updates
 If the vocabularies have been updated, the service requires new indexes to translate strings to entity ids.

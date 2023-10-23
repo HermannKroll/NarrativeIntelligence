@@ -1,4 +1,5 @@
-#nitests
+# nitests
+
 This is the test package for our Project.
 
 ## Structure
@@ -9,14 +10,15 @@ This is the test package for our Project.
 - util contains test helper code that can be utitlized by all tests
 - tmp a tempdir for all statically configured paths. cleared before session start
 
-
 ## Setting up test environment
-- create copy `nitests/jsonfiles/backend.example.json` called `backend.json` and change the `SQLite_path` to the corresponding absolute path
+
+- create copy `nitests/jsonfiles/backend.example.json` called `backend.json` and change the `SQLite_path` to the
+  corresponding absolute path
 
 ## Run tests
+
 - it is recommended to use pytest, but unittest should work as well
 - use src as root for tests
-
 
 ## Creating new tests
 

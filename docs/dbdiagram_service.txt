@@ -1,21 +1,97 @@
-PredicationDenorm
--
-id bigint PK
-subject_id string
-subject_type string
-relation string
-object_id string
-object_type string
-provenance_mapping string
+# This is the description of the database service schema (22/10/2023).
+# Code can be pasted on https://dbdiagram.io to generate the diagram
 
-DocumentMetadataService:
--
-document_id bigint FK >- Document.id
-document_collection string FK >- Document.collection
-document_id_original string
-title string
-authors string
-journals string
-publication_year int
-publication_month int
-publication_doi string
+Table Document {
+  id bigint [primary key]
+  collection string [primary key]
+  title string
+  abstract string
+  fulltext string [null]
+  date_inserted datetime
+}
+
+Table Predication {
+  id bigint PK
+  document_id bigint [ref: > Document.id]
+  document_collection string [ref: > Document.id]
+  subject_id string
+  subject_str string
+  subject_type string
+  predicate_org string
+  predicate string
+  relation string [null]
+  object_id string
+  object_str string
+  object_type string
+  confidence float [null]
+  sentence_id bigint [ref: > Sentence.id]
+  extraction_type string
+}
+
+Table Sentence {
+  id bigint [primary key]
+  document_collection string
+  text string
+  md5hash string
+}
+
+Table TagInvertedIndex {
+  entity_id string [primary key]
+  entity_type string [primary key]
+  document_collection string [primary key]
+  document_ids string
+}
+
+Table TermInvertedIndex {
+  term string [primary key]
+  document_collection string [primary key]
+  document_ids string 
+}
+
+Table DocumentMetadataService {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.collection]
+  document_id_original string
+  title string [null]
+  authors string [null]
+  journals string [null]
+  publication_year int [null]
+  publication_month int [null]
+  publication_doi string [null]
+  document_classifications string [null]
+}
+
+Table PredicationInvertedIndex {
+  id bigint [primary key, increment]
+  subject_id string
+  subject_type string
+  relation string
+  object_id string
+  object_type string
+  provenance_mapping string
+}
+
+Table PredicationRating {
+  user_id string [primary key]
+  query string [primary key]
+  predication_id bigint [primary key, ref: > Predication.id]
+  rating string
+  date_inserted datetime
+}
+
+Table SubstitutionGroupRating {
+  variable_name string [primary key]
+  entity_name string [primary key]
+  entity_id string [primary key]
+  entity_type string [primary key]
+  user_id string [primary key]
+  query string [primary key]
+  rating string
+  date_inserted datetime
+}
+
+Table EntityKeywords {
+  entity_id string [primary key]
+  entity_type string
+  keyword_data string
+}

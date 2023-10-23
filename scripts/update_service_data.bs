@@ -1,28 +1,8 @@
 #!/bin/bash
-ROOT_DIR="/data/pubmed/"
-VACUUM_SQL="/home/kroll/mining/NarrativeIntelligence/sql/vacuum_db.sql"
-MEDLINE_BASELINE="/data/pubmed/2021_12/"
-MEDLINE_UPDATES="/data/pubmed/2022_updates/"
 PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/mining/NarrativeIntelligence/scripts/highest_predication_id.txt"
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
 echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
-
-cd $ROOT_DIR
-mkdir $MEDLINE_BASELINE
-mkdir $MEDLINE_UPDATES
-
-# Load the Metadata
-# Donwload the latest medline via
-# wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
-# Download the latest updates via
-wget -m ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles -P $MEDLINE_UPDATES
-
-# Load Updates
-python3 ~/mining/NarrativeIntelligence/src/narraint/document/load_pubmed_metadata.py $MEDLINE_UPDATES -c PubMed
-# Load Baseline
-# python3 ~/mining/NarrativeIntelligence/src/narraint/document/load_pubmed_metadata.py $MEDLINE_BASELINE -c PubMed
-
 
 # Finally compute the new metadata service table2
 python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/prepare_metadata_for_service.py
@@ -32,12 +12,6 @@ python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_re
 python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 # Not required at the moment
 # python3 ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_term.py
-
-# Finally vacuum all tables
-# Execute Cleaning Rules for Tagging
-# echo 'vacuum db tables...'
-# psql "host=127.0.0.1 port=5432 dbname=fidpharmazie user=mininguser password=F2M>FAJL2ptVm)W" -f $VACUUM_SQL
-
 
 # Export the highest known id
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
