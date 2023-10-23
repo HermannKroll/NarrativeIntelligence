@@ -87,15 +87,6 @@
                 <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
                     Please be patient. This process can take up to one minute.
                 </p>
-
-
-                <div class="alert alert-danger" style="display:none;" id="alert_translation" role="alert">
-                    This is a danger alert—check it out!
-                </div>
-                <ul class="list-group" id="query_builder_list">
-                </ul>
-            </div>
-        </form>
                 <div class="alert alert-danger" style="display:none" id="alert_translation" role="alert"></div>
             </div>
             <!-- keyword search  -->
@@ -468,7 +459,7 @@
                             <label><strong>Results by year:</strong></label>
                         </div>
                         <div class="row mx-2 align-items-center">
-                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" id="range_container">
+                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" style="max-width: 150px" id="range_container">
                                 <canvas id="myChart" style="width:100%"></canvas>
                                 <div class="sliders_control">
                                     <input id="fromSlider" type="range"/>
@@ -506,6 +497,15 @@
                                onclick="refreshSearch()" class="col-1">
                         <label class="col-11" for="checkbox_classification">Pharm. Technology</label>
                     </div>
+
+                    <div class="row m-1 align-items-center">
+                        <label><strong>Filter by type:</strong></label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="checkbox" name="checkbox_sys_review" id="checkbox_sys_review"
+                               onclick="refreshSearch()" class="col-1">
+                        <label class="col-11" for="checkbox_sys_review">Systematic Review</label>
+                    </div>
                 </form>
             </div>
 
@@ -513,7 +513,7 @@
             <div class="col">
                 <div id="resultdiv">
                     <div class="row">
-                        <div class="col">
+                        <div class="col-12">
                             <h2 id="document_header">Results:
 
                                 <a href="https://youtu.be/DrG1u8497g0" target="_blank">
@@ -521,36 +521,42 @@
                                 </a>
                             </h2>
                         </div>
-                        <div class="col-md-auto" id="div_input_page" style="display: none">
-                            <label>Page: </label>
-                            <input type="number" size="1" id="input_page_no" step="1" value="1"/>
-                            <label> of </label>
-                            <label id="label_max_page"> of X</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-4" id="div_input_page" style="display: none">
+                            <div class="input-group w-100">
+                                <label class="input-group-text" for="input_page_no">Page: </label>
+                                <input class="form-control w-auto" type="number" size="1" id="input_page_no" step="1" value="1"/>
+                                <label class="input-group-text"> of </label>
+                                <label class="input-group-text" id="label_max_page"> of X</label>
+                            </div>
                         </div>
 
-                        <div class="col-md-auto">
-                            <select class="form-select" id="select_sorting_year" style="width: auto; display: none">
+                        <div class="col-12 col-md-4">
+                            <select class="form-select w-100" id="select_sorting_year" style="width: auto; display: none">
                                 <option selected value="True">Latest Publications First</option>
                                 <option value="False">Oldest Publications First</option>
                             </select>
                         </div>
-                        <div class="col-md-auto">
-                            <select class="form-select" id="select_sorting_freq" style="width: auto; display: none">
+
+                        <div class="col-12 col-md-4">
+                            <select class="form-select w-100" id="select_sorting_freq" style="width: auto; display: none">
                                 <option selected value="True">Most Frequent Substitutions First</option>
                                 <option value="False">Unusual Substitutions First</option>
                             </select>
                         </div>
                     </div>
-                    <div>
-                        <label for="input_title_filter" id="input_title_filter_label" style="width: 60%; display: none">Search
-                            in result titles:</label>
-                        <input type="text" class="form-control" placeholder="search in result titles"
-                               id="input_title_filter" style="width: 60%; display: none">
+                    <div class="row">
+                        <label for="input_title_filter" id="input_title_filter_label" class="col-12 col-md-8 d-none">Search
+                                in result titles:</label>
+                        <div class="input-group w-75">
+                            <input type="text" class="col-12 col-md-8 form-control d-none" placeholder="search in result titles"
+                                   id="input_title_filter">
+                        </div>
                     </div>
                     <hr class="mt-2 mb-3"/>
                     <div class="row">
                         <div id="div_wrapper_documents">
-
                             <div id="div_documents"></div>
                         </div>
                     </div>
