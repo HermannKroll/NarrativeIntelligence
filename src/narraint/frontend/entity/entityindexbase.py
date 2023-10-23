@@ -172,7 +172,7 @@ class EntityIndexBase:
         # However, loading all supplements into the index will be too large
         # That is why we query all tagged MeSH supplements first and use them to build the index
         logging.info(f'Reading MeSH supplement file: {mesh_supplement_file}')
-        mesh_supp = MeSHDBSupplementary()
+        mesh_supp = MeSHDBSupplementary.instance()
         mesh_supp.load_xml(filename=mesh_supplement_file, prefetch_all=True)
 
         logging.info('Query all MeSH supplements from Tag table...')
