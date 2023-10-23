@@ -74,11 +74,14 @@ def insert_data(session, index, predication_id_min):
                                     document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
     progress.done()
     logging.info('Beginning insert into tag_inverted_index table...')
-    TagInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True)
+    TagInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True, commit=False)
     insert_list.clear()
 
 
 def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=False, buffer_size=1000):
+    if predication_id_min and low_memory:
+        raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
+
     start_time = datetime.now()
     session = SessionExtended.get()
     if not predication_id_min:
@@ -112,34 +115,30 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
     query = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
     query = query.distinct()
     if low_memory:
-        query = query.order_by(Tag.document_id, Tag.document_collection)
+        query = query.order_by(Tag.ent_id, Tag.ent_type, Tag.document_collection, Tag.document_id)
     query = query.yield_per(QUERY_YIELD_PER_K)
 
     if low_memory:
         buffer = defaultdict(set)
-        current_sort_key = ()
-        first_sort_key_idx = 0
-        #try:
+        last_key = ()
         for idx, tag_row in enumerate(query):
             progress.print_progress(idx)
-            if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
-                first_sort_key_idx += 1
-                continue
-            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
-            sort_key = (tag_row.document_id, tag_row.document_collection)
-            if idx == first_sort_key_idx:
-                current_sort_key = sort_key
-            doc_id = tag_row.document_id
-            if current_sort_key != sort_key or len(buffer) >= buffer_size:
-                if current_sort_key != sort_key:
-                    current_sort_key = sort_key
+
+            sort_key = (tag_row.document_collection, tag_row.ent_id, tag_row.ent_type)
+            if idx == 0:
+                last_key = sort_key
+
+            # The whole tag must be inserted within one buffer
+            if last_key != sort_key and len(buffer) >= buffer_size:
                 insert_data(session, buffer, predication_id_min)
                 buffer.clear()
-                buffer = defaultdict(set)
-            buffer[key].add(doc_id)
-        # except:
-        #     print("sqlite3.ProgrammingError: Cannot operate on a closed database.")
+
+            last_key = sort_key
+            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
+            buffer[key].add(tag_row.document_id)
+
         insert_data(session, buffer, predication_id_min)
+        session.commit()
         buffer.clear()
 
     else:
@@ -153,10 +152,10 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
             doc_id = tag_row.document_id
             index[key].add(doc_id)
 
-    progress.done()
-
-    if not low_memory:
         insert_data(session, index, predication_id_min)
+        session.commit()
+
+    progress.done()
 
     end_time = datetime.now()
     logging.info(f"Tag inverted index table created. Took me {end_time - start_time} minutes.")

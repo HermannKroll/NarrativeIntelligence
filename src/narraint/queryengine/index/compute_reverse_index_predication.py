@@ -14,10 +14,6 @@ from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
 
-def return_s_p_o(element):
-    return (element[3], element[5], element[6])
-
-
 def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     # Restructure dictionaries
     # for k in fact_to_doc_ids:
@@ -89,11 +85,14 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
         ))
     progress2.done()
 
-    PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
+    PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
     insert_list.clear()
 
 
 def denormalize_predication_table(predication_id_min: int = None, consider_metadata=True, low_memory=False, buffer_size=1000):
+    if predication_id_min and low_memory:
+        raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
+
     session = SessionExtended.get()
     if not predication_id_min:
         logging.info('Deleting old denormalized predication...')
@@ -144,39 +143,38 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
 
     if low_memory:
         buffer = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
-        current_s_p_o = ()
-        try:
-            for idx, prov in enumerate(prov_query):
-                progress.print_progress(idx)
-                s_id = prov.subject_id
-                s_t = prov.subject_type
-                p = prov.relation
-                o_id = prov.object_id
-                o_t = prov.object_type
-                seen_key = (s_id, s_t, p, o_id, o_t)
-                s_p_o = (s_id, p, o_id)
-                if idx == 0:
-                    current_s_p_o = s_p_o
-                if current_s_p_o != s_p_o or len(buffer) >= buffer_size:
-                    if s_p_o != current_s_p_o:
-                        current_s_p_o = s_p_o
-                    insert_data(session, buffer, predication_id_min, insert_list)
-                    buffer.clear()
-                    buffer = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+        last_spo = ()
+        for idx, prov in enumerate(prov_query):
+            progress.print_progress(idx)
+            s_id = prov.subject_id
+            s_t = prov.subject_type
+            p = prov.relation
+            o_id = prov.object_id
+            o_t = prov.object_type
 
-                buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
+            s_p_o = (s_id, p, o_id)
+            if idx == 0:
+                last_spo = s_p_o
+            # The whole spo key must be inserted within one buffer
+            if last_spo != s_p_o and len(buffer) >= buffer_size:
+                insert_data(session, buffer, predication_id_min, insert_list)
+                buffer.clear()
 
-                # Hack to support also the Covid 19 collection
-                # TODO: not very generic
-                if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                    #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
-                    buffer[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
-                if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                    #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
-                    buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
-        except:
-            print("sqlite3.ProgrammingError: Cannot operate on a closed database.")
+            last_spo = s_p_o
+            seen_key = (s_id, s_t, p, o_id, o_t)
+            buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
+
+            # Hack to support also the Covid 19 collection
+            # TODO: not very generic
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
+                #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
+                buffer[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
+                #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
+                buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
+
         insert_data(session, buffer, predication_id_min, insert_list)
+        session.commit()
         buffer.clear()
     else:
         for idx, prov in enumerate(prov_query):
@@ -199,9 +197,12 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
                 #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
                 fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
 
+        insert_data(session, fact_to_prov_ids, predication_id_min, insert_list)
+        session.commit()
+
     progress.done()
 
-    insert_data(session, fact_to_prov_ids, predication_id_min, insert_list)
+
 
     end_time = datetime.now()
     logging.info(f"Query table created. Took me {end_time - start_time} minutes.")
