@@ -1271,12 +1271,17 @@ def get_keyword_search_request(request):
             try:
                 logging.debug('Generating graph queries for "{}"'.format(keywords))
 
-                nd_result = requests.get(
-                    f"http://127.0.0.1:5000//query?keywords={keywords}")
-                # return dict{terms: list[str], entities: list[str], statements: list[(str, str, str)]}
-                json_data = nd_result.json()
-                if nd_result.status_code == 200:
-                    return JsonResponse(status=200, data=dict(query_graphs=json_data))
+                keywords = keywords.split("_AND_")
+
+                # TODO...
+
+                json_data = [
+                    [("Metformin", "treats", "Diabetes Mellitus")],
+                    [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
+                    [("Insulin", "associated", "Diabetes Mellitus")],
+                ]
+
+                return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
             except Exception:
                 logging.debug(f'Could generate graph queries for "{keywords}"')
