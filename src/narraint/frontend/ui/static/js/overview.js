@@ -300,16 +300,16 @@ async function fillSearchbox(prefix) {
 
         let element =
             `<a href=${query} style="text-decoration: none; color: inherit;" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')" target="_blank">
-                <p>${item.name}</p>
+                <p title="Search in Narrative Service">${item.name}</p>
             </a>
-            <div style="background-color: ${bgColor};" class="count">
+            <div style="background-color: ${bgColor};" class="count" title="Search in Narrative Service">
                 <a href=${query} target="_blank" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')">${item.count}</a>
             </div>`;
 
         if (item.max_phase_for_ind != null) {
             const imgSrc = (item.max_phase_for_ind >= 0) ? url_chembl_phase + item.max_phase_for_ind + ".svg" : url_chembl_phase_new;
             element +=
-                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')"
+                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')" title="Search in ChEMBL"
                    href="https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:${currentChemblID} && drug_indication.mesh_id:${item.id.substring(5, item.id.length)}">
                    <img src="${imgSrc}" alt="Phase ${(item.max_phase_for_ind >= 0) ? item.max_phase_for_ind : "unknown"}">
                 </a>`;
@@ -665,7 +665,7 @@ function initializeNetworkGraph() {
             networkEdges.add({
                 from: nodeName, to: currentDrugName,
                 label: `${entity.count}`,
-                title: `${entity.count}`,
+                title: "Search in Narrative Service",
                 font: {color: "#000", strokeWidth: 0},
                 length: options[entType].edgeLen,
                 width: 2.0,
