@@ -19,8 +19,7 @@ from django.views.decorators.cache import never_cache
 
 from narraint.frontend.frontend.settings.base import INSTALLED_APPS, ADMIN_ENABLED
 from narraint.frontend.ui.views import StatsView, HelpView, DocumentView, DrugOverviewView, \
-    SearchView, SwaggerUIView, LogsView, LongCovidView, CovidView19, MECFSView, \
-    KeywordSearchView, NewsView
+    SearchView, SwaggerUIView, LogsView, LongCovidView, CovidView19, MECFSView, NewsView
 
 urlpatterns = [
     path(r'', include('ui.urls')),
