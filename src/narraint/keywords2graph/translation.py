@@ -1,5 +1,6 @@
 import argparse
 import ast
+import copy
 import itertools
 import logging
 from datetime import datetime
@@ -24,11 +25,23 @@ class SupportedFactPattern:
         self.support = support
 
 
+    def __str__(self):
+        return f'<{self.support}: {self.keyword1}, {self.relation}, {self.keyword2}>'
+
+    def __repr__(self):
+        return f'<{self.support}: {self.keyword1}, {self.relation}, {self.keyword2}>'
+
 class SupportedGraphPattern:
 
     def __init__(self):
         self.fact_patterns: [SupportedFactPattern] = []
         self.minimum_support = 0
+
+    def copy(self):
+        g = SupportedGraphPattern()
+        g.minimum_support = self.minimum_support
+        g.fact_patterns = copy.copy(self.fact_patterns)
+        return g
 
     def add_supported_fact_patterns(self, fp: SupportedFactPattern):
         if self.minimum_support == 0 and fp.support > 0:
@@ -39,7 +52,7 @@ class SupportedGraphPattern:
         self.fact_patterns.append(fp)
 
     def get_relations(self):
-        return {fp.relations for fp in self.fact_patterns}
+        return {fp.relation for fp in self.fact_patterns}
 
     def is_specific(self):
         return 'associated' not in self.get_relations()
@@ -82,7 +95,8 @@ class Keyword2GraphTranslation:
         entity_support_list = [(et, e, supp) for (et, e), supp in entity2support.items()]
         entity_support_list.sort(key=lambda x: x[2], reverse=True)
 
-        return entity_support_list[0]
+        # Get the type of the first element
+        return entity_support_list[0][0]
 
     def find_all_possible_query_patterns(self, keywords_with_types) -> [SupportedGraphPattern]:
         # Suppose types: A, B, C
@@ -96,23 +110,37 @@ class Keyword2GraphTranslation:
 
         # Go through each combination and compute all possible relations between each entity types
         # Then find the minimum support of the whole pattern (less supported edge)
-        possible_patterns = []
+        final_possible_patterns = []
         for comb in itertools.permutations(keywords_with_types, r=len(keywords_with_types)):
+            # Add the first empty pattern to this list of possible patterns
+            possible_patterns_per_comb = []
             pattern = SupportedGraphPattern()
-            for i in range(0, len(comb) - 2):
+            possible_patterns_per_comb.append(pattern)
+
+            for i in range(0, len(comb) - 1):
                 kw1, t1 = comb[i]
                 kw2, t2 = comb[i + 1]
 
-                # Find possible relations between these types and get the support
-                relation2support = self.graph.relations(t1, t2)
-                for relation, support in relation2support.items():
-                    pattern.add_supported_fact_patterns(SupportedFactPattern(kw1, t1, relation, kw2, t2, support))
+                # Extend all previously found patterns
+                possible_patterns_extended = []
+                for pp in possible_patterns_per_comb:
 
-            possible_patterns.append(pattern)
+                    # Find possible relations between these types and get the support
+                    relation2support = self.graph.get_relations_between(t1, t2)
+                    for relation, support in relation2support.items():
+                        pp_copy = pp.copy()
+                        pp_copy.add_supported_fact_patterns(SupportedFactPattern(kw1, t1, relation, kw2, t2, support))
+                        possible_patterns_extended.append(pp_copy)
+
+                # old patterns are have now been extended
+                possible_patterns_per_comb = copy.copy(possible_patterns_extended)
+
+            # add all patterns for this combination
+            final_possible_patterns.extend(possible_patterns_per_comb)
 
         # Now support the query patterns by their minimum support
-        possible_patterns.sort(key=lambda x: x.minimum_support, reverse=True)
-        return possible_patterns
+        final_possible_patterns.sort(key=lambda x: x.minimum_support, reverse=True)
+        return final_possible_patterns
 
     def translate_keywords(self, keyword_lists: List[str]) -> [GraphQuery]:
         # The first step is to transform keywords into entities
