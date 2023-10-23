@@ -47,7 +47,7 @@ python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiont
 python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/util/compute_id_file_diff.py $ALL_PUBTATOR_PMIDS $PMIDS_IN_DB $IDS_TO_DOWNLOAD
 
 # Download all PubTator files + their annotations
-python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/pubtator/service/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
+python3 ~/mining/NarrativeIntelligence/lib/NarrativeAnnotation/src/narrant/pubtator/download_pubtator_central_files.py $IDS_TO_DOWNLOAD $UPDATES_PUBTATOR
 
 # Load all PubTator files to database
 python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/document/load_document.py $UPDATES_PUBTATOR -c PubMed --tagger-map /home/kroll/mining/NarrativeIntelligence/lib/NarrativeAnnotation/resources/pubtator_central_taggermap.json
