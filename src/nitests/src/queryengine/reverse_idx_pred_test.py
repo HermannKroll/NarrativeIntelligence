@@ -62,10 +62,10 @@ class ReversePredicationIdxText(TestCase):
                             object_id="B", object_type="BT", object_str="B_STR",
                             sentence_id=1, confidence=1.0, extraction_type="Test"),
                        dict(id=1003, document_id=2, document_collection="RIDXTEST",
-                             subject_id="A", subject_type="AT", subject_str="A_STR",
-                             predicate="t1", relation="T1",
-                             object_id="B", object_type="BT", object_str="B_STR",
-                             sentence_id=1, confidence=1.0, extraction_type="Test"),
+                            subject_id="A", subject_type="AT", subject_str="A_STR",
+                            predicate="t1", relation="T1",
+                            object_id="B", object_type="BT", object_str="B_STR",
+                            sentence_id=1, confidence=1.0, extraction_type="Test"),
                        dict(id=1004, document_id=2, document_collection="RIDXTEST",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t3", relation="T3",
@@ -77,7 +77,8 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"RIDXTEST": {"1": [1000, 1002], "2": [1003]}}', '{"RIDXTEST": {"1": [1001]}}', '{"RIDXTEST": {"2": [1004]}}']
+        allowed_pm = ['{"RIDXTEST": {"1": [1000, 1002], "2": [1003]}}', '{"RIDXTEST": {"1": [1001]}}',
+                      '{"RIDXTEST": {"2": [1004]}}']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):

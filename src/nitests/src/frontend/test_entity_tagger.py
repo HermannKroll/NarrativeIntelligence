@@ -29,7 +29,8 @@ class EntityTaggerTestCase(TestCase):
             self.assertIn(t.entity_id, valid_simvastatin_ids)
 
         self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('SYNVINOLIN'))).entity_id)
-        self.assertIn('CHEMBL1064', list([e.entity_id for e in self.entity_tagger.tag_entity('Simvastatin hydroxy acid')]))
+        self.assertIn('CHEMBL1064',
+                      list([e.entity_id for e in self.entity_tagger.tag_entity('Simvastatin hydroxy acid')]))
         self.assertEqual('CHEMBL1064', next(iter(self.entity_tagger.tag_entity('MK-0733'))).entity_id)
 
         acetarsol_tags = self.entity_tagger.tag_entity('acetarsol', expand_search_by_prefix=False)
@@ -53,7 +54,7 @@ class EntityTaggerTestCase(TestCase):
         self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('LA-6023')])
         self.assertIn('CHEMBL1431', [t.entity_id for t in self.entity_tagger.tag_entity('Metformin')])
 
-        self.assertIn('CHEMBL1064',[t.entity_id for t in self.entity_tagger.tag_entity('Simvastatin')])
+        self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('Simvastatin')])
         self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('SYNVINOLIN')])
         self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('Simvastatin hydroxy acid')])
         self.assertIn('CHEMBL1064', [t.entity_id for t in self.entity_tagger.tag_entity('MK-0733')])

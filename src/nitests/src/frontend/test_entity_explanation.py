@@ -2,7 +2,6 @@ import string
 from unittest import TestCase
 
 from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.config import PLANT_GENUS_DATABASE_FILE
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 
