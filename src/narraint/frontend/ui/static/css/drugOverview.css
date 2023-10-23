@@ -139,6 +139,10 @@ select option:hover {
   transition: width 0.5s, height 0.5s;
 }
 
+#drug_inchi {
+  overflow-wrap: break-word !important;
+}
+
 /* CONTAINER CONTENT ALIGNMENT */
 .bottom_searchbox {
   max-height: 15rem;
