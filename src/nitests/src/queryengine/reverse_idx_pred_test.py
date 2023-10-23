@@ -12,6 +12,15 @@ class ReversePredicationIdxText(TestCase):
 
     def setUp(self) -> None:
         session = SessionExtended.get()
+
+        stmt = delete(PredicationInvertedIndex)
+        session.execute(stmt)
+        session.commit()
+
+        stmt = delete(Predication)
+        session.execute(stmt)
+        session.commit()
+
         document_values = [dict(id=1, collection="RIDXTEST", title="Test", abstract="Test Abstract"),
                            dict(id=2, collection="RIDXTEST", title="Test", abstract="Test Abstract")]
         sentences_values = [dict(id=1, document_collection="RIDXTEST", text="ABC", md5hash="HASH")]
@@ -29,11 +38,6 @@ class ReversePredicationIdxText(TestCase):
         Document.bulk_insert_values_into_table(session, document_values)
         Sentence.bulk_insert_values_into_table(session, sentences_values)
         Predication.bulk_insert_values_into_table(session, pred_values)
-
-        session = SessionExtended.get()
-        stmt = delete(PredicationInvertedIndex)
-        session.execute(stmt)
-        session.commit()
 
     def test_full_reverse_idx(self):
         denormalize_predication_table(consider_metadata=False)

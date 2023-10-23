@@ -13,6 +13,16 @@ class ReverseTagIdxTest(TestCase):
 
     def setUp(self) -> None:
         session = SessionExtended.get()
+
+        stmt = delete(TagInvertedIndex)
+        session.execute(stmt)
+        session.commit()
+
+        stmt = delete(Tag)
+        session.execute(stmt)
+        session.commit()
+
+
         document_values = [dict(id=1, collection="RIDXTEST2", title="Test", abstract="Test Abstract"),
                            dict(id=2, collection="RIDXTEST2", title="Test", abstract="Test Abstract")]
         sentences_values = [dict(id=1, document_collection="RIDXTEST2", text="ABC", md5hash="HASH")]
@@ -35,10 +45,7 @@ class ReverseTagIdxTest(TestCase):
         Predication.bulk_insert_values_into_table(session, pred_values)
         Tag.bulk_insert_values_into_table(session, tag_values)
 
-        session = SessionExtended.get()
-        stmt = delete(PredicationInvertedIndex)
-        session.execute(stmt)
-        session.commit()
+
 
     def test_full_reverse_idx(self):
         compute_inverted_index_for_tags()
