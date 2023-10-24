@@ -29,6 +29,7 @@ class TagInvertedIndex(Extended, DatabaseTable):
     entity_id = Column(String, nullable=False, index=True, primary_key=True)
     entity_type = Column(String, nullable=False, index=True, primary_key=True)
     document_collection = Column(String, nullable=False, index=True, primary_key=True)
+    support = Column(Integer, nullable=False)
     document_ids = Column(String, nullable=False)
 
 

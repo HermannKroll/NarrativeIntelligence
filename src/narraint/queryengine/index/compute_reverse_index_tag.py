@@ -65,12 +65,14 @@ def insert_data(session, index, predication_id_min):
                 insert_list.append(dict(entity_id=gene_id,
                                         entity_type=GENE,
                                         document_collection=doc_col,
+                                        support=len(doc_ids),
                                         document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
 
         else:
             insert_list.append(dict(entity_id=entity_id,
                                     entity_type=entity_type,
                                     document_collection=doc_col,
+                                    support=len(doc_ids),
                                     document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
     progress.done()
     logging.info('Beginning insert into tag_inverted_index table...')
