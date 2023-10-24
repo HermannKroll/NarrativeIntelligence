@@ -332,7 +332,6 @@ function createGraph(statements) {
             from: s,
             to: o,
             label: p,
-            arrows: { to: { enabled: true } },
             smooth: { enabled: false },
             font: { align: 'top'}
         });
