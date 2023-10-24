@@ -43,9 +43,14 @@ window.addEventListener("DOMContentLoaded", () => {
             return false;
         }
     }).on("keydown", (event) => {
-        if (event.key === "Enter")
-            keywordAdd();
-        else if (event.key === "Tab") {
+        if (event.key === "Enter") {
+            if (document.querySelector("#search_input").value.trim() === "") {
+                // submit on empty input
+                keywordSearch();
+            } else {
+                keywordAdd();
+            }
+        } else if (event.key === "Tab") {
             event.preventDefault();
             keywordAdd();
         }
