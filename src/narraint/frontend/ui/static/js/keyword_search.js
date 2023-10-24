@@ -215,7 +215,7 @@ function showResults(response) {
     let divList = createResultList(results, query_len);
     divDocuments.append(divList);
 
-    saveHistoryEntry(result_size);
+    saveHistoryEntry({size: result_size});
     document.getElementById("resultdiv").scrollIntoView();
 }
 

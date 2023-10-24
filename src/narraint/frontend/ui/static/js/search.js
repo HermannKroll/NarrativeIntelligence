@@ -927,6 +927,7 @@ const search = (event) => {
             toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
             fromSlider.onchange = () => refreshSearch();
             toSlider.onchange = () => refreshSearch();
+            saveHistoryEntry({size: result_size, title_filter: title_filter});
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
