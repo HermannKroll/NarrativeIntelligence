@@ -127,6 +127,8 @@ class Keyword2GraphTranslation:
 
                     # Find possible relations between these types and get the support
                     relation2support = self.graph.get_relations_between(t1, t2)
+                    if 'associated' not in relation2support:
+                        relation2support['associated'] = 0
                     for relation, support in relation2support.items():
                         pp_copy = pp.copy()
                         pp_copy.add_supported_fact_patterns(SupportedFactPattern(kw1, t1, relation, kw2, t2, support))
