@@ -22,6 +22,9 @@ class ReverseTagIdxTest(TestCase):
         session.execute(stmt)
         session.commit()
 
+        stmt = delete(Predication)
+        session.execute(stmt)
+        session.commit()
 
         document_values = [dict(id=1, collection="IDX_INVERTED_TAG", title="Test", abstract="Test Abstract"),
                            dict(id=2, collection="IDX_INVERTED_TAG", title="Test", abstract="Test Abstract")]
