@@ -6,7 +6,13 @@ let networkOptions = {
         dragView: false,
         dragNodes: false
     },
-    physics: { solver: "forceAtlas2Based" },
+    physics: {
+        solver: "forceAtlas2Based",
+        forceAtlas2Based: {
+            springLength: 125,
+            avoidOverlap: 1
+        }
+    },
     groups: {
         default_ge: {
             color: {
