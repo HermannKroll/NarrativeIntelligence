@@ -11,8 +11,10 @@ from narraint.backend.models import TagInvertedIndex
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED
 from narrant.entity.entity import Entity
 
+ASSOCIATED = PREDICATE_ASSOCIATED
 
 class SupportedFactPattern:
 
@@ -55,11 +57,11 @@ class SupportedGraphPattern:
         return {fp.relation for fp in self.fact_patterns}
 
     def is_specific(self):
-        return 'associated' not in self.get_relations()
+        return ASSOCIATED not in self.get_relations()
 
     def is_associated(self):
         relations = self.get_relations()
-        return len(relations) == 1 and 'associated' in relations
+        return len(relations) == 1 and ASSOCIATED in relations
 
     def to_json_data(self):
         data = []
@@ -127,8 +129,8 @@ class Keyword2GraphTranslation:
 
                     # Find possible relations between these types and get the support
                     relation2support = self.graph.get_relations_between(t1, t2)
-                    if 'associated' not in relation2support:
-                        relation2support['associated'] = 0
+                    if ASSOCIATED not in relation2support:
+                        relation2support[ASSOCIATED] = 0
                     for relation, support in relation2support.items():
                         pp_copy = pp.copy()
                         pp_copy.add_supported_fact_patterns(SupportedFactPattern(kw1, t1, relation, kw2, t2, support))
