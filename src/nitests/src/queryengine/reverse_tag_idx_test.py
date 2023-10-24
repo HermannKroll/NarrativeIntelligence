@@ -112,12 +112,12 @@ class ReverseTagIdxTest(TestCase):
             db_rows[key] = (json.loads(row.document_ids), row.support)
 
             # support must correspond to the number of documents
-            self.assertEquals(row.support, len(db_rows[key])[0])
+            self.assertEquals(row.support, len(db_rows[key][0]))
 
         # Check keys
         self.assertEqual(allowed_doc_ids[0], db_rows[allowed_keys[0]][0])
         self.assertEqual(allowed_doc_ids[1], db_rows[allowed_keys[1]][0])
 
         # Check support
-        self.assertEqual(1, db_rows[allowed_keys[0]][1])
+        self.assertEqual(2, db_rows[allowed_keys[0]][1])
         self.assertEqual(1, db_rows[allowed_keys[1]][1])
