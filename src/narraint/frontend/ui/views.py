@@ -1253,6 +1253,7 @@ def get_keyword_search_request(request):
     if request.GET.keys() & {"keywords"}:
         keywords = request.GET.get("keywords", "")
         if keywords.strip():
+            time_start = datetime.now()
             try:
                 logging.debug('Generating graph queries for "{}"'.format(keywords))
 
@@ -1268,13 +1269,17 @@ def get_keyword_search_request(request):
                 #     [("Insulin", "associated", "Diabetes Mellitus")],
                 # ]
 
+                View.instance().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
             except Exception as e:
+                View.instance().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
                 logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
-            
+
     return HttpResponse(status=500)
 
 
