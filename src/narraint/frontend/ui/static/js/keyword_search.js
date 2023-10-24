@@ -95,6 +95,7 @@ function keywordAdd() {
 }
 
 async function keywordSearch() {
+    const queryGraphContainer = document.querySelector('#query_graph_container');
     const keywordDiv = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector("#search_input");
     const keywords = [];
@@ -111,6 +112,7 @@ async function keywordSearch() {
         return;
     }
 
+    queryGraphContainer.classList.toggle('d-none', true);
     showLoadingScreen();
 
     const queryGraphDiv = document.getElementById('query_graphs');
@@ -122,9 +124,11 @@ async function keywordSearch() {
             if (response.status === 200)
                 return response.json();
             else if (response.status === 500) {
-                throw new Error(response.json()["reason"]);
+                return response.json().then((d) => {
+                    return Promise.reject(d["reason"]);
+                })
             }
-            throw new Error("Unable to request graph queries");
+            return Promise.reject("Unable to request graph queries");
         })
         .then((data) => {
             // format: list[(str, str, str)]
@@ -135,10 +139,12 @@ async function keywordSearch() {
                 }
                 createQueryGraph(queryGraph, queryGraphDiv);
             }
+            queryGraphContainer.classList.toggle('d-none', false);
         })
-        .catch((e) => showAlert(e.message))
+        .catch((e) => {
+            showAlert(e);
+        })
         .finally(() => {
-            document.querySelector('#query_graph_container').classList.toggle('d-none', false);
             hideLoadingScreen();
         });
 }
