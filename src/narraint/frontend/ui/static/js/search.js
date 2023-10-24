@@ -603,7 +603,7 @@ function initFromURLQueryParams() {
         let titleFilter = params.get("title_filter");
         if (titleFilter.includes("systemat review")) {
             document.getElementById("checkbox_sys_review").checked = true;
-            titleFilter = titleFilter.replace("systemat review", "");
+            titleFilter = titleFilter.replace("systemat review", "").trim();
         }
         document.getElementById("input_title_filter").value = titleFilter;
     }
@@ -683,7 +683,7 @@ const search = (event) => {
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    let title_filter = document.getElementById("input_title_filter").value;
+    let title_filter = document.getElementById("input_title_filter").value.trim();
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
 
