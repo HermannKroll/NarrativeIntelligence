@@ -9,9 +9,10 @@ from typing import List
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.queryengine.query import GraphQuery
-from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED
+from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
 from narrant.entity.entity import Entity
 
 ASSOCIATED = PREDICATE_ASSOCIATED
@@ -74,7 +75,7 @@ class Keyword2GraphTranslation:
 
     def __init__(self):
         self.graph: SchemaSupportGraph = SchemaSupportGraph.instance()
-        self.tagger: EntityTagger = EntityTagger.instance()
+        self.translation: QueryTranslation = QueryTranslation()
 
     @staticmethod
     def greedy_find_most_supported_entity_type(entities: [Entity]):
@@ -154,8 +155,20 @@ class Keyword2GraphTranslation:
         keyword_lists = list(keyword_lists)
         keywords_with_types = list()
         for keywords in keyword_lists:
-            entities = self.tagger.tag_entity(keywords)
-            ms_type = Keyword2GraphTranslation.greedy_find_most_supported_entity_type(entities)
+            entities = self.translation.convert_text_to_entity(keywords)
+
+            # Was is a variable?
+            if len(entities) == 1 and list(entities)[0].entity_type == ENTITY_TYPE_VARIABLE:
+                # ID should be something like this f'?{var_type}({var_type})'
+                var_type = VAR_TYPE.search(list(entities)[0].entity_id)
+                if var_type:
+                    ms_type = var_type.group(1)
+                else:
+                    # We have the type ALL ->
+                    ms_type = "All"
+            else:
+                # Get type from most supported entity
+                ms_type = Keyword2GraphTranslation.greedy_find_most_supported_entity_type(entities)
 
             keywords_with_types.append((keywords, ms_type))
 
