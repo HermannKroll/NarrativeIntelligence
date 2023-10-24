@@ -60,9 +60,11 @@
                         </a>
                     </div>
                 </div>
-                            <!-- drug suggestion link -->
-                <div class="row w-auto">
-                    <a href="javascript: openDrugSuggestion()">Suggest a drug</a>
+
+                <!-- drug suggestion link -->
+                <div class="row flex-row justify-content-center">
+                    <a class="w-auto" href="javascript: openDrugSuggestion()">Suggest a drug</a>
+                    <a class="w-auto" href="javascript: openHistory()">Search History</a>
                 </div>
             </div>
             <!-- Content -->
@@ -333,6 +335,42 @@
         </div>
     </div>
 
+    <!-- Search history -->
+    <div class="container">
+        <div class="modal" tabindex="-1" role="dialog" id="historyModal">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl" style="width: inherit" role="document">
+                <div class="modal-content h-100 w-100">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Search history</h5>
+                        <button type="button" class="btn-close" onclick="closeHistory()" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <table class="table">
+                                <colgroup>
+                                   <col style="width: 30%;">
+                                   <col style="width: 70%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Search</th>
+                                </tr>
+                                </thead>
+                                <tbody id="historyTable">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="closeHistory()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <noscript>
         <style>
             body {
@@ -376,6 +414,7 @@
         document.onwebkitfullscreenchange = fsCloseAction;
         document.onmsfullscreenchange = fsCloseAction;
 
+        const historyQueryKey = "drug";
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
 
@@ -391,4 +430,5 @@
     <script src="{% static 'js/drugOverview.js' %}?version=11" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?version=1" type="text/javascript"></script>
 {% endblock %}
