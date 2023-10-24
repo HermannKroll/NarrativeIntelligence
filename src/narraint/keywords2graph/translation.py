@@ -1,5 +1,4 @@
 import argparse
-import ast
 import copy
 import itertools
 import logging
@@ -8,7 +7,6 @@ from typing import List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
-from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.queryengine.query import GraphQuery
