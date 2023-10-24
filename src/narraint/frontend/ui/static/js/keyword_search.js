@@ -92,7 +92,7 @@ async function keywordSearch() {
 
     // Substring because the tailing X should be removed (X do remove the keyword)
     keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
-        n.innerText.substring(0, n.innerText.length - 1)));
+        n.innerText.substring(0, n.innerText.length - 2)));
 
 
     const keywordsString = keywords.join("_AND_")
