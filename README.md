@@ -506,7 +506,7 @@ python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_rev
 python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 ```
 
-Please note that the low memory mode cannot be combined with the delta mode (predication id minimum).
+Please note that the low memory mode and buffer size cannot be combined with the delta mode (predication id minimum).
 
 
 You can export the latest predication id via:
