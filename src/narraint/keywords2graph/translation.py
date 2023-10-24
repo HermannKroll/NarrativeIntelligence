@@ -80,7 +80,7 @@ class Keyword2GraphTranslation:
         entity_types = {e.entity_type for e in entities}
 
         session = SessionExtended.get()
-        query = session.query(TagInvertedIndex)
+        query = session.query(TagInvertedIndex.entity_id, TagInvertedIndex.entity_type, TagInvertedIndex.support)
         query = query.filter(TagInvertedIndex.entity_id.in_(entity_ids))
         query = query.filter(TagInvertedIndex.entity_type.in_(entity_types))
 
@@ -89,7 +89,7 @@ class Keyword2GraphTranslation:
             if (row.entity_type, row.entity_id) not in entity2support:
                 entity2support[(row.entity_type, row.entity_id)] = 0
 
-            entity2support[(row.entity_type, row.entity_id)] += len(ast.literal_eval(row.document_ids))
+            entity2support[(row.entity_type, row.entity_id)] += row.support
 
         # Compute a sorted list
         entity_support_list = [(et, e, supp) for (et, e), supp in entity2support.items()]
