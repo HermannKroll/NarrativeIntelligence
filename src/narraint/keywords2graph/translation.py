@@ -170,9 +170,11 @@ class Keyword2GraphTranslation:
 
             keywords_with_types.append((keywords, ms_type))
 
+        logging.debug(f'Generating possible query patterns for: {keywords_with_types}')
         # Next find all possible query patterns
         patterns = self.find_all_possible_query_patterns(keywords_with_types)
 
+        logging.debug(f'{len(patterns)} patterns have been generated.')
         # Compose the result
         results = []
 
