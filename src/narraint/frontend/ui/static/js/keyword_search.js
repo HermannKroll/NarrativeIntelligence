@@ -94,25 +94,30 @@ async function keywordSearch() {
     keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
         n.innerText.substring(0, n.innerText.length - 2)));
 
-
     const keywordsString = keywords.join("_AND_")
     if (keywordsString === "") {
-        const inputAlert = document.getElementById('input_alert');
-        inputAlert.classList.toggle('d-none', false);
-        setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
+        showAlert("Empty input. Provide keywords to search!");
         return;
     }
+
+    showLoadingScreen();
 
     const queryGraphDiv = document.getElementById('query_graphs');
     queryGraphDiv.innerHTML = "";
     document.getElementById('div_documents').innerText = '';
 
     await fetch(`${url_keyword_search_request}?keywords=${keywordsString}`)
-        .then((response) => { return response.json() })
+        .then((response) => {
+            if (response.status === 200)
+                return response.json();
+            else if (response.status === 500) {
+                throw new Error(response.json()["reason"]);
+            }
+            throw new Error("Unable to request graph queries");
+        })
         .then((data) => {
             // format: list[(str, str, str)]
             for (let idx in Object.keys(data['query_graphs'])) {
-
                 const queryGraph = data['query_graphs'][idx];
                 if (queryGraph === null) {
                     continue;
@@ -120,10 +125,19 @@ async function keywordSearch() {
                 createQueryGraph(queryGraph, queryGraphDiv);
             }
         })
-        .catch((e) => console.error(e))
+        .catch((e) => showAlert(e.message))
         .finally(() => {
-            document.getElementById('query_graph_container').classList.toggle('d-none');
+            document.querySelector('#query_graph_container').classList.toggle('d-none', false);
+            hideLoadingScreen();
         });
+}
+
+function showAlert(message) {
+    hideLoadingScreen();
+    const inputAlert = document.querySelector('#input_alert');
+    inputAlert.classList.toggle('d-none', false);
+    inputAlert.innerText = message;
+    setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
 }
 
 /**
@@ -167,10 +181,7 @@ function showResults(response) {
     divDocuments.empty();
 
     if (response["valid_query"] === "") {
-        const alert = document.getElementById('result_alert');//$('#result_alert');
-        alert.classList.toggle('d-none');
-
-        setTimeout(() => alert.classList.toggle('d-none'), 5000);
+        showAlert("Provided an invalid query!");
         return;
     }
 
@@ -225,6 +236,8 @@ function addClickEvent(statements, container) {
         resetBorders();
         latest_valid_query = params;
 
+        showLoadingScreen()
+
         fetch(`${search_url}?${params}&data_source=PubMed`)
             .then((response) => { return response.json(); })
             .then((data) => {
@@ -233,7 +246,20 @@ function addClickEvent(statements, container) {
                 container.classList.add('border-danger');
             })
             .catch((e) => console.log(e))
+            .finally(() => hideLoadingScreen());
     }
+}
+
+function showLoadingScreen() {
+    document.documentElement.scrollIntoView({behavior: "instant"});
+    document.body.scrollIntoView({behavior: "instant"});
+    document.body.classList.toggle("overflow-hidden", true);
+    document.querySelector("#loading_screen").classList.toggle("d-none", false);
+}
+
+function hideLoadingScreen() {
+    document.body.classList.toggle("overflow-hidden", false);
+    document.querySelector("#loading_screen").classList.toggle("d-none", true);
 }
 
 function addTooltipEvent(statements, div) {
