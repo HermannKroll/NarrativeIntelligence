@@ -474,6 +474,27 @@ python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_rev
 python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py
 ```
 
+However, the whole index creation might consume much memory. 
+We support a low memory mode.
+Run:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --low_memory
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --low_memory
+```
+
+This mode will take more time but less memory.
+You may also adjust the buffer size (how much memory can be consumed):
+
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py \
+   --low_memory --buffer_size 1000
+   
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py \
+    --low_memory --buffer_size 1000
+```
+
+
+
 There is an alternative to recreating the whole index. 
 We support to specify the minimum predication id. 
 The idea is that only documents are updated in the index which are new since the last index update.
@@ -484,6 +505,9 @@ Run:
 python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 python ~/mining/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --predicate_id_minimum $PREDICATION_MINIMUM_UPDATE_ID
 ```
+
+Please note that the low memory mode cannot be combined with the delta mode (predication id minimum).
+
 
 You can export the latest predication id via:
 ```
