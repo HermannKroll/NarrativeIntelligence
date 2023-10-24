@@ -56,7 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function keywordAdd() {
     const keywordList = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector('#search_input');
-    const keywordId = "keyword-tag-" + keywordInput.value.toLowerCase().replace(" ", "-");
+    const keywordId = "keyword-tag-" + keywordInput.value.trim().toLowerCase().replace(" ", "-");
 
     // add keywords only once
     if (Array.from(keywordList.childNodes).some((k) => k.id === keywordId)) {
@@ -64,9 +64,14 @@ function keywordAdd() {
         return;
     }
 
+    // Don't add the empty keywod
+    if (keywordInput.value.trim() === ""){
+        return;
+    }
+
     const div = document.createElement("div");
     div.classList.add("text-dark", "bg-light", "border", "rounded", "position-relative", "me-3", "mt-3", "px-2");
-    div.innerText = keywordInput.value;
+    div.innerText = keywordInput.value.trim();
     div.id = keywordId
     const span = document.createElement("span");
     span.setAttribute("role", "button");
@@ -82,10 +87,13 @@ async function keywordSearch() {
     const keywordDiv = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector("#search_input");
     const keywords = [];
-    if (keywordInput.value !== "")
+    if (keywordInput.value.trim() !== "")
         keywords.push(keywordInput.value);
+
+    // Substring because the tailing X should be removed (X do remove the keyword)
     keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
-        n.id.replace("keyword-tag-", "")));
+        n.innerText.substring(0, n.innerText.length - 1)));
+
 
     const keywordsString = keywords.join("_AND_")
     if (keywordsString === "") {
