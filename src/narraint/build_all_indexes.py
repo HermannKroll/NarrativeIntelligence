@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 
 from narraint.config import BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.build_all_indexes import build_entity_indexes
 from narrant.build_all_tagging_indexes import build_tagging_indexes
@@ -21,6 +22,9 @@ def build_service_indexes():
 
     entity_tagger = EntityTagger.instance(load_index=False)
     entity_tagger.store_index()
+
+    enitity_explainer = EntityExplainer.instance(load_index=False)
+    enitity_explainer.store_index()
 
     ac = AutocompletionUtil.instance(load_index=False)
     ac.build_autocompletion_index()
