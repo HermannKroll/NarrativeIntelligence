@@ -576,7 +576,7 @@ python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
 ## Vacuum Database tables
 The service database might degenerate over time if too many updates happen. 
 It might be a good idea then to vacuum full every database table (rewrite + recreate indexes). 
-Therefore, we prepared a set of SQL statements in[vacuum_db.sql](sql/vacuum_db.sql).
+Therefore, we prepared a set of SQL statements in [vacuum_db.sql](sql/vacuum_db.sql).
 
 Either log in your postgres user, open a psql shell and paste the statements manually:
 ```
