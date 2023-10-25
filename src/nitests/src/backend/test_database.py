@@ -2,10 +2,9 @@ import json
 import os
 import unittest
 
+from kgextractiontoolbox.backend.models import Tagger
 from narraint.backend.database import SessionExtended
 from narraint.config import BACKEND_CONFIG
-from kgextractiontoolbox.backend.models import Tagger
-from nitests.util import tmp_rel_path
 
 
 class TestSession(unittest.TestCase):

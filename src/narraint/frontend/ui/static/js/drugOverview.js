@@ -48,7 +48,7 @@ async function buildSite() {
     await loadOverviewData()
         .then(() => createNetworkGraph())
         .catch((e) => console.log(e))
-
+    saveHistoryEntry();
 }
 
 /**

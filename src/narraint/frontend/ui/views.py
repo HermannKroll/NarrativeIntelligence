@@ -10,10 +10,8 @@ from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
 
-import requests
 from PIL import Image
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
@@ -22,16 +20,17 @@ from sqlalchemy.exc import OperationalError
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
-from narraint.backend.retrieve import retrieve_narrative_documents_from_database
+from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narraint.frontend.entity.util import explain_concept_translation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
+from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -54,6 +53,7 @@ class View:
     """
     entity_tagger = None
     cache = None
+    explainer = None
 
     _instance = None
     initialized = False
@@ -73,6 +73,8 @@ class View:
             cls.cache = SearchCache()
             cls.autocompletion = AutocompletionUtil.instance()
             cls.translation = QueryTranslation()
+            cls.explainer = EntityExplainer.instance()
+            cls.keyword2graph = Keyword2GraphTranslation()
 
         return cls._instance
 
@@ -1098,10 +1100,24 @@ def get_keywords(request):
 
 
 def get_explain_translation(request):
-    if "concept" in request.GET:
+    if "concept" in request.GET and 'query' in request.GET:
         try:
             concept = str(request.GET["concept"]).strip()
-            headings = explain_concept_translation(concept)
+            search_string = str(request.GET.get("query", "").strip())
+            logging.info(f'checking query: {search_string}')
+            query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+                search_string)
+
+            if not query_fact_patterns:
+                return JsonResponse(dict(headings=["Please complete query first"]))
+
+            # If the search string starts with the concepts,
+            if search_string.startswith(concept):
+                entities = query_fact_patterns.fact_patterns[0].subjects
+            else:
+                entities = query_fact_patterns.fact_patterns[0].objects
+
+            headings = View.explainer.explain_entities(entities)
             return JsonResponse(dict(headings=headings))
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))
@@ -1123,19 +1139,6 @@ class SearchView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View.instance().query_logger.write_page_view_log(SearchView.template_name)
-        return super().get(request, *args, **kwargs)
-
-
-class NewSearchView(TemplateView):
-    template_name = "ui/new_search.html"
-
-    def __init__(self):
-        init_view = View.instance()
-        super(NewSearchView, self).__init__()
-
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(
-            NewSearchView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1214,13 +1217,6 @@ class DocumentView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class DrugOverviewIndexView(TemplateView):
-    template_name = "ui/drug_overview_index.html"
-
-    def get(self, request, *args, **kwargs):
-        return redirect("drug_overview")
-
-
 class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
 
@@ -1253,63 +1249,37 @@ class MECFSView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-# invokes Django to compress the results
-@gzip_page
-def get_ps_query(request):
-    if request.GET.keys() & {"query", "confidence", "sources"}:
-        query = request.GET["query"].strip()
-        confidence = request.GET["confidence"]
-        sources = request.GET["sources"]
-        if "statement" in request.GET:
-            statement = request.GET["statement"]
-        else:
-            statement = None
-        try:
-            confidence = float(confidence)
-            logging.info('Received political sciences query...')
-            logging.info(f'Search with conf. {confidence} for query: {query}')
-            if statement:
-                logging.info(f'Use statement "{statement}"')
-            logging.info(f'Sources: {sources}')
-            nd_result = requests.get(
-                f"http://127.0.0.1:5050//query?confidence={confidence}&sources={sources}&query_str={query}&statement={statement}")
-            json_data = nd_result.json()
-            if nd_result.status_code == 200:
-                return JsonResponse(status=200, data=json_data)
-        except ValueError:
-            return JsonResponse(status=500, data=dict(reason=f"confidence must be a float (not {confidence}"))
-    else:
-        return JsonResponse(status=500, data=dict(reason="query or confidence are missing"))
-
-
-class PoliticalSciencesView(TemplateView):
-    template_name = "ui/political_sciences.html"
-
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(PoliticalSciencesView.template_name)
-        return super().get(request, *args, **kwargs)
-
-
-class KeywordSearchView(TemplateView):
-    template_name = "ui/keyword_search.html"
-
-
 def get_keyword_search_request(request):
     if request.GET.keys() & {"keywords"}:
         keywords = request.GET.get("keywords", "")
         if keywords.strip():
+            time_start = datetime.now()
             try:
                 logging.debug('Generating graph queries for "{}"'.format(keywords))
 
-                nd_result = requests.get(
-                    f"http://127.0.0.1:5000//query?keywords={keywords}")
-                # return dict{terms: list[str], entities: list[str], statements: list[(str, str, str)]}
-                json_data = nd_result.json()
-                if nd_result.status_code == 200:
-                    return JsonResponse(status=200, data=dict(query_graphs=json_data))
+                keywords = keywords.split("_AND_")
+                if len(keywords) < 2:
+                    return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
 
-            except Exception:
-                logging.debug(f'Could generate graph queries for "{keywords}"')
+                json_data = View.instance().keyword2graph.translate_keywords(keywords)
+                # This is the format
+                # json_data = [
+                #     [("Metformin", "treats", "Diabetes Mellitus")],
+                #     [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
+                #     [("Insulin", "associated", "Diabetes Mellitus")],
+                # ]
+
+                View.instance().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
+                return JsonResponse(status=200, data=dict(query_graphs=json_data))
+
+            except Exception as e:
+                View.instance().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
+                query_trans_string = str(e)
+                logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
+                return JsonResponse(status=500, data=dict(reason=query_trans_string))
+
     return HttpResponse(status=500)
 
 

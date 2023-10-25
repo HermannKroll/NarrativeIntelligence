@@ -176,15 +176,13 @@ function createQueryListItem(subject, predicate, object) {
     let uniqueListItemID = getUniqueListID();
     addQueryPattern(uniqueListItemID, subject, predicate, object);
     let deleteEvent = '$(\'#' + uniqueListItemID + '\').remove();removeQueryPattern(\'' + uniqueListItemID + '\');'
-    let listItem = $('<li id="' + uniqueListItemID + '" class="list-group-item">'
-        + '<div class="container">' +
-        '  <div class="row">' +
-        '    <div class="col-4" style="padding-left: 0"><span class="name">' + subject + '</span></div>' +
-        '    <div class="col-2"><span class="name">' + predicate + '</span></div>' +
-        '    <div class="col-4"><span class="name">' + object + '</span></div>' +
-        '    <div class="col-1"><button class="btn btn-danger remove-item" onclick="' + deleteEvent + '">-</button></div>' +
-        '  </div>' +
-        '</div>' +
+    let listItem = $('<li id="' + uniqueListItemID + '" class="list-group-item">' +
+        '   <div class="row">' +
+        '       <div class="d-flex col-sm-4 align-items-center">' + subject + '</div>' +
+        '       <div class="d-flex col-sm-2 align-items-center">' + predicate + '</div>' +
+        '       <div class="d-flex col-sm-4 align-items-center">' + object + '</div>' +
+        '       <div class="d-flex col-sm-1"><button class="btn btn-danger" onclick="' + deleteEvent + '">-</button></div>' +
+        '   </div>' +
         '</li>');
     $('#query_builder_list').append(listItem);
     document.getElementById('input_subject').value = "";
@@ -444,9 +442,9 @@ const setButtonSearching = isSearching => {
     btn.empty();
 
     if (isSearching) {
-        let span = $('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+        let span = $('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>');
         btn.append(span)
-            .append(" Searching ...")
+            .append("Searching")
             .prop("disabled", true);
         help.fadeIn();
     } else {
@@ -602,7 +600,12 @@ function initFromURLQueryParams() {
         document.querySelector('#toSlider').value = params.get("year_end");
     }
     if (params.has("title_filter")) {
-        document.getElementById("input_title_filter").value = params.get("title_filter");
+        let titleFilter = params.get("title_filter");
+        if (titleFilter.includes("systemat review")) {
+            document.getElementById("checkbox_sys_review").checked = true;
+            titleFilter = titleFilter.replace("systemat review", "").trim();
+        }
+        document.getElementById("input_title_filter").value = titleFilter;
     }
     if (params.has("classification_filter")) {
         document.getElementById("checkbox_classification").checked = true;
@@ -612,9 +615,6 @@ function initFromURLQueryParams() {
         lastQuery = query;
         example_search(query);
     }
-
-
-
 }
 
 let currentMaxPage = 0;
@@ -678,11 +678,12 @@ const search = (event) => {
     let year_element = document.getElementById("select_sorting_year");
     let year_sort_desc = year_element.value;
     let use_classification = document.getElementById("checkbox_classification").checked;
+    let use_sys_review = document.getElementById("checkbox_sys_review").checked;
 
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    let title_filter = document.getElementById("input_title_filter").value;
+    let title_filter = document.getElementById("input_title_filter").value.trim();
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
 
@@ -752,7 +753,15 @@ const search = (event) => {
     } else {
         url.searchParams.delete("year_end");
     }
-
+    if (use_sys_review) {
+        if (!title_filter.includes("systemat review")) {
+            if (title_filter.length > 0)
+                title_filter += " ";
+            title_filter += "systemat review";
+        }
+    } else {
+        title_filter = title_filter.replace("systemat review", "");
+    }
     if (title_filter.length > 0) {
         url.searchParams.set("title_filter", title_filter);
     } else {
@@ -835,8 +844,8 @@ const search = (event) => {
                 document_header_appendix = " (Truncated)"
             }
             if (result_size !== 0) {
-                document.getElementById("input_title_filter").style.display = "block";
-                document.getElementById("input_title_filter_label").style.display = "block";
+                document.getElementById("input_title_filter").classList.toggle("d-none", false);
+                document.getElementById("input_title_filter_label").classList.toggle("d-none", false);
 
                 documents_header.html(result_size + " Documents" + document_header_appendix)
                 // scroll to results
@@ -918,6 +927,7 @@ const search = (event) => {
             toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
             fromSlider.onchange = () => refreshSearch();
             toSlider.onchange = () => refreshSearch();
+            saveHistoryEntry({size: result_size, title_filter: title_filter});
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";
@@ -1737,11 +1747,17 @@ function initializeValues(slider, value, min, max) {
 
 function getSynonyms(element_id, ev) {
     let concept = getTextOrPlaceholderFromElement(element_id);
+    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    let predicate_input = document.getElementById('input_predicate');
+    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    let query_text = subject + ' ' + predicate + ' ' + object;
     if (concept !== "") {
         let request = $.ajax({
             url: explain_translation_url,
             data: {
                 concept: concept,
+                query: query_text
             }
         });
         request.done(function (response) {

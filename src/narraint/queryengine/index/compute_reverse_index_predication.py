@@ -14,73 +14,7 @@ from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
 
-def denormalize_predication_table(predication_id_min: int = None, consider_metadata=True):
-    session = SessionExtended.get()
-    if not predication_id_min:
-        logging.info('Deleting old denormalized predication...')
-        stmt = delete(PredicationInvertedIndex)
-        session.execute(stmt)
-        session.commit()
-
-    logging.info('Counting the number of predications...')
-    pred_count = session.query(Predication).filter(Predication.relation != None)
-    if predication_id_min:
-        logging.info(f'Only considering predication ids above {predication_id_min}')
-        pred_count = pred_count.filter(Predication.id >= predication_id_min)
-    pred_count = pred_count.count()
-
-    start_time = datetime.now()
-    # "is not None" instead of "!=" None" DOES NOT WORK!
-    prov_query = session.query(Predication.id,
-                               Predication.document_id, Predication.document_collection,
-                               Predication.subject_id, Predication.subject_type,
-                               Predication.relation,
-                               Predication.object_id, Predication.object_type)
-
-    prov_query = prov_query.filter(Predication.relation != None)
-
-    if consider_metadata:
-        prov_query = prov_query.join(DocumentMetadataService,
-                                     and_(Predication.document_id == DocumentMetadataService.document_id,
-                                          Predication.document_collection == DocumentMetadataService.document_collection))
-    if predication_id_min:
-        prov_query = prov_query.filter(Predication.id >= predication_id_min)
-
-    prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
-
-    # Hack to support also the Covid 19 collection
-    # TODO: not very generic
-    doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
-
-    insert_list = []
-    logging.info("Starting...")
-    # fact_to_doc_ids = defaultdict(lambda: defaultdict(list))
-    fact_to_prov_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
-
-    progress = Progress(total=pred_count, print_every=1000, text="denormalizing predication...")
-    progress.start_time()
-    for idx, prov in enumerate(prov_query):
-        progress.print_progress(idx)
-        s_id = prov.subject_id
-        s_t = prov.subject_type
-        p = prov.relation
-        o_id = prov.object_id
-        o_t = prov.object_type
-        seen_key = (s_id, s_t, p, o_id, o_t)
-        # fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
-        fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].add(prov.id)
-
-        # Hack to support also the Covid 19 collection
-        # TODO: not very generic
-        if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-            #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
-            fact_to_prov_ids[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
-        if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-            #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
-            fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
-
-    progress.done()
-
+def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     # Restructure dictionaries
     # for k in fact_to_doc_ids:
     #   for v in fact_to_doc_ids[k]:
@@ -151,8 +85,124 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
         ))
     progress2.done()
 
-    PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
+    PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
     insert_list.clear()
+
+
+def denormalize_predication_table(predication_id_min: int = None, consider_metadata=True, low_memory=False, buffer_size=1000):
+    if predication_id_min and low_memory:
+        raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
+
+    session = SessionExtended.get()
+    if not predication_id_min:
+        logging.info('Deleting old denormalized predication...')
+        stmt = delete(PredicationInvertedIndex)
+        session.execute(stmt)
+        session.commit()
+
+    logging.info('Counting the number of predications...')
+    pred_count = session.query(Predication).filter(Predication.relation != None)
+    if predication_id_min:
+        logging.info(f'Only considering predication ids above {predication_id_min}')
+        pred_count = pred_count.filter(Predication.id >= predication_id_min)
+    pred_count = pred_count.count()
+
+    start_time = datetime.now()
+    # "is not None" instead of "!=" None" DOES NOT WORK!
+    prov_query = session.query(Predication.id,
+                               Predication.document_id, Predication.document_collection,
+                               Predication.subject_id, Predication.subject_type,
+                               Predication.relation,
+                               Predication.object_id, Predication.object_type)
+
+    prov_query = prov_query.filter(Predication.relation != None)
+
+    if consider_metadata:
+        prov_query = prov_query.join(DocumentMetadataService,
+                                     and_(Predication.document_id == DocumentMetadataService.document_id,
+                                          Predication.document_collection == DocumentMetadataService.document_collection))
+    if predication_id_min:
+        prov_query = prov_query.filter(Predication.id >= predication_id_min)
+
+    if low_memory:
+        prov_query = prov_query.order_by(Predication.subject_id, Predication.relation, Predication.object_id)
+
+    prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
+
+    # Hack to support also the Covid 19 collection
+    # TODO: not very generic
+    doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
+
+    insert_list = []
+    logging.info("Starting...")
+    # fact_to_doc_ids = defaultdict(lambda: defaultdict(list))
+    fact_to_prov_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+
+    progress = Progress(total=pred_count, print_every=1000, text="denormalizing predication...")
+    progress.start_time()
+
+    if low_memory:
+        buffer = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+        last_spo = ()
+        for idx, prov in enumerate(prov_query):
+            progress.print_progress(idx)
+            s_id = prov.subject_id
+            s_t = prov.subject_type
+            p = prov.relation
+            o_id = prov.object_id
+            o_t = prov.object_type
+
+            s_p_o = (s_id, p, o_id)
+            if idx == 0:
+                last_spo = s_p_o
+            # The whole spo key must be inserted within one buffer
+            if last_spo != s_p_o and len(buffer) >= buffer_size:
+                insert_data(session, buffer, predication_id_min, insert_list)
+                buffer.clear()
+
+            last_spo = s_p_o
+            seen_key = (s_id, s_t, p, o_id, o_t)
+            buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
+
+            # Hack to support also the Covid 19 collection
+            # TODO: not very generic
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
+                #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
+                buffer[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
+                #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
+                buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
+
+        insert_data(session, buffer, predication_id_min, insert_list)
+        session.commit()
+        buffer.clear()
+    else:
+        for idx, prov in enumerate(prov_query):
+            progress.print_progress(idx)
+            s_id = prov.subject_id
+            s_t = prov.subject_type
+            p = prov.relation
+            o_id = prov.object_id
+            o_t = prov.object_type
+            seen_key = (s_id, s_t, p, o_id, o_t)
+            # fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
+            fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].add(prov.id)
+
+            # Hack to support also the Covid 19 collection
+            # TODO: not very generic
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
+                #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
+                fact_to_prov_ids[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
+            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
+                #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
+                fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
+
+        insert_data(session, fact_to_prov_ids, predication_id_min, insert_list)
+        session.commit()
+
+    progress.done()
+
+
 
     end_time = datetime.now()
     logging.info(f"Query table created. Took me {end_time - start_time} minutes.")
@@ -165,9 +215,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--predicate_id_minimum", default=None, type=int, required=False,
                         help="only predication ids above this will be considered")
+    parser.add_argument("--low-memory", action="store_true", default=False, required=False, help="Use low-memory mode")
+    parser.add_argument("--buffer-size", type=int, default=1000, required=False, help="Buffer size for low-memory mode")
     args = parser.parse_args()
 
-    denormalize_predication_table(predication_id_min=args.predicate_id_minimum)
+    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory, buffer_size=args.buffer_size)
 
 
 if __name__ == "__main__":

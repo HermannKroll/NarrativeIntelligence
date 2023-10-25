@@ -1,97 +1,107 @@
-# This is the description of the database schema (03/03/2020).
-# Code can be pasted on https://app.quickdatabasediagrams.com to generate the diagram
+# This is the description of the database schema (22/10/2023).
+# Code can be pasted on https://dbdiagram.io to generate the diagram
 
-Document
--
-id PK bigint
-collection PK string
-title string
-abstract string
-fulltext string NULLABLE
-date_inserted datetime
+Table Document {
+  id bigint [primary key]
+  collection string [primary key]
+  title string
+  abstract string
+  fulltext string [null]
+  date_inserted datetime
+}
 
-DocumentTranslation
--
-document_id int PK FK >- Document.id
-document_collection string PK  FK >- Document.collection
-source_doc_id string
-md5 string
-date_inserted DateTime
-source string
+Table DocumentTranslation {
+  document_id bigint [primary key]
+  document_collection string [primary key]
+  source_doc_id string
+  md5 string
+  date_inserted datetime
+  source string
+}
 
-Tagger
--
-name PK string
-version PK string
+Table Tagger {
+  name string [primary key]
+  version string [primary key]
+}
 
-DocTaggedBy
--
-document_id int PK FK >- Document.id
-document_collection string PK  FK >- Document.collection
-tagger_name string PK FK >- Tagger.name
-tagger_version string PK FK >- Tagger.version
-ent_type PK string
-date_inserted datetime
+Table DocTaggedBy {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.collection]
+  tagger_name string [primary key, ref: > Tagger.name]
+  tagger_version string [primary key, ref: > Tagger.version]
+  ent_type string [primary key]
+  date_inserted datetime
+}
 
-Tag
--
-id int PK
-ent_type string UNIQUE
-start int UNIQUE
-end int UNIQUE
-ent_id string UNIQUE
-ent_str string
-document_id int UNIQUE FK >- Document.id
-document_collection string UNIQUE FK >- Document.collection
+Table Tag {
+  id bigint [primary key]
+  ent_type string [unique]
+  start int [unique]
+  end int [unique]
+  ent_id string [unique]
+  ent_str string
+  document_id int [unique, ref: > Document.id]
+  document_collection string [unique, ref: > Document.id]
+}
 
-Predication
--
-id bigint PK
-document_id bigint FK >- Document.id
-document_collection string FK >- Document.collection
-subject_id string
-subject_str string
-subject_type string
-predicate string
-relation string NULLABLE
-object_id string
-object_str string
-object_type string
-confidence float NULLABLE
-sentence_id bigint FK >- Sentence.id
-extraction_type string
+Table Predication {
+  id bigint PK
+  document_id bigint [ref: > Document.id]
+  document_collection string [ref: > Document.id]
+  subject_id string
+  subject_str string
+  subject_type string
+  predicate_org string
+  predicate string
+  relation string [null]
+  object_id string
+  object_str string
+  object_type string
+  confidence float [null]
+  sentence_id bigint [ref: > Sentence.id]
+  extraction_type string
+}
 
-PredicationRating
--
-user_id string PK
-query string
-predication_id bigint FK >- Predication.id
-rating string
-date_inserted datetime
+Table Sentence {
+  id bigint [primary key]
+  document_collection string
+  text string
+  md5hash string
+}
 
+Table DocProcessedByIE {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.id]
+  extraction_type string
+  date_inserted datetime
+}
 
-Sentence
--
-id bigint PK
-document_collection string FK >- Document.collection
-text string
-md5hash string
+Table DocumentMetadata {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.id]
+  document_id_original string
+  authors string
+  journals string
+  publication_year int
+  publication_month int
+  publication_doi string
+}
 
-DocProcessedByIE:
--
-document_id bigint FK >- Document.id
-document_collection string FK >- Document.collection
-extraction_type string
-date_inserted DateTime
+Table DocumentClassification {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.id]
+  classification string PK
+  explanation string
+}
 
-DocumentMetadata:
--
-document_id bigint FK >- Document.id
-document_collection string FK >- Document.collection
-document_id_original string
-authors string
-journals string
-publication_year int
-publication_month int
-publication_doi string
+Table DocumentSection {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.id]
+  position int PK
+  title string
+  text string
+}
 
+Table PredicationToDelete {
+  predication_id bigint PK
+}

@@ -29,6 +29,7 @@ class TagInvertedIndex(Extended, DatabaseTable):
     entity_id = Column(String, nullable=False, index=True, primary_key=True)
     entity_type = Column(String, nullable=False, index=True, primary_key=True)
     document_collection = Column(String, nullable=False, index=True, primary_key=True)
+    support = Column(Integer, nullable=False)
     document_ids = Column(String, nullable=False)
 
 
@@ -52,21 +53,8 @@ class DocumentTranslation(models.DocumentTranslation):
     pass
 
 
-class DocumentMetadata(Extended, DatabaseTable):
-    __tablename__ = 'document_metadata'
-    __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
-        PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
-    )
-
-    document_id = Column(BigInteger, nullable=False, index=True)
-    document_collection = Column(String, nullable=False, index=True)
-    document_id_original = Column(String, nullable=True)
-    authors = Column(String, nullable=True)
-    journals = Column(String, nullable=True)
-    publication_year = Column(Integer, nullable=True)
-    publication_month = Column(Integer, nullable=True)
-    publication_doi = Column(String, nullable=True)
+class DocumentMetadata(models.DocumentMetadata):
+    pass
 
 
 class DocumentMetadataService(Extended, DatabaseTable):
@@ -214,3 +202,12 @@ class EntityKeywords(Extended, DatabaseTable):
                                                     keyword_data=keyword_data)
         session.execute(insert_stmt)
         session.commit()
+
+
+class SchemaSupportGraphInfo(Extended, DatabaseTable):
+    __tablename__ = "schema_support_graph_info"
+
+    subject_type = Column(String, nullable=False, primary_key=True)
+    relation = Column(String, nullable=False, primary_key=True)
+    object_type = Column(String, nullable=False, primary_key=True)
+    support = Column(Integer, nullable=False)
