@@ -406,6 +406,47 @@ That is why we redirect the output to a file.
 - preload forces that all indexes are load before spawning the workers
 - timeout specifies when a long request will be stopped and the corresponding worker is rebooted
 
+## System.d job configuration
+You may also configure the Narrative Service as a system.d job. 
+
+Create a new job file:
+```
+nano /etc/systemd/system/narrative.service
+```
+
+Enter the following script:
+```
+[Unit]
+Description=NarrativeService
+After=network.target
+
+[Service]
+Type=simple
+User=pubpharm
+WorkingDirectory=/home/pubpharm/NarrativeIntelligence/src/narraint/frontend/
+ExecStart= /home/pubpharm/anaconda3/envs/narraint/bin/python3.8 /home/pubpharm/anaconda3/envs/narraint/bin/gunicorn -b 127.0.0.1:8080 --timeout 500 frontend.wsgi -w 4 --preload
+Environment="PYTHONPATH=/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+Environment="DJANGO_SETTINGS_MODULE=frontend.settings.prod"
+
+[Install]
+WantedBy=default.target
+```
+
+Enable the job:
+```
+systemctl enable narrative.service
+```
+
+And finally start the job:
+```
+systemctl start narrative.service
+```
+
+
+Get the service log:
+```
+journalctl -u narrative -f
+```
 
 # Updating the Service (Code)
 Switch to screen session and stop service.
