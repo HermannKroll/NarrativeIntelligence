@@ -539,6 +539,40 @@ Then run the bash script. This may take a while.
 bash scripts/update_service_data.bs
 ```
 
+# Periodic Updates
+There are some indexes that do not require a rebuilding every time. 
+They are based on statistics of the database.
+However, it might be a good idea to update them in periodic times.
+
+First, there are indexes for the entity translation, explanation and autocompletion.
+Run:
+```
+python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py --force
+```
+
+**--force** enforces the creation without asking whether you are connected to the right DB first.
+This is necessary for a automated script.
+
+Next, we have a schema graph support information table to support the keyword to query graph translation.
+To update this table, run:
+```
+python ~/NarrativeIntelligence/src/narraint/keywords2graph/schema_support_graph.py
+```
+
+The Drug Overviews show keyword clouds to the users. 
+These clouds can be updated via:
+```
+python ~/NarrativeIntelligence/src/narraint/keywords/generate_drug_keywords.py
+```
+
+The word clouds for COVID-19 and Long COVID can be updated by:
+```
+python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
+```
+
+
+
+
 ## Vacuum Database tables
 The service database might degenerate over time if too many updates happen. 
 It might be a good idea then to vacuum full every database table (rewrite + recreate indexes). 
