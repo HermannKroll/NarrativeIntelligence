@@ -140,7 +140,7 @@ select option:hover {
 }
 
 #drug_inchi {
-  overflow-wrap: break-word !important;
+  word-break: break-all !important;
 }
 
 /* CONTAINER CONTENT ALIGNMENT */
