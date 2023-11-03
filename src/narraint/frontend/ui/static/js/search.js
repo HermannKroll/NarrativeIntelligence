@@ -645,6 +645,12 @@ function pageUpdated() {
 function computePageInfo(result_size) {
     let pageCount = Math.ceil(parseInt(result_size) / DEFAULT_AGGREGATED_RESULTS_PER_PAGE);
     currentMaxPage = pageCount;
+
+    // handle empty results appropriately to increase UX
+    if (pageCount === 0)
+        pageCount = 1;
+
+    document.getElementById("input_page_no").max = pageCount;
     document.getElementById("label_max_page").textContent = pageCount.toString();
     document.getElementById("div_input_page").style.display = "block";
 }
