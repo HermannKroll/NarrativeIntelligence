@@ -29,6 +29,7 @@ class TagInvertedIndex(Extended, DatabaseTable):
     entity_id = Column(String, nullable=False, index=True, primary_key=True)
     entity_type = Column(String, nullable=False, index=True, primary_key=True)
     document_collection = Column(String, nullable=False, index=True, primary_key=True)
+    support = Column(Integer, nullable=False)
     document_ids = Column(String, nullable=False)
 
 
@@ -201,3 +202,12 @@ class EntityKeywords(Extended, DatabaseTable):
                                                     keyword_data=keyword_data)
         session.execute(insert_stmt)
         session.commit()
+
+
+class SchemaSupportGraphInfo(Extended, DatabaseTable):
+    __tablename__ = "schema_support_graph_info"
+
+    subject_type = Column(String, nullable=False, primary_key=True)
+    relation = Column(String, nullable=False, primary_key=True)
+    object_type = Column(String, nullable=False, primary_key=True)
+    support = Column(Integer, nullable=False)

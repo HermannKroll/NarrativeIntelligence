@@ -22,22 +22,26 @@ class ReverseTagIdxTest(TestCase):
         session.execute(stmt)
         session.commit()
 
-        document_values = [dict(id=1, collection="RIDXTEST2", title="Test", abstract="Test Abstract"),
-                           dict(id=2, collection="RIDXTEST2", title="Test", abstract="Test Abstract")]
-        sentences_values = [dict(id=1, document_collection="RIDXTEST2", text="ABC", md5hash="HASH")]
-        pred_values = [dict(id=100000, document_id=1, document_collection="RIDXTEST2",
+        stmt = delete(Predication)
+        session.execute(stmt)
+        session.commit()
+
+        document_values = [dict(id=1, collection="IDX_INVERTED_TAG_2", title="Test", abstract="Test Abstract"),
+                           dict(id=2, collection="IDX_INVERTED_TAG_2", title="Test", abstract="Test Abstract")]
+        sentences_values = [dict(id=1, document_collection="IDX_INVERTED_TAG_2", text="ABC", md5hash="HASH")]
+        pred_values = [dict(id=100000, document_id=1, document_collection="IDX_INVERTED_TAG_2",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t1", relation="T1",
                             object_id="B", object_type="BT", object_str="B_STR",
                             sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=100001, document_id=1, document_collection="RIDXTEST2",
+                       dict(id=100001, document_id=1, document_collection="IDX_INVERTED_TAG_2",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t2", relation="T2",
                             object_id="B", object_type="BT", object_str="B_STR",
                             sentence_id=1, confidence=1.0, extraction_type="Test")]
 
         tag_values = [dict(id=100000, ent_type="AT", ent_id="A", ent_str="AS", start=0, end=0,
-                           document_id=1, document_collection="RIDXTEST2")]
+                           document_id=1, document_collection="IDX_INVERTED_TAG_2")]
 
         Document.bulk_insert_values_into_table(session, document_values)
         Sentence.bulk_insert_values_into_table(session, sentences_values)
@@ -50,7 +54,7 @@ class ReverseTagIdxTest(TestCase):
         session = SessionExtended.get()
         self.assertEqual(1, session.query(TagInvertedIndex).count())
 
-        allowed_keys = [("A", "AT", "RIDXTEST2")]
+        allowed_keys = [("A", "AT", "IDX_INVERTED_TAG_2")]
         allowed_doc_ids = [[1]]
 
         db_rows = {}
@@ -64,14 +68,14 @@ class ReverseTagIdxTest(TestCase):
     def test_full_reverse_idx_low_memory_buffer1(self):
         tag_values = [
             dict(id=100001, ent_type="AT", ent_id="A", ent_str="AS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2"),
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2"),
             dict(id=100002, ent_type="BT", ent_id="B", ent_str="BS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2")
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2")
         ]
         session = SessionExtended.get()
         Tag.bulk_insert_values_into_table(session, tag_values)
 
-        pred_values = [dict(id=100004, document_id=2, document_collection="RIDXTEST2",
+        pred_values = [dict(id=100004, document_id=2, document_collection="IDX_INVERTED_TAG_2",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t3", relation="T3",
                             object_id="B", object_type="BT", object_str="B_STR",
@@ -82,7 +86,7 @@ class ReverseTagIdxTest(TestCase):
         compute_inverted_index_for_tags(low_memory=True, buffer_size=1)
         self.assertEqual(2, session.query(TagInvertedIndex).count())
 
-        allowed_keys = [("A", "AT", "RIDXTEST2"), ("B", "BT", "RIDXTEST2")]
+        allowed_keys = [("A", "AT", "IDX_INVERTED_TAG_2"), ("B", "BT", "IDX_INVERTED_TAG_2")]
         allowed_doc_ids = [[2, 1], [2]]
 
         db_rows = {}
@@ -97,14 +101,14 @@ class ReverseTagIdxTest(TestCase):
     def test_full_reverse_idx_low_memory_buffer2(self):
         tag_values = [
             dict(id=100001, ent_type="AT", ent_id="A", ent_str="AS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2"),
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2"),
             dict(id=100002, ent_type="BT", ent_id="B", ent_str="BS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2")
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2")
         ]
         session = SessionExtended.get()
         Tag.bulk_insert_values_into_table(session, tag_values)
 
-        pred_values = [dict(id=100004, document_id=2, document_collection="RIDXTEST2",
+        pred_values = [dict(id=100004, document_id=2, document_collection="IDX_INVERTED_TAG_2",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t3", relation="T3",
                             object_id="B", object_type="BT", object_str="B_STR",
@@ -115,7 +119,7 @@ class ReverseTagIdxTest(TestCase):
         compute_inverted_index_for_tags(low_memory=True, buffer_size=2)
         self.assertEqual(2, session.query(TagInvertedIndex).count())
 
-        allowed_keys = [("A", "AT", "RIDXTEST2"), ("B", "BT", "RIDXTEST2")]
+        allowed_keys = [("A", "AT", "IDX_INVERTED_TAG_2"), ("B", "BT", "IDX_INVERTED_TAG_2")]
         allowed_doc_ids = [[2, 1], [2]]
 
         db_rows = {}
@@ -130,14 +134,14 @@ class ReverseTagIdxTest(TestCase):
     def test_full_reverse_idx_low_memory_buffer5(self):
         tag_values = [
             dict(id=100001, ent_type="AT", ent_id="A", ent_str="AS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2"),
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2"),
             dict(id=100002, ent_type="BT", ent_id="B", ent_str="BS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2")
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2")
         ]
         session = SessionExtended.get()
         Tag.bulk_insert_values_into_table(session, tag_values)
 
-        pred_values = [dict(id=100004, document_id=2, document_collection="RIDXTEST2",
+        pred_values = [dict(id=100004, document_id=2, document_collection="IDX_INVERTED_TAG_2",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t3", relation="T3",
                             object_id="B", object_type="BT", object_str="B_STR",
@@ -148,7 +152,7 @@ class ReverseTagIdxTest(TestCase):
         compute_inverted_index_for_tags(low_memory=True, buffer_size=5)
         self.assertEqual(2, session.query(TagInvertedIndex).count())
 
-        allowed_keys = [("A", "AT", "RIDXTEST2"), ("B", "BT", "RIDXTEST2")]
+        allowed_keys = [("A", "AT", "IDX_INVERTED_TAG_2"), ("B", "BT", "IDX_INVERTED_TAG_2")]
         allowed_doc_ids = [[2, 1], [2]]
 
         db_rows = {}
@@ -163,14 +167,14 @@ class ReverseTagIdxTest(TestCase):
     def test_full_reverse_idx_low_memory_buffer1000(self):
         tag_values = [
             dict(id=100001, ent_type="AT", ent_id="A", ent_str="AS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2"),
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2"),
             dict(id=100002, ent_type="BT", ent_id="B", ent_str="BS", start=0, end=0,
-                 document_id=2, document_collection="RIDXTEST2")
+                 document_id=2, document_collection="IDX_INVERTED_TAG_2")
         ]
         session = SessionExtended.get()
         Tag.bulk_insert_values_into_table(session, tag_values)
 
-        pred_values = [dict(id=100004, document_id=2, document_collection="RIDXTEST2",
+        pred_values = [dict(id=100004, document_id=2, document_collection="IDX_INVERTED_TAG",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t3", relation="T3",
                             object_id="B", object_type="BT", object_str="B_STR",
@@ -181,7 +185,7 @@ class ReverseTagIdxTest(TestCase):
         compute_inverted_index_for_tags(low_memory=True, buffer_size=1000)
         self.assertEqual(2, session.query(TagInvertedIndex).count())
 
-        allowed_keys = [("A", "AT", "RIDXTEST2"), ("B", "BT", "RIDXTEST2")]
+        allowed_keys = [("A", "AT", "IDX_INVERTED_TAG_2"), ("B", "BT", "IDX_INVERTED_TAG_2")]
         allowed_doc_ids = [[2, 1], [2]]
 
         db_rows = {}

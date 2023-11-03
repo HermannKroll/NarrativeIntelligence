@@ -603,7 +603,7 @@ function initFromURLQueryParams() {
         let titleFilter = params.get("title_filter");
         if (titleFilter.includes("systemat review")) {
             document.getElementById("checkbox_sys_review").checked = true;
-            titleFilter = titleFilter.replace("systemat review", "");
+            titleFilter = titleFilter.replace("systemat review", "").trim();
         }
         document.getElementById("input_title_filter").value = titleFilter;
     }
@@ -645,6 +645,12 @@ function pageUpdated() {
 function computePageInfo(result_size) {
     let pageCount = Math.ceil(parseInt(result_size) / DEFAULT_AGGREGATED_RESULTS_PER_PAGE);
     currentMaxPage = pageCount;
+
+    // handle empty results appropriately to increase UX
+    if (pageCount === 0)
+        pageCount = 1;
+
+    document.getElementById("input_page_no").max = pageCount;
     document.getElementById("label_max_page").textContent = pageCount.toString();
     document.getElementById("div_input_page").style.display = "block";
 }
@@ -683,7 +689,7 @@ const search = (event) => {
     let data_source = document.querySelector('input[name = "data_source"]:checked').value;
     lastDataSource = data_source;
     let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    let title_filter = document.getElementById("input_title_filter").value;
+    let title_filter = document.getElementById("input_title_filter").value.trim();
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     let inner_ranking = "NOT IMPLEMENTED";
 
@@ -927,6 +933,7 @@ const search = (event) => {
             toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
             fromSlider.onchange = () => refreshSearch();
             toSlider.onchange = () => refreshSearch();
+            saveHistoryEntry({size: result_size, title_filter: title_filter});
         } else {
             document.getElementById("select_sorting_year").style.display = "none";
             document.getElementById("select_sorting_freq").style.display = "none";

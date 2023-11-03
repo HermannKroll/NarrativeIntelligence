@@ -30,6 +30,7 @@ from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
+from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -73,6 +74,7 @@ class View:
             cls.autocompletion = AutocompletionUtil.instance()
             cls.translation = QueryTranslation()
             cls.explainer = EntityExplainer.instance()
+            cls.keyword2graph = Keyword2GraphTranslation()
 
         return cls._instance
 
@@ -1251,23 +1253,33 @@ def get_keyword_search_request(request):
     if request.GET.keys() & {"keywords"}:
         keywords = request.GET.get("keywords", "")
         if keywords.strip():
+            time_start = datetime.now()
             try:
                 logging.debug('Generating graph queries for "{}"'.format(keywords))
 
                 keywords = keywords.split("_AND_")
+                if len(keywords) < 2:
+                    return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
 
-                # TODO...
+                json_data = View.instance().keyword2graph.translate_keywords(keywords)
+                # This is the format
+                # json_data = [
+                #     [("Metformin", "treats", "Diabetes Mellitus")],
+                #     [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
+                #     [("Insulin", "associated", "Diabetes Mellitus")],
+                # ]
 
-                json_data = [
-                    [("Metformin", "treats", "Diabetes Mellitus")],
-                    [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
-                    [("Insulin", "associated", "Diabetes Mellitus")],
-                ]
-
+                View.instance().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
-            except Exception:
-                logging.debug(f'Could generate graph queries for "{keywords}"')
+            except Exception as e:
+                View.instance().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
+                                                            time_needed=datetime.now() - time_start)
+                query_trans_string = str(e)
+                logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
+                return JsonResponse(status=500, data=dict(reason=query_trans_string))
+
     return HttpResponse(status=500)
 
 

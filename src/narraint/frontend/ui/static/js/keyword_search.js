@@ -6,7 +6,13 @@ let networkOptions = {
         dragView: false,
         dragNodes: false
     },
-    physics: { solver: "forceAtlas2Based" },
+    physics: {
+        solver: "forceAtlas2Based",
+        forceAtlas2Based: {
+            springLength: 125,
+            avoidOverlap: 1
+        }
+    },
     groups: {
         default_ge: {
             color: {
@@ -43,9 +49,14 @@ window.addEventListener("DOMContentLoaded", () => {
             return false;
         }
     }).on("keydown", (event) => {
-        if (event.key === "Enter")
-            keywordAdd();
-        else if (event.key === "Tab") {
+        if (event.key === "Enter") {
+            if (document.querySelector("#search_input").value.trim() === "") {
+                // submit on empty input
+                keywordSearch();
+            } else {
+                keywordAdd();
+            }
+        } else if (event.key === "Tab") {
             event.preventDefault();
             keywordAdd();
         }
@@ -56,7 +67,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function keywordAdd() {
     const keywordList = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector('#search_input');
-    const keywordId = "keyword-tag-" + keywordInput.value.toLowerCase().replace(" ", "-");
+    const keywordId = "keyword-tag-" + keywordInput.value.trim().toLowerCase().replace(" ", "-");
 
     // add keywords only once
     if (Array.from(keywordList.childNodes).some((k) => k.id === keywordId)) {
@@ -64,9 +75,14 @@ function keywordAdd() {
         return;
     }
 
+    // Don't add the empty keywod
+    if (keywordInput.value.trim() === ""){
+        return;
+    }
+
     const div = document.createElement("div");
     div.classList.add("text-dark", "bg-light", "border", "rounded", "position-relative", "me-3", "mt-3", "px-2");
-    div.innerText = keywordInput.value;
+    div.innerText = keywordInput.value.trim();
     div.id = keywordId
     const span = document.createElement("span");
     span.setAttribute("role", "button");
@@ -79,43 +95,66 @@ function keywordAdd() {
 }
 
 async function keywordSearch() {
+    const queryGraphContainer = document.querySelector('#query_graph_container');
     const keywordDiv = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector("#search_input");
     const keywords = [];
-    if (keywordInput.value !== "")
+    if (keywordInput.value.trim() !== "")
         keywords.push(keywordInput.value);
+
+    // Substring because the tailing X should be removed (X do remove the keyword)
     keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
-        n.id.replace("keyword-tag-", "")));
+        n.innerText.substring(0, n.innerText.length - 2)));
 
     const keywordsString = keywords.join("_AND_")
     if (keywordsString === "") {
-        const inputAlert = document.getElementById('input_alert');
-        inputAlert.classList.toggle('d-none', false);
-        setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
+        showAlert("Empty input. Provide keywords to search!");
         return;
     }
+
+    queryGraphContainer.classList.toggle('d-none', true);
+    showLoadingScreen();
 
     const queryGraphDiv = document.getElementById('query_graphs');
     queryGraphDiv.innerHTML = "";
     document.getElementById('div_documents').innerText = '';
 
     await fetch(`${url_keyword_search_request}?keywords=${keywordsString}`)
-        .then((response) => { return response.json() })
+        .then((response) => {
+            if (response.status === 200)
+                return response.json();
+            else if (response.status === 500) {
+                return response.json().then((d) => {
+                    return Promise.reject(d["reason"]);
+                })
+            }
+            return Promise.reject("Unable to request graph queries");
+        })
         .then((data) => {
             // format: list[(str, str, str)]
             for (let idx in Object.keys(data['query_graphs'])) {
-
                 const queryGraph = data['query_graphs'][idx];
                 if (queryGraph === null) {
                     continue;
                 }
                 createQueryGraph(queryGraph, queryGraphDiv);
             }
+            queryGraphContainer.classList.toggle('d-none', false);
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+            showAlert(e);
+        })
         .finally(() => {
-            document.getElementById('query_graph_container').classList.toggle('d-none');
+            hideLoadingScreen();
         });
+}
+
+function showAlert(message) {
+    hideLoadingScreen();
+    const inputAlert = document.querySelector('#input_alert');
+    inputAlert.classList.toggle('d-none', false);
+    inputAlert.innerText = message;
+    setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
 }
 
 /**
@@ -159,10 +198,7 @@ function showResults(response) {
     divDocuments.empty();
 
     if (response["valid_query"] === "") {
-        const alert = document.getElementById('result_alert');//$('#result_alert');
-        alert.classList.toggle('d-none');
-
-        setTimeout(() => alert.classList.toggle('d-none'), 5000);
+        showAlert("Provided an invalid query!");
         return;
     }
 
@@ -191,7 +227,7 @@ function showResults(response) {
     let divList = createResultList(results, query_len);
     divDocuments.append(divList);
 
-    saveHistoryEntry(result_size);
+    saveHistoryEntry({size: result_size, title_filter: ""});
     document.getElementById("resultdiv").scrollIntoView();
 }
 
@@ -217,6 +253,8 @@ function addClickEvent(statements, container) {
         resetBorders();
         latest_valid_query = params;
 
+        showLoadingScreen()
+
         fetch(`${search_url}?${params}&data_source=PubMed`)
             .then((response) => { return response.json(); })
             .then((data) => {
@@ -225,7 +263,20 @@ function addClickEvent(statements, container) {
                 container.classList.add('border-danger');
             })
             .catch((e) => console.log(e))
+            .finally(() => hideLoadingScreen());
     }
+}
+
+function showLoadingScreen() {
+    document.documentElement.scrollIntoView({behavior: "instant"});
+    document.body.scrollIntoView({behavior: "instant"});
+    document.body.classList.toggle("overflow-hidden", true);
+    document.querySelector("#loading_screen").classList.toggle("d-none", false);
+}
+
+function hideLoadingScreen() {
+    document.body.classList.toggle("overflow-hidden", false);
+    document.querySelector("#loading_screen").classList.toggle("d-none", true);
 }
 
 function addTooltipEvent(statements, div) {
@@ -293,7 +344,6 @@ function createGraph(statements) {
             from: s,
             to: o,
             label: p,
-            arrows: { to: { enabled: true } },
             smooth: { enabled: false },
             font: { align: 'top'}
         });

@@ -1,6 +1,7 @@
 # This is the description of the database schema (22/10/2023).
 # Code can be pasted on https://dbdiagram.io to generate the diagram
 
+
 Table Document {
   id bigint [primary key]
   collection string [primary key]
@@ -10,9 +11,9 @@ Table Document {
   date_inserted datetime
 }
 
-Table DocumentTranslation {
-  document_id bigint [primary key]
-  document_collection string [primary key]
+Table Document_Translation {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.id]
   source_doc_id string
   md5 string
   date_inserted datetime
@@ -24,7 +25,7 @@ Table Tagger {
   version string [primary key]
 }
 
-Table DocTaggedBy {
+Table Doc_Tagged_By {
   document_id bigint [primary key, ref: > Document.id]
   document_collection string [primary key, ref: > Document.collection]
   tagger_name string [primary key, ref: > Tagger.name]
@@ -69,14 +70,14 @@ Table Sentence {
   md5hash string
 }
 
-Table DocProcessedByIE {
+Table Doc_Processed_By_IE {
   document_id bigint [primary key, ref: > Document.id]
   document_collection string [primary key, ref: > Document.id]
   extraction_type string
   date_inserted datetime
 }
 
-Table DocumentMetadata {
+Table Document_Metadata {
   document_id bigint [primary key, ref: > Document.id]
   document_collection string [primary key, ref: > Document.id]
   document_id_original string
@@ -87,14 +88,14 @@ Table DocumentMetadata {
   publication_doi string
 }
 
-Table DocumentClassification {
+Table Document_Classification {
   document_id bigint [primary key, ref: > Document.id]
   document_collection string [primary key, ref: > Document.id]
   classification string PK
   explanation string
 }
 
-Table DocumentSection {
+Table Document_Section {
   document_id bigint [primary key, ref: > Document.id]
   document_collection string [primary key, ref: > Document.id]
   position int PK
@@ -102,6 +103,6 @@ Table DocumentSection {
   text string
 }
 
-Table PredicationToDelete {
+Table Predication_To_Delete {
   predication_id bigint PK
 }
