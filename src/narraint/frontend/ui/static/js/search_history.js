@@ -42,11 +42,32 @@ function historyToTableRow(entry) {
     tableRow.appendChild(dateCell);
     tableRow.appendChild(queryCell);
 
-    if (entry.options.title_filter !== undefined) {
+    if (entry.options.filterOptions !== undefined) {
+        const filterOptions = entry.options.filterOptions;
         const restrictionCell = document.createElement("td");
-        if (entry.options.title_filter.length > 0) {
-            restrictionCell.innerHTML = "<b>Title-Filter</b>:<br>" + entry.options.title_filter.toString();
+        let restrictionText = "";
+        if (filterOptions.title_filter !== undefined && filterOptions.title_filter.length > 0) {
+            let titleFilter = filterOptions.title_filter;
+            let useSysReview = false;
+
+            if (titleFilter.includes("systemat review")) {
+                titleFilter = titleFilter.replace("systemat review", "").trim();
+                useSysReview = true;
+            }
+
+            if (titleFilter.length > 0)
+                restrictionText += "<strong>Title-Filter</strong>: " + titleFilter.toString() + "<br>";
+
+            if (useSysReview)
+                restrictionText += "<strong>Other</strong>: " + "systematic review" + "<br>"
         }
+
+        if (filterOptions.use_classification)
+            restrictionText += "<strong>Other</strong>: " + "pharm. technology" + "<br>"
+        // further restrictions / filter options
+
+        restrictionText = restrictionText.replace(/<br>$/i, "");
+        restrictionCell.innerHTML = restrictionText;
         tableRow.appendChild(restrictionCell);
     }
 
