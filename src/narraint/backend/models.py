@@ -211,3 +211,10 @@ class SchemaSupportGraphInfo(Extended, DatabaseTable):
     relation = Column(String, nullable=False, primary_key=True)
     object_type = Column(String, nullable=False, primary_key=True)
     support = Column(Integer, nullable=False)
+
+class DrugDiseaseTrialPhase(Extended, DatabaseTable):
+    __tablename__ = "drug_disease_trial_phase"
+
+    drug = Column(String, primary_key=True)
+    disease = Column(String, primary_key=True)
+    phase = Column(Integer, nullable=False)
