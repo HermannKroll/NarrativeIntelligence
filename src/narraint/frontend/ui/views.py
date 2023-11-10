@@ -19,7 +19,7 @@ from sqlalchemy.exc import OperationalError
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
-    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords
+    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
@@ -1300,3 +1300,34 @@ def get_news_data(request):
 
 logging.info('Initialize view')
 View.instance()
+
+
+def get_clinical_trial_phases(request):
+    if request.GET.keys() & {"molecule_chembl_id"}:
+        chembl_id = request.GET.get("molecule_chembl_id", "")
+
+        if not chembl_id.strip():
+            logging.debug('Could not query clinical trials for empty chembl id')
+            return HttpResponse(status=500)
+
+        time_start = datetime.now()
+        session = SessionExtended.get()
+        try:
+            q = session.query(DrugDiseaseTrialPhase)
+            q = q.filter(DrugDiseaseTrialPhase.drug == chembl_id)
+
+            drug_indications = []
+
+            for row in q:
+                drug_indications.append(dict(mesh_id=row.disease, max_phase_for_ind=row.phase))
+
+            View.instance().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
+                                                        time_needed=datetime.now() - time_start)
+            return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
+        except Exception as _:
+            logging.debug('Could not query clinical trials for {}'.format(chembl_id))
+            View.instance().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
+                                                        time_needed=datetime.now() - time_start)
+
+            return HttpResponse(status=500)
+    return HttpResponse(status=500)
