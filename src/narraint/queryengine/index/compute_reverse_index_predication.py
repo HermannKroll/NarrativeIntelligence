@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import and_, delete
+from sqlalchemy import and_, delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
@@ -54,8 +54,12 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
 
         p2.done()
         logging.info(f'{deleted_rows} inverted index entries must be deleted')
+
         logging.debug('Committing...')
         session.commit()
+        if SessionExtended.is_postgres:
+            session.execute(text("LOCK TABLE " + PredicationInvertedIndex.__tablename__ + " IN EXCLUSIVE MODE"))
+
         logging.info('Entries deleted')
 
     logging.info("Compute insert...")
@@ -72,7 +76,7 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     for idx, k in enumerate(fact_to_prov_ids):
         progress2.print_progress(idx)
         if idx % BULK_INSERT_AFTER_K == 0:
-            PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False)
+            PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
             insert_list.clear()
         insert_list.append(dict(
             subject_id=k[0],
@@ -99,6 +103,9 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
         stmt = delete(PredicationInvertedIndex)
         session.execute(stmt)
         session.commit()
+
+    if SessionExtended.is_postgres:
+        session.execute(text("LOCK TABLE " + PredicationInvertedIndex.__tablename__ + " IN EXCLUSIVE MODE"))
 
     logging.info('Counting the number of predications...')
     pred_count = session.query(Predication).filter(Predication.relation != None)

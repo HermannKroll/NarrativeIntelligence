@@ -406,6 +406,8 @@
         const url_drug_search = "{% url 'drug_search_log' %}";
         const url_substance_href = "{% url 'drug_substance_forward_log' %}";
         const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
+        
+        const url_clinical_trial_phases = "{% url 'clinical_trial_phases' %}"
 
         let currentFullscreenPrefix = null;
         // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
@@ -426,8 +428,8 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script src="{% static 'js/paper.js' %}?version=9" type="text/javascript"></script>
-    <script src="{% static 'js/overview.js' %}?version=4" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverview.js' %}?version=11" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?version=5" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverview.js' %}?version=12" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=6" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=1" type="text/javascript"></script>

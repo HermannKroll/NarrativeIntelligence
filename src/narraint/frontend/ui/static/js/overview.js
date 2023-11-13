@@ -309,8 +309,8 @@ async function fillSearchbox(prefix) {
         if (item.max_phase_for_ind != null) {
             const imgSrc = (item.max_phase_for_ind >= 0) ? url_chembl_phase + item.max_phase_for_ind + ".svg" : url_chembl_phase_new;
             element +=
-                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')" title="Search in ChEMBL"
-                   href="https://www.ebi.ac.uk/chembl/g/#browse/drug_indications/filter/drug_indication.parent_molecule_chembl_id:${currentChemblID} && drug_indication.mesh_id:${item.id.substring(5, item.id.length)}">
+                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')" title="Search in clinicaltrials.gov"
+                   href="https://clinicaltrials.gov/search?cond=${item.name}&viewType=Table&term=${currentDrugName}">
                    <img src="${imgSrc}" alt="Phase ${(item.max_phase_for_ind >= 0) ? item.max_phase_for_ind : "unknown"}">
                 </a>`;
         }
