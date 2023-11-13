@@ -38,13 +38,13 @@ su pubpharm
 
 To use this project, clone this project and its submodules via:
 ```
-git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules https://github.com/HermannKroll/NarrativeIntelligence.git
 ```
 
 
 For development purposes, dev should be cloned:
 ```
-git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules --branch dev https://github.com/HermannKroll/NarrativeIntelligence.git
 ```
 
 ## Cloning a private repository (deprecated)

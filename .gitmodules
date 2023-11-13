@@ -1,6 +1,6 @@
 [submodule "lib/NarrativeAnnotation"]
 	path = lib/NarrativeAnnotation
-	url = git@github.com:HermannKroll/NarrativeAnnotation.git
+	url = https://github.com/HermannKroll/NarrativeAnnotation.git
 [submodule "lib/KGExtractionToolbox"]
 	path = lib/KGExtractionToolbox
-	url = git@github.com:HermannKroll/KGExtractionToolbox
+	url = https://github.com/HermannKroll/KGExtractionToolbox
