@@ -70,11 +70,15 @@ class ClinicalTrialPhaseExtractor:
 
     @staticmethod
     def retrieve_tags(tagger, text):
-        text.replace("|", " ")
-        text_doc = doc.TaggedDocument(title=text, abstract="", id=1)
-        tagger.tag_doc(text_doc)
-        text_doc.remove_duplicates_and_sort_tags()
-        return text_doc.tags
+        tagged_list = []
+        untagged_list = text.split("|")
+        for item in untagged_list:
+            text_doc = doc.TaggedDocument(title=item, abstract="", id=1)
+            tagger.tag_doc(text_doc)
+            text_doc.remove_duplicates_and_sort_tags()
+            for tag in text_doc.tags:
+                tagged_list.append(tag.ent_id)
+        return tagged_list
 
     @staticmethod
     def convert_phase(phases_text):
@@ -108,10 +112,8 @@ class ClinicalTrialPhaseExtractor:
             start_time = datetime.now()
             for row in csv_reader:
                 try:
-                    drugs = [d.ent_id for d in
-                             ClinicalTrialPhaseExtractor.retrieve_tags(drug_tagger, row["Interventions"])]
-                    diseases = [dis.ent_id for dis in
-                                ClinicalTrialPhaseExtractor.retrieve_tags(disease_tagger, row["Conditions"])]
+                    drugs = ClinicalTrialPhaseExtractor.retrieve_tags(drug_tagger, row["Interventions"])
+                    diseases = ClinicalTrialPhaseExtractor.retrieve_tags(disease_tagger, row["Conditions"])
 
                     if not drugs or not diseases:
                         print_progress_with_eta("reading clinical trial rows", idx, total_rows, start_time)
@@ -123,7 +125,7 @@ class ClinicalTrialPhaseExtractor:
                     for drug, disease in itertools.product(drugs, diseases):
                         if (drug, disease) in dd_phase and phase > dd_phase[(drug, disease)]:
                             dd_phase[(drug, disease)] = phase
-                        else:
+                        elif (drug, disease) not in dd_phase:
                             dd_phase[(drug, disease)] = phase
 
                 except Exception as e:
