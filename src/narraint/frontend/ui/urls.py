@@ -6,7 +6,7 @@ from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_
     get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
     post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, \
     get_keywords, get_logs_data, get_new_query, get_keyword_search_request, get_explain_translation, get_news_data, \
-    post_drug_suggestion, get_clinical_trial_phases
+    post_drug_suggestion, get_clinical_trial_phases, get_last_db_update
 
 urlpatterns = [
     path("query", get_query, name="query"),
@@ -36,5 +36,6 @@ urlpatterns = [
     path("keyword_search_request", get_keyword_search_request, name="keyword_search_request"),
     path("explain_translation", get_explain_translation, name="explain_translation"),
     path("get_news_data", get_news_data, name="get_news_data"),
-    path("clinical_trial_phases", get_clinical_trial_phases, name="clinical_trial_phases")
+    path("clinical_trial_phases", get_clinical_trial_phases, name="clinical_trial_phases"),
+    path("database_update", get_last_db_update, name="database_update")
 ]
