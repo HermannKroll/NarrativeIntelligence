@@ -552,9 +552,15 @@ Please note that the low memory mode and buffer size cannot be combined with the
 
 You can export the latest predication id via:
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
+python ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
 ```
 Replace $PREDICATION_MINIMUM_UPDATE_ID_FILE by a concrete path. 
+
+
+Finally, we can update the database table that stores the date of the latest update via:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
+```
 
 
 ## Update Automation Script
