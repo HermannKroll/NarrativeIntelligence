@@ -617,6 +617,12 @@ The word clouds for COVID-19 and Long COVID can be updated by:
 python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
 ```
 
+The trial status of drug disease indications is pre-computed by crawling ClinicalTrials.gov. 
+The data should be updated in periodic intervalls (but not in every service update). 
+To recompute the drug disease indications from ClinicalTrials.gov, run:
+```
+python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
+```
 
 
 
