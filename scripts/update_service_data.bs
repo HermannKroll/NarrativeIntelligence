@@ -18,3 +18,11 @@ python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/
 
 # Set DB date to now
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
+
+# Remove old cache
+rm -rf /home/kroll/NarrativeIntelligence/cache_old
+# Create a backup of the current cache
+mv /home/kroll/NarrativeIntelligence/cache /home/kroll/NarrativeIntelligence/cache_old
+
+# Execute common queries
+python3 ~/NarrativeIntelligence/src/narraint/frontend/ui/execute_common_queries.py
