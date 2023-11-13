@@ -406,6 +406,47 @@ That is why we redirect the output to a file.
 - preload forces that all indexes are load before spawning the workers
 - timeout specifies when a long request will be stopped and the corresponding worker is rebooted
 
+## System.d job configuration
+You may also configure the Narrative Service as a system.d job. 
+
+Create a new job file:
+```
+nano /etc/systemd/system/narrative.service
+```
+
+Enter the following script:
+```
+[Unit]
+Description=NarrativeService
+After=network.target
+
+[Service]
+Type=simple
+User=pubpharm
+WorkingDirectory=/home/pubpharm/NarrativeIntelligence/src/narraint/frontend/
+ExecStart= /home/pubpharm/anaconda3/envs/narraint/bin/python3.8 /home/pubpharm/anaconda3/envs/narraint/bin/gunicorn -b 127.0.0.1:8080 --timeout 500 frontend.wsgi -w 4 --preload
+Environment="PYTHONPATH=/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+Environment="DJANGO_SETTINGS_MODULE=frontend.settings.prod"
+
+[Install]
+WantedBy=default.target
+```
+
+Enable the job:
+```
+systemctl enable narrative.service
+```
+
+And finally start the job:
+```
+systemctl start narrative.service
+```
+
+
+Get the service log:
+```
+journalctl -u narrative -f
+```
 
 # Updating the Service (Code)
 Switch to screen session and stop service.
@@ -511,9 +552,15 @@ Please note that the low memory mode and buffer size cannot be combined with the
 
 You can export the latest predication id via:
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
+python ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
 ```
 Replace $PREDICATION_MINIMUM_UPDATE_ID_FILE by a concrete path. 
+
+
+Finally, we can update the database table that stores the date of the latest update via:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
+```
 
 
 ## Update Automation Script
@@ -570,13 +617,19 @@ The word clouds for COVID-19 and Long COVID can be updated by:
 python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
 ```
 
+The trial status of drug disease indications is pre-computed by crawling ClinicalTrials.gov. 
+The data should be updated in periodic intervalls (but not in every service update). 
+To recompute the drug disease indications from ClinicalTrials.gov, run:
+```
+python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
+```
 
 
 
 ## Vacuum Database tables
 The service database might degenerate over time if too many updates happen. 
 It might be a good idea then to vacuum full every database table (rewrite + recreate indexes). 
-Therefore, we prepared a set of SQL statements in[vacuum_db.sql](sql/vacuum_db.sql).
+Therefore, we prepared a set of SQL statements in [vacuum_db.sql](sql/vacuum_db.sql).
 
 Either log in your postgres user, open a psql shell and paste the statements manually:
 ```

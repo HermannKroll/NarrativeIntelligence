@@ -4,7 +4,7 @@ import string
 from datetime import datetime
 
 import nltk
-from sqlalchemy import delete
+from sqlalchemy import delete, text
 
 from kgextractiontoolbox.backend.models import Document
 from kgextractiontoolbox.backend.retrieve import iterate_over_all_documents_in_collection
@@ -20,6 +20,9 @@ def compute_inverted_index_for_terms():
     stmt = delete(TermInvertedIndex)
     session.execute(stmt)
     session.commit()
+
+    if SessionExtended.is_postgres:
+        session.execute(text("LOCK TABLE " + TermInvertedIndex.__tablename__))
 
     stopwords = set(nltk.corpus.stopwords.words('english'))
     trans_map = {p: ' ' for p in string.punctuation}
@@ -61,9 +64,10 @@ def compute_inverted_index_for_terms():
                                     document_ids=str(doc_ids), reverse=True))
 
         logging.info('Beginning insert into term_inverted_index table...')
-        TermInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True)
+        TermInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True, commit=False)
         insert_list.clear()
 
+    session.commit()
     end_time = datetime.now()
     logging.info(f"Term inverted index table created. Took me {end_time - start_time} minutes.")
 

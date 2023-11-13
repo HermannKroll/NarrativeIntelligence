@@ -19,15 +19,16 @@
     <div class="container">
         <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <a class="navbar-brand" href="{% url 'search' %}" style="text-align: center;">Narrative Service</a>
-            <a href="https://www.pubpharm.de"><img src="{% static 'pubpharm_home.png' %}" height="auto" width="112px" alt="Pubpharm" class="home-pub"></a>
+            <a href="https://www.pubpharm.de"><img src="{% static 'pubpharm_home.png' %}" height="auto" width="112px"
+                                                   alt="Pubpharm" class="home-pub"></a>
         </div>
 
         <a href="https://youtu.be/YDvUzrJdfm4" target="_blank">
-          <img src="{% static 'icons/help.png' %}" height="40px">
+            <img src="{% static 'icons/help.png' %}" height="40px">
         </a>
 
-        <span class="collapse navbar-collapse navbar-text text-nowrap">
-            Last updated 27.05.2023
+        <span class="collapse navbar-collapse navbar-text text-nowrap" id="db_update">
+            Last updated ...
         </span>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -47,7 +48,7 @@
                 <li class="nav-item" id="nav_item_overview">
                     <a class="nav-link" href="{% url 'long_covid' %}">Long COVID Overview</a>
                 </li>
-          <!--      <li class="nav-item" id="nav_item_stats">
+                <!--      <li class="nav-item" id="nav_item_stats">
                     <a class="nav-link" href="{% url 'stats' %}">Statistics</a>
                 </li>
             -->
@@ -60,8 +61,10 @@
             </ul>
         </div>
         <div class="mx-auto mx-md-0 d-flex flex-nowrap">
-            <a href="https://www.pubpharm.de" class="me-1"><img src="{% static 'fid_logo.png' %}" height="50px" alt="FID Logo"></a>
-            <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'ifislogo.png' %}" height="50px" alt="IFIS Logo"/></a>
+            <a href="https://www.pubpharm.de" class="me-1"><img src="{% static 'fid_logo.png' %}" height="50px"
+                                                                alt="FID Logo"></a>
+            <a href="http://www.ifis.cs.tu-bs.de/"><img src="{% static 'ifislogo.png' %}" height="50px"
+                                                        alt="IFIS Logo"/></a>
         </div>
     </div>
 </nav>
@@ -108,6 +111,22 @@
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script>
+    const database_update_url = "{% url 'database_update' %}";
+
+    fetch(database_update_url)
+        .then(response => response.json())
+        .then(result => {
+            console.log(result);
+            let dbdate = result["last_update"];
+            console.log("Last DB update date: " + dbdate);
+            document.getElementById("db_update").innerText = "Last updated: " + dbdate;
+        })
+        .catch((e) => {
+            console.log(e);
+            document.getElementById("db_update").innerText = "Last updated: N/A";
+        })
+
+
     let nav_bar_bottom = $("#nav_bar_bottom");
     let info_element = $('#info_for_user');
 

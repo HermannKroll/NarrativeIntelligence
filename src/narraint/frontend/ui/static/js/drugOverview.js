@@ -1,7 +1,7 @@
 let keywordToLog = null;
 
 const overviews = {
-    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
+    indi: {name: "Indications (Study Phase via <a href='https://clinicaltrials.gov'>clinicaltrials.gov</a>)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
     admin: {name: "Administration", predicate: "administered", object: "DosageForm", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["DosageForm"]},
     targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Gene"]},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["LabMethod"]},
@@ -264,29 +264,22 @@ async function indiDataCallback() {
     const data = overviews[prefix].fullData;
     const chemblData = [];
 
-    const baseUrl = "https://www.ebi.ac.uk"
-    let urlPath = `/chembl/api/data/drug_indication.json?molecule_chembl_id=${currentChemblID}&limit=1000`
+    let url = url_clinical_trial_phases + "?molecule_chembl_id=" + currentChemblID;
 
-    while(urlPath !== null) {
-        await fetch(baseUrl + urlPath)
-            .then((result) => {
-                return result.json();
-            })
-            .then((data) => {
-                chemblData.push(...data["drug_indications"]);
-                // api returns null if no more data is available
-                urlPath = data["page_meta"]["next"];
-            })
-            .catch(() => {
-                // interrupt the retrieval process instantly
-                console.log("unable to retrieve chembl clinical phase data");
-                urlPath = null;
-            });
-    }
+    await fetch(url)
+        .then((result) => {
+            return result.json();
+        })
+        .then((data) => {
+            chemblData.push(...data["drug_indications"]);
+        })
+        .catch((e) => { console.log(e)})
+
+    console.log(chemblData);
 
     // match equivalent entities and add chembl phase
     for(let idx in data) {
-        let entity = chemblData.find((e) => e["mesh_id"] === data[idx]["id"].split(":")[1]);
+        let entity = chemblData.find((e) => e["mesh_id"].split(":")[1] === data[idx]["id"].split(":")[1]);
         if(entity) {
             data[idx].max_phase_for_ind = Number.parseInt(entity.max_phase_for_ind);
         } else {

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Column, String, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
-    BigInteger, insert, Integer
+    BigInteger, insert, Integer, Date, delete
 
 from kgextractiontoolbox.backend import models
 from kgextractiontoolbox.backend.models import Base, DatabaseTable
@@ -211,3 +211,38 @@ class SchemaSupportGraphInfo(Extended, DatabaseTable):
     relation = Column(String, nullable=False, primary_key=True)
     object_type = Column(String, nullable=False, primary_key=True)
     support = Column(Integer, nullable=False)
+
+
+class DrugDiseaseTrialPhase(Extended, DatabaseTable):
+    __tablename__ = "drug_disease_trial_phase"
+
+    drug = Column(String, primary_key=True)
+    disease = Column(String, primary_key=True)
+    phase = Column(Integer, nullable=False)
+
+
+class DatabaseUpdate(Extended, DatabaseTable):
+    __tablename__ = "database_update"
+
+    last_update = Column(Date, primary_key=True)
+
+    @staticmethod
+    def get_latest_update(session):
+        dates = []
+        for date in session.query(DatabaseUpdate):
+            dates.append(date.last_update)
+
+        if len(dates) == 0:
+            raise ValueError('There are not update dates in the database')
+
+        dates.sort(reverse=True)
+        return dates[0]
+
+    @staticmethod
+    def update_date_to_now(session):
+        delete_stmt = delete(DatabaseUpdate)
+        session.execute(delete_stmt)
+
+        insert_stmt = insert(DatabaseUpdate).values(last_update=datetime.now())
+        session.execute(insert_stmt)
+        session.commit()

@@ -10,6 +10,19 @@ Table Document {
   date_inserted datetime
 }
 
+Table Document_Metadata_Service {
+  document_id bigint [primary key, ref: > Document.id]
+  document_collection string [primary key, ref: > Document.collection]
+  document_id_original string
+  title string [null]
+  authors string [null]
+  journals string [null]
+  publication_year int [null]
+  publication_month int [null]
+  publication_doi string [null]
+  document_classifications string [null]
+}
+
 Table Predication {
   id bigint PK
   document_id bigint [ref: > Document.id]
@@ -35,33 +48,23 @@ Table Sentence {
   md5hash string
 }
 
-Table TagInvertedIndex {
+Table Tag_Inverted_Index {
   entity_id string [primary key]
   entity_type string [primary key]
   document_collection string [primary key]
+  support int
   document_ids string
 }
 
-Table TermInvertedIndex {
+Table Term_Inverted_Index {
   term string [primary key]
   document_collection string [primary key]
   document_ids string 
 }
 
-Table DocumentMetadataService {
-  document_id bigint [primary key, ref: > Document.id]
-  document_collection string [primary key, ref: > Document.collection]
-  document_id_original string
-  title string [null]
-  authors string [null]
-  journals string [null]
-  publication_year int [null]
-  publication_month int [null]
-  publication_doi string [null]
-  document_classifications string [null]
-}
 
-Table PredicationInvertedIndex {
+
+Table Predication_Inverted_Index {
   id bigint [primary key, increment]
   subject_id string
   subject_type string
@@ -71,7 +74,7 @@ Table PredicationInvertedIndex {
   provenance_mapping string
 }
 
-Table PredicationRating {
+Table Predication_Rating {
   user_id string [primary key]
   query string [primary key]
   predication_id bigint [primary key, ref: > Predication.id]
@@ -79,7 +82,7 @@ Table PredicationRating {
   date_inserted datetime
 }
 
-Table SubstitutionGroupRating {
+Table Substitution_Group_Rating {
   variable_name string [primary key]
   entity_name string [primary key]
   entity_id string [primary key]
@@ -90,8 +93,15 @@ Table SubstitutionGroupRating {
   date_inserted datetime
 }
 
-Table EntityKeywords {
+Table Entity_Keywords {
   entity_id string [primary key]
   entity_type string
   keyword_data string
+}
+
+Table Schema_Support_Graph_Info {
+  subject_type string [primary key]
+  relation string [primary key]
+  object_type string [primary key]
+  support int
 }

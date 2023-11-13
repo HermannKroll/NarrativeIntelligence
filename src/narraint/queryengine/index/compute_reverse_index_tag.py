@@ -5,7 +5,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import delete, and_
+from sqlalchemy import delete, and_, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
@@ -35,8 +35,13 @@ def insert_data(session, index, predication_id_min):
                 session.delete(row)
         p2.done()
         logging.info(f'{deleted_rows} inverted index entries must be deleted')
+
         logging.debug('Committing...')
         session.commit()
+
+        if SessionExtended.is_postgres:
+            session.execute(text("LOCK TABLE " + TagInvertedIndex.__tablename__))
+
         logging.info('Entries deleted')
 
     logging.info('Using the Gene Resolver to replace gene ids by symbols')
@@ -91,6 +96,9 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
         stmt = delete(TagInvertedIndex)
         session.execute(stmt)
         session.commit()
+
+    if SessionExtended.is_postgres:
+        session.execute(text("LOCK TABLE " + TagInvertedIndex.__tablename__))
 
     logging.info('Counting the number of tags...')
     tag_count = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)

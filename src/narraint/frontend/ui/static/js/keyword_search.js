@@ -188,51 +188,22 @@ function queryGraphURL(statements) {
         statementStrings.push(`${subj} ${pred} ${obj}`);
 
     });
-    const query = statementStrings.join("_AND_");
-
-    return new URLSearchParams({ query: query }).toString();
+    return statementStrings.join("_AND_");
 }
 
-function showResults(response) {
-    let divDocuments = $('#div_documents');
-    divDocuments.empty();
+/**
+ * Function resets all visual elements of the keyword tab to default.
+ * Existing data is cleared. A new keyword query request is required
+ * to show entries of the tab again.
+ */
+function resetKeywordSearch() {
+    // clear graphs array
+    graphs.length = 0;
 
-    if (response["valid_query"] === "") {
-        showAlert("Provided an invalid query!");
-        return;
-    }
-
-    let query_len = 0;
-
-    // Hide sort buttons depending on the result
-    let is_aggregate = response["is_aggregate"];
-    document.getElementById("select_sorting_year").classList.remove("d-none");
-    if (is_aggregate === true) {
-        document.getElementById("select_sorting_freq").classList.remove("d-none");
-    } else {
-        document.getElementById("select_sorting_freq").classList.toggle("d-none", false);
-    }
-
-    let results = response["results"];
-    let result_size = results["s"];
-
-    // Show Page only if the result is an aggregated list of variable substitutions
-    if (results["t"] === "agg_l") {
-        computePageInfo(results["no_subs"]);
-    } else {
-        document.getElementById("div_input_page").style.display = "none";
-    }
-
-    // Create documents DIV
-    let divList = createResultList(results, query_len);
-    divDocuments.append(divList);
-
-    saveHistoryEntry({size: result_size, title_filter: ""});
-    document.getElementById("resultdiv").scrollIntoView();
-}
-
-function updateURLParams(query) {
-    window.history.replaceState({}, null, "/?" + query + "&data_source=PubMed");
+    document.querySelector("#keyword-list").innerHTML = "";
+    document.querySelector("#query_graphs").innerHTML = "";
+    document.querySelector("#search_input").value = "";
+    document.querySelector("#query_graph_container").classList.toggle("d-none", true);
 }
 
 function resetBorders() {
@@ -242,27 +213,22 @@ function resetBorders() {
 }
 
 function addClickEvent(statements, container) {
-    const params = queryGraphURL(statements);
+    const query = queryGraphURL(statements);
 
     container.onclick = async () => {
         // check if the requested query is already shown
-        if (latest_valid_query === params) {
+        if (latest_valid_query === query) {
             return;
         }
 
         resetBorders();
-        latest_valid_query = params;
+        showLoadingScreen();
 
-        showLoadingScreen()
-
-        fetch(`${search_url}?${params}&data_source=PubMed`)
-            .then((response) => { return response.json(); })
-            .then((data) => {
-                updateURLParams(params)
-                showResults(data, params);
-                container.classList.add('border-danger');
-            })
-            .catch((e) => console.log(e))
+        const parameters = getInputParameters(query);
+        initQueryBuilderFromString(query);
+        logInputParameters(parameters);
+        updateURLParameters(parameters);
+        submitSearch(parameters)
             .finally(() => hideLoadingScreen());
     }
 }

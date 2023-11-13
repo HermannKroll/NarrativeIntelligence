@@ -24,6 +24,19 @@ let CYTOSCAPE_STYLE = [
     }
 ];
 
+const YEAR_RESULT_FILTER_CONFIG = {
+    scales: {
+        xAxes: [{
+            display: false
+        }],
+        yAxes: [{
+            display: false //this will remove all the x-axis grid lines
+        }]
+    },
+    legend: {display: false},
+}
+
+
 // dictionary used to translate shortened urls into specific query links
 const short_urls = {
     'q1': '&quot;post-acute COVID-19 syndrome&quot; associated Disease',
@@ -279,7 +292,7 @@ function tryDecodeShortURL(query) {
     return false;
 }
 
-function example_search(search_str) {
+function initQueryBuilderFromString(search_str) {
     if (tryDecodeShortURL(search_str)) {
         search_str = lastQuery;
     }
@@ -604,6 +617,8 @@ function initFromURLQueryParams() {
         if (titleFilter.includes("systemat review")) {
             document.getElementById("checkbox_sys_review").checked = true;
             titleFilter = titleFilter.replace("systemat review", "").trim();
+        } else {
+            document.getElementById("checkbox_sys_review").checked = false;
         }
         document.getElementById("input_title_filter").value = titleFilter;
     }
@@ -613,7 +628,7 @@ function initFromURLQueryParams() {
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
-        example_search(query);
+        initQueryBuilderFromString(query);
     }
 }
 
@@ -645,6 +660,12 @@ function pageUpdated() {
 function computePageInfo(result_size) {
     let pageCount = Math.ceil(parseInt(result_size) / DEFAULT_AGGREGATED_RESULTS_PER_PAGE);
     currentMaxPage = pageCount;
+
+    // handle empty results appropriately to increase UX
+    if (pageCount === 0)
+        pageCount = 1;
+
+    document.getElementById("input_page_no").max = pageCount;
     document.getElementById("label_max_page").textContent = pageCount.toString();
     document.getElementById("div_input_page").style.display = "block";
 }
@@ -663,296 +684,338 @@ const search = (event) => {
     event.preventDefault();
     let query = getCurrentQuery();
     console.log(query);
-    let start_pos = getStartPositionBasedOnCurrentPage();
-    // consider start pos only if query isn't changed
-    if (lastQuery !== query) {
-        document.getElementById("input_title_filter").value = "";
-        start_pos = 0;
-        setCurrentPage(0);
-        lastQuery = query;
-    }
-    let end_pos = start_pos + DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 
-    let freq_element = document.getElementById("select_sorting_freq");
-    let freq_sort_desc = freq_element.value;
-    let year_element = document.getElementById("select_sorting_year");
-    let year_sort_desc = year_element.value;
-    let use_classification = document.getElementById("checkbox_classification").checked;
-    let use_sys_review = document.getElementById("checkbox_sys_review").checked;
-
-    let data_source = document.querySelector('input[name = "data_source"]:checked').value;
-    lastDataSource = data_source;
-    let outer_ranking = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    let title_filter = document.getElementById("input_title_filter").value.trim();
-    //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
-    let inner_ranking = "NOT IMPLEMENTED";
-
-    let fromSlider = document.querySelector("#fromSlider");
-    let toSlider = document.querySelector("#toSlider");
-    let year_start;
-    let year_end;
-    if (latest_query_translation === query) {
-        year_start = fromSlider.value;
-        year_end = toSlider.value;
-    }
-    let classification_filter = null;
-
-    if (!checkQuery()) {
+    if (!checkQuery())
         return;
-    }
 
-    console.log("Query: " + query);
-    console.log("Data source: " + data_source)
-    console.log("Outer Ranking: " + outer_ranking)
-    console.log("Inner Ranking: " + inner_ranking)
-    console.log("Sorting by frequency (desc): " + freq_sort_desc)
-    console.log("Sorting by year (desc): " + year_sort_desc)
-    console.log("Start position: " + start_pos)
-    console.log("End position: " + end_pos)
-    console.log("Start year: " + year_start)
-    console.log("End year: " + year_end)
-    console.log("Title filter: " + title_filter)
-    console.log("Classification: " + use_classification)
+    resetKeywordSearch();
+    const parameters = getInputParameters(query);
     setButtonSearching(true);
+    logInputParameters(parameters);
+    updateURLParameters(parameters);
 
+    submitSearch(parameters)
+        .finally(() => setButtonSearching(false));
+}
+
+/**
+ * Function creates a request including the provided parameters. On success, the response
+ * gets parsed appropriately and function to visualize the data is executed. Errors are
+ * debug logged so no further errors have to handled while executing this function.
+ * @param parameters {{}}
+ * @returns {Promise<void | void>}
+ */
+function submitSearch(parameters) {
+    const parameterString = createURLParameterString(parameters);
+
+    return fetch(search_url + "?" + parameterString)
+        .then((response) => response.json())
+        .then((data) => showResults(data, parameters))
+        .catch((e) => console.log(e))
+}
+
+/**
+ * Function creates a parameter string that has only elements with valid values.
+ * @param parameters {{}}
+ * @returns {string}
+ */
+function createURLParameterString(parameters) {
+    return Object.entries(parameters).map(([key, value]) => {
+        if (value === undefined || value === null) {
+            return;
+        }
+        return key.toString() + "=" + value.toString();
+    }).join("&");
+}
+
+/**
+ * Function to adjusts the current URL based on the provided parameters object.
+ * @param parameters {{}}
+ */
+function updateURLParameters(parameters) {
     const url = new URL(window.location.href);
-    url.searchParams.set('query', query);
-    url.searchParams.set("data_source", data_source);
-    if (outer_ranking !== "outer_ranking_substitution") {
-        url.searchParams.set("visualization", outer_ranking);
+    url.searchParams.set('query',  parameters["query"]);
+    url.searchParams.set("data_source",  parameters["data_source"]);
+    if (parameters["outer_ranking"] !== "outer_ranking_substitution") {
+        url.searchParams.set("visualization", parameters["outer_ranking"]);
     } else {
         url.searchParams.delete("visualization");
     }
 
-    if (freq_sort_desc !== "True") {
-        url.searchParams.set("sort_frequency_desc", freq_sort_desc);
+    if (parameters["freq_sort"] !== "True") {
+        url.searchParams.set("sort_frequency_desc", parameters["freq_sort"]);
     } else {
         url.searchParams.delete("sort_frequency_desc");
     }
 
-    if (year_sort_desc !== "True") {
-        url.searchParams.set("sort_year_desc", year_sort_desc);
+    if (parameters["year_sort"] !== "True") {
+        url.searchParams.set("sort_year_desc", parameters["year_sort"]);
     } else {
         url.searchParams.delete("sort_year_desc");
     }
 
-    if (start_pos !== 0) {
-        url.searchParams.set("start_pos", start_pos);
+    if (parameters["start_pos"] !== 0) {
+        url.searchParams.set("start_pos", parameters["start_pos"]);
     } else {
         url.searchParams.delete("start_pos");
     }
 
     //   url.searchParams.set("end_pos", end_pos);
-    if (year_start !== undefined && year_start !== "undefined" && year_start !== fromSlider.min) {
-        url.searchParams.set("year_start", year_start);
+    if (parameters["year_start"] !== undefined && parameters["year_start"] !== document.querySelector("#fromSlider").min) {
+        url.searchParams.set("year_start", parameters["year_start"]);
     } else {
         url.searchParams.delete("year_start");
     }
-    if (year_end !== undefined && year_end !== "undefined" && year_end !== toSlider.max) {
-        url.searchParams.set("year_end", year_end);
+    if (parameters["year_end"] !== undefined && parameters["year_end"] !== document.querySelector("#toSlider").max) {
+        url.searchParams.set("year_end", parameters["year_end"]);
     } else {
         url.searchParams.delete("year_end");
     }
-    if (use_sys_review) {
-        if (!title_filter.includes("systemat review")) {
-            if (title_filter.length > 0)
-                title_filter += " ";
-            title_filter += "systemat review";
+    if (parameters["use_sys_review"]) {
+        if (!parameters["title_filter"].includes("systemat review")) {
+            if (parameters["title_filter"].length > 0)
+                parameters["title_filter"] += " ";
+            parameters["title_filter"] += "systemat review";
         }
     } else {
-        title_filter = title_filter.replace("systemat review", "");
+        parameters["title_filter"] = parameters["title_filter"].replace("systemat review", "");
     }
-    if (title_filter.length > 0) {
-        url.searchParams.set("title_filter", title_filter);
+    if (parameters["title_filter"].length > 0) {
+        url.searchParams.set("title_filter", parameters["title_filter"]);
     } else {
         url.searchParams.delete("title_filter");
     }
 
-    if (use_classification) {
+    if (parameters["use_classification"]) {
         url.searchParams.set("classification_filter", "PharmaceuticalTechnology");
-        classification_filter = "PharmaceuticalTechnology";
+        parameters["classification_filter"] = "PharmaceuticalTechnology";
     } else {
         url.searchParams.delete("classification_filter");
     }
-
     window.history.pushState("Query", "Title", "/" + url.search.toString());
+}
 
-    let request = $.ajax({
-        url: search_url,
-        data: {
-            query: query,
-            data_source: data_source,
-            outer_ranking: outer_ranking,
-            freq_sort: freq_sort_desc,
-            year_sort: year_sort_desc,
-            start_pos: start_pos,
-            end_pos: end_pos,
-            year_start: year_start,
-            year_end: year_end,
-            title_filter: title_filter,
-            classification_filter: classification_filter
-            /*,
-            inner_ranking: inner_ranking*/
-        }
-    });
+/**
+ * Function to debug log the provided input parameters.
+ * @param parameters {{}}
+ */
+function logInputParameters(parameters) {
+    console.log("Query: " + parameters["query"]);
+    console.log("Data source: " +  parameters["data_source"]);
+    console.log("Outer Ranking: " +  parameters["outer_ranking"]);
+    console.log("Inner Ranking: " +  parameters["inner_ranking"]);
+    console.log("Sorting by frequency (desc): " +  parameters["freq_sort_desc"]);
+    console.log("Sorting by year (desc): " +  parameters["year_sort_desc"]);
+    console.log("Start position: " +  parameters["start_pos"]);
+    console.log("End position: " +  parameters["end_pos"]);
+    console.log("Start year: " +  parameters["year_start"]);
+    console.log("End year: " +  parameters["year_end"]);
+    console.log("Title filter: " +  parameters["title_filter"]);
+    console.log("Classification: " +  parameters["use_classification"]);
+}
 
-    request.done(function (response) {
-        console.log(response);
+/**
+ * Function stores all necessary values of each input filter into one object.
+ * @param query {string} formatted query string
+ * @returns {{}} object of each filter input element
+ */
+function getInputParameters(query) {
+    const obj = {};
 
-        // Clear DIVs
-        let form = $('#graph-patterns');
-        form.empty();
-        let divDocuments = $('#div_documents');
-        divDocuments.empty();
+    obj["query"] = query;
+    adjustSelectedPage(obj);
+    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
+    obj["year_sort"] = document.getElementById("select_sorting_year").value;
+    let data_source = document.querySelector('input[name = "data_source"]:checked').value;
+    lastDataSource = data_source;
+    obj["data_source"] = data_source;
+    obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]:checked').value;
+    //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
+    //dict["inner_ranking"] = "NOT IMPLEMENTED";
+    obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
-        let valid_query = response["valid_query"];
-        if (valid_query === true) {
-            let query_len = 0;
-            latest_valid_query = query;
+    if (latest_query_translation === query) {
+        // add year filter params only if the filter already contains valid years (of the current search)
+        obj["year_start"] = document.querySelector("#fromSlider").value;
+        obj["year_end"] = document.querySelector("#toSlider").value;
+    } else {
+        // remove filter if the query contains a new search
+        document.getElementById("checkbox_classification").checked = false;
+        document.getElementById("checkbox_sys_review").checked = false;
+    }
 
-            // Hide sort buttons depending on the result
-            let is_aggregate = response["is_aggregate"];
-            document.getElementById("select_sorting_year").style.display = "block";
-            if (is_aggregate === true) {
-                document.getElementById("select_sorting_freq").style.display = "block";
-            } else {
-                document.getElementById("select_sorting_freq").style.display = "none";
-            }
+    obj["use_classification"] = document.getElementById("checkbox_classification").checked;
+    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
 
-            // Print query translation
-            let query_translation = $("#query_translation");
-            let query_trans_string = response["query_translation"];
-            let query_limit_hit = response["query_limit_hit"];
-            query_translation.text(query_trans_string);
-            let results = response["results"];
-            let result_size = results["s"];
+    obj["classification_filter"] = null;
+    console.log(obj)
+    return obj;
+}
 
-            // Show Page only if the result is a aggregated list of variable substitutions
-            if (outer_ranking !== "outer_ranking_ontology" && results["t"] === "agg_l") {
-                computePageInfo(results["no_subs"]);
-            } else {
-                document.getElementById("div_input_page").style.display = "none";
-            }
+/**
+ * Function resets the visible page of the result window depending on the provided query.
+ * Additionally, the `start_pos` and `end_pos` are added to the parameters object.
+ * @param parameters {{}}
+ */
+function adjustSelectedPage(parameters) {
+    let start_pos = getStartPositionBasedOnCurrentPage();
+    // consider start pos only if query isn't changed
+    if (lastQuery !== parameters["query"]) {
+        document.getElementById("input_title_filter").value = "";
+        start_pos = 0;
+        setCurrentPage(0);
+        lastQuery = parameters["query"];
+    }
+    let end_pos = start_pos + DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
+    parameters["start_pos"] = start_pos;
+    parameters["end_pos"] = end_pos;
+}
 
-            // Create documents DIV
-            let divList = createResultList(results, query_len);
-            divDocuments.append(divList);
+/**
+ * Function processes the response object, retrieved from the request, and creates all relevant
+ * result elements based on the previously provided input parameters object.
+ * @param response {{}}
+ * @param parameters {{}}
+ */
+function showResults(response, parameters) {
+    console.log(response);
 
-            let documents_header = $("#header_documents");
-            let document_header_appendix = "";
-            if (query_limit_hit === true) {
-                document_header_appendix = " (Truncated)"
-            }
-            if (result_size !== 0) {
-                document.getElementById("input_title_filter").classList.toggle("d-none", false);
-                document.getElementById("input_title_filter_label").classList.toggle("d-none", false);
+    // Clear DIVs
+    let form = $('#graph-patterns');
+    form.empty();
+    let divDocuments = $('#div_documents');
+    divDocuments.empty();
 
-                documents_header.html(result_size + " Documents" + document_header_appendix)
-                // scroll to results
-                document.getElementById("resultdiv").scrollIntoView();
-            } else {
-                documents_header.html("Documents")
+    let valid_query = response["valid_query"];
+    if (valid_query !== true) {
+        document.getElementById("select_sorting_year").style.display = "none";
+        document.getElementById("select_sorting_freq").style.display = "none";
+        document.getElementById("div_input_page").style.display = "none";
+        document.getElementById("input_title_filter").style.display = "none";
+        document.getElementById("input_title_filter_label").style.display = "none";
+        let query_trans_string = response["query_translation"];
+        console.log('translation error:' + query_trans_string)
+        $('#alert_translation').text(query_trans_string);
+        $('#alert_translation').fadeIn();
+        return;
+    }
 
-                // check if the used predicated is to specific (!= 'associated')
-                let predicate_input = document.getElementById('input_predicate');
-                let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+    let query_len = 0;
+    latest_valid_query = parameters["query"];
 
-                if (predicate !== 'associated') {
-                    $('#modal_empty_result').modal("toggle");
-                }
-            }
-            let year_aggregation = response["year_aggregation"];
+    // Hide sort buttons depending on the result
+    let is_aggregate = response["is_aggregate"];
+    document.getElementById("select_sorting_year").style.display = "block";
+    if (is_aggregate === true) {
+        document.getElementById("select_sorting_freq").style.display = "block";
+    } else {
+        document.getElementById("select_sorting_freq").style.display = "none";
+    }
 
-            let year_filter_container = document.querySelector(".year_filter");
-            if (JSON.stringify(year_aggregation) !== '{}') {
-                year_filter_container.style.display = "block";
-            } else {
-                year_filter_container.style.display = "none";
-            }
-            const fromSlider = document.querySelector('#fromSlider');
-            const toSlider = document.querySelector('#toSlider');
-            let xValues = new Array();
-            let yValues = new Array();
-            for (const year in year_aggregation) {
-                xValues.push(year);
-                yValues.push(year_aggregation[year]);
-            }
-            if (latest_query_translation != query_trans_string.split("----->")[0].trim()) {
+    // Print query translation
+    let query_translation = $("#query_translation");
+    let query_trans_string = response["query_translation"];
+    let query_limit_hit = response["query_limit_hit"];
+    query_translation.text(query_trans_string);
+    let results = response["results"];
+    let result_size = results["s"];
 
-                initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
-                initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+    // Show Page only if the result is a aggregated list of variable substitutions
+    if (parameters["outer_ranking"] !== "outer_ranking_ontology" && results["t"] === "agg_l") {
+        computePageInfo(results["no_subs"]);
+    } else {
+        document.getElementById("div_input_page").style.display = "none";
+    }
 
-            }
-            latest_query_translation = query_trans_string.split("----->")[0].trim();
-            fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
-            setToggleAccessible(toSlider, toSlider.min);
-            setValue(toSlider, 'rangeTo');
-            setValue(fromSlider, 'rangeFrom');
-            let chart = document.getElementById("myChart");
-            if (chart != undefined) {
-                let slider_control = document.querySelector(".sliders_control");
-                let chart_container = document.querySelector("#range_container")
-                chart.remove();
-                const new_chart = document.createElement("canvas");
-                new_chart.id = "myChart";
-                //chart_container.append(new_chart);
-                chart_container.insertBefore(new_chart, slider_control);
-            }
-            let barChart = new Chart("myChart", {
-                type: "bar",
-                data: {
-                    labels: xValues,
-                    datasets: [{
-                        backgroundColor: [],
-                        data: yValues,
-                    }]
-                },
-                options: {
-                    scales: {
-                        xAxes: [{
-                            display: false
-                            //gridLines: {
-                            //  display:false
-                            //}
-                        }],
-                        yAxes: [{
-                            display: false //this will remove all the x-axis grid lines
-                        }]
-                    },
-                    legend: {display: false},
-                }
-            });
-            updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
-            fromSlider.oninput = () => controlFromSlider(barChart, fromSlider, toSlider);
-            toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
-            fromSlider.onchange = () => refreshSearch();
-            toSlider.onchange = () => refreshSearch();
-            saveHistoryEntry({size: result_size, title_filter: title_filter});
-        } else {
-            document.getElementById("select_sorting_year").style.display = "none";
-            document.getElementById("select_sorting_freq").style.display = "none";
-            document.getElementById("div_input_page").style.display = "none";
-            document.getElementById("input_title_filter").style.display = "none";
-            document.getElementById("input_title_filter_label").style.display = "none";
-            let query_trans_string = response["query_translation"];
-            console.log('translation error:' + query_trans_string)
-            $('#alert_translation').text(query_trans_string);
-            $('#alert_translation').fadeIn();
-        }
+    // Create documents DIV
+    let divList = createResultList(results, query_len);
+    divDocuments.append(divList);
 
-        // Disable button
-        setButtonSearching(false);
+    let documents_header = $("#header_documents");
+    let document_header_appendix = "";
+    if (query_limit_hit === true) {
+        document_header_appendix = " (Truncated)"
+    }
+    if (result_size !== 0) {
+        document.getElementById("input_title_filter").classList.toggle("d-none", false);
+        document.getElementById("input_title_filter_label").classList.toggle("d-none", false);
 
-    });
-
-    request.fail(function (result) {
-        setButtonSearching(false);
-        let documents_header = $("#header_documents");
+        documents_header.html(result_size + " Documents" + document_header_appendix)
+        // scroll to results
+        document.getElementById("resultdiv").scrollIntoView();
+    } else {
         documents_header.html("Documents")
-        console.log(result);
-    });
-};
 
+        // check if the used predicated is to specific (!= 'associated')
+        let predicate_input = document.getElementById('input_predicate');
+        let predicate = predicate_input.options[predicate_input.selectedIndex].value;
+
+        if (predicate !== 'associated') {
+            $('#modal_empty_result').modal("toggle");
+        }
+    }
+    updateYearFilter(response["year_aggregation"], query_trans_string);
+
+    latest_query_translation = query_trans_string.split("----->")[0].trim();
+    saveHistoryEntry({size: result_size, filterOptions: parameters});
+}
+
+/**
+ * Function edits the year input filter based on the received year aggregation list and translation string.
+ * @param year_aggregation {[number]}
+ * @param query_trans_string {string}
+ */
+function updateYearFilter(year_aggregation, query_trans_string) {
+    let year_filter_container = document.getElementById("year-filter");
+    if (JSON.stringify(year_aggregation) !== '{}') {
+        year_filter_container.style.display = "block";
+    } else {
+        year_filter_container.style.display = "none";
+    }
+    const fromSlider = document.querySelector('#fromSlider');
+    const toSlider = document.querySelector('#toSlider');
+    let xValues = [];
+    let yValues = [];
+    for (const year in year_aggregation) {
+        xValues.push(year);
+        yValues.push(year_aggregation[year]);
+    }
+    if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
+        initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+        initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+    }
+
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
+    setToggleAccessible(toSlider, toSlider.min);
+    setValue(toSlider, 'rangeTo');
+    setValue(fromSlider, 'rangeFrom');
+    let chart = document.getElementById("myChart");
+    if (chart !== undefined) {
+        let slider_control = document.querySelector(".sliders_control");
+        let chart_container = document.querySelector("#range_container")
+        chart.remove();
+        const new_chart = document.createElement("canvas");
+        new_chart.id = "myChart";
+        //chart_container.append(new_chart);
+        chart_container.insertBefore(new_chart, slider_control);
+    }
+    let barChart = new Chart("myChart", {
+        type: "bar",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: [],
+                data: yValues,
+            }]
+        },
+        options: YEAR_RESULT_FILTER_CONFIG
+    });
+    updateBarChart(barChart, fromSlider, fromSlider.value, toSlider.value);
+    fromSlider.oninput = () => controlFromSlider(barChart, fromSlider, toSlider);
+    toSlider.oninput = () => controlToSlider(barChart, fromSlider, toSlider);
+    fromSlider.onchange = () => refreshSearch();
+    toSlider.onchange = () => refreshSearch();
+}
 
 let uniqueAccordionIDCounter = 0;
 const getUniqueAccordionID = () => {
@@ -1803,11 +1866,9 @@ obj.onmouseleave = () => {
 
 function checkQuery() {
     let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input = document.getElementById('input_predicate');
-    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
     let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    let query_text = subject + ' ' + predicate + ' ' + object;
 
+    // check if the main query input is empty while additional triples connected via '_AND_' could exist
     if (subject.length === 0 && object.length === 0) {
         return true;
     }
