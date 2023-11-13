@@ -17,10 +17,10 @@ from django.views.generic import TemplateView
 from sqlalchemy import func
 from sqlalchemy.exc import OperationalError
 
+from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
-    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase
-from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
+    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase, DatabaseUpdate
 from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
@@ -1127,6 +1127,20 @@ def get_explain_translation(request):
             return HttpResponse(status=500)
     else:
         View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+        return HttpResponse(status=500)
+
+
+def get_last_db_update(request):
+    try:
+        session = SessionExtended.get()
+        last_update = str(DatabaseUpdate.get_latest_update(session))
+        last_update = last_update.replace('-', '.')
+        logging.debug(f"Get last DB update: {last_update}")
+        View.instance().query_logger.write_api_call(True, "get_last_db_update", str(request))
+        return JsonResponse(data=dict(last_update=last_update))
+    except Exception as e:
+        View.instance().query_logger.write_api_call(False, "get_last_db_update", str(request))
+        traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)
 
 

@@ -552,9 +552,15 @@ Please note that the low memory mode and buffer size cannot be combined with the
 
 You can export the latest predication id via:
 ```
-python3 ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
+python ~/mining/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
 ```
 Replace $PREDICATION_MINIMUM_UPDATE_ID_FILE by a concrete path. 
+
+
+Finally, we can update the database table that stores the date of the latest update via:
+```
+python ~/mining/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
+```
 
 
 ## Update Automation Script
@@ -611,6 +617,12 @@ The word clouds for COVID-19 and Long COVID can be updated by:
 python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
 ```
 
+The trial status of drug disease indications is pre-computed by crawling ClinicalTrials.gov. 
+The data should be updated in periodic intervalls (but not in every service update). 
+To recompute the drug disease indications from ClinicalTrials.gov, run:
+```
+python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
+```
 
 
 
