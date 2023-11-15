@@ -222,6 +222,9 @@ function addClickEvent(statements, container) {
         }
 
         resetBorders();
+        // mark selected pattern with a red border
+        container.classList.add('border-danger');
+
         showLoadingScreen();
 
         const parameters = getInputParameters(query);
