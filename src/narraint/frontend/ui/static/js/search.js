@@ -688,7 +688,8 @@ const search = (event) => {
     if (!checkQuery())
         return;
 
-    resetKeywordSearch();
+    // Todo: hardfix at the moment
+    // resetKeywordSearch();
     const parameters = getInputParameters(query);
     setButtonSearching(true);
     logInputParameters(parameters);
