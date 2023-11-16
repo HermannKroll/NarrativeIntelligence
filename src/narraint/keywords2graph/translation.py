@@ -92,6 +92,7 @@ class SupportedGraphPattern:
             for fp2 in other.fact_patterns:
                 if fp1.is_equal(fp2) or fp1.is_flipped_equal(fp2):
                     match = True
+                    break
             if not match:
                 return False
         return True
