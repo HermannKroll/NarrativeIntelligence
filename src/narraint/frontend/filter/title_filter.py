@@ -24,7 +24,6 @@ class TitleFilter:
 
             search_str = search_str.replace('+', ' ')
             search_str = search_str.strip()
-            print(search_str)
             eldar_q = Query(search_str, match_word=False, ignore_case=True)
             return list([r for r in results if eldar_q(r.title)])
 
