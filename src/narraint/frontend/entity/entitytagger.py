@@ -7,7 +7,6 @@ from typing import Set
 from narraint.frontend.entity.entityindexbase import EntityIndexBase
 from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.entity.entity import Entity
-from narrant.entity.meshontology import MeSHOntology
 
 
 class EntityTagger(EntityIndexBase):

@@ -15,6 +15,7 @@ from narrant.entity.entity import Entity
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 
+
 class SupportedFactPattern:
 
     def __init__(self, keyword1, entity_type1, relation, keyword2, entity_type2, support):
@@ -25,12 +26,28 @@ class SupportedFactPattern:
         self.entity_type2 = entity_type2
         self.support = support
 
+    def is_equal(self, other):
+        if not isinstance(other, SupportedFactPattern):
+            return False
+        s = self.keyword1 == other.keyword1 and self.entity_type1 == other.entity_type1
+        r = self.relation == other.relation
+        o = self.keyword2 == other.keyword2 and self.entity_type2 == other.entity_type2
+        return s and r and o
+
+    def is_flipped_equal(self, other):
+        if not isinstance(other, SupportedFactPattern):
+            return False
+        s = self.keyword1 == other.keyword2 and self.entity_type1 == other.entity_type2
+        r = self.relation == other.relation
+        o = self.keyword2 == other.keyword1 and self.entity_type2 == other.entity_type1
+        return s and r and o
 
     def __str__(self):
         return f'<{self.support}: {self.keyword1}, {self.relation}, {self.keyword2}>'
 
     def __repr__(self):
         return f'<{self.support}: {self.keyword1}, {self.relation}, {self.keyword2}>'
+
 
 class SupportedGraphPattern:
 
@@ -61,6 +78,24 @@ class SupportedGraphPattern:
     def is_associated(self):
         relations = self.get_relations()
         return len(relations) == 1 and ASSOCIATED in relations
+
+    def is_flipped_equal_to_other(self, other):
+        if not isinstance(other, SupportedGraphPattern):
+            return False
+        if len(self.fact_patterns) != len(other.fact_patterns):
+            return False
+        # Iterate over all fact patterns
+        # Check whether each fp has an equal pattern in other or is flipped equal to a pattern in other
+        # Only if every pattern has a match, the pattern is equal
+        for fp1 in self.fact_patterns:
+            match = False
+            for fp2 in other.fact_patterns:
+                if fp1.is_equal(fp2) or fp1.is_flipped_equal(fp2):
+                    match = True
+                    break
+            if not match:
+                return False
+        return True
 
     def to_json_data(self):
         data = []
@@ -138,8 +173,19 @@ class Keyword2GraphTranslation:
                 # old patterns are have now been extended
                 possible_patterns_per_comb = copy.copy(possible_patterns_extended)
 
-            # add all patterns for this combination
-            final_possible_patterns.extend(possible_patterns_per_comb)
+            # add all patterns for this combination only if the pattern has not been included yet
+            # a flipped pattern (s, p, o) == (o, p, s) is not a new pattern because they will
+            # result in the same visualization for the user. The query engine will order s, p, o based on r
+            # automatically. So we don't need to generated flipped versions here
+            # So for each new pattern check whether an existing pattern already contains the flipped version
+            for new_candidate in possible_patterns_per_comb:
+                match = False
+                for existing_pattern in final_possible_patterns:
+                    if new_candidate.is_flipped_equal_to_other(existing_pattern):
+                        match = True
+                        break
+                if not match:
+                    final_possible_patterns.append(new_candidate)
 
         # Now support the query patterns by their minimum support
         final_possible_patterns.sort(key=lambda x: x.minimum_support, reverse=True)
