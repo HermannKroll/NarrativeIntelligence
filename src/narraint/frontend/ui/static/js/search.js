@@ -475,7 +475,7 @@ $(document).on('keydown', function (e) {
 })
 
 $(document).ready(function () {
-
+    initializeQueryBuilderTooltips();
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
@@ -629,6 +629,8 @@ function initFromURLQueryParams() {
         let query = params.get("query");
         lastQuery = query;
         initQueryBuilderFromString(query);
+        updateTooltipByType("subject");
+        updateTooltipByType("object");
     }
 }
 
@@ -694,6 +696,9 @@ const search = (event) => {
     setButtonSearching(true);
     logInputParameters(parameters);
     updateURLParameters(parameters);
+
+    updateTooltipByType("subject");
+    updateTooltipByType("object");
 
     submitSearch(parameters)
         .finally(() => setButtonSearching(false));
@@ -1809,62 +1814,6 @@ function initializeValues(slider, value, min, max) {
     slider.value = value;
 }
 
-function getSynonyms(element_id, ev) {
-    let concept = getTextOrPlaceholderFromElement(element_id);
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input = document.getElementById('input_predicate');
-    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    let query_text = subject + ' ' + predicate + ' ' + object;
-    if (concept !== "") {
-        let request = $.ajax({
-            url: explain_translation_url,
-            data: {
-                concept: concept,
-                query: query_text
-            }
-        });
-        request.done(function (response) {
-            tt.classList.remove('d-none');
-            tt.innerHTML = response['headings'].join('<br>'); // anzuzeigender String (auch HTML styled möglich)
-            // horizontales Offset
-            tt.style.top = ev.pageY + "px";
-            // vertikales Offset (habe es noch nicht geschafft, dass das Fenster tatsächlich rechts oberhalb vom Zeiger angezeigt wird :/ ))
-            tt.style.left = (ev.pageX + 10) + "px";
-        });
-    }
-}
-
-const tt = document.getElementById('tooltip');
-
-let sub = document.querySelector('#input_subject');
-sub.onmouseenter = (ev) => {
-    getSynonyms('input_subject', ev);
-};
-
-sub.onmousemove = (ev) => {
-    tt.style.top = ev.pageY + "px";
-    tt.style.left = (ev.pageX + 10) + "px";
-};
-
-sub.onmouseleave = () => {
-    tt.classList.add('d-none');
-};
-
-let obj = document.querySelector('#input_object');
-obj.onmouseenter = (ev) => {
-    getSynonyms('input_object', ev);
-};
-
-obj.onmousemove = (ev) => {
-    tt.style.top = ev.pageY + "px";
-    tt.style.left = (ev.pageX + 10) + "px";
-};
-
-obj.onmouseleave = () => {
-    tt.classList.add('d-none');
-};
-
 function checkQuery() {
     let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
@@ -1885,4 +1834,101 @@ function checkQuery() {
         return false;
     }
     return true;
+}
+
+/**
+ * Function sets event listeners for query builder tooltips.
+ */
+function initializeQueryBuilderTooltips() {
+    const subjectTooltip = document.getElementById("subjectTooltip");
+    const subjectInput = document.getElementById("input_subject");
+    const objectTooltip = document.getElementById("objectTooltip");
+    const objectInput = document.getElementById("input_object");
+
+    subjectInput.oninput = async () => {
+        if (subjectInput.value.length < 3)
+            return;
+        await updateTooltipByType("subject");
+    }
+    objectInput.oninput = async () => {
+        if (objectInput.value.length < 3)
+            return;
+        await updateTooltipByType("object");
+    }
+
+    subjectInput.onmouseover = (e) => {
+        subjectTooltip.classList.toggle('d-none', false);
+        subjectTooltip.style.top = (e.pageY) + "px";
+        subjectTooltip.style.left= (e.pageX) + "px";
+    };
+
+    subjectInput.onmousemove = (e) => {
+        subjectTooltip.classList.toggle('d-none', false);
+        subjectTooltip.style.top = (e.pageY) + "px";
+        subjectTooltip.style.left= (e.pageX) + "px";
+
+        setTimeout(() => {
+            if (!subjectInput.parentNode.matches(":hover")) {
+                subjectTooltip.classList.toggle('d-none', true);
+            }
+        }, 250);
+    };
+
+    subjectInput.onmouseleave = () => {
+        subjectTooltip.classList.toggle('d-none', true);
+    };
+
+    objectInput.onmouseover = (e) => {
+        objectTooltip.classList.toggle('d-none', false);
+        objectTooltip.style.top = (e.pageY) + "px";
+        objectTooltip.style.left= (e.pageX) + "px";
+    };
+
+    objectInput.onmousemove = (e) => {
+        objectTooltip.classList.toggle('d-none', false);
+        objectTooltip.style.top = (e.pageY) + "px";
+        objectTooltip.style.left= (e.pageX) + "px";
+
+        setTimeout(() => {
+            if (!objectTooltip.parentNode.matches(":hover")) {
+                objectTooltip.classList.toggle('d-none', true);
+            }
+        }, 250);
+    };
+
+    objectInput.onmouseleave = () => {
+        objectTooltip.classList.toggle('d-none', true);
+    };
+}
+
+/**
+ * Function updates the tooltip by type. For that, a request to the service
+ * is called and the corresponding tooltip is updated.
+ * @param type {string} input type {subject/object}
+ */
+async function updateTooltipByType(type) {
+    if ("subject" !== type && "object" !== type)
+        return;
+
+    const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    const predicateInput = document.getElementById('input_predicate');
+    const predicate = predicateInput.options[predicateInput.selectedIndex].value;
+    const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    const query_text = subject + ' ' + predicate + ' ' + object;
+    const concept = (type === "subject") ? subject : object;
+
+    if (concept === "")
+        return;
+
+    const tooltipText = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + query_text)
+        .then((response) => {
+            return response.json()
+        })
+        .then((data) => {
+            return data['headings'].join('<br>');
+        })
+        .catch((e) => console.log(e));
+
+    const tooltip = document.getElementById(type + "Tooltip");
+    tooltip.innerHTML = tooltipText;
 }

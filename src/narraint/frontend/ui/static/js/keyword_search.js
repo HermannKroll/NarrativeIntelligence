@@ -249,7 +249,7 @@ function hideLoadingScreen() {
 }
 
 function addTooltipEvent(statements, div) {
-    const tooltip = document.getElementById('tooltip');
+    const tooltip = document.getElementById('graphTooltip');
     const statementStrings = [];
     for (const i in statements) {
         const [s, p, o] = statements[i];
@@ -262,14 +262,20 @@ function addTooltipEvent(statements, div) {
     div.onmouseover = (e) => {
         tooltip.classList.toggle('d-none', false);
         tooltip.innerHTML = str;
-        tooltip.style.top = (e.pageY - tooltip.offsetHeight) + "px";
+        tooltip.style.top = (e.pageY) + "px";
         tooltip.style.left= (e.pageX) + "px";
     };
 
     div.onmousemove = (e) => {
         tooltip.classList.toggle('d-none', false);
-        tooltip.style.top = (e.pageY - tooltip.offsetHeight) + "px";
+        tooltip.style.top = (e.pageY) + "px";
         tooltip.style.left= (e.pageX) + "px";
+
+        setTimeout(() => {
+            if (!tooltip.parentNode.matches(":hover")) {
+                tooltip.classList.toggle('d-none', true);
+            }
+        }, 250);
     };
 
     div.onmouseleave = () => {

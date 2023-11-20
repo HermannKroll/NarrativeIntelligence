@@ -689,7 +689,9 @@
             </div>
         </div>
     </div>
-    <div class="d-none position-absolute bg-light border rounded p-1" id="tooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="graphTooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="subjectTooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="objectTooltip" style="z-index:3;"></div>
 
     <!-- loading screen -->
     <div class="position-absolute start-0 top-0 w-100 h-100 bg-dark d-flex d-none" id="loading_screen"
@@ -748,10 +750,10 @@
         const historyQueryKey = "query";
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
-    <script src="{% static 'js/search.js' %}?version=24" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=25" type="text/javascript"></script>
     <script src="{% static 'js/paper.js' %}?version=17" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
-    <script src="{% static 'js/keyword_search.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/keyword_search.js' %}?version=7" type="text/javascript"></script>
 {% endblock %}
