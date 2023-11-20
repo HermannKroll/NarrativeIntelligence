@@ -1932,3 +1932,32 @@ async function updateTooltipByType(type) {
     const tooltip = document.getElementById(type + "Tooltip");
     tooltip.innerHTML = tooltipText;
 }
+
+/**
+ * The function sets the help settings for the keyword search tab.
+ */
+function setKeywordSearchHelp() {
+    let anchor = document.getElementById("searchHelpAnchor");
+    anchor.href = "https://youtu.be/iagphBPLokM";
+    anchor.target = "_blank";
+    anchor.onclick = undefined;
+}
+
+/**
+ * The function sets the help settings for the query builder tab.
+ */
+function setQueryBuilderHelp() {
+    let anchor = document.getElementById("searchHelpAnchor");
+    anchor.href = "#";
+    anchor.target = "";
+    anchor.onclick = () => showKeywordSearchHelp();
+}
+
+/**
+ * Function to show the extended keyword search modal.
+ */
+function showKeywordSearchHelp() {
+    let modalElement = document.getElementById('keywordSearchHelpModal')
+    let modal = new bootstrap.Modal(modalElement);
+    modal.show();
+}
