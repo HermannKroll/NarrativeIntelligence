@@ -109,8 +109,9 @@ class EntityIndexBase:
         Add all excipient terms to the internal dict
         :return:
         """
-        for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms=False):
-            self._add_term(excipient_name, excipient_name.capitalize(), EXCIPIENT)
+        for term, ex_ids in ExcipientVocabulary.create_excipient_vocabulary(expand_terms=False).items():
+            for ex_id in ex_ids:
+                self._add_term(term, ex_id, EXCIPIENT)
 
     def _add_plant_families(self):
         """
@@ -216,7 +217,7 @@ class EntityIndexBase:
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
-        drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
+        drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary(expand_terms=False)
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
                 self._add_term(term, chid, CHEMICAL)

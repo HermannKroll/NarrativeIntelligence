@@ -43,6 +43,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
     parser = ArgumentParser(description="Recreates Indexes")
+    parser.add_argument("--only-service", action='store_true', help="Rebuilds indexes only for the narrative service")
     parser.add_argument("--force", action='store_true', help="Skip asking for the correct DB connection")
     parser.add_argument("--skip-mesh", action='store_true', help="Skip the recreation of MeSH Indexes")
     parser.add_argument("--complete", action='store_true', help="Builds a complete Gene and Species Index...")
@@ -69,8 +70,9 @@ def main():
         user_input = user_input.lower()
 
     if 'y' in user_input or 'yes' in user_input:
-        build_tagging_indexes()
-        build_entity_indexes(complete=args.complete, skip_mesh=args.skip_mesh, force=args.force)
+        if not args.only_service:
+            build_tagging_indexes()
+            build_entity_indexes(complete=args.complete, skip_mesh=args.skip_mesh, force=args.force)
         build_service_indexes()
     else:
         print('user canceled index creation')

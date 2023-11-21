@@ -25,10 +25,10 @@
     <!-- search type selection tabs -->
     <div class="container">
         <ul class="nav nav-tabs border-bottom-0">
-            <li class="nav-item">
+            <li class="nav-item" onclick="setKeywordSearchHelp()">
                 <a class="nav-link active" data-bs-toggle="tab" href="#search-type-query" role="tab">Query Builder</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
         </ul>
@@ -128,7 +128,7 @@
             <div class="col-12">
                 <div class="d-flex justify-content-center">
                     <h6>How to Search:
-                        <a href="https://youtu.be/iagphBPLokM" target="_blank">
+                        <a href="https://youtu.be/iagphBPLokM" target="_blank" id="searchHelpAnchor">
                             <img src="{% static 'icons/help.png' %}" height="40px">
                         </a>
                     </h6>
@@ -655,6 +655,24 @@
                 </div>
             </div>
         </div>
+
+        <!-- Keyword search help -->
+        <div class="modal" tabindex="-1" role="dialog" id="keywordSearchHelpModal">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <!--<div class="modal-header">
+                        <h5 class="modal-title">Keyword Search Help</h5>
+                        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                    </div>-->
+                    <div class="modal-body" style="overflow: hidden">
+                        <img src="{% static 'assets/keyword_query_help.gif' %}" class="w-100">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="popup" id="newsPopup">
@@ -689,7 +707,9 @@
             </div>
         </div>
     </div>
-    <div class="d-none position-absolute bg-light border rounded p-1" id="tooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="graphTooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="subjectTooltip" style="z-index:3;"></div>
+    <div class="d-none position-absolute bg-light border rounded p-1" id="objectTooltip" style="z-index:3;"></div>
 
     <!-- loading screen -->
     <div class="position-absolute start-0 top-0 w-100 h-100 bg-dark d-flex d-none" id="loading_screen"
@@ -748,10 +768,10 @@
         const historyQueryKey = "query";
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
-    <script src="{% static 'js/search.js' %}?version=24" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=26" type="text/javascript"></script>
     <script src="{% static 'js/paper.js' %}?version=17" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
-    <script src="{% static 'js/keyword_search.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/keyword_search.js' %}?version=7" type="text/javascript"></script>
 {% endblock %}
