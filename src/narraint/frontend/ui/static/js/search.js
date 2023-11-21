@@ -629,8 +629,7 @@ function initFromURLQueryParams() {
         let query = params.get("query");
         lastQuery = query;
         initQueryBuilderFromString(query);
-        updateTooltipByType("subject");
-        updateTooltipByType("object");
+        updateQueryBuilderTooltips();
     }
 }
 
@@ -697,8 +696,7 @@ const search = (event) => {
     logInputParameters(parameters);
     updateURLParameters(parameters);
 
-    updateTooltipByType("subject");
-    updateTooltipByType("object");
+    updateQueryBuilderTooltips();
 
     submitSearch(parameters)
         .finally(() => setButtonSearching(false));
@@ -1845,82 +1843,77 @@ function initializeQueryBuilderTooltips() {
     const objectTooltip = document.getElementById("objectTooltip");
     const objectInput = document.getElementById("input_object");
 
-    subjectInput.oninput = async () => {
-        if (subjectInput.value.length < 3)
-            return;
-        await updateTooltipByType("subject");
-    }
-    objectInput.oninput = async () => {
-        if (objectInput.value.length < 3)
-            return;
-        await updateTooltipByType("object");
-    }
+    subjectInput.oninput = updateQueryBuilderTooltips;
+    objectInput.oninput = updateQueryBuilderTooltips;
 
-    subjectInput.onmouseover = (e) => {
-        subjectTooltip.classList.toggle('d-none', false);
-        subjectTooltip.style.top = (e.pageY) + "px";
-        subjectTooltip.style.left= (e.pageX) + "px";
-    };
-
-    subjectInput.onmousemove = (e) => {
-        subjectTooltip.classList.toggle('d-none', false);
-        subjectTooltip.style.top = (e.pageY) + "px";
-        subjectTooltip.style.left= (e.pageX) + "px";
-
-        setTimeout(() => {
-            if (!subjectInput.parentNode.matches(":hover")) {
-                subjectTooltip.classList.toggle('d-none', true);
-            }
-        }, 250);
-    };
-
-    subjectInput.onmouseleave = () => {
-        subjectTooltip.classList.toggle('d-none', true);
-    };
-
-    objectInput.onmouseover = (e) => {
-        objectTooltip.classList.toggle('d-none', false);
-        objectTooltip.style.top = (e.pageY) + "px";
-        objectTooltip.style.left= (e.pageX) + "px";
-    };
-
-    objectInput.onmousemove = (e) => {
-        objectTooltip.classList.toggle('d-none', false);
-        objectTooltip.style.top = (e.pageY) + "px";
-        objectTooltip.style.left= (e.pageX) + "px";
-
-        setTimeout(() => {
-            if (!objectTooltip.parentNode.matches(":hover")) {
-                objectTooltip.classList.toggle('d-none', true);
-            }
-        }, 250);
-    };
-
-    objectInput.onmouseleave = () => {
-        objectTooltip.classList.toggle('d-none', true);
-    };
+    addTooltipEvents(subjectTooltip, subjectInput, objectInput);
+    addTooltipEvents(objectTooltip, objectInput, subjectInput);
 }
 
 /**
- * Function updates the tooltip by type. For that, a request to the service
- * is called and the corresponding tooltip is updated.
- * @param type {string} input type {subject/object}
+ * Function adds all necessary event listeners for the query builder tooltips.
+ * @param tooltip {HTMLDivElement} target tooltip
+ * @param input {HTMLInputElement} corresponding input element
+ * @param otherInput {HTMLInputElement} other input element
  */
-async function updateTooltipByType(type) {
-    if ("subject" !== type && "object" !== type)
-        return;
+function addTooltipEvents(tooltip, input, otherInput) {
+    input.onmouseover = (e) => updateTooltipPosition(e);
+    input.onmousemove = (e) => updateTooltipPosition(e, true);
+    input.onmouseleave = () => tooltip.classList.toggle('d-none', true);
 
+    /**
+     * Function to update the position of the tooltip if an event is raised.
+     * The parameter withTimeout=true is used to add a timeout which hides
+     * the tooltip in case of an undetected mousemove out of the input element.
+     * @param e {MouseEvent}
+     * @param withTimeout {boolean}
+     */
+    function updateTooltipPosition(e, withTimeout=false){
+        if (input.value === "" || otherInput === "" || tooltip.innerText === "")
+            return;
+        tooltip.classList.toggle('d-none', false);
+        tooltip.style.top = (e.pageY) + "px";
+        tooltip.style.left= (e.pageX) + "px";
+
+        if (withTimeout) {
+            setTimeout(() => {
+                if (!input.parentNode.matches(":hover")) {
+                    tooltip.classList.toggle('d-none', true);
+                }
+            }, 250);
+        }
+    }
+}
+
+/**
+ * Function prepares the relevant information to call the tooltip update.
+ * If one of the inputs is empty, the text of the tooltips is cleared.
+ */
+function updateQueryBuilderTooltips() {
     const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     const predicateInput = document.getElementById('input_predicate');
     const predicate = predicateInput.options[predicateInput.selectedIndex].value;
     const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    const query_text = subject + ' ' + predicate + ' ' + object;
-    const concept = (type === "subject") ? subject : object;
+    const queryText = subject + ' ' + predicate + ' ' + object;
+    const subjectTooltip = document.getElementById("subjectTooltip");
+    const objectTooltip = document.getElementById("objectTooltip");
 
-    if (concept === "")
+    subjectTooltip.classList.toggle("d-none", true);
+    objectTooltip.classList.toggle("d-none", true);
+
+    if (subject === "" || object === "") {
+        subjectTooltip.innerText = "";
+        objectTooltip.innerText = "";
         return;
+    }
 
-    const tooltipText = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + query_text)
+    // call them synchronous and do not wait to finish the task
+    updateTooltipByType(subjectTooltip, subject, queryText);
+    updateTooltipByType(objectTooltip, object, queryText);
+}
+
+async function updateTooltipByType(tooltip, concept, queryText){
+    tooltip.innerHTML = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
         .then((response) => {
             return response.json()
         })
@@ -1928,9 +1921,6 @@ async function updateTooltipByType(type) {
             return data['headings'].join('<br>');
         })
         .catch((e) => console.log(e));
-
-    const tooltip = document.getElementById(type + "Tooltip");
-    tooltip.innerHTML = tooltipText;
 }
 
 /**
