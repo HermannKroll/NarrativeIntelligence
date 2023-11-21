@@ -475,7 +475,7 @@ $(document).on('keydown', function (e) {
 })
 
 $(document).ready(function () {
-    initializeQueryBuilderTooltips();
+    initializeExplanationPopover();
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
@@ -515,6 +515,9 @@ $(document).ready(function () {
             return false;
         }
     }).on("keydown", function (event) {
+        bootstrap.Popover.getInstance(document.getElementById("input_subject")).hide();
+        bootstrap.Popover.getInstance(document.getElementById("input_object")).hide();
+
         // don't navigate away from the field on tab when selecting an item
         if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
             event.preventDefault();
@@ -629,7 +632,6 @@ function initFromURLQueryParams() {
         let query = params.get("query");
         lastQuery = query;
         initQueryBuilderFromString(query);
-        updateQueryBuilderTooltips();
     }
 }
 
@@ -695,8 +697,6 @@ const search = (event) => {
     setButtonSearching(true);
     logInputParameters(parameters);
     updateURLParameters(parameters);
-
-    updateQueryBuilderTooltips();
 
     submitSearch(parameters)
         .finally(() => setButtonSearching(false));
@@ -852,7 +852,6 @@ function getInputParameters(query) {
     obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
 
     obj["classification_filter"] = null;
-    console.log(obj)
     return obj;
 }
 
@@ -959,7 +958,7 @@ function showResults(response, parameters) {
         }
     }
     updateYearFilter(response["year_aggregation"], query_trans_string);
-
+    updateExplanationPopover();
     latest_query_translation = query_trans_string.split("----->")[0].trim();
     saveHistoryEntry({size: result_size, filterOptions: parameters});
 }
@@ -1835,85 +1834,53 @@ function checkQuery() {
 }
 
 /**
- * Function sets event listeners for query builder tooltips.
+ * Function sets event listeners for query builder popover.
  */
-function initializeQueryBuilderTooltips() {
-    const subjectTooltip = document.getElementById("subjectTooltip");
+function initializeExplanationPopover() {
     const subjectInput = document.getElementById("input_subject");
-    const objectTooltip = document.getElementById("objectTooltip");
     const objectInput = document.getElementById("input_object");
+    const options = {
+        trigger: 'focus',
+        html: true,
+        placement: 'bottom'
+    };
+    new bootstrap.Popover(subjectInput, options);
+    new bootstrap.Popover(objectInput, options);
 
-    subjectInput.oninput = updateQueryBuilderTooltips;
-    objectInput.oninput = updateQueryBuilderTooltips;
-
-    addTooltipEvents(subjectTooltip, subjectInput, objectInput);
-    addTooltipEvents(objectTooltip, objectInput, subjectInput);
+    subjectInput.oninput = updateExplanationPopover;
+    objectInput.oninput = updateExplanationPopover;
 }
 
 /**
- * Function adds all necessary event listeners for the query builder tooltips.
- * @param tooltip {HTMLDivElement} target tooltip
- * @param input {HTMLInputElement} corresponding input element
- * @param otherInput {HTMLInputElement} other input element
+ * Function prepares the relevant information to call the popover update.
+ * If one of the inputs is empty, the text of the popover is cleared.
  */
-function addTooltipEvents(tooltip, input, otherInput) {
-    input.onmouseover = (e) => updateTooltipPosition(e);
-    input.onmousemove = (e) => updateTooltipPosition(e, true);
-    input.onmouseleave = () => tooltip.classList.toggle('d-none', true);
-
-    /**
-     * Function to update the position of the tooltip if an event is raised.
-     * The parameter withTimeout=true is used to add a timeout which hides
-     * the tooltip in case of an undetected mousemove out of the input element.
-     * @param e {MouseEvent}
-     * @param withTimeout {boolean}
-     */
-    function updateTooltipPosition(e, withTimeout=false){
-        if (input.value === "" || otherInput === "" || tooltip.innerText === "")
-            return;
-        tooltip.classList.toggle('d-none', false);
-        tooltip.style.top = (e.pageY) + "px";
-        tooltip.style.left= (e.pageX) + "px";
-
-        if (withTimeout) {
-            setTimeout(() => {
-                if (!input.parentNode.matches(":hover")) {
-                    tooltip.classList.toggle('d-none', true);
-                }
-            }, 250);
-        }
-    }
-}
-
-/**
- * Function prepares the relevant information to call the tooltip update.
- * If one of the inputs is empty, the text of the tooltips is cleared.
- */
-function updateQueryBuilderTooltips() {
+function updateExplanationPopover() {
     const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     const predicateInput = document.getElementById('input_predicate');
     const predicate = predicateInput.options[predicateInput.selectedIndex].value;
     const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
     const queryText = subject + ' ' + predicate + ' ' + object;
-    const subjectTooltip = document.getElementById("subjectTooltip");
-    const objectTooltip = document.getElementById("objectTooltip");
 
-    subjectTooltip.classList.toggle("d-none", true);
-    objectTooltip.classList.toggle("d-none", true);
+    const subjectPopover = bootstrap.Popover.getInstance(document.getElementById("input_subject"));
+    const objectPopover = bootstrap.Popover.getInstance(document.getElementById("input_object"));
+
+    subjectPopover.hide();
+    objectPopover.hide();
 
     if (subject === "" || object === "") {
-        subjectTooltip.innerText = "";
-        objectTooltip.innerText = "";
+        subjectPopover._config.content = "";
+        objectPopover._config.content = "";
         return;
     }
 
-    // call them synchronous and do not wait to finish the task
-    updateTooltipByType(subjectTooltip, subject, queryText);
-    updateTooltipByType(objectTooltip, object, queryText);
+    // call them synchronous and do not wait for the finish
+    updatePopoverByType(subjectPopover, subject, queryText);
+    updatePopoverByType(objectPopover, object, queryText);
 }
 
-async function updateTooltipByType(tooltip, concept, queryText){
-    tooltip.innerHTML = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
+async function updatePopoverByType(popover, concept, queryText){
+    popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
         .then((response) => {
             return response.json()
         })
