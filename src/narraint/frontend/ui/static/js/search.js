@@ -475,7 +475,7 @@ $(document).on('keydown', function (e) {
 })
 
 $(document).ready(function () {
-    initializeQueryBuilderTooltips();
+    initializeExplanationPopover();
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
@@ -515,6 +515,9 @@ $(document).ready(function () {
             return false;
         }
     }).on("keydown", function (event) {
+        bootstrap.Popover.getInstance(document.getElementById("input_subject")).hide();
+        bootstrap.Popover.getInstance(document.getElementById("input_object")).hide();
+
         // don't navigate away from the field on tab when selecting an item
         if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
             event.preventDefault();
@@ -629,8 +632,6 @@ function initFromURLQueryParams() {
         let query = params.get("query");
         lastQuery = query;
         initQueryBuilderFromString(query);
-        updateTooltipByType("subject");
-        updateTooltipByType("object");
     }
 }
 
@@ -696,9 +697,6 @@ const search = (event) => {
     setButtonSearching(true);
     logInputParameters(parameters);
     updateURLParameters(parameters);
-
-    updateTooltipByType("subject");
-    updateTooltipByType("object");
 
     submitSearch(parameters)
         .finally(() => setButtonSearching(false));
@@ -854,7 +852,6 @@ function getInputParameters(query) {
     obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
 
     obj["classification_filter"] = null;
-    console.log(obj)
     return obj;
 }
 
@@ -961,7 +958,7 @@ function showResults(response, parameters) {
         }
     }
     updateYearFilter(response["year_aggregation"], query_trans_string);
-
+    updateExplanationPopover();
     latest_query_translation = query_trans_string.split("----->")[0].trim();
     saveHistoryEntry({size: result_size, filterOptions: parameters});
 }
@@ -1837,90 +1834,53 @@ function checkQuery() {
 }
 
 /**
- * Function sets event listeners for query builder tooltips.
+ * Function sets event listeners for query builder popover.
  */
-function initializeQueryBuilderTooltips() {
-    const subjectTooltip = document.getElementById("subjectTooltip");
+function initializeExplanationPopover() {
     const subjectInput = document.getElementById("input_subject");
-    const objectTooltip = document.getElementById("objectTooltip");
     const objectInput = document.getElementById("input_object");
-
-    subjectInput.oninput = async () => {
-        if (subjectInput.value.length < 3)
-            return;
-        await updateTooltipByType("subject");
-    }
-    objectInput.oninput = async () => {
-        if (objectInput.value.length < 3)
-            return;
-        await updateTooltipByType("object");
-    }
-
-    subjectInput.onmouseover = (e) => {
-        subjectTooltip.classList.toggle('d-none', false);
-        subjectTooltip.style.top = (e.pageY) + "px";
-        subjectTooltip.style.left= (e.pageX) + "px";
+    const options = {
+        trigger: 'focus',
+        html: true,
+        placement: 'bottom'
     };
+    new bootstrap.Popover(subjectInput, options);
+    new bootstrap.Popover(objectInput, options);
 
-    subjectInput.onmousemove = (e) => {
-        subjectTooltip.classList.toggle('d-none', false);
-        subjectTooltip.style.top = (e.pageY) + "px";
-        subjectTooltip.style.left= (e.pageX) + "px";
-
-        setTimeout(() => {
-            if (!subjectInput.parentNode.matches(":hover")) {
-                subjectTooltip.classList.toggle('d-none', true);
-            }
-        }, 250);
-    };
-
-    subjectInput.onmouseleave = () => {
-        subjectTooltip.classList.toggle('d-none', true);
-    };
-
-    objectInput.onmouseover = (e) => {
-        objectTooltip.classList.toggle('d-none', false);
-        objectTooltip.style.top = (e.pageY) + "px";
-        objectTooltip.style.left= (e.pageX) + "px";
-    };
-
-    objectInput.onmousemove = (e) => {
-        objectTooltip.classList.toggle('d-none', false);
-        objectTooltip.style.top = (e.pageY) + "px";
-        objectTooltip.style.left= (e.pageX) + "px";
-
-        setTimeout(() => {
-            if (!objectTooltip.parentNode.matches(":hover")) {
-                objectTooltip.classList.toggle('d-none', true);
-            }
-        }, 250);
-    };
-
-    objectInput.onmouseleave = () => {
-        objectTooltip.classList.toggle('d-none', true);
-    };
+    subjectInput.oninput = updateExplanationPopover;
+    objectInput.oninput = updateExplanationPopover;
 }
 
 /**
- * Function updates the tooltip by type. For that, a request to the service
- * is called and the corresponding tooltip is updated.
- * @param type {string} input type {subject/object}
+ * Function prepares the relevant information to call the popover update.
+ * If one of the inputs is empty, the text of the popover is cleared.
  */
-async function updateTooltipByType(type) {
-    if ("subject" !== type && "object" !== type)
-        return;
-
+function updateExplanationPopover() {
     const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     const predicateInput = document.getElementById('input_predicate');
     const predicate = predicateInput.options[predicateInput.selectedIndex].value;
     const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    const query_text = subject + ' ' + predicate + ' ' + object;
-    const concept = (type === "subject") ? subject : object;
+    const queryText = subject + ' ' + predicate + ' ' + object;
 
-    if (concept === "")
+    const subjectPopover = bootstrap.Popover.getInstance(document.getElementById("input_subject"));
+    const objectPopover = bootstrap.Popover.getInstance(document.getElementById("input_object"));
+
+    subjectPopover.hide();
+    objectPopover.hide();
+
+    if (subject === "" || object === "") {
+        subjectPopover._config.content = "";
+        objectPopover._config.content = "";
         return;
+    }
 
-    const tooltipText = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + query_text)
+    // call them synchronous and do not wait for the finish
+    updatePopoverByType(subjectPopover, subject, queryText);
+    updatePopoverByType(objectPopover, object, queryText);
+}
+
+async function updatePopoverByType(popover, concept, queryText){
+    popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
         .then((response) => {
             return response.json()
         })
@@ -1928,9 +1888,6 @@ async function updateTooltipByType(type) {
             return data['headings'].join('<br>');
         })
         .catch((e) => console.log(e));
-
-    const tooltip = document.getElementById(type + "Tooltip");
-    tooltip.innerHTML = tooltipText;
 }
 
 /**

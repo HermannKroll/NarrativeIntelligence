@@ -169,7 +169,6 @@ function createQueryGraph(statements, parentDiv) {
     graphs.push(container);
 
     addClickEvent(statements, container);
-    addTooltipEvent(statements, graphDiv);
 
     const data = createGraph(statements);
     new vis.Network(graphDiv, data, networkOptions);
@@ -248,40 +247,6 @@ function hideLoadingScreen() {
     document.querySelector("#loading_screen").classList.toggle("d-none", true);
 }
 
-function addTooltipEvent(statements, div) {
-    const tooltip = document.getElementById('graphTooltip');
-    const statementStrings = [];
-    for (const i in statements) {
-        const [s, p, o] = statements[i];
-        statementStrings.push(`"${s}" ${p} "${o}"`);
-    }
-
-    let str = "";
-    str += statementStrings.join(' AND<br><br>');
-
-    div.onmouseover = (e) => {
-        tooltip.classList.toggle('d-none', false);
-        tooltip.innerHTML = str;
-        tooltip.style.top = (e.pageY) + "px";
-        tooltip.style.left= (e.pageX) + "px";
-    };
-
-    div.onmousemove = (e) => {
-        tooltip.classList.toggle('d-none', false);
-        tooltip.style.top = (e.pageY) + "px";
-        tooltip.style.left= (e.pageX) + "px";
-
-        setTimeout(() => {
-            if (!tooltip.parentNode.matches(":hover")) {
-                tooltip.classList.toggle('d-none', true);
-            }
-        }, 250);
-    };
-
-    div.onmouseleave = () => {
-        tooltip.classList.toggle('d-none', true);
-    };
-}
 
 function createQueryGraphContainer() {
     const column = document.createElement('div');
