@@ -12,7 +12,7 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __instance = None
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     def instance(load_index=True):
