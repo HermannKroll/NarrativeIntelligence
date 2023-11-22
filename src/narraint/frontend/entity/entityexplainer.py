@@ -22,7 +22,7 @@ class EntityExplainer(EntityIndexBase):
 
     def __init__(self, load_index=True):
         super().__init__()
-        self.expand_mesh_descriptors = False
+        self.expand_by_subclasses = False
         if EntityExplainer.__instance is not None:
             raise Exception('This class is a singleton - use EntityExplainer.instance()')
         else:
