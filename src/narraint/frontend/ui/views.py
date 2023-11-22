@@ -1113,7 +1113,8 @@ def get_explain_translation(request):
 
             # If the search string starts with the concepts,
             search_string = search_string.replace('"', '').strip()
-            if search_string.startswith(concept):
+            concept_string = concept.replace('"', '').strip()
+            if search_string.startswith(concept_string):
                 entities = query_fact_patterns.fact_patterns[0].subjects
             else:
                 entities = query_fact_patterns.fact_patterns[0].objects
