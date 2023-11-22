@@ -131,7 +131,16 @@ class EntityTaggerTestCase(TestCase):
         excipient_names = [n for n in ExcipientVocabulary.read_excipients_names(expand_terms=False)]
         for en in excipient_names:
             if en.strip():
-                self.assertIn(en.lower(), [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)])
+                eids = [t.entity_id.lower() for t in self.entity_tagger.tag_entity(en)]
+                # If chembl is included then the excipient has been mapped to chembl.
+                # We don't know the id here
+                chembl_found = False
+                for eid in eids:
+                    if eid.startswith('chembl'):
+                        chembl_found = True
+                        break
+                if not chembl_found:
+                    self.assertIn(en.lower(), eids)
 
     def test_gene_names(self):
         valid_cyp3a4_symbol = {'cyp3a4'}
