@@ -207,7 +207,7 @@ class EntityExplanationTestCase(TestCase):
                 self.assertNotIn(not_n2, terms)
 
     def test_no_atc_trees(self):
-        direct_names = ['pecilocin', "VARIOTIN"]
+        direct_names = ['Pecilocin', "variotin"]
         not_expanded_names = ["antibiotics", "antibiotics for topical use", "antibiotics for dermatological use"]
         for n1 in direct_names:
             terms = [t for t in self.entity_explainer.explain_entity_str(n1, truncate_at_k=1000)]
