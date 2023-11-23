@@ -1855,7 +1855,7 @@ function initializeExplanationPopover() {
  * Function prepares the relevant information to call the popover update.
  * If one of the inputs is empty, the text of the popover is cleared.
  */
-function updateExplanationPopover() {
+async function updateExplanationPopover() {
     const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     const predicateInput = document.getElementById('input_predicate');
     const predicate = predicateInput.options[predicateInput.selectedIndex].value;
@@ -1875,8 +1875,8 @@ function updateExplanationPopover() {
     }
 
     // call them synchronous and do not wait for the finish
-    updatePopoverByType(subjectPopover, subject, queryText);
-    updatePopoverByType(objectPopover, object, queryText);
+    await updatePopoverByType(subjectPopover, subject, queryText);
+    await updatePopoverByType(objectPopover, object, queryText);
 }
 
 async function updatePopoverByType(popover, concept, queryText){
@@ -1885,7 +1885,7 @@ async function updatePopoverByType(popover, concept, queryText){
             return response.json()
         })
         .then((data) => {
-            return data['headings'].join('<br>');
+            return data['headings'].join('<hr class="border-1 my-0"/>');
         })
         .catch((e) => console.log(e));
 }
