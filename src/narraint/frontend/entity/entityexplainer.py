@@ -12,7 +12,7 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __instance = None
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     def instance(load_index=True):
@@ -22,6 +22,7 @@ class EntityExplainer(EntityIndexBase):
 
     def __init__(self, load_index=True):
         super().__init__()
+        self.expand_by_subclasses = False
         if EntityExplainer.__instance is not None:
             raise Exception('This class is a singleton - use EntityExplainer.instance()')
         else:

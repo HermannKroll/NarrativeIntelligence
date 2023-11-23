@@ -88,6 +88,11 @@ class EntityTagger(EntityIndexBase):
         # Lower, strip and remove all punctuation
         t_low = term.lower().translate(self.__translator).strip()
         entities = set()
+
+        # fix working with empty strings here
+        if not t_low.strip():
+            return entities
+
         if expand_search_by_prefix:
             if not self.autocompletion:
                 from narraint.frontend.entity import autocompletion
