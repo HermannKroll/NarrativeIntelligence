@@ -1111,9 +1111,12 @@ def get_explain_translation(request):
             if not query_fact_patterns:
                 return JsonResponse(dict(headings=["Please complete query first"]))
 
-            # If the search string starts with the concepts,
+            # If the search string starts with the concepts
+            # However, composed words like "Mass Spectrometry" starts with a quote character
+            # So ignore all quote characters here
             search_string = search_string.replace('"', '').strip()
-            if search_string.startswith(concept):
+            concept_string = concept.replace('"', '').strip()
+            if search_string.startswith(concept_string):
                 entities = query_fact_patterns.fact_patterns[0].subjects
             else:
                 entities = query_fact_patterns.fact_patterns[0].objects

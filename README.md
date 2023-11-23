@@ -492,6 +492,35 @@ So, please read the instructions of our [NarrativeAnnotation GitHub Page](https:
 NarrativeAnnotation contains all scripts to transform biomedical documents into graphs.
 
 
+## Database User
+The mining package needs to have write-PRIVILEGES on the database table.
+So create a second user and grant him the following PRIVILEGES.
+
+Connect to the database as the postgres user.
+```
+sudo su postgres
+psql -d fidpharmazie
+```
+Then create a user and set the PRIVILEGES:
+```
+CREATE USER mininguser WITH PASSWORD 'EXAMPLE_PW';
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mininguser;
+```
+
+Finally, edit the database connection in ``backend.json``:
+```
+{
+  "use_SQLite": false,
+  "SQLite_path": "sqlitebase.db",
+  "POSTGRES_DB": "fidpharmazie",
+  "POSTGRES_HOST": "127.0.0.1",
+  "POSTGRES_PORT": "5432",
+  "POSTGRES_USER": "mininguser",
+  "POSTGRES_PW": "EXAMPLE_PW",
+  "POSTGRES_SCHEMA": "public"
+}
+```
+
 ## Update Service Reverse Indexes
 As soon as the database is updated, the service requires an update of tables for reverse indexes and metadata. 
 

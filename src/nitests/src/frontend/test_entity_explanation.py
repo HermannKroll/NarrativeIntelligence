@@ -195,3 +195,23 @@ class EntityExplanationTestCase(TestCase):
         self.assertIn("COVID-19", headings)
         self.assertNotIn("COVID-19 Drug Treatment", headings)
         self.assertNotIn("COVID-19 Testing", headings)
+
+    def test_no_mesh_expansion(self):
+        direct_names = ['Long COVID', "Long Haul COVID-19", "Long-Haul COVID"]
+        not_expanded_names = ["COVID 19", "Chronic Condition"]
+        for n1 in direct_names:
+            terms = [t for t in self.entity_explainer.explain_entity_str(n1, truncate_at_k=1000)]
+            for n2 in direct_names:
+                self.assertIn(n2, terms)
+            for not_n2 in not_expanded_names:
+                self.assertNotIn(not_n2, terms)
+
+    def test_no_atc_trees(self):
+        direct_names = ['Pecilocin', "variotin"]
+        not_expanded_names = ["antibiotics", "antibiotics for topical use", "antibiotics for dermatological use"]
+        for n1 in direct_names:
+            terms = [t for t in self.entity_explainer.explain_entity_str(n1, truncate_at_k=1000)]
+            for n2 in direct_names:
+                self.assertIn(n2, terms)
+            for not_n2 in not_expanded_names:
+                self.assertNotIn(not_n2, terms)
