@@ -1060,6 +1060,11 @@ def post_drug_ov_chembl_phase_href_log(request):
 
 def post_report(request):
     try:
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except JSONDecodeError:
+            logging.debug('Invalid JSON received')
+            return HttpResponse(status=500)
         req_data = json.loads(request.body.decode("utf-8"))
         report_description = req_data.get("description", "")
         report_img_64 = req_data.get("img64", "")
