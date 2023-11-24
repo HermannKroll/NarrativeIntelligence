@@ -475,7 +475,7 @@ $(document).on('keydown', function (e) {
 })
 
 $(document).ready(function () {
-
+    initializeExplanationPopover();
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
@@ -515,6 +515,9 @@ $(document).ready(function () {
             return false;
         }
     }).on("keydown", function (event) {
+        bootstrap.Popover.getInstance(document.getElementById("input_subject")).hide();
+        bootstrap.Popover.getInstance(document.getElementById("input_object")).hide();
+
         // don't navigate away from the field on tab when selecting an item
         if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
             event.preventDefault();
@@ -688,7 +691,8 @@ const search = (event) => {
     if (!checkQuery())
         return;
 
-    resetKeywordSearch();
+    // Todo: hardfix at the moment
+    // resetKeywordSearch();
     const parameters = getInputParameters(query);
     setButtonSearching(true);
     logInputParameters(parameters);
@@ -848,7 +852,6 @@ function getInputParameters(query) {
     obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
 
     obj["classification_filter"] = null;
-    console.log(obj)
     return obj;
 }
 
@@ -955,7 +958,7 @@ function showResults(response, parameters) {
         }
     }
     updateYearFilter(response["year_aggregation"], query_trans_string);
-
+    updateExplanationPopover();
     latest_query_translation = query_trans_string.split("----->")[0].trim();
     saveHistoryEntry({size: result_size, filterOptions: parameters});
 }
@@ -1808,62 +1811,6 @@ function initializeValues(slider, value, min, max) {
     slider.value = value;
 }
 
-function getSynonyms(element_id, ev) {
-    let concept = getTextOrPlaceholderFromElement(element_id);
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input = document.getElementById('input_predicate');
-    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    let query_text = subject + ' ' + predicate + ' ' + object;
-    if (concept !== "") {
-        let request = $.ajax({
-            url: explain_translation_url,
-            data: {
-                concept: concept,
-                query: query_text
-            }
-        });
-        request.done(function (response) {
-            tt.classList.remove('d-none');
-            tt.innerHTML = response['headings'].join('<br>'); // anzuzeigender String (auch HTML styled möglich)
-            // horizontales Offset
-            tt.style.top = ev.pageY + "px";
-            // vertikales Offset (habe es noch nicht geschafft, dass das Fenster tatsächlich rechts oberhalb vom Zeiger angezeigt wird :/ ))
-            tt.style.left = (ev.pageX + 10) + "px";
-        });
-    }
-}
-
-const tt = document.getElementById('tooltip');
-
-let sub = document.querySelector('#input_subject');
-sub.onmouseenter = (ev) => {
-    getSynonyms('input_subject', ev);
-};
-
-sub.onmousemove = (ev) => {
-    tt.style.top = ev.pageY + "px";
-    tt.style.left = (ev.pageX + 10) + "px";
-};
-
-sub.onmouseleave = () => {
-    tt.classList.add('d-none');
-};
-
-let obj = document.querySelector('#input_object');
-obj.onmouseenter = (ev) => {
-    getSynonyms('input_object', ev);
-};
-
-obj.onmousemove = (ev) => {
-    tt.style.top = ev.pageY + "px";
-    tt.style.left = (ev.pageX + 10) + "px";
-};
-
-obj.onmouseleave = () => {
-    tt.classList.add('d-none');
-};
-
 function checkQuery() {
     let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
     let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
@@ -1884,4 +1831,90 @@ function checkQuery() {
         return false;
     }
     return true;
+}
+
+/**
+ * Function sets event listeners for query builder popover.
+ */
+function initializeExplanationPopover() {
+    const subjectInput = document.getElementById("input_subject");
+    const objectInput = document.getElementById("input_object");
+    const options = {
+        trigger: 'focus',
+        html: true,
+        placement: 'bottom'
+    };
+    new bootstrap.Popover(subjectInput, options);
+    new bootstrap.Popover(objectInput, options);
+
+    subjectInput.oninput = updateExplanationPopover;
+    objectInput.oninput = updateExplanationPopover;
+}
+
+/**
+ * Function prepares the relevant information to call the popover update.
+ * If one of the inputs is empty, the text of the popover is cleared.
+ */
+async function updateExplanationPopover() {
+    const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
+    const predicateInput = document.getElementById('input_predicate');
+    const predicate = predicateInput.options[predicateInput.selectedIndex].value;
+    const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
+    const queryText = subject + ' ' + predicate + ' ' + object;
+
+    const subjectPopover = bootstrap.Popover.getInstance(document.getElementById("input_subject"));
+    const objectPopover = bootstrap.Popover.getInstance(document.getElementById("input_object"));
+
+    subjectPopover.hide();
+    objectPopover.hide();
+
+    if (subject === "" || object === "") {
+        subjectPopover._config.content = "";
+        objectPopover._config.content = "";
+        return;
+    }
+
+    // call them synchronous and do not wait for the finish
+    await updatePopoverByType(subjectPopover, subject, queryText);
+    await updatePopoverByType(objectPopover, object, queryText);
+}
+
+async function updatePopoverByType(popover, concept, queryText){
+    popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
+        .then((response) => {
+            return response.json()
+        })
+        .then((data) => {
+            return data['headings'].join('<hr class="border-1 my-0"/>');
+        })
+        .catch((e) => console.log(e));
+}
+
+/**
+ * The function sets the help settings for the keyword search tab.
+ */
+function setKeywordSearchHelp() {
+    let anchor = document.getElementById("searchHelpAnchor");
+    anchor.href = "https://youtu.be/iagphBPLokM";
+    anchor.target = "_blank";
+    anchor.onclick = undefined;
+}
+
+/**
+ * The function sets the help settings for the query builder tab.
+ */
+function setQueryBuilderHelp() {
+    let anchor = document.getElementById("searchHelpAnchor");
+    anchor.href = "#";
+    anchor.target = "";
+    anchor.onclick = () => showKeywordSearchHelp();
+}
+
+/**
+ * Function to show the extended keyword search modal.
+ */
+function showKeywordSearchHelp() {
+    let modalElement = document.getElementById('keywordSearchHelpModal')
+    let modal = new bootstrap.Modal(modalElement);
+    modal.show();
 }

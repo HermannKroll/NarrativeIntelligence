@@ -104,7 +104,7 @@ async function keywordSearch() {
 
     // Substring because the tailing X should be removed (X do remove the keyword)
     keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
-        n.innerText.substring(0, n.innerText.length - 2)));
+        n.innerText.substring(0, n.innerText.length - 1).replace('\n', '').trim()));
 
     const keywordsString = keywords.join("_AND_")
     if (keywordsString === "") {
@@ -169,7 +169,6 @@ function createQueryGraph(statements, parentDiv) {
     graphs.push(container);
 
     addClickEvent(statements, container);
-    addTooltipEvent(statements, graphDiv);
 
     const data = createGraph(statements);
     new vis.Network(graphDiv, data, networkOptions);
@@ -222,6 +221,9 @@ function addClickEvent(statements, container) {
         }
 
         resetBorders();
+        // mark selected pattern with a red border
+        container.classList.add('border-danger');
+
         showLoadingScreen();
 
         const parameters = getInputParameters(query);
@@ -245,34 +247,6 @@ function hideLoadingScreen() {
     document.querySelector("#loading_screen").classList.toggle("d-none", true);
 }
 
-function addTooltipEvent(statements, div) {
-    const tooltip = document.getElementById('tooltip');
-    const statementStrings = [];
-    for (const i in statements) {
-        const [s, p, o] = statements[i];
-        statementStrings.push(`"${s}" ${p} "${o}"`);
-    }
-
-    let str = "";
-    str += statementStrings.join(' AND<br><br>');
-
-    div.onmouseover = (e) => {
-        tooltip.classList.toggle('d-none', false);
-        tooltip.innerHTML = str;
-        tooltip.style.top = (e.pageY - tooltip.offsetHeight) + "px";
-        tooltip.style.left= (e.pageX) + "px";
-    };
-
-    div.onmousemove = (e) => {
-        tooltip.classList.toggle('d-none', false);
-        tooltip.style.top = (e.pageY - tooltip.offsetHeight) + "px";
-        tooltip.style.left= (e.pageX) + "px";
-    };
-
-    div.onmouseleave = () => {
-        tooltip.classList.toggle('d-none', true);
-    };
-}
 
 function createQueryGraphContainer() {
     const column = document.createElement('div');

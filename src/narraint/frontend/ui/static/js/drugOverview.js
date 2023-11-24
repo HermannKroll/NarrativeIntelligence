@@ -1,7 +1,7 @@
 let keywordToLog = null;
 
 const overviews = {
-    indi: {name: "Indications (Study Phase via ChEMBL)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
+    indi: {name: "Indications (Study Phase via <a href='https://clinicaltrials.gov'>clinicaltrials.gov</a>)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
     admin: {name: "Administration", predicate: "administered", object: "DosageForm", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["DosageForm"]},
     targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Gene"]},
     labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["LabMethod"]},

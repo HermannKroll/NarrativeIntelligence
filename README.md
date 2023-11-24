@@ -38,13 +38,13 @@ su pubpharm
 
 To use this project, clone this project and its submodules via:
 ```
-git clone --recurse-submodules git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules https://github.com/HermannKroll/NarrativeIntelligence.git
 ```
 
 
 For development purposes, dev should be cloned:
 ```
-git clone --recurse-submodules --branch dev git@github.com:HermannKroll/NarrativeIntelligence.git
+git clone --recurse-submodules --branch dev https://github.com/HermannKroll/NarrativeIntelligence.git
 ```
 
 ## Cloning a private repository (deprecated)
@@ -492,6 +492,35 @@ So, please read the instructions of our [NarrativeAnnotation GitHub Page](https:
 NarrativeAnnotation contains all scripts to transform biomedical documents into graphs.
 
 
+## Database User
+The mining package needs to have write-PRIVILEGES on the database table.
+So create a second user and grant him the following PRIVILEGES.
+
+Connect to the database as the postgres user.
+```
+sudo su postgres
+psql -d fidpharmazie
+```
+Then create a user and set the PRIVILEGES:
+```
+CREATE USER mininguser WITH PASSWORD 'EXAMPLE_PW';
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mininguser;
+```
+
+Finally, edit the database connection in ``backend.json``:
+```
+{
+  "use_SQLite": false,
+  "SQLite_path": "sqlitebase.db",
+  "POSTGRES_DB": "fidpharmazie",
+  "POSTGRES_HOST": "127.0.0.1",
+  "POSTGRES_PORT": "5432",
+  "POSTGRES_USER": "mininguser",
+  "POSTGRES_PW": "EXAMPLE_PW",
+  "POSTGRES_SCHEMA": "public"
+}
+```
+
 ## Update Service Reverse Indexes
 As soon as the database is updated, the service requires an update of tables for reverse indexes and metadata. 
 
@@ -617,6 +646,12 @@ The word clouds for COVID-19 and Long COVID can be updated by:
 python ~/NarrativeIntelligence/src/narraint/keywords/generate_covid_keywords.py
 ```
 
+The trial status of drug disease indications is pre-computed by crawling ClinicalTrials.gov. 
+The data should be updated in periodic intervalls (but not in every service update). 
+To recompute the drug disease indications from ClinicalTrials.gov, run:
+```
+python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
+```
 
 
 

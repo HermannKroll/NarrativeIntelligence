@@ -33,6 +33,7 @@ from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 class EntityIndexBase:
 
     def __init__(self):
+        self.expand_by_subclasses = True
         self.mesh_ontology = MeSHOntology.instance()
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
@@ -109,8 +110,9 @@ class EntityIndexBase:
         Add all excipient terms to the internal dict
         :return:
         """
-        for excipient_name in ExcipientVocabulary.read_excipients_names(expand_terms=False):
-            self._add_term(excipient_name, excipient_name.capitalize(), EXCIPIENT)
+        for term, ex_ids in ExcipientVocabulary.create_excipient_vocabulary(expand_terms=False).items():
+            for ex_id in ex_ids:
+                self._add_term(term, ex_id, EXCIPIENT)
 
     def _add_plant_families(self):
         """
@@ -131,41 +133,63 @@ class EntityIndexBase:
             for term in desc.terms:
                 mesh_mappings[mesh_id].add(term.string)
 
-        logging.info('Computing Trie for fast lookup...')
-        start_time = datetime.now()
-        mesh_trie = datrie.Trie(string.printable)
-        for idx, mesh_id in enumerate(mesh_mappings):
-            print_progress_with_eta("computing trie", idx, len(mesh_mappings), start_time, print_every_k=10)
-            try:
-                tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
-                for tn in tree_nos:
-                    tn_and_id = f'{tn.lower()}:{mesh_id}'
-                    mesh_trie[tn_and_id] = tn_and_id
-            except KeyError:
-                continue
+        # Should we expand mesh descriptors by their subdescriptors
+        if self.expand_by_subclasses:
+            logging.info('Expanding MeSH Descriptors by their sub descriptors...')
+            logging.info('Computing Trie for fast lookup...')
+            start_time = datetime.now()
+            mesh_trie = datrie.Trie(string.printable)
+            for idx, mesh_id in enumerate(mesh_mappings):
+                print_progress_with_eta("computing trie", idx, len(mesh_mappings), start_time, print_every_k=10)
+                try:
+                    tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                    for tn in tree_nos:
+                        tn_and_id = f'{tn.lower()}:{mesh_id}'
+                        mesh_trie[tn_and_id] = tn_and_id
+                except KeyError:
+                    continue
 
-        logging.info('Finished')
+            logging.info('Finished')
 
-        logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
-        start_time = datetime.now()
-        for idx, (mesh_id, mesh_terms) in enumerate(mesh_mappings.items()):
-            print_progress_with_eta("adding mesh terms", idx, len(mesh_mappings), start_time, print_every_k=10)
-            try:
-                tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
-                for tn in tree_nos:
-                    # find the given entity type for the tree number
-                    try:
-                        for ent_type in MeSHOntology.tree_number_to_entity_type(tn):
-                            sub_descs = mesh_trie.keys(tn.lower())
-                            for mesh_term in mesh_terms:
-                                term = mesh_term
-                                self._add_term(term, f'MESH:{mesh_id}', ent_type)
-                                for sub_d in sub_descs:
-                                    self._add_term(term, f'MESH:{sub_d.split(":")[1]}', ent_type)
-                    except KeyError:
-                        continue
-            except KeyError:
-                continue
+            logging.info('Mesh read ({} entries)'.format(len(mesh_mappings)))
+            start_time = datetime.now()
+            for idx, (mesh_id, mesh_terms) in enumerate(mesh_mappings.items()):
+                print_progress_with_eta("adding mesh terms", idx, len(mesh_mappings), start_time, print_every_k=10)
+                try:
+                    tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                    for tn in tree_nos:
+                        # find the given entity type for the tree number
+                        try:
+                            for ent_type in MeSHOntology.tree_number_to_entity_type(tn):
+                                sub_descs = mesh_trie.keys(tn.lower())
+                                for mesh_term in mesh_terms:
+                                    term = mesh_term
+                                    self._add_term(term, f'MESH:{mesh_id}', ent_type)
+                                    for sub_d in sub_descs:
+                                        self._add_term(term, f'MESH:{sub_d.split(":")[1]}', ent_type)
+                        except KeyError:
+                            continue
+                except KeyError:
+                    continue
+        else:
+            # no expansion we can just add them
+            logging.info('Do NOT expand MeSH Descriptors by their sub descriptors...')
+            start_time = datetime.now()
+            for idx, (mesh_id, mesh_terms) in enumerate(mesh_mappings.items()):
+                print_progress_with_eta("adding mesh terms", idx, len(mesh_mappings), start_time, print_every_k=10)
+                try:
+                    tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
+                    for tn in tree_nos:
+                        # find the given entity type for the tree number
+                        try:
+                            for ent_type in MeSHOntology.tree_number_to_entity_type(tn):
+                                for mesh_term in mesh_terms:
+                                    term = mesh_term
+                                    self._add_term(term, f'MESH:{mesh_id}', ent_type)
+                        except KeyError:
+                            continue
+                except KeyError:
+                    continue
 
     def _add_mesh_supplements(self, mesh_supplement_file=MESH_SUPPLEMENTARY_FILE):
         # All MeSH supplements are Diseases in our database
@@ -209,14 +233,18 @@ class EntityIndexBase:
         :return: None
         """
         # read also atc classes
-        atc_tree: ATCTree = ATCTree.instance()
-        for atc_class_name, chembl_ids in atc_tree.atcclassname2chembl.items():
-            for chid in chembl_ids:
-                self._add_term(atc_class_name, chid, DRUG, entity_class=atc_class_name)
+        if self.expand_by_subclasses:
+            logging.info('Adding ATC tree information...')
+            atc_tree: ATCTree = ATCTree.instance()
+            for atc_class_name, chembl_ids in atc_tree.atcclassname2chembl.items():
+                for chid in chembl_ids:
+                    self._add_term(atc_class_name, chid, DRUG, entity_class=atc_class_name)
+        else:
+            logging.info('Skipping atc tree information')
 
     def _add_chembl_chemicals(self):
         logging.info('Adding ChEMBL chemicals...')
-        drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary()
+        drug_terms2dbid = ChemicalVocabulary.create_chembl_chemical_vocabulary(expand_terms=False)
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
                 self._add_term(term, chid, CHEMICAL)
