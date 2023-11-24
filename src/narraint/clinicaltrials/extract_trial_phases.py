@@ -98,6 +98,7 @@ class ClinicalTrialPhaseExtractor:
     def extract_drug_disease_phase_tuples(self):
         logging.info("Starting the process to extract phases.")
         config = cnf.Config(PREPROCESS_CONFIG)
+        config.config["dict"]["min_full_tag_len"] = 3
         dd_phase = {}
         drug_tagger = DrugTagger(**dict(logger=logging, config=config, collection="trial_drugs"))
         drug_tagger.prepare()
