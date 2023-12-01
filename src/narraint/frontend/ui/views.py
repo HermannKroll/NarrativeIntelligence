@@ -22,7 +22,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase, DatabaseUpdate, Sentence
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, \
-    FEEDBACK_DIR, FEEDBACK_PREDICATION_DIR
+    FEEDBACK_DIR, FEEDBACK_PREDICATION_DIR, FEEDBACK_SUBGROUP_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -921,11 +921,25 @@ def post_subgroup_feedback(request):
             rating = data["rating"]
             userid = data["userid"]
 
-            session = SessionExtended.get()
+            result = dict(variable_name=variable_name,
+                       entity_name=entity_name,
+                       entity_id=entity_id,
+                       entity_type=entity_type,
+                       query=query,
+                       user_id=userid,
+                       rating=rating)
 
-            SubstitutionGroupRating.insert_sub_group_user_rating(
-                session, userid, query, variable_name, entity_name, entity_id,
-                entity_type, rating)
+            # create a filename for this rating
+            timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
+            rating_filename = os.path.join(FEEDBACK_SUBGROUP_DIR, f'subgroup_{userid}_{timestamp}.json')
+            with open(rating_filename, 'wt') as f:
+                json.dump(result, f, sort_keys=True, indent=4)
+
+
+           # session = SessionExtended.get()
+            #SubstitutionGroupRating.insert_sub_group_user_rating(
+            #    session, userid, query, variable_name, entity_name, entity_id,
+            #    entity_type, rating)
 
             logging.info(f'User "{userid}" has rated "{variable_name}":'
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
