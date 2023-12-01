@@ -120,10 +120,8 @@ CREATE USER servicero WITH PASSWORD 'EXAMPLE_PW';
 Now grant all required rights.
 ```
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO servicero;
-GRANT INSERT ON TABLE public.PREDICATION_RATING TO servicero;
-GRANT INSERT ON TABLE public.SUBSTITUTION_GROUP_RATING TO servicero;
 ```
-Ratings must be inserted. For all other tables, read access is sufficient for the service to run. 
+Ratings are not stored in DB anymore. They will be stored in a dedicated directory (feedback).
 
 ### Backup the Database
 The database can be backuped via the following command:
