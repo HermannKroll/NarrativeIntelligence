@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, DateTime, ForeignKeyConstraint, PrimaryKeyConstraint, \
+from sqlalchemy import Column, String, ForeignKeyConstraint, PrimaryKeyConstraint, \
     BigInteger, insert, Integer, Date, delete
 
 from kgextractiontoolbox.backend import models
@@ -92,55 +92,6 @@ class PredicationInvertedIndex(Extended, DatabaseTable):
     provenance_mapping = Column(String, nullable=False)
 
 
-class PredicationRating(Extended, DatabaseTable):
-    __tablename__ = "predication_rating"
-    __table_args__ = (
-        ForeignKeyConstraint(('predication_id',), ('predication.id',)),
-        PrimaryKeyConstraint('user_id', 'query', 'predication_id', sqlite_on_conflict='IGNORE')
-    )
-    user_id = Column(String)
-    query = Column(String)
-    predication_id = Column(BigInteger)
-    rating = Column(String)
-    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
-
-    @staticmethod
-    def query_predication_ratings(session):
-        query = session.query(PredicationRating, Predication, Sentence) \
-            .filter(PredicationRating.predication_id == Predication.id) \
-            .filter(Sentence.id == Predication.sentence_id)
-        for res in query:
-            yield res
-
-    @staticmethod
-    def query_predication_ratings_as_dicts(session):
-        query = session.query(PredicationRating, Predication, Sentence) \
-            .filter(PredicationRating.predication_id == Predication.id) \
-            .filter(Sentence.id == Predication.sentence_id)
-        for res in query:
-            yield dict(document_id=res.Predication.document_id,
-                       document_collection=res.Predication.document_collection,
-                       rating=res.PredicationRating.rating,
-                       user_id=res.PredicationRating.user_id,
-                       query=res.PredicationRating.query,
-                       subject_id=res.Predication.subject_id,
-                       subject_type=res.Predication.subject_type,
-                       subject_str=res.Predication.subject_str,
-                       predicate=res.Predication.predicate,
-                       relation=res.Predication.relation,
-                       object_id=res.Predication.object_id,
-                       object_type=res.Predication.object_type,
-                       object_str=res.Predication.object_str,
-                       sentence=res.Sentence.text)
-
-    @staticmethod
-    def insert_user_rating(session, user_id: str, query: str, predication_id: int, rating: str):
-        insert_stmt = insert(PredicationRating).values(user_id=user_id, query=query, predication_id=predication_id,
-                                                       rating=rating)
-        session.execute(insert_stmt)
-        session.commit()
-
-
 class PredicationToDelete(models.PredicationToDelete):
     pass
 
@@ -151,43 +102,6 @@ class Sentence(models.Sentence):
 
 class DocProcessedByIE(models.DocProcessedByIE):
     pass
-
-
-class SubstitutionGroupRating(Extended, DatabaseTable):
-    __tablename__ = "substitution_group_rating"
-    variable_name = Column(String, primary_key=True)
-    entity_name = Column(String, primary_key=True)
-    entity_id = Column(String, primary_key=True)
-    entity_type = Column(String, primary_key=True)
-    user_id = Column(String, primary_key=True)
-    query = Column(String, primary_key=True)
-    rating = Column(String)
-    date_inserted = Column(DateTime, nullable=False, default=datetime.now)
-
-    @staticmethod
-    def insert_sub_group_user_rating(
-            session, user_id: str, query: str, variable_name: str,
-            entity_name: str, entity_id: str, entity_type: str, rating: str):
-        insert_stmt = insert(SubstitutionGroupRating).values(
-            user_id=user_id, query=query, variable_name=variable_name,
-            entity_name=entity_name, entity_id=entity_id,
-            entity_type=entity_type, rating=rating)
-        session.execute(insert_stmt)
-        session.commit()
-
-    @staticmethod
-    def query_subgroup_ratings_as_dicts(session):
-        query = session.query(SubstitutionGroupRating)
-        if not query:
-            return dict()
-        for res in query:
-            yield dict(variable_name=res.variable_name,
-                       entity_name=res.entity_name,
-                       entity_id=res.entity_id,
-                       entity_type=res.entity_type,
-                       query=res.query,
-                       user_id=res.user_id,
-                       rating=res.rating)
 
 
 class EntityKeywords(Extended, DatabaseTable):
