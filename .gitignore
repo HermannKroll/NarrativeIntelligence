@@ -124,6 +124,7 @@ cache/
 config/*
 !config/*.prod.json
 !config/*.example.json
+feedback/
 
 # Docker
 docker/*.tgz
