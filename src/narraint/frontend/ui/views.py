@@ -21,7 +21,8 @@ from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_fr
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, PredicationRating, \
     TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase, DatabaseUpdate, Sentence
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, FEEDBACK_DIR
+from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, \
+    FEEDBACK_DIR, FEEDBACK_PREDICATION_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -848,7 +849,7 @@ def post_feedback(request):
     if data and data.keys() & {"query", "rating", "userid", "predicationids"}:
         try:
             time_start = datetime.now()
-            predication_ids = list([int(d) for d in data["predicationids"].split(';')])
+            predication_ids = list([int(d) for d in data["predicationids"].split(',')])
             query_str = data["query"]
             rating = data["rating"]
             userid = data["userid"]
@@ -878,7 +879,7 @@ def post_feedback(request):
 
             # create a filename for this rating
             timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
-            rating_filename = os.path.join(FEEDBACK_DIR, f'predication_{userid}_{timestamp}.json')
+            rating_filename = os.path.join(FEEDBACK_PREDICATION_DIR, f'predication_{userid}_{timestamp}.json')
             with open(rating_filename, 'wt') as f:
                 json.dump(result, f, sort_keys=True, indent=4)
 
@@ -1096,7 +1097,7 @@ def post_report(request):
         req_data = json.loads(request.body.decode("utf-8"))
         report_description = req_data.get("description", "")
         report_img_64 = req_data.get("img64", "")
-        report_path = os.path.join(REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
+        report_path = os.path.join(FEEDBACK_REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)

@@ -13,8 +13,11 @@ TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
 TMP_DIR_TAGGER = os.path.join(TMP_DIR, 'tagger')
 CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
 CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
-REPORT_DIR = os.path.join(GIT_ROOT_DIR, 'reports')
+
 FEEDBACK_DIR = os.path.join(GIT_ROOT_DIR, 'feedback')
+FEEDBACK_REPORT_DIR = os.path.join(FEEDBACK_DIR, 'reports')
+FEEDBACK_PREDICATION_DIR = os.path.join(FEEDBACK_DIR, "predications")
+FEEDBACK_SUBGROUP_DIR = os.path.join(FEEDBACK_DIR, "subgroups")
 
 QUERY_YIELD_PER_K = 1000000
 BULK_INSERT_AFTER_K = 100000
@@ -25,11 +28,19 @@ if not os.path.isdir(TMP_DIR):
 if not os.path.isdir(TMP_DIR_TAGGER):
     os.makedirs(TMP_DIR_TAGGER)
 
-if not os.path.isdir(REPORT_DIR):
-    os.makedirs(REPORT_DIR)
-
 if not os.path.isdir(FEEDBACK_DIR):
     os.makedirs(FEEDBACK_DIR)
+
+if not os.path.isdir(FEEDBACK_REPORT_DIR):
+    os.makedirs(FEEDBACK_REPORT_DIR)
+
+if not os.path.isdir(FEEDBACK_PREDICATION_DIR):
+    os.makedirs(FEEDBACK_PREDICATION_DIR)
+
+if not os.path.isdir(FEEDBACK_SUBGROUP_DIR):
+    os.makedirs(FEEDBACK_SUBGROUP_DIR)
+
+
 
 # Backend for Tagging
 BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
