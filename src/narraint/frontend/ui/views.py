@@ -19,9 +19,10 @@ from sqlalchemy.exc import OperationalError
 
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, PredicationRating, \
-    TagInvertedIndex, SubstitutionGroupRating, EntityKeywords, DrugDiseaseTrialPhase, DatabaseUpdate
-from narraint.config import REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR
+from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
+    DatabaseUpdate, Sentence
+from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, \
+    FEEDBACK_PREDICATION_DIR, FEEDBACK_SUBGROUP_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -848,18 +849,43 @@ def post_feedback(request):
     if data and data.keys() & {"query", "rating", "userid", "predicationids"}:
         try:
             time_start = datetime.now()
-            predication_ids = data["predicationids"]
-            query = data["query"]
+            predication_ids = list([int(d) for d in data["predicationids"].split(',')])
+            query_str = data["query"]
             rating = data["rating"]
             userid = data["userid"]
 
+            # we need to find the predication info and sentence info that belongs
+            # to this user rating. Both information must be queried from DB
             session = SessionExtended.get()
-            for pred_id in predication_ids.split(','):
-                PredicationRating.insert_user_rating(session, userid, query, int(pred_id), rating)
+            db_query = session.query(Predication, Sentence)
+            db_query = db_query.filter(Predication.id.in_(predication_ids))
+            db_query = db_query.filter(Sentence.id == Predication.sentence_id)
+            result = []
+            for res in db_query:
+                result.append(dict(document_id=res.Predication.document_id,
+                                   document_collection=res.Predication.document_collection,
+                                   rating=rating,
+                                   user_id=userid,
+                                   query=query_str,
+                                   subject_id=res.Predication.subject_id,
+                                   subject_type=res.Predication.subject_type,
+                                   subject_str=res.Predication.subject_str,
+                                   predicate=res.Predication.predicate,
+                                   relation=res.Predication.relation,
+                                   object_id=res.Predication.object_id,
+                                   object_type=res.Predication.object_type,
+                                   object_str=res.Predication.object_str,
+                                   sentence=res.Sentence.text))
 
-            logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating}"')
+            # create a filename for this rating
+            timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
+            rating_filename = os.path.join(FEEDBACK_PREDICATION_DIR, f'predication_{userid}_{timestamp}.json')
+            with open(rating_filename, 'wt') as f:
+                json.dump(result, f, sort_keys=True, indent=4)
+
+            logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating} (stored in {rating_filename})"')
             try:
-                View.instance().query_logger.write_rating(query, userid, predication_ids)
+                View.instance().query_logger.write_rating(query_str, userid, predication_ids)
             except IOError:
                 logging.debug('Could not write rating log file')
             View.instance().query_logger.write_api_call(True, "get_feedback", str(request),
@@ -892,11 +918,19 @@ def post_subgroup_feedback(request):
             rating = data["rating"]
             userid = data["userid"]
 
-            session = SessionExtended.get()
+            result = dict(variable_name=variable_name,
+                          entity_name=entity_name,
+                          entity_id=entity_id,
+                          entity_type=entity_type,
+                          query=query,
+                          user_id=userid,
+                          rating=rating)
 
-            SubstitutionGroupRating.insert_sub_group_user_rating(
-                session, userid, query, variable_name, entity_name, entity_id,
-                entity_type, rating)
+            # create a filename for this rating
+            timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
+            rating_filename = os.path.join(FEEDBACK_SUBGROUP_DIR, f'subgroup_{userid}_{timestamp}.json')
+            with open(rating_filename, 'wt') as f:
+                json.dump(result, f, sort_keys=True, indent=4)
 
             logging.info(f'User "{userid}" has rated "{variable_name}":'
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
@@ -1068,7 +1102,7 @@ def post_report(request):
         req_data = json.loads(request.body.decode("utf-8"))
         report_description = req_data.get("description", "")
         report_img_64 = req_data.get("img64", "")
-        report_path = os.path.join(REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
+        report_path = os.path.join(FEEDBACK_REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)
