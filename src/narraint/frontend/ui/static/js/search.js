@@ -257,7 +257,6 @@ function clearQueryBuilder() {
 function split(val) {
     // split string by space but do not split spaces within brackets
     // remove all leading and closing brackets from splits
-    //console.log(val + " converted to " + termsCleaned);
     return val.match(/\\?.|^$/g).reduce((p, c) => {
         if (c === '"') {
             p.quote ^= 1;
@@ -354,7 +353,7 @@ async function openFeedback() {
     $("#feedback_button").addClass("disabled")
     await new Promise(r => setTimeout(r, 10));
     const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0})
+    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging:false})
 
     const base64image = canvas.toDataURL("image/png");
     let screenshot = $("#screenshot")
@@ -381,11 +380,9 @@ async function openFeedback() {
     })
     let ctx = screenshotCanvas[0].getContext('2d')
 
-
     function draw(e) {
-
-        console.log("draw")
-        if (e.buttons !== 1) return;
+        if (e.buttons !== 1)
+            return;
 
         ctx.beginPath();
 
@@ -401,7 +398,6 @@ async function openFeedback() {
     }
 
     function setPosition(e) {
-        console.log("setposition")
         let rect = e.target.getBoundingClientRect();
         pos.x = (e.clientX - rect.left) * canvas.width / imgrect.width;
         pos.y = (e.clientY - rect.top) * canvas.height / imgrect.height;
@@ -887,8 +883,6 @@ function adjustSelectedPage(parameters) {
  * @param parameters {{}}
  */
 function showResults(response, parameters) {
-    console.log(response);
-
     // Clear DIVs
     let form = $('#graph-patterns');
     form.empty();
@@ -1659,13 +1653,10 @@ function queryAndBuildConceptTree() {
 
 function createTreeDataFromQueryResult(inputTree) {
     let outputTree = []
-    //console.log(inputTree)
     for (let node of inputTree) {
-        //console.log(node)
         let out_node = [];
         let name = node["name"]
         if ("children" in node) {
-            //console.log(node["children"])
             if ("children" in node["children"][0]) {
                 out_node["children"] = createTreeDataFromQueryResult(node["children"])
             } else {
