@@ -410,17 +410,23 @@ async function openFeedback() {
 
 function closeFeedback(send = false) {
     if (send) {
-        let combine_canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1920;
+        let combineCanvas = document.createElement("canvas");
         let dim = document.getElementById('screenshotCanvas');
-        combine_canvas.width = dim.width;
-        combine_canvas.height = dim.height;
-        let ctx = combine_canvas.getContext('2d')
-        ctx.drawImage(document.getElementById('screenshot'), 0, 0)
-        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0)
+        // resize if the screenwidth is larger than 1920px
+        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH: dim.width;
+        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width): dim.height;
+
+        combineCanvas.width = targetWidth;
+        combineCanvas.height = targetHeight;
+
+        let ctx = combineCanvas.getContext('2d')
+        ctx.drawImage(document.getElementById('screenshot'), 0, 0, targetWidth, targetHeight);
+        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0, targetWidth, targetHeight);
 
         const params = {
             description: $("#feedbackText").val(),
-            img64: combine_canvas.toDataURL("image/png")
+            img64: combineCanvas.toDataURL("image/png")
         };
         const options = {
             method: 'POST',

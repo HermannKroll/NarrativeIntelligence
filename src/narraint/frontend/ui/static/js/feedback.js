@@ -86,19 +86,24 @@ async function closeFeedback(send = false) {
         return;
     }
 
-    const combine_canvas = document.createElement("canvas");
+    const combineCanvas = document.createElement("canvas");
     const drawCanvas = document.getElementById("screenshotCanvas");
     const screenshot = document.getElementById("screenshot");
     const textArea = document.getElementById("feedbackText");
-    combine_canvas.width = drawCanvas.width;
-    combine_canvas.height = drawCanvas.height;
-    let ctx = combine_canvas.getContext('2d')
-    ctx.drawImage(screenshot, 0, 0)
-    ctx.drawImage(drawCanvas, 0, 0)
+    const MAX_WIDTH = 1920;
+    // resize if the screenwidth is larger than 1920px
+    const targetWidth = (drawCanvas.width > MAX_WIDTH) ? MAX_WIDTH: drawCanvas.width;
+    const targetHeight = (drawCanvas.width > MAX_WIDTH) ? drawCanvas.height * (MAX_WIDTH / drawCanvas.width): drawCanvas.height;
+
+    combineCanvas.width = targetWidth;
+    combineCanvas.height = targetHeight;
+    let ctx = combineCanvas.getContext('2d')
+    ctx.drawImage(screenshot, 0, 0, targetWidth, targetHeight)
+    ctx.drawImage(drawCanvas, 0, 0, targetWidth, targetHeight)
 
     const params = {
         description: textArea.value,
-        img64: combine_canvas.toDataURL("image/png")
+        img64: combineCanvas.toDataURL("image/png")
     };
     const options = {
         method: 'POST',
