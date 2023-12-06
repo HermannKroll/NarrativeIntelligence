@@ -1102,7 +1102,7 @@ def post_report(request):
         req_data = json.loads(request.body.decode("utf-8"))
         report_description = req_data.get("description", "")
         report_img_64 = req_data.get("img64", "")
-        report_path = os.path.join(FEEDBACK_REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H:%M:%S}")
+        report_path = os.path.join(FEEDBACK_REPORT_DIR, f"{datetime.now():%Y-%m-%d_%H-%M-%S}")
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)
