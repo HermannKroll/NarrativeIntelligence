@@ -120,10 +120,8 @@ CREATE USER servicero WITH PASSWORD 'EXAMPLE_PW';
 Now grant all required rights.
 ```
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO servicero;
-GRANT INSERT ON TABLE public.PREDICATION_RATING TO servicero;
-GRANT INSERT ON TABLE public.SUBSTITUTION_GROUP_RATING TO servicero;
 ```
-Ratings must be inserted. For all other tables, read access is sufficient for the service to run. 
+Ratings are not stored in DB anymore. They will be stored in a dedicated directory (feedback).
 
 ### Backup the Database
 The database can be backuped via the following command:
@@ -521,6 +519,14 @@ Finally, edit the database connection in ``backend.json``:
 }
 ```
 
+## Create database schema/model
+Usually, the Object-Relational Mapper (SQLAlchemy) will create the database tables if a session is created.
+However, if you just need to create the data model + tables without doing anything, you can execute the following script:
+
+```
+python src/narraint/backend/create_database.py
+```
+
 ## Update Service Reverse Indexes
 As soon as the database is updated, the service requires an update of tables for reverse indexes and metadata. 
 
@@ -681,6 +687,24 @@ Run:
 python src/narraint/build_all_indexes.py
 ```
 Indexes should now be up-to-date.
+
+## Data Dummy Generation
+We support an option to create artificial data for test purposes. 
+Do not run the script on your productive db.
+Your user must have privileges for the DB (see step before).
+
+```
+python src/narraint/dummy/generate_dummy_data.py DOCS
+```
+
+**DOCS** is an integer about how many documents + data should be generated.
+The script will generate:
+- documents
+- tags
+- sentences
+- predications
+
+plus rebuild the inverted indexes for retrieval.
 
 
 # Development

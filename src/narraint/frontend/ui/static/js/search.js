@@ -257,7 +257,6 @@ function clearQueryBuilder() {
 function split(val) {
     // split string by space but do not split spaces within brackets
     // remove all leading and closing brackets from splits
-    //console.log(val + " converted to " + termsCleaned);
     return val.match(/\\?.|^$/g).reduce((p, c) => {
         if (c === '"') {
             p.quote ^= 1;
@@ -354,7 +353,7 @@ async function openFeedback() {
     $("#feedback_button").addClass("disabled")
     await new Promise(r => setTimeout(r, 10));
     const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0})
+    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging:false})
 
     const base64image = canvas.toDataURL("image/png");
     let screenshot = $("#screenshot")
@@ -381,11 +380,9 @@ async function openFeedback() {
     })
     let ctx = screenshotCanvas[0].getContext('2d')
 
-
     function draw(e) {
-
-        console.log("draw")
-        if (e.buttons !== 1) return;
+        if (e.buttons !== 1)
+            return;
 
         ctx.beginPath();
 
@@ -401,7 +398,6 @@ async function openFeedback() {
     }
 
     function setPosition(e) {
-        console.log("setposition")
         let rect = e.target.getBoundingClientRect();
         pos.x = (e.clientX - rect.left) * canvas.width / imgrect.width;
         pos.y = (e.clientY - rect.top) * canvas.height / imgrect.height;
@@ -410,17 +406,23 @@ async function openFeedback() {
 
 function closeFeedback(send = false) {
     if (send) {
-        let combine_canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1920;
+        let combineCanvas = document.createElement("canvas");
         let dim = document.getElementById('screenshotCanvas');
-        combine_canvas.width = dim.width;
-        combine_canvas.height = dim.height;
-        let ctx = combine_canvas.getContext('2d')
-        ctx.drawImage(document.getElementById('screenshot'), 0, 0)
-        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0)
+        // resize if the screenwidth is larger than 1920px
+        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH: dim.width;
+        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width): dim.height;
+
+        combineCanvas.width = targetWidth;
+        combineCanvas.height = targetHeight;
+
+        let ctx = combineCanvas.getContext('2d')
+        ctx.drawImage(document.getElementById('screenshot'), 0, 0, targetWidth, targetHeight);
+        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0, targetWidth, targetHeight);
 
         const params = {
             description: $("#feedbackText").val(),
-            img64: combine_canvas.toDataURL("image/png")
+            img64: combineCanvas.toDataURL("image/png")
         };
         const options = {
             method: 'POST',
@@ -881,8 +883,6 @@ function adjustSelectedPage(parameters) {
  * @param parameters {{}}
  */
 function showResults(response, parameters) {
-    console.log(response);
-
     // Clear DIVs
     let form = $('#graph-patterns');
     form.empty();
@@ -1653,13 +1653,10 @@ function queryAndBuildConceptTree() {
 
 function createTreeDataFromQueryResult(inputTree) {
     let outputTree = []
-    //console.log(inputTree)
     for (let node of inputTree) {
-        //console.log(node)
         let out_node = [];
         let name = node["name"]
         if ("children" in node) {
-            //console.log(node["children"])
             if ("children" in node["children"][0]) {
                 out_node["children"] = createTreeDataFromQueryResult(node["children"])
             } else {

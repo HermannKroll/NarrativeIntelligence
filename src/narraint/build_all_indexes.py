@@ -2,6 +2,7 @@ import json
 import logging
 from argparse import ArgumentParser
 
+from narraint.backend.util import get_db_connection_name
 from narraint.config import BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
@@ -53,15 +54,8 @@ def main():
     logging.info('=' * 60)
     logging.info('=' * 60)
     logging.info('Building narrative service indexes...')
-    with open(BACKEND_CONFIG) as f:
-        config = json.load(f)
-    print('Some indexes rely on the tag / predication table of the database...')
-    is_sqlite = False or ("use_SQLite" in config and config["use_SQLite"])
-    if is_sqlite:
-        database_name = config["SQLite_path"]
-    else:
-        database_name = config["POSTGRES_DB"]
-    print(f'Your current database is: {database_name}')
+    database_name = get_db_connection_name()
+    logging.info(f'Your current database is: {database_name}')
 
     if args.force:
         user_input = 'y'

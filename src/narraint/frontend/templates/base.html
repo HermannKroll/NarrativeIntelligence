@@ -116,7 +116,6 @@
     fetch(database_update_url)
         .then(response => response.json())
         .then(result => {
-            console.log(result);
             let dbdate = result["last_update"];
             console.log("Last DB update date: " + dbdate);
             document.getElementById("db_update").innerText = "Last updated: " + dbdate;
