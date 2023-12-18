@@ -704,7 +704,10 @@ The script will generate:
 - sentences
 - predications
 
-plus rebuild the inverted indexes for retrieval.
+The argument **--incremental** will only add data incrementally and does not delete the collection before.
+```
+python src/narraint/dummy/generate_dummy_data.py DOCS --incremental
+```
 
 
 # Development
