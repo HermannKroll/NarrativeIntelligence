@@ -9,6 +9,11 @@
     <link href="{% static 'css/../../static/css/../../static/css/libraries/bootstrap.min.css' %}"
           rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        body {
+            --bs-font-sans-serif: "Source Sans Pro", sans-serif;
+        }
+    </style>
     {% block css %}{% endblock %}
 
     <title>{% block title %}{% endblock %}</title>
