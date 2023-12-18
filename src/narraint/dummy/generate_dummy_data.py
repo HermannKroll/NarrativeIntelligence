@@ -8,8 +8,6 @@ from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.delete_collection import delete_document_collection_from_database_enhanced
 from narraint.backend.util import get_db_connection_name
-from narraint.queryengine.index.compute_reverse_index_predication import denormalize_predication_table
-from narraint.queryengine.index.compute_reverse_index_tag import compute_inverted_index_for_tags
 
 NUMBER_OF_ENTITIES = 100000
 NUMBER_OF_ENTITY_TYPES = 10
@@ -36,7 +34,7 @@ def get_random_string(min_length: int, max_length: int):
     return result_str
 
 
-def generate_dummy_db_data(number_of_documents: int, collection: str):
+def generate_dummy_db_data(number_of_documents: int, collection: str, incremental: bool):
     if not number_of_documents:
         raise ValueError('Number of documents must be > 0')
 
@@ -46,8 +44,15 @@ def generate_dummy_db_data(number_of_documents: int, collection: str):
     tag_values = []
     predication_values = []
     sentence_values = []
-    sentence_id = 0
 
+    sentence_id = Sentence.query_highest_sentence_id(session) + 1
+    if incremental:
+        doc_offset = Document.query_highest_document_id(session, document_collection=collection) + 1
+    else:
+        doc_offset = 0
+
+    logging.info(f'Next sentence id is: {sentence_id}')
+    logging.info(f'Next document id is: {doc_offset}')
     logging.info('-' * 60)
     logging.info('-' * 60)
     logging.info('Beginning generation phase')
@@ -55,7 +60,7 @@ def generate_dummy_db_data(number_of_documents: int, collection: str):
     progress.start_time()
     for doc_idx in range(0, number_of_documents):
         progress.print_progress(doc_idx)
-        document_values.append(dict(id=doc_idx,
+        document_values.append(dict(id=doc_offset + doc_idx,
                                     collection=collection,
                                     title=get_random_string(20, 50),
                                     abstract=get_random_string(300, 500)))
@@ -117,6 +122,7 @@ def generate_dummy_db_data(number_of_documents: int, collection: str):
             predication_values.clear()
 
     # Insert Remaining data
+    print()
     logging.info(f'Inserting {len(document_values)} documents /'
                  f' {len(tag_values)} tags /'
                  f' {len(sentence_values)} sentences /'
@@ -132,16 +138,6 @@ def generate_dummy_db_data(number_of_documents: int, collection: str):
     logging.info('-' * 60)
 
 
-    # rebuild inverted indexes
-    logging.info('-' * 60)
-    logging.info('-' * 60)
-    logging.info('Recreating inverted service indexes for retrieval')
-    logging.info('-' * 60)
-    logging.info('-' * 60)
-    compute_inverted_index_for_tags()
-    denormalize_predication_table()
-
-
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
@@ -149,34 +145,38 @@ def main():
 
     parser = ArgumentParser(description="Generate dummy data for the DB for test purposes")
     parser.add_argument('number_of_documents', type=int, help="Number of documents that should be generated")
+    parser.add_argument('--incremental', action="store_true", help="Don't delete data and just add incremental data")
     args = parser.parse_args()
 
-    logging.info('=' * 70)
-    logging.info('=' * 70)
-    logging.info('=' * 70)
-    logging.info('========== Be careful right now - The script will delete DB data ===========')
-    logging.info('=' * 70)
-    logging.info('=' * 70)
-    logging.info('=' * 70)
-    database_name = get_db_connection_name()
-    logging.info(f'Your current database is: {database_name}')
-
     document_collection = "DUMMY_GENERATOR"
-    session = SessionExtended.get()
-    doc_count = session.query(Document.id.distinct()).filter(Document.collection == document_collection).count()
-    logging.info('{} documents found in collection {}'.format(doc_count, document_collection))
-    print('{} documents are found'.format(doc_count))
-    print(f'Are you really want to delete documents in collection {document_collection}? '
-          f'This will also delete all corresponding tags (Tag), '
-          'tagging information (doc_taggedb_by), facts (Predication) and extraction information (doc_processed_by_ie)')
-    answer = input('Enter y(yes) to proceed the deletion...')
-    if (answer and (answer.lower() == 'y' or answer.lower() == 'yes')):
-        delete_document_collection_from_database_enhanced(document_collection)
-        logging.info('Finished')
-    else:
-        print('Canceled')
+    if not args.incremental:
+        logging.info('=' * 70)
+        logging.info('=' * 70)
+        logging.info('=' * 70)
+        logging.info('========== Be careful right now - The script will delete DB data ===========')
+        logging.info('=' * 70)
+        logging.info('=' * 70)
+        logging.info('=' * 70)
+        database_name = get_db_connection_name()
+        logging.info(f'Your current database is: {database_name}')
 
-    generate_dummy_db_data(int(args.number_of_documents), document_collection)
+        session = SessionExtended.get()
+        doc_count = session.query(Document.id.distinct()).filter(Document.collection == document_collection).count()
+        logging.info('{} documents found in collection {}'.format(doc_count, document_collection))
+        print('{} documents are found'.format(doc_count))
+        print(f'Are you really want to delete documents in collection {document_collection}? '
+              f'This will also delete all corresponding tags (Tag), '
+              'tagging information (doc_taggedb_by), facts (Predication) and extraction information (doc_processed_by_ie)')
+        answer = input('Enter y(yes) to proceed the deletion...')
+        if (answer and (answer.lower() == 'y' or answer.lower() == 'yes')):
+            delete_document_collection_from_database_enhanced(document_collection)
+            logging.info('Finished')
+        else:
+            print('Canceled')
+    else:
+        logging.info(f'Adding incremental data to collection: {document_collection}')
+
+    generate_dummy_db_data(int(args.number_of_documents), document_collection, args.incremental)
 
 
 if __name__ == "__main__":
