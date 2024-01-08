@@ -1,5 +1,5 @@
 #!/bin/bash
-PREDICATION_MINIMUM_UPDATE_ID_FILE="/home/kroll/NarrativeIntelligence/scripts/highest_predication_id.txt"
+PREDICATION_MINIMUM_UPDATE_ID_FILE=/home/"$USER"/NarrativeIntelligence/scripts/highest_predication_id.txt
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
 echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
@@ -20,9 +20,9 @@ python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
 
 # Remove old cache
-rm -rf /home/kroll/NarrativeIntelligence/cache_old
+rm -rf ~/NarrativeIntelligence/cache_old
 # Create a backup of the current cache
-mv /home/kroll/NarrativeIntelligence/cache /home/kroll/NarrativeIntelligence/cache_old
+mv ~/NarrativeIntelligence/cache ~/NarrativeIntelligence/cache_old
 
 # Execute common queries
-python3 ~/NarrativeIntelligence/src/narraint/frontend/ui/execute_common_queries.py
+# python3 ~/NarrativeIntelligence/src/narraint/frontend/ui/execute_common_queries.py
