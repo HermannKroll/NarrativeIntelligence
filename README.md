@@ -600,16 +600,16 @@ python ~/mining/NarrativeIntelligence/src/narraint/queryengine/update_database_u
 
 ## Update Automation Script
 We wrote a script to automate the whole service update procedure. 
-The script can be found in [scripts/update_service_data.bs](scripts/update_service_data.bs).
+The script can be found in [scripts/update_service_data.sh](scripts/update_service_data.sh).
 
 Make sure that +x is set for the script:
 ```
-chmod +x scripts/update_service_data.bs
+chmod +x scripts/update_service_data.sh
 ```
 
 You may have to open the script and adjusts paths (e.g., where to store the latest predication id).
 ```
-nano scripts/update_service_data.bsh
+nano scripts/update_service_data.sh
 ```
 
 **Make sure** that the file $PREDICATION_MINIMUM_UPDATE_ID_FILE exists and stores the latest predication id.
@@ -618,7 +618,7 @@ nano scripts/update_service_data.bsh
 Make sure that the virtual environment narraint is activated and that your Python path is configured properly. 
 Then run the bash script. This may take a while.
 ```
-bash scripts/update_service_data.bs
+bash scripts/update_service_data.sh
 ```
 
 # Periodic Updates
