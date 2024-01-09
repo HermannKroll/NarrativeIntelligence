@@ -622,6 +622,25 @@ bash scripts/update_service_data.sh
 ```
 
 # Periodic Updates
+There are some indexes and tables which only need updates in once in a while. 
+
+
+## Automation
+We build pipelines to execute all necessary scripts (see details below). 
+
+Update once a month: [update_every_month.sh](scripts%2Fupdate_every_month.sh)
+```
+bash scripts/update_every_month.sh
+```
+
+Update every six months: [updates_every_6_months.sh](scripts%2Fupdates_every_6_months.sh)
+```
+bash scripts/updates_every_6_months.sh
+```
+
+
+
+## Detailed Scripts:
 There are some indexes that do not require a rebuilding every time. 
 They are based on statistics of the database.
 However, it might be a good idea to update them in periodic times.
