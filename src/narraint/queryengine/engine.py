@@ -413,6 +413,7 @@ class QueryEngine:
         fp2prov_mappings = {}
         fp2var_prov_mappings = {}
         logging.debug(f'Executing query {graph_query}...')
+        found_document_collections = set()
         for idx, fact_pattern in enumerate(graph_query):
             prov_mappings, var2subs, v2prov = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern,
                                                                                                 document_collection_filter=document_collection_filter)
@@ -427,18 +428,29 @@ class QueryEngine:
 
             fp2var_prov_mappings[idx] = v2prov
             fp2prov_mappings[idx] = prov_mappings
+
             # check that facts are matched within the same documents
-            doc_ids_for_fp = set()
-            doc_col_for_fp = set()
+            doc_ids_for_fp = dict()
+            # init all already known collection with the empty document id set
+            for d_col in found_document_collections:
+                doc_ids_for_fp[d_col] = set()
+
+            # Now retrieve all found document ids via the provenance mappings
             for pm in prov_mappings:
                 for d_col, docids2provids in pm.items():
-                    doc_col_for_fp.add(d_col)
-                    doc_ids_for_fp.update(docids2provids.keys())
-            for d_col in doc_col_for_fp:
+                    found_document_collections.add(d_col)
+
+                    if d_col not in doc_ids_for_fp:
+                        doc_ids_for_fp[d_col] = set()
+
+                    doc_ids_for_fp[d_col].update(docids2provids.keys())
+
+            # Next compute the intersection of document ids with prior result sets
+            for d_col in found_document_collections:
                 if idx == 0:
-                    collection2valid_doc_ids[d_col].update(doc_ids_for_fp)
+                    collection2valid_doc_ids[d_col].update(doc_ids_for_fp[d_col])
                 else:
-                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp)
+                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp[d_col])
 
             # fact pattern has a variable
             if len(var2subs) > 0:
