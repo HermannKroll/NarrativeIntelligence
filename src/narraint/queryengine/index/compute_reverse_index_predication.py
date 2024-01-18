@@ -113,6 +113,7 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
         logging.info(f'Only considering predication ids above {predication_id_min}')
         pred_count = pred_count.filter(Predication.id >= predication_id_min)
     pred_count = pred_count.count()
+    logging.info(f'{pred_count} predication were found')
 
     start_time = datetime.now()
     # "is not None" instead of "!=" None" DOES NOT WORK!
@@ -125,9 +126,12 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
     prov_query = prov_query.filter(Predication.relation != None)
 
     if consider_metadata:
+        logging.info('Only documents are considered that have metadata')
         prov_query = prov_query.join(DocumentMetadataService,
                                      and_(Predication.document_id == DocumentMetadataService.document_id,
                                           Predication.document_collection == DocumentMetadataService.document_collection))
+    else:
+        logging.info('All documents are considered')
     if predication_id_min:
         prov_query = prov_query.filter(Predication.id >= predication_id_min)
 
@@ -224,9 +228,11 @@ def main():
                         help="only predication ids above this will be considered")
     parser.add_argument("--low-memory", action="store_true", default=False, required=False, help="Use low-memory mode")
     parser.add_argument("--buffer-size", type=int, default=1000, required=False, help="Buffer size for low-memory mode")
+    parser.add_argument("--ignore-metadata", action="store_true", default=False, required=False, help="By default only documents are indexed that have metadata")
     args = parser.parse_args()
 
-    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory, buffer_size=args.buffer_size)
+    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory, buffer_size=args.buffer_size,
+                                  consider_metadata=not args.ignore_metadata)
 
 
 if __name__ == "__main__":
