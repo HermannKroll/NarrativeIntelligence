@@ -389,13 +389,15 @@ class QueryEngine:
         return query_results
 
     @staticmethod
-    def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
+    def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None,
+                                     load_document_metadata=True) \
             -> List[QueryDocumentResult]:
         """
         Computes a GraphQuery
         The query will automatically be expanded and optimized
         :param graph_query: a graph query object
         :param document_collection_filter: only keep extraction from these document collections
+        :param load_document_metadata: if true metadata will be queried for the retrieved documents
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
@@ -533,9 +535,15 @@ class QueryEngine:
         # No variables are used in the query
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
-                doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+                doc2metadata = {}
+                if load_document_metadata:
+                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                    if load_document_metadata:
+                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                    else:
+                        title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
+                            None, None, None, None
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
@@ -552,7 +560,9 @@ class QueryEngine:
                     sorted_d_ids = sorted_d_ids[:QUERY_DOCUMENT_LIMIT]
                     d_ids = set(sorted_d_ids)
 
-                doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+                doc2metadata = {}
+                if load_document_metadata:
+                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
 
                 doc2substitution = defaultdict(lambda: defaultdict(set))
                 for var_name in collection2valid_subs:
@@ -577,7 +587,12 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                        if load_document_metadata:
+                            title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                        else:
+                            title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
+                                None, None, None, None
+
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
