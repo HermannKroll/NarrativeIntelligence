@@ -46,7 +46,7 @@ if not os.path.isdir(FEEDBACK_SUBGROUP_DIR):
 
 
 # Backend for Tagging
-BACKEND_CONFIG = BACKEND_CONFIG = str(search_config(Path(CONFIG_DIR) / '..', Path('config'), Path('backend.json')))
+BACKEND_CONFIG = str(search_config(Path(CONFIG_DIR) / '..', Path('config'), Path('backend.json')))
 
 # CHEMBL ATC Tree
 CHEMBL_ATC_TREE_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_tree.json")
