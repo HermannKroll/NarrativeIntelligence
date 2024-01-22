@@ -2,6 +2,9 @@
 This module contains constants which point to important directories.
 """
 import os
+from pathlib import Path
+
+from kgextractiontoolbox.config import search_config
 
 GIT_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
 
@@ -43,7 +46,7 @@ if not os.path.isdir(FEEDBACK_SUBGROUP_DIR):
 
 
 # Backend for Tagging
-BACKEND_CONFIG = os.path.join(CONFIG_DIR, "backend.json")
+BACKEND_CONFIG = BACKEND_CONFIG = str(search_config(Path(CONFIG_DIR) / '..', Path('config'), Path('backend.json')))
 
 # CHEMBL ATC Tree
 CHEMBL_ATC_TREE_FILE = os.path.join(RESOURCE_DIR, "chembl_atc_tree.json")
