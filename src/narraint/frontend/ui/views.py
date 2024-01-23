@@ -1318,7 +1318,8 @@ def get_keyword_search_request(request):
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
 
-                json_data = View.instance().keyword2graph.translate_keywords(keywords)
+                possible_queries = View.instance().keyword2graph.translate_keywords(keywords)
+                json_data = [r.to_json_data() for r in possible_queries]
                 # This is the format
                 # json_data = [
                 #     [("Metformin", "treats", "Diabetes Mellitus")],
