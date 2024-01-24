@@ -234,7 +234,8 @@ class Keyword2GraphTranslation:
 
         # Find the associated pattern
         associated_patterns = list([p for p in patterns if p.is_associated()])
-        results.append(associated_patterns[0])
+        if len(associated_patterns) > 0:
+            results.append(associated_patterns[0])
 
         return results
 
