@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from narraint.frontend.entity.query_translation import QueryTranslation
-from narrant.preprocessing.enttypes import PLANT_FAMILY_GENUS
+from narrant.entitylinking.enttypes import PLANT_FAMILY_GENUS
 
 
 class QueryTranslationTestCase(TestCase):

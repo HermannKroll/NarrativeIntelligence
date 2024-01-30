@@ -6,7 +6,7 @@ from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, VAR_TYPE, MES
 from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES, PREDICATE_TYPING, \
     have_entities_correct_order
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
+from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM
 
 
 class QueryOptimizer:

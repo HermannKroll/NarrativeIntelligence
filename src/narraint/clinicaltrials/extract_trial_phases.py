@@ -15,8 +15,8 @@ from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import DrugDiseaseTrialPhase
 from narrant.config import PREPROCESS_CONFIG
-from narrant.preprocessing.pharmacy.disease import DiseaseTagger
-from narrant.preprocessing.pharmacy.drug import DrugTagger
+from narrant.entitylinking.pharmacy.disease import DiseaseTagger
+from narrant.entitylinking.pharmacy.drug import DrugTagger
 
 
 class ClinicalTrialPhaseExtractor:

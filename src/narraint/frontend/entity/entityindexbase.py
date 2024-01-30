@@ -18,7 +18,7 @@ from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.mesh.supplementary import MeSHDBSupplementary
-from narrant.preprocessing.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
+from narrant.entitylinking.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE, TARGET, ORGANISM
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary

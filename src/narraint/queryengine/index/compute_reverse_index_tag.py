@@ -12,7 +12,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, TagInvertedIndex, Predication
 from narraint.config import QUERY_YIELD_PER_K
 from narrant.entity.entityresolver import GeneResolver
-from narrant.preprocessing.enttypes import GENE
+from narrant.entitylinking.enttypes import GENE
 
 
 def insert_data(session, index, predication_id_min):

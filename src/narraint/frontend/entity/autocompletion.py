@@ -7,7 +7,7 @@ import datrie
 
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.preprocessing.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
+from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE, ORGANISM, TARGET, TISSUE, \
     HEALTH_STATUS
 from kgextractiontoolbox.progress import print_progress_with_eta

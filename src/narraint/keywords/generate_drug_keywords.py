@@ -16,7 +16,7 @@ from narraint.config import DRUG_KEYWORD_STOPWORD_LIST
 from narrant.entity.entityresolver import EntityResolver
 
 # used to switch between table access and debugging console logging.infos
-from narrant.preprocessing.enttypes import DRUG
+from narrant.entitylinking.enttypes import DRUG
 
 ACCESS_ENTITY_KEYWORDS_TABLE = True
 

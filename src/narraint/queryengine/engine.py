@@ -16,7 +16,7 @@ from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
-from narrant.preprocessing.enttypes import ALL
+from narrant.entitylinking.enttypes import ALL
 
 QUERY_DOCUMENT_LIMIT = 1500000
 

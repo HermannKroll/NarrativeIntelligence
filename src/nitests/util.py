@@ -2,7 +2,7 @@ import logging
 import os
 import tempfile
 
-import narrant.preprocessing.config as cnf
+import narrant.entitylinking.config as cnf
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.document.document import TaggedEntity
 from narraint.backend.database import SessionExtended
