@@ -1,9 +1,7 @@
-import json
 import logging
 from argparse import ArgumentParser
 
 from narraint.backend.util import get_db_connection_name
-from narraint.config import BACKEND_CONFIG
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -49,7 +47,6 @@ def main():
     parser.add_argument("--skip-mesh", action='store_true', help="Skip the recreation of MeSH Indexes")
     parser.add_argument("--complete", action='store_true', help="Builds a complete Gene and Species Index...")
     args = parser.parse_args()
-
 
     logging.info('=' * 60)
     logging.info('=' * 60)
