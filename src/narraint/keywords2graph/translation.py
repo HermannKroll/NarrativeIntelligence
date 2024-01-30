@@ -9,7 +9,6 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
-from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
 from narrant.entity.entity import Entity
 
@@ -191,7 +190,7 @@ class Keyword2GraphTranslation:
         final_possible_patterns.sort(key=lambda x: x.minimum_support, reverse=True)
         return final_possible_patterns
 
-    def translate_keywords(self, keyword_lists: List[str]) -> [GraphQuery]:
+    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
         # The first step is to transform keywords into entities
         # Then for each set of possible entities the most supported translation is searched
         # Most supported means to have the highest support (be detected in the most documents)
@@ -235,9 +234,10 @@ class Keyword2GraphTranslation:
 
         # Find the associated pattern
         associated_patterns = list([p for p in patterns if p.is_associated()])
-        results.append(associated_patterns[0])
+        if len(associated_patterns) > 0:
+            results.append(associated_patterns[0])
 
-        return [r.to_json_data() for r in results]
+        return results
 
 
 def main():

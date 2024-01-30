@@ -16,7 +16,7 @@ from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
-from narrant.preprocessing.enttypes import ALL
+from narrant.entitylinking.enttypes import ALL
 
 QUERY_DOCUMENT_LIMIT = 1500000
 
@@ -389,13 +389,15 @@ class QueryEngine:
         return query_results
 
     @staticmethod
-    def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
+    def process_query_with_expansion(graph_query: GraphQuery, document_collection_filter: Set[str] = None,
+                                     load_document_metadata=True) \
             -> List[QueryDocumentResult]:
         """
         Computes a GraphQuery
         The query will automatically be expanded and optimized
         :param graph_query: a graph query object
         :param document_collection_filter: only keep extraction from these document collections
+        :param load_document_metadata: if true metadata will be queried for the retrieved documents
         :return: a list of QueryDocumentResults
         """
         start_time = datetime.now()
@@ -413,6 +415,7 @@ class QueryEngine:
         fp2prov_mappings = {}
         fp2var_prov_mappings = {}
         logging.debug(f'Executing query {graph_query}...')
+        found_document_collections = set()
         for idx, fact_pattern in enumerate(graph_query):
             prov_mappings, var2subs, v2prov = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern,
                                                                                                 document_collection_filter=document_collection_filter)
@@ -427,18 +430,29 @@ class QueryEngine:
 
             fp2var_prov_mappings[idx] = v2prov
             fp2prov_mappings[idx] = prov_mappings
+
             # check that facts are matched within the same documents
-            doc_ids_for_fp = set()
-            doc_col_for_fp = set()
+            doc_ids_for_fp = dict()
+            # init all already known collection with the empty document id set
+            for d_col in found_document_collections:
+                doc_ids_for_fp[d_col] = set()
+
+            # Now retrieve all found document ids via the provenance mappings
             for pm in prov_mappings:
                 for d_col, docids2provids in pm.items():
-                    doc_col_for_fp.add(d_col)
-                    doc_ids_for_fp.update(docids2provids.keys())
-            for d_col in doc_col_for_fp:
+                    found_document_collections.add(d_col)
+
+                    if d_col not in doc_ids_for_fp:
+                        doc_ids_for_fp[d_col] = set()
+
+                    doc_ids_for_fp[d_col].update(docids2provids.keys())
+
+            # Next compute the intersection of document ids with prior result sets
+            for d_col in found_document_collections:
                 if idx == 0:
-                    collection2valid_doc_ids[d_col].update(doc_ids_for_fp)
+                    collection2valid_doc_ids[d_col].update(doc_ids_for_fp[d_col])
                 else:
-                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp)
+                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp[d_col])
 
             # fact pattern has a variable
             if len(var2subs) > 0:
@@ -521,9 +535,15 @@ class QueryEngine:
         # No variables are used in the query
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
-                doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+                doc2metadata = {}
+                if load_document_metadata:
+                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                    if load_document_metadata:
+                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                    else:
+                        title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
+                            None, None, None, None
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
@@ -540,7 +560,9 @@ class QueryEngine:
                     sorted_d_ids = sorted_d_ids[:QUERY_DOCUMENT_LIMIT]
                     d_ids = set(sorted_d_ids)
 
-                doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+                doc2metadata = {}
+                if load_document_metadata:
+                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
 
                 doc2substitution = defaultdict(lambda: defaultdict(set))
                 for var_name in collection2valid_subs:
@@ -565,7 +587,12 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                        if load_document_metadata:
+                            title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
+                        else:
+                            title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
+                                None, None, None, None
+
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():

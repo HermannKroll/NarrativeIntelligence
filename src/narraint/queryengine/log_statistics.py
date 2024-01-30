@@ -4,12 +4,13 @@ from datetime import datetime
 
 from narraint.config import LOG_DIR
 
-narrative_path = os.path.join(LOG_DIR + "/queries")
-overview_path = os.path.join(LOG_DIR + "/drug_ov_search")
+narrative_path = os.path.join(LOG_DIR, "queries")
+overview_path = os.path.join(LOG_DIR, "drug_ov_search")
+suggestion_path = os.path.join(LOG_DIR, "drug_suggestion")
 
 
 def get_date_of_today():
-    return datetime.now().date();
+    return datetime.now().date()
 
 
 def get_json_of_log(path):
@@ -34,13 +35,11 @@ def get_json_of_log(path):
 
 
 def get_list_of_parameter(json_object, parameter):
-    today = datetime.now().date()
     parameter_list = []
     for i in json_object:
         if i.__contains__(parameter) and not i[parameter] in parameter_list:
             parameter_list.append(i[parameter])
     parameter_list = sorted(parameter_list)
-    # print(parameter_list)
     return parameter_list
 
 
@@ -137,6 +136,22 @@ def get_graph_input(json_object_narrative, json_object_overview):
     return result_narrative, result_overview
 
 
+def get_drug_suggestions():
+    raw_suggestions = get_json_of_log(suggestion_path)
+    suggestions = dict()
+
+    # clean suggestions and count duplicates
+    for s in raw_suggestions:
+        drug = s["drug"].lower().strip()
+        if drug not in suggestions:
+            suggestions[drug] = 0
+        suggestions[drug] += 1
+
+    # sort by number of suggestions and, if it is not possible, by name
+    suggestions = sorted(suggestions.items(), key=lambda x: (-x[1], x[0]))
+    return suggestions
+
+
 def create_dictionary_of_logs():
     narrative_json = get_json_of_log(narrative_path)
     overview_json = get_json_of_log(overview_path)
@@ -149,6 +164,7 @@ def create_dictionary_of_logs():
     result_narrative['amountQueries'], result_overview['amountQueries'] = get_all_amounts_of_occurrences(narrative_json,
                                                                                                          overview_json)
     result_narrative['graphInput'], result_overview['graphInput'] = get_graph_input(narrative_json, overview_json)
+    result_overview['suggestions'] = get_drug_suggestions()
     result['narrative'] = result_narrative
     result['overview'] = result_overview
     result['today'] = get_date_of_today()

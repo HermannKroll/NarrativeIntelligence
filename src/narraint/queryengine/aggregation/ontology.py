@@ -5,7 +5,7 @@ from narraint.queryengine.aggregation.substitution import ResultAggregationBySub
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList, QueryResultAggregate, \
     QueryResultAggregateList, QueryEntitySubstitution
 from narrant.entity.meshontology import MeSHOntology
-from narrant.preprocessing.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
+from narrant.entitylinking.enttypes import DISEASE, CHEMICAL, DOSAGE_FORM, METHOD, LAB_METHOD
 
 MISCELLANEOUS_PREFIX = "Miscellaneous"
 

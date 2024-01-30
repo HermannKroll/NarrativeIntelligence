@@ -8,7 +8,7 @@ from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS, DRUG, TARGET
+from narrant.entitylinking.enttypes import ALL, DOSAGE_FORM, GENE, SPECIES, LAB_METHOD, PLANT_FAMILY_GENUS, DRUG, TARGET
 
 
 class QueryTranslation:

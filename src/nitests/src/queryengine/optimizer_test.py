@@ -4,7 +4,7 @@ from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import ENTITY_TYPE_VARIABLE, MESH_ONTOLOGY
 from narrant.entity.entity import Entity
-from narrant.preprocessing.enttypes import DISEASE, DRUG, GENE, METHOD, DOSAGE_FORM
+from narrant.entitylinking.enttypes import DISEASE, DRUG, GENE, METHOD, DOSAGE_FORM
 
 
 class QueryOptimizerTestCase(TestCase):

@@ -167,7 +167,7 @@ class EntityExplanationTestCase(TestCase):
         for n in cyp3a4_names:
             self.assertIn(n, terms)
 
-        mtor_names = ['MTOR', 'mechanistic target of rapamycin', 'SKS', 'FRAP', 'FRAP1', 'FRAP2', 'RAFT1', 'RAPT1']
+        mtor_names = ['MTOR', 'mechanistic Target of rapamycin', 'SKS', 'FRAP', 'FRAP1', 'FRAP2', 'RAFT1', 'RAPT1']
         terms = [t for t in self.entity_explainer.explain_entity_str('MTOR', truncate_at_k=1000)]
         for n in mtor_names:
             self.assertIn(n, terms)
