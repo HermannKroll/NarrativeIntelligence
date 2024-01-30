@@ -1341,21 +1341,6 @@ def get_keyword_search_request(request):
     return HttpResponse(status=500)
 
 
-class NewsView(TemplateView):
-    template_name = "ui/news.html"
-
-    def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(NewsView.template_name)
-        return super().get(request, *args, **kwargs)
-
-
-def get_news_data(request):
-    person = request.GET.get("person", "")
-    with open(os.path.join(RESOURCE_DIR, f"news/summarized_{person}.json")) as f:
-        data = json.load(f)
-    return JsonResponse(data=data)
-
-
 logging.info('Initialize view')
 View.instance()
 
