@@ -16,6 +16,7 @@ function load_data(data) {
     load_top_querystring(overview["topQueries"], ov_prefix);
     load_performed_queries(overview["amountQueries"], ov_prefix);
     load_usage_graph(overview['graphInput'], "performed queries",ov_prefix);
+    loadSuggestedDrugs(overview['suggestions'])
 }
 
 function load_usage_graph(data, y_label, prefix) {
@@ -123,8 +124,8 @@ function load_performed_queries(data, prefix) {
         let tableLine = document.createElement("tr");
         let queryName = document.createElement("td");
         let queryAmount = document.createElement("td");
-        queryName.innerHTML = time_map[obj];
-        queryAmount.innerHTML = data[obj];
+        queryName.innerText = time_map[obj];
+        queryAmount.innerText = data[obj];
         tableLine.appendChild(queryName);
         tableLine.appendChild(queryAmount);
         tbody.appendChild(tableLine);
@@ -173,11 +174,25 @@ function iterateThroughData(data, time, element) {
         let tableLine = document.createElement("tr");
         let queryName = document.createElement("td");
         let queryAmount = document.createElement("td");
-        queryName.innerHTML = obj;
-        queryAmount.innerHTML = data[time][obj];
+        queryName.innerText = obj;
+        queryAmount.innerText = data[time][obj];
         tableLine.appendChild(queryName);
         tableLine.appendChild(queryAmount);
         element.appendChild(tableLine);
+    }
+}
+
+function loadSuggestedDrugs(suggestions) {
+    const tableBody = document.getElementById("overview_table_suggested_drugs");
+    for (const i in suggestions) {
+        const tableRow = document.createElement("tr");
+        const drugName = document.createElement("td");
+        const drugCount = document.createElement("td");
+        drugName.innerText = suggestions[i][0];
+        drugCount.innerText = suggestions[i][1];
+        tableRow.appendChild(drugName);
+        tableRow.appendChild(drugCount);
+        tableBody.appendChild(tableRow);
     }
 }
 
