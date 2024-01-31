@@ -58,7 +58,7 @@ def compute_inverted_index_for_terms():
         progress.done()
         logging.info('Beginning insert into term_inverted_index table...')
         insert_list = []
-        progress = Progress(total=len(term_index_local), print_every=100, text="Inserting data")
+        progress = Progress(total=len(term_index_local), print_every=1, text="Inserting data")
         progress.start_time()
         for idx, (term, doc_ids) in enumerate(term_index_local.items()):
             progress.print_progress(idx)
