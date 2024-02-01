@@ -15,15 +15,11 @@ from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID
 
 
 def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
-    # Restructure dictionaries
-    # for k in fact_to_doc_ids:
-    #   for v in fact_to_doc_ids[k]:
-    #      fact_to_doc_ids[k][v] = sorted(set(fact_to_doc_ids[k][v]))
 
-    for k in fact_to_prov_ids:
-        for v in fact_to_prov_ids[k]:
-            for w in fact_to_prov_ids[k][v]:
-                fact_to_prov_ids[k][v][w] = set(fact_to_prov_ids[k][v][w])
+    for row_key in fact_to_prov_ids:
+        for doc_collection in fact_to_prov_ids[row_key]:
+            for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
+                fact_to_prov_ids[row_key][doc_collection][docid2prov] = set(fact_to_prov_ids[row_key][doc_collection][docid2prov])
 
     if predication_id_min:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
@@ -41,13 +37,13 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in fact_to_prov_ids:
                 # This works because documents are either new or old (we do not do updates within documents)
-                for doc_collection, provs in json.loads(row.provenance_mapping).items():
-                    for doc_id, predication_ids in provs.items():
-                        doc_id = int(doc_id)
-                        if doc_id in fact_to_prov_ids[row_key][doc_collection]:
-                            fact_to_prov_ids[row_key][doc_collection][doc_id].update(predication_ids)
-                        else:
-                            fact_to_prov_ids[row_key][doc_collection][doc_id] = predication_ids
+                doc_collection = row.document_collection
+                for doc_id, predication_ids in json.loads(row.provenance_mapping).items():
+                    doc_id = int(doc_id)
+                    if doc_id in fact_to_prov_ids[row_key][doc_collection]:
+                        fact_to_prov_ids[row_key][doc_collection][doc_id].update(predication_ids)
+                    else:
+                        fact_to_prov_ids[row_key][doc_collection][doc_id] = predication_ids
 
                 session.delete(row)
                 deleted_rows += 1
@@ -65,28 +61,33 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     logging.info("Compute insert...")
 
     # Converting all sets to lists again
-    for k in fact_to_prov_ids:
-        for v in fact_to_prov_ids[k]:
-            for w in fact_to_prov_ids[k][v]:
-                fact_to_prov_ids[k][v][w] = sorted(set(fact_to_prov_ids[k][v][w]))
+    for row_key in fact_to_prov_ids:
+        for doc_collection in fact_to_prov_ids[row_key]:
+            for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
+                fact_to_prov_ids[row_key][doc_collection][docid2prov] = sorted(set(fact_to_prov_ids[row_key][doc_collection][docid2prov]))
 
     key_count = len(fact_to_prov_ids)
     progress2 = Progress(total=key_count, print_every=100, text="insert values...")
     progress2.start_time()
-    for idx, k in enumerate(fact_to_prov_ids):
-        progress2.print_progress(idx)
-        if idx % BULK_INSERT_AFTER_K == 0:
-            PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
-            insert_list.clear()
-        insert_list.append(dict(
-            subject_id=k[0],
-            subject_type=k[1],
-            relation=k[2],
-            object_id=k[3],
-            object_type=k[4],
-            #     document_ids=json.dumps(fact_to_doc_ids[k]),
-            provenance_mapping=json.dumps(fact_to_prov_ids[k])
-        ))
+    for idx, row_key in enumerate(fact_to_prov_ids):
+        for doc_collection in fact_to_prov_ids[row_key]:
+            progress2.print_progress(idx)
+            if idx % BULK_INSERT_AFTER_K == 0:
+                PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
+                insert_list.clear()
+
+            assert len(fact_to_prov_ids[row_key][doc_collection]) > 0
+
+            insert_list.append(dict(
+                document_collection=doc_collection,
+                subject_id=row_key[0],
+                subject_type=row_key[1],
+                relation=row_key[2],
+                object_id=row_key[3],
+                object_type=row_key[4],
+                support=len(fact_to_prov_ids[row_key][doc_collection]),
+                provenance_mapping=json.dumps(fact_to_prov_ids[row_key][doc_collection])
+            ))
     progress2.done()
 
     PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
@@ -146,7 +147,6 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
 
     insert_list = []
     logging.info("Starting...")
-    # fact_to_doc_ids = defaultdict(lambda: defaultdict(list))
     fact_to_prov_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
 
     progress = Progress(total=pred_count, print_every=1000, text="denormalizing predication...")
@@ -178,10 +178,8 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
             # Hack to support also the Covid 19 collection
             # TODO: not very generic
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
                 buffer[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
                 buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
 
         insert_data(session, buffer, predication_id_min, insert_list)
@@ -202,10 +200,8 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
             # Hack to support also the Covid 19 collection
             # TODO: not very generic
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                #    fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].append(prov.document_id)
                 fact_to_prov_ids[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                #   fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].append(prov.document_id)
                 fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
 
         insert_data(session, fact_to_prov_ids, predication_id_min, insert_list)
