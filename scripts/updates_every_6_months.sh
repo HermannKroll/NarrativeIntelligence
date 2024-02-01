@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Update indexes
-python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py --force
 
 # Generate Drug Overviews
 python3 ~/NarrativeIntelligence/src/narraint/keywords/generate_drug_keywords.py
