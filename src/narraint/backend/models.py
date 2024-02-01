@@ -41,6 +41,20 @@ class TermInvertedIndex(Extended, DatabaseTable):
     document_ids = Column(String, nullable=False)
 
 
+class PredicationInvertedIndex(Extended, DatabaseTable):
+    __tablename__ = "predication_inverted_index"
+
+    id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
+    document_collection = Column(String, nullable=False, index=True)
+    subject_id = Column(String, nullable=False, index=True)
+    subject_type = Column(String, nullable=False, index=True)
+    relation = Column(String, nullable=False, index=True)
+    object_id = Column(String, nullable=False, index=True)
+    object_type = Column(String, nullable=False, index=True)
+    support = Column(Integer, nullable=False)
+    provenance_mapping = Column(String, nullable=False)
+
+
 class Tagger(models.Tagger):
     pass
 
@@ -78,18 +92,6 @@ class DocumentMetadataService(Extended, DatabaseTable):
 
 class Predication(models.Predication):
     pass
-
-
-class PredicationInvertedIndex(Extended, DatabaseTable):
-    __tablename__ = "predication_inverted_index"
-
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
-    subject_id = Column(String, nullable=False, index=True)
-    subject_type = Column(String, nullable=False, index=True)
-    relation = Column(String, nullable=False, index=True)
-    object_id = Column(String, nullable=False, index=True)
-    object_type = Column(String, nullable=False, index=True)
-    provenance_mapping = Column(String, nullable=False)
 
 
 class PredicationToDelete(models.PredicationToDelete):

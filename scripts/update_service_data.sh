@@ -1,5 +1,5 @@
 #!/bin/bash
-PREDICATION_MINIMUM_UPDATE_ID_FILE=/home/"$USER"/NarrativeIntelligence/scripts/highest_predication_id.txt
+PREDICATION_MINIMUM_UPDATE_ID_FILE=/home/"$USER"/db_highest_predication_id.txt
 PREDICATION_MINIMUM_UPDATE_ID=$(<"$PREDICATION_MINIMUM_UPDATE_ID_FILE")
 
 echo "Highest predication id is $PREDICATION_MINIMUM_UPDATE_ID"
@@ -24,9 +24,6 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
-# Not required at the moment
-# python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_term.py
-
 # Export the highest known id
 python3 ~/NarrativeIntelligence/lib/KGExtractionToolbox/src/kgextractiontoolbox/backend/export_highest_predication_id.py $PREDICATION_MINIMUM_UPDATE_ID_FILE
 if [[ $? != 0 ]]; then
@@ -40,11 +37,3 @@ if [[ $? != 0 ]]; then
     echo "Previous script returned exit code != 0 -> Stopping pipeline."
     exit -1
 fi
-
-# Remove old cache
-rm -rf ~/NarrativeIntelligence/cache_old
-# Create a backup of the current cache
-mv ~/NarrativeIntelligence/cache ~/NarrativeIntelligence/cache_old
-
-# Execute common queries
-# python3 ~/NarrativeIntelligence/src/narraint/frontend/ui/execute_common_queries.py

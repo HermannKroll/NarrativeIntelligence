@@ -76,8 +76,8 @@ class QueryEngine:
         doc2metadata = {}
         for r in q_titles:
             title, authors, journals, year, month, doi, org_id = r.title, r.authors, r.journals, r.publication_year, \
-                                                                 r.publication_month, r.publication_doi, \
-                                                                 r.document_id_original
+                r.publication_month, r.publication_doi, \
+                r.document_id_original
             doc_classes = None
             if r.document_classifications:
                 doc_classes = ast.literal_eval(r.document_classifications)
@@ -119,6 +119,14 @@ class QueryEngine:
         """
         session = SessionExtended.get()
         query = session.query(PredicationInvertedIndex)
+
+        # check document collections
+        if len(document_collection_filter) == 1:
+            # then just check the first element of the set
+            query = query.filter(PredicationInvertedIndex.document_collection == next(iter(document_collection_filter)))
+        if len(document_collection_filter) > 1:
+            query = query.filter(PredicationInvertedIndex.document_collection.in_(document_collection_filter))
+
         # directly check predicate
         if fact_pattern.predicate != DO_NOT_CARE_PREDICATE:
             query = query.filter(PredicationInvertedIndex.relation == fact_pattern.predicate)
@@ -173,8 +181,6 @@ class QueryEngine:
             query = query.filter(PredicationInvertedIndex.subject_type.in_(subject_types))
         elif len(subject_types) == 1:
             query = query.filter(PredicationInvertedIndex.subject_type == subject_types[0])
-        else:
-            pass
 
         # check the object types
         object_types = QueryExpander.expand_entity_types(object_types)
@@ -182,8 +188,6 @@ class QueryEngine:
             query = query.filter(PredicationInvertedIndex.object_type.in_(object_types))
         elif len(object_types) == 1:
             query = query.filter(PredicationInvertedIndex.object_type == object_types[0])
-        else:
-            pass
 
         # if the query asks for a class as subject or object
         # then use the class name as a variable name for the results
@@ -201,28 +205,18 @@ class QueryEngine:
         var2subs_to_prove = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         for result in query:
             prov_mapping = json.loads(result.provenance_mapping)
+            doc_col = result.document_collection
             # Apply document collection filter
-            if document_collection_filter and len(document_collection_filter) >= 1:
-                if len(document_collection_filter) > 1:
-                    raise ValueError("Do not support filtering multiple collections right now")
-                if LIT_COVID_COLLECTION in document_collection_filter or LONG_COVID_COLLECTION in document_collection_filter:
-                    # keep only relevant document collection
-                    # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
-                    prov_mapping = {"PubMed": v for d_col, v in prov_mapping.items() if
-                                    d_col in document_collection_filter}
-                else:
-                    prov_mapping = {d_col: v for d_col, v in prov_mapping.items() if
-                                    d_col in document_collection_filter}
-                # only continue with prov mappings that are not empty
-                if not prov_mapping or len(prov_mapping) == 0:
-                    continue
+            # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
+            if doc_col == LIT_COVID_COLLECTION or doc_col == LONG_COVID_COLLECTION:
+                doc_col = "PubMed"
+
             # convert every document id to an integer for speed
-            for doc_col in prov_mapping:
-                prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping[doc_col].items()}
+            prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping[doc_col].items()}
 
             # Compute the hash dictionaries and indexes to the data
             provenance_mappings.append(prov_mapping)
-            for doc_col, docids2prov in prov_mapping.items():
+            for docids2prov in prov_mapping:
                 doc_ids = set(docids2prov.keys())
                 for var_name, position in var_names_in_query:
                     sub_id, sub_type = None, None
@@ -452,7 +446,8 @@ class QueryEngine:
                 if idx == 0:
                     collection2valid_doc_ids[d_col].update(doc_ids_for_fp[d_col])
                 else:
-                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(doc_ids_for_fp[d_col])
+                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(
+                        doc_ids_for_fp[d_col])
 
             # fact pattern has a variable
             if len(var2subs) > 0:

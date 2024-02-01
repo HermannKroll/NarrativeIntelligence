@@ -56,18 +56,26 @@ def compute_inverted_index_for_terms():
                 term_index_local[term].add(doc.id)
 
         progress.done()
-        logging.info('Preparing insert data...')
+        logging.info('Beginning insert into term_inverted_index table...')
         insert_list = []
-        for term, doc_ids in term_index_local.items():
+        progress = Progress(total=len(term_index_local), print_every=1, text="Inserting data")
+        progress.start_time()
+        for idx, (term, doc_ids) in enumerate(term_index_local.items()):
+            progress.print_progress(idx)
+            doc_ids_sorted = sorted([d for d in doc_ids], reverse=True)
             insert_list.append(dict(term=term,
                                     document_collection=collection,
-                                    document_ids=str(doc_ids), reverse=True))
+                                    document_ids=str(doc_ids_sorted), reverse=True))
 
-        logging.info('Beginning insert into term_inverted_index table...')
-        TermInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True, commit=False)
+            # large terms could cause problems that is why we insert data here
+            if len(insert_list) >= 100:
+                TermInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True)
+                insert_list.clear()
+
+        TermInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True)
         insert_list.clear()
+        progress.done()
 
-    session.commit()
     end_time = datetime.now()
     logging.info(f"Term inverted index table created. Took me {end_time - start_time} minutes.")
 
