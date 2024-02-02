@@ -110,6 +110,10 @@ class EntityTagger(EntityIndexBase):
         # check singular form
         if t_low[-1] == 's':
             entities.update(self.__find_entities(t_low[:-1]))
+        # some drugs might be searched without the ending "e"
+        if not expand_search_by_prefix and len(entities) == 0 and t_low[-1] != 'e':
+            entities.update(self.__find_entities(f'{t_low}e'))
+
         return entities
 
     def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
