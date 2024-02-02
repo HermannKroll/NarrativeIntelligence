@@ -204,7 +204,7 @@ class QueryEngine:
         var2subs = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         var2subs_to_prove = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         for result in query:
-            prov_mapping = json.loads(result.provenance_mapping)
+            prov_mapping_raw = json.loads(result.provenance_mapping)
             doc_col = result.document_collection
             # Apply document collection filter
             # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
@@ -212,11 +212,12 @@ class QueryEngine:
                 doc_col = "PubMed"
 
             # convert every document id to an integer for speed
-            prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping[doc_col].items()}
+            prov_mapping = dict()
+            prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping_raw.items()}
 
             # Compute the hash dictionaries and indexes to the data
             provenance_mappings.append(prov_mapping)
-            for docids2prov in prov_mapping:
+            for _, docids2prov in prov_mapping.items():
                 doc_ids = set(docids2prov.keys())
                 for var_name, position in var_names_in_query:
                     sub_id, sub_type = None, None
