@@ -10,6 +10,25 @@ class EntityTaggerTestCase(TestCase):
     def setUp(self) -> None:
         self.entity_tagger = EntityTagger.instance()
 
+    def test_drugs_without_e(self):
+        self.assertEqual(len(self.entity_tagger.tag_entity('codein', expand_search_by_prefix=False)),
+                         len(self.entity_tagger.tag_entity('codeine', expand_search_by_prefix=False)))
+
+        self.assertEqual(len(self.entity_tagger.tag_entity('Codein', expand_search_by_prefix=False)),
+                         len(self.entity_tagger.tag_entity('Codeine', expand_search_by_prefix=False)))
+
+        for ent in self.entity_tagger.tag_entity('codeine', expand_search_by_prefix=True):
+            self.assertIn(ent, self.entity_tagger.tag_entity('codein', expand_search_by_prefix=True))
+
+        for ent in self.entity_tagger.tag_entity('Codeine', expand_search_by_prefix=True):
+            self.assertIn(ent, self.entity_tagger.tag_entity('Codein', expand_search_by_prefix=True))
+
+        self.assertEqual(len(self.entity_tagger.tag_entity('Furosemid', expand_search_by_prefix=False)),
+                         len(self.entity_tagger.tag_entity('Furosemide', expand_search_by_prefix=False)))
+
+        for ent in self.entity_tagger.tag_entity('Furosemide', expand_search_by_prefix=True):
+            self.assertIn(ent, self.entity_tagger.tag_entity('Furosemid', expand_search_by_prefix=True))
+
     def test_chembl_entries(self):
         """
         Tests whether drugbank names and headings can be tagged correctly
