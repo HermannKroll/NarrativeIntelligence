@@ -24,6 +24,38 @@ QUERY_DOCUMENT_LIMIT = 1500000
 class QueryEngine:
 
     @staticmethod
+    def enrich_document_results_with_metadata(documents: [QueryDocumentResult], collection2ids: dict) -> [
+        QueryDocumentResult]:
+        """
+        Enriches a set of document results with document metadata
+        :param documents: a list of document results
+        :param collection2ids: a dictionary mapping doc collections to id sets
+        :return:
+        """
+        filtered_document_results = []
+        for d_col, d_ids in collection2ids.items():
+            doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
+
+            for d in documents:
+                # check whether document belongs to that collection
+                if d.document_collection == d_col:
+                    # only add documents that have metadata
+                    if d.document_id in doc2metadata:
+                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[d.document_id]
+                        d.title = title
+                        d.authors = authors
+                        d.journals = journals
+                        d.year = year
+                        d.month = month
+                        d.doi = doi
+                        d.org_id = org_id
+                        d.doc_classes = doc_classes
+
+                        filtered_document_results.append(d)
+
+        return filtered_document_results
+
+    @staticmethod
     def query_provenance_information(provenance: Dict[int, Set[int]]) -> QueryExplanation:
         """
         Queries Provenance information from the database
@@ -343,8 +375,8 @@ class QueryEngine:
         return doc_col2valid_ids
 
     @staticmethod
-    def process_query_without_statements(graph_query: GraphQuery, document_collection_filter: Set[str] = None) \
-            -> List[QueryDocumentResult]:
+    def process_query_without_statements(graph_query: GraphQuery, document_collection_filter: Set[str] = None,
+                                         load_document_metadata: bool = True) -> List[QueryDocumentResult]:
         logging.debug('Process query without statements...')
         collection2valid_doc_ids = {}
         # Query for terms and entities
@@ -372,14 +404,16 @@ class QueryEngine:
         # No variables are used in the query
         query_results = []
         for d_col, d_ids in collection2valid_doc_ids.items():
-            logging.debug(f'{len(d_ids)} ids for collection {d_col} computed. Search for metadata...')
-            doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
             for d_id in d_ids:
-                if int(d_id) in doc2metadata:
-                    title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
-                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
-                                                             {}, 0.0, {}, org_document_id=org_id, doi=doi,
-                                                             document_collection=d_col, document_classes=doc_classes))
+                query_results.append(QueryDocumentResult(int(d_id), title="", authors="", journals="",
+                                                         publication_year=0, publication_month=0,
+                                                         var2substitution={}, confidence=0.0,
+                                                         position2provenance_ids={},
+                                                         org_document_id=None, doi=None,
+                                                         document_collection=d_col, document_classes=None))
+        if load_document_metadata:
+            query_results = QueryEngine.enrich_document_results_with_metadata(query_results, collection2valid_doc_ids)
+
         logging.debug(f'{len(query_results)} results computed')
         return query_results
 
@@ -398,7 +432,8 @@ class QueryEngine:
         start_time = datetime.now()
 
         if not graph_query.has_statements() and (graph_query.has_entities() or graph_query.has_terms()):
-            return QueryEngine.process_query_without_statements(graph_query, document_collection_filter)
+            return QueryEngine.process_query_without_statements(graph_query, document_collection_filter,
+                                                                load_document_metadata)
 
         graph_query = QueryOptimizer.optimize_query(graph_query)
         if not graph_query:
@@ -531,21 +566,16 @@ class QueryEngine:
         # No variables are used in the query
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
-                doc2metadata = {}
-                if load_document_metadata:
-                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
                 for d_id in d_ids:
-                    if load_document_metadata:
-                        title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
-                    else:
-                        title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
-                            None, None, None, None
                     fp2prov = {}
                     for idx, _ in enumerate(graph_query):
                         fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
-                    query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
-                                                             {}, 0.0, fp2prov, org_document_id=org_id, doi=doi,
-                                                             document_collection=d_col, document_classes=doc_classes))
+                    query_results.append(QueryDocumentResult(int(d_id), title="", authors="", journals="",
+                                                             publication_year=0, publication_month=0,
+                                                             var2substitution={}, confidence=0.0,
+                                                             position2provenance_ids=fp2prov,
+                                                             org_document_id=None, doi=None,
+                                                             document_collection=d_col, document_classes=None))
         else:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 # Todo: Hack
@@ -555,10 +585,6 @@ class QueryEngine:
                     logging.warning(f'Only considering the latest {QUERY_DOCUMENT_LIMIT} document ids')
                     sorted_d_ids = sorted_d_ids[:QUERY_DOCUMENT_LIMIT]
                     d_ids = set(sorted_d_ids)
-
-                doc2metadata = {}
-                if load_document_metadata:
-                    doc2metadata = QueryEngine.query_metadata_for_doc_ids(d_ids, d_col)
 
                 doc2substitution = defaultdict(lambda: defaultdict(set))
                 for var_name in collection2valid_subs:
@@ -583,12 +609,6 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        if load_document_metadata:
-                            title, authors, journals, year, month, doi, org_id, doc_classes = doc2metadata[int(d_id)]
-                        else:
-                            title, authors, journals, year, month, doi, org_id, doc_classes = None, None, None, None, \
-                                None, None, None, None
-
                         fp2prov = defaultdict(set)
                         for idx, fp in enumerate(graph_query):
                             if fp.has_variable():
@@ -600,11 +620,19 @@ class QueryEngine:
                             else:
                                 fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
 
-                        query_results.append(QueryDocumentResult(int(d_id), title, authors, journals, year, month,
-                                                                 var2sub_for_doc, 0.0, fp2prov,
-                                                                 org_document_id=org_id, doi=doi,
+                        query_results.append(QueryDocumentResult(int(d_id), title="", authors="", journals="",
+                                                                 publication_year=0, publication_month=0,
+                                                                 var2substitution=var2sub_for_doc,
+                                                                 confidence=0.0,
+                                                                 position2provenance_ids=fp2prov,
+                                                                 org_document_id=None, doi=None,
                                                                  document_collection=d_col,
-                                                                 document_classes=doc_classes))
+                                                                 document_classes=None))
+
+        # Apply metadata filter in the end
+        if load_document_metadata:
+            query_results = QueryEngine.enrich_document_results_with_metadata(query_results, collection2valid_doc_ids)
+
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
         return query_results

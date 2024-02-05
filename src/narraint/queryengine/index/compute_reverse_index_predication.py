@@ -15,11 +15,11 @@ from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID
 
 
 def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
-
     for row_key in fact_to_prov_ids:
         for doc_collection in fact_to_prov_ids[row_key]:
             for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
-                fact_to_prov_ids[row_key][doc_collection][docid2prov] = set(fact_to_prov_ids[row_key][doc_collection][docid2prov])
+                fact_to_prov_ids[row_key][doc_collection][docid2prov] = set(
+                    fact_to_prov_ids[row_key][doc_collection][docid2prov])
 
     if predication_id_min:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
@@ -64,7 +64,8 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     for row_key in fact_to_prov_ids:
         for doc_collection in fact_to_prov_ids[row_key]:
             for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
-                fact_to_prov_ids[row_key][doc_collection][docid2prov] = sorted(set(fact_to_prov_ids[row_key][doc_collection][docid2prov]))
+                fact_to_prov_ids[row_key][doc_collection][docid2prov] = sorted(
+                    set(fact_to_prov_ids[row_key][doc_collection][docid2prov]))
 
     key_count = len(fact_to_prov_ids)
     progress2 = Progress(total=key_count, print_every=100, text="insert values...")
@@ -73,7 +74,8 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
         for doc_collection in fact_to_prov_ids[row_key]:
             progress2.print_progress(idx)
             if idx % BULK_INSERT_AFTER_K == 0:
-                PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False, commit=False)
+                PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False,
+                                                                       commit=False)
                 insert_list.clear()
 
             assert len(fact_to_prov_ids[row_key][doc_collection]) > 0
@@ -94,7 +96,7 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     insert_list.clear()
 
 
-def denormalize_predication_table(predication_id_min: int = None, consider_metadata=True, low_memory=False, buffer_size=1000):
+def denormalize_predication_table(predication_id_min: int = None, low_memory=False, buffer_size=1000):
     if predication_id_min and low_memory:
         raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
 
@@ -126,13 +128,6 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
 
     prov_query = prov_query.filter(Predication.relation != None)
 
-    if consider_metadata:
-        logging.info('Only documents are considered that have metadata')
-        prov_query = prov_query.join(DocumentMetadataService,
-                                     and_(Predication.document_id == DocumentMetadataService.document_id,
-                                          Predication.document_collection == DocumentMetadataService.document_collection))
-    else:
-        logging.info('All documents are considered')
     if predication_id_min:
         prov_query = prov_query.filter(Predication.id >= predication_id_min)
 
@@ -209,8 +204,6 @@ def denormalize_predication_table(predication_id_min: int = None, consider_metad
 
     progress.done()
 
-
-
     end_time = datetime.now()
     logging.info(f"Query table created. Took me {end_time - start_time} minutes.")
 
@@ -224,11 +217,10 @@ def main():
                         help="only predication ids above this will be considered")
     parser.add_argument("--low-memory", action="store_true", default=False, required=False, help="Use low-memory mode")
     parser.add_argument("--buffer-size", type=int, default=1000, required=False, help="Buffer size for low-memory mode")
-    parser.add_argument("--ignore-metadata", action="store_true", default=False, required=False, help="By default only documents are indexed that have metadata")
     args = parser.parse_args()
 
-    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory, buffer_size=args.buffer_size,
-                                  consider_metadata=not args.ignore_metadata)
+    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory,
+                                  buffer_size=args.buffer_size)
 
 
 if __name__ == "__main__":

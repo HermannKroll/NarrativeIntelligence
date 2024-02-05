@@ -4,8 +4,7 @@ import logging
 from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, DocumentMetadata, DocumentMetadataService, Document, \
-    DocumentClassification
+from narraint.backend.models import DocumentMetadata, DocumentMetadataService, Document, DocumentClassification
 
 BULK_QUERY_CURSOR_COUNT = 500000
 
@@ -25,23 +24,20 @@ def compute_document_metadata_service_table(rebuild=False):
         session.execute(stmt)
         session.commit()
 
-    logging.info('Querying document collections the predication table...')
-    q_p_ids = session.query(Predication.document_collection.distinct()) \
-        .filter(Predication.relation.isnot(None))
+    logging.info('Querying document collections in document table...')
+    q_p_ids = session.query(Document.collection.distinct())
     document_collections = set()
     for r in q_p_ids:
         document_collections.add(r[0])
 
     logging.info(f'Found {len(document_collections)} document collections...')
     for d_col in document_collections:
-        logging.info(f'Querying relevant document ids from Predication table for collection: {d_col}')
-        pred_query = session.query(Predication.document_id) \
-            .filter(Predication.relation.isnot(None)) \
-            .filter(Predication.document_collection == d_col).distinct()
+        logging.info(f'Querying relevant document ids from document table for collection: {d_col}')
+        pred_query = session.query(Document.id).filter(Document.collection == d_col).distinct()
         relevant_doc_ids = set()
         for row in pred_query:
             relevant_doc_ids.add(row[0])
-        logging.info(f'Found {len(relevant_doc_ids)} relevant document ids in predication table...')
+        logging.info(f'Found {len(relevant_doc_ids)} relevant document ids in document table...')
 
         logging.info('Querying document ids that have metadata in DocumentMetadataService table...')
         aq = session.query(DocumentMetadataService.document_id)
@@ -98,10 +94,11 @@ def compute_document_metadata_service_table(rebuild=False):
                 if len(authors_comps) > 5:
                     authors = ' | '.join(authors_comps[:5]) + f' | {len(authors_comps) - 5}+'
 
+                if publication_year == 0 or not publication_year:
+                    continue
+
             else:
                 # skip documents that does not have this information available
-                continue
-            if publication_year == 0 or not publication_year:
                 continue
 
             document_classes = None
@@ -111,7 +108,7 @@ def compute_document_metadata_service_table(rebuild=False):
                                       authors=authors, journals=journals, publication_year=publication_year,
                                       publication_month=publication_month, document_id_original=document_id_original,
                                       publication_doi=doi, document_classifications=document_classes))
-            
+
         logging.info(f'Inserting {len(insert_values)} into database table DocumentMetadataService...')
         DocumentMetadataService.bulk_insert_values_into_table(session, insert_values, check_constraints=True)
         logging.info('Finished')
