@@ -429,12 +429,19 @@ function fillNews(data) {
     }
 
     for (--i; i >= 0; i--) {
+        if (data[0].results[i].metadata === null) {
+            continue;
+        }
+
         const itemDiv = document.createElement('div');
         const itemHeader = document.createElement('h2');
         const itemJournal = document.createElement('p');
         const itemDate = document.createElement('p');
 
         itemHeader.textContent = data[0].results[i].title;
+        itemDiv.append(itemHeader);
+
+
         itemJournal.textContent = data[0].results[i].metadata.journals;
         itemJournal.classList.add("journal");
         if (data[0].results[i].metadata.publication_month !== 0) {
@@ -443,9 +450,11 @@ function fillNews(data) {
             itemDate.textContent = data[0].results[i].metadata.publication_year;
         }
         itemDate.classList.add("date");
-        itemDiv.append(itemHeader);
+
         itemDiv.append(itemJournal);
         itemDiv.append(itemDate);
+
+
         itemDiv.id = "paper" + i;
         itemDiv.addEventListener("click", function () {
             showDetail(itemDiv.id);
