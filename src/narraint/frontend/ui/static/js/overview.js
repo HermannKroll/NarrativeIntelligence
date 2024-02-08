@@ -429,7 +429,7 @@ function fillNews(data) {
     }
 
     for (--i; i >= 0; i--) {
-        if (data[0].results[i].metadata === null) {
+        if (data[0].results[i].metadata == null) {
             continue;
         }
 
