@@ -437,6 +437,18 @@ def get_query_sub_count(request):
         # Get sub count list via caching
         sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collection)
 
+        if "topk" in request.GET:
+            try:
+                topk = int(str(request.GET["topk"]).strip())
+                if topk <= 0:
+                    return JsonResponse(status=500, data=dict(answer="topk must be a positive integer"))
+
+                sub_count_list = sub_count_list[:topk]
+
+            except ValueError:
+                return JsonResponse(status=500, data=dict(answer="topk must be a positive integer"))
+
+
         View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
                                                     time_needed=datetime.now() - time_start)
         # send results back
