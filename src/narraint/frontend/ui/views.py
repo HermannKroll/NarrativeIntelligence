@@ -385,8 +385,10 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
             logging.error('Cannot load query result from cache...')
     if not cached_sub_count_list:
         # run query
-        # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        # compute the query and do not load metadata (not required)
+        results = QueryEngine.process_query_with_expansion(graph_query,
+                                                           document_collection_filter={document_collection},
+                                                           load_document_metadata=False)
 
         # next get the aggregation by var names
         substitution_aggregation = ResultTreeAggregationBySubstitution()
