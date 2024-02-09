@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source .mailenv
+subject="Narrative Service update error"
 
 conda activate narrant
 export PYTHONPATH="/root/NarrativeIntelligence/src/:/root/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/root/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
