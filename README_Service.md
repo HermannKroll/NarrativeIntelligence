@@ -62,14 +62,17 @@ We used V14.
 ## Configure Postgres
 
 ```
-sudo nano /etc/postgresql/14/main
+sudo nano /etc/postgresql/14/main/postgresql.conf
 ```
 
 Change the following settings. 
 More memory is better.
 ```
-shared_buffers = 10GB	
-work_mem = 2GB			
+shared_buffers = 20GB	
+work_mem = 5GB			
+
+max_wal_size = 1GB
+min_wal_size = 500MB
 ```
 
 Restart Postgres Server.
