@@ -4,7 +4,7 @@ info:
   description: PubPharm Narrative Service API
   version: 1.0.0
 servers:
-  - url: http://narrative.pubpharm.de
+  - url: https://narrative.pubpharm.de
     description: PubPharm Narrative Service
 paths:
   /autocompletion:
@@ -131,6 +131,14 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+        - in: query
+          name: topk
+          required: false
+          schema:
+            type: int
+          example: 10
+          description: determines how many substitutions should be retrieved (ranked by supporting documents descending)
+
 
   /query_narrative_documents:
     get:
