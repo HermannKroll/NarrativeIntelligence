@@ -24,7 +24,29 @@ As root:
 export PYTHONPATH="/root/NarrativeIntelligence/src/:/root/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/root/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 ```
 
-# Automated Pipelines
+
+# Full Automation of all Pipelines
+We created one script to execute all pipelines. 
+The script will send a mail if an error occurs. 
+Therefore, create a mailenv:
+```
+cd ~/NarrativeIntelligence/scripts/
+nano source .mailenv
+```
+
+Edit the following lines:
+```
+ADDRESS="target@beispiel.de"
+SENDER="from@beispiel.de (Narrative Service Updater)"
+```
+Save it.
+
+For the complete pipeline run:
+```
+bash ~/NarrativeIntelligence/scripts/all_pipeline_updates.sh
+```
+
+# Automated Index Pipelines
 We wrote a script to automate the whole service update procedure. 
 The script can be found in [scripts/update_service_data.sh](scripts/update_service_data.sh).
 
