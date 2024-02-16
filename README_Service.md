@@ -495,7 +495,7 @@ This can happen if the vocabularies have changed.
 cd ~/NarrativeIntelligence/lib/NarrativeAnnotation/
 bash download_data.sh
 
-python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py
+python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py --force
 ```
 
 # Export User Ratings and Log Files
