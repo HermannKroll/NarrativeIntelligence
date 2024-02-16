@@ -18,7 +18,7 @@ class EntityTagger(EntityIndexBase):
     """
     __instance = None
 
-    VERSION = 3
+    VERSION = 4
 
     @staticmethod
     def instance(load_index=True):
@@ -37,6 +37,11 @@ class EntityTagger(EntityIndexBase):
             self.known_terms = set()
 
             trans_map = {p: '' for p in string.punctuation}
+            # necessary to not distinguish between
+            # "Axicabtagene Ciloleucel"
+            # "Axicabtagene-Ciloleucel"
+            # "AxicabtageneCiloleucel"
+            trans_map[' '] = ''
             self.__translator = str.maketrans(trans_map)
             self.version = None
             if load_index:
@@ -73,11 +78,8 @@ class EntityTagger(EntityIndexBase):
         self.known_terms.add(term_lower)
 
         term_wo_punctuation = term_lower.translate(self.__translator).strip()
-        if entity_class:
-            self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type,
-                                                             entity_class=entity_class))
-        else:
-            self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type))
+        self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type,
+                                                         entity_class=entity_class))
 
     def __find_entities(self, term: str) -> Set[Entity]:
         if term not in self.term2entity:
@@ -113,7 +115,6 @@ class EntityTagger(EntityIndexBase):
         # some drugs might be searched without the ending "e"
         if not expand_search_by_prefix and len(entities) == 0 and t_low[-1] != 'e':
             entities.update(self.__find_entities(f'{t_low}e'))
-
         return entities
 
     def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:

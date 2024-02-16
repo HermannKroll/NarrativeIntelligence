@@ -5,18 +5,18 @@ from datetime import datetime
 
 import datrie
 
+from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
     PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE, ORGANISM, TARGET, TISSUE, \
     HEALTH_STATUS
-from kgextractiontoolbox.progress import print_progress_with_eta
 
 
 class AutocompletionUtil:
     __instance = None
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     def instance(load_index=True):
@@ -106,10 +106,13 @@ class AutocompletionUtil:
         tagger = EntityTagger.instance()
         start_time = datetime.now()
         task_size = len(tagger.term2entity.items())
-        for idx, (term, t_entities) in enumerate(tagger.term2entity.items()):
-            for e in t_entities:
-                self.add_entity_to_dict(e.entity_type, term)
-            print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
+        for idx, term in enumerate(tagger.known_terms):
+            try:
+                for e in tagger.tag_entity(term, expand_search_by_prefix=False):
+                    self.add_entity_to_dict(e.entity_type, term)
+                print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
+            except KeyError:
+                pass
 
         logging.info('Index built')
 

@@ -41,7 +41,7 @@ class ReversePredicationIdxText(TestCase):
         Predication.bulk_insert_values_into_table(session, pred_values)
 
     def test_full_reverse_idx_low_memory(self):
-        denormalize_predication_table(consider_metadata=False, low_memory=True, buffer_size=1)
+        denormalize_predication_table(low_memory=True, buffer_size=1)
 
         session = SessionExtended.get()
         self.assertEqual(2, session.query(PredicationInvertedIndex).count())
@@ -79,7 +79,7 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(consider_metadata=False, low_memory=True, buffer_size=1)
+        denormalize_predication_table(low_memory=True, buffer_size=1)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
@@ -93,7 +93,6 @@ class ReversePredicationIdxText(TestCase):
             db_rows[key] = row.provenance_mapping
             self.assertIn(row.document_collection, ["RIDXTEST"])
             self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
-
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
@@ -118,7 +117,7 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(consider_metadata=False, low_memory=True, buffer_size=2)
+        denormalize_predication_table(low_memory=True, buffer_size=2)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
@@ -156,7 +155,7 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(consider_metadata=False, low_memory=True, buffer_size=3)
+        denormalize_predication_table(low_memory=True, buffer_size=3)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
@@ -170,7 +169,6 @@ class ReversePredicationIdxText(TestCase):
             db_rows[key] = row.provenance_mapping
             self.assertIn(row.document_collection, ["RIDXTEST"])
             self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
-
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
@@ -195,7 +193,7 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(consider_metadata=False, low_memory=True, buffer_size=1000)
+        denormalize_predication_table(low_memory=True, buffer_size=1000)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]

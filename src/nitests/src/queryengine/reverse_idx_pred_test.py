@@ -1,5 +1,4 @@
 import ast
-import json
 from unittest import TestCase
 
 from sqlalchemy import delete
@@ -42,7 +41,7 @@ class ReversePredicationIdxText(TestCase):
         Predication.bulk_insert_values_into_table(session, pred_values)
 
     def test_full_reverse_idx(self):
-        denormalize_predication_table(consider_metadata=False)
+        denormalize_predication_table()
 
         session = SessionExtended.get()
         self.assertEqual(2, session.query(PredicationInvertedIndex).count())
@@ -62,7 +61,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
 
     def test_full_reverse_idx_no_collection(self):
-        denormalize_predication_table(consider_metadata=False)
+        denormalize_predication_table()
 
         session = SessionExtended.get()
         self.assertEqual(0, session.query(PredicationInvertedIndex)
@@ -70,7 +69,7 @@ class ReversePredicationIdxText(TestCase):
 
     def test_full_reverse_idx_delta_mode(self):
         session = SessionExtended.get()
-        denormalize_predication_table(consider_metadata=False)
+        denormalize_predication_table()
         pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t1", relation="T1",
@@ -88,7 +87,7 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(predication_id_min=1002, consider_metadata=False)
+        denormalize_predication_table(predication_id_min=1002)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
