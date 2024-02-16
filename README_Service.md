@@ -71,7 +71,7 @@ More memory is better.
 shared_buffers = 20GB	
 work_mem = 5GB			
 
-max_wal_size = 1GB
+max_wal_size = 2GB
 min_wal_size = 500MB
 ```
 
@@ -225,6 +225,13 @@ Next, configure your database connection in ``backend.json``:
 }
 ```
 Save and exit.
+
+Additionally, we need the entity linking configuration to build indexes. 
+```
+cd ~/NarrativeIntelligence/config
+cp entity_linking.prod.json entity_linking.json
+```
+No paths needs to be adjusted.
 
 ## Python Path
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
@@ -450,6 +457,11 @@ journalctl -u narrative -f
 ```
 
 # Updating the Service (Code)
+Make sure that you are the right user.
+```
+su pubpharm
+```
+
 Switch to screen session and stop service.
 Then pull updates from GitHub.
 Note that we have to update three repositories.
@@ -458,16 +470,55 @@ cd ~/NarrativeIntelligence/
 git pull --recurse-submodules
 ```
 
+As root do:
+```
+sudo chmod -R 777 /var/www
+```
+
+As pubpharm user do:
 Collect changes and update static www data.
 ```
+
 cd ~/NarrativeIntelligence/src/narraint/frontend/
-sudo chmod -R 777 /var/www
+
+conda activate narraint
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
+
+
 python manage.py collectstatic
+```
+
+As root do:
+```
 sudo chmod -R 775 /var/www	  
 ```
 
-Start the service again.
+Then delete the cache and execute common queries:
+```
+conda activate narraint
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
 
+bash ~/NarrativeIntelligence/scripts/update_on_service.sh
+```
+
+
+Start the service again.
+```
+sudo systemctl restart narrative.service
+```
+
+
+### In case of errors
+If you receive an error due to missing files like MeSH or missing indexes, please recreate all indexes. 
+This can happen if the vocabularies have changed.
+```
+cd ~/NarrativeIntelligence/lib/NarrativeAnnotation/
+bash download_data.sh
+
+python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py --force
+```
 
 # Export User Ratings and Log Files
 Ratings and log files are written into a log and a feedback directory.
