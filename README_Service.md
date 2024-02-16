@@ -450,6 +450,11 @@ journalctl -u narrative -f
 ```
 
 # Updating the Service (Code)
+Make sure that you are the right user.
+```
+su pubpharm
+```
+
 Switch to screen session and stop service.
 Then pull updates from GitHub.
 Note that we have to update three repositories.
@@ -461,6 +466,10 @@ git pull --recurse-submodules
 Collect changes and update static www data.
 ```
 cd ~/NarrativeIntelligence/src/narraint/frontend/
+
+conda activate narraint
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+
 sudo chmod -R 777 /var/www
 python manage.py collectstatic
 sudo chmod -R 775 /var/www	  
