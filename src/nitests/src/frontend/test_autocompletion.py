@@ -24,15 +24,15 @@ class AutocompletionTestCase(TestCase):
             self.assertIn(test, simvastatin_ac_test)
 
     def test_autocompletion_diseases(self):
-        diabetes_2_names = ['Diabetes Mellitus Adult Onset', 'Diabetes Mellitus Ketosis Resistant',
-                            'Diabetes Mellitus Maturity Onset',
-                            'Diabetes Mellitus Non Insulin Dependent',
-                            'Diabetes Mellitus Non Insulin Dependent',
-                            'Diabetes Mellitus Noninsulin Dependent',
-                            'Diabetes Mellitus Noninsulin Dependent',
-                            'Diabetes Mellitus Slow Onset',
-                            'Diabetes Mellitus Stable',
-                            'diabetes mellitus Type II']
+        diabetes_2_names = ['Diabetes Mellitus, Adult Onset', 'Diabetes Mellitus, Ketosis Resistant',
+                            'Diabetes Mellitus, Maturity Onset',
+                            'Diabetes Mellitus, Non Insulin Dependent',
+                            'Diabetes Mellitus, Non Insulin Dependent',
+                            'Diabetes Mellitus, Noninsulin Dependent',
+                            'Diabetes Mellitus, Noninsulin Dependent',
+                            'Diabetes Mellitus, Slow Onset',
+                            'Diabetes Mellitus, Stable',
+                            'diabetes mellitus, Type II']
         diabetes_ac = self.autocompletion.autocomplete("diabetes")
         for test in diabetes_2_names:
             self.assertIn(test.lower(), diabetes_ac)
