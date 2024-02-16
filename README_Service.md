@@ -470,9 +470,14 @@ cd ~/NarrativeIntelligence/
 git pull --recurse-submodules
 ```
 
-Collect changes and update static www data.
+As root do:
 ```
 sudo chmod -R 777 /var/www
+```
+
+As pubpharm user do:
+Collect changes and update static www data.
+```
 
 cd ~/NarrativeIntelligence/src/narraint/frontend/
 
@@ -482,8 +487,13 @@ export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
 
 
 python manage.py collectstatic
+```
+
+As root do:
+```
 sudo chmod -R 775 /var/www	  
 ```
+
 
 Start the service again.
 ```
