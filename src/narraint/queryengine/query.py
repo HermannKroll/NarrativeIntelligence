@@ -22,15 +22,25 @@ class FactPattern:
         return FactPattern(self.objects, self.predicate, self.subjects)
 
     def get_subject_class(self):
-        for s in self.subjects:
-            if s.entity_class:
-                return s.entity_class
+        # only apply this filter if we queried a special SINGLE entity that represents a class
+        # otherwise entities like "human" will be completed to things like "human edidermal growth ..."
+        # and then the query will be understood as a variable-based query which is wrong
+        # we can check it by ensuring that all queried entities are from the same type
+        if len({s.entity_type for s in self.subjects}) == 1:
+            for s in self.subjects:
+                if s.entity_class:
+                    return s.entity_class
         return None
 
     def get_object_class(self):
-        for o in self.objects:
-            if o.entity_class:
-                return o.entity_class
+        # only apply this filter if we queried a special SINGLE entity that represents a class
+        # otherwise entities like "human" will be completed to things like "human edidermal growth ..."
+        # and then the query will be understood as a variable-based query which is wrong
+        # we can check it by ensuring that all queried entities are from the same type
+        if len({o.entity_type for o in self.objects}) == 1:
+            for o in self.objects:
+                if o.entity_class:
+                    return o.entity_class
         return None
 
     def has_entity(self):
