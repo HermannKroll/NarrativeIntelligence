@@ -476,6 +476,7 @@ cd ~/NarrativeIntelligence/src/narraint/frontend/
 
 conda activate narraint
 export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
 
 sudo chmod -R 777 /var/www
 python manage.py collectstatic
