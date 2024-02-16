@@ -226,6 +226,13 @@ Next, configure your database connection in ``backend.json``:
 ```
 Save and exit.
 
+Additionally, we need the entity linking configuration to build indexes. 
+```
+cd ~/NarrativeIntelligence/config
+cp entity_linking.prod.json entity_linking.json
+```
+No paths needs to be adjusted.
+
 ## Python Path
 Make always be sure that if you run any of our scripts, you activated your conda environment and set the Python Path.
 ```
@@ -476,7 +483,20 @@ sudo chmod -R 775 /var/www
 ```
 
 Start the service again.
+```
+sudo systemctl restart narrative.service
+```
 
+
+### In case of errors
+If you receive an error due to missing files like MeSH or missing indexes, please recreate all indexes. 
+This can happen if the vocabularies have changed.
+```
+cd ~/NarrativeIntelligence/lib/NarrativeAnnotation/
+bash download_data.sh
+
+python ~/NarrativeIntelligence/src/narraint/build_all_indexes.py
+```
 
 # Export User Ratings and Log Files
 Ratings and log files are written into a log and a feedback directory.
