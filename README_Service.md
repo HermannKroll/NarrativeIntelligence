@@ -494,6 +494,15 @@ As root do:
 sudo chmod -R 775 /var/www	  
 ```
 
+Then delete the cache and execute common queries:
+```
+conda activate narraint
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
+export DJANGO_SETTINGS_MODULE="frontend.settings.prod"
+
+bash ~/NarrativeIntelligence/scripts/update_on_service.sh
+```
+
 
 Start the service again.
 ```
