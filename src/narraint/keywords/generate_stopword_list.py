@@ -52,7 +52,7 @@ def retrieve_keyword_list(entity_type: str="Drug") -> list[str]:
     except Exception as e:
         print(e)
         session.remove()
-        exit(1)
+        exit(-1)
     finally:
         session.remove()
 

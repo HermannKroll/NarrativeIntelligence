@@ -1,7 +1,9 @@
 #!/bin/bash
 
-source .mailenv
+source ~/NarrativeIntelligence/scripts/.mailenv
 SUBJECT="Narrative Service update error"
+
+eval "$(conda shell.bash hook)"
 
 conda activate narrant
 export PYTHONPATH="/root/NarrativeIntelligence/src/:/root/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/root/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
@@ -36,3 +38,5 @@ if [[ $? != 0 ]]; then
     mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
     exit -1
 fi
+
+echo "Narrative Update done" | mailx -s "Narrative Service Update done" "$ADDRESS" -r "$SENDER"
