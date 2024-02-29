@@ -1,0 +1,1 @@
+ALTER TABLE document_translation ADD CONSTRAINT document_translation_source_id_unique UNIQUE (source_doc_id, document_collection);
