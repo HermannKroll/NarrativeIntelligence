@@ -132,7 +132,8 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
         prov_query = prov_query.filter(Predication.id >= predication_id_min)
 
     if low_memory:
-        prov_query = prov_query.order_by(Predication.subject_id, Predication.relation, Predication.object_id)
+        prov_query = prov_query.order_by(Predication.subject_id, Predication.subject_type, Predication.relation,
+                                         Predication.object_id, Predication.object_type)
 
     prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
 
