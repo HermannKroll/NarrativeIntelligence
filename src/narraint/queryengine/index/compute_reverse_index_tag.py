@@ -11,8 +11,7 @@ from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, TagInvertedIndex, Predication
 from narraint.config import QUERY_YIELD_PER_K
-from narrant.entity.entityresolver import GeneResolver
-from narrant.entitylinking.enttypes import GENE
+from narrant.entity.entityidtranslator import EntityIDTranslator
 
 
 def insert_data(session, index, predication_id_min):
@@ -45,40 +44,17 @@ def insert_data(session, index, predication_id_min):
         logging.info('Entries deleted')
 
     logging.info('Using the Gene Resolver to replace gene ids by symbols')
-    generesolver = GeneResolver()
-    generesolver.load_index()
+    entityidtranslator = EntityIDTranslator()
 
     progress = Progress(total=len(index.items()), print_every=1000, text="Computing insert values...")
     progress.start_time()
     insert_list = []
     for (entity_id, entity_type, doc_col), doc_ids in index.items():
-        if entity_type == GENE:
-            gene_ids = set()
-            if ';' in entity_id:
-                for g_id in entity_id.split(';'):
-                    try:
-                        gene_ids.update(generesolver.gene_id_to_symbol(g_id.strip()).lower())
-                    except (KeyError, ValueError):
-                        continue
-            else:
-                try:
-                    gene_ids.add(generesolver.gene_id_to_symbol(entity_id).lower())
-                except (KeyError, ValueError):
-                    continue
-
-            for gene_id in gene_ids:
-                insert_list.append(dict(entity_id=gene_id,
-                                        entity_type=GENE,
-                                        document_collection=doc_col,
-                                        support=len(doc_ids),
-                                        document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
-
-        else:
-            insert_list.append(dict(entity_id=entity_id,
-                                    entity_type=entity_type,
-                                    document_collection=doc_col,
-                                    support=len(doc_ids),
-                                    document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
+        insert_list.append(dict(entity_id=entityidtranslator.translate_entity_id(entity_id, entity_type),
+                                entity_type=entity_type,
+                                document_collection=doc_col,
+                                support=len(doc_ids),
+                                document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
     progress.done()
     logging.info('Beginning insert into tag_inverted_index table...')
     TagInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True, commit=False)
