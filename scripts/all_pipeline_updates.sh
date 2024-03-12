@@ -40,12 +40,5 @@ if [[ $? != 0 ]]; then
 fi
 
 
-# Update clinical trial phases for drug overviews
-python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py 2> /root/ns_update_err.log
-if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
-    exit -1
-fi
-
 
 echo "Narrative Update done" | mailx -s "Narrative Service Update done" "$ADDRESS" -r "$SENDER"
