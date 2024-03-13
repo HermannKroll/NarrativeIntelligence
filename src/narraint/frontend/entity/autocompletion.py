@@ -18,36 +18,29 @@ class AutocompletionUtil:
 
     VERSION = 2
 
-    @staticmethod
-    def instance(load_index=True):
-        if AutocompletionUtil.__instance is None:
-            AutocompletionUtil(load_index=load_index)
-        return AutocompletionUtil.__instance
+    def __new__(cls, load_index=True):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+            cls.__instance.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target",
+                                             SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG, CHEMBL_CHEMICAL, METHOD,
+                                             LAB_METHOD, VACCINE, TARGET, ORGANISM, TISSUE, HEALTH_STATUS}
+            cls.__instance.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
+            cls.__instance.other_terms = list(["PlantGenus", "PlantGenera"])
+            cls.__instance.variable_types = sorted(list(cls.__instance.variable_types))
 
-    def __init__(self, logger=logging, load_index=True):
-        if AutocompletionUtil.__instance is not None:
-            raise Exception('This class is a singleton - use AutocompletionUtil.instance()')
-        else:
-            self.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target",
-                                   SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG, CHEMBL_CHEMICAL, METHOD,
-                                   LAB_METHOD, VACCINE, TARGET, ORGANISM, TISSUE, HEALTH_STATUS}
-            self.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
-            self.other_terms = list(["PlantGenus", "PlantGenera"])
-            self.variable_types = sorted(list(self.variable_types))
-
-            self.logger = logger
-            self.known_terms = set()
-            self.known_drug_terms = set()
-            self.trie = None
-            self.drug_trie = None
-            self.version = None
+            cls.__instance.logger = logging
+            cls.__instance.known_terms = set()
+            cls.__instance.known_drug_terms = set()
+            cls.__instance.trie = None
+            cls.__instance.drug_trie = None
+            cls.__instance.version = None
             if load_index:
                 try:
-                    self.load_autocompletion_index()
+                    cls.__instance.load_autocompletion_index()
                 except ValueError:
                     logging.info('Autocompletion index is outdated. Creating a new one...')
-                    self.build_autocompletion_index()
-            AutocompletionUtil.__instance = self
+                    cls.__instance.build_autocompletion_index()
+        return cls.__instance
 
     def __build_trie_structure(self, known_terms):
         self.logger.info(f'Building Trie structure with {len(known_terms)} terms...')
@@ -103,7 +96,7 @@ class AutocompletionUtil:
     def compute_known_entities_in_db(self):
         # Write dosage form terms + synonyms
         logging.info('Adding entity tagger entries...')
-        tagger = EntityTagger.instance()
+        tagger = EntityTagger()
         start_time = datetime.now()
         task_size = len(tagger.term2entity.items())
         for idx, term in enumerate(tagger.known_terms):
@@ -179,7 +172,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    ac = AutocompletionUtil.instance()
+    ac = AutocompletionUtil()
     ac.build_autocompletion_index()
 
 

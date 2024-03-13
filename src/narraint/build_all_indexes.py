@@ -19,13 +19,13 @@ def build_service_indexes():
     logging.info('=' * 60)
     logging.info('Computing tagging index...')
 
-    entity_tagger = EntityTagger.instance(load_index=False)
+    entity_tagger = EntityTagger(load_index=False)
     entity_tagger.store_index()
 
-    enitity_explainer = EntityExplainer.instance(load_index=False)
+    enitity_explainer = EntityExplainer(load_index=False)
     enitity_explainer.store_index()
 
-    ac = AutocompletionUtil.instance(load_index=False)
+    ac = AutocompletionUtil(load_index=False)
     ac.build_autocompletion_index()
 
     logging.info('=' * 60)

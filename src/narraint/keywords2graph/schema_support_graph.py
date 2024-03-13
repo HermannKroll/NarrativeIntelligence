@@ -15,21 +15,14 @@ CO_OCCURRENCE_RELATION = 'co_occurred'
 class SchemaSupportGraph:
     __instance = None
 
-    @staticmethod
-    def instance():
-        if SchemaSupportGraph.__instance is None:
-            SchemaSupportGraph()
-        return SchemaSupportGraph.__instance
-
-    def __init__(self):
-        if SchemaSupportGraph.__instance is not None:
-            raise Exception('This class is a singleton - use SchemaSupportGraph.instance()')
-        else:
-            self.spo2support = {}
-            self.relations = set()
-            self.entity_types = set()
-            self.load_schema_graph_from_db()
-            SchemaSupportGraph.__instance = self
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+            cls.__instance.spo2support = {}
+            cls.__instance.relations = set()
+            cls.__instance.entity_types = set()
+            cls.__instance.load_schema_graph_from_db()
+        return cls.__instance
 
     def load_schema_graph_from_db(self):
         """

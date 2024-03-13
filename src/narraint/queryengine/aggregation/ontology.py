@@ -22,7 +22,7 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self.__doc_ids_per_aggregation = defaultdict(set)
         self.results = []
         self.doc_ids = []
-        self.mesh_ontology = MeSHOntology.instance()
+        self.mesh_ontology = MeSHOntology()
         self.pref2result = {}
         self._pref_trees_visited = set()
         self._pref_tree_nodes_with_docs = set()

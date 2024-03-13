@@ -9,7 +9,7 @@ from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 class EntityExplanationTestCase(TestCase):
 
     def setUp(self) -> None:
-        self.entity_explainer = EntityExplainer.instance()
+        self.entity_explainer = EntityExplainer()
 
     def test_chembl_entries(self):
         """

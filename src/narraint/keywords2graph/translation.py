@@ -106,7 +106,7 @@ class SupportedGraphPattern:
 class Keyword2GraphTranslation:
 
     def __init__(self):
-        self.graph: SchemaSupportGraph = SchemaSupportGraph.instance()
+        self.graph: SchemaSupportGraph = SchemaSupportGraph()
         self.translation: QueryTranslation = QueryTranslation()
 
     @staticmethod

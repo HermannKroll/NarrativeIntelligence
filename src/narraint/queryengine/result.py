@@ -24,7 +24,7 @@ class QueryEntitySubstitution:
         Uses the EntityResolver to find the vocabulary name/heading for the entity id and type
         :return:
         """
-        entity_resolver = EntityResolver.instance()
+        entity_resolver = EntityResolver()
         if self.entity_type == 'predicate':
             return self.entity_id  # id is already the name
         try:

@@ -33,7 +33,7 @@ class QueryTranslation:
         self.variable_type_mappings["lab method"] = LAB_METHOD
         self.variable_type_mappings["target"] = TARGET
         self.variable_type_mappings["targets"] = TARGET
-        self.entity_tagger = EntityTagger.instance()
+        self.entity_tagger = EntityTagger()
 
         relation_vocab = RelationVocabulary()
         relation_vocab.load_from_json(PHARM_RELATION_VOCABULARY)

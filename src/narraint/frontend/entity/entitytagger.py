@@ -20,21 +20,13 @@ class EntityTagger(EntityIndexBase):
 
     VERSION = 4
 
-    @staticmethod
-    def instance(load_index=True):
-        if EntityTagger.__instance is None:
-            EntityTagger(load_index=load_index)
-        return EntityTagger.__instance
-
-    def __init__(self, load_index=True):
-        super().__init__()
-        self.autocompletion = None
-        if EntityTagger.__instance is not None:
-            raise Exception('This class is a singleton - use EntityTagger.instance()')
-        else:
+    def __new__(cls, load_index=True):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
             logging.info('Initialize EntityTagger...')
-            self.term2entity = defaultdict(set)
-            self.known_terms = set()
+            cls.__instance.autocompletion = None
+            cls.__instance.term2entity = defaultdict(set)
+            cls.__instance.known_terms = set()
 
             trans_map = {p: '' for p in string.punctuation}
             # necessary to not distinguish between
@@ -42,16 +34,16 @@ class EntityTagger(EntityIndexBase):
             # "Axicabtagene-Ciloleucel"
             # "AxicabtageneCiloleucel"
             trans_map[' '] = ''
-            self.__translator = str.maketrans(trans_map)
-            self.version = None
+            cls.__instance.__translator = str.maketrans(trans_map)
+            cls.__instance.version = None
             if load_index:
                 try:
-                    self._load_index()
+                    cls.__instance._load_index()
                 except ValueError:
-                    # The index has been outdated or is old - create a new one
                     logging.info('Index is outdated. Creating a new one...')
-                    self.store_index()
-            EntityTagger.__instance = self
+                    # The index has been outdated or is old - create a new one
+                    cls.__instance.store_index()
+        return cls.__instance
 
     def _load_index(self, index_path=ENTITY_TAGGING_INDEX):
         logging.info(f'Loading entity tagging index from {index_path}')
@@ -98,7 +90,7 @@ class EntityTagger(EntityIndexBase):
         if expand_search_by_prefix:
             if not self.autocompletion:
                 from narraint.frontend.entity import autocompletion
-                self.autocompletion = autocompletion.AutocompletionUtil.instance()
+                self.autocompletion = autocompletion.AutocompletionUtil()
             expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
             logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
             for term in expanded_terms:
@@ -135,7 +127,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_tagger = EntityTagger.instance(load_index=False)
+    entity_tagger = EntityTagger(load_index=False)
     entity_tagger.store_index()
 
 

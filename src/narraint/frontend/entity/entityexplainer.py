@@ -14,31 +14,23 @@ class EntityExplainer(EntityIndexBase):
 
     VERSION = 3
 
-    @staticmethod
-    def instance(load_index=True):
-        if EntityExplainer.__instance is None:
-            EntityExplainer(load_index=load_index)
-        return EntityExplainer.__instance
-
-    def __init__(self, load_index=True):
-        super().__init__()
-        self.expand_by_subclasses = False
-        if EntityExplainer.__instance is not None:
-            raise Exception('This class is a singleton - use EntityExplainer.instance()')
-        else:
+    def __new__(cls, load_index=True):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
             logging.info('Initialize EntityTagger...')
-            self.entity2terms = defaultdict(set)
-            self.version = None
+            cls.__instance.expand_by_subclasses = False
+            cls.__instance.entity2terms = defaultdict(set)
+            cls.__instance.version = None
             trans_map = {p: '' for p in string.punctuation}
-            self.__translator = str.maketrans(trans_map)
+            cls.__instance.__translator = str.maketrans(trans_map)
             if load_index:
                 try:
-                    self._load_index()
+                    cls.__instance._load_index()
                 except ValueError:
                     # The index has been outdated or is old - create a new one
                     logging.info('Index is outdated. Creating a new one...')
-                    self.store_index()
-            EntityExplainer.__instance = self
+                    cls.__instance.store_index()
+        return cls.__instance
 
     def _load_index(self, index_path=ENTITY_EXPLAINER_INDEX):
         logging.info(f'Loading entity explainer index from {index_path}')
@@ -89,7 +81,7 @@ class EntityExplainer(EntityIndexBase):
         return selected_headings
 
     def explain_entities(self, entities, truncate_at_k=25):
-        resolver = EntityResolver.instance()
+        resolver = EntityResolver()
         headings = set()
         # Add all headings and known terms for the possible entity ids
         for entity in entities:
@@ -114,7 +106,7 @@ class EntityExplainer(EntityIndexBase):
         return headings
 
     def explain_entity_str(self, entity_str, truncate_at_k=25):
-        tagger = EntityTagger.instance()
+        tagger = EntityTagger()
         entities = tagger.tag_entity(entity_str)
         return self.explain_entities(entities, truncate_at_k=truncate_at_k)
 
@@ -124,7 +116,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_explainer = EntityExplainer.instance(load_index=False)
+    entity_explainer = EntityExplainer(load_index=False)
     entity_explainer.store_index()
 
 

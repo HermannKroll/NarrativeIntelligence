@@ -68,7 +68,7 @@ class SchemaSupportGraphTest(TestCase):
         SchemaSupportGraph.compute_schema_graph()
 
     def test_schema_graph_based_on_predications(self):
-        sg: SchemaSupportGraph = SchemaSupportGraph.instance()
+        sg: SchemaSupportGraph = SchemaSupportGraph()
         self.assertEqual(3, sg.get_support("AT", "T1", "BT"))
         self.assertEqual(2, sg.get_support("AT", "T2", "BT"))
         self.assertEqual(1, sg.get_support("AT_X", "T5", "BT"))
@@ -88,7 +88,7 @@ class SchemaSupportGraphTest(TestCase):
     def test_schema_graph_no_support_values(self):
         SchemaSupportGraph.compute_schema_graph()
 
-        sg: SchemaSupportGraph = SchemaSupportGraph.instance()
+        sg: SchemaSupportGraph = SchemaSupportGraph()
         self.assertEqual(0, sg.get_support("AT_N", "T1", "BT"))
         self.assertEqual(0, sg.get_support("AT_N", "T2", "BT"))
         self.assertEqual(0, sg.get_support("AT_X_N", "T5", "BT"))
