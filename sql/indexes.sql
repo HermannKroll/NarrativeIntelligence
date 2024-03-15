@@ -9,6 +9,8 @@ CREATE INDEX pred_object_id_idx ON PREDICATION(object_id);
 CREATE INDEX pred_object_type_idx ON PREDICATION(object_type);
 CREATE INDEX pred_extraction_type_idx ON PREDICATION(extraction_type);
 
+CREATE INDEX pred_sentence_id_idx ON PREDICATION(sentence_id);
+
 -- support fast like search
 CREATE INDEX trgm_idx_predication_subject_id ON Predication USING gin (subject_id gin_trgm_ops);
 CREATE INDEX trgm_idx_predication_object_id ON Predication USING gin (object_id gin_trgm_ops);
