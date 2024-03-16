@@ -50,7 +50,11 @@ def insert_data(session, index, predication_id_min):
     progress.start_time()
     insert_list = []
     for (entity_id, entity_type, doc_col), doc_ids in index.items():
-        insert_list.append(dict(entity_id=entityidtranslator.translate_entity_id(entity_id, entity_type),
+        try:
+            translated_id = entityidtranslator.translate_entity_id(entity_id, entity_type)
+        except (KeyError, ValueError):
+            continue
+        insert_list.append(dict(entity_id=translated_id,
                                 entity_type=entity_type,
                                 document_collection=doc_col,
                                 support=len(doc_ids),
