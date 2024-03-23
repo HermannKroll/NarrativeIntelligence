@@ -18,6 +18,7 @@ The predication dictionary uses strings instead of tuples as keys ('seen_keys') 
 the memory usage is lower.
 """
 
+SEPERATOR_STRING = "_;_"
 
 def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     for row_key in fact_to_prov_ids:
@@ -37,8 +38,8 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
         p2.start_time()
         for idx, row in enumerate(inv_q):
             p2.print_progress(idx)
-            row_key = "_".join([str(row.subject_id), str(row.subject_type), str(row.relation), str(row.object_id),
-                                str(row.object_type)])
+            row_key = SEPERATOR_STRING.join([str(row.subject_id), str(row.subject_type), str(row.relation),
+                                             str(row.object_id), str(row.object_type)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in fact_to_prov_ids:
@@ -85,7 +86,7 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
                 insert_list.clear()
 
             assert len(fact_to_prov_ids[row_key][doc_collection]) > 0
-            subject_id, subject_type, relation, object_id, object_type = row_key.split("_")
+            subject_id, subject_type, relation, object_id, object_type = row_key.split(SEPERATOR_STRING)
             insert_list.append(dict(
                 document_collection=doc_collection,
                 subject_id=subject_id,
@@ -174,7 +175,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
                 buffer.clear()
 
             last_spo = s_p_o
-            seen_key = "_".join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
+            seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
 
             # Hack to support also the Covid 19 collection
@@ -195,7 +196,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
             p = prov.relation
             o_id = prov.object_id
             o_t = prov.object_type
-            seen_key = "_".join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
+            seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             # fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
             fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].add(prov.id)
 
