@@ -150,7 +150,7 @@ async function loadOverviewData() {
             await ov.dataCallback();
         }
 
-        let _ = fillSearchbox(prefix);
+        fillSearchbox(prefix).catch(console.log);
     }
 }
 
@@ -233,7 +233,7 @@ function searchElements(prefix) {
     }
     overviews[prefix].visibleData = newData;
     clearSearchBox(prefix);
-    fillSearchbox(prefix);
+    fillSearchbox(prefix).catch(console.error);
 }
 
 /**
@@ -269,11 +269,11 @@ function sortElements(prefix) {
     }
 
     clearSearchBox(prefix);
-    fillSearchbox(prefix);
+    fillSearchbox(prefix).catch(console.error);
 }
 
 /**
- * The function filles the container of the prefix with the stored data depending on the
+ * The function fills the container of the prefix with the stored data depending on the
  * maximum visible elements.
  * @param prefix entity container
  * @returns {Promise<void>}
@@ -283,9 +283,10 @@ async function fillSearchbox(prefix) {
     const maxCount = overviews[prefix].count;
     const data = overviews[prefix].visibleData;
 
-    const maxLen = (overviews[prefix].numVisible > data.length) ? data.length : overviews[prefix].numVisible;
+    const endIndex = Math.min(overviews[prefix].numVisible, data.length);
+    const startIndex = searchbox.children.length
 
-    for (let i = overviews[prefix].numVisible - VISIBLE_ELEMENTS; i < maxLen; i++) {
+    for (let i = startIndex; i < endIndex; i++) {
         const item = data[i];
         if (item == null) {
             break;
@@ -293,32 +294,54 @@ async function fillSearchbox(prefix) {
 
         const itemDiv = document.createElement('div');
         const query = getLinkToQuery(prefix, item);
-        const stringQuery = query.split('query=')[1].replaceAll('+', ' ').replaceAll('"', "&quot;");
+        const stringQuery = query.split('query=')[1]
+            .replaceAll('+', ' ').replaceAll('"', "&quot;");
         let scale = Math.log10(item.count) / Math.log10(maxCount);
         scale = (isNaN(scale)) ? 1 : scale; //scale can be NaN (div by 0) - set it to 1
         const bgColor = colorInterpolation(94, 94, 94, 34, 117, 189, scale);
 
-        let element =
-            `<a href=${query} style="text-decoration: none; color: inherit;" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')" target="_blank">
-                <p title="Search in Narrative Service">${item.name}</p>
-            </a>
-            <div style="background-color: ${bgColor};" class="count" title="Search in Narrative Service">
-                <a href=${query} target="_blank" onclick="logSubstanceHref('${currentDrugName}','${item.name}','${stringQuery}')">${item.count}</a>
-            </div>`;
+        const itemTextBody = document.createElement("a");
+        itemTextBody.href = query;
+        itemTextBody.style.textDecoration = "none";
+        itemTextBody.style.color = "inherit";
+        itemTextBody.onclick = () => logSubstanceHref(currentDrugName, item.name, stringQuery);
+        itemTextBody.target = "_blank";
+
+        const itemText = document.createElement("p");
+        itemText.title = "Search in Narrative Service";
+        itemText.innerText = item.name;
+        itemTextBody.appendChild(itemText);
+
+        const itemCountBody = document.createElement("div");
+        itemCountBody.style.backgroundColor = bgColor;
+        itemCountBody.classList.add("count");
+        itemCountBody.title = `Search in Narrative Service"`;
+
+        const itemCount = document.createElement("a");
+        itemCount.href = query;
+        itemCount.target = "_blank";
+        itemCount.onclick = () => logSubstanceHref(currentDrugName, item.name, stringQuery);
+        itemCount.innerText = item.count;
+        itemCountBody.appendChild(itemCount);
+        itemDiv.appendChild(itemTextBody);
+        itemDiv.appendChild(itemCountBody);
 
         if (item.max_phase_for_ind != null) {
-            const imgSrc = (item.max_phase_for_ind >= 0) ? url_chembl_phase + item.max_phase_for_ind + ".svg" : url_chembl_phase_new;
-            element +=
-                `<a class="phase" target="_blank" onclick="logChemblPhaseHref('${currentDrugName}', '${item.name}', '${item.id}', '${stringQuery}', '${item.max_phase_for_ind}')" title="Search in clinicaltrials.gov"
-                   href="https://clinicaltrials.gov/search?cond=${item.name}&viewType=Table&term=${currentDrugName}">
-                   <img src="${imgSrc}" alt="Phase ${(item.max_phase_for_ind >= 0) ? item.max_phase_for_ind : "unknown"}">
-                </a>`;
+            const phaseImgSrc = (item.max_phase_for_ind >= 0) ? url_chembl_phase + item.max_phase_for_ind + ".svg" : url_chembl_phase_new;
+            const phaseBody = document.createElement("a");
+            phaseBody.classList.add("phase");
+            phaseBody.target = "_blank";
+            phaseBody.onclick = () => logChemblPhaseHref(currentDrugName, item.name, item.id, stringQuery, item.max_phase_for_ind);
+            phaseBody.title = "Search in clinicaltrials.gov";
+            phaseBody.href = `https://clinicaltrials.gov/search?cond=${item.name}&viewType=Table&term=${currentDrugName}`;
+            const phaseImg = document.createElement("img");
+            phaseImg.src = phaseImgSrc;
+            phaseImg.alt = `Phase ${(item.max_phase_for_ind >= 0) ? item.max_phase_for_ind : "unknown"}`
+            phaseBody.appendChild(phaseImg);
+            itemDiv.appendChild(phaseBody);
         }
-
-        itemDiv.innerHTML = element;
         searchbox.append(itemDiv);
     }
-    // console.log(overviews[prefix].numVisible, "items added to", prefix)
     doneLoading(prefix);
 }
 
@@ -396,19 +419,15 @@ async function scrollUpdateElements(prefix) {
     }
 
     const content = document.getElementById(prefix + "Content");
-    const posRel = (content.scrollTop + content.offsetHeight) / content.scrollHeight * 100;
+    const relativePosition = (content.scrollTop + content.offsetHeight) / content.scrollHeight;
 
-    // add
-    if (posRel >= 70) {
-        const newEndIdx = overviews[prefix].numVisible + VISIBLE_ELEMENTS;
-        const dataLen = overviews[prefix].visibleData.length;
-
-        if (dataLen >= newEndIdx) {
-            overviews[prefix].numVisible = overviews[prefix].numVisible + VISIBLE_ELEMENTS;
-        } else {
-            overviews[prefix].numVisible = dataLen;
-        }
-        await fillSearchbox(prefix);
+    // check the current scroll position and add additional items if the user
+    // scrolled more than (>=) 70% of the containers' height.
+    if (relativePosition >= 0.7) {
+        const newIdxVisible = overviews[prefix].numVisible + VISIBLE_ELEMENTS;
+        const maxIdxVisible = overviews[prefix].visibleData.length;
+        overviews[prefix].numVisible = Math.min(newIdxVisible, maxIdxVisible);
+        fillSearchbox(prefix).catch(console.error);
     }
 }
 
