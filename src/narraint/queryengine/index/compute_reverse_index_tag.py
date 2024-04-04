@@ -5,13 +5,20 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import delete, and_, text
+from sqlalchemy import delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, TagInvertedIndex, Predication
 from narraint.config import QUERY_YIELD_PER_K
 from narrant.entity.entityidtranslator import EntityIDTranslator
+
+"""
+The tag-cache dictionary uses strings instead of tuples as keys ('seen_keys') for predication entries. With this, 
+the memory usage is lower.
+"""
+
+SEPERATOR_STRING = "_;_"
 
 
 def insert_data(session, index, predication_id_min):
@@ -25,7 +32,7 @@ def insert_data(session, index, predication_id_min):
         deleted_rows = 0
         for idx, row in enumerate(inv_q):
             p2.print_progress(idx)
-            row_key = row.entity_id, row.entity_type, row.document_collection
+            row_key = SEPERATOR_STRING.join([str(row.entity_id), str(row.entity_type), str(row.document_collection)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in index:
@@ -49,8 +56,9 @@ def insert_data(session, index, predication_id_min):
     progress = Progress(total=len(index.items()), print_every=1000, text="Computing insert values...")
     progress.start_time()
     insert_list = []
-    for (entity_id, entity_type, doc_col), doc_ids in index.items():
+    for row_key, doc_ids in index.items():
         try:
+            entity_id, entity_type, doc_col = row_key.split(SEPERATOR_STRING)
             translated_id = entityidtranslator.translate_entity_id(entity_id, entity_type)
         except (KeyError, ValueError):
             continue
@@ -124,7 +132,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
                 buffer.clear()
 
             last_key = sort_key
-            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
+            key = SEPERATOR_STRING.join([str(tag_row.ent_id), str(tag_row.ent_type), str(tag_row.document_collection)])
             buffer[key].add(tag_row.document_id)
 
         insert_data(session, buffer, predication_id_min)
@@ -138,7 +146,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
             if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
                 continue
 
-            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
+            key = SEPERATOR_STRING.join([str(tag_row.ent_id), str(tag_row.ent_type), str(tag_row.document_collection)])
             doc_id = tag_row.document_id
             index[key].add(doc_id)
 
