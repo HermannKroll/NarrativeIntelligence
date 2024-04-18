@@ -32,6 +32,7 @@ def insert_data(session, index, predication_id_min):
         deleted_rows = 0
         for idx, row in enumerate(inv_q):
             p2.print_progress(idx)
+            # tag ids are already translated inside the TagInvertedIndex
             row_key = SEPERATOR_STRING.join([str(row.entity_id), str(row.entity_type), str(row.document_collection)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
@@ -50,19 +51,12 @@ def insert_data(session, index, predication_id_min):
 
         logging.info('Entries deleted')
 
-    logging.info('Using the Gene Resolver to replace gene ids by symbols')
-    entityidtranslator = EntityIDTranslator()
-
     progress = Progress(total=len(index.items()), print_every=1000, text="Computing insert values...")
     progress.start_time()
     insert_list = []
     for row_key, doc_ids in index.items():
-        try:
-            entity_id, entity_type, doc_col = row_key.split(SEPERATOR_STRING)
-            translated_id = entityidtranslator.translate_entity_id(entity_id, entity_type)
-        except (KeyError, ValueError):
-            continue
-        insert_list.append(dict(entity_id=translated_id,
+        entity_id, entity_type, doc_col = row_key.split(SEPERATOR_STRING)
+        insert_list.append(dict(entity_id=entity_id,
                                 entity_type=entity_type,
                                 document_collection=doc_col,
                                 support=len(doc_ids),
@@ -116,13 +110,20 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
         query = query.order_by(Tag.ent_id, Tag.ent_type, Tag.document_collection, Tag.document_id)
     query = query.yield_per(QUERY_YIELD_PER_K)
 
+    logging.info('Using the Gene Resolver to replace gene ids by symbols')
+    entityidtranslator = EntityIDTranslator()
+
     if low_memory:
         buffer = defaultdict(set)
         last_key = ()
         for idx, tag_row in enumerate(query):
             progress.print_progress(idx)
+            try:
+                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
+            except (KeyError, ValueError):
+                continue
 
-            sort_key = (tag_row.document_collection, tag_row.ent_id, tag_row.ent_type)
+            sort_key = (tag_row.document_collection, translated_id, tag_row.ent_type)
             if idx == 0:
                 last_key = sort_key
 
@@ -132,7 +133,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
                 buffer.clear()
 
             last_key = sort_key
-            key = SEPERATOR_STRING.join([str(tag_row.ent_id), str(tag_row.ent_type), str(tag_row.document_collection)])
+            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
             buffer[key].add(tag_row.document_id)
 
         insert_data(session, buffer, predication_id_min)
@@ -145,10 +146,13 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
             progress.print_progress(idx)
             if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
                 continue
+            try:
+                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
+            except (KeyError, ValueError):
+                continue
 
-            key = SEPERATOR_STRING.join([str(tag_row.ent_id), str(tag_row.ent_type), str(tag_row.document_collection)])
-            doc_id = tag_row.document_id
-            index[key].add(doc_id)
+            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
+            index[key].add(tag_row.document_id)
 
         insert_data(session, index, predication_id_min)
         session.commit()
