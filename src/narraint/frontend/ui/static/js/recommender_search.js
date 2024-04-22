@@ -724,11 +724,11 @@ function submitSearch(parameters) {
 
 function recommenderSearch() {
     const documentInput = document.querySelector("#btn_search");
-    const query = "Metformin treats \"Diabetes Mellitus\""
+    const query = document.getElementById("search_input").value;
     const parameters = getInputParameters(query)
     setButtonSearching(true);
     logInputParameters(parameters);
-    updateURLParameters(parameters);
+    // updateURLParameters(parameters);
 
     submitRecommenderSearch(parameters)
         .finally(() => setButtonSearching(false));
