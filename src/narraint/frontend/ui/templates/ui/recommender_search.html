@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+{% csrf_token %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/simpleTree.css' %}" type="text/css"/>
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/ui.css' %}" type="text/css"/>
+{% endblock %}
+
+{% block title %}Narrative Service{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 text-center">
+                <p class="mt-0">
+                    If you want to cite our system or are interested in more information, see
+                    <a href="https://doi.org/10.1007/s00799-023-00356-3">10.1007/s00799-023-00356-3</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <form action="{% url 'search' %}" id="search_form">
+                        {% csrf_token %}
+            <div class="row">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search_input"
+                           placeholder="enter pmid and press enter  (e.g. 37924788)">
+
+                    <button class="btn btn-primary" type="button" id="btn_search" onclick="recommenderSearch()">
+                        <span class="spinner-border spinner-border-sm d-none" id="search_spinner" role="status"></span>
+                        Search
+                    </button>
+                </div>
+                <ul class="list-group" id="query_builder_list"></ul>
+                <p id="help_search" class="form-text text-muted" aria-describedby="btn_search">
+                    Please be patient. This process can take up to one minute.
+                </p>
+                <div class="alert alert-danger" style="display:none" id="alert_translation" role="alert"></div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <div class="container">
+    <div class="row">
+        <div class="col d-flex justify-content-center" style="height: 20px;">
+
+        </div>
+        <div class="graph" id="paperGraphTest"></div>
+    </div>
+
+
+        <!-- "Bootstrap Modal" (popup window) for ATC classes -->
+        <div class="modal" id="atcModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable"
+                 role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Concept Selection:</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-header">
+                        <div class="input-group rounded mb-1 mt-1">
+                            <input id="browseSearch" type="search" class="form-control rounded"
+                                   placeholder="Search"
+                                   aria-label="Search"
+                                   aria-describedby="search-addon"/>
+                            <span class="input-group-text border-0" id="search-addon">
+                                    <i class="fa fa-search"></i>
+                                  </span>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div id="browseTree"></div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                        <button id="atcTreeOK" class="btn btn-success" data-bs-dismiss="modal" type="button" onclick="">
+                            OK
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- "popup" used to notify the user that the result is empty -->
+        <div class="modal" tabindex="-1" id="modal_empty_result" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">No Results</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        The result set is empty. Do you want to search again more
+                        general using the predicate 'associated'?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success"
+                                data-bs-dismiss="modal" id="btn_search_again">
+                            Yes
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
+                            No
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="row flex-lg-row flex-column">
+            <!-- left column: filter options menu-->
+            <div class="col col-lg-2 mb-2 mb-lg-0">
+                <form class="border rounded">
+                    <div class="row m-1 align-items-center">
+                        <label><strong>Data Source:</strong></label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio" id="radio_pubmed" name="data_source" class="col-1"
+                               value="PubMed" onclick="refreshSearch()" checked>
+                        <label class="col-11" for="radio_pubmed">
+                            PubMed (<a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio" id="radio_litcovid" name="data_source" class="col-1"
+                               value="LitCovid" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_litcovid">
+                            LitCovid (<a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/"
+                                         target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio" id="radio_long_covid" name="data_source" class="col-1"
+                               value="LongCovid" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_long_covid">
+                            Long Covid (<a
+                                href="https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1"
+                                target="_blank">Help</a>)
+                        </label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio"
+                               id="radio_zbmed" name="data_source" class="col-1"
+                               value="ZBMed" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_zbmed">
+                            Covid 19 Pre-Prints<br>via ZBMED (<a
+                                href="https://preview.zbmed.de/" target="_blank">Help</a>)
+                        </label>
+                    </div>
+
+                    <!-- Year filter -->
+                    <div id="year-filter" class="year_filter">
+                        <div class="row m-1 align-items-center">
+                            <label><strong>Results by year:</strong></label>
+                        </div>
+                        <div class="row mx-2 align-items-center">
+                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" style="max-width: 150px"
+                                 id="range_container">
+                                <canvas id="myChart" style="width:100%"></canvas>
+                                <div class="sliders_control">
+                                    <input id="fromSlider" type="range"/>
+                                    <div class="range-value" id="rangeFrom"></div>
+                                    <input id="toSlider" type="range"/>
+                                    <div class="range-value" id="rangeTo"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization Buttons -->
+                    <div class="row m-1 align-items-center">
+                        <label><strong>Visualization by:</strong></label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                               value="outer_ranking_substitution" class="col-1"
+                               checked="checked" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_outer_ranking_a">
+                            Substitution</label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="col-1"
+                               value="outer_ranking_ontology" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_outer_ranking_b">
+                            MeSH-Taxonomy</label>
+                    </div>
+
+                    <div class="row m-1 align-items-center">
+                        <label><strong>Classifications:</strong></label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="checkbox" name="checkbox_classification" id="checkbox_classification"
+                               onclick="refreshSearch()" class="col-1">
+                        <label class="col-11" for="checkbox_classification">Pharm. Technology</label>
+                    </div>
+
+                    <div class="row m-1 align-items-center">
+                        <label><strong>Filter by type:</strong></label>
+                    </div>
+                    <div class="row m-1 align-items-center">
+                        <input type="checkbox" name="checkbox_sys_review" id="checkbox_sys_review"
+                               onclick="refreshSearch()" class="col-1">
+                        <label class="col-11" for="checkbox_sys_review">Systematic Review</label>
+                    </div>
+                </form>
+            </div>
+
+            <!-- right column: results table -->
+            <div class="col">
+                <div id="resultdiv">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2 id="document_header">Results:
+
+                                <a href="https://youtu.be/DrG1u8497g0" target="_blank">
+                                    <img src="{% static 'icons/help.png' %}" height="40px">
+                                </a>
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-4" id="div_input_page" style="display: none">
+                            <div class="input-group w-100">
+                                <label class="input-group-text" for="input_page_no">Page: </label>
+                                <input class="form-control" type="number" size="1" id="input_page_no" step="1" value="1"
+                                       min="1"/>
+                                <label class="input-group-text"> of </label>
+                                <label class="input-group-text" id="label_max_page"> of X</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <select class="form-select w-100" id="select_sorting_year"
+                                    style="width: auto; display: none">
+                                <option selected value="True">Relevance</option>
+                                <option value="True">Latest Publications First</option>
+                                <option value="False">Oldest Publications First</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <select class="form-select w-100" id="select_sorting_freq"
+                                    style="width: auto; display: none">
+                                <option selected value="True">Most Frequent Substitutions First</option>
+                                <option value="False">Unusual Substitutions First</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="input_title_filter" id="input_title_filter_label" class="col-12 col-md-8 d-none">Search
+                            in result titles:</label>
+                        <div class="input-group w-75">
+                            <input type="text" class="col-12 col-md-8 form-control d-none"
+                                   placeholder="search in result titles"
+                                   id="input_title_filter">
+                        </div>
+                    </div>
+                    <hr class="mt-2 mb-3"/>
+                    <div class="row">
+                        <div id="div_wrapper_documents">
+                            <div id="div_documents"></div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!--end col-->
+        </div> <!--end row-->
+
+        <!-- Feedback stuff-->
+        <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
+                onclick="openFeedback()" data-html2canvas-ignore="true">
+            <span id="feedbackbtn_text">Feedback</span>
+            <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
+        </button>
+        <div class="modal" tabindex="-1" role="dialog" id="feedbackModal">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl"
+                 role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send feedback with screenshot</h5>
+                        <button type="button" class="btn-close"
+                                onclick="closeFeedback()" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row mt-2">
+                                <div class="outsideWrapper">
+                                    <div class="insideWrapper" id="screenshotContainer">
+                                        <img src="null" id="screenshot"
+                                             class="img-fluid coveredImage border border-primary">
+                                        <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col text-center">
+                                    <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p>Please mark the problematic section on the image above and/or describe the problem you have
+                            encountered:</p>
+                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                            Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search history -->
+        <div class="modal" tabindex="-1" role="dialog" id="historyModal">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+                <div class="modal-content h-100">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Search history</h5>
+                        <button type="button" class="btn-close" onclick="closeHistory()" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <table class="table">
+                                <colgroup>
+                                    <col style="width: 20%;">
+                                    <col style="width: 40%;">
+                                    <col style="width: 30%;">
+                                    <col style="width: 10%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Search</th>
+                                    <th>Restrictions</th>
+                                    <th>Results</th>
+                                </tr>
+                                </thead>
+                                <tbody id="historyTable">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="closeHistory()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keyword search help -->
+        <div class="modal" tabindex="-1" role="dialog" id="keywordSearchHelpModal">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <!--<div class="modal-header">
+                        <h5 class="modal-title">Keyword Search Help</h5>
+                        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                    </div>-->
+                    <div class="modal-body" style="overflow: hidden">
+                        <img src="{% static 'assets/keyword_query_help.gif' %}" class="w-100">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="newsPopup">
+        <div class="newsdetail">
+            <div class="top">
+                <a id="paperLink">View Paper</a>
+                <a id="paperTab">Open in a new tab
+                    <img src="{% static 'assets/searchicon.svg' %}">
+                </a>
+                <div onclick="hidePaperView()">
+                    <img src="{% static 'assets/close.svg' %}">
+                </div>
+            </div>
+            <div class="bottom">
+                <div class="checkbox" id="newsCheckbox"></div>
+                <div class="paper">
+                    <h2 id="paperTitle"></h2>
+                    <p class="author" id="paperAuthor"></p>
+                    <p class="journal" id="paperJournal"></p>
+                    <p class="date" id="paperDate"></p>
+                    <p class="abstract" id="paperAbstract"></p>
+
+                    <div id="classifications">
+                        <h2 id="classificationHeader">Classifications</h2>
+                        <div id="classificationDiv"></div>
+                        <p id="classificationInfo"
+                           style="margin-top: 10px; font-size:15px;">
+                            <em>(1,10) means text passage 1-10</em></p>
+                    </div>
+                </div>
+                <div class="graph" id="paperGraph"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- loading screen -->
+    <div class="position-absolute start-0 top-0 w-100 h-100 bg-dark d-flex d-none" id="loading_screen"
+         style="opacity: 50%; z-index: 1000">
+        <div class="spinner-border text-primary m-auto" role="status" id="result_spinner">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <noscript>
+        <div class="noscript">
+            <div>
+                This website requires JavaScript enabled to function properly.
+            </div>
+        </div>
+    </noscript>
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- used for paper view popup -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
+
+    <script type="text/javascript">
+        const document_url = "{% url 'document' %}";
+        const search_url = "{% url 'query' %}";
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const query_check_url = "{% url 'check_query' %}";
+        const tree_info_url = "{% url 'tree_info' %}"
+        const feedback_url = "{% url 'feedback' %}";
+        const subgroup_feedback_url = "{% url 'subgroup_feedback' %}";
+        const provenance_url = "{% url 'provenance' %}";
+        const report_url = "{% url 'report' %}";
+        const document_clicked_url = "{% url 'document_clicked' %}";
+        const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png'  %}";
+        const ok_symbol_url = "{% static 'ok.png' %}";
+        const cancel_symbol_url = "{% static 'cancel.png' %}";
+        const search_icon_url = "{% static 'assets/searchicon.svg' %}"
+        const url_graph_preview = "{% static 'graph_preview.png' %}";
+        const url_paper_view_log = "{% url 'paper_view_log' %}";
+        const explain_translation_url = "{% url 'explain_translation' %}";
+        const url_keyword_search_request = "{% url 'keyword_search_request' %}";
+
+        const url_document_graph = "{% url 'document_graph' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+        const url_recommended_documents = "{% url 'recommended_documents' %}";
+
+        $("#nav_item_search").addClass("active");
+        $("#nav_item_help").removeClass("active");
+        //$("#nav_item_stats").removeClass("active");
+
+        const historyQueryKey = "query";
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    </script>
+    <script src="{% static 'js/recommender_search.js' %}?version=3" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=17" type="text/javascript"></script>
+    <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
+    <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
+{% endblock %}

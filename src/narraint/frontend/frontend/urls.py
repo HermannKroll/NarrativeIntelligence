@@ -19,7 +19,7 @@ from django.views.decorators.cache import never_cache
 
 from narraint.frontend.frontend.settings.base import INSTALLED_APPS, ADMIN_ENABLED
 from narraint.frontend.ui.views import StatsView, HelpView, DocumentView, DrugOverviewView, \
-    SearchView, SwaggerUIView, LogsView, LongCovidView, CovidView19, MECFSView
+    SearchView, SwaggerUIView, LogsView, LongCovidView, CovidView19, MECFSView, RecommenderView
 
 urlpatterns = [
     path(r'', include('ui.urls')),
@@ -34,6 +34,7 @@ urlpatterns = [
     path('drug_overview_index/', DrugOverviewView.as_view(), name='drug_overview_index'),
     path("new_search/", never_cache(SearchView.as_view()), name="new_search"),
     path("keyword_search/", never_cache(SearchView.as_view()), name="keyword_search_view"),
+    path("recommendation/", never_cache(RecommenderView.as_view()), name="recommender_search_view"),
     path("", never_cache(SearchView.as_view()), name="search"),
     path('api/', SwaggerUIView.as_view(
         extra_context={'schema_url': 'openapi-schema'}

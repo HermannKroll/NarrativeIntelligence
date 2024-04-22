@@ -1273,6 +1273,13 @@ class HelpView(TemplateView):
         View().query_logger.write_page_view_log(HelpView.template_name)
         return super().get(request, *args, **kwargs)
 
+class RecommenderView(TemplateView):
+    template_name = "ui/recommender_search.html"
+
+    def get(self, request, *args, **kwargs):
+        View().query_logger.write_page_view_log(RecommenderView.template_name)
+        return super().get(request, *args, **kwargs)
+
 
 class DocumentView(TemplateView):
     template_name = "ui/paper.html"
@@ -1382,3 +1389,185 @@ def get_clinical_trial_phases(request):
 
             return HttpResponse(status=500)
     return HttpResponse(status=500)
+
+
+@gzip_page
+def get_recommended_documents(request):
+    results_converted = []
+    is_aggregate = False
+    valid_query = False
+    query_limit_hit = False
+    query_trans_string = ""
+    if "query" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
+    if "data_source" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+
+    try:
+        query = str(request.GET.get("query", "").strip())
+        data_source = str(request.GET.get("data_source", "").strip())
+        if "outer_ranking" in request.GET:
+            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        else:
+            outer_ranking = "outer_ranking_substitution"
+
+        if "start_pos" in request.GET:
+            start_pos = request.GET.get("start_pos").strip()
+            try:
+                start_pos = int(start_pos)
+            except ValueError:
+                start_pos = None
+        else:
+            start_pos = None
+        if "end_pos" in request.GET:
+            end_pos = request.GET.get("end_pos").strip()
+            try:
+                end_pos = int(end_pos)
+            except ValueError:
+                end_pos = None
+        else:
+            end_pos = None
+
+        if "freq_sort" in request.GET:
+            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
+            if freq_sort_desc == 'False':
+                freq_sort_desc = False
+            else:
+                freq_sort_desc = True
+        else:
+            freq_sort_desc = True
+
+        if "year_sort" in request.GET:
+            year_sort_desc = str(request.GET.get("year_sort", "").strip())
+            if year_sort_desc == 'False':
+                year_sort_desc = False
+            else:
+                year_sort_desc = True
+        else:
+            year_sort_desc = True
+
+        year_start = None
+        if "year_start" in request.GET:
+            year_start = str(request.GET.get("year_start", "").strip())
+            try:
+                year_start = int(year_start)
+            except ValueError:
+                year_start = None
+
+        year_end = None
+        if "year_end" in request.GET:
+            year_end = str(request.GET.get("year_end", "").strip())
+            try:
+                year_end = int(year_end)
+            except ValueError:
+                year_end = None
+
+        title_filter = None
+        if "title_filter" in request.GET:
+            title_filter = str(request.GET.get("title_filter", "").strip())
+
+        classification_filter = None
+        if "classification_filter" in request.GET:
+            classification_filter = str(request.GET.get("classification_filter", "").strip())
+            if classification_filter:
+                classification_filter = classification_filter.split(';')
+            else:
+                classification_filter = None
+
+        # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
+        logging.info(f'Query string is: {query}')
+        logging.info("Selected data source is {}".format(data_source))
+        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+        # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
+        time_start = datetime.now()
+        graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
+            query)
+        year_aggregation = {}
+        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+            results_converted = []
+            query_trans_string = "Data source is unknown"
+            logger.error('parsing error')
+        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+            query_trans_string = "Outer ranking strategy is unknown"
+            logger.error('parsing error')
+        elif not graph_query or len(graph_query.fact_patterns) == 0:
+            results_converted = []
+            logger.error('parsing error')
+        elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
+                graph_query) > 1:
+            results_converted = []
+            nt_string = ""
+            query_trans_string = "Do not support multiple variables in an ontology-based ranking"
+            logger.error("Do not support multiple variables in an ontology-based ranking")
+        else:
+            logger.info(f'Translated Query is: {str(graph_query)}')
+            valid_query = True
+            document_collection = data_source
+
+            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
+            result_ids = {r.document_id for r in results}
+            opt_query = QueryOptimizer.optimize_query(graph_query)
+            View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+                                                         query, opt_query)
+
+            results = TitleFilter.filter_documents(results, title_filter)
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            results_converted = []
+            if outer_ranking == 'outer_ranking_substitution':
+                substitution_aggregation = ResultTreeAggregationBySubstitution()
+                sorted_var_names = graph_query.get_var_names_in_order()
+                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
+                                                                                     freq_sort_desc, year_sort_desc,
+                                                                                     start_pos, end_pos)
+                results_converted = results_ranked.to_dict()
+            elif outer_ranking == 'outer_ranking_ontology':
+                substitution_ontology = ResultAggregationByOntology()
+                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                                  year_sort_desc)
+                results_converted = results_ranked.to_dict()
+
+        for r in results_converted["r"]:
+            facts = [{'s': 'Metformin', 'p': 'treats', 'o': 'Diabetes Mellitus'}]
+            nodes = ['Metformin', 'Diabetes Mellitus']
+
+            data = {
+                "nodes": [],
+                "edges": []
+            }
+
+            node_id_map = {}
+            next_node_id = 1
+
+            for node in nodes:
+                node_id = next_node_id
+                node_id_map[node] = node_id
+                data["nodes"].append({"id": node_id, "label": node})
+                next_node_id += 1
+
+            for fact in facts:
+                source_id = node_id_map[fact["s"]]
+                target_id = node_id_map[fact["o"]]
+                data["edges"].append({"from": source_id, "to": target_id, "label": fact["p"]})
+            r["graph_data"] = data
+
+        View().query_logger.write_api_call(True, "get_query", str(request),
+                                                    time_needed=datetime.now() - time_start)
+
+        return JsonResponse(
+            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
+                 query_translation=query_trans_string, year_aggregation=year_aggregation,
+                 query_limit_hit="False"))
+    except Exception:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        query_trans_string = "keyword query cannot be converted (syntax error)"
+        traceback.print_exc(file=sys.stdout)
+        return JsonResponse(
+            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                 query_limit_hit="False"))
