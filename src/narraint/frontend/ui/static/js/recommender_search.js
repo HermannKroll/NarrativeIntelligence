@@ -756,7 +756,7 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         "by: " + authors + '<br>' +
         '</div></div><br>'); */
 
-    let divDoc_RecommenderGraph = $('<div class="graph rounded border w-100" id="' + document_id + '_graph"></div>');
+    let divDoc_RecommenderGraph = $('<div class="graph rounded border w-100" style="height:500px" id="' + document_id + '_graph"></div>');
     divDoc_Card.append(divDoc_RecommenderGraph);
     let divFinal = $('<div/>');
     divFinal.append(divDoc_Card);
