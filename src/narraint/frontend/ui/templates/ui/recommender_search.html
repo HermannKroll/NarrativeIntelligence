@@ -282,55 +282,7 @@
             </div> <!--end col-->
         </div> <!--end row-->
 
-        <!-- Feedback stuff-->
-        <button type="button" class="btn btn-primary feedbackbtn" id="feedback_button"
-                onclick="openFeedback()" data-html2canvas-ignore="true">
-            <span id="feedbackbtn_text">Feedback</span>
-            <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status"></span>
-        </button>
-        <div class="modal" tabindex="-1" role="dialog" id="feedbackModal">
-            <div class="modal-dialog modal-dialog-scrollable modal-xl"
-                 role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Send feedback with screenshot</h5>
-                        <button type="button" class="btn-close"
-                                onclick="closeFeedback()" aria-label="Close">
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container">
-                            <div class="row mt-2">
-                                <div class="outsideWrapper">
-                                    <div class="insideWrapper" id="screenshotContainer">
-                                        <img src="null" id="screenshot"
-                                             class="img-fluid coveredImage border border-primary">
-                                        <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col text-center">
-                                    <button type="button" class="btn btn-secondary" onclick="reset_scanvas()">Reset
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p>Please mark the problematic section on the image above and/or describe the problem you have
-                            encountered:</p>
-                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
-                            Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+     
         <!-- Search history -->
         <div class="modal" tabindex="-1" role="dialog" id="historyModal">
             <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">

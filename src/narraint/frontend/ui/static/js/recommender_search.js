@@ -6,27 +6,6 @@ let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 let recommender_graph = null;
 let recommender_papernetwork = null;
 
-
-let CYTOSCAPE_STYLE = [
-    {
-        selector: 'node',
-        style: {
-            'background-color': '#8EB72B',
-            'label': 'data(id)'
-        }
-    },
-    {
-        selector: 'edge',
-        style: {
-            'width': 3,
-            'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
-            'target-arrow-shape': 'triangle',
-            'label': 'data(label)'
-        }
-    }
-];
-
 const YEAR_RESULT_FILTER_CONFIG = {
     scales: {
         xAxes: [{
@@ -40,46 +19,6 @@ const YEAR_RESULT_FILTER_CONFIG = {
 }
 
 
-// dictionary used to translate shortened urls into specific query links
-const short_urls = {
-    'q1': '&quot;post-acute COVID-19 syndrome&quot; associated Disease',
-    'q2': 'Drug treats &quot;post-acute COVID-19 syndrome&quot;',
-    'q3': 'Drug treats Covid19',
-    'q4': 'Covid19 associated &quot;ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS&quot;',
-    'q5': 'Disease associated Covid19',
-    'q6': 'Covid19 associated Target',
-    'q7': 'Covid19 associated Human _AND_ Disease associated Human',
-    'q8': 'Covid19 associated Vaccine',
-    'q9': 'Covid19 associated &quot;Pfizer Covid 19 Vaccine&quot; _AND_ Human associated Disease',
-    'q10': '&quot;Mass Spectrometry&quot; method Simvastatin',
-    'q11': '?X(Method) method Simvastatin',
-    'q12': '?X(LabMethod) method Simvastatin',
-    'q13': 'Metformin treats &quot;Diabetes Mellitus&quot;',
-    'q14': 'Simvastatin treats Hypercholesterolemia',
-    'q15': 'Metformin treats ?X(Disease)',
-    'q16': 'Metformin treats ?X(Species)',
-    'q17': 'Vinca associated ?Y(Disease)',
-    'q18': 'Digitalis associated ?Y(Disease)',
-    'q19': '?X(PlantFamily) associated ?Y(Disease)',
-    'q20': 'Metformin administered ?X(DosageForm)',
-    'q21': 'Metformin administered Injections',
-    'q22': 'Lidocaine administered ?X(DosageForm)',
-    'q23': '?X(Drug) administered liposomes',
-    'q24': '?X(Drug) administered &quot;Nebulizers and Vaporizers&quot;',
-    'q25': 'Metformin inhibits mtor',
-    'q26': 'Metformin inhibits ?X(Target)',
-    'q27': '?X(Drug) inhibits cyp3a4',
-    'q28': 'cyp3a4 metabolises Simvastatin',
-    'q29': 'Simvastatin induces Rhabdomyolysis',
-    'q30': 'Simvastatin induces &quot;Muscular Diseases&quot;',
-    'q31': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated human',
-    'q32': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin associated ?X(Drug)',
-    'q33': 'Metformin treats &quot;Diabetes Mellitus&quot;_AND_ Metformin administered ?X(DosageForm)',
-    'q34': 'Simvastatin induces &quot;Muscular Diseases&quot;_AND_ ?X(Drug) inhibits cyp3a4',
-    'q35': '?Drug(Drug) treats ?Dis(Disease)',
-    'q36': '?Drug(Drug) administered ?Form(DosageForm)',
-};
-
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -92,235 +31,6 @@ $('#btn_search_again').click(() => {
     predicate_input.selectedIndex = 0;
     refreshSearch();
 })
-
-$('#cookiebtnDeny').click(() => {
-    $('.toast').toast('hide')
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-})
-
-const cookieAcceptBtnHandler = (callback) => {
-    let userid = uuidv4();
-    localStorage.setItem('userid', userid);
-    $('.toast').toast('hide');
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-    callback();
-}
-
-function getUserIDFromLocalStorage(callback) {
-    if (!localStorage.getItem('userid')) {
-        console.log("no user id found in local storage");
-
-        //remove previously stored events and add the new callback event
-        $('#cookiebtnAccept').off('click').click(() => {
-            cookieAcceptBtnHandler(callback);
-        })
-
-        let cookie_toast = $('#cookie_toast');
-        cookie_toast.show();
-        cookie_toast.toast('show');
-        return "cookie";
-    }
-    return localStorage.getItem('userid');
-}
-
-
-function escapeString(input_string) {
-    if (input_string.includes(' ')) {
-        return '"' + input_string + '"'.trim();
-    }
-    return input_string.trim();
-}
-
-function getTextOrPlaceholderFromElement(element_id) {
-    let text = document.getElementById(element_id).value;
-    if (text.length > 0) {
-        return text;
-    } else {
-        return "";
-    }
-
-}
-
-
-let uniqueListID = 0;
-const getUniqueListID = () => {
-    uniqueListID += 1;
-    return 'li_' + uniqueListID;
-}
-
-let queryPatternDict = {};
-
-function addQueryPattern(id, subject, predicate, object) {
-    queryPatternDict[id] = [subject, predicate, object];
-}
-
-function removeQueryPattern(id) {
-    delete queryPatternDict[id];
-}
-
-function removeAllQueryPatterns() {
-    let ids = Object.keys(queryPatternDict);
-    ids.forEach(id => {
-        removeQueryPattern(id);
-    });
-}
-
-function getCurrentQuery() {
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input = document.getElementById('input_predicate');
-    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-
-    let query = "";
-    if (subject.length > 0 && object.length > 0) {
-        query = (subject + ' ' + predicate + ' ' + object);
-    }
-
-    Object.values(queryPatternDict).forEach(val => {
-        // do not add this pattern twice
-        if (val[0] !== subject || val[1] !== predicate || val[2] !== object) {
-            query = (val[0] + ' ' + val[1] + ' ' + val[2] + '_AND_') + query;
-        }
-    });
-
-    return query;
-}
-
-function createQueryListItem(subject, predicate, object) {
-    let uniqueListItemID = getUniqueListID();
-    addQueryPattern(uniqueListItemID, subject, predicate, object);
-    let deleteEvent = '$(\'#' + uniqueListItemID + '\').remove();removeQueryPattern(\'' + uniqueListItemID + '\');'
-    let listItem = $('<li id="' + uniqueListItemID + '" class="list-group-item">' +
-        '   <div class="row">' +
-        '       <div class="d-flex col-sm-4 align-items-center">' + subject + '</div>' +
-        '       <div class="d-flex col-sm-2 align-items-center">' + predicate + '</div>' +
-        '       <div class="d-flex col-sm-4 align-items-center">' + object + '</div>' +
-        '       <div class="d-flex col-sm-1"><button class="btn btn-danger" onclick="' + deleteEvent + '">-</button></div>' +
-        '   </div>' +
-        '</li>');
-    $('#query_builder_list').append(listItem);
-    document.getElementById('input_subject').value = "";
-    document.getElementById('input_predicate').options[0].selected = true;
-    document.getElementById('input_object').value = "";
-}
-
-function addQueryPart() {
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let predicate_input = document.getElementById('input_predicate');
-    let predicate = predicate_input.options[predicate_input.selectedIndex].value;
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    let query_text = subject + ' ' + predicate + ' ' + object;
-
-    if (subject.length === 0) {
-        $('#alert_translation').text('subject is empty');
-        $('#alert_translation').fadeIn();
-        return;
-    }
-    if (object.length === 0) {
-        $('#alert_translation').text('object is empty');
-        $('#alert_translation').fadeIn();
-    }
-
-    let request = $.ajax({
-        url: query_check_url,
-        data: {
-            query: query_text
-        }
-    });
-
-    request.done(function (response) {
-        let answer = response['valid']
-        if (answer === "True") {
-            $('#alert_translation').hide();
-            createQueryListItem(subject, predicate, object)
-        } else {
-            console.log('translation error:' + response["query"])
-            $('#alert_translation').text(response["query"]);
-            $('#alert_translation').fadeIn();
-        }
-    });
-
-    request.fail(function (result) {
-        $('#alert_translation').text('connection issues (please reload website)');
-        $('#alert_translation').fadeIn();
-    });
-}
-
-
-function clearQueryBuilder() {
-    removeAllQueryPatterns();
-    let queryBuilder = document.getElementById('query_builder_list');
-    while (queryBuilder.firstChild) {
-        queryBuilder.removeChild(queryBuilder.firstChild);
-    }
-}
-
-function split(val) {
-    // split string by space but do not split spaces within brackets
-    // remove all leading and closing brackets from splits
-    return val.match(/\\?.|^$/g).reduce((p, c) => {
-        if (c === '"') {
-            p.quote ^= 1;
-        } else if (!p.quote && c === ' ') {
-            p.a.push('');
-        } else {
-            p.a[p.a.length - 1] += c.replace(/\\(.)/, "$1");
-        }
-        return p;
-    }, {a: ['']}).a;
-}
-
-let optionMapping = {
-    "associated": 0,
-    "administered": 1,
-    "compares": 2,
-    "decreases": 3,
-    "induces": 4,
-    "interacts": 5,
-    "inhibits": 6,
-    "metabolises": 7,
-    "method": 8,
-    "treats": 9
-}
-
-function tryDecodeShortURL(query) {
-    if (query in short_urls) {
-        //Known query abbreviation. Decode html escape sequences.
-        lastQuery = $('<div>' + short_urls[query] + '</div>').text();
-        return true;
-    }
-    return false;
-}
-
-function initQueryBuilderFromString(search_str) {
-    if (tryDecodeShortURL(search_str)) {
-        search_str = lastQuery;
-    }
-
-    $('#collapseExamples').collapse('hide');
-    clearQueryBuilder();
-    console.log(search_str);
-    let first = true;
-    search_str.split('_AND_').forEach(comp => {
-        let triple = split(comp.trim());
-        if (first === false) {
-            let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-            let predicate_input = document.getElementById('input_predicate');
-            let predicate = predicate_input.options[predicate_input.selectedIndex].value;
-            let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-            createQueryListItem(subject, predicate, object);
-        }
-        document.getElementById('input_subject').value = triple[0];
-        document.getElementById('input_predicate').options[optionMapping[triple[1]]].selected = true;
-        document.getElementById('input_object').value = triple[2];
-        first = false;
-    });
-
-    document.getElementById("btn_search").click();
-    $('html,body').scrollTop(0);
-}
 
 function refreshSearch(fromUrl = false) {
     if (result_present()) {
@@ -343,116 +53,6 @@ document.getElementById("select_sorting_year").addEventListener("change", functi
 document.getElementById("select_sorting_freq").addEventListener("change", function () {
     document.getElementById("btn_search").click()
 });
-
-let imgrect = {width: 0, height: 0};
-document.getElementById("screenshot").addEventListener('load', (e) => {
-    imgrect = e.target.getBoundingClientRect();
-});
-
-
-async function openFeedback() {
-    $("#feedbackbtn_text").html("Generating Screenshot (may take a while)");
-    $("#reportSpinner").addClass("busy");
-    $("#feedback_button").addClass("disabled")
-    await new Promise(r => setTimeout(r, 10));
-    const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging: false})
-
-    const base64image = canvas.toDataURL("image/png");
-    let screenshot = $("#screenshot")
-    await screenshot.attr("src", base64image);
-    $("#feedbackModal").modal("toggle");
-    $("#reportSpinner").removeClass("busy");
-    $("#feedback_button").removeClass("disabled")
-    $("#feedbackbtn_text").html("Feedback");
-
-
-    $("#screenshotCanvas").remove();
-
-    $("#screenshotContainer").append('<canvas class="coveringCanvas" id="screenshotCanvas"></canvas>')
-
-    let screenshotCanvas = $("#screenshotCanvas");
-    screenshotCanvas.attr('width', canvas.width);
-    screenshotCanvas.attr('height', canvas.height);
-    let pos = {x: 0, y: 0};
-    screenshotCanvas.mousemove(draw);
-    screenshotCanvas.mousedown(setPosition);
-    screenshotCanvas.mouseenter(setPosition);
-    screenshotCanvas.mouseenter(() => {
-        document
-    })
-    let ctx = screenshotCanvas[0].getContext('2d')
-
-    function draw(e) {
-        if (e.buttons !== 1)
-            return;
-
-        ctx.beginPath();
-
-        ctx.lineWidth = 5;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#c0392b';
-
-        ctx.moveTo(pos.x, pos.y);
-        setPosition(e);
-        ctx.lineTo(pos.x, pos.y);
-
-        ctx.stroke();
-    }
-
-    function setPosition(e) {
-        let rect = e.target.getBoundingClientRect();
-        pos.x = (e.clientX - rect.left) * canvas.width / imgrect.width;
-        pos.y = (e.clientY - rect.top) * canvas.height / imgrect.height;
-    }
-}
-
-function closeFeedback(send = false) {
-    if (send) {
-        const MAX_WIDTH = 1920;
-        let combineCanvas = document.createElement("canvas");
-        let dim = document.getElementById('screenshotCanvas');
-        // resize if the screenwidth is larger than 1920px
-        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH : dim.width;
-        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width) : dim.height;
-
-        combineCanvas.width = targetWidth;
-        combineCanvas.height = targetHeight;
-
-        let ctx = combineCanvas.getContext('2d')
-        ctx.drawImage(document.getElementById('screenshot'), 0, 0, targetWidth, targetHeight);
-        ctx.drawImage(document.getElementById('screenshotCanvas'), 0, 0, targetWidth, targetHeight);
-
-        const params = {
-            description: $("#feedbackText").val(),
-            img64: combineCanvas.toDataURL("image/png")
-        };
-        const options = {
-            method: 'POST',
-            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
-            mode: 'same-origin',
-            body: JSON.stringify(params)
-        };
-        fetch(report_url, options).then(response => {
-                if (response.ok) {
-                    alert("Report successfully sent!");
-                    $("#feedbackModal").modal("toggle");
-                    $("#feedbackText").val("");
-                } else {
-                    alert("Sending report has failed!");
-                }
-            }
-        )
-    } else {
-        $("#feedbackModal").modal("toggle");
-    }
-}
-
-const reset_scanvas = () => {
-    const canvas = document.getElementById("screenshotCanvas");
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
 
 const setButtonSearching = isSearching => {
     let btn = $('#btn_search');
@@ -490,79 +90,6 @@ $(document).ready(function () {
     buildSelectionTrees();
 
     $("#search_form").submit(search);
-
-    $('#input_subject').autocomplete({
-        minLength: 0,
-        autoFocus: true,
-        source: function (request, response) {
-            let relevantTerm = request.term;
-            $.ajax({
-                type: "GET",
-                url: autocompletion_url,
-                data: {
-                    term: relevantTerm
-                },
-                success: function (data) {
-                    // delegate back to autocomplete, but extract the last term
-                    response(data["terms"]);
-                }
-            });
-        }
-        ,
-        focus: function () {
-            // prevent value inserted on focus
-            return false;
-        }
-        ,
-        select: function (event, ui) {
-            this.value = ui.item.value.trim();
-            return false;
-        }
-    }).on("keydown", function (event) {
-        bootstrap.Popover.getInstance(document.getElementById("input_subject")).hide();
-        bootstrap.Popover.getInstance(document.getElementById("input_object")).hide();
-
-        // don't navigate away from the field on tab when selecting an item
-        if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
-            event.preventDefault();
-        }
-    });
-
-
-    $('#input_object').autocomplete({
-        minLength: 0,
-        autoFocus: true,
-        source: function (request, response) {
-            let relevantTerm = request.term;
-            $.ajax({
-                type: "GET",
-                url: autocompletion_url,
-                data: {
-                    term: relevantTerm
-                },
-                success: function (data) {
-                    // delegate back to autocomplete, but extract the last term
-                    response(data["terms"]);
-                }
-            });
-        }
-        ,
-        focus: function () {
-            // prevent value inserted on focus
-            return false;
-        }
-        ,
-        select: function (event, ui) {
-            this.value = ui.item.value.trim();
-            return false;
-        }
-
-    }).on("keydown", function (event) {
-        // don't navigate away from the field on tab when selecting an item
-        if (event.keyCode === $.ui.keyCode.TAB /** && $(this).data("ui-autocomplete").menu.active **/) {
-            event.preventDefault();
-        }
-    });
 
     document.getElementById("input_page_no").addEventListener('change', (event) => {
         pageUpdated();
@@ -635,7 +162,8 @@ function initFromURLQueryParams() {
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
-        initQueryBuilderFromString(query);
+        document.getElementById("search_input").value = query;
+        document.getElementById("btn_search").click();
     }
 }
 
@@ -684,19 +212,15 @@ function getStartPositionBasedOnCurrentPage() {
 let lastQuery = "";
 let lastDataSource = "";
 
+
 const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#modal_empty_result').hide();
     $('#alert_translation').hide();
     event.preventDefault();
-    let query = getCurrentQuery();
+    let query = document.getElementById("search_input").value;
     console.log(query);
 
-    if (!checkQuery())
-        return;
-
-    // Todo: hardfix at the moment
-    // resetKeywordSearch();
     const parameters = getInputParameters(query);
     setButtonSearching(true);
     logInputParameters(parameters);
@@ -728,7 +252,7 @@ function recommenderSearch() {
     const parameters = getInputParameters(query)
     setButtonSearching(true);
     logInputParameters(parameters);
-    // updateURLParameters(parameters);
+    updateURLParameters(parameters);
 
     submitRecommenderSearch(parameters)
         .finally(() => setButtonSearching(false));
@@ -821,7 +345,7 @@ function updateURLParameters(parameters) {
     } else {
         url.searchParams.delete("classification_filter");
     }
-    window.history.pushState("Query", "Title", "/" + url.search.toString());
+    window.history.pushState("Query", "Title", "/recommendation" + url.search.toString());
 }
 
 /**
@@ -1783,86 +1307,3 @@ function initializeValues(slider, value, min, max) {
     slider.min = min;
     slider.value = value;
 }
-
-function checkQuery() {
-    let subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    let object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-
-    // check if the main query input is empty while additional triples connected via '_AND_' could exist
-    if (subject.length === 0 && object.length === 0) {
-        return true;
-    }
-
-    if (subject.length === 0) {
-        $('#alert_translation').text('Subject is empty');
-        $('#alert_translation').fadeIn();
-        return false;
-    }
-    if (object.length === 0) {
-        $('#alert_translation').text('Object is empty');
-        $('#alert_translation').fadeIn();
-        return false;
-    }
-    return true;
-}
-
-/**
- * Function sets event listeners for query builder popover.
- */
-function initializeExplanationPopover() {
-    const subjectInput = document.getElementById("input_subject");
-    const objectInput = document.getElementById("input_object");
-    const options = {
-        trigger: 'focus',
-        html: true,
-        placement: 'bottom'
-    };
-    new bootstrap.Popover(subjectInput, options);
-    new bootstrap.Popover(objectInput, options);
-
-    subjectInput.oninput = updateExplanationPopover;
-    objectInput.oninput = updateExplanationPopover;
-}
-
-/**
- * Function prepares the relevant information to call the popover update.
- * If one of the inputs is empty, the text of the popover is cleared.
- */
-async function updateExplanationPopover() {
-    const subject = escapeString(getTextOrPlaceholderFromElement('input_subject'));
-    const predicateInput = document.getElementById('input_predicate');
-    const predicate = predicateInput.options[predicateInput.selectedIndex].value;
-    const object = escapeString(getTextOrPlaceholderFromElement('input_object'));
-    const queryText = subject + ' ' + predicate + ' ' + object;
-
-    const subjectPopover = bootstrap.Popover.getInstance(document.getElementById("input_subject"));
-    const objectPopover = bootstrap.Popover.getInstance(document.getElementById("input_object"));
-
-    subjectPopover.hide();
-    objectPopover.hide();
-
-    if (subject === "" || object === "") {
-        subjectPopover._config.content = "";
-        objectPopover._config.content = "";
-        return;
-    }
-
-    // call them synchronous and do not wait for the finish
-    await updatePopoverByType(subjectPopover, subject, queryText);
-    await updatePopoverByType(objectPopover, object, queryText);
-}
-
-async function updatePopoverByType(popover, concept, queryText) {
-    popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
-        .then((response) => {
-            return response.json()
-        })
-        .then((data) => {
-            return data['headings'].join('<hr class="border-1 my-0"/>');
-        })
-        .catch((e) => console.log(e));
-}
-
-// window.onload = function() {
-//     initQueryBuilderFromString('Metformin administered Injections');
-// };

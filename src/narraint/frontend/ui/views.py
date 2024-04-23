@@ -1415,41 +1415,6 @@ def get_recommended_documents(request):
         else:
             outer_ranking = "outer_ranking_substitution"
 
-        if "start_pos" in request.GET:
-            start_pos = request.GET.get("start_pos").strip()
-            try:
-                start_pos = int(start_pos)
-            except ValueError:
-                start_pos = None
-        else:
-            start_pos = None
-        if "end_pos" in request.GET:
-            end_pos = request.GET.get("end_pos").strip()
-            try:
-                end_pos = int(end_pos)
-            except ValueError:
-                end_pos = None
-        else:
-            end_pos = None
-
-        if "freq_sort" in request.GET:
-            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
-            if freq_sort_desc == 'False':
-                freq_sort_desc = False
-            else:
-                freq_sort_desc = True
-        else:
-            freq_sort_desc = True
-
-        if "year_sort" in request.GET:
-            year_sort_desc = str(request.GET.get("year_sort", "").strip())
-            if year_sort_desc == 'False':
-                year_sort_desc = False
-            else:
-                year_sort_desc = True
-        else:
-            year_sort_desc = True
-
         year_start = None
         if "year_start" in request.GET:
             year_start = str(request.GET.get("year_start", "").strip())
