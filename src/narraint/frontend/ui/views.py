@@ -1484,7 +1484,6 @@ def get_recommended_documents(request):
             # do filtering stuff
             results = TitleFilter.filter_documents(results, title_filter)
             year_aggregation = TimeFilter.aggregate_years(results)
-            print(year_aggregation)
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
             if classification_filter:
                 logging.debug(f'Filtering document classifications with {classification_filter}...')

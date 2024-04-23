@@ -217,7 +217,6 @@ const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#modal_empty_result').hide();
     $('#alert_translation').hide();
-    event.preventDefault();
     let query = document.getElementById("search_input").value;
     console.log(query);
 
@@ -241,27 +240,6 @@ function submitSearch(parameters) {
     const parameterString = createURLParameterString(parameters);
 
     return fetch(search_url + "?" + parameterString)
-        .then((response) => response.json())
-        .then((data) => showResults(data, parameters))
-        .catch((e) => console.log(e))
-}
-
-function recommenderSearch() {
-    const documentInput = document.querySelector("#btn_search");
-    const query = document.getElementById("search_input").value;
-    const parameters = getInputParameters(query)
-    setButtonSearching(true);
-    logInputParameters(parameters);
-    updateURLParameters(parameters);
-
-    submitRecommenderSearch(parameters)
-        .finally(() => setButtonSearching(false));
-}
-
-function submitRecommenderSearch(parameters) {
-    const parameterString = createURLParameterString(parameters);
-
-    return fetch(url_recommended_documents + "?" + parameterString)
         .then((response) => response.json())
         .then((data) => showResults(data, parameters))
         .catch((e) => console.log(e))
@@ -453,6 +431,8 @@ function showResults(response, parameters) {
         return;
     }
 
+    latest_query_translation = lastQuery;
+
     let query_len = 0;
     latest_valid_query = parameters["query"];
 
@@ -521,7 +501,6 @@ function showResults(response, parameters) {
 
 
     updateYearFilter(response["year_aggregation"], query_trans_string);
-    latest_query_translation = query_trans_string.split("----->")[0].trim();
 }
 
 
@@ -545,10 +524,9 @@ function updateYearFilter(year_aggregation, query_trans_string) {
         xValues.push(year);
         yValues.push(year_aggregation[year]);
     }
-    if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
-        initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
-        initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
-    }
+
+    initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+    initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
 
     fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
     setToggleAccessible(toSlider, toSlider.min);
