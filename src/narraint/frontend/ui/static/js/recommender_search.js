@@ -217,7 +217,7 @@ const search = (event) => {
     $('#collapseExamples').collapse('hide');
     $('#modal_empty_result').hide();
     $('#alert_translation').hide();
-    let query = document.getElementById("search_input").value;
+    let query = document.getElementById("search_input").value.trim();
     console.log(query);
 
     const parameters = getInputParameters(query);
@@ -737,9 +737,11 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     divDoc_Body.append(divDoc_Content);
 
-    //let
+    let divDocRecommenderLink = $('<br><a class="btn-link" href="http://www.localhost:8000/recommendation?query=' + document_id + '" target="_blank">Show similar articles</a>');
+
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
+    divDoc_Body.append(divDocRecommenderLink);
 
 
     /*
@@ -756,7 +758,10 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         "by: " + authors + '<br>' +
         '</div></div><br>'); */
 
-    let divDoc_RecommenderGraph = $('<div class="graph rounded border w-100" style="height:500px" id="' + document_id + '_graph"></div>');
+    let div_provenance_button = $('<button class="btn btn-light" data-bs-toggle="collapse">Explanation Excerpt</button>');
+    divDoc_Card.append(div_provenance_button);
+
+    let divDoc_RecommenderGraph = $('<div class="graph rounded border w-100" style="height:600px" id="' + document_id + '_graph"></div>');
     divDoc_Card.append(divDoc_RecommenderGraph);
     let divFinal = $('<div/>');
     divFinal.append(divDoc_Card);

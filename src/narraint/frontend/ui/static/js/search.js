@@ -1293,10 +1293,11 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
 
     divDoc_Body.append(divDoc_Content);
 
-    //let
+    let divDocRecommenderLink = $('<br><a class="btn-link" href="http://www.localhost:8000/recommendation?query=' + document_id + '" target="_blank">Show similar articles</a>');
+
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
-
+    divDoc_Body.append(divDocRecommenderLink);
 
     /*
     let divDoc = $('<div class="card"><div class="card-body">' +
