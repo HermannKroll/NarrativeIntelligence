@@ -83,47 +83,16 @@ def get_document_graph(request):
         try:
             start_time = datetime.now()
             document_id = int(document_id)
-            session = SessionExtended.get()
-            query = session.query(Predication).filter(Predication.document_collection == document_collection)
-            query = query.filter(Predication.document_id == document_id)
-            query = query.filter(Predication.relation.isnot(None))
-            facts = defaultdict(set)
-            nodes = set()
-            for r in query:
-                try:
-                    subject_name = View().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
-                                                                           resolve_gene_by_id=False)
-                    object_name = View().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
-                                                                          resolve_gene_by_id=False)
-                    subject_name = f'{subject_name} ({r.subject_type})'
-                    object_name = f'{object_name} ({r.object_type})'
 
-                    if subject_name < object_name:
-                        key = subject_name, r.relation, object_name
-                        so_key = subject_name, object_name
-                    else:
-                        key = object_name, r.relation, subject_name
-                        so_key = object_name, subject_name
-                    if key not in facts:
-                        facts[so_key].add(r.relation)
-                        nodes.add(subject_name)
-                        nodes.add(object_name)
-                except Exception:
-                    pass
+            r = requests.get(f'http://localhost:5000/core/{document_id}')
+            # convert the json answer back to our internal document result representation
+            json_data = r.json()
+            nodes = json_data["nodes"]
+            facts = json_data["facts"]
+            print(facts)
 
-            result = []
-            for (s, o), predicates in facts.items():
-                p_txt = []
-                for p in predicates:
-                    # if there is a more specific edge then associated, ignore it
-                    if len(predicates) > 1 and p == "associated":
-                        continue
-                    p_txt.append(p)
-                p_txt = '|'.join([pt for pt in p_txt])
-                result.append(dict(s=s, p=p_txt, o=o))
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
-            session.remove()
             try:
                 View().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
                                                              len(facts))
@@ -131,7 +100,7 @@ def get_document_graph(request):
                 logging.debug('Could not write document graph log file')
 
             View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
-            return JsonResponse(dict(nodes=list(nodes), facts=result))
+            return JsonResponse(dict(nodes=list(nodes), facts=facts))
         except ValueError:
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
