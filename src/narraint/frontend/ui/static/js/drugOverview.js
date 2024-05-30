@@ -273,9 +273,7 @@ async function indiDataCallback() {
         .then((data) => {
             chemblData.push(...data["drug_indications"]);
         })
-        .catch((e) => { console.log(e)})
-
-    console.log(chemblData);
+        .catch((e) => { console.error(e)})
 
     // match equivalent entities and add chembl phase
     for(let idx in data) {
