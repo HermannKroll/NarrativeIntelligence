@@ -792,6 +792,15 @@ const networkSelectNode = async (e) => {
 }
 
 /**
+ * The function simulates a "click" on the root node to reset the selection of
+ * a non-root node. Therefore, an "event-object" is created.
+ */
+function networkUnselectNode() {
+    networkSelectNode({nodes: [currentDrugName]})
+        .catch((_) => console.error("Node selection reset not possible."));
+}
+
+/**
  * The function retrieves additional edge data for the selected node. Therefore,
  * depending on the type of the node, one or two API-request are made.
  *
