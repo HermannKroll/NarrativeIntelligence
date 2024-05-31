@@ -617,11 +617,13 @@ def get_query(request):
                                                          query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
-            year_aggregation = TimeFilter.aggregate_years(results)
-            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+
             if classification_filter:
                 logging.debug(f'Filtering document classifications with {classification_filter}...')
                 results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
