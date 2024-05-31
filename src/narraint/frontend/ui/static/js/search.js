@@ -841,7 +841,7 @@ function getInputParameters(query) {
     //dict["inner_ranking"] = "NOT IMPLEMENTED";
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
-    if (latest_query_translation === query) {
+    if (latest_valid_query === query) {
         // add year filter params only if the filter already contains valid years (of the current search)
         obj["year_start"] = document.querySelector("#fromSlider").value;
         obj["year_end"] = document.querySelector("#toSlider").value;
