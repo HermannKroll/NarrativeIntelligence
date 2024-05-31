@@ -298,7 +298,7 @@ function initQueryBuilderFromString(search_str) {
 
     $('#collapseExamples').collapse('hide');
     clearQueryBuilder();
-    console.log(search_str);
+
     let first = true;
     search_str.split('_AND_').forEach(comp => {
         let triple = split(comp.trim());
@@ -688,7 +688,6 @@ const search = (event) => {
     $('#alert_translation').hide();
     event.preventDefault();
     let query = getCurrentQuery();
-    console.log(query);
 
     if (!checkQuery())
         return;
@@ -806,18 +805,20 @@ function updateURLParameters(parameters) {
  * @param parameters {{}}
  */
 function logInputParameters(parameters) {
-    console.log("Query: " + parameters["query"]);
-    console.log("Data source: " +  parameters["data_source"]);
-    console.log("Outer Ranking: " +  parameters["outer_ranking"]);
-    console.log("Inner Ranking: " +  parameters["inner_ranking"]);
-    console.log("Sorting by frequency (desc): " +  parameters["freq_sort_desc"]);
-    console.log("Sorting by year (desc): " +  parameters["year_sort_desc"]);
-    console.log("Start position: " +  parameters["start_pos"]);
-    console.log("End position: " +  parameters["end_pos"]);
-    console.log("Start year: " +  parameters["year_start"]);
-    console.log("End year: " +  parameters["year_end"]);
-    console.log("Title filter: " +  parameters["title_filter"]);
-    console.log("Classification: " +  parameters["use_classification"]);
+    let message = "Query                      : " + parameters["query"] + "\n";
+    message += "Data source                : " + parameters["data_source"] + "\n";
+    message += "Outer Ranking              : " + parameters["outer_ranking"] + "\n";
+    message += "Inner Ranking              : " + parameters["inner_ranking"] + "\n";
+    message += "Sorting by frequency (desc): " + parameters["freq_sort_desc"] + "\n";
+    message += "Sorting by year (desc)     : " + parameters["year_sort_desc"] + "\n";
+    message += "Start position             : " + parameters["start_pos"] + "\n";
+    message += "End position               : " + parameters["end_pos"] + "\n";
+    message += "Start year                 : " + parameters["year_start"] + "\n";
+    message += "End year                   : " + parameters["year_end"] + "\n";
+    message += "Title filter               : " + parameters["title_filter"] + "\n";
+    message += "Classification             : " + parameters["use_classification"] + "\n";
+    message += "Systematic Review          : " + parameters["use_sys_review"] + "\n";
+    console.log(message);
 }
 
 /**
