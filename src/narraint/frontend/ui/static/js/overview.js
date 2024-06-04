@@ -811,6 +811,15 @@ const networkOnClick = async (e) => {
 const networkSelectNode = async (e) => {
     const nodeId = e.nodes[0];
     const node = networkNodes.get(nodeId);
+
+    // disable the selection if the node is clicked a second time.
+    if (currentDTDnode === nodeId) {
+        networkUnselectNode();
+        currentDTDnode = "";
+        return;
+    }
+
+    // fetch information about the associated edges if not known yet.
     if (!node.assocEdges) {
         startLoading("drugNetwork");
         await retrieveAdditionalEdges(node.id, node.type);
@@ -835,6 +844,7 @@ const networkSelectNode = async (e) => {
     });
     centerNetwork(network);
     network.unselectAll();
+    currentDTDnode = nodeId;
 }
 
 /**
