@@ -1,10 +1,55 @@
+/**
+ * Global object to store the json data for the news (newest papers) of
+ * the bottom container of the page.
+ * @type {null|Object}
+ */
 let newsData = null;
+
+/**
+ * Global Network to store the vis-js network graph of the Drug-Target-Disease
+ * network container.
+ * @type {null|vis.Network}
+ */
 let network = null;
+
+/**
+ * Global DataSet to store the nodes of the Drug-Target-Disease network.
+ * @type {null|vis.DataSet}
+ */
 let networkNodes = null;
+
+/**
+ * Global DataSet to store the edges of the Drug-Target-Disease network.
+ * @type {null|vis.DataSet}
+ */
 let networkEdges = null;
+
+/**
+ * Global string to store the ChemblID of the currently visualized drug used
+ * to request additional information with the service and from third party
+ * web-apis.
+ * @type {null|string}
+ */
 let currentChemblID = null;
+
+/**
+ * Global string to store the actual name of the currently visualized drug.
+ * @type {null|string}
+ */
 let currentDrugName = null;
+
+/**
+ * Global variable to store if a scroll event is being processed right now.
+ * @type {boolean}
+ */
 let scrollUpdateTicking = false;
+
+/**
+ * Global variable to store the currently selected node of the DTD network.
+ * Can be null if no node is selected.
+ * @type {string}
+ */
+let currentDTDnode = "";
 
 /**
  * networkData: {
@@ -12,7 +57,8 @@ let scrollUpdateTicking = false;
  *  target: ent_type {String},
  *  disease: ent_type {String},
  *  phase: {bool}
- * @type {Object}
+ * }
+ * @type {object}
  */
 let networkData = null;
 
