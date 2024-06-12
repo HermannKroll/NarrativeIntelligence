@@ -2,6 +2,7 @@ import argparse
 import copy
 import itertools
 import logging
+from collections import defaultdict
 from datetime import datetime
 from typing import List
 
@@ -11,6 +12,7 @@ from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
 from narrant.entity.entity import Entity
+from narrant.entitylinking.enttypes import ALL, DOSAGE_FORM
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 
@@ -119,16 +121,23 @@ class Keyword2GraphTranslation:
         query = query.filter(TagInvertedIndex.entity_id.in_(entity_ids))
         query = query.filter(TagInvertedIndex.entity_type.in_(entity_types))
 
-        entity2support = {}
-        for row in query:
-            if (row.entity_type, row.entity_id) not in entity2support:
-                entity2support[(row.entity_type, row.entity_id)] = 0
+        # we can control the preference if entity types have the same support
+        preference_dict = dict()
+        preference_dict[DOSAGE_FORM] = 10
 
-            entity2support[(row.entity_type, row.entity_id)] += row.support
+        entity2support = defaultdict(lambda: [0, 0])  # [support, preference]
+
+        for row in query:
+            entity_key = (row.entity_type, row.entity_id)
+            if entity_key not in entity2support:
+                entity2support[entity_key][1] = preference_dict.get(row.entity_type, 1)
+
+            entity2support[entity_key][0] += row.support
 
         # Compute a sorted list
-        entity_support_list = [(et, e, supp) for (et, e), supp in entity2support.items()]
-        entity_support_list.sort(key=lambda x: x[2], reverse=True)
+        entity_support_list = [(et, e, supp, pref) for (et, e), (supp, pref) in entity2support.items()]
+        entity_support_list.sort(key=lambda x: (x[2], x[3]), reverse=True)
+        logging.debug(f"{entity_support_list}")
 
         # Get the type of the first element
         return entity_support_list[0][0]
@@ -194,13 +203,13 @@ class Keyword2GraphTranslation:
         # The first step is to transform keywords into entities
         # Then for each set of possible entities the most supported translation is searched
         # Most supported means to have the highest support (be detected in the most documents)
-        # Force to be a list (must have the same order scross the following script
+        # Force to be a list (must have the same order across the following script
         keyword_lists = list(keyword_lists)
         keywords_with_types = list()
         for keywords in keyword_lists:
             entities = self.translation.convert_text_to_entity(keywords)
-
-            # Was is a variable?
+            logging.debug(f'Found entities: {entities}')
+            # What is a variable?
             if len(entities) == 1 and list(entities)[0].entity_type == ENTITY_TYPE_VARIABLE:
                 # ID should be something like this f'?{var_type}({var_type})'
                 var_type = VAR_TYPE.search(list(entities)[0].entity_id)
@@ -260,6 +269,10 @@ def main():
     print("")
     print("")
     print(g.translate_keywords(["Simvastatin", "Rhabdomyolysis"]))
+    print("")
+    print("")
+    print("")
+    print(g.translate_keywords(["Budesonide", "Nasal Administration", "Asthma"]))
 
     print('took: ', (datetime.now() - start).seconds, ' s')
 
