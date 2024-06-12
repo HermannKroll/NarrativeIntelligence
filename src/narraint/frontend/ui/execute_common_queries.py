@@ -1,10 +1,8 @@
 import logging
 
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
-from narraint.frontend.entity.entitytagger import EntityTagger
-from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
+from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
 
 COMMON_QUERIES = [
@@ -50,7 +48,87 @@ COMMON_QUERIES = [
     "Drug treats post-acute COVID-19 syndrome"
 ]
 
-DOCUMENT_COLLECTIONS = ['PubMed', 'LitCovid', "LongCovid", "ZBMed"]
+FREQUENT_CONCEPTS = [
+    "covid 19",
+    "long covid",
+    "Chronic Fatigue Syndrome",
+
+    "Acetylsalicylic acid",
+    "Aflibercept",
+    "Ambazone",
+    "Amlodipine",
+    "amphotericin",
+    "amsacrine",
+    "Aspirin",
+    "Baloxavir marboxil",
+    "baricitinib",
+    "Bisoprolol",
+    "Cannabis",
+    "Carvedilol",
+    "Crataegus",
+    "daratumumab",
+    "diabetes mellitus",
+    "Difelikefalin",
+    "Digitoxin",
+    "Disintegrin",
+    "Docetaxel",
+    "Elacestrant",
+    "Enalapril",
+    "Erlotinib",
+    "Ertugliflozin",
+    "Escitalopram",
+    "Etoricoxib",
+    "etrasimod",
+    "Exenatide",
+    "hay fever",
+    "Hypericin",
+    "hypericum perforatum",
+    "Ibuprofen",
+    "jacaranone",
+    "Ketamine",
+    "Lasmiditan",
+    "Leprosy",
+    "Lercanidipin",
+    "Meprobamate",
+    "Metamizol",
+    "Metformin",
+    "Mirtazapine",
+    "Nebivolol",
+    "Omega 3 fatty acids",
+    "Omeprazole",
+    "Palmitoylethanolamid",
+    "Psilocin",
+    "Quinapril",
+    "Rivaroxaban",
+    "Selinexor",
+    "Sertraline",
+    "sitagliptin",
+    "Sumatriptan",
+    "Ticagrelor",
+    "Valsartan",
+    "Vemurafenib",
+    "Venlafaxine",
+    "budesonide",
+    "paclitaxel",
+    "coffeine",
+    "simvastatin",
+    "upadacitinib"
+]
+
+DRUG_OVERVIEW_QUERY_TEMPLATES = [
+    "XXX treats Disease",
+    "XXX administered DosageForm",
+    "XXX interacts Target",
+    "XXX method LabMethod",
+    "XXX associated ?X(Species)",
+    "XXX associated ?X(Drug)",
+    "XXX interacts Drug",
+    "XXX induces Disease",
+    "XXX associated ?X(Tissue)",
+    "Drug associated XXX",
+    "Disease associated XXX",
+    "Gene associated XXX"
+]
 
 
 def execute_common_queries():
@@ -59,7 +137,7 @@ def execute_common_queries():
     for q in COMMON_QUERIES:
         logging.info('Caching Query: {}'.format(q))
         graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(q)
-        for collection in DOCUMENT_COLLECTIONS:
+        for collection in ['PubMed', 'LitCovid', "LongCovid", "ZBMed"]:
 
             results = QueryEngine.process_query_with_expansion(graph_query,
                                                                document_collection_filter={collection})
@@ -70,11 +148,48 @@ def execute_common_queries():
                 logging.error('Cannot store query result to cache...')
 
 
+def execute_frequent_drug_overviews():
+    cache = SearchCache()
+    translation = QueryTranslation()
+    aggregation_strategy = "overview"
+    collection = "PubMed"
+
+    for drug in FREQUENT_CONCEPTS:
+        for qt in DRUG_OVERVIEW_QUERY_TEMPLATES:
+            query_str = qt.replace("XXX", drug.strip())
+            logging.info('Caching Query: {}'.format(query_str))
+            graph_query, query_trans_string = translation.convert_query_text_to_fact_patterns(query_str)
+
+            results = QueryEngine.process_query_with_expansion(graph_query,
+                                                               document_collection_filter={collection},
+                                                               load_document_metadata=False)
+
+            # next get the aggregation by var names
+            substitution_aggregation = ResultTreeAggregationBySubstitution()
+            results_ranked, is_aggregate = substitution_aggregation.rank_results(results, freq_sort_desc=True)
+
+            # generate a list of [(ent_id, ent_name, doc_count), ...]
+            sub_count_list = list()
+            # go through all aggregated results
+            for aggregate in results_ranked.results:
+                var2sub = aggregate.var2substitution
+                # get the first substitution
+                var_name, sub = next(iter(var2sub.items()))
+                sub_count_list.append(dict(id=sub.entity_id,
+                                           name=sub.entity_name,
+                                           count=aggregate.get_result_size()))
+
+            cache.add_result_to_cache(collection, graph_query,
+                                      sub_count_list,
+                                      aggregation_name=aggregation_strategy)
+
+
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
     execute_common_queries()
+    execute_frequent_drug_overviews()
 
 
 if __name__ == "__main__":

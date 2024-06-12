@@ -16,7 +16,6 @@ from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
-from narrant.entitylinking.enttypes import ALL
 
 QUERY_DOCUMENT_LIMIT = 1500000
 
@@ -45,11 +44,11 @@ class QueryEngine:
                         d.title = title
                         d.authors = authors
                         d.journals = journals
-                        d.year = year
-                        d.month = month
+                        d.publication_year = year
+                        d.publication_month = month
                         d.doi = doi
                         d.org_id = org_id
-                        d.doc_classes = doc_classes
+                        d.document_classes = doc_classes
 
                         filtered_document_results.append(d)
 
@@ -632,7 +631,6 @@ class QueryEngine:
         # Apply metadata filter in the end
         if load_document_metadata:
             query_results = QueryEngine.enrich_document_results_with_metadata(query_results, collection2valid_doc_ids)
-
 
         query_results.sort(key=lambda x: x.document_id, reverse=True)
         return query_results

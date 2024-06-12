@@ -59,24 +59,18 @@ class View:
     _instance = None
     initialized = False
 
-    def __init__(self):
-        raise RuntimeError('Singleton, use instance() instead')
-
-    @classmethod
-    def instance(cls):
-        if not cls.initialized:
-            cls.initialized = True
-            cls._instance = cls.__new__(cls)
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
             # init resolver here
             cls.query_logger = QueryLogger()
-            cls.resolver = EntityResolver.instance()
-            cls.entity_tagger = EntityTagger.instance()
+            cls.resolver = EntityResolver()
+            cls.entity_tagger = EntityTagger()
             cls.cache = SearchCache()
-            cls.autocompletion = AutocompletionUtil.instance()
+            cls.autocompletion = AutocompletionUtil()
             cls.translation = QueryTranslation()
-            cls.explainer = EntityExplainer.instance()
+            cls.explainer = EntityExplainer()
             cls.keyword2graph = Keyword2GraphTranslation()
-
         return cls._instance
 
 
@@ -95,9 +89,9 @@ def get_document_graph(request):
             nodes = set()
             for r in query:
                 try:
-                    subject_name = View.instance().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
+                    subject_name = View().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
                                                                                     resolve_gene_by_id=False)
-                    object_name = View.instance().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
+                    object_name = View().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
                                                                                    resolve_gene_by_id=False)
                     subject_name = f'{subject_name} ({r.subject_type})'
                     object_name = f'{object_name} ({r.object_type})'
@@ -129,18 +123,18 @@ def get_document_graph(request):
             time_needed = datetime.now() - start_time
             session.remove()
             try:
-                View.instance().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
+                View().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
                                                                       len(facts))
             except IOError:
                 logging.debug('Could not write document graph log file')
 
-            View.instance().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
+            View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
             return JsonResponse(dict(nodes=list(nodes), facts=result))
         except ValueError:
-            View.instance().query_logger.write_api_call(False, "get_document_graph", str(request))
+            View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
     else:
-        View.instance().query_logger.write_api_call(False, "get_document_graph", str(request))
+        View().query_logger.write_api_call(False, "get_document_graph", str(request))
         return HttpResponse(status=500)
 
 
@@ -150,10 +144,10 @@ def get_autocompletion(request):
         completion_terms = []
         if "entity_type" in request.GET:
             entity_type = str(request.GET.get("entity_type", "").strip())
-            completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string,
+            completion_terms = View().autocompletion.compute_autocompletion_list(search_string,
                                                                                           entity_type=entity_type)
         else:
-            completion_terms = View.instance().autocompletion.compute_autocompletion_list(search_string)
+            completion_terms = View().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
         return JsonResponse(dict(terms=completion_terms))
     else:
@@ -181,7 +175,7 @@ def get_check_query(request):
     try:
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
-        query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+        query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
             search_string)
         if query_fact_patterns:
             logging.info('query is valid')
@@ -204,9 +198,9 @@ def get_term_to_entity(request):
             if expand_by_prefix_str == "false":
                 expand_by_prefix = False
         try:
-            entities = View.instance().translation.convert_text_to_entity(term,
+            entities = View().translation.convert_text_to_entity(term,
                                                                           expand_search_by_prefix=expand_by_prefix)
-            resolver = EntityResolver.instance()
+            resolver = EntityResolver()
             for e in entities:
                 try:
                     e.entity_name = resolver.get_name_for_var_ent_id(e.entity_id, e.entity_type)
@@ -225,7 +219,7 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
     start_time = datetime.now()
     if DO_CACHING:
         try:
-            cached_results = View.instance().cache.load_result_from_cache(document_collection, graph_query)
+            cached_results = View().cache.load_result_from_cache(document_collection, graph_query)
             cache_hit = True
         except Exception:
             logging.error('Cannot load query result from cache...')
@@ -241,7 +235,7 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
         cache_hit = False
         if DO_CACHING:
             try:
-                View.instance().cache.add_result_to_cache(document_collection, graph_query, results)
+                View().cache.add_result_to_cache(document_collection, graph_query, results)
             except Exception:
                 logging.error('Cannot store query result to cache...')
     time_needed = datetime.now() - start_time
@@ -251,22 +245,22 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
 @gzip_page
 def get_query_narrative_documents(request):
     if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     query = str(request.GET["query"]).strip()
     document_collection = str(request.GET["data_source"]).strip()
 
-    graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+    graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
     if not graph_query or len(graph_query.fact_patterns) == 0:
-        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
 
     if QueryTranslation.count_variables_in_query(graph_query) != 0:
-        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Does not support queries with variables"))
 
     try:
@@ -279,33 +273,33 @@ def get_query_narrative_documents(request):
         narrative_documents = retrieve_narrative_documents_from_database(session, document_ids=result_ids,
                                                                          document_collection=document_collection)
 
-        View.instance().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
+        View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
+        View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
 @gzip_page
 def get_query_document_ids(request):
     if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     query = str(request.GET["query"]).strip()
     document_collection = str(request.GET["data_source"]).strip()
 
-    graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+    graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
     if not graph_query or len(graph_query.fact_patterns) == 0:
-        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
 
     if QueryTranslation.count_variables_in_query(graph_query) != 0:
-        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(answer="Does not support queries with variables"))
 
     try:
@@ -313,21 +307,21 @@ def get_query_document_ids(request):
         # compute the query
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
         result_ids = sorted(list({r.document_id for r in results}))
-        View.instance().query_logger.write_api_call(True, "get_query_document_ids", str(request),
+        View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_query_document_ids", str(request))
+        View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
 @gzip_page
 def get_narrative_documents(request):
     if "document" not in request.GET and "documents" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        View().query_logger.write_api_call(False, "get_narrative_document", str(request))
         return JsonResponse(status=500, data=dict(reason="document/documents parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        View().query_logger.write_api_call(False, "get_narrative_document", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     document_ids = set()
@@ -336,13 +330,13 @@ def get_narrative_documents(request):
             document_id = int(request.GET["document"].strip())
             document_ids.add(document_id)
         except ValueError:
-            View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+            View().query_logger.write_api_call(False, "get_narrative_document", str(request))
             return JsonResponse(status=500, data=dict(reason="document must be an integer"))
     elif "documents" in request.GET:
         try:
             document_ids.update([int(did) for did in request.GET["documents"].strip().split(';')])
         except ValueError:
-            View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+            View().query_logger.write_api_call(False, "get_narrative_document", str(request))
             return JsonResponse(status=500, data=dict(reason="documents must be a list of integer (separated by ;)"))
 
     document_collection = str(request.GET["data_source"]).strip()
@@ -353,13 +347,13 @@ def get_narrative_documents(request):
         narrative_documents = retrieve_narrative_documents_from_database(session, document_ids=document_ids,
                                                                          document_collection=document_collection)
 
-        View.instance().query_logger.write_api_call(True, "get_narrative_document", str(request),
+        View().query_logger.write_api_call(True, "get_narrative_document", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception as e:
         logger.error(f"get_narrative_document: {e}")
         traceback.print_exc()
-        View.instance().query_logger.write_api_call(False, "get_narrative_document", str(request))
+        View().query_logger.write_api_call(False, "get_narrative_document", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
@@ -374,7 +368,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     cached_sub_count_list = None
     if DO_CACHING:
         try:
-            cached_sub_count_list = View.instance().cache.load_result_from_cache(document_collection, graph_query,
+            cached_sub_count_list = View().cache.load_result_from_cache(document_collection, graph_query,
                                                                                  aggregation_name=aggregation_strategy)
             if cached_sub_count_list:
                 logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
@@ -407,7 +401,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
 
         if DO_CACHING:
             try:
-                View.instance().cache.add_result_to_cache(document_collection, graph_query,
+                View().cache.add_result_to_cache(document_collection, graph_query,
                                                           sub_count_list,
                                                           aggregation_name=aggregation_strategy)
             except Exception:
@@ -426,13 +420,13 @@ def get_query_sub_count(request):
                                 data=dict(answer="data source not valid", reason="Data sources supported: PubMed,"
                                                                                  " LitCovid and LongCovid"))
 
-        graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(query)
+        graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
         if not graph_query or len(graph_query.fact_patterns) == 0:
-            View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
+            View().query_logger.write_api_call(False, "get_query_sub_count", str(request))
             return JsonResponse(status=500, data=dict(answer="Query not valid", reason=query_trans_string))
 
         if QueryTranslation.count_variables_in_query(graph_query) != 1:
-            View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
+            View().query_logger.write_api_call(False, "get_query_sub_count", str(request))
             return JsonResponse(status=500, data=dict(answer="query must have one variable"))
 
         time_start = datetime.now()
@@ -451,21 +445,21 @@ def get_query_sub_count(request):
                 return JsonResponse(status=500, data=dict(answer="topk must be a positive integer"))
 
 
-        View.instance().query_logger.write_api_call(True, "get_query_sub_count", str(request),
+        View().query_logger.write_api_call(True, "get_query_sub_count", str(request),
                                                     time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
-        View.instance().query_logger.write_api_call(False, "get_query_sub_count", str(request))
+        View().query_logger.write_api_call(False, "get_query_sub_count", str(request))
         return HttpResponse(status=500)
 
 
 def get_document_ids_for_entity(request):
     if "entity_id" not in request.GET or "entity_type" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        View().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
         return JsonResponse(status=500, data=dict(reason="entity_id and entity_type are required parameters"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        View().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
@@ -488,7 +482,7 @@ def get_document_ids_for_entity(request):
         else:
             document_ids = []
         session.remove()
-        View.instance().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
+        View().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
                                                     time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
@@ -496,7 +490,7 @@ def get_document_ids_for_entity(request):
     except Exception as e:
         logger.error(f"get_document_ids_for_entity: {e}")
         traceback.print_exc()
-        View.instance().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
+        View().query_logger.write_api_call(False, "get_document_ids_for_entity", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
@@ -509,10 +503,10 @@ def get_query(request):
     query_limit_hit = False
     query_trans_string = ""
     if "query" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
@@ -592,7 +586,7 @@ def get_query(request):
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
-        graph_query, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+        graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
             query)
         year_aggregation = {}
         if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
@@ -619,15 +613,17 @@ def get_query(request):
             results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+            View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
                                                          query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
-            year_aggregation = TimeFilter.aggregate_years(results)
-            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+
             if classification_filter:
                 logging.debug(f'Filtering document classifications with {classification_filter}...')
                 results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
@@ -643,7 +639,7 @@ def get_query(request):
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
 
-        View.instance().query_logger.write_api_call(True, "get_query", str(request),
+        View().query_logger.write_api_call(True, "get_query", str(request),
                                                     time_needed=datetime.now() - time_start)
 
         return JsonResponse(
@@ -651,7 +647,7 @@ def get_query(request):
                  query_translation=query_trans_string, year_aggregation=year_aggregation,
                  query_limit_hit="False"))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_query", str(request))
+        View().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
@@ -668,7 +664,7 @@ def get_new_query(request):
     query_limit_hit = False
     query_trans_string = ""
     if "data_source" not in request.GET:
-        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
+        View().query_logger.write_api_call(False, "get_new_query", str(request))
         return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
 
     try:
@@ -742,7 +738,7 @@ def get_new_query(request):
             query = str(request.GET.get("query", "").strip())
             logging.info(f'Query string is: {query}')
             try:
-                graph_query, query_trans_string = View.instance().translation \
+                graph_query, query_trans_string = View().translation \
                     .convert_query_text_to_fact_patterns(query)
             except:
                 pass
@@ -767,7 +763,7 @@ def get_new_query(request):
             # search for all documents containing all additional entities
             for re in req_entities:
                 try:
-                    entities = View.instance().translation.convert_text_to_entity(re)
+                    entities = View().translation.convert_text_to_entity(re)
                     should_add = True
                     for e in entities:
                         if e.entity_id.startswith('?'):
@@ -790,7 +786,7 @@ def get_new_query(request):
                 do_query_processing_with_caching(graph_query, document_collection)
             #  result_ids = {r.document_id for r in results}
             # opt_query = QueryOptimizer.optimize_query(graph_query)
-            #   View.instance().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+            #   View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
             #                                                query, opt_query)
             results_converted = []
             if outer_ranking == 'outer_ranking_substitution':
@@ -806,14 +802,14 @@ def get_new_query(request):
                                                                                   year_sort_desc)
                 results_converted = results_ranked.to_dict()
 
-        View.instance().query_logger.write_api_call(True, "get_new_query", str(request),
+        View().query_logger.write_api_call(True, "get_new_query", str(request),
                                                     time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
                  query_limit_hit="False"))
     except Exception:
-        View.instance().query_logger.write_api_call(False, "get_new_query", str(request))
+        View().query_logger.write_api_call(False, "get_new_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
@@ -835,20 +831,20 @@ def get_provenance(request):
             for _, pred_ids in fp2prov_ids.items():
                 predication_ids.update(pred_ids)
             try:
-                View.instance().query_logger.write_provenance_log(time_needed, document_collection, document_id,
+                View().query_logger.write_provenance_log(time_needed, document_collection, document_id,
                                                                   predication_ids)
             except IOError:
                 logging.debug('Could not write provenance log file')
 
-            View.instance().query_logger.write_api_call(True, "get_provenance", str(request),
+            View().query_logger.write_api_call(True, "get_provenance", str(request),
                                                         time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
         except Exception:
-            View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+            View().query_logger.write_api_call(False, "get_provenance", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
     else:
-        View.instance().query_logger.write_api_call(False, "get_provenance", str(request))
+        View().query_logger.write_api_call(False, "get_provenance", str(request))
         return HttpResponse(status=500)
 
 
@@ -899,17 +895,17 @@ def post_feedback(request):
 
             logging.info(f'User "{userid}" has rated "{predication_ids}" as "{rating} (stored in {rating_filename})"')
             try:
-                View.instance().query_logger.write_rating(query_str, userid, predication_ids)
+                View().query_logger.write_rating(query_str, userid, predication_ids)
             except IOError:
                 logging.debug('Could not write rating log file')
-            View.instance().query_logger.write_api_call(True, "get_feedback", str(request),
+            View().query_logger.write_api_call(True, "get_feedback", str(request),
                                                         time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
-            View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
+            View().query_logger.write_api_call(False, "get_feedback", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
-    View.instance().query_logger.write_api_call(False, "get_feedback", str(request))
+    View().query_logger.write_api_call(False, "get_feedback", str(request))
     return HttpResponse(status=500)
 
 
@@ -949,19 +945,19 @@ def post_subgroup_feedback(request):
             logging.info(f'User "{userid}" has rated "{variable_name}":'
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
             try:
-                View.instance().query_logger.write_subgroup_rating_log(
+                View().query_logger.write_subgroup_rating_log(
                     query, userid, variable_name, entity_name, entity_id, entity_type)
             except IOError:
                 logging.debug('Could not write rating log file')
-            View.instance().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
+            View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
                                                         time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
-            View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+            View().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
 
-    View.instance().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
+    View().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
     return HttpResponse(status=500)
 
 
@@ -981,19 +977,19 @@ def post_drug_suggestion(request):
 
             logging.info(f'received new drug suggestion {drug}')
             try:
-                View.instance().query_logger.write_drug_suggestion(drug, description)
+                View().query_logger.write_drug_suggestion(drug, description)
             except IOError:
                 logging.debug('Could not write drug suggestion log file')
-            View.instance().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
+            View().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
                                                         time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
 
         except IOError:
-            View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
+            View().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
 
-    View.instance().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
+    View().query_logger.write_api_call(False, "post_drug_suggestion", str(request))
     return HttpResponse(status=500)
 
 
@@ -1003,7 +999,7 @@ def post_document_link_clicked(request):
         data = json.loads(request.body)
     except JSONDecodeError:
         logging.debug('Invalid JSON received')
-        View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
+        View().query_logger.write_api_call(False, "document_clicked", str(request))
         return HttpResponse(status=500)
 
     if data and data.keys() & {"query", "document_id", "link", "data_source"}:
@@ -1012,13 +1008,13 @@ def post_document_link_clicked(request):
         document_collection = data["data_source"]
         link = data["link"]
         try:
-            View.instance().query_logger.write_document_link_clicked(query, document_collection, document_id, link)
+            View().query_logger.write_document_link_clicked(query, document_collection, document_id, link)
         except IOError:
-            View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
+            View().query_logger.write_api_call(False, "document_clicked", str(request))
             return HttpResponse(status=500)
-        View.instance().query_logger.write_api_call(True, "document_clicked", str(request))
+        View().query_logger.write_api_call(True, "document_clicked", str(request))
         return HttpResponse(status=200)
-    View.instance().query_logger.write_api_call(False, "document_clicked", str(request))
+    View().query_logger.write_api_call(False, "document_clicked", str(request))
     return HttpResponse(status=500)
 
 
@@ -1027,7 +1023,7 @@ def post_paper_view_log(request):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
+        View().query_logger.write_api_call(False, "paper_view_log", str(request))
         return HttpResponse(status=500)
 
     if data and data.keys() & {"doc_id", "doc_collection"}:
@@ -1035,14 +1031,14 @@ def post_paper_view_log(request):
         doc_collection = data["doc_collection"]
 
         try:
-            View.instance().query_logger.write_paper_view(doc_id, doc_collection)
+            View().query_logger.write_paper_view(doc_id, doc_collection)
         except IOError:
-            View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
+            View().query_logger.write_api_call(False, "paper_view_log", str(request))
             return HttpResponse(status=500)
 
-        View.instance().query_logger.write_api_call(True, "paper_view_log", str(request))
+        View().query_logger.write_api_call(True, "paper_view_log", str(request))
         return HttpResponse(status=200)
-    View.instance().query_logger.write_api_call(False, "paper_view_log", str(request))
+    View().query_logger.write_api_call(False, "paper_view_log", str(request))
     return HttpResponse(status=500)
 
 
@@ -1057,7 +1053,7 @@ def post_drug_ov_search_log(request):
     if data and data.keys() & {"drug"}:
         drug = data["drug"]
         try:
-            View.instance().query_logger.write_drug_ov_search(drug)
+            View().query_logger.write_drug_ov_search(drug)
         except IOError:
             logging.debug('Could not write drug searched log file')
         return HttpResponse(status=200)
@@ -1077,7 +1073,7 @@ def post_drug_ov_subst_href_log(request):
         substance = data["substance"]
         query = data["query"]
         try:
-            View.instance().query_logger.write_drug_ov_substance_href(drug, substance, query)
+            View().query_logger.write_drug_ov_substance_href(drug, substance, query)
         except IOError:
             logging.debug('Could not write substance href log file')
         return HttpResponse(status=200)
@@ -1099,7 +1095,7 @@ def post_drug_ov_chembl_phase_href_log(request):
         phase = data["phase"]
         query = data["query"]
         try:
-            View.instance().query_logger.write_drug_ov_chembl_phase_href(drug, disease_name, disease_id, phase, query)
+            View().query_logger.write_drug_ov_chembl_phase_href(drug, disease_name, disease_id, phase, query)
         except IOError:
             logging.debug('Could not write chembl phase href log file')
         return HttpResponse(status=200)
@@ -1158,7 +1154,7 @@ def get_explain_translation(request):
             concept = str(request.GET["concept"]).strip()
             search_string = str(request.GET.get("query", "").strip())
             logging.info(f'checking query: {search_string}')
-            query_fact_patterns, query_trans_string = View.instance().translation.convert_query_text_to_fact_patterns(
+            query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
                 search_string)
 
             if not query_fact_patterns:
@@ -1179,11 +1175,11 @@ def get_explain_translation(request):
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))
         except Exception:
-            View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+            View().query_logger.write_api_call(False, "get_explain_translation", str(request))
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
     else:
-        View.instance().query_logger.write_api_call(False, "get_explain_translation", str(request))
+        View().query_logger.write_api_call(False, "get_explain_translation", str(request))
         return HttpResponse(status=500)
 
 
@@ -1193,10 +1189,10 @@ def get_last_db_update(request):
         last_update = str(DatabaseUpdate.get_latest_update(session))
         last_update = last_update.replace('-', '.')
         logging.debug(f"Get last DB update: {last_update}")
-        View.instance().query_logger.write_api_call(True, "get_last_db_update", str(request))
+        View().query_logger.write_api_call(True, "get_last_db_update", str(request))
         return JsonResponse(data=dict(last_update=last_update))
     except Exception as e:
-        View.instance().query_logger.write_api_call(False, "get_last_db_update", str(request))
+        View().query_logger.write_api_call(False, "get_last_db_update", str(request))
         traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)
 
@@ -1205,11 +1201,11 @@ class SearchView(TemplateView):
     template_name = "ui/search.html"
 
     def __init__(self):
-        init_view = View.instance()
+        init_view = View()
         super(SearchView, self).__init__()
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(SearchView.template_name)
+        View().query_logger.write_page_view_log(SearchView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1234,7 +1230,7 @@ class LogsView(TemplateView):
                 traceback.print_exc(file=sys.stdout)
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(LogsView.template_name)
+        View().query_logger.write_page_view_log(LogsView.template_name)
         LogsView.recompute_logs_if_necessary()
         return super().get(request, *args, **kwargs)
 
@@ -1249,7 +1245,7 @@ class StatsView(TemplateView):
     stats_query_results = None
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(StatsView.template_name)
+        View().query_logger.write_page_view_log(StatsView.template_name)
         if request.is_ajax():
             if "query" in request.GET:
                 if not StatsView.stats_query_results:
@@ -1276,7 +1272,7 @@ class HelpView(TemplateView):
     template_name = "ui/help.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(HelpView.template_name)
+        View().query_logger.write_page_view_log(HelpView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1284,7 +1280,7 @@ class DocumentView(TemplateView):
     template_name = "ui/paper.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(DocumentView.template_name)
+        View().query_logger.write_page_view_log(DocumentView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1292,7 +1288,7 @@ class DrugOverviewView(TemplateView):
     template_name = "ui/drug_overview.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(DrugOverviewView.template_name)
+        View().query_logger.write_page_view_log(DrugOverviewView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1300,7 +1296,7 @@ class LongCovidView(TemplateView):
     template_name = "ui/long_covid.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(LongCovidView.template_name)
+        View().query_logger.write_page_view_log(LongCovidView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1308,7 +1304,7 @@ class CovidView19(TemplateView):
     template_name = "ui/covid19.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(CovidView19.template_name)
+        View().query_logger.write_page_view_log(CovidView19.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1316,7 +1312,7 @@ class MECFSView(TemplateView):
     template_name = "ui/mecfs.html"
 
     def get(self, request, *args, **kwargs):
-        View.instance().query_logger.write_page_view_log(MECFSView.template_name)
+        View().query_logger.write_page_view_log(MECFSView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1332,7 +1328,7 @@ def get_keyword_search_request(request):
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
 
-                possible_queries = View.instance().keyword2graph.translate_keywords(keywords)
+                possible_queries = View().keyword2graph.translate_keywords(keywords)
                 json_data = [r.to_json_data() for r in possible_queries]
                 # This is the format
                 # json_data = [
@@ -1341,12 +1337,12 @@ def get_keyword_search_request(request):
                 #     [("Insulin", "associated", "Diabetes Mellitus")],
                 # ]
 
-                View.instance().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
+                View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
                                                             time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
             except Exception as e:
-                View.instance().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
+                View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
                                                             time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
                 logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
@@ -1356,7 +1352,7 @@ def get_keyword_search_request(request):
 
 
 logging.info('Initialize view')
-View.instance()
+View()
 
 
 def get_clinical_trial_phases(request):
@@ -1378,12 +1374,12 @@ def get_clinical_trial_phases(request):
             for row in q:
                 drug_indications.append(dict(mesh_id=row.disease, max_phase_for_ind=row.phase))
 
-            View.instance().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
+            View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
                                                         time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
         except Exception as _:
             logging.debug('Could not query clinical trials for {}'.format(chembl_id))
-            View.instance().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
+            View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
                                                         time_needed=datetime.now() - time_start)
 
             return HttpResponse(status=500)

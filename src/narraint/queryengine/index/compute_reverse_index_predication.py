@@ -4,15 +4,21 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import and_, delete, text
+from sqlalchemy import delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication, DocumentMetadataService
+from narraint.backend.models import Predication
 from narraint.backend.models import PredicationInvertedIndex
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
+"""
+The predication dictionary uses strings instead of tuples as keys ('seen_keys') for predication entries. With this, 
+the memory usage is lower.
+"""
+
+SEPERATOR_STRING = "_;_"
 
 def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     for row_key in fact_to_prov_ids:
@@ -32,7 +38,8 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
         p2.start_time()
         for idx, row in enumerate(inv_q):
             p2.print_progress(idx)
-            row_key = row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type
+            row_key = SEPERATOR_STRING.join([str(row.subject_id), str(row.subject_type), str(row.relation),
+                                             str(row.object_id), str(row.object_type)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in fact_to_prov_ids:
@@ -79,14 +86,14 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
                 insert_list.clear()
 
             assert len(fact_to_prov_ids[row_key][doc_collection]) > 0
-
+            subject_id, subject_type, relation, object_id, object_type = row_key.split(SEPERATOR_STRING)
             insert_list.append(dict(
                 document_collection=doc_collection,
-                subject_id=row_key[0],
-                subject_type=row_key[1],
-                relation=row_key[2],
-                object_id=row_key[3],
-                object_type=row_key[4],
+                subject_id=subject_id,
+                subject_type=subject_type,
+                relation=relation,
+                object_id=object_id,
+                object_type=object_type,
                 support=len(fact_to_prov_ids[row_key][doc_collection]),
                 provenance_mapping=json.dumps(fact_to_prov_ids[row_key][doc_collection])
             ))
@@ -132,7 +139,8 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
         prov_query = prov_query.filter(Predication.id >= predication_id_min)
 
     if low_memory:
-        prov_query = prov_query.order_by(Predication.subject_id, Predication.relation, Predication.object_id)
+        prov_query = prov_query.order_by(Predication.subject_id, Predication.subject_type, Predication.relation,
+                                         Predication.object_id, Predication.object_type)
 
     prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
 
@@ -167,7 +175,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
                 buffer.clear()
 
             last_spo = s_p_o
-            seen_key = (s_id, s_t, p, o_id, o_t)
+            seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
 
             # Hack to support also the Covid 19 collection
@@ -188,7 +196,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
             p = prov.relation
             o_id = prov.object_id
             o_t = prov.object_type
-            seen_key = (s_id, s_t, p, o_id, o_t)
+            seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             # fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
             fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].add(prov.id)
 

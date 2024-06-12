@@ -194,7 +194,7 @@ def main():
             text.append(res[0])
 
         text = " ".join([t for t in text])
-        entity_name = EntityResolver.instance().get_name_for_var_ent_id(entity_id, entity_type)
+        entity_name = EntityResolver().get_name_for_var_ent_id(entity_id, entity_type)
         stem_dict = generate_stem_dict(text)
         keywords = generate_keywords(text, entity_name, stem_dict)
         if keywords == "[]":

@@ -23,7 +23,7 @@ def main():
 
     for i in inputs:
         # Calculate the local service result count
-        graph_query, _ = View.instance().translation.convert_query_text_to_fact_patterns(i)
+        graph_query, _ = View().translation.convert_query_text_to_fact_patterns(i)
         results = QueryEngine.process_query_with_expansion(graph_query=graph_query, document_collection_filter={'PubMed'})
 
         # Retrieve the live service query result

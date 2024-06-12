@@ -6,7 +6,7 @@ from narraint.frontend.entity.autocompletion import AutocompletionUtil
 class AutocompletionTestCase(TestCase):
 
     def setUp(self) -> None:
-        self.autocompletion: AutocompletionUtil = AutocompletionUtil.instance()
+        self.autocompletion: AutocompletionUtil = AutocompletionUtil()
 
     def test_autocompletion_drugs(self):
         metformin_gold = ["metformin"]

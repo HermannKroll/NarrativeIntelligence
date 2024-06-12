@@ -39,4 +39,6 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
+
+
 echo "Narrative Update done" | mailx -s "Narrative Service Update done" "$ADDRESS" -r "$SENDER"

@@ -5,14 +5,20 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import delete, and_, text
+from sqlalchemy import delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Tag, TagInvertedIndex, Predication
 from narraint.config import QUERY_YIELD_PER_K
-from narrant.entity.entityresolver import GeneResolver
-from narrant.entitylinking.enttypes import GENE
+from narrant.entity.entityidtranslator import EntityIDTranslator
+
+"""
+The tag-cache dictionary uses strings instead of tuples as keys ('seen_keys') for predication entries. With this, 
+the memory usage is lower.
+"""
+
+SEPERATOR_STRING = "_;_"
 
 
 def insert_data(session, index, predication_id_min):
@@ -26,7 +32,8 @@ def insert_data(session, index, predication_id_min):
         deleted_rows = 0
         for idx, row in enumerate(inv_q):
             p2.print_progress(idx)
-            row_key = row.entity_id, row.entity_type, row.document_collection
+            # tag ids are already translated inside the TagInvertedIndex
+            row_key = SEPERATOR_STRING.join([str(row.entity_id), str(row.entity_type), str(row.document_collection)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
             if row_key in index:
@@ -44,41 +51,16 @@ def insert_data(session, index, predication_id_min):
 
         logging.info('Entries deleted')
 
-    logging.info('Using the Gene Resolver to replace gene ids by symbols')
-    generesolver = GeneResolver()
-    generesolver.load_index()
-
     progress = Progress(total=len(index.items()), print_every=1000, text="Computing insert values...")
     progress.start_time()
     insert_list = []
-    for (entity_id, entity_type, doc_col), doc_ids in index.items():
-        if entity_type == GENE:
-            gene_ids = set()
-            if ';' in entity_id:
-                for g_id in entity_id.split(';'):
-                    try:
-                        gene_ids.update(generesolver.gene_id_to_symbol(g_id.strip()).lower())
-                    except (KeyError, ValueError):
-                        continue
-            else:
-                try:
-                    gene_ids.add(generesolver.gene_id_to_symbol(entity_id).lower())
-                except (KeyError, ValueError):
-                    continue
-
-            for gene_id in gene_ids:
-                insert_list.append(dict(entity_id=gene_id,
-                                        entity_type=GENE,
-                                        document_collection=doc_col,
-                                        support=len(doc_ids),
-                                        document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
-
-        else:
-            insert_list.append(dict(entity_id=entity_id,
-                                    entity_type=entity_type,
-                                    document_collection=doc_col,
-                                    support=len(doc_ids),
-                                    document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
+    for row_key, doc_ids in index.items():
+        entity_id, entity_type, doc_col = row_key.split(SEPERATOR_STRING)
+        insert_list.append(dict(entity_id=entity_id,
+                                entity_type=entity_type,
+                                document_collection=doc_col,
+                                support=len(doc_ids),
+                                document_ids=json.dumps(sorted(list(doc_ids), reverse=True))))
     progress.done()
     logging.info('Beginning insert into tag_inverted_index table...')
     TagInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=True, commit=False)
@@ -128,13 +110,20 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
         query = query.order_by(Tag.ent_id, Tag.ent_type, Tag.document_collection, Tag.document_id)
     query = query.yield_per(QUERY_YIELD_PER_K)
 
+    logging.info('Using the Gene Resolver to replace gene ids by symbols')
+    entityidtranslator = EntityIDTranslator()
+
     if low_memory:
         buffer = defaultdict(set)
         last_key = ()
         for idx, tag_row in enumerate(query):
             progress.print_progress(idx)
+            try:
+                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
+            except (KeyError, ValueError):
+                continue
 
-            sort_key = (tag_row.document_collection, tag_row.ent_id, tag_row.ent_type)
+            sort_key = (tag_row.document_collection, translated_id, tag_row.ent_type)
             if idx == 0:
                 last_key = sort_key
 
@@ -144,7 +133,7 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
                 buffer.clear()
 
             last_key = sort_key
-            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
+            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
             buffer[key].add(tag_row.document_id)
 
         insert_data(session, buffer, predication_id_min)
@@ -157,10 +146,13 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
             progress.print_progress(idx)
             if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
                 continue
+            try:
+                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
+            except (KeyError, ValueError):
+                continue
 
-            key = (tag_row.ent_id, tag_row.ent_type, tag_row.document_collection)
-            doc_id = tag_row.document_id
-            index[key].add(doc_id)
+            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
+            index[key].add(tag_row.document_id)
 
         insert_data(session, index, predication_id_min)
         session.commit()

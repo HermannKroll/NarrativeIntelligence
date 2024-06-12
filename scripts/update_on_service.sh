@@ -1,3 +1,6 @@
+eval "$(conda shell.bash hook)"
+conda activate narraint
+export PYTHONPATH="/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 
 # Remove old cache
 echo "Deleting old cache backup directory"

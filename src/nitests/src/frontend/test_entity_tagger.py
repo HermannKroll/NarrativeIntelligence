@@ -8,7 +8,7 @@ from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 class EntityTaggerTestCase(TestCase):
 
     def setUp(self) -> None:
-        self.entity_tagger = EntityTagger.instance()
+        self.entity_tagger = EntityTagger()
 
     def test_drugs_without_e(self):
         self.assertEqual(len(self.entity_tagger.tag_entity('codein', expand_search_by_prefix=False)),

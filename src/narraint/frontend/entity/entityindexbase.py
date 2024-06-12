@@ -34,14 +34,14 @@ class EntityIndexBase:
 
     def __init__(self):
         self.expand_by_subclasses = True
-        self.mesh_ontology = MeSHOntology.instance()
+        self.mesh_ontology = MeSHOntology()
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
         raise NotImplementedError
 
     def _create_index(self):
 
-        resolver = EntityResolver.instance()
+        resolver = EntityResolver()
         for e_term, e_id in resolver.species.get_reverse_index().items():
             self._add_term(e_term, e_id, SPECIES)
 
@@ -124,7 +124,7 @@ class EntityIndexBase:
 
     def _add_mesh_tags(self, mesh_file=MESH_DESCRIPTORS_FILE):
         logging.info('Reading mesh file: {}'.format(mesh_file))
-        meshdb = MeSHDB.instance()
+        meshdb = MeSHDB()
         meshdb.load_xml(mesh_file)
         mesh_mappings = defaultdict(set)
         for desc in meshdb.get_all_descs():
@@ -196,7 +196,7 @@ class EntityIndexBase:
         # However, loading all supplements into the index will be too large
         # That is why we query all tagged MeSH supplements first and use them to build the index
         logging.info(f'Reading MeSH supplement file: {mesh_supplement_file}')
-        mesh_supp = MeSHDBSupplementary.instance()
+        mesh_supp = MeSHDBSupplementary()
         mesh_supp.load_xml(filename=mesh_supplement_file, prefetch_all=True)
 
         logging.info('Query all MeSH supplements from Tag table...')
@@ -235,7 +235,7 @@ class EntityIndexBase:
         # read also atc classes
         if self.expand_by_subclasses:
             logging.info('Adding ATC tree information...')
-            atc_tree: ATCTree = ATCTree.instance()
+            atc_tree: ATCTree = ATCTree()
             for atc_class_name, chembl_ids in atc_tree.atcclassname2chembl.items():
                 for chid in chembl_ids:
                     self._add_term(atc_class_name, chid, DRUG, entity_class=atc_class_name)

@@ -10,10 +10,10 @@ nltk~=3.8.1
 lxml~=4.9.1
 psycopg2-binary~=2.9.1
 psutil~=5.7.3
-ijson~=3.1.4
 requests~=2.31.0
 click~=7.1.2
 Pillow~=10.0.1
 eldar~=0.0.8
 unidecode~=1.2.0
+ijson==3.2.3
 git+https://github.com/LIAAD/yake

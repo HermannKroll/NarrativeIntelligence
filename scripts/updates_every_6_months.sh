@@ -10,5 +10,5 @@ python ~/NarrativeIntelligence/src/narraint/keywords2graph/schema_support_graph.
 
 
 # Rebuild the retrieval indexes
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py --low-memory
+python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_predication.py --low-memory

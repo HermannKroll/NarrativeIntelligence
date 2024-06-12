@@ -169,6 +169,7 @@
                                 <div class="input-group-text">
                                     <input type="range" class="form-range mx-0 mx-sm-0" id="drugNetworkSlider" min="5" max="20" value="6" step="1" oninput="updateNetworkGraph()">
                                 </div>
+                                <button class="btn btn-secondary" onclick="networkUnselectNode()">Clear Selection</button>
                                 <button class="btn btn-secondary" onclick="centerNetwork(network)">
                                     Center
                                 </button>
@@ -426,8 +427,8 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script src="{% static 'js/paper.js' %}?version=9" type="text/javascript"></script>
-    <script src="{% static 'js/overview.js' %}?version=6" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverview.js' %}?version=13" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverview.js' %}?version=14" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=1" type="text/javascript"></script>

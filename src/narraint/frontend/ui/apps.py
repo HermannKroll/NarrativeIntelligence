@@ -14,6 +14,6 @@ class UiConfig(AppConfig):
     def ready(self):
         configure_logging()
         logging.info('Initializing entity tagger & entity resolver once...')
-        UiConfig.resolver = EntityResolver.instance()
-        UiConfig.entity_tagger = EntityTagger.instance()
+        UiConfig.resolver = EntityResolver()
+        UiConfig.entity_tagger = EntityTagger()
         logging.info('Index loaded')
