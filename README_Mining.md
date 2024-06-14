@@ -4,6 +4,12 @@ However, the data mining (entity linking and statement extraction) is implemente
 So, please read the instructions of our [NarrativeAnnotation GitHub Page](https://github.com/HermannKroll/NarrativeAnnotation/blob/main/README.md). 
 NarrativeAnnotation contains all scripts to transform biomedical documents into graphs.
 
+# Update Mining Pipeline
+```
+cd ~/NarrativeIntelligence/
+git pull --recurse-submodules
+```
+
 ## Setup configurations
 mv ~/NarrativeAnnotation/config/*.json ~/NarrativeIntelligence/config/
 
