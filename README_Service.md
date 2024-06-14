@@ -466,7 +466,7 @@ git pull --recurse-submodules
 
 Update requirements:
 ```
-conda activate narrant
+conda activate narraint
 pip install --upgrade -r ~/NarrativeIntelligence/requirements.txt
 ```
 
