@@ -464,6 +464,13 @@ cd ~/NarrativeIntelligence/
 git pull --recurse-submodules
 ```
 
+Update requirements:
+```
+conda activate narrant
+pip install --upgrade -r ~/NarrativeIntelligence/requirements.txt
+```
+
+
 As root do:
 ```
 sudo chmod -R 777 /var/www
