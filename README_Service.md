@@ -47,12 +47,6 @@ For development purposes, dev should be cloned:
 git clone --recurse-submodules --branch dev https://github.com/HermannKroll/NarrativeIntelligence.git
 ```
 
-## Cloning a private repository (deprecated)
-When cloning a private repository of GitHub, you need to create private public key pair for your account.
-```
-ssh-keygen
-```
-Put the public key into your GitHub account which was granted access to this repository. 
 
 # Database Setup
 The narrative service requires a Postgres database that contains processed documents. 
