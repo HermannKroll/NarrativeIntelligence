@@ -21,8 +21,8 @@ from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_fr
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
-from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, \
-    FEEDBACK_PREDICATION_DIR, FEEDBACK_SUBGROUP_DIR
+from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
+    FEEDBACK_SUBGROUP_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -82,8 +82,6 @@ def get_document_graph(request):
         document_id = str(request.GET.get("document", "").strip())
         document_collection = str(request.GET.get("data_source", "").strip())
 
-
-
         try:
             start_time = datetime.now()
             document_id = int(document_id)
@@ -111,9 +109,9 @@ def get_document_graph(request):
             for stmt, score in sorted_extracted_statements:
                 try:
                     subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
-                                                                                    resolve_gene_by_id=False)
+                                                                           resolve_gene_by_id=False)
                     object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
-                                                                                   resolve_gene_by_id=False)
+                                                                          resolve_gene_by_id=False)
                     subject_name = f'{subject_name} ({stmt.subject_type})'
                     object_name = f'{object_name} ({stmt.object_type})'
 
@@ -155,7 +153,7 @@ def get_document_graph(request):
             session.remove()
             try:
                 View().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
-                                                                      len(facts))
+                                                             len(facts))
             except IOError:
                 logging.debug('Could not write document graph log file')
 
@@ -176,7 +174,7 @@ def get_autocompletion(request):
         if "entity_type" in request.GET:
             entity_type = str(request.GET.get("entity_type", "").strip())
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string,
-                                                                                          entity_type=entity_type)
+                                                                                 entity_type=entity_type)
         else:
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
@@ -230,7 +228,7 @@ def get_term_to_entity(request):
                 expand_by_prefix = False
         try:
             entities = View().translation.convert_text_to_entity(term,
-                                                                          expand_search_by_prefix=expand_by_prefix)
+                                                                 expand_search_by_prefix=expand_by_prefix)
             resolver = EntityResolver()
             for e in entities:
                 try:
@@ -305,7 +303,7 @@ def get_query_narrative_documents(request):
                                                                          document_collection=document_collection)
 
         View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception:
         View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
@@ -339,7 +337,7 @@ def get_query_document_ids(request):
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
         result_ids = sorted(list({r.document_id for r in results}))
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
     except Exception:
         View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
@@ -379,7 +377,7 @@ def get_narrative_documents(request):
                                                                          document_collection=document_collection)
 
         View().query_logger.write_api_call(True, "get_narrative_document", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception as e:
         logger.error(f"get_narrative_document: {e}")
@@ -400,7 +398,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     if DO_CACHING:
         try:
             cached_sub_count_list = View().cache.load_result_from_cache(document_collection, graph_query,
-                                                                                 aggregation_name=aggregation_strategy)
+                                                                        aggregation_name=aggregation_strategy)
             if cached_sub_count_list:
                 logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
                 return cached_sub_count_list, True
@@ -433,8 +431,8 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
         if DO_CACHING:
             try:
                 View().cache.add_result_to_cache(document_collection, graph_query,
-                                                          sub_count_list,
-                                                          aggregation_name=aggregation_strategy)
+                                                 sub_count_list,
+                                                 aggregation_name=aggregation_strategy)
             except Exception:
                 logging.error('Cannot store query result to cache...')
 
@@ -475,9 +473,8 @@ def get_query_sub_count(request):
             except ValueError:
                 return JsonResponse(status=500, data=dict(answer="topk must be a positive integer"))
 
-
         View().query_logger.write_api_call(True, "get_query_sub_count", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
@@ -514,7 +511,7 @@ def get_document_ids_for_entity(request):
             document_ids = []
         session.remove()
         View().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
 
@@ -645,7 +642,7 @@ def get_query(request):
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
             View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                         query, opt_query)
+                                                query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
 
@@ -671,7 +668,7 @@ def get_query(request):
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_query", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
 
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
@@ -834,7 +831,7 @@ def get_new_query(request):
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_new_query", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
@@ -863,12 +860,12 @@ def get_provenance(request):
                 predication_ids.update(pred_ids)
             try:
                 View().query_logger.write_provenance_log(time_needed, document_collection, document_id,
-                                                                  predication_ids)
+                                                         predication_ids)
             except IOError:
                 logging.debug('Could not write provenance log file')
 
             View().query_logger.write_api_call(True, "get_provenance", str(request),
-                                                        time_needed=datetime.now() - start)
+                                               time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
         except Exception:
             View().query_logger.write_api_call(False, "get_provenance", str(request))
@@ -930,7 +927,7 @@ def post_feedback(request):
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_feedback", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
             View().query_logger.write_api_call(False, "get_feedback", str(request))
@@ -981,7 +978,7 @@ def post_subgroup_feedback(request):
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
             View().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
@@ -1012,7 +1009,7 @@ def post_drug_suggestion(request):
             except IOError:
                 logging.debug('Could not write drug suggestion log file')
             View().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
 
         except IOError:
@@ -1369,12 +1366,12 @@ def get_keyword_search_request(request):
                 # ]
 
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
-                                                            time_needed=datetime.now() - time_start)
+                                                   time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
             except Exception as e:
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
-                                                            time_needed=datetime.now() - time_start)
+                                                   time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
                 logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
@@ -1406,12 +1403,12 @@ def get_clinical_trial_phases(request):
                 drug_indications.append(dict(mesh_id=row.disease, max_phase_for_ind=row.phase))
 
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
         except Exception as _:
             logging.debug('Could not query clinical trials for {}'.format(chembl_id))
             View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
 
             return HttpResponse(status=500)
     return HttpResponse(status=500)
