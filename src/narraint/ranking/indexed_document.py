@@ -1,5 +1,6 @@
 from kgextractiontoolbox.document.narrative_document import NarrativeDocument, StatementExtraction
 from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES
+from narrant.entity.entityidtranslator import EntityIDTranslator
 
 
 class IndexedDocument(NarrativeDocument):
@@ -12,10 +13,11 @@ class IndexedDocument(NarrativeDocument):
         super().__init__(document_id=nd.id, title=nd.title, abstract=nd.abstract,
                          metadata=nd.metadata, tags=nd.tags, sentences=nd.sentences,
                          extracted_statements=nd.extracted_statements)
+        # singleton implementation
+        entityidtranslator = EntityIDTranslator()
 
         self.extracted_statements = [s for s in self.extracted_statements if s.relation]
         self.classification = nd.classification
-
         self.spo2confidence = {}
 
         self.entity2frequency = {}
@@ -24,7 +26,9 @@ class IndexedDocument(NarrativeDocument):
         self.text_len = len(self.get_text_content(sections=True))
         self.concept_count = len(self.tags)
         for t in self.tags:
-            key = (t.ent_type, t.ent_id)
+            # translate gene ids to symbols to be compatible to statement gene representation
+            translated_id = entityidtranslator.translate_entity_id(t.ent_id, t.ent_type)
+            key = (t.ent_type, translated_id)
 
             if key not in self.entity2frequency:
                 self.entity2frequency[key] = 1
