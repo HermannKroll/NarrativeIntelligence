@@ -72,7 +72,6 @@ class DocumentCorpus:
                 self.cache_concept2support[key] += row.support
             else:
                 self.cache_concept2support[key] = row.support
-        self.all_idf_data_cached = True
         logging.info('Finished')
 
     def get_entity_ifd_score(self, entity_type: str, entity_id: str) -> float:
