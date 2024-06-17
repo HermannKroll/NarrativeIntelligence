@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/simpleTree.css' %}" type="text/css"/>
     <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/ui.css' %}" type="text/css"/>
 {% endblock %}
@@ -78,7 +79,9 @@
                         <div class="col-8 col-md-4 col-lg-2 mx-auto">
                             <div class="btn-group w-100" role="group" aria-label="query control">
                                 <button class="btn btn-success" type="button" onclick="addQueryPart()">Add</button>
-                                <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center" type="submit" id="btn_search">Search</button>
+                                <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center"
+                                        type="submit" id="btn_search">Search
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -94,12 +97,13 @@
                 <div class="row">
                     <div class="input-group">
                         <input type="text" class="form-control" aria-label="Keywords" id="search_input"
-                               placeholder="enter keywords and press enter  (e.g. metformin diabetes mellitus injection)" >
+                               placeholder="enter keywords and press enter  (e.g. metformin diabetes mellitus injection)">
                         <button class="btn btn-success" type="button" id="keyword_add" onclick="keywordAdd()">
                             Add
                         </button>
                         <button class="btn btn-primary" type="button" id="search_submit" onclick="keywordSearch()">
-                            <span class="spinner-border spinner-border-sm d-none" id="search_spinner" role="status"></span>
+                            <span class="spinner-border spinner-border-sm d-none" id="search_spinner"
+                                  role="status"></span>
                             Search
                         </button>
                     </div>
@@ -239,10 +243,12 @@
                                 Covid19 associated ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Disease associated Covid19')">Disease associated Covid19
+                                    onclick="initQueryBuilderFromString('Disease associated Covid19')">Disease
+                                associated Covid19
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Covid19 associated Target')">Covid19 associated Target
+                                    onclick="initQueryBuilderFromString('Covid19 associated Target')">Covid19 associated
+                                Target
                             </button>
                             <button type="button" class="btn btn-outline-primary"
                                     onclick="initQueryBuilderFromString('Covid19 associated Human _AND_ Disease associated Human')">
@@ -261,40 +267,48 @@
                                 Methods
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('&quot;Mass Spectrometry&quot; method Simvastatin')">Mass
+                                    onclick="initQueryBuilderFromString('&quot;Mass Spectrometry&quot; method Simvastatin')">
+                                Mass
                                 Spectrometry method Simvastatin
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('?X(Method) method Simvastatin')">?X(Method) method
+                                    onclick="initQueryBuilderFromString('?X(Method) method Simvastatin')">?X(Method)
+                                method
                                 Simvastatin
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('?X(LabMethod) method Simvastatin')">?X(LabMethod) method
+                                    onclick="initQueryBuilderFromString('?X(LabMethod) method Simvastatin')">
+                                ?X(LabMethod) method
                                 Simvastatin
                             </button>
                             <div class="alert alert-info" role="alert">
                                 Treatment
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin treats &quot;Diabetes Mellitus&quot;')">Metformin
+                                    onclick="initQueryBuilderFromString('Metformin treats &quot;Diabetes Mellitus&quot;')">
+                                Metformin
                                 treats
                                 "Diabetes Mellitus"
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Simvastatin treats Hypercholesterolemia')">Simvastatin
+                                    onclick="initQueryBuilderFromString('Simvastatin treats Hypercholesterolemia')">
+                                Simvastatin
                                 treats
                                 Hypercholesterolemia
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin treats ?X(Disease)')">Metformin treats
+                                    onclick="initQueryBuilderFromString('Metformin treats ?X(Disease)')">Metformin
+                                treats
                                 ?X(Disease)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin treats ?X(Species)')">Metformin treats
+                                    onclick="initQueryBuilderFromString('Metformin treats ?X(Species)')">Metformin
+                                treats
                                 ?X(Species)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Drug associated &quot;Monkey Pox&quot;')">Drug associated
+                                    onclick="initQueryBuilderFromString('Drug associated &quot;Monkey Pox&quot;')">Drug
+                                associated
                                 Monkey Pox
                             </button>
 
@@ -303,15 +317,18 @@
                                 Plant Family Associations
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Vinca associated ?Y(Disease)')">Vinca associated
+                                    onclick="initQueryBuilderFromString('Vinca associated ?Y(Disease)')">Vinca
+                                associated
                                 ?Y(Disease)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Digitalis associated ?Y(Disease)')">Digitalis associated
+                                    onclick="initQueryBuilderFromString('Digitalis associated ?Y(Disease)')">Digitalis
+                                associated
                                 ?Y(Disease)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('?X(PlantFamily) associated ?Y(Disease)')">?X(PlantFamily)
+                                    onclick="initQueryBuilderFromString('?X(PlantFamily) associated ?Y(Disease)')">
+                                ?X(PlantFamily)
                                 associated ?Y(Disease)
                             </button>
 
@@ -320,16 +337,19 @@
                                 Administered
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin administered ?X(DosageForm)')">Metformin
+                                    onclick="initQueryBuilderFromString('Metformin administered ?X(DosageForm)')">
+                                Metformin
                                 administered
                                 ?X(DosageForm)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin administered Injections')">Metformin administered
+                                    onclick="initQueryBuilderFromString('Metformin administered Injections')">Metformin
+                                administered
                                 Injections
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Lidocaine administered ?X(DosageForm)')">Lidocaine
+                                    onclick="initQueryBuilderFromString('Lidocaine administered ?X(DosageForm)')">
+                                Lidocaine
                                 administered
                                 ?X(DosageForm)
                             </button>
@@ -347,17 +367,21 @@
                                 Gene Interactions
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin inhibits mtor')">Metformin inhibits mtor
+                                    onclick="initQueryBuilderFromString('Metformin inhibits mtor')">Metformin inhibits
+                                mtor
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Metformin inhibits ?X(Target)')">Metformin inhibits
+                                    onclick="initQueryBuilderFromString('Metformin inhibits ?X(Target)')">Metformin
+                                inhibits
                                 ?X(Target)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits cyp3a4
+                                    onclick="initQueryBuilderFromString('?X(Drug) inhibits cyp3a4')">?X(Drug) inhibits
+                                cyp3a4
                             </button>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('cyp3a4 metabolises Simvastatin')">cyp3a4 metabolises
+                                    onclick="initQueryBuilderFromString('cyp3a4 metabolises Simvastatin')">cyp3a4
+                                metabolises
                                 Simvastatin
                             </button>
 
@@ -366,7 +390,8 @@
                                 Adverse Effects
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('Simvastatin induces Rhabdomyolysis')">Simvastatin induces
+                                    onclick="initQueryBuilderFromString('Simvastatin induces Rhabdomyolysis')">
+                                Simvastatin induces
                                 Rhabdomyolysis
                             </button>
                             <button type="button" class="btn btn-outline-primary"
@@ -401,7 +426,8 @@
                                 Large Queries
                             </div>
                             <button type="button" class="btn btn-outline-primary"
-                                    onclick="initQueryBuilderFromString('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug) treats
+                                    onclick="initQueryBuilderFromString('?Drug(Drug) treats ?Dis(Disease)')">?Drug(Drug)
+                                treats
                                 ?Dis(Disease)
                             </button>
                             <button type="button" class="btn btn-outline-primary"
@@ -464,7 +490,8 @@
                             <label><strong>Results by year:</strong></label>
                         </div>
                         <div class="row mx-2 align-items-center">
-                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" style="max-width: 150px" id="range_container">
+                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" style="max-width: 150px"
+                                 id="range_container">
                                 <canvas id="myChart" style="width:100%"></canvas>
                                 <div class="sliders_control">
                                     <input id="fromSlider" type="range"/>
@@ -531,21 +558,24 @@
                         <div class="col-12 col-md-4" id="div_input_page" style="display: none">
                             <div class="input-group w-100">
                                 <label class="input-group-text" for="input_page_no">Page: </label>
-                                <input class="form-control" type="number" size="1" id="input_page_no" step="1" value="1" min="1"/>
+                                <input class="form-control" type="number" size="1" id="input_page_no" step="1" value="1"
+                                       min="1"/>
                                 <label class="input-group-text"> of </label>
                                 <label class="input-group-text" id="label_max_page"> of X</label>
                             </div>
                         </div>
 
                         <div class="col-12 col-md-4">
-                            <select class="form-select w-100" id="select_sorting_year" style="width: auto; display: none">
+                            <select class="form-select w-100" id="select_sorting_year"
+                                    style="width: auto; display: none">
                                 <option selected value="True">Latest Publications First</option>
                                 <option value="False">Oldest Publications First</option>
                             </select>
                         </div>
 
                         <div class="col-12 col-md-4">
-                            <select class="form-select w-100" id="select_sorting_freq" style="width: auto; display: none">
+                            <select class="form-select w-100" id="select_sorting_freq"
+                                    style="width: auto; display: none">
                                 <option selected value="True">Most Frequent Substitutions First</option>
                                 <option value="False">Unusual Substitutions First</option>
                             </select>
@@ -553,9 +583,10 @@
                     </div>
                     <div class="row">
                         <label for="input_title_filter" id="input_title_filter_label" class="col-12 col-md-8 d-none">Search
-                                in result titles:</label>
+                            in result titles:</label>
                         <div class="input-group w-75">
-                            <input type="text" class="col-12 col-md-8 form-control d-none" placeholder="search in result titles"
+                            <input type="text" class="col-12 col-md-8 form-control d-none"
+                                   placeholder="search in result titles"
                                    id="input_title_filter">
                         </div>
                     </div>
@@ -630,10 +661,10 @@
                         <div class="container">
                             <table class="table">
                                 <colgroup>
-                                   <col style="width: 20%;">
-                                   <col style="width: 40%;">
-                                   <col style="width: 30%;">
-                                   <col style="width: 10%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 40%;">
+                                    <col style="width: 30%;">
+                                    <col style="width: 10%;">
                                 </colgroup>
                                 <thead>
                                 <tr>
@@ -703,14 +734,23 @@
                             <em>(1,10) means text passage 1-10</em></p>
                     </div>
                 </div>
-                <div class="graph" id="paperGraph"></div>
+                <div class="graphContainer" id="graphContainer">
+                    <div class="graphNetwork" id="paperGraph"></div>
+                    <div class="input-group mx-auto mb-auto me-sm-0 w-auto  h-fc graphFooter">
+                        <span class="input-group-text ml-auto" id="paperNetworkAmount"></span>
+                        <div class="input-group-text">
+                            <input type="range" class="form-range mx-0 mx-sm-0" id="paperNetworkSlider" min="1"
+                                   step="1" oninput="updatePaperNetworkGraph()">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- loading screen -->
     <div class="position-absolute start-0 top-0 w-100 h-100 bg-dark d-flex d-none" id="loading_screen"
-        style="opacity: 50%; z-index: 1000">
+         style="opacity: 50%; z-index: 1000">
         <div class="spinner-border text-primary m-auto" role="status" id="result_spinner">
             <span class="visually-hidden">Loading...</span>
         </div>
@@ -764,7 +804,7 @@
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
     <script src="{% static 'js/search.js' %}?version=31" type="text/javascript"></script>
-    <script src="{% static 'js/paper.js' %}?version=17" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=18" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>

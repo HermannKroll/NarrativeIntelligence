@@ -291,10 +291,23 @@ function initCheckbox(typeArray) {
 }
 
 function visualize_document_graph(container) {
+
     let nodes = document_graph["nodes"];
+    let facts = document_graph["facts"]
     let node2id = {};
     let id = 1;
     let nodesToCreate = new vis.DataSet([]);
+
+    let maxSliderValue = facts.length;
+    let networkSlider = document.getElementById("paperNetworkSlider")
+    networkSlider.max = maxSliderValue;
+    if (maxSliderValue < 10) {
+        networkSlider.value = maxSliderValue;
+        document.getElementById("paperNetworkAmount").innerText = `Top ${maxSliderValue}`;
+    } else {
+        networkSlider.value = "10";
+        document.getElementById("paperNetworkAmount").innerText = `Top 10`;
+    }
     nodes.forEach(node => {
         let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
         if (colorLabel == "PlantFamily/Genus") {
@@ -311,7 +324,7 @@ function visualize_document_graph(container) {
     });
 
     let edgesToCreate = new vis.DataSet([]);
-    document_graph["facts"].forEach(fact => {
+    facts.forEach(fact => {
         let subject = node2id[fact['s']];
         let predicate = fact['p'];
         let object = node2id[fact['o']];
@@ -356,6 +369,7 @@ function visualize_document_graph(container) {
 
     // initialize your network!
     papernetwork = new vis.Network(container, data, options);
+    updatePaperNetworkGraph();
     /* this would stop the physics engine once and for all, so dragging only drags one node aswell
     network.on("stabilizationIterationsDone", function () {
         network.setOptions( { physics: false } );
@@ -394,4 +408,48 @@ function centerNetwork(network) {
     network.fit({
         animation: true
     })
+}
+
+function updatePaperNetworkGraph() {
+    const topK = document.getElementById("paperNetworkSlider").value;
+    document.getElementById("paperNetworkAmount").innerText = `Top ${topK}`;
+
+    let usedNodes = new Set();
+    document_graph["facts"].slice(0, topK).forEach(fact => {
+        usedNodes.add(fact['s']);
+        usedNodes.add(fact['o']);
+    });
+
+    let filteredNodes = document_graph["nodes"].filter(node => usedNodes.has(node));
+
+    let nodesToCreate = new vis.DataSet([]);
+    let node2id = {};
+    let id = 1;
+
+    filteredNodes.forEach(node => {
+        let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
+        if (colorLabel == "PlantFamily/Genus") {
+            colorLabel = "Plant";
+        }
+        if (!activeTypeMap.get(colorLabel)) {
+            return;
+        }
+        node2id[node] = id;
+        let color = typeColorMap[colorLabel];
+        let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color};
+        nodesToCreate.add(nodeData);
+        id = id + 1;
+    });
+
+    let edgesToCreate = new vis.DataSet([]);
+    document_graph["facts"].slice(0, topK).forEach(fact => {
+        if (node2id[fact['s']] && node2id[fact['o']]) {
+            let edgeData = {'from': node2id[fact['s']], 'to': node2id[fact['o']], 'label': fact['p']};
+            edgesToCreate.add(edgeData);
+        }
+    });
+
+    papernetwork.setData({nodes: nodesToCreate, edges: edgesToCreate});
+    papernetwork.stabilize(100);
+    papernetwork.physics.physicsEnabled = false;
 }
