@@ -39,6 +39,8 @@ from narraint.queryengine.log_statistics import create_dictionary_of_logs
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
+from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.indexed_document import IndexedDocument
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -71,6 +73,7 @@ class View:
             cls.translation = QueryTranslation()
             cls.explainer = EntityExplainer()
             cls.keyword2graph = Keyword2GraphTranslation()
+            cls.corpus = DocumentCorpus()
         return cls._instance
 
 
@@ -78,38 +81,64 @@ def get_document_graph(request):
     if "document" in request.GET and "data_source" in request.GET:
         document_id = str(request.GET.get("document", "").strip())
         document_collection = str(request.GET.get("data_source", "").strip())
+
+
+
         try:
             start_time = datetime.now()
             document_id = int(document_id)
             session = SessionExtended.get()
-            query = session.query(Predication).filter(Predication.document_collection == document_collection)
-            query = query.filter(Predication.document_id == document_id)
-            query = query.filter(Predication.relation.isnot(None))
+
+            # retrieve all document information from DB
+            narrative_documents = retrieve_narrative_documents_from_database(session, document_ids={document_id},
+                                                                             document_collection=document_collection)
+
+            if len(narrative_documents) != 1:
+                View().query_logger.write_api_call(False, "get_document_graph", str(request))
+                return JsonResponse(status=500, data=dict(reason="No document data available", nodes=[], facts=[]))
+
+            # index the document to compute frequency and coverage
+            indexed_document = IndexedDocument(narrative_documents[0])
+            # score all edge and sort them
+            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_concept_idf(s, indexed_document))
+                                           for s in indexed_document.extracted_statements]
+            sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
+
             facts = defaultdict(set)
+            facts2score = dict()
             nodes = set()
-            for r in query:
+            # translate + aggregate edges
+            for stmt, score in sorted_extracted_statements:
                 try:
-                    subject_name = View().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
+                    subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
                                                                                     resolve_gene_by_id=False)
-                    object_name = View().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
+                    object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
                                                                                    resolve_gene_by_id=False)
-                    subject_name = f'{subject_name} ({r.subject_type})'
-                    object_name = f'{object_name} ({r.object_type})'
+                    subject_name = f'{subject_name} ({stmt.subject_type})'
+                    object_name = f'{object_name} ({stmt.object_type})'
 
                     if subject_name < object_name:
-                        key = subject_name, r.relation, object_name
+                        key = subject_name, stmt.relation, object_name
                         so_key = subject_name, object_name
                     else:
-                        key = object_name, r.relation, subject_name
+                        key = object_name, stmt.relation, subject_name
                         so_key = object_name, subject_name
+                    # This code aggregates facts by predicates
+                    # Only one edge between two nodes is shown but labels are concatenated
                     if key not in facts:
-                        facts[so_key].add(r.relation)
+                        facts[so_key].add(stmt.relation)
+                        if so_key in facts2score:
+                            facts2score[so_key] = max(score, facts2score[so_key])
+                        else:
+                            facts2score[so_key] = score
                         nodes.add(subject_name)
                         nodes.add(object_name)
                 except Exception:
                     pass
 
-            result = []
+            scored_results = []
+            # This code aggregates facts by predicates
+            # Only one edge between two nodes is shown but labels are concatenated
             for (s, o), predicates in facts.items():
                 p_txt = []
                 for p in predicates:
@@ -118,7 +147,9 @@ def get_document_graph(request):
                         continue
                     p_txt.append(p)
                 p_txt = '|'.join([pt for pt in p_txt])
-                result.append(dict(s=s, p=p_txt, o=o))
+                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)]))
+            # sort results by score descending
+            scored_results.sort(key=lambda x: x["score"], reverse=True)
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
             session.remove()
@@ -129,7 +160,7 @@ def get_document_graph(request):
                 logging.debug('Could not write document graph log file')
 
             View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
-            return JsonResponse(dict(nodes=list(nodes), facts=result))
+            return JsonResponse(dict(nodes=list(nodes), facts=scored_results))
         except ValueError:
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
