@@ -1,12 +1,15 @@
 import ast
+from datetime import datetime, timedelta
 from unittest import TestCase
 
 from sqlalchemy import delete
 
 from kgextractiontoolbox.backend.models import Document, Sentence, Predication
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import PredicationInvertedIndex
+from narraint.backend.models import PredicationInvertedIndex, DatabaseUpdate
 from narraint.queryengine.index.compute_reverse_index_predication import denormalize_predication_table
+
+YESTERDAY = datetime.now() - timedelta(days=1)
 
 
 class ReversePredicationIdxText(TestCase):
@@ -22,7 +25,7 @@ class ReversePredicationIdxText(TestCase):
         session.execute(stmt)
         session.commit()
 
-        document_values = [dict(id=1, collection="RIDXTEST", title="Test", abstract="Test Abstract"),
+        document_values = [dict(id=1, collection="RIDXTEST", title="Test", abstract="Test Abstract", date_inserted=YESTERDAY),
                            dict(id=2, collection="RIDXTEST", title="Test", abstract="Test Abstract")]
         sentences_values = [dict(id=1, document_collection="RIDXTEST", text="ABC", md5hash="HASH")]
         pred_values = [dict(id=1000, document_id=1, document_collection="RIDXTEST",
@@ -70,7 +73,7 @@ class ReversePredicationIdxText(TestCase):
     def test_full_reverse_idx_delta_mode(self):
         session = SessionExtended.get()
         denormalize_predication_table()
-        pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
+        pred_values = [dict(id=1002, document_id=2, document_collection="RIDXTEST",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t1", relation="T1",
                             object_id="B", object_type="BT", object_str="B_STR",
@@ -87,11 +90,12 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
-        denormalize_predication_table(predication_id_min=1002)
+        DatabaseUpdate.update_date_to_now(session)
+        denormalize_predication_table(newer_documents=True)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"1": [1000, 1002], "2": [1003]}', '{"1": [1001]}',
+        allowed_pm = ['{"2": [1002, 1003], "1": [1000]}', '{"1": [1001]}',
                       '{"2": [1004]}']
 
         db_rows = {}
