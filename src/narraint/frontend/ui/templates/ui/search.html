@@ -447,40 +447,10 @@
             <!-- left column: filter options menu-->
             <div class="col col-lg-2 mb-2 mb-lg-0">
                 <form class="border rounded">
-                    <div class="row m-1 align-items-center">
-                        <label><strong>Data Source:</strong></label>
-                    </div>
-                    <div class="row m-1 align-items-center">
-                        <input type="radio" id="radio_pubmed" name="data_source" class="col-1"
-                               value="PubMed" onclick="refreshSearch()" checked>
-                        <label class="col-11" for="radio_pubmed">
-                            PubMed (<a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">Help</a>)
-                        </label>
-                    </div>
-                    <div class="row m-1 align-items-center">
-                        <input type="radio" id="radio_litcovid" name="data_source" class="col-1"
-                               value="LitCovid" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_litcovid">
-                            LitCovid (<a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/"
-                                         target="_blank">Help</a>)
-                        </label>
-                    </div>
-                    <div class="row m-1 align-items-center">
-                        <input type="radio" id="radio_long_covid" name="data_source" class="col-1"
-                               value="LongCovid" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_long_covid">
-                            Long Covid (<a
-                                href="https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1"
-                                target="_blank">Help</a>)
-                        </label>
-                    </div>
-                    <div class="row m-1 align-items-center">
-                        <input type="radio"
-                               id="radio_zbmed" name="data_source" class="col-1"
-                               value="ZBMed" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_zbmed">
-                            Covid 19 Pre-Prints<br>via ZBMED (<a
-                                href="https://preview.zbmed.de/" target="_blank">Help</a>)
+                    <!-- Collection class filter -->
+                    <div class="row m-1 align-items-center" id="collection-filter">
+                        <label>
+                            <strong>Data Source:</strong>
                         </label>
                     </div>
 
@@ -506,15 +476,13 @@
                     <!-- Visualization Buttons -->
                     <div class="row m-1 align-items-center">
                         <label><strong>Visualization by:</strong></label>
-                    </div>
-                    <div class="row m-1 align-items-center">
+
                         <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
                                value="outer_ranking_substitution" class="col-1"
                                checked="checked" onclick="refreshSearch()">
                         <label class="col-11" for="radio_outer_ranking_a">
                             Substitution</label>
-                    </div>
-                    <div class="row m-1 align-items-center">
+
                         <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="col-1"
                                value="outer_ranking_ontology" onclick="refreshSearch()">
                         <label class="col-11" for="radio_outer_ranking_b">
@@ -523,17 +491,15 @@
 
                     <div class="row m-1 align-items-center">
                         <label><strong>Classifications:</strong></label>
-                    </div>
-                    <div class="row m-1 align-items-center">
                         <input type="checkbox" name="checkbox_classification" id="checkbox_classification"
                                onclick="refreshSearch()" class="col-1">
                         <label class="col-11" for="checkbox_classification">Pharm. Technology</label>
                     </div>
 
                     <div class="row m-1 align-items-center">
-                        <label><strong>Filter by type:</strong></label>
-                    </div>
-                    <div class="row m-1 align-items-center">
+                        <label>
+                            <strong>Filter by type:</strong>
+                        </label>
                         <input type="checkbox" name="checkbox_sys_review" id="checkbox_sys_review"
                                onclick="refreshSearch()" class="col-1">
                         <label class="col-11" for="checkbox_sys_review">Systematic Review</label>
@@ -789,6 +755,7 @@
         const url_paper_view_log = "{% url 'paper_view_log' %}";
         const explain_translation_url = "{% url 'explain_translation' %}";
         const url_keyword_search_request = "{% url 'keyword_search_request' %}";
+        const url_available_collections = "{% url 'document_collections' %}"
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";

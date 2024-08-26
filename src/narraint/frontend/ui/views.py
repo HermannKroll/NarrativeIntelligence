@@ -28,6 +28,7 @@ from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
+from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
@@ -241,13 +242,14 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
-def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: str):
+def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: set):
     cache_hit = False
     cached_results = None
     start_time = datetime.now()
+    collection_string = "-".join(sorted(document_collection))
     if DO_CACHING:
         try:
-            cached_results = View().cache.load_result_from_cache(document_collection, graph_query)
+            cached_results = View().cache.load_result_from_cache(collection_string, graph_query)
             cache_hit = True
         except Exception:
             logging.error('Cannot load query result from cache...')
@@ -259,11 +261,12 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
     else:
         # run query
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter={document_collection})
+                                                           document_collection_filter=document_collection)
         cache_hit = False
         if DO_CACHING:
             try:
-                View().cache.add_result_to_cache(document_collection, graph_query, results)
+
+                View().cache.add_result_to_cache(collection_string, graph_query, results)
             except Exception:
                 logging.error('Cannot store query result to cache...')
     time_needed = datetime.now() - start_time
@@ -616,7 +619,9 @@ def get_query(request):
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
             query)
         year_aggregation = {}
-        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+
+        data_source = set(data_source.split(";"))
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in data_source):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -640,7 +645,7 @@ def get_query(request):
             results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
+            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit, len(result_ids),
                                                 query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
@@ -1426,3 +1431,11 @@ def get_clinical_trial_phases(request):
 
             return HttpResponse(status=500)
     return HttpResponse(status=500)
+
+
+def get_data_sources(request):
+    try:
+        available_data_sources = DataSourcesFilter.get_available_data_sources()
+        return JsonResponse(status=200, data=dict(data_sources=available_data_sources))
+    except Exception:
+        return HttpResponse(status=500)

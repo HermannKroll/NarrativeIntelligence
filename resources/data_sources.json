@@ -1,0 +1,30 @@
+[
+  {
+    "collection": "PubMed",
+    "label": "PubMed",
+    "selected": true,
+    "priority": 10,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/"
+  },
+  {
+    "collection": "LitCovid",
+    "label": "LitCovid",
+    "selected": false,
+    "priority": 8,
+    "url": "https://www.ncbi.nlm.nih.gov/research/coronavirus/"
+  },
+  {
+    "collection": "LongCovid",
+    "label": "Long Covid",
+    "selected": false,
+    "priority": 7,
+    "url": "https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1"
+  },
+  {
+    "collection": "ZBMed",
+    "label": "Covid 19 Pre-Prints via ZBMED",
+    "selected": false,
+    "priority": 6,
+    "url": "https://preview.zbmed.de/"
+  }
+]
