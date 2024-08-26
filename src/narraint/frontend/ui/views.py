@@ -28,6 +28,7 @@ from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
+from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
