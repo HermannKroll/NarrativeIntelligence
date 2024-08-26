@@ -47,7 +47,7 @@ class QueryEngine:
                         d.publication_year = year
                         d.publication_month = month
                         d.doi = doi
-                        d.org_id = org_id
+                        d.org_document_id = org_id
                         d.document_classes = doc_classes
 
                         filtered_document_results.append(d)
