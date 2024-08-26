@@ -486,6 +486,7 @@ $(document).ready(function () {
     });
 
     buildSelectionTrees();
+    buildDocumentCollectionFilter();
 
     $("#search_form").submit(search);
 
@@ -597,17 +598,14 @@ function initFromURLQueryParams() {
     }
 
     if (params.has("data_source")) {
-        let data_source = params.get("data_source");
-        if (data_source === "LongCovid") {
-            document.getElementById("radio_long_covid").checked = true;
-        } else if (data_source === "LitCovid") {
-            document.getElementById("radio_litcovid").checked = true;
-        } else if (data_source === "ZBMed") {
-            document.getElementById("radio_zbmed").checked = true;
-        } else {
-            document.getElementById("radio_pubmed").checked = true;
+        let dataSourceStr = params.get("data_source")
+        let dataSources = dataSourceStr.split(";");
+
+        for (let i in dataSources) {
+            document.getElementById("filter_" + dataSources[i]);
         }
-        lastDataSource = data_source;
+
+        lastDataSource = dataSourceStr;
     }
 
     if (params.has("start_pos")) {
@@ -833,10 +831,29 @@ function getInputParameters(query) {
     adjustSelectedPage(obj);
     obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
     obj["year_sort"] = document.getElementById("select_sorting_year").value;
-    let data_source = document.querySelector('input[name = "data_source"]:checked').value;
-    lastDataSource = data_source;
-    obj["data_source"] = data_source;
-    obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]:checked').value;
+
+    let dataSource = [];
+    let dataSourceChildren = document.getElementById("collection-filter").children;
+    console.log(dataSourceChildren)
+    for (let i in dataSourceChildren) {
+        const child = dataSourceChildren.item(i);
+        const name = child["name"] || "";
+        const checked = child["checked"] || false;
+
+        if (name !== "data_source" || !checked)
+            continue;
+
+        const dataSourceString = child["id"].split("_")[1];
+        dataSource.push(dataSourceString);
+    }
+    if (dataSource.length === 0) {
+        document.getElementById("filter_PubMed").checked = true;
+        dataSource.push("PubMed");
+    }
+
+    obj["data_source"] = dataSource.join(";");
+
+    obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     //dict["inner_ranking"] = "NOT IMPLEMENTED";
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
@@ -1723,6 +1740,62 @@ function getVariableData() {
 function buildSelectionTrees() {
     queryAndBuildConceptTree();
 }
+
+/**
+ * Function fetches the collections available for filtering. For each option, the appropriate
+ * filter entry gets created. The collection with the highest priority is checked initially.
+ * @returns {Promise<void>}
+ */
+async function buildDocumentCollectionFilter() {
+    const collections = await fetch(url_available_collections)
+        .then((response) => {
+            return response.json();
+        }).then((data) => {
+            return data["data_sources"];
+        })
+        .catch(() => {
+            console.error("Could not load collection filter types.");
+            return null;
+        });
+
+    if (!collections)
+        return;
+
+    const collectionFilter = document.getElementById("collection-filter");
+    const maxPriority = Math.max(...collections.map(o => o["priority"]))
+    const maxPriorityIndex = collections.findIndex((e) => {
+        return e["priority"] === maxPriority
+    });
+
+    for (const i in collections) {
+        const dc = collections[i];
+
+        const inputId = "filter_" + dc["collection"];
+        const filterInput = document.createElement("input");
+        filterInput.type = "checkbox";
+        filterInput.id = inputId;
+        filterInput.name = "data_source";
+        filterInput.classList.add(["col-1"]);
+        filterInput.value = dc["collection"];
+        filterInput.onclick = refreshSearch;
+
+        if (i === maxPriorityIndex.toString())
+            filterInput.checked = true;
+
+        const filterHelpAnchor = document.createElement("a");
+        filterHelpAnchor.href = dc["url"];
+        filterHelpAnchor.target = "_blank";
+        filterHelpAnchor.text = "Help";
+
+        const filterLabel = document.createElement("label");
+        filterLabel.classList.add(["col-11"]);
+        filterLabel.htmlFor = inputId;
+        filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
+
+        collectionFilter.append(filterInput, filterLabel);
+    }
+}
+
 
 function controlFromSlider(barChart, fromSlider, toSlider) {
     const [from, to] = getParsed(fromSlider, toSlider);
