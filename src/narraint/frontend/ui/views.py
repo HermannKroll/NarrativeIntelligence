@@ -22,7 +22,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
-    FEEDBACK_SUBGROUP_DIR
+    FEEDBACK_SUBGROUP_DIR, LOG_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -36,7 +36,6 @@ from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
-from narraint.queryengine.log_statistics import create_dictionary_of_logs
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
@@ -1256,7 +1255,22 @@ class LogsView(TemplateView):
         if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds > 3600 or not LogsView.data_dict:
             try:
                 logger.debug("Computing logs")
-                LogsView.data_dict = create_dictionary_of_logs()
+                log_path = os.path.join(LOG_DIR, "daily_logs_cache")
+                today = datetime.now().date()
+                cache_filename = f"daily_logs_cache_{today.strftime('%Y%m%d')}.json"
+                cache_file_path = os.path.join(log_path, cache_filename)
+                if os.path.exists(cache_file_path):
+                    try:
+                        with open(cache_file_path, 'r') as cache_file:
+                            data = json.load(cache_file)
+                    except json.JSONDecodeError:
+                        logger.error("Error decoding JSON from the cache file.")
+                    except IOError as e:
+                        logger.error(f"Error reading the cache file: {e}")
+                else:
+                    logger.warning(f"No cache file found for today: {cache_file_path}")
+
+                LogsView.data_dict = data
                 LogsView.log_date = datetime.now()
                 logger.debug("Logs computed")
             except:
