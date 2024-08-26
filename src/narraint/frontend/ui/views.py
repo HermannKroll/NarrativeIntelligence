@@ -1413,3 +1413,11 @@ def get_clinical_trial_phases(request):
 
             return HttpResponse(status=500)
     return HttpResponse(status=500)
+
+
+def get_data_sources(request):
+    try:
+        available_data_sources = DataSourcesFilter.get_available_data_sources()
+        return JsonResponse(status=200, data=dict(data_sources=available_data_sources))
+    except Exception:
+        return HttpResponse(status=500)
