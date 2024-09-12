@@ -95,8 +95,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"2": [1002, 1003], "1": [1000]}', '{"1": [1001]}',
-                      '{"2": [1004]}']
+        allowed_pm = [{"2": [1002, 1003], "1": [1000]}, {"1": [1001]}, {"2": [1004]}]
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
@@ -106,6 +105,6 @@ class ReversePredicationIdxText(TestCase):
             self.assertIn(row.document_collection, ["RIDXTEST"])
             self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
 
-        self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
-        self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
-        self.assertEqual(allowed_pm[2], db_rows[allowed_keys[2]])
+        self.assertEqual(allowed_pm[0], ast.literal_eval(db_rows[allowed_keys[0]]))
+        self.assertEqual(allowed_pm[1], ast.literal_eval(db_rows[allowed_keys[1]]))
+        self.assertEqual(allowed_pm[2], ast.literal_eval(db_rows[allowed_keys[2]]))
