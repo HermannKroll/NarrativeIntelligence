@@ -847,7 +847,9 @@ function getInputParameters(query) {
         dataSource.push(dataSourceString);
     }
     if (dataSource.length === 0) {
-        document.getElementById("filter_PubMed").checked = true;
+        if(document.getElementById("filter_PubMed") !== null){
+            document.getElementById("filter_PubMed").checked = true;
+        }
         dataSource.push("PubMed");
     }
 
