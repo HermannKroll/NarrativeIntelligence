@@ -74,7 +74,7 @@ class DocumentMetadata(models.DocumentMetadata):
 class DocumentMetadataService(Extended, DatabaseTable):
     __tablename__ = 'document_metadata_service'
     __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection')),
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection'), ondelete="CASCADE"),
         PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
     )
 

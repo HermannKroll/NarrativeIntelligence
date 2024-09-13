@@ -9,7 +9,7 @@ from sqlalchemy import delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Tag, TagInvertedIndex, Predication
+from narraint.backend.models import Tag, TagInvertedIndex, DatabaseUpdate, Document
 from narraint.config import QUERY_YIELD_PER_K
 from narrant.entity.entityidtranslator import EntityIDTranslator
 
@@ -21,8 +21,8 @@ the memory usage is lower.
 SEPERATOR_STRING = "_;_"
 
 
-def insert_data(session, index, predication_id_min):
-    if predication_id_min:
+def insert_data(session, index, newer_documents):
+    if newer_documents:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
         inv_count = session.query(TagInvertedIndex).count()
         logging.info(f'{inv_count} entries in index found')
@@ -67,13 +67,10 @@ def insert_data(session, index, predication_id_min):
     insert_list.clear()
 
 
-def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=False, buffer_size=1000):
-    if predication_id_min and low_memory:
-        raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
-
+def compute_inverted_index_for_tags(newer_documents: bool = False):
     start_time = datetime.now()
     session = SessionExtended.get()
-    if not predication_id_min:
+    if not newer_documents:
         logging.info('Deleting old inverted index for tags...')
         stmt = delete(TagInvertedIndex)
         session.execute(stmt)
@@ -84,78 +81,43 @@ def compute_inverted_index_for_tags(predication_id_min: int = None, low_memory=F
 
     logging.info('Counting the number of tags...')
     tag_count = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
+    if newer_documents:
+        latest_update = DatabaseUpdate.get_latest_update(session)
+        logging.info(f'Delta Mode activated - Only updating documents newer than {latest_update}')
+        tag_count = tag_count.join(Document)
+        tag_count = tag_count.filter(Document.date_inserted >= latest_update)
     tag_count = tag_count.distinct()
     tag_count = tag_count.count()
     logging.info(f'{tag_count} tags found')
-
-    collection2doc_ids = defaultdict(set)
-    if predication_id_min:
-        logging.info(
-            f'Delta Mode activated - Only updating relevant inverted index entries (id >= {predication_id_min})')
-        doc_id_query = session.query(Predication.document_id, Predication.document_collection)
-        doc_id_query = doc_id_query.filter(Predication.id >= predication_id_min)
-        doc_id_query = doc_id_query.distinct()
-        count = 0
-        for row in doc_id_query:
-            collection2doc_ids[row.document_collection].add(int(row.document_id))
-            count += 1
-        logging.info(f'{count} document ids for {len(collection2doc_ids)} collections found...')
 
     progress = Progress(total=tag_count, print_every=1000, text="Computing inverted tag index...")
     progress.start_time()
 
     query = session.query(Tag.document_id, Tag.document_collection, Tag.ent_id, Tag.ent_type)
+    if newer_documents:
+        latest_update = DatabaseUpdate.get_latest_update(session)
+        logging.info(f'Delta Mode activated - Only updating documents newer than {latest_update}')
+        query = query.join(Document)
+        query = query.filter(Document.date_inserted >= latest_update)
     query = query.distinct()
-    if low_memory:
-        query = query.order_by(Tag.ent_id, Tag.ent_type, Tag.document_collection, Tag.document_id)
     query = query.yield_per(QUERY_YIELD_PER_K)
 
     logging.info('Using the Gene Resolver to replace gene ids by symbols')
     entityidtranslator = EntityIDTranslator()
 
-    if low_memory:
-        buffer = defaultdict(set)
-        last_key = ()
-        for idx, tag_row in enumerate(query):
-            progress.print_progress(idx)
-            try:
-                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
-            except (KeyError, ValueError):
-                continue
+    index = defaultdict(set)
+    for idx, tag_row in enumerate(query):
+        progress.print_progress(idx)
+        try:
+            translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
+        except (KeyError, ValueError):
+            continue
 
-            sort_key = (tag_row.document_collection, translated_id, tag_row.ent_type)
-            if idx == 0:
-                last_key = sort_key
+        key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
+        index[key].add(tag_row.document_id)
 
-            # The whole tag must be inserted within one buffer
-            if last_key != sort_key and len(buffer) >= buffer_size:
-                insert_data(session, buffer, predication_id_min)
-                buffer.clear()
-
-            last_key = sort_key
-            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
-            buffer[key].add(tag_row.document_id)
-
-        insert_data(session, buffer, predication_id_min)
-        session.commit()
-        buffer.clear()
-
-    else:
-        index = defaultdict(set)
-        for idx, tag_row in enumerate(query):
-            progress.print_progress(idx)
-            if predication_id_min and tag_row.document_id not in collection2doc_ids[tag_row.document_collection]:
-                continue
-            try:
-                translated_id = entityidtranslator.translate_entity_id(tag_row.ent_id, tag_row.ent_type)
-            except (KeyError, ValueError):
-                continue
-
-            key = SEPERATOR_STRING.join([str(translated_id), str(tag_row.ent_type), str(tag_row.document_collection)])
-            index[key].add(tag_row.document_id)
-
-        insert_data(session, index, predication_id_min)
-        session.commit()
+    insert_data(session, index, newer_documents)
+    session.commit()
 
     progress.done()
 
@@ -168,14 +130,11 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--predicate_id_minimum", default=None, type=int, required=False,
-                        help="only predication ids above this will be considered")
-    parser.add_argument("--low-memory", action="store_true", default=False, required=False, help="Use low-memory mode")
-    parser.add_argument("--buffer-size", type=int, default=1000, required=False, help="Buffer size for low-memory mode")
+    parser.add_argument("--newer-documents", action="store_true", default=False, required=False,
+                        help="Compute reverse index only for newer documents (>= latest database-update-date)")
     args = parser.parse_args()
 
-    compute_inverted_index_for_tags(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory,
-                                    buffer_size=args.buffer_size)
+    compute_inverted_index_for_tags(newer_documents=args.newer_documents)
 
 
 if __name__ == "__main__":

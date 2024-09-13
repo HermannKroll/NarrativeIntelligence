@@ -167,7 +167,7 @@
                     <img src="{% static 'assets/close.svg' %}">
                 </div>
             </div>
-            <div class="bottom">
+            <div class="bottom" id="bottomDiv">
                 <div class="checkbox" id="newsCheckbox"></div>
                 <div class="paper">
                     <h2 id="paperTitle"></h2>
@@ -182,22 +182,6 @@
                         <p id="classificationInfo"
                            style="margin-top: 10px; font-size:15px;">
                             <em>(1,10) means text passage 1-10</em></p>
-                    </div>
-                </div>
-                <div class="graphContainer" id="graphContainer">
-                    <div class="graphNetwork" id="paperGraph"></div>
-                    <div class="graphFooter">
-                        <button class="btn btn-secondary me-1 ms-auto" onclick="centerNetwork(papernetwork)">
-                            Center
-                        </button>
-                        <button class="btn btn-secondary me-1" onclick="toggleFullscreenNetworkGraph('graph')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd"
-                                      d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
-                            </svg>
-                            <span type="button" id="graphFullscreen">Fullscreen</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -263,6 +247,8 @@
 {% endblock %}
 
 {% block javascript %}
+    <script src="{% static 'js/paper.js' %}?version=9" type="text/javascript"></script>
+
     <script type="text/javascript">
         const autocompletion_url = "{% url 'autocompletion' %}";
         const url_query = "/";
@@ -283,6 +269,10 @@
         const url_substance_href = "{% url 'drug_substance_forward_log' %}";
         const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
 
+        loadGraphTemplate({
+            targetContainer: "bottomDiv"
+        });
+
         let currentFullscreenPrefix = null;
         // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
         const fsCloseAction = () => {
@@ -294,13 +284,10 @@
 
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     </script>
-
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
-    <script src="{% static 'js/paper.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
     <script src="{% static 'js/mecfs.js' %}?version=2" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>

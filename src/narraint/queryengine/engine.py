@@ -47,7 +47,7 @@ class QueryEngine:
                         d.publication_year = year
                         d.publication_month = month
                         d.doi = doi
-                        d.org_id = org_id
+                        d.org_document_id = org_id
                         d.document_classes = doc_classes
 
                         filtered_document_results.append(d)
@@ -527,9 +527,10 @@ class QueryEngine:
             pm_valids = defaultdict(lambda: defaultdict(set))
             for pm in fp2prov_mappings[idx]:
                 for doc_col, valid_d_ids in collection2valid_doc_ids.items():
-                    for d_id, prov_ids in pm[doc_col].items():
-                        if d_id in valid_d_ids:
-                            pm_valids[doc_col][d_id].update(prov_ids)
+                    if doc_col in pm:
+                        for d_id, prov_ids in pm[doc_col].items():
+                            if d_id in valid_d_ids:
+                                pm_valids[doc_col][d_id].update(prov_ids)
             fp2prov_mappings_valid[idx] = pm_valids
 
         logging.debug(f'Query computed in {datetime.now() - start_time}s')

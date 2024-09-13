@@ -291,10 +291,23 @@ function initCheckbox(typeArray) {
 }
 
 function visualize_document_graph(container) {
+
     let nodes = document_graph["nodes"];
+    let facts = document_graph["facts"]
     let node2id = {};
     let id = 1;
     let nodesToCreate = new vis.DataSet([]);
+
+    let maxSliderValue = facts.length;
+    let networkSlider = document.getElementById("paperNetworkSlider")
+    networkSlider.max = maxSliderValue;
+    if (maxSliderValue < 10) {
+        networkSlider.value = maxSliderValue;
+        document.getElementById("paperNetworkAmount").innerText = `Top ${maxSliderValue}`;
+    } else {
+        networkSlider.value = "10";
+        document.getElementById("paperNetworkAmount").innerText = `Top 10`;
+    }
     nodes.forEach(node => {
         let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
         if (colorLabel == "PlantFamily/Genus") {
@@ -311,7 +324,7 @@ function visualize_document_graph(container) {
     });
 
     let edgesToCreate = new vis.DataSet([]);
-    document_graph["facts"].forEach(fact => {
+    facts.forEach(fact => {
         let subject = node2id[fact['s']];
         let predicate = fact['p'];
         let object = node2id[fact['o']];
@@ -356,6 +369,7 @@ function visualize_document_graph(container) {
 
     // initialize your network!
     papernetwork = new vis.Network(container, data, options);
+    updatePaperNetworkGraph();
     /* this would stop the physics engine once and for all, so dragging only drags one node aswell
     network.on("stabilizationIterationsDone", function () {
         network.setOptions( { physics: false } );
@@ -394,4 +408,81 @@ function centerNetwork(network) {
     network.fit({
         animation: true
     })
+}
+
+function updatePaperNetworkGraph() {
+    const topK = document.getElementById("paperNetworkSlider").value;
+    document.getElementById("paperNetworkAmount").innerText = `Top ${topK}`;
+
+    let usedNodes = new Set();
+    document_graph["facts"].slice(0, topK).forEach(fact => {
+        usedNodes.add(fact['s']);
+        usedNodes.add(fact['o']);
+    });
+
+    let filteredNodes = document_graph["nodes"].filter(node => usedNodes.has(node));
+
+    let nodesToCreate = new vis.DataSet([]);
+    let node2id = {};
+    let id = 1;
+
+    filteredNodes.forEach(node => {
+        let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
+        if (colorLabel == "PlantFamily/Genus") {
+            colorLabel = "Plant";
+        }
+        if (!activeTypeMap.get(colorLabel)) {
+            return;
+        }
+        node2id[node] = id;
+        let color = typeColorMap[colorLabel];
+        let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color};
+        nodesToCreate.add(nodeData);
+        id = id + 1;
+    });
+
+    let edgesToCreate = new vis.DataSet([]);
+    document_graph["facts"].slice(0, topK).forEach(fact => {
+        if (node2id[fact['s']] && node2id[fact['o']]) {
+            let edgeData = {'from': node2id[fact['s']], 'to': node2id[fact['o']], 'label': fact['p']};
+            edgesToCreate.add(edgeData);
+        }
+    });
+
+    papernetwork.setData({nodes: nodesToCreate, edges: edgesToCreate});
+    papernetwork.stabilize(100);
+    papernetwork.physics.physicsEnabled = false;
+}
+
+function loadGraphTemplate(options) {
+    const template = `
+        <div class="graphContainer" id="graphContainer">
+            <div class="graphNetwork" id="paperGraph"></div>
+            <div class="graphFooter">
+                <div class="input-group mx-auto mb-auto me-sm-0 w-auto h-fc graphFooter">
+                    <span class="input-group-text ml-auto" id="paperNetworkAmount"></span>
+                    <div class="input-group-text">
+                        <input type="range" class="form-range mx-0 mx-sm-0" id="paperNetworkSlider" min="1" step="1" oninput="updatePaperNetworkGraph()">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="centerNetwork(papernetwork)">
+                    Center
+                </button>
+                <button class="btn btn-secondary" onclick="toggleFullscreenNetworkGraph('graph')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen mb-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                    </svg>
+                    <span type="button" id="graphFullscreen">Fullscreen</span>
+                </button>
+            </div>
+        </div>
+    `;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = template;
+
+    const targetContainer = document.getElementById(options.targetContainer);
+
+    while (tempDiv.firstChild) {
+        targetContainer.appendChild(tempDiv.firstChild);
+    }
 }

@@ -344,7 +344,9 @@ select option:hover {
 }
 .newsdetail .bottom .graphContainer .graphFooter{
   display: flex;
+  padding-right: 2px;
 }
+
 
 .classTagsHeader {
   margin-right: 0.25em;

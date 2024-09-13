@@ -21,13 +21,14 @@ from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_fr
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
-from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, RESOURCE_DIR, \
-    FEEDBACK_PREDICATION_DIR, FEEDBACK_SUBGROUP_DIR
+from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
+    FEEDBACK_SUBGROUP_DIR, LOG_DIR
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
+from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
@@ -35,10 +36,11 @@ from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
-from narraint.queryengine.log_statistics import create_dictionary_of_logs
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
+from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.indexed_document import IndexedDocument
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -71,6 +73,7 @@ class View:
             cls.translation = QueryTranslation()
             cls.explainer = EntityExplainer()
             cls.keyword2graph = Keyword2GraphTranslation()
+            cls.corpus = DocumentCorpus()
         return cls._instance
 
 
@@ -78,38 +81,62 @@ def get_document_graph(request):
     if "document" in request.GET and "data_source" in request.GET:
         document_id = str(request.GET.get("document", "").strip())
         document_collection = str(request.GET.get("data_source", "").strip())
+
         try:
             start_time = datetime.now()
             document_id = int(document_id)
             session = SessionExtended.get()
-            query = session.query(Predication).filter(Predication.document_collection == document_collection)
-            query = query.filter(Predication.document_id == document_id)
-            query = query.filter(Predication.relation.isnot(None))
+
+            # retrieve all document information from DB
+            narrative_documents = retrieve_narrative_documents_from_database(session, document_ids={document_id},
+                                                                             document_collection=document_collection)
+
+            if len(narrative_documents) != 1:
+                View().query_logger.write_api_call(False, "get_document_graph", str(request))
+                return JsonResponse(status=500, data=dict(reason="No document data available", nodes=[], facts=[]))
+
+            # index the document to compute frequency and coverage
+            indexed_document = IndexedDocument(narrative_documents[0])
+            # score all edge and sort them
+            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_concept_idf(s, indexed_document))
+                                           for s in indexed_document.extracted_statements]
+            sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
+
             facts = defaultdict(set)
+            facts2score = dict()
             nodes = set()
-            for r in query:
+            # translate + aggregate edges
+            for stmt, score in sorted_extracted_statements:
                 try:
-                    subject_name = View().resolver.get_name_for_var_ent_id(r.subject_id, r.subject_type,
-                                                                                    resolve_gene_by_id=False)
-                    object_name = View().resolver.get_name_for_var_ent_id(r.object_id, r.object_type,
-                                                                                   resolve_gene_by_id=False)
-                    subject_name = f'{subject_name} ({r.subject_type})'
-                    object_name = f'{object_name} ({r.object_type})'
+                    subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
+                                                                           resolve_gene_by_id=False)
+                    object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
+                                                                          resolve_gene_by_id=False)
+                    subject_name = f'{subject_name} ({stmt.subject_type})'
+                    object_name = f'{object_name} ({stmt.object_type})'
 
                     if subject_name < object_name:
-                        key = subject_name, r.relation, object_name
+                        key = subject_name, stmt.relation, object_name
                         so_key = subject_name, object_name
                     else:
-                        key = object_name, r.relation, subject_name
+                        key = object_name, stmt.relation, subject_name
                         so_key = object_name, subject_name
+                    # This code aggregates facts by predicates
+                    # Only one edge between two nodes is shown but labels are concatenated
                     if key not in facts:
-                        facts[so_key].add(r.relation)
+                        facts[so_key].add(stmt.relation)
+                        if so_key in facts2score:
+                            facts2score[so_key] = max(score, facts2score[so_key])
+                        else:
+                            facts2score[so_key] = score
                         nodes.add(subject_name)
                         nodes.add(object_name)
                 except Exception:
                     pass
 
-            result = []
+            scored_results = []
+            # This code aggregates facts by predicates
+            # Only one edge between two nodes is shown but labels are concatenated
             for (s, o), predicates in facts.items():
                 p_txt = []
                 for p in predicates:
@@ -118,18 +145,20 @@ def get_document_graph(request):
                         continue
                     p_txt.append(p)
                 p_txt = '|'.join([pt for pt in p_txt])
-                result.append(dict(s=s, p=p_txt, o=o))
+                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)]))
+            # sort results by score descending
+            scored_results.sort(key=lambda x: x["score"], reverse=True)
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
             time_needed = datetime.now() - start_time
             session.remove()
             try:
                 View().query_logger.write_document_graph_log(time_needed, document_collection, document_id,
-                                                                      len(facts))
+                                                             len(facts))
             except IOError:
                 logging.debug('Could not write document graph log file')
 
             View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
-            return JsonResponse(dict(nodes=list(nodes), facts=result))
+            return JsonResponse(dict(nodes=list(nodes), facts=scored_results))
         except ValueError:
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
@@ -145,7 +174,7 @@ def get_autocompletion(request):
         if "entity_type" in request.GET:
             entity_type = str(request.GET.get("entity_type", "").strip())
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string,
-                                                                                          entity_type=entity_type)
+                                                                                 entity_type=entity_type)
         else:
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
@@ -199,7 +228,7 @@ def get_term_to_entity(request):
                 expand_by_prefix = False
         try:
             entities = View().translation.convert_text_to_entity(term,
-                                                                          expand_search_by_prefix=expand_by_prefix)
+                                                                 expand_search_by_prefix=expand_by_prefix)
             resolver = EntityResolver()
             for e in entities:
                 try:
@@ -213,13 +242,14 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
-def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: str):
+def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: set):
     cache_hit = False
     cached_results = None
     start_time = datetime.now()
+    collection_string = "-".join(sorted(document_collection))
     if DO_CACHING:
         try:
-            cached_results = View().cache.load_result_from_cache(document_collection, graph_query)
+            cached_results = View().cache.load_result_from_cache(collection_string, graph_query)
             cache_hit = True
         except Exception:
             logging.error('Cannot load query result from cache...')
@@ -231,11 +261,12 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
     else:
         # run query
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter={document_collection})
+                                                           document_collection_filter=document_collection)
         cache_hit = False
         if DO_CACHING:
             try:
-                View().cache.add_result_to_cache(document_collection, graph_query, results)
+
+                View().cache.add_result_to_cache(collection_string, graph_query, results)
             except Exception:
                 logging.error('Cannot store query result to cache...')
     time_needed = datetime.now() - start_time
@@ -274,7 +305,7 @@ def get_query_narrative_documents(request):
                                                                          document_collection=document_collection)
 
         View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception:
         View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
@@ -308,7 +339,7 @@ def get_query_document_ids(request):
         results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
         result_ids = sorted(list({r.document_id for r in results}))
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
     except Exception:
         View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
@@ -348,7 +379,7 @@ def get_narrative_documents(request):
                                                                          document_collection=document_collection)
 
         View().query_logger.write_api_call(True, "get_narrative_document", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
     except Exception as e:
         logger.error(f"get_narrative_document: {e}")
@@ -369,7 +400,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     if DO_CACHING:
         try:
             cached_sub_count_list = View().cache.load_result_from_cache(document_collection, graph_query,
-                                                                                 aggregation_name=aggregation_strategy)
+                                                                        aggregation_name=aggregation_strategy)
             if cached_sub_count_list:
                 logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
                 return cached_sub_count_list, True
@@ -402,8 +433,8 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
         if DO_CACHING:
             try:
                 View().cache.add_result_to_cache(document_collection, graph_query,
-                                                          sub_count_list,
-                                                          aggregation_name=aggregation_strategy)
+                                                 sub_count_list,
+                                                 aggregation_name=aggregation_strategy)
             except Exception:
                 logging.error('Cannot store query result to cache...')
 
@@ -444,9 +475,8 @@ def get_query_sub_count(request):
             except ValueError:
                 return JsonResponse(status=500, data=dict(answer="topk must be a positive integer"))
 
-
         View().query_logger.write_api_call(True, "get_query_sub_count", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(sub_count_list=sub_count_list))
     else:
@@ -483,7 +513,7 @@ def get_document_ids_for_entity(request):
             document_ids = []
         session.remove()
         View().query_logger.write_api_call(True, "get_document_ids_for_entity", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
 
@@ -589,7 +619,9 @@ def get_query(request):
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
             query)
         year_aggregation = {}
-        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+
+        data_source = set(data_source.split(";"))
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in data_source):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -613,8 +645,8 @@ def get_query(request):
             results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
-                                                         query, opt_query)
+            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit, len(result_ids),
+                                                query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
 
@@ -640,7 +672,7 @@ def get_query(request):
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_query", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
 
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
@@ -803,7 +835,7 @@ def get_new_query(request):
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_new_query", str(request),
-                                                    time_needed=datetime.now() - time_start)
+                                           time_needed=datetime.now() - time_start)
         return JsonResponse(
             dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
                  query_translation=query_trans_string,
@@ -832,12 +864,12 @@ def get_provenance(request):
                 predication_ids.update(pred_ids)
             try:
                 View().query_logger.write_provenance_log(time_needed, document_collection, document_id,
-                                                                  predication_ids)
+                                                         predication_ids)
             except IOError:
                 logging.debug('Could not write provenance log file')
 
             View().query_logger.write_api_call(True, "get_provenance", str(request),
-                                                        time_needed=datetime.now() - start)
+                                               time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
         except Exception:
             View().query_logger.write_api_call(False, "get_provenance", str(request))
@@ -899,7 +931,7 @@ def post_feedback(request):
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_feedback", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
             View().query_logger.write_api_call(False, "get_feedback", str(request))
@@ -950,7 +982,7 @@ def post_subgroup_feedback(request):
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
         except Exception:
             View().query_logger.write_api_call(False, "get_subgroup_feedback", str(request))
@@ -981,7 +1013,7 @@ def post_drug_suggestion(request):
             except IOError:
                 logging.debug('Could not write drug suggestion log file')
             View().query_logger.write_api_call(True, "post_drug_suggestion", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
 
         except IOError:
@@ -1223,7 +1255,22 @@ class LogsView(TemplateView):
         if not LogsView.log_date or (datetime.now() - LogsView.log_date).seconds > 3600 or not LogsView.data_dict:
             try:
                 logger.debug("Computing logs")
-                LogsView.data_dict = create_dictionary_of_logs()
+                log_path = os.path.join(LOG_DIR, "daily_logs_cache")
+                today = datetime.now().date()
+                cache_filename = f"daily_logs_cache_{today.strftime('%Y%m%d')}.json"
+                cache_file_path = os.path.join(log_path, cache_filename)
+                if os.path.exists(cache_file_path):
+                    try:
+                        with open(cache_file_path, 'r') as cache_file:
+                            data = json.load(cache_file)
+                    except json.JSONDecodeError:
+                        logger.error("Error decoding JSON from the cache file.")
+                    except IOError as e:
+                        logger.error(f"Error reading the cache file: {e}")
+                else:
+                    logger.warning(f"No cache file found for today: {cache_file_path}")
+
+                LogsView.data_dict = data
                 LogsView.log_date = datetime.now()
                 logger.debug("Logs computed")
             except:
@@ -1338,12 +1385,12 @@ def get_keyword_search_request(request):
                 # ]
 
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
-                                                            time_needed=datetime.now() - time_start)
+                                                   time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
 
             except Exception as e:
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
-                                                            time_needed=datetime.now() - time_start)
+                                                   time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
                 logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
@@ -1375,12 +1422,20 @@ def get_clinical_trial_phases(request):
                 drug_indications.append(dict(mesh_id=row.disease, max_phase_for_ind=row.phase))
 
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
         except Exception as _:
             logging.debug('Could not query clinical trials for {}'.format(chembl_id))
             View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
-                                                        time_needed=datetime.now() - time_start)
+                                               time_needed=datetime.now() - time_start)
 
             return HttpResponse(status=500)
     return HttpResponse(status=500)
+
+
+def get_data_sources(request):
+    try:
+        available_data_sources = DataSourcesFilter.get_available_data_sources()
+        return JsonResponse(status=200, data=dict(data_sources=available_data_sources))
+    except Exception:
+        return HttpResponse(status=500)

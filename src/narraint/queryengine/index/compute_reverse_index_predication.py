@@ -8,7 +8,7 @@ from sqlalchemy import delete, text
 
 from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import Predication
+from narraint.backend.models import Predication, DatabaseUpdate, Document
 from narraint.backend.models import PredicationInvertedIndex
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
 from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
@@ -20,14 +20,15 @@ the memory usage is lower.
 
 SEPERATOR_STRING = "_;_"
 
-def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
+
+def insert_data(session, fact_to_prov_ids, newer_documents, insert_list):
     for row_key in fact_to_prov_ids:
         for doc_collection in fact_to_prov_ids[row_key]:
             for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
                 fact_to_prov_ids[row_key][doc_collection][docid2prov] = set(
                     fact_to_prov_ids[row_key][doc_collection][docid2prov])
 
-    if predication_id_min:
+    if newer_documents:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
         inv_count = session.query(PredicationInvertedIndex).count()
         logging.info(f'{inv_count} entries are in the inverted index')
@@ -103,12 +104,12 @@ def insert_data(session, fact_to_prov_ids, predication_id_min, insert_list):
     insert_list.clear()
 
 
-def denormalize_predication_table(predication_id_min: int = None, low_memory=False, buffer_size=1000):
-    if predication_id_min and low_memory:
+def denormalize_predication_table(newer_documents: bool = False, low_memory=False, buffer_size=1000):
+    if newer_documents and low_memory:
         raise NotImplementedError('Low memory mode and predication id minimum cannot be used together')
 
     session = SessionExtended.get()
-    if not predication_id_min:
+    if not newer_documents:
         logging.info('Deleting old denormalized predication...')
         stmt = delete(PredicationInvertedIndex)
         session.execute(stmt)
@@ -119,9 +120,12 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
 
     logging.info('Counting the number of predications...')
     pred_count = session.query(Predication).filter(Predication.relation != None)
-    if predication_id_min:
-        logging.info(f'Only considering predication ids above {predication_id_min}')
-        pred_count = pred_count.filter(Predication.id >= predication_id_min)
+    if newer_documents:
+        latest_update = DatabaseUpdate.get_latest_update(session)
+        logging.info(f'Only considering predication ids after {latest_update}')
+        pred_count = pred_count.join(Document, isouter=False)
+        pred_count = pred_count.filter(Document.date_inserted >= latest_update)
+        pred_count = pred_count.filter(Predication.relation != None)
     pred_count = pred_count.count()
     logging.info(f'{pred_count} predication were found')
 
@@ -135,8 +139,11 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
 
     prov_query = prov_query.filter(Predication.relation != None)
 
-    if predication_id_min:
-        prov_query = prov_query.filter(Predication.id >= predication_id_min)
+    if newer_documents:
+        latest_update = DatabaseUpdate.get_latest_update(session)
+        prov_query = prov_query.join(Document)
+        prov_query = prov_query.filter(Document.date_inserted >= latest_update)
+        prov_query = prov_query.filter(Predication.relation != None)
 
     if low_memory:
         prov_query = prov_query.order_by(Predication.subject_id, Predication.subject_type, Predication.relation,
@@ -171,7 +178,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
                 last_spo = s_p_o
             # The whole spo key must be inserted within one buffer
             if last_spo != s_p_o and len(buffer) >= buffer_size:
-                insert_data(session, buffer, predication_id_min, insert_list)
+                insert_data(session, buffer, newer_documents, insert_list)
                 buffer.clear()
 
             last_spo = s_p_o
@@ -185,7 +192,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
                 buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
 
-        insert_data(session, buffer, predication_id_min, insert_list)
+        insert_data(session, buffer, newer_documents, insert_list)
         session.commit()
         buffer.clear()
     else:
@@ -207,7 +214,7 @@ def denormalize_predication_table(predication_id_min: int = None, low_memory=Fal
             if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
                 fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
 
-        insert_data(session, fact_to_prov_ids, predication_id_min, insert_list)
+        insert_data(session, fact_to_prov_ids, newer_documents, insert_list)
         session.commit()
 
     progress.done()
@@ -221,13 +228,13 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--predicate_id_minimum", default=None, type=int, required=False,
-                        help="only predication ids above this will be considered")
+    parser.add_argument("--newer-documents", action="store_true", default=False, required=False,
+                        help="Compute reverse index only for newer documents (>= latest database-update-date)")
     parser.add_argument("--low-memory", action="store_true", default=False, required=False, help="Use low-memory mode")
     parser.add_argument("--buffer-size", type=int, default=1000, required=False, help="Buffer size for low-memory mode")
     args = parser.parse_args()
 
-    denormalize_predication_table(predication_id_min=args.predicate_id_minimum, low_memory=args.low_memory,
+    denormalize_predication_table(newer_documents=args.newer_documents, low_memory=args.low_memory,
                                   buffer_size=args.buffer_size)
 
 
