@@ -26,10 +26,9 @@ class UiConfig(AppConfig):
         UiConfig.entity_tagger = EntityTagger()
         logging.info('Index loaded')
 
-        # logging.info("Starting daily log caching...")
-        # # Run cache_daily_logs() in a separate thread
-        # threading.Thread(target=cache_daily_logs, daemon=True).start()
-        # logging.info("Daily log caching process started.")
+        if len(sys.argv) > 1 and sys.argv[1] in ['collectstatic', 'migrate']:
+            logging.info('Skipping dailyWorker initialization')
+            return
 
         logging.info("Spawning the dailyWorker process...")
         daily_worker_path = os.path.join(os.path.dirname(__file__), "daily_worker.py")
