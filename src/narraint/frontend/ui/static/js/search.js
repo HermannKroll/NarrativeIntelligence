@@ -451,9 +451,9 @@ const reset_scanvas = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-const setButtonSearching = isSearching => {
-    let btn = $('#btn_search');
-    let help = $('#help_search');
+const setButtonSearching = (isSearching, buttonId, helpId) => {
+    let btn = $(`#${buttonId}`);
+    let help = $(`#${helpId}`);
     btn.empty();
 
     if (isSearching) {
@@ -568,9 +568,25 @@ $(document).ready(function () {
     });
 
     // Try to initialize from search url parameters if possible
-    initFromURLQueryParams();
+    const searchType = getSearchType();
+    if (searchType === "keyword") {
+        initKeywordSearchFromURL();
+    } else if (searchType === "recommend") {
+        initRecommendSearchFromURL();
+    } else {
+        initFromURLQueryParams();
+    }
 });
 
+function getSearchType() {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+
+    if (params.has("state")) {
+        return params.get("state").toLowerCase();
+    }
+    return "search";
+}
 
 function initFromURLQueryParams() {
     const url = new URL(window.location.href);
@@ -693,12 +709,12 @@ const search = (event) => {
     // Todo: hardfix at the moment
     // resetKeywordSearch();
     const parameters = getInputParameters(query);
-    setButtonSearching(true);
+    setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
 
     submitSearch(parameters)
-        .finally(() => setButtonSearching(false));
+        .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
 
 /**
@@ -819,22 +835,16 @@ function logInputParameters(parameters) {
     console.log(message);
 }
 
+
 /**
- * Function stores all necessary values of each input filter into one object.
- * @param query {string} formatted query string
- * @returns {{}} object of each filter input element
+ * Function gets all selected data sources and returns them as a list. If no data source
+ * is available, `PubMed` is returned as default.
+ * @returns {String[]} list of data sources
  */
-function getInputParameters(query) {
-    const obj = {};
-
-    obj["query"] = query;
-    adjustSelectedPage(obj);
-    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
-    obj["year_sort"] = document.getElementById("select_sorting_year").value;
-
+function getSelectedDataSources() {
     let dataSource = [];
     let dataSourceChildren = document.getElementById("collection-filter").children;
-    console.log(dataSourceChildren)
+
     for (let i in dataSourceChildren) {
         const child = dataSourceChildren.item(i);
         const name = child["name"] || "";
@@ -852,8 +862,25 @@ function getInputParameters(query) {
         }
         dataSource.push("PubMed");
     }
+    return dataSource;
+}
 
-    obj["data_source"] = dataSource.join(";");
+
+/**
+ * Function stores all necessary values of each input filter into one object.
+ * @param query {string} formatted query string
+ * @returns {{}} object of each filter input element
+ */
+function getInputParameters(query) {
+    const obj = {};
+
+    obj["query"] = query;
+    adjustSelectedPage(obj);
+    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
+    obj["year_sort"] = document.getElementById("select_sorting_year").value;
+
+    const dataSources = getSelectedDataSources();
+    obj["data_source"] = dataSources.join(";");
 
     obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -1963,6 +1990,8 @@ async function updatePopoverByType(popover, concept, queryText){
         .catch((e) => console.log(e));
 }
 
+let exampleQueriesContainer = document.getElementById("exampleQueries");
+
 /**
  * The function sets the help settings for the keyword search tab.
  */
@@ -1970,7 +1999,9 @@ function setKeywordSearchHelp() {
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
     anchor.target = "_blank";
-    anchor.onclick = undefined;
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "block";
+    }
 }
 
 /**
@@ -1981,6 +2012,9 @@ function setQueryBuilderHelp() {
     anchor.href = "#";
     anchor.target = "";
     anchor.onclick = () => showKeywordSearchHelp();
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "block";
+    }
 }
 
 /**
@@ -1990,4 +2024,13 @@ function showKeywordSearchHelp() {
     let modalElement = document.getElementById('keywordSearchHelpModal')
     let modal = new bootstrap.Modal(modalElement);
     modal.show();
+}
+
+/**
+ * The function sets the help settings for the query builder tab.
+ */
+function setUpRecommenderSearch() {
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "none";
+    }
 }

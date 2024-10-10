@@ -92,6 +92,75 @@ class QueryEngine:
         return query_explanation
 
     @staticmethod
+    def query_provenance_information_for_doc_id(document_id: str, document_collection: str, graph_query: GraphQuery) \
+            -> QueryExplanation:
+        """
+        Queries Provenance information from the database
+        :param provenance: a dict that maps a fact pattern index to a set of explaining predication ids
+        :return: an QueryExplanation object
+        """
+
+        print("doc_id", document_id)
+        print("document_collection", document_collection)
+        print("query", graph_query)
+
+        session = SessionExtended.get()
+        query = session.query(Predication.id,
+                              Predication.sentence_id, Predication.predicate, Predication.relation,
+                              Predication.subject_str, Predication.object_str, Predication.confidence,
+                              Predication.subject_id, Predication.object_id)
+        query = query.filter(Predication.document_id == document_id)
+        query = query.filter(Predication.document_collection == document_collection)
+
+        subjects = set()
+        predicates = set()
+        objects = set()
+        for fp in graph_query:
+            subjects.update([s.entity_id for s in fp.subjects])
+            predicates.add(fp.predicate)
+            objects.update([o.entity_id for o in fp.objects])
+            break
+
+        query = query.filter(Predication.subject_id.in_(list(subjects)))
+        query = query.filter(Predication.relation.in_(list(predicates)))
+        query = query.filter(Predication.object_id.in_(list(objects)))
+
+        print("subjects", subjects)
+        print("predicates", predicates)
+        print("objects", objects)
+
+        print(query)
+        print("num results", query.count())
+
+        predication_ids = set()
+        prov_id2fp_idx = defaultdict(set)
+        for fp_idx, fp in enumerate(graph_query):
+            for row in query:
+                if row[7] in [s.entity_id for s in fp.subjects] \
+                        and row[8] in [o.entity_id for o in fp.objects] \
+                        and row[3] == fp.predicate:
+                    predication_ids.add(row[0])
+                    prov_id2fp_idx[row[0]].add(fp_idx)
+
+        print("predication_ids", predication_ids)
+        print("prov_id2fp_idx", prov_id2fp_idx)
+
+        sentence_ids = set()
+        query_explanation = QueryExplanation()
+        for r in query:
+            sentence_ids.add(r[1])
+            for fp_idx in prov_id2fp_idx[r[0]]:
+                query_explanation.integrate_explanation(
+                    QueryFactExplanation(fp_idx, r[1], r[2], r[3], r[4], r[5], r[6], r[0]))
+
+        # replace all sentence ids by sentence str
+        id2sentence = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
+        for e in query_explanation.explanations:
+            e.sentence = id2sentence[e.sentence]
+
+        return query_explanation
+
+    @staticmethod
     def query_metadata_for_doc_ids(doc_ids: Set[int], document_collection: str):
         """
         Query the title, author, journals etc. for a set of doc ids and a document collection

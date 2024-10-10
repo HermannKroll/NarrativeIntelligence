@@ -38,6 +38,7 @@ class DocumentCorpus:
         logging.info('Querying available document collections...')
         session = SessionExtended.get()
         self.collections = set()
+        self.all_idf_data_cached = False
         for row in session.query(Document.collection).distinct():
             self.collections.add(row.collection)
 
@@ -72,6 +73,7 @@ class DocumentCorpus:
                 self.cache_concept2support[key] += row.support
             else:
                 self.cache_concept2support[key] = row.support
+        self.all_idf_data_cached = True
         logging.info('Finished')
 
     def get_entity_ifd_score(self, entity_type: str, entity_id: str) -> float:
@@ -131,3 +133,28 @@ class DocumentCorpus:
                        document.get_entity_coverage(statement.object_type, statement.object_id))
 
         return coverage * confidence * tfidf
+
+    def get_concept_support(self, entity_id):
+        if entity_id in self.cache_concept2support:
+            return self.cache_concept2support[entity_id]
+        # not in index, but all data should be loaded. so no retrieval is needed any more
+        # however, some strange statement concept might not appear in the concept index
+        if self.all_idf_data_cached:
+            return 1
+
+        session = SessionExtended.get()
+        q = session.query(TagInvertedIndex.support)
+        q = q.filter(TagInvertedIndex.entity_id == entity_id)
+        support = 0
+        for row in q:
+            support += row.support
+
+        if support == 0:
+            support = 1
+
+        self.cache_concept2support[entity_id] = support
+        return support
+
+    def get_concept_ifd_score(self, entity_id: str):
+        return math.log(self.get_document_count() / self.get_concept_support(entity_id)) / math.log(
+            self.document_count)

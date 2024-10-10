@@ -80,13 +80,13 @@ $(document).ready(function () {
     request.done(function (response) {
         console.log(response);
         visualize_document_graph(response);
-        setButtonSearching(false);
+        setButtonSearching(false, 'btn_search', 'help_search');
 
     });
 
     request.fail(function (result) {
         console.log('error')
-        setButtonSearching(false);
+        setButtonSearching(false, 'btn_search', 'help_search');
 
     });
 });

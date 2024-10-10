@@ -6,7 +6,8 @@ from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_
     get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
     post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, \
     get_keywords, get_logs_data, get_new_query, get_keyword_search_request, get_explain_translation, \
-    post_drug_suggestion, get_clinical_trial_phases, get_last_db_update, get_data_sources
+    post_drug_suggestion, get_clinical_trial_phases, get_last_db_update, get_data_sources, \
+    get_provenance_for_document, get_recommend
 
 urlpatterns = [
     path("query", get_query, name="query"),
@@ -19,6 +20,7 @@ urlpatterns = [
     path("suggest_drug", post_drug_suggestion, name="suggest_drug"),
     path("subgroup_feedback", post_subgroup_feedback, name="subgroup_feedback"),
     path("provenance", get_provenance, name="provenance"),
+    path("provenance_new", get_provenance_for_document, name="provenance_new"),
     path("report", post_report, name="report"),
     path("document_graph", get_document_graph, name="document_graph"),
     path("tree_info", get_tree_info, name="tree_info"),
@@ -38,4 +40,5 @@ urlpatterns = [
     path("clinical_trial_phases", get_clinical_trial_phases, name="clinical_trial_phases"),
     path("database_update", get_last_db_update, name="database_update"),
     path("document_collections", get_data_sources, name="document_collections"),
+    path("recommend", get_recommend, name="recommend"),
 ]

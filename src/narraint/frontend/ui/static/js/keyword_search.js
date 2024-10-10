@@ -64,6 +64,10 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 
+function initKeywordSearchFromURL() {
+
+}
+
 function keywordAdd() {
     const keywordList = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector('#search_input');

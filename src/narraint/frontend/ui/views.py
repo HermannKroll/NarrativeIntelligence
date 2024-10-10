@@ -39,8 +39,10 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
+from narraint.recommender.recommendation import apply_recommendation
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -880,6 +882,26 @@ def get_provenance(request):
         return HttpResponse(status=500)
 
 
+def get_provenance_for_document(request):
+    try:
+        if not request.GET.keys() & {"document_id", "query", "document_collection"}:
+            return HttpResponse(status=500)
+
+        start = datetime.now()
+
+        document_id = str(request.GET.get("document_id", "")).strip()
+        document_collection = str(request.GET.get("document_collection", "")).strip()
+        query = str(request.GET.get("query", "").strip())
+
+        graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
+
+        result = QueryEngine.query_provenance_information_for_doc_id(document_id, document_collection, graph_query)
+        return JsonResponse(dict(result=result.to_dict()))
+
+    except Exception as e:
+        print(e)
+        return HttpResponse(status=500)
+
 def post_feedback(request):
     data = None  # init needed for second evaluation step
     try:
@@ -1439,3 +1461,115 @@ def get_data_sources(request):
         return JsonResponse(status=200, data=dict(data_sources=available_data_sources))
     except Exception:
         return HttpResponse(status=500)
+
+def get_recommend(request):
+    results_converted = []
+    is_aggregate = False
+    valid_query = False
+    query_trans_string = ""
+    try:
+        if not request.GET.keys() & {"document_id", "document_collection"}:
+            return HttpResponse(status=500)
+
+
+        document_id = int(request.GET.get("document_id", ""))
+        document_collection = request.GET.get("document_collection", "")
+
+        if "outer_ranking" in request.GET:
+            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        else:
+            outer_ranking = "outer_ranking_substitution"
+
+        year_start = None
+        if "year_start" in request.GET:
+            year_start = str(request.GET.get("year_start", "").strip())
+            try:
+                year_start = int(year_start)
+            except ValueError:
+                year_start = None
+
+        year_end = None
+        if "year_end" in request.GET:
+            year_end = str(request.GET.get("year_end", "").strip())
+            try:
+                year_end = int(year_end)
+            except ValueError:
+                year_end = None
+
+        title_filter = None
+        if "title_filter" in request.GET:
+            title_filter = str(request.GET.get("title_filter", "").strip())
+
+        classification_filter = None
+        if "classification_filter" in request.GET:
+            classification_filter = str(request.GET.get("classification_filter", "").strip())
+            if classification_filter:
+                classification_filter = classification_filter.split(';')
+            else:
+                classification_filter = None
+
+        logging.info("Selected data source is {}".format(document_collection))
+        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+        time_start = datetime.now()
+        year_aggregation = {}
+        if document_collection not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+            results_converted = []
+            query_trans_string = "Data source is unknown"
+            logger.error('parsing error')
+        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+            query_trans_string = "Outer ranking strategy is unknown"
+            logger.error('parsing error')
+        else:
+            valid_query = True
+            logging.info(f'Requested recommendation for document id: {document_id}')
+
+            json_data = apply_recommendation(document_id, document_collection, View().corpus)
+
+            results = []
+            graph_data = dict()
+            for d in json_data:
+                results.append(QueryDocumentResult(document_id=d["docid"],
+                                                   title=d["title"],
+                                                   authors=d["authors"],
+                                                   journals=d["journals"],
+                                                   publication_year=d["year"],
+                                                   publication_month=d["month"],
+                                                   var2substitution={},
+                                                   confidence=1.0,
+                                                   position2provenance_ids={},
+                                                   org_document_id=d["org_document_id"],
+                                                   doi=d["doi"],
+                                                   document_collection=d["collection"]))
+                graph_data[d["docid"]] = d["graph_data"]
+
+            # do filtering stuff
+            results = TitleFilter.filter_documents(results, title_filter)
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            result_list = QueryDocumentResultList()
+            for r in results:
+                result_list.add_query_result(r)
+
+            results_converted = result_list.to_dict()
+            for idx, entry in enumerate(results_converted["r"]):
+                entry["graph_data"] = graph_data[entry["docid"]]
+
+        View().query_logger.write_api_call(True, "get_recommendation", str(request),
+                                           time_needed=datetime.now() - time_start)
+
+        return JsonResponse(dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
+                                 query_translation=query_trans_string, year_aggregation=year_aggregation,
+                                 query_limit_hit="False"))
+
+
+    except Exception:
+        View().query_logger.write_api_call(False, "get_recommend", str(request))
+        error_msg = "recommendation can not be applied"
+        traceback.print_exc(file=sys.stdout)
+        return JsonResponse(
+            dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
+                 query_limit_hit="False"))
