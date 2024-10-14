@@ -104,7 +104,11 @@ def get_document_graph(request):
                                            for s in indexed_document.extracted_statements]
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
+            sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
+            sentence_id2text = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
+
             facts = defaultdict(set)
+            facts2text = dict()
             facts2score = dict()
             nodes = set()
             # translate + aggregate edges
@@ -133,6 +137,9 @@ def get_document_graph(request):
                             facts2score[so_key] = score
                         nodes.add(subject_name)
                         nodes.add(object_name)
+
+                    # Map the fact to the corresponding sentence text
+                    facts2text[so_key] = sentence_id2text[stmt.sentence_id]
                 except Exception:
                     pass
 
@@ -147,7 +154,7 @@ def get_document_graph(request):
                         continue
                     p_txt.append(p)
                 p_txt = '|'.join([pt for pt in p_txt])
-                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)]))
+                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)], text=facts2text[(s, o)]))
             # sort results by score descending
             scored_results.sort(key=lambda x: x["score"], reverse=True)
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
@@ -901,6 +908,7 @@ def get_provenance_for_document(request):
     except Exception as e:
         print(e)
         return HttpResponse(status=500)
+
 
 def post_feedback(request):
     data = None  # init needed for second evaluation step
