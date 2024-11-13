@@ -47,21 +47,21 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(2, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT")]
-        allowed_pm = ['{"1": [1000]}', '{"1": [1001]}']
+        allowed_pm = ['1']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
             key = (row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = row.provenance_mapping
+            db_rows[key] = row.document_ids
             self.assertIn(row.document_collection, ["RIDXTEST"])
-            self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
+            self.assertEqual(row.support, len(row.document_ids.split(",")))
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
-        self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
+        self.assertEqual(allowed_pm[0], db_rows[allowed_keys[1]])
 
-    def test_full_reverse_idx_low_memory_buffer1(self):
-        session = SessionExtended.get()
+    @staticmethod
+    def prepare_buffer_size_tests(session):
         pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
                             subject_id="A", subject_type="AT", subject_str="A_STR",
                             predicate="t1", relation="T1",
@@ -79,20 +79,24 @@ class ReversePredicationIdxText(TestCase):
                             sentence_id=1, confidence=1.0, extraction_type="Test")
                        ]
         Predication.bulk_insert_values_into_table(session, pred_values)
+
+    def test_full_reverse_idx_low_memory_buffer1(self):
+        session = SessionExtended.get()
+        self.prepare_buffer_size_tests(session)
+
         denormalize_predication_table(low_memory=True, buffer_size=1)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"1": [1000, 1002], "2": [1003]}', '{"1": [1001]}',
-                      '{"2": [1004]}']
+        allowed_pm = ['2,1', '1', '2']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
             key = (row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = row.provenance_mapping
+            db_rows[key] = row.document_ids
             self.assertIn(row.document_collection, ["RIDXTEST"])
-            self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
+            self.assertEqual(row.support, len(row.document_ids.split(",")))
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
@@ -100,37 +104,21 @@ class ReversePredicationIdxText(TestCase):
 
     def test_full_reverse_idx_low_memory_buffer2(self):
         session = SessionExtended.get()
-        pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1003, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1004, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t3", relation="T3",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test")
-                       ]
-        Predication.bulk_insert_values_into_table(session, pred_values)
+        self.prepare_buffer_size_tests(session)
+
         denormalize_predication_table(low_memory=True, buffer_size=2)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"1": [1000, 1002], "2": [1003]}', '{"1": [1001]}',
-                      '{"2": [1004]}']
+        allowed_pm = ['2,1', '1', '2']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
             key = (row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = row.provenance_mapping
+            db_rows[key] = row.document_ids
             self.assertIn(row.document_collection, ["RIDXTEST"])
-            self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
+            self.assertEqual(row.support, len(row.document_ids.split(",")))
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
@@ -138,37 +126,21 @@ class ReversePredicationIdxText(TestCase):
 
     def test_full_reverse_idx_low_memory_buffer3(self):
         session = SessionExtended.get()
-        pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1003, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1004, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t3", relation="T3",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test")
-                       ]
-        Predication.bulk_insert_values_into_table(session, pred_values)
+        self.prepare_buffer_size_tests(session)
+
         denormalize_predication_table(low_memory=True, buffer_size=3)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"1": [1000, 1002], "2": [1003]}', '{"1": [1001]}',
-                      '{"2": [1004]}']
+        allowed_pm = ['2,1', '1', '2']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
             key = (row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = row.provenance_mapping
+            db_rows[key] = row.document_ids
             self.assertIn(row.document_collection, ["RIDXTEST"])
-            self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
+            self.assertEqual(row.support, len(row.document_ids.split(",")))
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
@@ -176,37 +148,21 @@ class ReversePredicationIdxText(TestCase):
 
     def test_full_reverse_idx_low_memory_buffer1000(self):
         session = SessionExtended.get()
-        pred_values = [dict(id=1002, document_id=1, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1003, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t1", relation="T1",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test"),
-                       dict(id=1004, document_id=2, document_collection="RIDXTEST",
-                            subject_id="A", subject_type="AT", subject_str="A_STR",
-                            predicate="t3", relation="T3",
-                            object_id="B", object_type="BT", object_str="B_STR",
-                            sentence_id=1, confidence=1.0, extraction_type="Test")
-                       ]
-        Predication.bulk_insert_values_into_table(session, pred_values)
+        self.prepare_buffer_size_tests(session)
+
         denormalize_predication_table(low_memory=True, buffer_size=1000)
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['{"1": [1000, 1002], "2": [1003]}', '{"1": [1001]}',
-                      '{"2": [1004]}']
+        allowed_pm = ['2,1', '1', '2']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
             key = (row.subject_id, row.subject_type, row.relation, row.object_id, row.object_type)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = row.provenance_mapping
+            db_rows[key] = row.document_ids
             self.assertIn(row.document_collection, ["RIDXTEST"])
-            self.assertEqual(row.support, len(ast.literal_eval(row.provenance_mapping)))
+            self.assertEqual(row.support, len(row.document_ids.split(",")))
 
         self.assertEqual(allowed_pm[0], db_rows[allowed_keys[0]])
         self.assertEqual(allowed_pm[1], db_rows[allowed_keys[1]])
