@@ -1,5 +1,7 @@
 let latest_valid_query = '';
 let latest_query_translation = '';
+let variables2entity = {};
+let cardBodyHierarchy = {}
 let DEFAULT_RESULT_DIVS_LIMIT = 500;
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
@@ -1081,19 +1083,19 @@ const getUniqueBodyID = () => {
 
 let globalAccordionDict = {};
 
-const createExpandListElement = (divID, next_element_count) => {
+const createExpandListElement = (divID, next_element_count, parentContainerID) => {
     let btnid = 'exp' + divID
     let cardid = 'exp_card_' + divID
     let divExpand = $('<div class="card" id="' + cardid + '"><div class="card-body">' +
         '<button class="btn btn-link" id="' + btnid + '">... click to expand (' + next_element_count + " left)" + '</button>' +
         '</div></div>');
     $(document).on('click', '#' + btnid, function () {
-        createExpandableAccordion(false, divID)
+        createExpandableAccordion(false, divID, parentContainerID)
     });
     return divExpand;
 }
 
-const createExpandableAccordion = (first_call, divID) => {
+const createExpandableAccordion = (first_call, divID, parentContainerID) => {
     let current_div = globalAccordionDict[divID][0];
     let query_len = globalAccordionDict[divID][1];
     let accordionID = globalAccordionDict[divID][2];
@@ -1112,14 +1114,14 @@ const createExpandableAccordion = (first_call, divID) => {
         i += 1;
         if (i < MAX_SHOWN_ELEMENTS) {
             let j = i + global_result_size;
-            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + j, collapseID + j));
+            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + j, collapseID + j, parentContainerID));
         } else {
             nextResultList.push(res);
         }
     });
     // add a expand button
     if (i > MAX_SHOWN_ELEMENTS) {
-        current_div.append(createExpandListElement(divID, nextResultList.length));
+        current_div.append(createExpandListElement(divID, nextResultList.length, parentContainerID));
     }
     globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList, global_result_size + i];
 }
@@ -1237,26 +1239,41 @@ const createProvenanceDivElement = (explanations) => {
     return div_provenance_all;
 }
 
-function queryAndVisualizeProvenanceInformation(query, document_id, data_source, provenance, unique_div_id) {
-    let request = $.ajax({
-        url: provenance_url,
-        data: {
-            query: query,
-            document_id: document_id,
-            data_source: data_source,
-            prov: JSON.stringify(provenance)
-        }
-    });
+async function queryAndVisualizeProvenanceInformation(query, documentID, collection, divID, parentContainerID) {
+    // find all variable substitutions for the current document
+    // therefore, just step up through the hierarchy
+    const variableList = [];
+    while (parentContainerID !== null) {
+        // collect translations in the tree
+        if (parentContainerID in variables2entity)
+            variableList.push(variables2entity[parentContainerID]);
 
-    request.done(function (response) {
-        let explanations = response["result"]["exp"];
-        let prov_div = createProvenanceDivElement(explanations);
-        $('#' + unique_div_id).append(prov_div);
-    });
+        // find parent variable substitution blocks (aggregations)
+        if (!(parentContainerID in cardBodyHierarchy))
+            break
+        parentContainerID = cardBodyHierarchy[parentContainerID];
+    }
 
-    request.fail(function (result) {
-        showInfoAtBottom("Query for provenance failed - please try again")
-    });
+    let parameters = "?document_id=" + documentID + "&document_collection=" + collection + "&query=" + query;
+    if (variableList.length > 0) {
+        parameters += "&variables=" + variableList.join(";");
+    }
+
+    await fetch(explain_document_url + parameters)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            return {};
+        })
+        .then(json => {
+            return json["result"]["exp"];
+        })
+        .then(explanations => {
+            const prov_div = createProvenanceDivElement(explanations);
+            $('#' + divID).append(prov_div);
+        })
+        .catch(_ => showInfoAtBottom("Query for provenance_new failed - please try again"));
 }
 
 let uniqueProvenanceID = 1;
@@ -1284,7 +1301,7 @@ function sendDocumentClicked(query, document_id, data_source, document_link) {
         });
 }
 
-const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
+const createResultDocumentElement = (queryResult, parentContainerID) => {
     let document_id = queryResult["docid"];
     let art_doc_id = document_id;
     let title = queryResult["title"];
@@ -1305,7 +1322,6 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         doiText = "DOI";
     }
 
-    let prov_ids = queryResult["prov"];
     let doi = queryResult["doi"];
 
     let divDoc_Card = $('<div class="card"/>');
@@ -1326,11 +1342,6 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         showPaperView(art_doc_id, collection)
     })
 
-    /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
-    divDoc_DocumentGraph.click(function () {
-        self.frames["paper_frame"].location.href = "http://localhost:8000/document" + '?document_id=' + art_doc_id + '&data_source=' + collection;
-    }) */
-
     divDoc_Body.append(divDoc_Image);
     divDoc_Body.append(divDoc_DocumentGraph);
 
@@ -1345,27 +1356,13 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
     divDoc_Body.append(divDoc_Body_Link);
 
 
-    /*
-    let divDoc = $('<div class="card"><div class="card-body">' +
-        '<a class="btn-link" href="' + doi + '" onclick="sendDocumentClicked("' + document_id + '","' + doi + '");" target="_blank">' +
-        '<img src="' + pubpharm_image_url + '" height="25px">' +
-        document_id + '</a>' +
-
-        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source=' + collection + '" target="_blank">' +
-        'Document Graph</a>' +
-
-        '<br><b>' + title + '</b><br>' +
-        "in: " + journals + " | " + month + year + '<br>' +
-        "by: " + authors + '<br>' +
-        '</div></div><br>'); */
-
     let unique_div_id = "prov_" + uniqueProvenanceID;
     uniqueProvenanceID = uniqueProvenanceID + 1;
     let div_provenance_button = $('<button class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#' + unique_div_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
-    div_provenance_button.click(function () {
+    div_provenance_button.click(async function () {
         if ($('#' + unique_div_id).html() === "") {
-            queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, prov_ids, unique_div_id);
+            await queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, unique_div_id, parentContainerID);
         }
     });
 
@@ -1387,7 +1384,7 @@ const showPaperView = (document_id, collection) => {
     queryAndFilterPaperDetail(document_id, collection);
 }
 
-const createDocumentList = (results, query_len) => {
+const createDocumentList = (results, query_len, parentContainerID) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
@@ -1406,8 +1403,8 @@ const createDocumentList = (results, query_len) => {
     if (resultSize > 1) {
         button_string += 's'
     }
-    ;
-    divH2.append('<button class="btn btn-link" type="button"data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
+
+    divH2.append('<button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse show" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     // tbd: grid
@@ -1416,7 +1413,7 @@ const createDocumentList = (results, query_len) => {
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
-
+    cardBodyHierarchy[divCardBodyID] = parentContainerID;
     globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
     createExpandableAccordion(true, divCardBodyID);
     return divAccordion;
@@ -1427,13 +1424,14 @@ let globalDocumentAggregateLazyCreated = {};
 
 const createDocumentAggregateLazy = (divCardBodyID) => {
     if (!globalDocumentAggregateLazyCreated[divCardBodyID]) {
-        createExpandableAccordion(true, divCardBodyID);
+        // simulate new parent container by duplicating the current scoped container
+        createExpandableAccordion(true, divCardBodyID, divCardBodyID);
         globalDocumentAggregateLazyCreated[divCardBodyID] = true;
     }
 };
 
 
-const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
+const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID, parentContainerID, lowerLevel) => {
     let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" style="display: flex" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
@@ -1478,6 +1476,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     }
     button_string += ' [';
     let i = 0;
+    const var2entities = [];
     var_names.forEach(name => {
         let entity_substitution = var_subs[name];
         let ent_str = entity_substitution["s"];
@@ -1485,6 +1484,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         let ent_type = entity_substitution["t"];
         let ent_name = entity_substitution["n"];
         let var_sub = name + ':= ' + ent_name + " (" + ent_id + " " + ent_type + ")";
+
+        var2entities.push([name, ent_id, ent_type].join("|"));
+
         // support ontological header nodes
         if (ent_name === ent_type) {
             var_sub = ent_name;
@@ -1536,11 +1538,13 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
-
+    cardBodyHierarchy[divCardBodyID] = parentContainerID;
+    variables2entity[divCardBodyID] = var2entities;
     globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
 
     // generate the content lazy
     divH2.click(function () {
+        // new hierarchy level
         createDocumentAggregateLazy(divCardBodyID);
     });
 
@@ -1582,30 +1586,29 @@ function rateSubGroupExtraction(correct, subgroup, callback) {
     return true;
 }
 
-const createDocumentAggregateList = (results, query_len) => {
+const createDocumentAggregateList = (results, query_len, parentContainerID) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
     let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
     let resultList = results["r"];
-
     globalAccordionDict[accordionID] = [divAccordion, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
-    createExpandableAccordion(true, accordionID);
+    createExpandableAccordion(true, accordionID, parentContainerID);
 
     return divAccordion;
 };
 
 
-const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID) => {
+const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID, parentContainerID = null) => {
     let typeOfRes = result["t"];
     if (typeOfRes === "doc") {
-        return (createResultDocumentElement(result, query_len, accordionID, headingID, collapseID));
+        return (createResultDocumentElement(result, parentContainerID));
     } else if (typeOfRes === "doc_l") {
-        return (createDocumentList(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentList(result, query_len, parentContainerID));
     } else if (typeOfRes === "agg") {
-        return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID, parentContainerID));
     } else if (typeOfRes === "agg_l") {
-        return (createDocumentAggregateList(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentAggregateList(result, query_len, parentContainerID));
     }
     console.log("ERROR - does not recognize result type: " + typeOfRes);
     return null;
@@ -1613,6 +1616,8 @@ const createDivListForResultElement = (result, query_len, accordionID, headingID
 
 
 const createResultList = (results, query_len) => {
+    // clear the current variables mapping
+    variables2entity = []
     let divList = $(`<div></div>`);
     divList.append(createDivListForResultElement(results, query_len, null, null, null));
     return divList;
