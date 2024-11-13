@@ -862,8 +862,6 @@ def get_provenance(request):
         try:
             document_id = str(request.GET["document_id"]).strip()
             document_collection = str(request.GET["data_source"]).strip()
-            time_start = datetime.now()
-
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
             result = QueryEngine.query_provenance_information(fp2prov_ids)
@@ -889,24 +887,29 @@ def get_provenance(request):
         return HttpResponse(status=500)
 
 
-def get_provenance_for_document(request):
+def get_explain_document(request):
+    required_parameters = {"document_id", "query", "document_collection"}
     try:
-        if not request.GET.keys() & {"document_id", "query", "document_collection"}:
+        if not required_parameters.issubset(request.GET.keys()):
+            View().query_logger.write_api_call(False, "get_provenance_for_document", str(request))
             return HttpResponse(status=500)
-
         start = datetime.now()
 
         document_id = str(request.GET.get("document_id", "")).strip()
         document_collection = str(request.GET.get("document_collection", "")).strip()
         query = str(request.GET.get("query", "").strip())
+        variables = ""
+        if "variables" in request.GET:
+            variables = request.GET.get("variables", "")
 
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
-
-        result = QueryEngine.query_provenance_information_for_doc_id(document_id, document_collection, graph_query)
+        result = QueryEngine.query_provenance_information_for_doc_id(document_id, document_collection, graph_query,
+                                                                     variables)
+        View().query_logger.write_api_call(True, "get_provenance_for_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
 
-    except Exception as e:
-        print(e)
+    except Exception:
+        View().query_logger.write_api_call(False, "get_provenance_for_document", str(request))
         return HttpResponse(status=500)
 
 
