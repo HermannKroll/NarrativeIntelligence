@@ -327,36 +327,31 @@ class QueryEngine:
             var_names_in_query.append((object_class, "object"))
 
         # execute the query
-        provenance_mappings = []
+        collection2doc_ids = dict()
         # compute the list of substitutions for the variables
         var2subs = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
-        var2subs_to_prove = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
         for result in query:
-            prov_mapping_raw = json.loads(result.provenance_mapping)
+            document_ids = set(PredicationInvertedIndex.prepare_document_ids(result.document_ids))
             doc_col = result.document_collection
             # Apply document collection filter
             # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
             if doc_col == LIT_COVID_COLLECTION or doc_col == LONG_COVID_COLLECTION:
                 doc_col = "PubMed"
 
-            # convert every document id to an integer for speed
-            prov_mapping = dict()
-            prov_mapping[doc_col] = {int(d): v for d, v in prov_mapping_raw.items()}
+            # add the new documents to the existing collection, if existing
+            if doc_col in collection2doc_ids:
+                collection2doc_ids[doc_col].update(document_ids)
+            else:
+                collection2doc_ids[doc_col] = document_ids
 
-            # Compute the hash dictionaries and indexes to the data
-            provenance_mappings.append(prov_mapping)
-            for _, docids2prov in prov_mapping.items():
-                doc_ids = set(docids2prov.keys())
-                for var_name, position in var_names_in_query:
-                    sub_id, sub_type = None, None
-                    if position == 'subject':
-                        sub_id, sub_type = result.subject_id, result.subject_type
-                    elif position == 'object':
-                        sub_id, sub_type = result.object_id, result.object_type
-                    var2subs[var_name][doc_col][(sub_id, sub_type)].update({doc_id for doc_id in doc_ids})
-                    for doc_id in doc_ids:
-                        var2subs_to_prove[doc_col][doc_id][(var_name, sub_id, sub_type)].update(docids2prov[doc_id])
-        return provenance_mappings, var2subs, var2subs_to_prove
+            for var_name, position in var_names_in_query:
+                sub_id, sub_type = None, None
+                if position == 'subject':
+                    sub_id, sub_type = result.subject_id, result.subject_type
+                elif position == 'object':
+                    sub_id, sub_type = result.object_id, result.object_type
+                var2subs[var_name][doc_col][(sub_id, sub_type)].update(document_ids)
+        return collection2doc_ids, var2subs
 
     @staticmethod
     def merge_var2subs(var2subs, var2subs_updates):
@@ -365,6 +360,15 @@ class QueryEngine:
                 for sub_key in var2subs_updates[var_name][doc_col]:
                     doc_ids = var2subs_updates[var_name][doc_col][sub_key]
                     var2subs[var_name][doc_col][sub_key].update(doc_ids)
+
+
+    @staticmethod
+    def merge_collection2docs(col2docs, col2docs_updates):
+        for collection, document_ids in col2docs_updates.items():
+            if collection in col2docs:
+                col2docs[collection].update(document_ids)
+            else:
+                col2docs[collection] = document_ids
 
     @staticmethod
     def query_for_terms_in_query(graph_query: GraphQuery, document_collection_filter) -> {str: int}:
@@ -538,48 +542,28 @@ class QueryEngine:
 
         collection2valid_doc_ids = defaultdict(set)
         collection2valid_subs = {}
-        fp2prov_mappings = {}
-        fp2var_prov_mappings = {}
+
         logging.debug(f'Executing query {graph_query}...')
-        found_document_collections = set()
         for idx, fact_pattern in enumerate(graph_query):
-            prov_mappings, var2subs, v2prov = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern,
-                                                                                                document_collection_filter=document_collection_filter)
+            collection2doc_ids, var2subs = QueryEngine.query_inverted_index_for_fact_pattern(fact_pattern,
+                                                                                        document_collection_filter=document_collection_filter)
             # must the fact pattern be expanded?
             for e_fp in QueryExpander.expand_fact_pattern(fact_pattern):
                 logging.debug(f'Expand {fact_pattern} to {e_fp}')
-                pm_ex, var2subs_ex, v2prov_ex = QueryEngine.query_inverted_index_for_fact_pattern(e_fp,
-                                                                                                  document_collection_filter=document_collection_filter)
+                collection2docs_expanded, var2subs_ex = QueryEngine.query_inverted_index_for_fact_pattern(e_fp,
+                                                                                       document_collection_filter=document_collection_filter)
                 QueryEngine.merge_var2subs(var2subs, var2subs_ex)
-                QueryEngine.merge_var2subs(v2prov, v2prov_ex)
-                prov_mappings.extend(pm_ex)
-
-            fp2var_prov_mappings[idx] = v2prov
-            fp2prov_mappings[idx] = prov_mappings
-
-            # check that facts are matched within the same documents
-            doc_ids_for_fp = dict()
-            # init all already known collection with the empty document id set
-            for d_col in found_document_collections:
-                doc_ids_for_fp[d_col] = set()
-
-            # Now retrieve all found document ids via the provenance mappings
-            for pm in prov_mappings:
-                for d_col, docids2provids in pm.items():
-                    found_document_collections.add(d_col)
-
-                    if d_col not in doc_ids_for_fp:
-                        doc_ids_for_fp[d_col] = set()
-
-                    doc_ids_for_fp[d_col].update(docids2provids.keys())
+                QueryEngine.merge_collection2docs(collection2doc_ids, collection2docs_expanded)
 
             # Next compute the intersection of document ids with prior result sets
-            for d_col in found_document_collections:
-                if idx == 0:
-                    collection2valid_doc_ids[d_col].update(doc_ids_for_fp[d_col])
-                else:
-                    collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(
-                        doc_ids_for_fp[d_col])
+            if idx == 0:
+                collection2valid_doc_ids = collection2doc_ids
+            else:
+                for d_col in collection2valid_doc_ids:
+                    if d_col in collection2doc_ids:
+                        collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(collection2doc_ids[d_col])
+                    else:
+                        collection2valid_doc_ids[d_col] = set()
 
             # fact pattern has a variable
             if len(var2subs) > 0:
@@ -618,18 +602,6 @@ class QueryEngine:
                             collection2valid_doc_ids[d_col] = collection2valid_doc_ids[d_col].intersection(
                                 compatible_doc_ids)
 
-        # compute
-        fp2prov_mappings_valid = {}
-        for idx, _ in enumerate(graph_query):
-            pm_valids = defaultdict(lambda: defaultdict(set))
-            for pm in fp2prov_mappings[idx]:
-                for doc_col, valid_d_ids in collection2valid_doc_ids.items():
-                    if doc_col in pm:
-                        for d_id, prov_ids in pm[doc_col].items():
-                            if d_id in valid_d_ids:
-                                pm_valids[doc_col][d_id].update(prov_ids)
-            fp2prov_mappings_valid[idx] = pm_valids
-
         logging.debug(f'Query computed in {datetime.now() - start_time}s')
         # Construct the results
         # query document titles
@@ -664,13 +636,10 @@ class QueryEngine:
         if len(collection2valid_subs) == 0:
             for d_col, d_ids in collection2valid_doc_ids.items():
                 for d_id in d_ids:
-                    fp2prov = {}
-                    for idx, _ in enumerate(graph_query):
-                        fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
                     query_results.append(QueryDocumentResult(int(d_id), title="", authors="", journals="",
                                                              publication_year=0, publication_month=0,
                                                              var2substitution={}, confidence=0.0,
-                                                             position2provenance_ids=fp2prov,
+                                                             position2provenance_ids={},
                                                              org_document_id=None, doi=None,
                                                              document_collection=d_col, document_classes=None))
         else:
@@ -706,22 +675,11 @@ class QueryEngine:
                             var2sub_for_doc[var_name] = QueryEntitySubstitution("", shared_sub[idx][0],
                                                                                 shared_sub[idx][1])
 
-                        fp2prov = defaultdict(set)
-                        for idx, fp in enumerate(graph_query):
-                            if fp.has_variable():
-                                fp_vars = fp.get_variable_names()
-                                for v_idx, v_name in enumerate(var_names):
-                                    if v_name in fp_vars:
-                                        sub_key = (v_name, shared_sub[v_idx][0], shared_sub[v_idx][1])
-                                        fp2prov[idx].update(fp2var_prov_mappings[idx][d_col][d_id][sub_key])
-                            else:
-                                fp2prov[idx] = fp2prov_mappings_valid[idx][d_col][d_id]
-
                         query_results.append(QueryDocumentResult(int(d_id), title="", authors="", journals="",
                                                                  publication_year=0, publication_month=0,
                                                                  var2substitution=var2sub_for_doc,
                                                                  confidence=0.0,
-                                                                 position2provenance_ids=fp2prov,
+                                                                 position2provenance_ids={},
                                                                  org_document_id=None, doi=None,
                                                                  document_collection=d_col,
                                                                  document_classes=None))
