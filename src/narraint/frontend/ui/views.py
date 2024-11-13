@@ -903,8 +903,8 @@ def get_explain_document(request):
             variables = request.GET.get("variables", "")
 
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
-        result = QueryEngine.query_provenance_information_for_doc_id(document_id, document_collection, graph_query,
-                                                                     variables)
+        result = QueryEngine.explain_document(document_id, document_collection, graph_query,
+                                              variables)
         View().query_logger.write_api_call(True, "get_provenance_for_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
 

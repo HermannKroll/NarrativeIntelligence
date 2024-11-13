@@ -1,6 +1,5 @@
 import ast
 import itertools
-import json
 import logging
 from collections import defaultdict
 from datetime import datetime
@@ -13,9 +12,10 @@ from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLEC
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
-from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE
+from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE, VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narraint.queryengine.result import QueryFactExplanation, QueryEntitySubstitution, QueryExplanation, \
     QueryDocumentResult
+from narrant.entity.entity import Entity
 
 QUERY_DOCUMENT_LIMIT = 1500000
 
@@ -92,72 +92,100 @@ class QueryEngine:
         return query_explanation
 
     @staticmethod
-    def query_provenance_information_for_doc_id(document_id: str, document_collection: str, graph_query: GraphQuery) \
-            -> QueryExplanation:
-        """
-        Queries Provenance information from the database
-        :param provenance: a dict that maps a fact pattern index to a set of explaining predication ids
-        :return: an QueryExplanation object
-        """
+    def replace_variables_with_entities(graph_query: GraphQuery, var_mapping: str):
+        logging.debug(f'Replacing variables with entities using "{var_mapping}"')
+        variables2entities = dict()
+        for mapping in var_mapping.split(";"):
+            variable, entity_id, entity_type = mapping.split("|")
+            variables2entities[variable + "(" + entity_type + ")"] = (entity_id, entity_type)
 
-        print("doc_id", document_id)
-        print("document_collection", document_collection)
-        print("query", graph_query)
+        for fp in graph_query.fact_patterns:
+            if len(fp.subjects) == 1 and fp.subjects[0].entity_type == ENTITY_TYPE_VARIABLE:
+                entity_id, entity_type = variables2entities[fp.subjects[0].entity_id]
+                fp.subjects = [Entity(entity_id, entity_type)]
 
+            if len(fp.objects) == 1 and fp.objects[0].entity_type == ENTITY_TYPE_VARIABLE:
+                entity_id, entity_type = variables2entities[fp.objects[0].entity_id]
+                fp.objects = [Entity(entity_id, entity_type)]
+
+        return graph_query
+
+    @staticmethod
+    def explain_document(document_id: str, document_collection: str, graph_query: GraphQuery,
+                         variables: str = "") -> QueryExplanation:
+        """
+        Queries Provenance information from the database for the given document with respect to the current query
+        :param document_id: document id that requires provenance information
+        :param document_collection: collection of the document
+        :param graph_query: query representation
+        :param variables: string of optional variable mappings
+        :return: a QueryExplanation object
+        """
+        query_explanation = QueryExplanation()
+
+        # we do not allow variables
+        if any(fp.has_variable() for fp in graph_query):
+            if not variables:
+                logging.error("Provenance requires non-variable fact-patterns but no variable mappings were provided")
+                return query_explanation
+
+            graph_query = QueryEngine.replace_variables_with_entities(graph_query, variables)
+
+        graph_query = QueryOptimizer.optimize_query(graph_query)
+        if not graph_query:
+            logging.error('Query will not yield results.')
+            return query_explanation
+
+        logging.debug("Query provenance information for doc {} ({})".format(document_id, document_collection))
+
+        # retrieve all predications for the provided document
         session = SessionExtended.get()
-        query = session.query(Predication.id,
-                              Predication.sentence_id, Predication.predicate, Predication.relation,
-                              Predication.subject_str, Predication.object_str, Predication.confidence,
-                              Predication.subject_id, Predication.object_id)
+        query = session.query(Predication.id, Predication.sentence_id, Predication.predicate, Predication.relation,
+                              Predication.subject_str, Predication.subject_id, Predication.subject_type,
+                              Predication.object_str, Predication.object_id, Predication.object_type,
+                              Predication.confidence)
         query = query.filter(Predication.document_id == document_id)
         query = query.filter(Predication.document_collection == document_collection)
 
-        subjects = set()
-        predicates = set()
-        objects = set()
-        for fp in graph_query:
-            subjects.update([s.entity_id for s in fp.subjects])
-            predicates.add(fp.predicate)
-            objects.update([o.entity_id for o in fp.objects])
-            break
-
-        query = query.filter(Predication.subject_id.in_(list(subjects)))
-        query = query.filter(Predication.relation.in_(list(predicates)))
-        query = query.filter(Predication.object_id.in_(list(objects)))
-
-        print("subjects", subjects)
-        print("predicates", predicates)
-        print("objects", objects)
-
-        print(query)
-        print("num results", query.count())
-
-        predication_ids = set()
-        prov_id2fp_idx = defaultdict(set)
-        for fp_idx, fp in enumerate(graph_query):
-            for row in query:
-                if row[7] in [s.entity_id for s in fp.subjects] \
-                        and row[8] in [o.entity_id for o in fp.objects] \
-                        and row[3] == fp.predicate:
-                    predication_ids.add(row[0])
-                    prov_id2fp_idx[row[0]].add(fp_idx)
-
-        print("predication_ids", predication_ids)
-        print("prov_id2fp_idx", prov_id2fp_idx)
+        if query.count() == 0:
+            logging.error('No predications for the document exist')
+            return query_explanation
 
         sentence_ids = set()
-        query_explanation = QueryExplanation()
-        for r in query:
-            sentence_ids.add(r[1])
-            for fp_idx in prov_id2fp_idx[r[0]]:
-                query_explanation.integrate_explanation(
-                    QueryFactExplanation(fp_idx, r[1], r[2], r[3], r[4], r[5], r[6], r[0]))
+
+        # query for each fact pattern
+        for index, fp in enumerate(graph_query.fact_patterns):
+            subject_ids = set(s.entity_id for s in fp.subjects)
+            subject_types = set(s.entity_type for s in fp.subjects)
+            predicates = {fp.predicate}
+            object_ids = set(o.entity_id for o in fp.objects)
+            object_types = set(o.entity_type for o in fp.objects)
+
+            for expanded_fp in QueryExpander.expand_fact_pattern(fp):
+                subject_ids.update(s.entity_id for s in expanded_fp.subjects)
+                subject_types.update((s.entity_type for s in expanded_fp.subjects))
+                predicates.add(expanded_fp.predicate)
+                object_ids.update(o.entity_id for o in expanded_fp.objects)
+                object_types.update(o.entity_type for o in expanded_fp.objects)
+
+            # ignore predicate when type equals "associated"
+            ignore_predicate = (len(predicates) == 1 and list(predicates)[0] == DO_NOT_CARE_PREDICATE)
+
+            # match fact patterns against predications
+            for r in query:
+                if (r.subject_id in subject_ids and r.subject_type in subject_types
+                        and r.object_id in object_ids and r.object_type in object_types
+                        and (ignore_predicate or r.relation in predicates)):
+                    fact_explanation = QueryFactExplanation(str(index), r.sentence_id, r.predicate, r.relation,
+                                                            r.subject_str, r.object_str, r.confidence, r.id)
+                    query_explanation.integrate_explanation(fact_explanation)
+                    sentence_ids.add(r.sentence_id)
 
         # replace all sentence ids by sentence str
         id2sentence = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
         for e in query_explanation.explanations:
             e.sentence = id2sentence[e.sentence]
-
+        logging.debug(query_explanation.to_dict())
         return query_explanation
 
     @staticmethod
