@@ -13,9 +13,9 @@ class FirstStage:
     Previously called FSConceptFlex, now default first stage implementation.
     """
 
-    def __init__(self, extractor: NarrativeCoreExtractor, document_collection: str):
+    def __init__(self, extractor: NarrativeCoreExtractor, document_collections: set):
         self.extractor = extractor
-        self.document_collection = document_collection
+        self.document_collections = document_collections
         self.session = SessionExtended.get()
         self.concept2documents = dict()
 
@@ -46,7 +46,7 @@ class FirstStage:
         # Search for matching nodes but not for predicates (ignore direction)
         q = q.filter(TagInvertedIndex.entity_id == concept)
         q = q.filter(TagInvertedIndex.entity_type == concept_type)
-        q = q.filter(TagInvertedIndex.document_collection == self.document_collection)
+        q = q.filter(TagInvertedIndex.document_collection.in_(self.document_collections))
         # print("retrieve_documents ", concept, " took ", datetime.datetime.now() - start)
         document_ids = set()
         for row in q:

@@ -5,6 +5,8 @@ let cardBodyHierarchy = {}
 let DEFAULT_RESULT_DIVS_LIMIT = 500;
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
+let current_search_method = 'query_builder';
+
 
 let CYTOSCAPE_STYLE = [
     {
@@ -328,7 +330,11 @@ function refreshSearch(fromUrl = false) {
         if (fromUrl === false) {
             setCurrentPage(0);
         }
-        document.getElementById("btn_search").click();
+        if (current_search_method === 'recommender') {
+            recommenderSearch();
+        } else {
+            document.getElementById("btn_search").click();
+        }
     }
 }
 
@@ -355,7 +361,7 @@ async function openFeedback() {
     $("#feedback_button").addClass("disabled")
     await new Promise(r => setTimeout(r, 10));
     const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging:false})
+    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging: false})
 
     const base64image = canvas.toDataURL("image/png");
     let screenshot = $("#screenshot")
@@ -412,8 +418,8 @@ function closeFeedback(send = false) {
         let combineCanvas = document.createElement("canvas");
         let dim = document.getElementById('screenshotCanvas');
         // resize if the screenwidth is larger than 1920px
-        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH: dim.width;
-        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width): dim.height;
+        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH : dim.width;
+        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width) : dim.height;
 
         combineCanvas.width = targetWidth;
         combineCanvas.height = targetHeight;
@@ -483,7 +489,11 @@ $(document).ready(function () {
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
-            search(e);
+            if (current_search_method === "recommender") {
+                recommenderSearch();
+            } else {
+                search(e);
+            }
         }
     });
 
@@ -569,31 +579,19 @@ $(document).ready(function () {
         pageUpdated();
     });
 
-    // Try to initialize from search url parameters if possible
-    const searchType = getSearchType();
-    if (searchType === "keyword") {
-        initKeywordSearchFromURL();
-    } else if (searchType === "recommend") {
-        initRecommendSearchFromURL();
-    } else {
-        initFromURLQueryParams();
-    }
+    initFromURLQueryParams();
 });
 
-function getSearchType() {
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams(url.search);
-
-    if (params.has("state")) {
-        return params.get("state").toLowerCase();
+function switchTab(tabId) {
+    const tabLink = document.querySelector(`a[href="${tabId}"]`);
+    if (tabLink) {
+        tabLink.click();
     }
-    return "search";
 }
 
 function initFromURLQueryParams() {
     const url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
-
     if (params.has("visualization")) {
         let visualization = params.get("visualization");
         if (visualization === "outer_ranking_substitution") {
@@ -646,10 +644,18 @@ function initFromURLQueryParams() {
     if (params.has("classification_filter")) {
         document.getElementById("checkbox_classification").checked = true;
     }
+    let search_method = params.get("search_method");
+
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
-        initQueryBuilderFromString(query);
+        if (search_method === "recommender") {
+            let query_col = params.get("query_col");
+            initRecommendSearchFromURL(query, query_col);
+        } else {
+            switchTab("#search-type-query");
+            initQueryBuilderFromString(query);
+        }
     }
 }
 
@@ -755,8 +761,13 @@ function createURLParameterString(parameters) {
  */
 function updateURLParameters(parameters) {
     const url = new URL(window.location.href);
-    url.searchParams.set('query',  parameters["query"]);
-    url.searchParams.set("data_source",  parameters["data_source"]);
+    url.searchParams.set('query', parameters["query"]);
+    url.searchParams.set("data_source", parameters["data_source"]);
+    if (parameters["query_col"]) {
+        url.searchParams.set("query_col", parameters["query_col"]);
+    } else {
+        url.searchParams.delete("query_col");
+    }
     if (parameters["outer_ranking"] !== "outer_ranking_substitution") {
         url.searchParams.set("visualization", parameters["outer_ranking"]);
     } else {
@@ -813,6 +824,12 @@ function updateURLParameters(parameters) {
     } else {
         url.searchParams.delete("classification_filter");
     }
+
+    if (parameters["search_method"]) {
+        url.searchParams.set("search_method", parameters["search_method"]);
+    } else {
+        url.searchParams.delete("title_filter");
+    }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 }
 
@@ -822,6 +839,9 @@ function updateURLParameters(parameters) {
  */
 function logInputParameters(parameters) {
     let message = "Query                      : " + parameters["query"] + "\n";
+    if (parameters["query_col"]) {
+        message += "Query Collection           : " + parameters["query_col"] + "\n";
+    }
     message += "Data source                : " + parameters["data_source"] + "\n";
     message += "Outer Ranking              : " + parameters["outer_ranking"] + "\n";
     message += "Inner Ranking              : " + parameters["inner_ranking"] + "\n";
@@ -859,7 +879,7 @@ function getSelectedDataSources() {
         dataSource.push(dataSourceString);
     }
     if (dataSource.length === 0) {
-        if(document.getElementById("filter_PubMed") !== null){
+        if (document.getElementById("filter_PubMed") !== null) {
             document.getElementById("filter_PubMed").checked = true;
         }
         dataSource.push("PubMed");
@@ -875,8 +895,11 @@ function getSelectedDataSources() {
  */
 function getInputParameters(query) {
     const obj = {};
-
     obj["query"] = query;
+    if (current_search_method === "recommender") {
+        const collectionInput = document.getElementById('input_collection');
+        obj["query_col"] = collectionInput.options[collectionInput.selectedIndex].value;
+    }
     adjustSelectedPage(obj);
     obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
     obj["year_sort"] = document.getElementById("select_sorting_year").value;
@@ -903,6 +926,7 @@ function getInputParameters(query) {
     obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
 
     obj["classification_filter"] = null;
+    obj["search_method"] = current_search_method;
     return obj;
 }
 
@@ -1008,7 +1032,12 @@ function showResults(response, parameters) {
     }
     updateYearFilter(response["year_aggregation"], query_trans_string);
     updateExplanationPopover();
-    latest_query_translation = query_trans_string.split("----->")[0].trim();
+    if (current_search_method === "recommender") {
+        latest_query_translation = query_trans_string;
+    } else {
+        latest_query_translation = query_trans_string.split("----->")[0].trim();
+    }
+
     saveHistoryEntry({size: result_size, filterOptions: parameters});
 }
 
@@ -1032,9 +1061,16 @@ function updateYearFilter(year_aggregation, query_trans_string) {
         xValues.push(year);
         yValues.push(year_aggregation[year]);
     }
-    if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
-        initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
-        initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+    if (current_search_method === "recommender") {
+        if (latest_query_translation !== query_trans_string) {
+            initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+            initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+        }
+    } else {
+        if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
+            initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+            initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+        }
     }
 
     fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
@@ -1303,6 +1339,10 @@ function sendDocumentClicked(query, document_id, data_source, document_link) {
 
 const createResultDocumentElement = (queryResult, parentContainerID) => {
     let document_id = queryResult["docid"];
+    let graph_data = null;
+    if (current_search_method === 'recommender') {
+        graph_data = queryResult["graph_data"];
+    }
     let art_doc_id = document_id;
     let title = queryResult["title"];
     let authors = queryResult["authors"];
@@ -1350,19 +1390,34 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         "by: " + authors + '<br>');
 
     divDoc_Body.append(divDoc_Content);
+    const collectionInput = document.getElementById('input_collection');
+    const selectedCollection = collectionInput.options[collectionInput.selectedIndex].value;
+
+    let divDocRecommenderLink = $(
+        '<br><a class="btn-link" href="#" onclick="initRecommendSearchFromURL(\'' + document_id + '\', \'' + selectedCollection + '\')" style="cursor: pointer;">Show similar articles</a>'
+    );
 
     //let
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
+    divDoc_Body.append(divDocRecommenderLink);
 
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
     uniqueProvenanceID = uniqueProvenanceID + 1;
     let div_provenance_button = $('<button class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#' + unique_div_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
+    if (current_search_method === 'recommender') {
+        let prov_div_recommender_graph = $('<div class="graph rounded border w-100" style="height:600px; display: none" id="' + document_id + '_graph"></div>');
+        div_provenance_collapsable_block.append(prov_div_recommender_graph);
+    }
     div_provenance_button.click(async function () {
-        if ($('#' + unique_div_id).html() === "") {
-            await queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, unique_div_id, parentContainerID);
+        if (current_search_method === 'recommender') {
+            visualizeRecommenderExplanationGraph(document_id, graph_data)
+        } else {
+            if ($('#' + unique_div_id).html() === "") {
+                await queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, unique_div_id, parentContainerID);
+            }
         }
     });
 
@@ -1984,7 +2039,7 @@ async function updateExplanationPopover() {
     await updatePopoverByType(objectPopover, object, queryText);
 }
 
-async function updatePopoverByType(popover, concept, queryText){
+async function updatePopoverByType(popover, concept, queryText) {
     popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
         .then((response) => {
             return response.json()
@@ -1995,17 +2050,31 @@ async function updatePopoverByType(popover, concept, queryText){
         .catch((e) => console.log(e));
 }
 
-let exampleQueriesContainer = document.getElementById("exampleQueries");
+const exampleQueriesContainer = document.getElementById("exampleQueries");
+const sortingYearContainer = document.getElementById("sorting_year_container");
+const visualizationByContainer = document.getElementById("visualization_filter");
+const previewContainer = document.getElementById('document_preview');
 
 /**
  * The function sets the help settings for the keyword search tab.
  */
 function setKeywordSearchHelp() {
+    current_search_method = 'query_builder';
+    // searchMethod = 'keywordSearch';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
     anchor.target = "_blank";
     if (exampleQueriesContainer) {
         exampleQueriesContainer.style.display = "block";
+    }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "block";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "block";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "none";
     }
 }
 
@@ -2013,12 +2082,22 @@ function setKeywordSearchHelp() {
  * The function sets the help settings for the query builder tab.
  */
 function setQueryBuilderHelp() {
+    current_search_method = 'keyword';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "#";
     anchor.target = "";
     anchor.onclick = () => showKeywordSearchHelp();
     if (exampleQueriesContainer) {
         exampleQueriesContainer.style.display = "block";
+    }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "block";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "block";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "none";
     }
 }
 
@@ -2031,11 +2110,51 @@ function showKeywordSearchHelp() {
     modal.show();
 }
 
+async function loadCollectionDropDownMenu() {
+    const collections = await fetch(url_available_collections)
+        .then((response) => {
+            if (!response.ok) return {};
+            return response.json();
+        })
+        .then((dataSources) => {
+            const dropDownMenu = document.getElementById("input_collection");
+            const collections = dataSources["data_sources"];
+
+            const seenCollections = new Set(
+                Array.from(dropDownMenu.options).map(option => option.value)
+            );
+
+            for (let i in collections) {
+                const collectionName = collections[i]["collection"];
+                if (!seenCollections.has(collectionName)) {
+                    const option = document.createElement("option");
+                    option.value = collectionName;
+                    option.innerText = collectionName;
+                    dropDownMenu.appendChild(option);
+                    seenCollections.add(collectionName);
+                }
+            }
+        })
+        .catch(_ => console.log("Could not retrieve available collections."));
+}
+
 /**
  * The function sets the help settings for the query builder tab.
  */
-function setUpRecommenderSearch() {
+async function setUpRecommenderSearch() {
+    current_search_method = 'recommender';
     if (exampleQueriesContainer) {
         exampleQueriesContainer.style.display = "none";
     }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "none";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "none";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "block";
+    }
+
+    await loadCollectionDropDownMenu();
 }

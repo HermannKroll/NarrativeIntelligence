@@ -12,18 +12,18 @@ from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF_HARD, NOT
 from narrant.entity.entityresolver import EntityResolver
 
 
-def apply_recommendation(document_id: int, document_collection: str, corpus: DocumentCorpus):
+def apply_recommendation(document_id: int, query_collection: str, document_collections: set, corpus: DocumentCorpus):
     session = SessionExtended.get()
 
     # Step 1: First stage retrieval
     print('Step 1: Perform first stage retrieval...')
 
     core_extractor = NarrativeCoreExtractor(corpus=corpus)
-    first_stage = FirstStage(extractor=core_extractor, document_collection=document_collection)
+    first_stage = FirstStage(extractor=core_extractor, document_collections=document_collections)
 
     input_docs = retrieve_narrative_documents_from_database(session=session,
                                                             document_ids={document_id},
-                                                            document_collection=document_collection)
+                                                            document_collection=query_collection)
     if len(input_docs) != 1:
         return []
 
@@ -48,7 +48,7 @@ def apply_recommendation(document_id: int, document_collection: str, corpus: Doc
     # Step 2: document data retrieval
     print('Step 2: Query document data...')
     retrieved_doc_ids = {d[0] for d in candidate_document_ids}
-    documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, document_collection)
+    documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, query_collection)
     documents = [RecommenderDocument(d) for d in documents]
     docid2doc = {d.id: d for d in documents}
 
@@ -56,7 +56,7 @@ def apply_recommendation(document_id: int, document_collection: str, corpus: Doc
     print('Step 3: Perform recommendation...')
     recommender = Recommender(extractor=core_extractor)
 
-    rec_doc_ids = recommender.recommend_documents(input_doc, documents)
+    rec_doc_ids = recommender.recommend_documents_core_overlap(input_doc, documents)
     # ingore scores
     rec_doc_ids = [d[0] for d in rec_doc_ids]
     ranked_docs = [docid2doc[d] for d in rec_doc_ids]

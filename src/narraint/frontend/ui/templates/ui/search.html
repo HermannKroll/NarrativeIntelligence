@@ -32,8 +32,9 @@
             <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
-            <li class="nav-item" onclick="setUpRecommenderSearch()"><!-- TODO add onClick="...setHelp..." -->
-                <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender</a>
+            <li class="nav-item" onclick="setUpRecommenderSearch()">
+                <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender
+                    (Beta)</a>
             </li>
         </ul>
 
@@ -125,11 +126,16 @@
             <div class="tab-pane fade" id="search-type-recommender">
                 <div class="row">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="recommender_input"
+                        <input type="text" class="form-control col-8" id="recommender_input"
                                placeholder="enter pmid and press enter  (e.g. 37924788)">
 
-                        <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center"
-                                        type="submit" id="btn_recommender" onclick="recommenderSearch()">Search
+                        <label for="input_collection"></label>
+                        <select class="form-select col-2" id="input_collection">
+                            <!-- add options dynamically <option value="collection1">collection1</option>-->
+                        </select>
+
+                        <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center col-2"
+                                type="submit" id="btn_recommender" onclick="recommenderSearch()">Search
                         </button>
                     </div>
                     <p id="help_recommend" class="form-text text-muted" aria-describedby="btn_recommender">
@@ -494,20 +500,27 @@
                     </div>
 
                     <!-- Visualization Buttons -->
-                    <div class="row m-1 align-items-center">
+                    <div class="row m-1 align-items-center" id="visualization_filter">
                         <label><strong>Visualization by:</strong></label>
 
-                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                               value="outer_ranking_substitution" class="col-1"
-                               checked="checked" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_outer_ranking_a">
-                            Substitution</label>
+                        <div class="d-flex align-items-center">
+                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                                   value="outer_ranking_substitution" class="me-2"
+                                   checked="checked" onclick="refreshSearch()">
+                            <label for="radio_outer_ranking_a">
+                                Substitution
+                            </label>
+                        </div>
 
-                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="col-1"
-                               value="outer_ranking_ontology" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_outer_ranking_b">
-                            MeSH-Taxonomy</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="me-2"
+                                   value="outer_ranking_ontology" onclick="refreshSearch()">
+                            <label for="radio_outer_ranking_b">
+                                MeSH-Taxonomy
+                            </label>
+                        </div>
                     </div>
+
 
                     <div class="row m-1 align-items-center">
                         <label><strong>Classifications:</strong></label>
@@ -530,6 +543,7 @@
             <!-- right column: results table -->
             <div class="col">
                 <div id="resultdiv">
+                    <div class="row" id="document_preview"></div>
                     <div class="row">
                         <div class="col-12">
                             <h2 id="document_header">Results:
@@ -551,7 +565,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4" id="sorting_year_container">
                             <select class="form-select w-100" id="select_sorting_year"
                                     style="width: auto; display: none">
                                 <option selected value="True">Latest Publications First</option>

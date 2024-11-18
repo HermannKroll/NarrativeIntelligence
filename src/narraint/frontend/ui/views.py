@@ -891,7 +891,7 @@ def get_explain_document(request):
     required_parameters = {"document_id", "query", "document_collection"}
     try:
         if not required_parameters.issubset(request.GET.keys()):
-            View().query_logger.write_api_call(False, "get_provenance_for_document", str(request))
+            View().query_logger.write_api_call(False, "get_explain_document", str(request))
             return HttpResponse(status=500)
         start = datetime.now()
 
@@ -905,11 +905,11 @@ def get_explain_document(request):
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
         result = QueryEngine.explain_document(document_id, document_collection, graph_query,
                                               variables)
-        View().query_logger.write_api_call(True, "get_provenance_for_document", str(request), start - datetime.now())
+        View().query_logger.write_api_call(True, "get_explain_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
 
     except Exception:
-        View().query_logger.write_api_call(False, "get_provenance_for_document", str(request))
+        View().query_logger.write_api_call(False, "get_explain_document", str(request))
         return HttpResponse(status=500)
 
 
@@ -1478,13 +1478,24 @@ def get_recommend(request):
     is_aggregate = False
     valid_query = False
     query_trans_string = ""
+    if "query" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="document_id parameter is missing"))
+    if "query_col" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="document_collection parameter is missing"))
+    if "data_source" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
     try:
-        if not request.GET.keys() & {"document_id", "document_collection"}:
+        if not request.GET.keys():
             return HttpResponse(status=500)
 
 
-        document_id = int(request.GET.get("document_id", ""))
-        document_collection = request.GET.get("document_collection", "")
+        document_id = int(request.GET.get("query", ""))
+        query_collection = request.GET.get("query_col", "")
+        query_trans_string = document_id
+        document_collections = request.GET.get("data_source", "")
 
         if "outer_ranking" in request.GET:
             outer_ranking = str(request.GET.get("outer_ranking", "").strip())
@@ -1519,11 +1530,12 @@ def get_recommend(request):
             else:
                 classification_filter = None
 
-        logging.info("Selected data source is {}".format(document_collection))
+        logging.info("Selected data source is {}".format(document_collections))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         time_start = datetime.now()
         year_aggregation = {}
-        if document_collection not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+        document_collections = set(document_collections.split(";"))
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -1534,7 +1546,7 @@ def get_recommend(request):
             valid_query = True
             logging.info(f'Requested recommendation for document id: {document_id}')
 
-            json_data = apply_recommendation(document_id, document_collection, View().corpus)
+            json_data = apply_recommendation(document_id, query_collection, document_collections, View().corpus)
 
             results = []
             graph_data = dict()
@@ -1554,9 +1566,9 @@ def get_recommend(request):
                 graph_data[d["docid"]] = d["graph_data"]
 
             # do filtering stuff
-            results = TitleFilter.filter_documents(results, title_filter)
             year_aggregation = TimeFilter.aggregate_years(results)
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            results = TitleFilter.filter_documents(results, title_filter)
             if classification_filter:
                 logging.debug(f'Filtering document classifications with {classification_filter}...')
                 results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
