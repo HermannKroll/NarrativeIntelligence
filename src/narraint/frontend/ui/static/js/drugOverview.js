@@ -193,8 +193,10 @@ async function setDrugData(entity_name) {
             document.getElementById('drug_inchi').innerText = "-";
         })
         .finally(() => {
-            let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
-            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + currentChemblID + '</a>';
+            const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
+            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            const pubchemLink = "https://pubchem.ncbi.nlm.nih.gov/compound/" + currentDrugName;
+            document.getElementById('drug_pubchem').innerHTML = '<a href="' + pubchemLink + '" target="_blank">' + decodeURI(currentDrugName) + '</a>'
         })
 }
 
