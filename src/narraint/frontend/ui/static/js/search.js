@@ -1390,14 +1390,10 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         "by: " + authors + '<br>');
 
     divDoc_Body.append(divDoc_Content);
-    const collectionInput = document.getElementById('input_collection');
-    const selectedCollection = collectionInput.options[collectionInput.selectedIndex].value;
-
     let divDocRecommenderLink = $(
-        '<br><a class="btn-link" href="#" onclick="initRecommendSearchFromURL(\'' + document_id + '\', \'' + selectedCollection + '\')" style="cursor: pointer;">Show similar articles</a>'
+        '<br><a class="btn-link" href="#" onclick="initRecommendSearchFromURL(\'' + document_id + '\', \'' + collection + '\')" style="cursor: pointer;">Show similar articles</a>'
     );
 
-    //let
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
     divDoc_Body.append(divDocRecommenderLink);
