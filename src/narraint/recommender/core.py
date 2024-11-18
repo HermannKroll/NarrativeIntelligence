@@ -136,7 +136,6 @@ class NarrativeCoreExtractor:
 
     def __init__(self, corpus: DocumentCorpus):
         self.corpus = corpus
-        self.cache = dict()
 
     def extract_concept_core(self, document: RecommenderDocument) -> NarrativeConceptCore:
         if not document.concepts:
@@ -156,9 +155,6 @@ class NarrativeCoreExtractor:
         return NarrativeConceptCore(scored_concepts)
 
     def extract_narrative_core_from_document(self, document: RecommenderDocument) -> NarrativeCore:
-        if document.id in self.cache:
-            return self.cache[document.id]
-
         if not document.extracted_statements:
             return None
 
@@ -195,5 +191,4 @@ class NarrativeCoreExtractor:
             core_node_pairs.add(so)
 
         core = NarrativeCore(core_statements)
-        self.cache[document.id] = core
         return core

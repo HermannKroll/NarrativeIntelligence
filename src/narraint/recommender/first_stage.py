@@ -1,6 +1,3 @@
-import ast
-import json
-
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.recommender.core import NarrativeCoreExtractor, NarrativeConceptCore
@@ -17,7 +14,6 @@ class FirstStage:
         self.extractor = extractor
         self.document_collections = document_collections
         self.session = SessionExtended.get()
-        self.concept2documents = dict()
 
     def retrieve_documents_for(self, document: RecommenderDocument):
         # Compute the cores
@@ -38,24 +34,15 @@ class FirstStage:
         return self.apply_dynamic_cutoff(document_ids_scored)
 
     def retrieve_documents(self, concept: str, concept_type: str):
-        import datetime
-        if concept in self.concept2documents:
-            return self.concept2documents[concept]
-        # start = datetime.datetime.now()
         q = self.session.query(TagInvertedIndex)
         # Search for matching nodes but not for predicates (ignore direction)
         q = q.filter(TagInvertedIndex.entity_id == concept)
         q = q.filter(TagInvertedIndex.entity_type == concept_type)
         q = q.filter(TagInvertedIndex.document_collection.in_(self.document_collections))
-        # print("retrieve_documents ", concept, " took ", datetime.datetime.now() - start)
         document_ids = set()
         for row in q:
-            # document_ids.update({int(d) for d in ast.literal_eval(row.document_ids)}) # 1min 14s
-            # document_ids.update({int(d) for d in row.document_ids.strip("[], ").split(",")}) 16s
-            document_ids.update({int(d) for d in json.loads(row.document_ids)}) # 14s
+            document_ids.update(TagInvertedIndex.prepare_document_ids(row.document_ids))
 
-        # add to cache
-        self.concept2documents[concept] = document_ids
         return document_ids
 
     def score_document_ids_with_core(self, core: NarrativeConceptCore):
