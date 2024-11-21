@@ -522,11 +522,10 @@
                     </div>
 
 
-                    <div class="row m-1 align-items-center">
-                        <label><strong>Classifications:</strong></label>
-                        <input type="checkbox" name="checkbox_classification" id="checkbox_classification"
-                               onclick="refreshSearch()" class="col-1">
-                        <label class="col-11" for="checkbox_classification">Pharm. Technology</label>
+                    <div class="row m-1 align-items-center" id="classification-filter">
+                        <label>
+                            <strong>Classifications:</strong>
+                        </label>
                     </div>
 
                     <div class="row m-1 align-items-center">
@@ -763,11 +762,11 @@
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
 
-    <script src="{% static 'js/search.js' %}?version=35" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=36" type="text/javascript"></script>
     <script src="{% static 'js/paper.js' %}?version=20" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
 
@@ -793,6 +792,7 @@
         const url_keyword_search_request = "{% url 'keyword_search_request' %}";
         const url_recommender_search = "{% url 'recommend' %}"
         const url_available_collections = "{% url 'document_collections' %}"
+        const url_available_classifications = "{% url 'document_classifications' %}"
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";

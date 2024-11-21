@@ -2,31 +2,9 @@ let latest_valid_query = '';
 let latest_query_translation = '';
 let variables2entity = {};
 let cardBodyHierarchy = {}
-let DEFAULT_RESULT_DIVS_LIMIT = 500;
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
 let current_search_method = 'query_builder';
-
-
-let CYTOSCAPE_STYLE = [
-    {
-        selector: 'node',
-        style: {
-            'background-color': '#8EB72B',
-            'label': 'data(id)'
-        }
-    },
-    {
-        selector: 'edge',
-        style: {
-            'width': 3,
-            'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
-            'target-arrow-shape': 'triangle',
-            'label': 'data(label)'
-        }
-    }
-];
 
 const YEAR_RESULT_FILTER_CONFIG = {
     scales: {
@@ -484,7 +462,7 @@ $(document).on('keydown', function (e) {
     }
 })
 
-$(document).ready(function () {
+$(document).ready(async function () {
     initializeExplanationPopover();
 
     $("#input_title_filter").on('keyup', function (e) {
@@ -498,7 +476,8 @@ $(document).ready(function () {
     });
 
     buildSelectionTrees();
-    buildDocumentCollectionFilter();
+    await buildDocumentCollectionFilter();
+    await buildDocumentClassificationFilter();
 
     $("#search_form").submit(search);
 
@@ -618,10 +597,15 @@ function initFromURLQueryParams() {
         let dataSources = dataSourceStr.split(";");
 
         for (let i in dataSources) {
-            document.getElementById("filter_" + dataSources[i]);
+            document.getElementById("filter_" + dataSources[i]).checked = true;
         }
+    }
 
-        lastDataSource = dataSourceStr;
+    if (params.has("classification_filter")) {
+        const classifications = params.get("classification_filter").split(";");
+        for (let i in classifications) {
+            document.getElementById("filter_" + classifications[i]).checked = true;
+        }
     }
 
     if (params.has("start_pos")) {
@@ -641,10 +625,8 @@ function initFromURLQueryParams() {
         }
         document.getElementById("input_title_filter").value = titleFilter;
     }
-    if (params.has("classification_filter")) {
-        document.getElementById("checkbox_classification").checked = true;
-    }
-    let search_method = params.get("search_method");
+
+    const search_method = params.get("search_method");
 
     if (params.has("query")) {
         let query = params.get("query");
@@ -747,10 +729,9 @@ function submitSearch(parameters) {
  * @returns {string}
  */
 function createURLParameterString(parameters) {
-    return Object.entries(parameters).map(([key, value]) => {
-        if (value === undefined || value === null) {
-            return;
-        }
+    return Object.entries(parameters).filter(([_, value]) => {
+        return !(value === undefined || value === null || value === "");
+    }).map(([key, value]) => {
         return key.toString() + "=" + value.toString();
     }).join("&");
 }
@@ -803,6 +784,7 @@ function updateURLParameters(parameters) {
     } else {
         url.searchParams.delete("year_end");
     }
+
     if (parameters["use_sys_review"]) {
         if (!parameters["title_filter"].includes("systemat review")) {
             if (parameters["title_filter"].length > 0)
@@ -812,17 +794,19 @@ function updateURLParameters(parameters) {
     } else {
         parameters["title_filter"] = parameters["title_filter"].replace("systemat review", "");
     }
+
     if (parameters["title_filter"].length > 0) {
         url.searchParams.set("title_filter", parameters["title_filter"]);
     } else {
         url.searchParams.delete("title_filter");
     }
 
-    if (parameters["use_classification"]) {
-        url.searchParams.set("classification_filter", "PharmaceuticalTechnology");
-        parameters["classification_filter"] = "PharmaceuticalTechnology";
+    // classifications
+    if (parameters["classification_filter"].length > 0) {
+        url.searchParams.set("classification_filter", parameters["classification_filter"]);
     } else {
         url.searchParams.delete("classification_filter");
+        parameters["classification_filter"] = undefined;
     }
 
     if (parameters["search_method"]) {
@@ -852,7 +836,7 @@ function logInputParameters(parameters) {
     message += "Start year                 : " + parameters["year_start"] + "\n";
     message += "End year                   : " + parameters["year_end"] + "\n";
     message += "Title filter               : " + parameters["title_filter"] + "\n";
-    message += "Classification             : " + parameters["use_classification"] + "\n";
+    message += "Classification Filter      : " + parameters["classification_filter"] + "\n";
     message += "Systematic Review          : " + parameters["use_sys_review"] + "\n";
     console.log(message);
 }
@@ -888,6 +872,40 @@ function getSelectedDataSources() {
 }
 
 
+function getSelectedClassifications() {
+    let classifications = [];
+    let classificationChildren = document.getElementById("classification-filter").children;
+
+    for (let i in classificationChildren) {
+        const child = classificationChildren.item(i);
+        const name = child["name"] || "";
+        const checked = child["checked"] || false;
+
+        if (name !== "classification" || !checked)
+            continue;
+
+        const classificationString = child["id"].split("_")[1];
+        classifications.push(classificationString);
+    }
+    return classifications;
+}
+
+
+function resetClassificationFilter() {
+    let classificationChildren = document.getElementById("classification-filter").children;
+
+    for (let i in classificationChildren) {
+        const child = classificationChildren.item(i);
+        const name = child["name"] || "";
+
+        if (name !== "classification")
+            continue;
+
+        child["checked"] = false;
+    }
+}
+
+
 /**
  * Function stores all necessary values of each input filter into one object.
  * @param query {string} formatted query string
@@ -913,19 +931,21 @@ function getInputParameters(query) {
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
     if (latest_valid_query === query) {
+        // same query requested
         // add year filter params only if the filter already contains valid years (of the current search)
         obj["year_start"] = document.querySelector("#fromSlider").value;
         obj["year_end"] = document.querySelector("#toSlider").value;
-    } else {
-        // remove filter if the query contains a new search
-        document.getElementById("checkbox_classification").checked = false;
+    } else if (latest_valid_query !== "") {
+        // old query visualized but new query requested
+        // therefore, remove every filter
+        resetClassificationFilter();
         document.getElementById("checkbox_sys_review").checked = false;
     }
 
-    obj["use_classification"] = document.getElementById("checkbox_classification").checked;
-    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
+    const classifications = getSelectedClassifications();
+    obj["classification_filter"] = classifications.join(";");
 
-    obj["classification_filter"] = null;
+    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
     obj["search_method"] = current_search_method;
     return obj;
 }
@@ -1840,6 +1860,9 @@ function buildSelectionTrees() {
 async function buildDocumentCollectionFilter() {
     const collections = await fetch(url_available_collections)
         .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
             return response.json();
         }).then((data) => {
             return data["data_sources"];
@@ -1884,6 +1907,52 @@ async function buildDocumentCollectionFilter() {
         filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
 
         collectionFilter.append(filterInput, filterLabel);
+    }
+}
+
+
+async function buildDocumentClassificationFilter() {
+    const classifications = await fetch(url_available_classifications)
+        .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
+            return response.json();
+        }).then((data) => {
+            return data["classifications"];
+        }).catch(() => console.error("Could not load classification filter types."));
+
+    if (!classifications)
+        return;
+
+    const classificationFilter = document.getElementById("classification-filter");
+    for (const i in classifications) {
+        const classification = classifications[i];
+
+        const inputId = "filter_" + classification["classification"];
+        const filterInput = document.createElement("input");
+        filterInput.type = "checkbox";
+        filterInput.id = inputId;
+        filterInput.name = "classification";
+        filterInput.classList.add(["col-1"]);
+        filterInput.value = classification["classification"];
+        filterInput.onclick = refreshSearch;
+
+        const filterLabel = document.createElement("label");
+        filterLabel.classList.add(["col-11"]);
+        filterLabel.htmlFor = inputId;
+
+        if ("url" in classification) {
+            const filterHelpAnchor = document.createElement("a");
+            filterHelpAnchor.href = classification["url"];
+            filterHelpAnchor.target = "_blank";
+            filterHelpAnchor.text = "Help";
+            filterLabel.append(classification["label"] + " (", filterHelpAnchor, ")");
+        } else {
+            filterLabel.append(classification["label"])
+        }
+
+        classificationFilter.append(filterInput, filterLabel);
     }
 }
 
