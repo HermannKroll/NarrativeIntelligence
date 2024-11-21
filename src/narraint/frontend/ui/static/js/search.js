@@ -1204,7 +1204,10 @@ const createProvenanceDivElement = (explanations) => {
     let div_provenance_all = $('<div>');
     let j = -1;
     try {
-        explanations.forEach(e => {
+        // sort by confidence and create an element for each explanation
+        explanations
+            .sort((a, b) => {return (a["conf"] >= b["conf"]) ? -1 : 1;})
+            .forEach(e => {
             let sentence = e["s"];
             let predication_ids_str = e['ids'];
             // an explanation might have multiple subjects / predicates / objects separated by //
