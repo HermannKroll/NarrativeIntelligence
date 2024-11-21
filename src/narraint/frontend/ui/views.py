@@ -1473,6 +1473,13 @@ def get_data_sources(request):
     except Exception:
         return HttpResponse(status=500)
 
+def get_classifications(request):
+    try:
+        available_classifications = ClassificationFilter.get_available_classifications()
+        return JsonResponse(status=200, data=dict(classifications=available_classifications))
+    except Exception:
+        return HttpResponse(status=500)
+
 def get_recommend(request):
     results_converted = []
     is_aggregate = False

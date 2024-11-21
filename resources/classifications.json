@@ -1,0 +1,16 @@
+[
+  {
+    "classification": "LongCovid",
+    "label": "Long Covid",
+    "url": "https://www.ncbi.nlm.nih.gov/research/coronavirus/docsum?text=e_condition:LongCovid&&sort=score%20desc&page=1"
+  },
+  {
+    "classification": "LitCovid",
+    "label": "Lit Covid",
+    "url": "https://www.ncbi.nlm.nih.gov/research/coronavirus/"
+  },
+  {
+    "classification": "PharmaceuticalTechnology",
+    "label": "Pharm. Technology"
+  }
+]
