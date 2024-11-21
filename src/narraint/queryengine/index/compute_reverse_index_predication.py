@@ -10,7 +10,6 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DatabaseUpdate, Document
 from narraint.backend.models import PredicationInvertedIndex
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
-from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
 """
 The predication dictionary uses strings instead of tuples as keys ('seen_keys') for predication entries. With this, 
@@ -143,10 +142,6 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
 
     prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
 
-    # Hack to support also the Covid 19 collection
-    # TODO: not very generic
-    doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
-
     insert_list = []
     logging.info("Starting...")
     fact_to_doc_ids = defaultdict(lambda: defaultdict(set))
@@ -177,13 +172,6 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
             seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             buffer[seen_key][prov.document_collection].add(prov.document_id)
 
-            # Hack to support also the Covid 19 collection
-            # TODO: not very generic
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                buffer[seen_key][LIT_COVID_COLLECTION].add(prov.document_id)
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                buffer[seen_key][LONG_COVID_COLLECTION].add(prov.document_id)
-
         insert_data(session, buffer, newer_documents, insert_list)
         session.commit()
         buffer.clear()
@@ -197,13 +185,6 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
             o_t = prov.object_type
             seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
             fact_to_doc_ids[seen_key][prov.document_collection].add(prov.document_id)
-
-            # Hack to support also the Covid 19 collection
-            # TODO: not very generic
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                fact_to_doc_ids[seen_key][LIT_COVID_COLLECTION].add(prov.document_id)
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                fact_to_doc_ids[seen_key][LONG_COVID_COLLECTION].add(prov.document_id)
 
         insert_data(session, fact_to_doc_ids, newer_documents, insert_list)
         session.commit()
