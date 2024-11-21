@@ -1303,13 +1303,16 @@ async function queryAndVisualizeProvenanceInformation(query, documentID, collect
             return {};
         })
         .then(json => {
-            return json["result"]["exp"];
+            if ("result" in json)
+                return json["result"]["exp"];
+
+            return Promise.reject();
         })
         .then(explanations => {
             const prov_div = createProvenanceDivElement(explanations);
             $('#' + divID).append(prov_div);
         })
-        .catch(_ => showInfoAtBottom("Query for provenance_new failed - please try again"));
+        .catch(_ => showInfoAtBottom("Failed to explain document - please try again"));
 }
 
 let uniqueProvenanceID = 1;
