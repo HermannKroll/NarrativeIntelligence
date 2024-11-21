@@ -8,7 +8,6 @@ from typing import Set, Dict, List
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, \
     PredicationInvertedIndex, DocumentMetadataService, TagInvertedIndex, TermInvertedIndex
-from narraint.queryengine.covid19 import LONG_COVID_COLLECTION, LIT_COVID_COLLECTION
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery, FactPattern
@@ -333,10 +332,6 @@ class QueryEngine:
         for result in query:
             document_ids = set(PredicationInvertedIndex.prepare_document_ids(result.document_ids))
             doc_col = result.document_collection
-            # Apply document collection filter
-            # Todo: Hacky solution - overwrite collection also to PubMed because they are subset
-            if doc_col == LIT_COVID_COLLECTION or doc_col == LONG_COVID_COLLECTION:
-                doc_col = "PubMed"
 
             # add the new documents to the existing collection, if existing
             if doc_col in collection2doc_ids:
