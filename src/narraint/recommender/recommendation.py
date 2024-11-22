@@ -1,3 +1,6 @@
+import logging
+from datetime import datetime
+
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
 from narraint.queryengine.engine import QueryEngine
@@ -23,9 +26,10 @@ class RecommendationSystem:
 
     def apply_recommendation(self, document_id: int, query_collection: str, document_collections: set):
         session = SessionExtended.get()
+        start = datetime.now()
 
         # Step 1: First stage retrieval
-        print('Step 1: Perform first stage retrieval...')
+        # print('Step 1: Perform first stage retrieval...')
 
         input_docs = retrieve_narrative_documents_from_database(session=session,
                                                                 document_ids={document_id},
@@ -36,8 +40,11 @@ class RecommendationSystem:
         input_doc = RecommenderDocument(input_docs[0])
         input_core = self.core_extractor.extract_narrative_core_from_document(input_doc)
 
-        if not input_core:
-            print("Step 1 could not extract document core")
+        if input_core is None:
+            return []
+
+        #      if not input_core:
+        #          print("Step 1 could not extract document core")
 
         input_core_concept = self.core_extractor.extract_concept_core(input_doc)
         candidate_document_ids = self.first_stage.retrieve_documents_for(input_doc, document_collections)
@@ -52,14 +59,14 @@ class RecommendationSystem:
             candidate_document_ids = candidate_document_ids[:FS_DOCUMENT_CUTOFF_HARD]
 
         # Step 2: document data retrieval
-        print('Step 2: Query document data...')
+        # print('Step 2: Query document data...')
         retrieved_doc_ids = {d[0] for d in candidate_document_ids}
         documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, query_collection)
         documents = [RecommenderDocument(d) for d in documents]
         docid2doc = {d.id: d for d in documents}
 
         # Step 3: recommendation
-        print('Step 3: Perform recommendation...')
+        # print('Step 3: Perform recommendation...')
 
         rec_doc_ids = self.recommender.recommend_documents_core_overlap(input_doc, documents)
         # ingore scores
@@ -69,7 +76,7 @@ class RecommendationSystem:
         # Step 4: Get cores of all documents
 
         # Produce the result
-        print('Step 4: Converting results...')
+        # print('Step 4: Converting results...')
         results = []
         for rec_doc in ranked_docs:
             results.append(QueryDocumentResult(document_id=rec_doc.id,
@@ -80,7 +87,7 @@ class RecommendationSystem:
                                                org_document_id=None, doi=None,
                                                document_collection="PubMed", document_classes=None))
 
-        print('Step 5: Loading document metadata...')
+        # print('Step 5: Loading document metadata...')
         # Load metadata for the documents
         results = QueryEngine.enrich_document_results_with_metadata(results, {"PubMed": rec_doc_ids})
 
@@ -89,7 +96,7 @@ class RecommendationSystem:
 
         # Convert to a json structure
         results_converted = [r.to_dict() for r in results]
-        print('Step 6: Enriching with graph data...')
+        # print('Step 6: Enriching with graph data...')
 
         for r in results_converted:
             NO_STATEMENTS_TO_SHOW = 6
@@ -200,4 +207,7 @@ class RecommendationSystem:
                     data["edges"].append({"from": source_id, "to": target_id, "label": fact["p"]})
             r["graph_data"] = data
 
+        needed_time = datetime.now() - start
+        logging.debug(f"Recommendation for document id {document_id} and collections: "
+                      f"{document_collections} took {needed_time}s")
         return results_converted

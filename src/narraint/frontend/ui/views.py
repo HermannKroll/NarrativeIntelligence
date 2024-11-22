@@ -1554,7 +1554,8 @@ def get_recommend(request):
             logger.error('parsing error')
         else:
             valid_query = True
-            logging.info(f'Requested recommendation for document id: {document_id}')
+            logging.debug(f'Performing paper recommendation for document id {document_id}, '
+                          f'query collection {query_collection} and document collections {document_collections}')
 
             json_data = View().recommender.apply_recommendation(document_id, query_collection, document_collections)
 
