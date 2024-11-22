@@ -42,7 +42,7 @@ from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
-from narraint.recommender.recommendation import apply_recommendation
+from narraint.recommender.recommendation import RecommendationSystem
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -76,6 +76,7 @@ class View:
             cls.explainer = EntityExplainer()
             cls.keyword2graph = Keyword2GraphTranslation()
             cls.corpus = DocumentCorpus()
+            cls.recommender = RecommendationSystem()
         return cls._instance
 
 
@@ -654,7 +655,8 @@ def get_query(request):
             results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit, len(result_ids),
+            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit,
+                                                len(result_ids),
                                                 query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
@@ -1473,12 +1475,14 @@ def get_data_sources(request):
     except Exception:
         return HttpResponse(status=500)
 
+
 def get_classifications(request):
     try:
         available_classifications = ClassificationFilter.get_available_classifications()
         return JsonResponse(status=200, data=dict(classifications=available_classifications))
     except Exception:
         return HttpResponse(status=500)
+
 
 def get_recommend(request):
     results_converted = []
@@ -1497,7 +1501,6 @@ def get_recommend(request):
     try:
         if not request.GET.keys():
             return HttpResponse(status=500)
-
 
         document_id = int(request.GET.get("query", ""))
         query_collection = request.GET.get("query_col", "")
@@ -1553,7 +1556,7 @@ def get_recommend(request):
             valid_query = True
             logging.info(f'Requested recommendation for document id: {document_id}')
 
-            json_data = apply_recommendation(document_id, query_collection, document_collections, View().corpus)
+            json_data = View().recommender.apply_recommendation(document_id, query_collection, document_collections)
 
             results = []
             graph_data = dict()
