@@ -252,11 +252,11 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
-def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: set):
+def do_query_processing_with_caching(graph_query: GraphQuery, document_collections: set):
     cache_hit = False
     cached_results = None
     start_time = datetime.now()
-    collection_string = "-".join(sorted(document_collection))
+    collection_string = "-".join(sorted(document_collections))
     if DO_CACHING:
         try:
             cached_results = View().cache.load_result_from_cache(collection_string, graph_query)
@@ -271,7 +271,7 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
     else:
         # run query
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter=document_collection)
+                                                           document_collection_filter=document_collections)
         cache_hit = False
         if DO_CACHING:
             try:
@@ -307,7 +307,7 @@ def get_query_narrative_documents(request):
     try:
         time_start = datetime.now()
         # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        results, _, _ = do_query_processing_with_caching(graph_query, {document_collection})
         result_ids = {r.document_id for r in results}
         # get narrative documents
         session = SessionExtended.get()
@@ -346,7 +346,7 @@ def get_query_document_ids(request):
     try:
         time_start = datetime.now()
         # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        results, _, _ = do_query_processing_with_caching(graph_query, {document_collection})
         result_ids = sorted(list({r.document_id for r in results}))
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                            time_needed=datetime.now() - time_start)
@@ -534,6 +534,9 @@ def get_document_ids_for_entity(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
+def get_document_collections_from_data_source_string(data_source: str) -> [str]:
+    return set(data_source.split(";"))
+
 # invokes Django to compress the results
 @gzip_page
 def get_query(request):
@@ -551,7 +554,8 @@ def get_query(request):
 
     try:
         query = str(request.GET.get("query", "").strip())
-        data_source = str(request.GET.get("data_source", "").strip())
+        data_source_str = str(request.GET.get("data_source", "").strip())
+        document_collections = get_document_collections_from_data_source_string(data_source_str)
         if "outer_ranking" in request.GET:
             outer_ranking = str(request.GET.get("outer_ranking", "").strip())
         else:
@@ -622,7 +626,7 @@ def get_query(request):
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
-        logging.info("Selected data source is {}".format(data_source))
+        logging.info("Selected data source is {}".format(document_collections))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
@@ -630,8 +634,7 @@ def get_query(request):
             query)
         year_aggregation = {}
 
-        data_source = set(data_source.split(";"))
-        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in data_source):
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -650,12 +653,11 @@ def get_query(request):
         else:
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
-            document_collection = data_source
 
-            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
+            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collections)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit,
+            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collections)), cache_hit,
                                                 len(result_ids),
                                                 query, opt_query)
 
@@ -712,7 +714,8 @@ def get_new_query(request):
 
     try:
         logging.debug(request)
-        data_source = str(request.GET.get("data_source", "").strip())
+        data_source_str = str(request.GET.get("data_source", "").strip())
+        document_collections = get_document_collections_from_data_source_string(data_source_str)
 
         req_entities = []
         if "entities" in request.GET:
@@ -770,7 +773,7 @@ def get_new_query(request):
 
         logging.info(f'Additional entities are {req_entities}')
         logging.info(f'Additional terms are {req_terms}')
-        logging.info("Selected data source is {}".format(data_source))
+        logging.info("Selected data source is {}".format(document_collections))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
@@ -786,7 +789,7 @@ def get_new_query(request):
             except:
                 pass
 
-        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -823,10 +826,8 @@ def get_new_query(request):
 
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
-            document_collection = data_source
 
-            results, cache_hit, time_needed = \
-                do_query_processing_with_caching(graph_query, document_collection)
+            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collections)
             #  result_ids = {r.document_id for r in results}
             # opt_query = QueryOptimizer.optimize_query(graph_query)
             #   View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
