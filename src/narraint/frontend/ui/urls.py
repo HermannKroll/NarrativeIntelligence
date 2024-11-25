@@ -5,13 +5,12 @@ from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_
     get_query_narrative_documents, get_narrative_documents, get_document_ids_for_entity, get_term_to_entity, \
     get_query_document_ids, post_subgroup_feedback, post_paper_view_log, \
     post_drug_ov_search_log, post_drug_ov_subst_href_log, post_drug_ov_chembl_phase_href_log, \
-    get_keywords, get_logs_data, get_new_query, get_keyword_search_request, get_explain_translation, \
+    get_keywords, get_logs_data, get_keyword_search_request, get_explain_translation, \
     post_drug_suggestion, get_clinical_trial_phases, get_last_db_update, get_data_sources, \
     get_explain_document, get_recommend, get_classifications
 
 urlpatterns = [
     path("query", get_query, name="query"),
-    path("new_query", get_new_query, name="new_query"),
     path("query_sub_count", get_query_sub_count, name="query_sub_count"),
     path("autocompletion", get_autocompletion, name="autocompletion"),
     path("check_query", get_check_query, name="check_query"),
