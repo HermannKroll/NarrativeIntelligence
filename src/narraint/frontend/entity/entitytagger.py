@@ -18,7 +18,7 @@ class EntityTagger(EntityIndexBase):
     """
     __instance = None
 
-    VERSION = 4
+    VERSION = 5
 
     def __new__(cls, load_index=True):
         if cls.__instance is None:
