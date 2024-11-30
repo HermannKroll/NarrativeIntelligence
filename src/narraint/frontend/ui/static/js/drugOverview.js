@@ -10,7 +10,8 @@ const overviews = {
     drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback},
-    tissue: {name: "Tissue", predicate: "associated", object: "?X(Tissue)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Tissue"]}
+    tissue: {name: "Tissue", predicate: "associated", object: "?X(Tissue)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Tissue"]},
+    celllines: {name: "Cell Lines", predicate: "associated", object: "CellLine", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["CellLine"]}
 }
 
 
