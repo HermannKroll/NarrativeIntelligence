@@ -7,10 +7,8 @@ import sys
 import traceback
 from collections import defaultdict
 from datetime import datetime
-from io import BytesIO
 from json import JSONDecodeError
 
-from PIL import Image
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
@@ -1025,8 +1023,9 @@ def post_report(request):
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)
-        img = Image.open(BytesIO(base64.b64decode(report_img_64[22:])))
-        img.save(os.path.join(report_path, "screenshot.png"), 'PNG')
+
+        with open(os.path.join(report_path, "screenshot.png"), "wb") as f:
+            f.write(base64.b64decode(report_img_64[22:]))
         return HttpResponse(status=200)
 
     except:
