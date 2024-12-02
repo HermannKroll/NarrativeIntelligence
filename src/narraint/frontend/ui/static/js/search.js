@@ -1422,7 +1422,7 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
 
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
-    divDoc_Body.append(divDocRecommenderLink);
+    // divDoc_Body.append(divDocRecommenderLink); // TODO deactivate for now
 
 
     let unique_div_id = "prov_" + uniqueProvenanceID;

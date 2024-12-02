@@ -32,10 +32,12 @@
             <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
+            <!--
             <li class="nav-item" onclick="setUpRecommenderSearch()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender
                     (Beta)</a>
             </li>
+            -->
         </ul>
 
         <div class="tab-content">
@@ -123,6 +125,7 @@
                 </div>
             </div>
             <!-- recommendation -->
+            <!--
             <div class="tab-pane fade" id="search-type-recommender">
                 <div class="row">
                     <div class="input-group">
@@ -131,7 +134,6 @@
 
                         <label for="input_collection"></label>
                         <select class="form-select col-2" id="input_collection">
-                            <!-- add options dynamically <option value="collection1">collection1</option>-->
                         </select>
 
                         <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center col-2"
@@ -144,6 +146,7 @@
                     <div class="alert alert-danger" style="display:none" id="alert_recommender" role="alert"></div>
                 </div>
             </div>
+            -->
         </div>
     </div>
 
@@ -762,8 +765,8 @@
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
 
-    <script src="{% static 'js/search.js' %}?version=36" type="text/javascript"></script>
-    <script src="{% static 'js/paper.js' %}?version=20" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=37" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=21" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
