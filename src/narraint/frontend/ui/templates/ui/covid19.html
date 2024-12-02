@@ -283,6 +283,8 @@
         document.onmsfullscreenchange = fsCloseAction;
 
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        activateOverviewTracking();
     </script>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
