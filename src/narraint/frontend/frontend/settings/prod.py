@@ -15,9 +15,10 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "134.169.32.177",
     "www.narrative.pubpharm.de",
-    "narrative.pubpharm.de"
+    "narrative.pubpharm.de",
+    "drugoverviews.pubpharm.de",
+    "drugoverview.pubpharm.de"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
