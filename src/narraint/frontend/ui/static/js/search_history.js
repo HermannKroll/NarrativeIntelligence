@@ -59,13 +59,20 @@ function historyToTableRow(entry) {
                 restrictionText += "<strong>Title-Filter</strong>: " + titleFilter.toString() + "<br>";
 
             if (useSysReview)
-                restrictionText += "<strong>Other</strong>: " + "systematic review" + "<br>"
+                restrictionText += "<strong>Other</strong>: systematic review<br>"
         }
 
-        if (filterOptions.use_classification)
-            restrictionText += "<strong>Other</strong>: " + "pharm. technology" + "<br>"
-        // further restrictions / filter options
+        if (filterOptions.classification_filter !== undefined && filterOptions.classification_filter.length > 0) {
+            const classifications = filterOptions.classification_filter.split(";");
+            for (const i in classifications)
+                restrictionText += "<strong>Other</strong>: " + classifications[i] + "<br>";
+        }
 
+        if (filterOptions.state === "recommend")
+            restrictionText += "recommended documents<br>"
+        // insert further restrictions / filter options
+
+        // remove the break at the end
         restrictionText = restrictionText.replace(/<br>$/i, "");
         restrictionCell.innerHTML = restrictionText;
         tableRow.appendChild(restrictionCell);

@@ -32,6 +32,12 @@
             <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
+            <!--
+            <li class="nav-item" onclick="setUpRecommenderSearch()">
+                <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender
+                    (Beta)</a>
+            </li>
+            -->
         </ul>
 
         <div class="tab-content">
@@ -118,6 +124,29 @@
                     </div>
                 </div>
             </div>
+            <!-- recommendation -->
+            <!--
+            <div class="tab-pane fade" id="search-type-recommender">
+                <div class="row">
+                    <div class="input-group">
+                        <input type="text" class="form-control col-8" id="recommender_input"
+                               placeholder="enter pmid and press enter  (e.g. 37924788)">
+
+                        <label for="input_collection"></label>
+                        <select class="form-select col-2" id="input_collection">
+                        </select>
+
+                        <button class="btn btn-primary d-flex flex-row flex-nowrap justify-content-center align-items-center col-2"
+                                type="submit" id="btn_recommender" onclick="recommenderSearch()">Search
+                        </button>
+                    </div>
+                    <p id="help_recommend" class="form-text text-muted" aria-describedby="btn_recommender">
+                        Please be patient. This process can take up to one minute.
+                    </p>
+                    <div class="alert alert-danger" style="display:none" id="alert_recommender" role="alert"></div>
+                </div>
+            </div>
+            -->
         </div>
     </div>
 
@@ -207,7 +236,7 @@
     </div>
 
     <div class="container">
-        <div class="row">
+        <div class="row" id="exampleQueries">
             <div class="accordion" id="accordionExample">
                 <div class="card mb-3">
                     <div class="card-header text-center" id="headingOne">
@@ -474,26 +503,32 @@
                     </div>
 
                     <!-- Visualization Buttons -->
-                    <div class="row m-1 align-items-center">
+                    <div class="row m-1 align-items-center" id="visualization_filter">
                         <label><strong>Visualization by:</strong></label>
 
-                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                               value="outer_ranking_substitution" class="col-1"
-                               checked="checked" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_outer_ranking_a">
-                            Substitution</label>
+                        <div class="d-flex align-items-center">
+                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                                   value="outer_ranking_substitution" class="me-2"
+                                   checked="checked" onclick="refreshSearch()">
+                            <label for="radio_outer_ranking_a">
+                                Substitution
+                            </label>
+                        </div>
 
-                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="col-1"
-                               value="outer_ranking_ontology" onclick="refreshSearch()">
-                        <label class="col-11" for="radio_outer_ranking_b">
-                            MeSH-Taxonomy</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="me-2"
+                                   value="outer_ranking_ontology" onclick="refreshSearch()">
+                            <label for="radio_outer_ranking_b">
+                                MeSH-Taxonomy
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="row m-1 align-items-center">
-                        <label><strong>Classifications:</strong></label>
-                        <input type="checkbox" name="checkbox_classification" id="checkbox_classification"
-                               onclick="refreshSearch()" class="col-1">
-                        <label class="col-11" for="checkbox_classification">Pharm. Technology</label>
+
+                    <div class="row m-1 align-items-center" id="classification-filter">
+                        <label>
+                            <strong>Classifications:</strong>
+                        </label>
                     </div>
 
                     <div class="row m-1 align-items-center">
@@ -510,6 +545,7 @@
             <!-- right column: results table -->
             <div class="col">
                 <div id="resultdiv">
+                    <div class="row" id="document_preview"></div>
                     <div class="row">
                         <div class="col-12">
                             <h2 id="document_header">Results:
@@ -531,7 +567,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4" id="sorting_year_container">
                             <select class="form-select w-100" id="select_sorting_year"
                                     style="width: auto; display: none">
                                 <option selected value="True">Latest Publications First</option>
@@ -729,12 +765,13 @@
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
 
-    <script src="{% static 'js/search.js' %}?version=32" type="text/javascript"></script>
-    <script src="{% static 'js/paper.js' %}?version=19" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=37" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=21" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
+    <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
@@ -745,6 +782,7 @@
         const feedback_url = "{% url 'feedback' %}";
         const subgroup_feedback_url = "{% url 'subgroup_feedback' %}";
         const provenance_url = "{% url 'provenance' %}";
+        const explain_document_url = "{% url 'explain_document' %}";
         const report_url = "{% url 'report' %}";
         const document_clicked_url = "{% url 'document_clicked' %}";
         const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png'  %}";
@@ -755,7 +793,9 @@
         const url_paper_view_log = "{% url 'paper_view_log' %}";
         const explain_translation_url = "{% url 'explain_translation' %}";
         const url_keyword_search_request = "{% url 'keyword_search_request' %}";
+        const url_recommender_search = "{% url 'recommend' %}"
         const url_available_collections = "{% url 'document_collections' %}"
+        const url_available_classifications = "{% url 'document_classifications' %}"
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";
@@ -770,5 +810,6 @@
 
         const historyQueryKey = "query";
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        activateSearchTracking();
     </script>
 {% endblock %}

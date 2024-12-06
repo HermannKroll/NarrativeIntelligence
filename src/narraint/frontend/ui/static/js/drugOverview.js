@@ -10,7 +10,8 @@ const overviews = {
     drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
     adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback},
-    tissue: {name: "Tissue", predicate: "associated", object: "?X(Tissue)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Tissue"]}
+    tissue: {name: "Tissue", predicate: "associated", object: "?X(Tissue)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Tissue"]},
+    celllines: {name: "Cell Lines", predicate: "associated", object: "CellLine", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["CellLine"]}
 }
 
 
@@ -193,8 +194,10 @@ async function setDrugData(entity_name) {
             document.getElementById('drug_inchi').innerText = "-";
         })
         .finally(() => {
-            let chembl_link = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
-            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chembl_link + '" target="_blank">' + currentChemblID + '</a>';
+            const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
+            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            const pubchemLink = "https://pubchem.ncbi.nlm.nih.gov/compound/" + currentDrugName;
+            document.getElementById('drug_pubchem').innerHTML = '<a href="' + pubchemLink + '" target="_blank">' + decodeURI(currentDrugName) + '</a>'
         })
 }
 

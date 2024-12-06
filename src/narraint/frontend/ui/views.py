@@ -7,10 +7,8 @@ import sys
 import traceback
 from collections import defaultdict
 from datetime import datetime
-from io import BytesIO
 from json import JSONDecodeError
 
-from PIL import Image
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
@@ -39,8 +37,10 @@ from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.logger import QueryLogger
 from narraint.queryengine.optimizer import QueryOptimizer
 from narraint.queryengine.query import GraphQuery
+from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
+from narraint.recommender.recommendation import RecommendationSystem
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -74,6 +74,7 @@ class View:
             cls.explainer = EntityExplainer()
             cls.keyword2graph = Keyword2GraphTranslation()
             cls.corpus = DocumentCorpus()
+            cls.recommender = RecommendationSystem()
         return cls._instance
 
 
@@ -102,7 +103,11 @@ def get_document_graph(request):
                                            for s in indexed_document.extracted_statements]
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
+            sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
+            sentence_id2text = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
+
             facts = defaultdict(set)
+            facts2text = dict()
             facts2score = dict()
             nodes = set()
             # translate + aggregate edges
@@ -131,6 +136,9 @@ def get_document_graph(request):
                             facts2score[so_key] = score
                         nodes.add(subject_name)
                         nodes.add(object_name)
+
+                    # Map the fact to the corresponding sentence text
+                    facts2text[so_key] = sentence_id2text[stmt.sentence_id]
                 except Exception:
                     pass
 
@@ -145,7 +153,7 @@ def get_document_graph(request):
                         continue
                     p_txt.append(p)
                 p_txt = '|'.join([pt for pt in p_txt])
-                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)]))
+                scored_results.append(dict(s=s, p=p_txt, o=o, score=facts2score[(s, o)], text=facts2text[(s, o)]))
             # sort results by score descending
             scored_results.sort(key=lambda x: x["score"], reverse=True)
             logging.info(f'Querying document graph for document id: {document_id} - {len(facts)} facts found')
@@ -242,11 +250,11 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
-def do_query_processing_with_caching(graph_query: GraphQuery, document_collection: set):
+def do_query_processing_with_caching(graph_query: GraphQuery, document_collections: set):
     cache_hit = False
     cached_results = None
     start_time = datetime.now()
-    collection_string = "-".join(sorted(document_collection))
+    collection_string = "-".join(sorted(document_collections))
     if DO_CACHING:
         try:
             cached_results = View().cache.load_result_from_cache(collection_string, graph_query)
@@ -261,7 +269,7 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
     else:
         # run query
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter=document_collection)
+                                                           document_collection_filter=document_collections)
         cache_hit = False
         if DO_CACHING:
             try:
@@ -297,7 +305,7 @@ def get_query_narrative_documents(request):
     try:
         time_start = datetime.now()
         # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        results, _, _ = do_query_processing_with_caching(graph_query, {document_collection})
         result_ids = {r.document_id for r in results}
         # get narrative documents
         session = SessionExtended.get()
@@ -336,7 +344,7 @@ def get_query_document_ids(request):
     try:
         time_start = datetime.now()
         # compute the query
-        results, _, _ = do_query_processing_with_caching(graph_query, document_collection)
+        results, _, _ = do_query_processing_with_caching(graph_query, {document_collection})
         result_ids = sorted(list({r.document_id for r in results}))
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                            time_needed=datetime.now() - time_start)
@@ -524,6 +532,10 @@ def get_document_ids_for_entity(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
+def get_document_collections_from_data_source_string(data_source: str) -> [str]:
+    return set(data_source.split(";"))
+
+
 # invokes Django to compress the results
 @gzip_page
 def get_query(request):
@@ -541,7 +553,8 @@ def get_query(request):
 
     try:
         query = str(request.GET.get("query", "").strip())
-        data_source = str(request.GET.get("data_source", "").strip())
+        data_source_str = str(request.GET.get("data_source", "").strip())
+        document_collections = get_document_collections_from_data_source_string(data_source_str)
         if "outer_ranking" in request.GET:
             outer_ranking = str(request.GET.get("outer_ranking", "").strip())
         else:
@@ -612,7 +625,7 @@ def get_query(request):
 
         # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
         logging.info(f'Query string is: {query}')
-        logging.info("Selected data source is {}".format(data_source))
+        logging.info("Selected data source is {}".format(document_collections))
         logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
@@ -620,8 +633,7 @@ def get_query(request):
             query)
         year_aggregation = {}
 
-        data_source = set(data_source.split(";"))
-        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in data_source):
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
             results_converted = []
             query_trans_string = "Data source is unknown"
             logger.error('parsing error')
@@ -640,12 +652,12 @@ def get_query(request):
         else:
             logger.info(f'Translated Query is: {str(graph_query)}')
             valid_query = True
-            document_collection = data_source
 
-            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collection)
+            results, cache_hit, time_needed = do_query_processing_with_caching(graph_query, document_collections)
             result_ids = {r.document_id for r in results}
             opt_query = QueryOptimizer.optimize_query(graph_query)
-            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collection)), cache_hit, len(result_ids),
+            View().query_logger.write_query_log(time_needed, "-".join(sorted(document_collections)), cache_hit,
+                                                len(result_ids),
                                                 query, opt_query)
 
             results = TitleFilter.filter_documents(results, title_filter)
@@ -687,174 +699,11 @@ def get_query(request):
                  query_limit_hit="False"))
 
 
-# invokes Django to compress the results
-@gzip_page
-def get_new_query(request):
-    results_converted = []
-    is_aggregate = False
-    valid_query = False
-    query_limit_hit = False
-    query_trans_string = ""
-    if "data_source" not in request.GET:
-        View().query_logger.write_api_call(False, "get_new_query", str(request))
-        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
-
-    try:
-        logging.debug(request)
-        data_source = str(request.GET.get("data_source", "").strip())
-
-        req_entities = []
-        if "entities" in request.GET:
-            req_ent_str = str(request.GET.get("entities", "").strip())
-            if req_ent_str:
-                req_entities = req_ent_str.split(";")
-
-        req_terms = []
-        if "terms" in request.GET:
-            req_term_str = str(request.GET.get("terms", "").strip())
-            if req_term_str:
-                req_terms = req_term_str.split(";")
-
-        if "outer_ranking" in request.GET:
-            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
-        else:
-            outer_ranking = "outer_ranking_substitution"
-
-        if "start_pos" in request.GET:
-            start_pos = request.GET.get("start_pos").strip()
-            try:
-                start_pos = int(start_pos)
-            except ValueError:
-                start_pos = None
-        else:
-            start_pos = None
-        if "end_pos" in request.GET:
-            end_pos = request.GET.get("end_pos").strip()
-            try:
-                end_pos = int(end_pos)
-            except ValueError:
-                end_pos = None
-        else:
-            end_pos = None
-
-        if "freq_sort" in request.GET:
-            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
-            if freq_sort_desc == 'False':
-                freq_sort_desc = False
-            else:
-                freq_sort_desc = True
-        else:
-            freq_sort_desc = True
-
-        if "year_sort" in request.GET:
-            year_sort_desc = str(request.GET.get("year_sort", "").strip())
-            if year_sort_desc == 'False':
-                year_sort_desc = False
-            else:
-                year_sort_desc = True
-        else:
-            year_sort_desc = True
-
-        # inner_ranking = str(request.GET.get("inner_ranking", "").strip())
-
-        logging.info(f'Additional entities are {req_entities}')
-        logging.info(f'Additional terms are {req_terms}')
-        logging.info("Selected data source is {}".format(data_source))
-        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
-        # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
-        time_start = datetime.now()
-        year_aggregation = {}
-        graph_query = GraphQuery()
-        query = ""
-        if "query" in request.GET:
-            query = str(request.GET.get("query", "").strip())
-            logging.info(f'Query string is: {query}')
-            try:
-                graph_query, query_trans_string = View().translation \
-                    .convert_query_text_to_fact_patterns(query)
-            except:
-                pass
-
-        if data_source not in ["LitCovid", "LongCovid", "PubMed", "ZBMed"]:
-            results_converted = []
-            query_trans_string = "Data source is unknown"
-            logger.error('parsing error')
-        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
-            query_trans_string = "Outer ranking strategy is unknown"
-            logger.error('parsing error')
-        elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
-                graph_query) > 1:
-            results_converted = []
-            nt_string = ""
-            query_trans_string = "Do not support multiple variables in an ontology-based ranking"
-            logger.error("Do not support multiple variables in an ontology-based ranking")
-        else:
-            if not graph_query:
-                graph_query = GraphQuery()
-
-            # search for all documents containing all additional entities
-            for re in req_entities:
-                try:
-                    entities = View().translation.convert_text_to_entity(re)
-                    should_add = True
-                    for e in entities:
-                        if e.entity_id.startswith('?'):
-                            logging.debug('Variable detected in entities - not supported at the moment (ignoring)')
-                            should_add = False
-                            break
-                    if should_add:
-                        graph_query.add_entity(list(entities))
-                except ValueError:
-                    logging.debug(f'No conversion found for {re}')
-
-            for term in req_terms:
-                graph_query.add_term(term)
-
-            logger.info(f'Translated Query is: {str(graph_query)}')
-            valid_query = True
-            document_collection = data_source
-
-            results, cache_hit, time_needed = \
-                do_query_processing_with_caching(graph_query, document_collection)
-            #  result_ids = {r.document_id for r in results}
-            # opt_query = QueryOptimizer.optimize_query(graph_query)
-            #   View().query_logger.write_query_log(time_needed, document_collection, cache_hit, len(result_ids),
-            #                                                query, opt_query)
-            results_converted = []
-            if outer_ranking == 'outer_ranking_substitution':
-                substitution_aggregation = ResultTreeAggregationBySubstitution()
-                sorted_var_names = graph_query.get_var_names_in_order()
-                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
-                                                                                     freq_sort_desc, year_sort_desc,
-                                                                                     start_pos, end_pos)
-                results_converted = results_ranked.to_dict()
-            elif outer_ranking == 'outer_ranking_ontology':
-                substitution_ontology = ResultAggregationByOntology()
-                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
-                                                                                  year_sort_desc)
-                results_converted = results_ranked.to_dict()
-
-        View().query_logger.write_api_call(True, "get_new_query", str(request),
-                                           time_needed=datetime.now() - time_start)
-        return JsonResponse(
-            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
-                 query_translation=query_trans_string,
-                 query_limit_hit="False"))
-    except Exception:
-        View().query_logger.write_api_call(False, "get_new_query", str(request))
-        query_trans_string = "keyword query cannot be converted (syntax error)"
-        traceback.print_exc(file=sys.stdout)
-        return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, query_limit_hit="False"))
-
-
 def get_provenance(request):
     if "prov" in request.GET and "document_id" in request.GET and "data_source" in request.GET:
         try:
             document_id = str(request.GET["document_id"]).strip()
             document_collection = str(request.GET["data_source"]).strip()
-            time_start = datetime.now()
-
             start = datetime.now()
             fp2prov_ids = json.loads(str(request.GET.get("prov", "").strip()))
             result = QueryEngine.query_provenance_information(fp2prov_ids)
@@ -877,6 +726,32 @@ def get_provenance(request):
             return HttpResponse(status=500)
     else:
         View().query_logger.write_api_call(False, "get_provenance", str(request))
+        return HttpResponse(status=500)
+
+
+def get_explain_document(request):
+    required_parameters = {"document_id", "query", "document_collection"}
+    try:
+        if not required_parameters.issubset(request.GET.keys()):
+            View().query_logger.write_api_call(False, "get_explain_document", str(request))
+            return HttpResponse(status=500)
+        start = datetime.now()
+
+        document_id = str(request.GET.get("document_id", "")).strip()
+        document_collection = str(request.GET.get("document_collection", "")).strip()
+        query = str(request.GET.get("query", "").strip())
+        variables = ""
+        if "variables" in request.GET:
+            variables = request.GET.get("variables", "")
+
+        graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
+        result = QueryEngine.explain_document(document_id, document_collection, graph_query,
+                                              variables)
+        View().query_logger.write_api_call(True, "get_explain_document", str(request), start - datetime.now())
+        return JsonResponse(dict(result=result.to_dict()))
+
+    except Exception:
+        View().query_logger.write_api_call(False, "get_explain_document", str(request))
         return HttpResponse(status=500)
 
 
@@ -1148,8 +1023,9 @@ def post_report(request):
         os.makedirs(report_path, exist_ok=True)
         with open(os.path.join(report_path, "description.txt"), "w+") as f:
             f.write(report_description)
-        img = Image.open(BytesIO(base64.b64decode(report_img_64[22:])))
-        img.save(os.path.join(report_path, "screenshot.png"), 'PNG')
+
+        with open(os.path.join(report_path, "screenshot.png"), "wb") as f:
+            f.write(base64.b64decode(report_img_64[22:]))
         return HttpResponse(status=200)
 
     except:
@@ -1439,3 +1315,136 @@ def get_data_sources(request):
         return JsonResponse(status=200, data=dict(data_sources=available_data_sources))
     except Exception:
         return HttpResponse(status=500)
+
+
+def get_classifications(request):
+    try:
+        available_classifications = ClassificationFilter.get_available_classifications()
+        return JsonResponse(status=200, data=dict(classifications=available_classifications))
+    except Exception:
+        return HttpResponse(status=500)
+
+
+def get_recommend(request):
+    results_converted = []
+    is_aggregate = False
+    valid_query = False
+    query_trans_string = ""
+    if "query" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="document_id parameter is missing"))
+    if "query_col" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="document_collection parameter is missing"))
+    if "data_source" not in request.GET:
+        View().query_logger.write_api_call(False, "get_query", str(request))
+        return JsonResponse(status=500, data=dict(reason="data_source parameter is missing"))
+    try:
+        if not request.GET.keys():
+            return HttpResponse(status=500)
+
+        document_id = int(request.GET.get("query", ""))
+        query_collection = request.GET.get("query_col", "")
+        query_trans_string = document_id
+        document_collections = request.GET.get("data_source", "")
+
+        if "outer_ranking" in request.GET:
+            outer_ranking = str(request.GET.get("outer_ranking", "").strip())
+        else:
+            outer_ranking = "outer_ranking_substitution"
+
+        year_start = None
+        if "year_start" in request.GET:
+            year_start = str(request.GET.get("year_start", "").strip())
+            try:
+                year_start = int(year_start)
+            except ValueError:
+                year_start = None
+
+        year_end = None
+        if "year_end" in request.GET:
+            year_end = str(request.GET.get("year_end", "").strip())
+            try:
+                year_end = int(year_end)
+            except ValueError:
+                year_end = None
+
+        title_filter = None
+        if "title_filter" in request.GET:
+            title_filter = str(request.GET.get("title_filter", "").strip())
+
+        classification_filter = None
+        if "classification_filter" in request.GET:
+            classification_filter = str(request.GET.get("classification_filter", "").strip())
+            if classification_filter:
+                classification_filter = classification_filter.split(';')
+            else:
+                classification_filter = None
+
+        logging.info("Selected data source is {}".format(document_collections))
+        logging.info('Strategy for outer ranking: {}'.format(outer_ranking))
+        time_start = datetime.now()
+        year_aggregation = {}
+        document_collections = set(document_collections.split(";"))
+        if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
+            results_converted = []
+            query_trans_string = "Data source is unknown"
+            logger.error('parsing error')
+        elif outer_ranking not in ["outer_ranking_substitution", "outer_ranking_ontology"]:
+            query_trans_string = "Outer ranking strategy is unknown"
+            logger.error('parsing error')
+        else:
+            valid_query = True
+            logging.debug(f'Performing paper recommendation for document id {document_id}, '
+                          f'query collection {query_collection} and document collections {document_collections}')
+
+            json_data = View().recommender.apply_recommendation(document_id, query_collection, document_collections)
+
+            results = []
+            graph_data = dict()
+            for d in json_data:
+                results.append(QueryDocumentResult(document_id=d["docid"],
+                                                   title=d["title"],
+                                                   authors=d["authors"],
+                                                   journals=d["journals"],
+                                                   publication_year=d["year"],
+                                                   publication_month=d["month"],
+                                                   var2substitution={},
+                                                   confidence=1.0,
+                                                   position2provenance_ids={},
+                                                   org_document_id=d["org_document_id"],
+                                                   doi=d["doi"],
+                                                   document_collection=d["collection"]))
+                graph_data[d["docid"]] = d["graph_data"]
+
+            # do filtering stuff
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            results = TitleFilter.filter_documents(results, title_filter)
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            result_list = QueryDocumentResultList()
+            for r in results:
+                result_list.add_query_result(r)
+
+            results_converted = result_list.to_dict()
+            for idx, entry in enumerate(results_converted["r"]):
+                entry["graph_data"] = graph_data[entry["docid"]]
+
+        View().query_logger.write_api_call(True, "get_recommendation", str(request),
+                                           time_needed=datetime.now() - time_start)
+
+        return JsonResponse(dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
+                                 query_translation=query_trans_string, year_aggregation=year_aggregation,
+                                 query_limit_hit="False"))
+
+
+    except Exception:
+        View().query_logger.write_api_call(False, "get_recommend", str(request))
+        error_msg = "recommendation can not be applied"
+        traceback.print_exc(file=sys.stdout)
+        return JsonResponse(
+            dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
+                 query_limit_hit="False"))

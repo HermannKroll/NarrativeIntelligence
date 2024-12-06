@@ -1,28 +1,10 @@
 let latest_valid_query = '';
 let latest_query_translation = '';
-let DEFAULT_RESULT_DIVS_LIMIT = 500;
+let variables2entity = {};
+let cardBodyHierarchy = {}
 let DEFAULT_AGGREGATED_RESULTS_PER_PAGE = 30;
 let MAX_SHOWN_ELEMENTS = DEFAULT_AGGREGATED_RESULTS_PER_PAGE;
-
-let CYTOSCAPE_STYLE = [
-    {
-        selector: 'node',
-        style: {
-            'background-color': '#8EB72B',
-            'label': 'data(id)'
-        }
-    },
-    {
-        selector: 'edge',
-        style: {
-            'width': 3,
-            'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
-            'target-arrow-shape': 'triangle',
-            'label': 'data(label)'
-        }
-    }
-];
+let current_search_method = 'query_builder';
 
 const YEAR_RESULT_FILTER_CONFIG = {
     scales: {
@@ -326,7 +308,11 @@ function refreshSearch(fromUrl = false) {
         if (fromUrl === false) {
             setCurrentPage(0);
         }
-        document.getElementById("btn_search").click();
+        if (current_search_method === 'recommender') {
+            recommenderSearch();
+        } else {
+            document.getElementById("btn_search").click();
+        }
     }
 }
 
@@ -353,7 +339,7 @@ async function openFeedback() {
     $("#feedback_button").addClass("disabled")
     await new Promise(r => setTimeout(r, 10));
     const screenshotTarget = document.body;
-    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging:false})
+    let canvas = await html2canvas(screenshotTarget, {scrollX: 0, scrollY: 0, logging: false})
 
     const base64image = canvas.toDataURL("image/png");
     let screenshot = $("#screenshot")
@@ -410,8 +396,8 @@ function closeFeedback(send = false) {
         let combineCanvas = document.createElement("canvas");
         let dim = document.getElementById('screenshotCanvas');
         // resize if the screenwidth is larger than 1920px
-        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH: dim.width;
-        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width): dim.height;
+        const targetWidth = (dim.width > MAX_WIDTH) ? MAX_WIDTH : dim.width;
+        const targetHeight = (dim.width > MAX_WIDTH) ? dim.height * (MAX_WIDTH / dim.width) : dim.height;
 
         combineCanvas.width = targetWidth;
         combineCanvas.height = targetHeight;
@@ -451,9 +437,9 @@ const reset_scanvas = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-const setButtonSearching = isSearching => {
-    let btn = $('#btn_search');
-    let help = $('#help_search');
+const setButtonSearching = (isSearching, buttonId, helpId) => {
+    let btn = $(`#${buttonId}`);
+    let help = $(`#${helpId}`);
     btn.empty();
 
     if (isSearching) {
@@ -476,17 +462,22 @@ $(document).on('keydown', function (e) {
     }
 })
 
-$(document).ready(function () {
+$(document).ready(async function () {
     initializeExplanationPopover();
 
     $("#input_title_filter").on('keyup', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
-            search(e);
+            if (current_search_method === "recommender") {
+                recommenderSearch();
+            } else {
+                search(e);
+            }
         }
     });
 
     buildSelectionTrees();
-    buildDocumentCollectionFilter();
+    await buildDocumentCollectionFilter();
+    await buildDocumentClassificationFilter();
 
     $("#search_form").submit(search);
 
@@ -567,15 +558,19 @@ $(document).ready(function () {
         pageUpdated();
     });
 
-    // Try to initialize from search url parameters if possible
     initFromURLQueryParams();
 });
 
+function switchTab(tabId) {
+    const tabLink = document.querySelector(`a[href="${tabId}"]`);
+    if (tabLink) {
+        tabLink.click();
+    }
+}
 
 function initFromURLQueryParams() {
     const url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
-
     if (params.has("visualization")) {
         let visualization = params.get("visualization");
         if (visualization === "outer_ranking_substitution") {
@@ -602,10 +597,15 @@ function initFromURLQueryParams() {
         let dataSources = dataSourceStr.split(";");
 
         for (let i in dataSources) {
-            document.getElementById("filter_" + dataSources[i]);
+            document.getElementById("filter_" + dataSources[i]).checked = true;
         }
+    }
 
-        lastDataSource = dataSourceStr;
+    if (params.has("classification_filter")) {
+        const classifications = params.get("classification_filter").split(";");
+        for (let i in classifications) {
+            document.getElementById("filter_" + classifications[i]).checked = true;
+        }
     }
 
     if (params.has("start_pos")) {
@@ -625,13 +625,19 @@ function initFromURLQueryParams() {
         }
         document.getElementById("input_title_filter").value = titleFilter;
     }
-    if (params.has("classification_filter")) {
-        document.getElementById("checkbox_classification").checked = true;
-    }
+
+    const search_method = params.get("search_method");
+
     if (params.has("query")) {
         let query = params.get("query");
         lastQuery = query;
-        initQueryBuilderFromString(query);
+        if (search_method === "recommender") {
+            let query_col = params.get("query_col");
+            initRecommendSearchFromURL(query, query_col);
+        } else {
+            switchTab("#search-type-query");
+            initQueryBuilderFromString(query);
+        }
     }
 }
 
@@ -693,12 +699,12 @@ const search = (event) => {
     // Todo: hardfix at the moment
     // resetKeywordSearch();
     const parameters = getInputParameters(query);
-    setButtonSearching(true);
+    setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
 
     submitSearch(parameters)
-        .finally(() => setButtonSearching(false));
+        .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
 
 /**
@@ -723,10 +729,9 @@ function submitSearch(parameters) {
  * @returns {string}
  */
 function createURLParameterString(parameters) {
-    return Object.entries(parameters).map(([key, value]) => {
-        if (value === undefined || value === null) {
-            return;
-        }
+    return Object.entries(parameters).filter(([_, value]) => {
+        return !(value === undefined || value === null || value === "");
+    }).map(([key, value]) => {
         return key.toString() + "=" + value.toString();
     }).join("&");
 }
@@ -737,8 +742,13 @@ function createURLParameterString(parameters) {
  */
 function updateURLParameters(parameters) {
     const url = new URL(window.location.href);
-    url.searchParams.set('query',  parameters["query"]);
-    url.searchParams.set("data_source",  parameters["data_source"]);
+    url.searchParams.set('query', parameters["query"]);
+    url.searchParams.set("data_source", parameters["data_source"]);
+    if (parameters["query_col"]) {
+        url.searchParams.set("query_col", parameters["query_col"]);
+    } else {
+        url.searchParams.delete("query_col");
+    }
     if (parameters["outer_ranking"] !== "outer_ranking_substitution") {
         url.searchParams.set("visualization", parameters["outer_ranking"]);
     } else {
@@ -774,6 +784,7 @@ function updateURLParameters(parameters) {
     } else {
         url.searchParams.delete("year_end");
     }
+
     if (parameters["use_sys_review"]) {
         if (!parameters["title_filter"].includes("systemat review")) {
             if (parameters["title_filter"].length > 0)
@@ -783,17 +794,25 @@ function updateURLParameters(parameters) {
     } else {
         parameters["title_filter"] = parameters["title_filter"].replace("systemat review", "");
     }
+
     if (parameters["title_filter"].length > 0) {
         url.searchParams.set("title_filter", parameters["title_filter"]);
     } else {
         url.searchParams.delete("title_filter");
     }
 
-    if (parameters["use_classification"]) {
-        url.searchParams.set("classification_filter", "PharmaceuticalTechnology");
-        parameters["classification_filter"] = "PharmaceuticalTechnology";
+    // classifications
+    if (parameters["classification_filter"].length > 0) {
+        url.searchParams.set("classification_filter", parameters["classification_filter"]);
     } else {
         url.searchParams.delete("classification_filter");
+        parameters["classification_filter"] = undefined;
+    }
+
+    if (parameters["search_method"]) {
+        url.searchParams.set("search_method", parameters["search_method"]);
+    } else {
+        url.searchParams.delete("title_filter");
     }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 }
@@ -804,6 +823,9 @@ function updateURLParameters(parameters) {
  */
 function logInputParameters(parameters) {
     let message = "Query                      : " + parameters["query"] + "\n";
+    if (parameters["query_col"]) {
+        message += "Query Collection           : " + parameters["query_col"] + "\n";
+    }
     message += "Data source                : " + parameters["data_source"] + "\n";
     message += "Outer Ranking              : " + parameters["outer_ranking"] + "\n";
     message += "Inner Ranking              : " + parameters["inner_ranking"] + "\n";
@@ -814,27 +836,21 @@ function logInputParameters(parameters) {
     message += "Start year                 : " + parameters["year_start"] + "\n";
     message += "End year                   : " + parameters["year_end"] + "\n";
     message += "Title filter               : " + parameters["title_filter"] + "\n";
-    message += "Classification             : " + parameters["use_classification"] + "\n";
+    message += "Classification Filter      : " + parameters["classification_filter"] + "\n";
     message += "Systematic Review          : " + parameters["use_sys_review"] + "\n";
     console.log(message);
 }
 
+
 /**
- * Function stores all necessary values of each input filter into one object.
- * @param query {string} formatted query string
- * @returns {{}} object of each filter input element
+ * Function gets all selected data sources and returns them as a list. If no data source
+ * is available, `PubMed` is returned as default.
+ * @returns {String[]} list of data sources
  */
-function getInputParameters(query) {
-    const obj = {};
-
-    obj["query"] = query;
-    adjustSelectedPage(obj);
-    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
-    obj["year_sort"] = document.getElementById("select_sorting_year").value;
-
+function getSelectedDataSources() {
     let dataSource = [];
     let dataSourceChildren = document.getElementById("collection-filter").children;
-    console.log(dataSourceChildren)
+
     for (let i in dataSourceChildren) {
         const child = dataSourceChildren.item(i);
         const name = child["name"] || "";
@@ -847,13 +863,67 @@ function getInputParameters(query) {
         dataSource.push(dataSourceString);
     }
     if (dataSource.length === 0) {
-        if(document.getElementById("filter_PubMed") !== null){
+        if (document.getElementById("filter_PubMed") !== null) {
             document.getElementById("filter_PubMed").checked = true;
         }
         dataSource.push("PubMed");
     }
+    return dataSource;
+}
 
-    obj["data_source"] = dataSource.join(";");
+
+function getSelectedClassifications() {
+    let classifications = [];
+    let classificationChildren = document.getElementById("classification-filter").children;
+
+    for (let i in classificationChildren) {
+        const child = classificationChildren.item(i);
+        const name = child["name"] || "";
+        const checked = child["checked"] || false;
+
+        if (name !== "classification" || !checked)
+            continue;
+
+        const classificationString = child["id"].split("_")[1];
+        classifications.push(classificationString);
+    }
+    return classifications;
+}
+
+
+function resetClassificationFilter() {
+    let classificationChildren = document.getElementById("classification-filter").children;
+
+    for (let i in classificationChildren) {
+        const child = classificationChildren.item(i);
+        const name = child["name"] || "";
+
+        if (name !== "classification")
+            continue;
+
+        child["checked"] = false;
+    }
+}
+
+
+/**
+ * Function stores all necessary values of each input filter into one object.
+ * @param query {string} formatted query string
+ * @returns {{}} object of each filter input element
+ */
+function getInputParameters(query) {
+    const obj = {};
+    obj["query"] = query;
+    if (current_search_method === "recommender") {
+        const collectionInput = document.getElementById('input_collection');
+        obj["query_col"] = collectionInput.options[collectionInput.selectedIndex].value;
+    }
+    adjustSelectedPage(obj);
+    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
+    obj["year_sort"] = document.getElementById("select_sorting_year").value;
+
+    const dataSources = getSelectedDataSources();
+    obj["data_source"] = dataSources.join(";");
 
     obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]').value;
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
@@ -861,19 +931,22 @@ function getInputParameters(query) {
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
     if (latest_valid_query === query) {
+        // same query requested
         // add year filter params only if the filter already contains valid years (of the current search)
         obj["year_start"] = document.querySelector("#fromSlider").value;
         obj["year_end"] = document.querySelector("#toSlider").value;
-    } else {
-        // remove filter if the query contains a new search
-        document.getElementById("checkbox_classification").checked = false;
+    } else if (latest_valid_query !== "") {
+        // old query visualized but new query requested
+        // therefore, remove every filter
+        resetClassificationFilter();
         document.getElementById("checkbox_sys_review").checked = false;
     }
 
-    obj["use_classification"] = document.getElementById("checkbox_classification").checked;
-    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
+    const classifications = getSelectedClassifications();
+    obj["classification_filter"] = classifications.join(";");
 
-    obj["classification_filter"] = null;
+    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
+    obj["search_method"] = current_search_method;
     return obj;
 }
 
@@ -979,7 +1052,12 @@ function showResults(response, parameters) {
     }
     updateYearFilter(response["year_aggregation"], query_trans_string);
     updateExplanationPopover();
-    latest_query_translation = query_trans_string.split("----->")[0].trim();
+    if (current_search_method === "recommender") {
+        latest_query_translation = query_trans_string;
+    } else {
+        latest_query_translation = query_trans_string.split("----->")[0].trim();
+    }
+
     saveHistoryEntry({size: result_size, filterOptions: parameters});
 }
 
@@ -1003,9 +1081,16 @@ function updateYearFilter(year_aggregation, query_trans_string) {
         xValues.push(year);
         yValues.push(year_aggregation[year]);
     }
-    if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
-        initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
-        initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+    if (current_search_method === "recommender") {
+        if (latest_query_translation !== query_trans_string) {
+            initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+            initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+        }
+    } else {
+        if (latest_query_translation !== query_trans_string.split("----->")[0].trim()) {
+            initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
+            initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
+        }
     }
 
     fillSlider(fromSlider, toSlider, '#C6C6C6', '#0d6efd', toSlider);
@@ -1054,19 +1139,19 @@ const getUniqueBodyID = () => {
 
 let globalAccordionDict = {};
 
-const createExpandListElement = (divID, next_element_count) => {
+const createExpandListElement = (divID, next_element_count, parentContainerID) => {
     let btnid = 'exp' + divID
     let cardid = 'exp_card_' + divID
     let divExpand = $('<div class="card" id="' + cardid + '"><div class="card-body">' +
         '<button class="btn btn-link" id="' + btnid + '">... click to expand (' + next_element_count + " left)" + '</button>' +
         '</div></div>');
     $(document).on('click', '#' + btnid, function () {
-        createExpandableAccordion(false, divID)
+        createExpandableAccordion(false, divID, parentContainerID)
     });
     return divExpand;
 }
 
-const createExpandableAccordion = (first_call, divID) => {
+const createExpandableAccordion = (first_call, divID, parentContainerID) => {
     let current_div = globalAccordionDict[divID][0];
     let query_len = globalAccordionDict[divID][1];
     let accordionID = globalAccordionDict[divID][2];
@@ -1085,14 +1170,14 @@ const createExpandableAccordion = (first_call, divID) => {
         i += 1;
         if (i < MAX_SHOWN_ELEMENTS) {
             let j = i + global_result_size;
-            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + j, collapseID + j));
+            current_div.append(createDivListForResultElement(res, query_len, accordionID, headingID + j, collapseID + j, parentContainerID));
         } else {
             nextResultList.push(res);
         }
     });
     // add a expand button
     if (i > MAX_SHOWN_ELEMENTS) {
-        current_div.append(createExpandListElement(divID, nextResultList.length));
+        current_div.append(createExpandListElement(divID, nextResultList.length, parentContainerID));
     }
     globalAccordionDict[divID] = [current_div, query_len, accordionID, headingID, collapseID, nextResultList, global_result_size + i];
 }
@@ -1139,7 +1224,10 @@ const createProvenanceDivElement = (explanations) => {
     let div_provenance_all = $('<div>');
     let j = -1;
     try {
-        explanations.forEach(e => {
+        // sort by confidence and create an element for each explanation
+        explanations
+            .sort((a, b) => {return (a["conf"] >= b["conf"]) ? -1 : 1;})
+            .forEach(e => {
             let sentence = e["s"];
             let predication_ids_str = e['ids'];
             // an explanation might have multiple subjects / predicates / objects separated by //
@@ -1210,26 +1298,44 @@ const createProvenanceDivElement = (explanations) => {
     return div_provenance_all;
 }
 
-function queryAndVisualizeProvenanceInformation(query, document_id, data_source, provenance, unique_div_id) {
-    let request = $.ajax({
-        url: provenance_url,
-        data: {
-            query: query,
-            document_id: document_id,
-            data_source: data_source,
-            prov: JSON.stringify(provenance)
-        }
-    });
+async function queryAndVisualizeProvenanceInformation(query, documentID, collection, divID, parentContainerID) {
+    // find all variable substitutions for the current document
+    // therefore, just step up through the hierarchy
+    const variableList = [];
+    while (parentContainerID !== null) {
+        // collect translations in the tree
+        if (parentContainerID in variables2entity)
+            variableList.push(variables2entity[parentContainerID]);
 
-    request.done(function (response) {
-        let explanations = response["result"]["exp"];
-        let prov_div = createProvenanceDivElement(explanations);
-        $('#' + unique_div_id).append(prov_div);
-    });
+        // find parent variable substitution blocks (aggregations)
+        if (!(parentContainerID in cardBodyHierarchy))
+            break
+        parentContainerID = cardBodyHierarchy[parentContainerID];
+    }
 
-    request.fail(function (result) {
-        showInfoAtBottom("Query for provenance failed - please try again")
-    });
+    let parameters = "?document_id=" + documentID + "&document_collection=" + collection + "&query=" + query;
+    if (variableList.length > 0) {
+        parameters += "&variables=" + variableList.join(";");
+    }
+
+    await fetch(explain_document_url + parameters)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            return {};
+        })
+        .then(json => {
+            if ("result" in json)
+                return json["result"]["exp"];
+
+            return Promise.reject();
+        })
+        .then(explanations => {
+            const prov_div = createProvenanceDivElement(explanations);
+            $('#' + divID).append(prov_div);
+        })
+        .catch(_ => showInfoAtBottom("Failed to explain document - please try again"));
 }
 
 let uniqueProvenanceID = 1;
@@ -1257,8 +1363,12 @@ function sendDocumentClicked(query, document_id, data_source, document_link) {
         });
 }
 
-const createResultDocumentElement = (queryResult, query_len, accordionID, headingID, collapseID) => {
+const createResultDocumentElement = (queryResult, parentContainerID) => {
     let document_id = queryResult["docid"];
+    let graph_data = null;
+    if (current_search_method === 'recommender') {
+        graph_data = queryResult["graph_data"];
+    }
     let art_doc_id = document_id;
     let title = queryResult["title"];
     let authors = queryResult["authors"];
@@ -1278,7 +1388,6 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         doiText = "DOI";
     }
 
-    let prov_ids = queryResult["prov"];
     let doi = queryResult["doi"];
 
     let divDoc_Card = $('<div class="card"/>');
@@ -1299,11 +1408,6 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         showPaperView(art_doc_id, collection)
     })
 
-    /*let divDoc_DocumentGraph = $('<a class="btn-link float-right" target="_blank">Document Content</a>');
-    divDoc_DocumentGraph.click(function () {
-        self.frames["paper_frame"].location.href = "http://localhost:8000/document" + '?document_id=' + art_doc_id + '&data_source=' + collection;
-    }) */
-
     divDoc_Body.append(divDoc_Image);
     divDoc_Body.append(divDoc_DocumentGraph);
 
@@ -1312,33 +1416,30 @@ const createResultDocumentElement = (queryResult, query_len, accordionID, headin
         "by: " + authors + '<br>');
 
     divDoc_Body.append(divDoc_Content);
+    let divDocRecommenderLink = $(
+        '<br><a class="btn-link" href="#" onclick="initRecommendSearchFromURL(\'' + document_id + '\', \'' + collection + '\')" style="cursor: pointer;">Show similar articles</a>'
+    );
 
-    //let
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
+    // divDoc_Body.append(divDocRecommenderLink); // TODO deactivate for now
 
-
-    /*
-    let divDoc = $('<div class="card"><div class="card-body">' +
-        '<a class="btn-link" href="' + doi + '" onclick="sendDocumentClicked("' + document_id + '","' + doi + '");" target="_blank">' +
-        '<img src="' + pubpharm_image_url + '" height="25px">' +
-        document_id + '</a>' +
-
-        '<a class="btn-link float-right" href="http://134.169.32.177/document?id=' + art_doc_id + '&data_source=' + collection + '" target="_blank">' +
-        'Document Graph</a>' +
-
-        '<br><b>' + title + '</b><br>' +
-        "in: " + journals + " | " + month + year + '<br>' +
-        "by: " + authors + '<br>' +
-        '</div></div><br>'); */
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
     uniqueProvenanceID = uniqueProvenanceID + 1;
     let div_provenance_button = $('<button class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#' + unique_div_id + '">Provenance</button>');
     let div_provenance_collapsable_block = $('<div class="collapse" id="' + unique_div_id + '">');
-    div_provenance_button.click(function () {
-        if ($('#' + unique_div_id).html() === "") {
-            queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, prov_ids, unique_div_id);
+    if (current_search_method === 'recommender') {
+        let prov_div_recommender_graph = $('<div class="graph rounded border w-100" style="height:600px; display: none" id="' + document_id + '_graph"></div>');
+        div_provenance_collapsable_block.append(prov_div_recommender_graph);
+    }
+    div_provenance_button.click(async function () {
+        if (current_search_method === 'recommender') {
+            visualizeRecommenderExplanationGraph(document_id, graph_data)
+        } else {
+            if ($('#' + unique_div_id).html() === "") {
+                await queryAndVisualizeProvenanceInformation(lastQuery, document_id, collection, unique_div_id, parentContainerID);
+            }
         }
     });
 
@@ -1360,7 +1461,7 @@ const showPaperView = (document_id, collection) => {
     queryAndFilterPaperDetail(document_id, collection);
 }
 
-const createDocumentList = (results, query_len) => {
+const createDocumentList = (results, query_len, parentContainerID) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
@@ -1379,8 +1480,8 @@ const createDocumentList = (results, query_len) => {
     if (resultSize > 1) {
         button_string += 's'
     }
-    ;
-    divH2.append('<button class="btn btn-link" type="button"data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
+
+    divH2.append('<button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseID + '" ' +
         'aria-expanded="true" aria-controls="' + collapseID + '">' + button_string + '</button>');
     let divCardEntry = $('<div id="' + collapseID + '" class="collapse show" aria-labelledby="' + headingID + '" data-parent="#' + accordionID + '"></div>');
     // tbd: grid
@@ -1389,7 +1490,7 @@ const createDocumentList = (results, query_len) => {
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
-
+    cardBodyHierarchy[divCardBodyID] = parentContainerID;
     globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
     createExpandableAccordion(true, divCardBodyID);
     return divAccordion;
@@ -1400,13 +1501,14 @@ let globalDocumentAggregateLazyCreated = {};
 
 const createDocumentAggregateLazy = (divCardBodyID) => {
     if (!globalDocumentAggregateLazyCreated[divCardBodyID]) {
-        createExpandableAccordion(true, divCardBodyID);
+        // simulate new parent container by duplicating the current scoped container
+        createExpandableAccordion(true, divCardBodyID, divCardBodyID);
         globalDocumentAggregateLazyCreated[divCardBodyID] = true;
     }
 };
 
 
-const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID) => {
+const createDocumentAggregate = (queryAggregate, query_len, accordionID, headingID, collapseID, parentContainerID, lowerLevel) => {
     let divCard = $('<div class="card"></div>');
     let divCardHeader = $('<div class="card-header" style="display: flex" id="' + headingID + '"></div>');
     divCard.append(divCardHeader);
@@ -1451,6 +1553,7 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     }
     button_string += ' [';
     let i = 0;
+    const var2entities = [];
     var_names.forEach(name => {
         let entity_substitution = var_subs[name];
         let ent_str = entity_substitution["s"];
@@ -1458,6 +1561,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
         let ent_type = entity_substitution["t"];
         let ent_name = entity_substitution["n"];
         let var_sub = name + ':= ' + ent_name + " (" + ent_id + " " + ent_type + ")";
+
+        var2entities.push([name, ent_id, ent_type].join("|"));
+
         // support ontological header nodes
         if (ent_name === ent_type) {
             var_sub = ent_name;
@@ -1509,11 +1615,13 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCardEntry.append(divCardBody);
     divCard.append(divCardEntry);
 
-
+    cardBodyHierarchy[divCardBodyID] = parentContainerID;
+    variables2entity[divCardBodyID] = var2entities;
     globalAccordionDict[divCardBodyID] = [divCardBody, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
 
     // generate the content lazy
     divH2.click(function () {
+        // new hierarchy level
         createDocumentAggregateLazy(divCardBodyID);
     });
 
@@ -1555,30 +1663,29 @@ function rateSubGroupExtraction(correct, subgroup, callback) {
     return true;
 }
 
-const createDocumentAggregateList = (results, query_len) => {
+const createDocumentAggregateList = (results, query_len, parentContainerID) => {
     let accordionID = "accordion" + getUniqueAccordionID();
     let headingID = accordionID + "heading" + 1;
     let collapseID = accordionID + "collapse" + 1;
     let divAccordion = $('<div class="accordion" id="' + accordionID + '"></div>');
     let resultList = results["r"];
-
     globalAccordionDict[accordionID] = [divAccordion, query_len, accordionID, headingID, collapseID, resultList, resultList.length];
-    createExpandableAccordion(true, accordionID);
+    createExpandableAccordion(true, accordionID, parentContainerID);
 
     return divAccordion;
 };
 
 
-const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID) => {
+const createDivListForResultElement = (result, query_len, accordionID, headingID, collapseID, parentContainerID = null) => {
     let typeOfRes = result["t"];
     if (typeOfRes === "doc") {
-        return (createResultDocumentElement(result, query_len, accordionID, headingID, collapseID));
+        return (createResultDocumentElement(result, parentContainerID));
     } else if (typeOfRes === "doc_l") {
-        return (createDocumentList(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentList(result, query_len, parentContainerID));
     } else if (typeOfRes === "agg") {
-        return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentAggregate(result, query_len, accordionID, headingID, collapseID, parentContainerID));
     } else if (typeOfRes === "agg_l") {
-        return (createDocumentAggregateList(result, query_len, accordionID, headingID, collapseID));
+        return (createDocumentAggregateList(result, query_len, parentContainerID));
     }
     console.log("ERROR - does not recognize result type: " + typeOfRes);
     return null;
@@ -1586,6 +1693,8 @@ const createDivListForResultElement = (result, query_len, accordionID, headingID
 
 
 const createResultList = (results, query_len) => {
+    // clear the current variables mapping
+    variables2entity = []
     let divList = $(`<div></div>`);
     divList.append(createDivListForResultElement(results, query_len, null, null, null));
     return divList;
@@ -1751,6 +1860,9 @@ function buildSelectionTrees() {
 async function buildDocumentCollectionFilter() {
     const collections = await fetch(url_available_collections)
         .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
             return response.json();
         }).then((data) => {
             return data["data_sources"];
@@ -1795,6 +1907,52 @@ async function buildDocumentCollectionFilter() {
         filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
 
         collectionFilter.append(filterInput, filterLabel);
+    }
+}
+
+
+async function buildDocumentClassificationFilter() {
+    const classifications = await fetch(url_available_classifications)
+        .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
+            return response.json();
+        }).then((data) => {
+            return data["classifications"];
+        }).catch(() => console.error("Could not load classification filter types."));
+
+    if (!classifications)
+        return;
+
+    const classificationFilter = document.getElementById("classification-filter");
+    for (const i in classifications) {
+        const classification = classifications[i];
+
+        const inputId = "filter_" + classification["classification"];
+        const filterInput = document.createElement("input");
+        filterInput.type = "checkbox";
+        filterInput.id = inputId;
+        filterInput.name = "classification";
+        filterInput.classList.add(["col-1"]);
+        filterInput.value = classification["classification"];
+        filterInput.onclick = refreshSearch;
+
+        const filterLabel = document.createElement("label");
+        filterLabel.classList.add(["col-11"]);
+        filterLabel.htmlFor = inputId;
+
+        if ("url" in classification) {
+            const filterHelpAnchor = document.createElement("a");
+            filterHelpAnchor.href = classification["url"];
+            filterHelpAnchor.target = "_blank";
+            filterHelpAnchor.text = "Help";
+            filterLabel.append(classification["label"] + " (", filterHelpAnchor, ")");
+        } else {
+            filterLabel.append(classification["label"])
+        }
+
+        classificationFilter.append(filterInput, filterLabel);
     }
 }
 
@@ -1952,7 +2110,7 @@ async function updateExplanationPopover() {
     await updatePopoverByType(objectPopover, object, queryText);
 }
 
-async function updatePopoverByType(popover, concept, queryText){
+async function updatePopoverByType(popover, concept, queryText) {
     popover._config.content = await fetch(explain_translation_url + "?concept=" + concept + "&query=" + queryText)
         .then((response) => {
             return response.json()
@@ -1963,24 +2121,55 @@ async function updatePopoverByType(popover, concept, queryText){
         .catch((e) => console.log(e));
 }
 
+const exampleQueriesContainer = document.getElementById("exampleQueries");
+const sortingYearContainer = document.getElementById("sorting_year_container");
+const visualizationByContainer = document.getElementById("visualization_filter");
+const previewContainer = document.getElementById('document_preview');
+
 /**
  * The function sets the help settings for the keyword search tab.
  */
 function setKeywordSearchHelp() {
+    current_search_method = 'query_builder';
+    // searchMethod = 'keywordSearch';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
     anchor.target = "_blank";
-    anchor.onclick = undefined;
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "block";
+    }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "block";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "block";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "none";
+    }
 }
 
 /**
  * The function sets the help settings for the query builder tab.
  */
 function setQueryBuilderHelp() {
+    current_search_method = 'keyword';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "#";
     anchor.target = "";
     anchor.onclick = () => showKeywordSearchHelp();
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "block";
+    }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "block";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "block";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "none";
+    }
 }
 
 /**
@@ -1990,4 +2179,53 @@ function showKeywordSearchHelp() {
     let modalElement = document.getElementById('keywordSearchHelpModal')
     let modal = new bootstrap.Modal(modalElement);
     modal.show();
+}
+
+async function loadCollectionDropDownMenu() {
+    const collections = await fetch(url_available_collections)
+        .then((response) => {
+            if (!response.ok) return {};
+            return response.json();
+        })
+        .then((dataSources) => {
+            const dropDownMenu = document.getElementById("input_collection");
+            const collections = dataSources["data_sources"];
+
+            const seenCollections = new Set(
+                Array.from(dropDownMenu.options).map(option => option.value)
+            );
+
+            for (let i in collections) {
+                const collectionName = collections[i]["collection"];
+                if (!seenCollections.has(collectionName)) {
+                    const option = document.createElement("option");
+                    option.value = collectionName;
+                    option.innerText = collectionName;
+                    dropDownMenu.appendChild(option);
+                    seenCollections.add(collectionName);
+                }
+            }
+        })
+        .catch(_ => console.log("Could not retrieve available collections."));
+}
+
+/**
+ * The function sets the help settings for the query builder tab.
+ */
+async function setUpRecommenderSearch() {
+    current_search_method = 'recommender';
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "none";
+    }
+    if (sortingYearContainer) {
+        sortingYearContainer.style.display = "none";
+    }
+    if (visualizationByContainer) {
+        visualizationByContainer.style.display = "none";
+    }
+    if (previewContainer) {
+        previewContainer.style.display = "block";
+    }
+
+    await loadCollectionDropDownMenu();
 }

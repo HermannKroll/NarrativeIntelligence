@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 from collections import defaultdict
 from datetime import datetime
@@ -11,7 +10,6 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, DatabaseUpdate, Document
 from narraint.backend.models import PredicationInvertedIndex
 from narraint.config import BULK_INSERT_AFTER_K, QUERY_YIELD_PER_K
-from narraint.queryengine.covid19 import get_document_ids_for_covid19, LIT_COVID_COLLECTION, LONG_COVID_COLLECTION
 
 """
 The predication dictionary uses strings instead of tuples as keys ('seen_keys') for predication entries. With this, 
@@ -20,13 +18,7 @@ the memory usage is lower.
 
 SEPERATOR_STRING = "_;_"
 
-
-def insert_data(session, fact_to_prov_ids, newer_documents, insert_list):
-    for row_key in fact_to_prov_ids:
-        for doc_collection in fact_to_prov_ids[row_key]:
-            for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
-                fact_to_prov_ids[row_key][doc_collection][docid2prov] = set(
-                    fact_to_prov_ids[row_key][doc_collection][docid2prov])
+def insert_data(session, fact_to_doc_ids, newer_documents, insert_list):
 
     if newer_documents:
         logging.info('Delta Mode activated - Only updating relevant inverted index entries')
@@ -43,15 +35,15 @@ def insert_data(session, fact_to_prov_ids, newer_documents, insert_list):
                                              str(row.object_id), str(row.object_type)])
 
             # if this key has been updated - we need to retain the old document ids + delete the old entry
-            if row_key in fact_to_prov_ids:
+            if row_key in fact_to_doc_ids:
                 # This works because documents are either new or old (we do not do updates within documents)
                 doc_collection = row.document_collection
-                for doc_id, predication_ids in json.loads(row.provenance_mapping).items():
-                    doc_id = int(doc_id)
-                    if doc_id in fact_to_prov_ids[row_key][doc_collection]:
-                        fact_to_prov_ids[row_key][doc_collection][doc_id].update(predication_ids)
-                    else:
-                        fact_to_prov_ids[row_key][doc_collection][doc_id] = predication_ids
+                old_document_ids = PredicationInvertedIndex.prepare_document_ids(row.document_ids)
+
+                if doc_collection in fact_to_doc_ids[row_key]:
+                    fact_to_doc_ids[row_key][doc_collection].update(old_document_ids)
+                else:
+                    fact_to_doc_ids[row_key][doc_collection] = old_document_ids
 
                 session.delete(row)
                 deleted_rows += 1
@@ -68,26 +60,25 @@ def insert_data(session, fact_to_prov_ids, newer_documents, insert_list):
 
     logging.info("Compute insert...")
 
-    # Converting all sets to lists again
-    for row_key in fact_to_prov_ids:
-        for doc_collection in fact_to_prov_ids[row_key]:
-            for docid2prov in fact_to_prov_ids[row_key][doc_collection]:
-                fact_to_prov_ids[row_key][doc_collection][docid2prov] = sorted(
-                    set(fact_to_prov_ids[row_key][doc_collection][docid2prov]))
+    # Converting all sets to sorted lists in descending order
+    for row_key in fact_to_doc_ids:
+        for doc_collection in fact_to_doc_ids[row_key]:
+            fact_to_doc_ids[row_key][doc_collection] = sorted(fact_to_doc_ids[row_key][doc_collection], reverse=True)
 
-    key_count = len(fact_to_prov_ids)
+    key_count = len(fact_to_doc_ids)
     progress2 = Progress(total=key_count, print_every=100, text="insert values...")
     progress2.start_time()
-    for idx, row_key in enumerate(fact_to_prov_ids):
-        for doc_collection in fact_to_prov_ids[row_key]:
+    for idx, row_key in enumerate(fact_to_doc_ids):
+        for doc_collection in fact_to_doc_ids[row_key]:
             progress2.print_progress(idx)
             if idx % BULK_INSERT_AFTER_K == 0:
                 PredicationInvertedIndex.bulk_insert_values_into_table(session, insert_list, check_constraints=False,
                                                                        commit=False)
                 insert_list.clear()
 
-            assert len(fact_to_prov_ids[row_key][doc_collection]) > 0
+            assert len(fact_to_doc_ids[row_key][doc_collection]) > 0
             subject_id, subject_type, relation, object_id, object_type = row_key.split(SEPERATOR_STRING)
+            document_ids_str = "[" + ",".join(str(i) for i in fact_to_doc_ids[row_key][doc_collection]) + "]"
             insert_list.append(dict(
                 document_collection=doc_collection,
                 subject_id=subject_id,
@@ -95,8 +86,8 @@ def insert_data(session, fact_to_prov_ids, newer_documents, insert_list):
                 relation=relation,
                 object_id=object_id,
                 object_type=object_type,
-                support=len(fact_to_prov_ids[row_key][doc_collection]),
-                provenance_mapping=json.dumps(fact_to_prov_ids[row_key][doc_collection])
+                support=len(fact_to_doc_ids[row_key][doc_collection]),
+                document_ids=document_ids_str
             ))
     progress2.done()
 
@@ -151,19 +142,15 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
 
     prov_query = prov_query.yield_per(10 * QUERY_YIELD_PER_K)
 
-    # Hack to support also the Covid 19 collection
-    # TODO: not very generic
-    doc_ids_litcovid, doc_ids_longcovid = get_document_ids_for_covid19()
-
     insert_list = []
     logging.info("Starting...")
-    fact_to_prov_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+    fact_to_doc_ids = defaultdict(lambda: defaultdict(set))
 
     progress = Progress(total=pred_count, print_every=1000, text="denormalizing predication...")
     progress.start_time()
 
     if low_memory:
-        buffer = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+        buffer = defaultdict(lambda: defaultdict(set))
         last_spo = ()
         for idx, prov in enumerate(prov_query):
             progress.print_progress(idx)
@@ -183,14 +170,7 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
 
             last_spo = s_p_o
             seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
-            buffer[seen_key][prov.document_collection][prov.document_id].add(prov.id)
-
-            # Hack to support also the Covid 19 collection
-            # TODO: not very generic
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                buffer[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                buffer[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
+            buffer[seen_key][prov.document_collection].add(prov.document_id)
 
         insert_data(session, buffer, newer_documents, insert_list)
         session.commit()
@@ -204,17 +184,9 @@ def denormalize_predication_table(newer_documents: bool = False, low_memory=Fals
             o_id = prov.object_id
             o_t = prov.object_type
             seen_key = SEPERATOR_STRING.join([str(s_id), str(s_t), str(p), str(o_id), str(o_t)])
-            # fact_to_doc_ids[seen_key][prov.document_collection].append(prov.document_id)
-            fact_to_prov_ids[seen_key][prov.document_collection][prov.document_id].add(prov.id)
+            fact_to_doc_ids[seen_key][prov.document_collection].add(prov.document_id)
 
-            # Hack to support also the Covid 19 collection
-            # TODO: not very generic
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_litcovid:
-                fact_to_prov_ids[seen_key][LIT_COVID_COLLECTION][prov.document_id].add(prov.id)
-            if prov.document_collection == "PubMed" and prov.document_id in doc_ids_longcovid:
-                fact_to_prov_ids[seen_key][LONG_COVID_COLLECTION][prov.document_id].add(prov.id)
-
-        insert_data(session, fact_to_prov_ids, newer_documents, insert_list)
+        insert_data(session, fact_to_doc_ids, newer_documents, insert_list)
         session.commit()
 
     progress.done()

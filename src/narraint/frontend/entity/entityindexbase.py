@@ -19,7 +19,8 @@ from narrant.entity.meshontology import MeSHOntology
 from narrant.mesh.data import MeSHDB
 from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.entitylinking.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
-    VACCINE, DISEASE, TARGET, ORGANISM
+    VACCINE, DISEASE, TARGET, ORGANISM, CELLLINE
+from narrant.vocabularies.cellline_vocabulary import CellLineVocabulary
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
 from narrant.vocabularies.drug_vocabulary import DrugVocabulary
@@ -59,6 +60,7 @@ class EntityIndexBase:
         # Targets are deactivated at the moment
         # self._add_chembl_targets()
         self._add_chembl_organisms()
+        self._add_celllines()
 
     def _add_additional_diseases(self):
         logging.info('Adding additional diseases')
@@ -262,3 +264,10 @@ class EntityIndexBase:
         for term, chids in terms2id.items():
             for chid in chids:
                 self._add_term(term, chid, ORGANISM)
+
+    def _add_celllines(self):
+        logging.info('Adding Cell Lines...')
+        terms2id = CellLineVocabulary.create_cell_line_vocabulary(expand_by_s_and_e=False)
+        for term, chids in terms2id.items():
+            for chid in chids:
+                self._add_term(term, chid, CELLLINE)

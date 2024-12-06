@@ -13,7 +13,7 @@ const typeColorMap = {
     "ProteinMutation": "#b9ffcb",
     "DNAMutation": "#4aff78",
     "Variant": "#ffa981",
-    "CellLine": "#00bc0f",
+    "CellLine": "#ce41ff",
     "SNP": "#fd83ca",
     "DomainMotif": "#f383fd",
     "Plant": "#dcfd83",
@@ -291,15 +291,16 @@ function initCheckbox(typeArray) {
 }
 
 function visualize_document_graph(container) {
+    const nodes = document_graph["nodes"];
+    const facts = document_graph["facts"];
+    const node2id = {};
+    const fact2text = {};
 
-    let nodes = document_graph["nodes"];
-    let facts = document_graph["facts"]
-    let node2id = {};
-    let id = 1;
-    let nodesToCreate = new vis.DataSet([]);
+    const nodesToCreate = new vis.DataSet();
+    const edgesToCreate = new vis.DataSet();
 
-    let maxSliderValue = facts.length;
-    let networkSlider = document.getElementById("paperNetworkSlider")
+    const maxSliderValue = facts.length;
+    const networkSlider = document.getElementById("paperNetworkSlider")
     networkSlider.max = maxSliderValue;
     if (maxSliderValue < 10) {
         networkSlider.value = maxSliderValue;
@@ -308,38 +309,34 @@ function visualize_document_graph(container) {
         networkSlider.value = "10";
         document.getElementById("paperNetworkAmount").innerText = `Top 10`;
     }
-    nodes.forEach(node => {
+
+    nodes.forEach((node, id) => {
         let colorLabel = node.slice(node.indexOf("(") + 1, node.indexOf(")"));
-        if (colorLabel == "PlantFamily/Genus") {
+        if (colorLabel === "PlantFamily/Genus") {
             colorLabel = "Plant"
         }
         if (!activeTypeMap.get(colorLabel)) {
             return;
         }
         node2id[node] = id;
-        let color = typeColorMap[colorLabel];
-        let nodeData = {'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color};
-        nodesToCreate.add(nodeData);
-        id = id + 1;
+        const color = typeColorMap[colorLabel];
+        nodesToCreate.add({'id': id, 'label': node.slice(0, node.indexOf("(")), 'color': color});
     });
 
-    let edgesToCreate = new vis.DataSet([]);
     facts.forEach(fact => {
-        let subject = node2id[fact['s']];
-        let predicate = fact['p'];
-        let object = node2id[fact['o']];
-        let edgeData = {'from': subject, 'to': object, 'label': predicate};
-        //console.log(edgeData);
-        edgesToCreate.add(edgeData);
+        const subjectId = node2id[fact['s']];
+        const predicate = fact['p'];
+        const objectId = node2id[fact['o']];
+        edgesToCreate.add({'from': subjectId, 'to': objectId, 'label': predicate});
+
+        const subjectText = fact['s'].slice(0, fact['s'].indexOf("("))
+        const objectText = fact['o'].slice(0, fact['o'].indexOf("("))
+        fact2text[[subjectText, objectText]] = fact['text'];
+        fact2text[[objectText, subjectText]] = fact['text'];
     });
 
-    // create a netwok
-    // provide the data in the vis format
-    var data = {
-        nodes: nodesToCreate,
-        edges: edgesToCreate
-    };
-    var options = {
+    // create a network
+    let options = {
         interaction: {
             multiselect: true,
             hover: true,
@@ -367,8 +364,39 @@ function visualize_document_graph(container) {
         }
     };
 
-    // initialize your network!
-    papernetwork = new vis.Network(container, data, options);
+    papernetwork = new vis.Network(container, {nodes: nodesToCreate, edges: edgesToCreate}, options);
+    papernetwork.on("hoverEdge", (e => {
+        const edge = papernetwork.body.edges[e["edge"]];
+        const text = fact2text[[edge["from"]["options"]["label"], edge["to"]["options"]["label"]]];
+        const title = document.getElementById("paperTitle");
+        const abstract = document.getElementById("paperAbstract");
+        const documentText = title.textContent + abstract.textContent;
+
+        if (!documentText.includes(text)) {
+            return;
+        }
+
+        const startPos = documentText.indexOf(text);
+        markInstance.markRanges([{
+                start: startPos,
+                length: text.length,
+            }],
+            {
+                className: "document-highlight",
+                element: "A",
+                each: (e) => {
+                    e.style.backgroundColor = "#fffa88";
+                    e.style.textDecoration = "none";
+                    e.style.color = "#000"
+                }
+            }
+        );
+    }));
+
+    papernetwork.on("blurEdge", (_) => {
+        markInstance.unmark({className: "document-highlight"});
+    });
+
     updatePaperNetworkGraph();
     /* this would stop the physics engine once and for all, so dragging only drags one node aswell
     network.on("stabilizationIterationsDone", function () {

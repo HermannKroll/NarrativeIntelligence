@@ -32,6 +32,10 @@ class TagInvertedIndex(Extended, DatabaseTable):
     support = Column(Integer, nullable=False)
     document_ids = Column(String, nullable=False)
 
+    @staticmethod
+    def prepare_document_ids(document_ids_str: str):
+        return list(int(doc_id) for doc_id in document_ids_str.strip("[]").split(","))
+
 
 class TermInvertedIndex(Extended, DatabaseTable):
     __tablename__ = "term_inverted_index"
@@ -52,7 +56,12 @@ class PredicationInvertedIndex(Extended, DatabaseTable):
     object_id = Column(String, nullable=False, index=True)
     object_type = Column(String, nullable=False, index=True)
     support = Column(Integer, nullable=False)
-    provenance_mapping = Column(String, nullable=False)
+    document_ids = Column(String, nullable=False)
+
+    @staticmethod
+    def prepare_document_ids(document_ids_str: str):
+        return list(int(doc_id) for doc_id in document_ids_str.strip("[]").split(","))
+
 
 
 class Tagger(models.Tagger):

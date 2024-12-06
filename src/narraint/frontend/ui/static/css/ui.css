@@ -94,6 +94,10 @@
     display: none;
 }
 
+#help_recommend {
+    display: none;
+}
+
 .feedbackbtn {
     position: fixed;
     bottom: 5px;
