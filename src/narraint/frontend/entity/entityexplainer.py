@@ -12,7 +12,7 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __instance = None
 
-    VERSION = 3
+    VERSION = 4
 
     def __new__(cls, load_index=True):
         if cls.__instance is None:
