@@ -12,9 +12,10 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __instance = None
 
-    VERSION = 3
+    VERSION = 4
+    LOAD_INDEX = True
 
-    def __new__(cls, load_index=True):
+    def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             logging.info('Initialize EntityTagger...')
@@ -23,7 +24,7 @@ class EntityExplainer(EntityIndexBase):
             cls.__instance.version = None
             trans_map = {p: '' for p in string.punctuation}
             cls.__instance.__translator = str.maketrans(trans_map)
-            if load_index:
+            if EntityExplainer.LOAD_INDEX:
                 try:
                     cls.__instance._load_index()
                 except ValueError:
@@ -116,7 +117,8 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_explainer = EntityExplainer(load_index=False)
+    EntityExplainer.LOAD_INDEX = False
+    entity_explainer = EntityExplainer()
     entity_explainer.store_index()
 
 
