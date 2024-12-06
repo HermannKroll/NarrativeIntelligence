@@ -19,8 +19,9 @@ class EntityTagger(EntityIndexBase):
     __instance = None
 
     VERSION = 5
+    LOAD_INDEX = True
 
-    def __new__(cls, load_index=True):
+    def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             logging.info('Initialize EntityTagger...')
@@ -36,7 +37,7 @@ class EntityTagger(EntityIndexBase):
             trans_map[' '] = ''
             cls.__instance.__translator = str.maketrans(trans_map)
             cls.__instance.version = None
-            if load_index:
+            if EntityTagger.LOAD_INDEX:
                 try:
                     cls.__instance._load_index()
                 except ValueError:
@@ -127,7 +128,8 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_tagger = EntityTagger(load_index=False)
+    EntityTagger.LOAD_INDEX = False
+    entity_tagger = EntityTagger()
     entity_tagger.store_index()
 
 

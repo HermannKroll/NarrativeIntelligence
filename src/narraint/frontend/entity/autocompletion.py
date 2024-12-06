@@ -17,8 +17,9 @@ class AutocompletionUtil:
     __instance = None
 
     VERSION = 3
+    LOAD_INDEX = True
 
-    def __new__(cls, load_index=True):
+    def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             cls.__instance.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target",
@@ -34,7 +35,7 @@ class AutocompletionUtil:
             cls.__instance.trie = None
             cls.__instance.drug_trie = None
             cls.__instance.version = None
-            if load_index:
+            if AutocompletionUtil.LOAD_INDEX:
                 try:
                     cls.__instance.load_autocompletion_index()
                 except ValueError:
@@ -172,6 +173,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
+    AutocompletionUtil.LOAD_INDEX = False
     ac = AutocompletionUtil()
     ac.build_autocompletion_index()
 
