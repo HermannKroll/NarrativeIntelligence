@@ -1069,9 +1069,9 @@ function showResults(response, parameters) {
 function updateYearFilter(year_aggregation, query_trans_string) {
     let year_filter_container = document.getElementById("year-filter");
     if (JSON.stringify(year_aggregation) !== '{}') {
-        year_filter_container.style.display = "block";
+        year_filter_container.classList.toggle("d-none", false);
     } else {
-        year_filter_container.style.display = "none";
+        year_filter_container.classList.toggle("d-none", true);
     }
     const fromSlider = document.querySelector('#fromSlider');
     const toSlider = document.querySelector('#toSlider');
