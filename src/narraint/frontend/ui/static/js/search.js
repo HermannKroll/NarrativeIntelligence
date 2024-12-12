@@ -1253,9 +1253,9 @@ const createProvenanceDivElement = (explanations) => {
             }
 
             let rate_pos_id = getUniqueRateButtonID();
-            let div_rate_pos = $('<img style="cursor: pointer" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+            let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
             let rate_neg_id = getUniqueRateButtonID();
-            let div_rate_neg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+            let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
 
             div_rate_pos.click(function () {
                 if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
@@ -1271,7 +1271,7 @@ const createProvenanceDivElement = (explanations) => {
                 }
             });
 
-            let div_col_rating = $('<div class="col-1">');
+            let div_col_rating = $('<div class="col-1 align-content-center">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
 
@@ -1281,7 +1281,7 @@ const createProvenanceDivElement = (explanations) => {
                 e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
                 '</div>');
 
-            let div_prov_example = $('<div class="container">');
+            let div_prov_example = $('<div class="container mt-1 border-top">');
             let div_prov_example_row = $('<div class="row">');
 
             div_prov_example_row.append(div_provenance);
@@ -1516,11 +1516,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCardHeader.append(divH2);
 
     let rate_pos_id = getUniqueRateButtonID()
-    let imgAggrRatePos = $('<img class="subgroupRatingImg"' +
-        ' id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+    let imgAggrRatePos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct aggregation">');
     let rate_neg_id = getUniqueRateButtonID()
-    let imgAggrRateNeg = $('<img class="subgroupRatingImg" ' +
-        ' id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+    let imgAggrRateNeg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong aggregation">');
 
     imgAggrRatePos.click(() => {
         let subgroup = queryAggregate.sub;

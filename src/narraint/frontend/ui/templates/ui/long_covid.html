@@ -247,10 +247,12 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/paper.js' %}?version=11" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?version=12" type="text/javascript"></script>
 
     <script type="text/javascript">
         const autocompletion_url = "{% url 'autocompletion' %}";
+        const ok_symbol_url = "{% static 'ok.png' %}";
+        const cancel_symbol_url = "{% static 'cancel.png' %}";
         const url_query = "/";
         const url_query_sub_count = "{% url 'query_sub_count' %}";
         const url_query_document_ids_for_entity = "{% url 'document_ids_for_entity' %}";
@@ -268,6 +270,8 @@
         const url_drug_search = "{% url 'drug_search_log' %}";
         const url_substance_href = "{% url 'drug_substance_forward_log' %}";
         const url_chembl_phase_href = "{% url 'drug_chembl_phase_log' %}";
+        const url_document_classification_feedback = "{% url 'document_classification_feedback' %}";
+
 
         loadGraphTemplate({
             targetContainer: "bottomDiv"
