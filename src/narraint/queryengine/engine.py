@@ -184,7 +184,6 @@ class QueryEngine:
         id2sentence = QueryEngine.query_sentences_for_sent_ids(sentence_ids)
         for e in query_explanation.explanations:
             e.sentence = id2sentence[e.sentence]
-        logging.debug(query_explanation.to_dict())
         return query_explanation
 
     @staticmethod
