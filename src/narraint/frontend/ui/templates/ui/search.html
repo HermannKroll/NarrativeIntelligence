@@ -475,22 +475,19 @@
         <div class="row flex-lg-row flex-column">
             <!-- left column: filter options menu-->
             <div class="col col-lg-2 mb-2 mb-lg-0">
-                <form class="border rounded">
+                <form class="border rounded px-2">
                     <!-- Collection class filter -->
-                    <div class="row m-1 align-items-center" id="collection-filter">
-                        <label>
+                    <div class="row m-1 align-items-center border-bottom" id="collection-filter">
+                        <label class="g-0">
                             <strong>Data Source:</strong>
                         </label>
                     </div>
 
                     <!-- Year filter -->
-                    <div id="year-filter" class="year_filter">
-                        <div class="row m-1 align-items-center">
-                            <label><strong>Results by year:</strong></label>
-                        </div>
-                        <div class="row mx-2 align-items-center">
-                            <div class="d-flex flex-column col-12 col-sm-6 col-lg-12 px-1" style="max-width: 150px"
-                                 id="range_container">
+                    <div id="year-filter" class="row m-1 align-items-center d-flex border-bottom">
+                        <label class="g-0"><strong>Results by year:</strong></label>
+                        <div class="col-12 col-sm-6 col-lg-12 px-1 g-0" style="max-width: 350px;">
+                            <div class="mx-2" id="range_container">
                                 <canvas id="myChart" style="width:100%"></canvas>
                                 <div class="sliders_control">
                                     <input id="fromSlider" type="range"/>
@@ -503,36 +500,35 @@
                     </div>
 
                     <!-- Visualization Buttons -->
-                    <div class="row m-1 align-items-center" id="visualization_filter">
-                        <label><strong>Visualization by:</strong></label>
+                    <div class="row m-1 align-items-center d-flex border-bottom" id="visualization_filter">
+                        <label class="g-0"><strong>Visualization by:</strong></label>
 
-                        <div class="d-flex align-items-center">
-                            <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
-                                   value="outer_ranking_substitution" class="me-2"
-                                   checked="checked" onclick="refreshSearch()">
-                            <label for="radio_outer_ranking_a">
-                                Substitution
-                            </label>
-                        </div>
 
-                        <div class="d-flex align-items-center mt-2">
-                            <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="me-2"
-                                   value="outer_ranking_ontology" onclick="refreshSearch()">
-                            <label for="radio_outer_ranking_b">
-                                MeSH-Taxonomy
-                            </label>
-                        </div>
+                        <input type="radio" id="radio_outer_ranking_a" name="outer_ranking"
+                               value="outer_ranking_substitution" class="col-1"
+                               checked="checked" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_outer_ranking_a">
+                            Substitution
+                        </label>
+
+
+
+                        <input type="radio" id="radio_outer_ranking_b" name="outer_ranking" class="col-1"
+                               value="outer_ranking_ontology" onclick="refreshSearch()">
+                        <label class="col-11" for="radio_outer_ranking_b">
+                            MeSH-Taxonomy
+                        </label>
+
                     </div>
 
-
-                    <div class="row m-1 align-items-center" id="classification-filter">
-                        <label>
+                    <div class="row m-1 align-items-center border-bottom" id="classification-filter">
+                        <label class="g-0">
                             <strong>Classifications:</strong>
                         </label>
                     </div>
 
                     <div class="row m-1 align-items-center">
-                        <label>
+                        <label class="g-0">
                             <strong>Filter by type:</strong>
                         </label>
                         <input type="checkbox" name="checkbox_sys_review" id="checkbox_sys_review"
