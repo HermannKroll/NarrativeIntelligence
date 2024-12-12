@@ -55,6 +55,7 @@ class QueryLogger:
         self.log_dir_drug_ov_search = os.path.join(log_dir, 'drug_ov_search')
         self.log_dir_drug_ov_subst_href = os.path.join(log_dir, 'drug_ov_substance_href')
         self.log_dir_drug_ov_chembl_ph = os.path.join(log_dir, 'drug_ov_chembl_phase')
+        self.log_dir_doc_classification = os.path.join(log_dir, 'document_classification')
         if not os.path.isdir(log_dir):
             raise Exception(f'no provenance log dir available {log_dir}')
         if not os.path.isdir(self.log_dir_queries):
@@ -83,6 +84,8 @@ class QueryLogger:
             os.mkdir(self.log_dir_drug_ov_subst_href)
         if not os.path.isdir(self.log_dir_drug_ov_chembl_ph):
             os.mkdir(self.log_dir_drug_ov_chembl_ph)
+        if not os.path.isdir(self.log_dir_doc_classification):
+            os.mkdir(self.log_dir_doc_classification)
 
         self.query_header = 'timestamp\ttime needed\tcollection\tcache hit\thits\tquery string\tgraph query'
         self.provenance_header = 'timestamp\ttime needed\tdocument collection\tdocument id\tprovenance ids'
@@ -97,6 +100,7 @@ class QueryLogger:
         self.drug_ov_search_header = 'timestamp\tdrug'
         self.drug_ov_subst_href_header = 'timestamp\tquery\tdrug\tentity'
         self.drug_ov_chembl_phase_header = 'timestamp\tquery\tdrug\tdisease_name\tdisease_id\tphase'
+        self.doc_classification_header = 'timestamp\tdocument id\tcollection\tclassification\trating'
 
     def write_query_log(self, time_needed, collection, cache_hit: bool, hits_count: int, query_string: str,
                         graph_query: GraphQuery):
@@ -197,3 +201,9 @@ class QueryLogger:
         log_entry = f'{query}\t{drug}\t{disease_name}\t{disease_id}\t{phase}'
         write_entry(log_entry, log_file_name, self.drug_ov_chembl_phase_header,
                     "drug ov chembl phase href")
+
+    def write_document_classification(self, document_id, document_collection, classification, rating):
+        log_file_name = os.path.join(self.log_dir_doc_classification,
+                                     f'{time.strftime("%Y-%m-%d")}-document_classification.log')
+        log_entry = f'{document_id}\t{document_collection}\t{classification}\t{rating}'
+        write_entry(log_entry, log_file_name, self.doc_classification_header, "doc classification feedback")
