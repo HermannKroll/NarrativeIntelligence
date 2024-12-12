@@ -816,6 +816,34 @@ def post_feedback(request):
     return HttpResponse(status=500)
 
 
+def post_document_classification_feedback(request):
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"doc_id", "doc_collection", "classification", "rating"}:
+        try:
+            time_start = datetime.now()
+            document_id = data["doc_id"]
+            document_collection = data["doc_collection"]
+            classification = data["classification"]
+            rating = data["rating"]
+
+            View().query_logger.write_document_classification(document_id, document_collection, classification, rating)
+            View().query_logger.write_api_call(True, "post_document_classification_feedback", str(request),
+                                               time_needed=datetime.now() - time_start)
+            return HttpResponse(status=200)
+        except Exception:
+            View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
+    return HttpResponse(status=500)
+
+
 def post_subgroup_feedback(request):
     data = None  # init needed for second evaluation step
     try:
