@@ -59,6 +59,8 @@ const short_urls = {
     'q36': '?Drug(Drug) administered ?Form(DosageForm)',
 };
 
+const visualizationByContainer = document.getElementById("visualization_filter");
+
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -1006,8 +1008,10 @@ function showResults(response, parameters) {
     document.getElementById("select_sorting_year").style.display = "block";
     if (is_aggregate === true) {
         document.getElementById("select_sorting_freq").style.display = "block";
+        visualizationByContainer.style.display = "block";
     } else {
         document.getElementById("select_sorting_freq").style.display = "none";
+        visualizationByContainer.style.display = "none";
     }
 
     // Print query translation
@@ -2164,7 +2168,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const exampleQueriesContainer = document.getElementById("exampleQueries");
 const sortingYearContainer = document.getElementById("sorting_year_container");
-const visualizationByContainer = document.getElementById("visualization_filter");
 const previewContainer = document.getElementById('document_preview');
 
 /**
@@ -2172,7 +2175,6 @@ const previewContainer = document.getElementById('document_preview');
  */
 function setKeywordSearchHelp() {
     current_search_method = 'query_builder';
-    // searchMethod = 'keywordSearch';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
     anchor.target = "_blank";
@@ -2183,7 +2185,7 @@ function setKeywordSearchHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "block";
+        visualizationByContainer.style.display = "none";
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2206,7 +2208,7 @@ function setQueryBuilderHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "block";
+        visualizationByContainer.style.display = "none";
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
