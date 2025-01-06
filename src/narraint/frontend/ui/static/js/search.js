@@ -297,6 +297,8 @@ function initQueryBuilderFromString(search_str) {
         first = false;
     });
 
+    document.getElementById('btn_clear_search').style.display = 'block';
+
     document.getElementById("btn_search").click();
     $('html,body').scrollTop(0);
 }
@@ -2118,6 +2120,47 @@ async function updatePopoverByType(popover, concept, queryText) {
         })
         .catch((e) => console.log(e));
 }
+
+function toggleClearSearchButton() {
+    const subjectInput = document.getElementById('input_subject').value.trim();
+    const predicateInput = document.getElementById('input_predicate').value.trim();
+    const objectInput = document.getElementById('input_object').value.trim();
+    const queryList = document.getElementById('query_builder_list').children.length;
+
+    const clearButton = document.getElementById('btn_clear_search');
+    console.log(subjectInput);
+    console.log(predicateInput);
+    console.log(objectInput);
+    console.log(queryList);
+    if (subjectInput || predicateInput !== "associated" || objectInput || queryList > 0) {
+        clearButton.style.display = 'block';
+    } else {
+        clearButton.style.display = 'none';
+    }
+}
+
+function clearSearchForm() {
+    document.getElementById('input_subject').value = '';
+    document.getElementById('input_predicate').selectedIndex = 0;
+    document.getElementById('input_object').value = '';
+
+    const queryBuilderList = document.getElementById('query_builder_list');
+    while (queryBuilderList.firstChild) {
+        queryBuilderList.removeChild(queryBuilderList.firstChild);
+    }
+
+    document.getElementById('btn_clear_search').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('input_subject').addEventListener('input', toggleClearSearchButton);
+    document.getElementById('input_predicate').addEventListener('change', toggleClearSearchButton);
+    document.getElementById('input_object').addEventListener('input', toggleClearSearchButton);
+
+    const observer = new MutationObserver(toggleClearSearchButton);
+    observer.observe(document.getElementById('query_builder_list'), { childList: true });
+});
+
 
 const exampleQueriesContainer = document.getElementById("exampleQueries");
 const sortingYearContainer = document.getElementById("sorting_year_container");
