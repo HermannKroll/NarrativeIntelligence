@@ -1277,7 +1277,7 @@ const createProvenanceDivElement = (explanations) => {
                 }
             });
 
-            let div_col_rating = $('<div class="col-1 align-content-center">');
+            let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
 

@@ -178,7 +178,14 @@ function sendPaperClassificationFeedback(documentID, classification, isPositive,
         }
     );
     fetch(request)
-        .then(_ => document.getElementById(containerId).classList.add("feedbackButtonHide"))
+        .then(response => {
+            if (response.ok) {
+                showInfoAtBottom("Thank you for your Feedback!");
+                document.getElementById(containerId).classList.add("feedbackButtonHide");
+            } else {
+                showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+            }
+        })
         .catch(e => console.log(e))
 }
 

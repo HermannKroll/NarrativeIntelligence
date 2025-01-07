@@ -363,7 +363,7 @@ select option:hover {
 
 .classFeedback {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     margin: 5px;
 }
