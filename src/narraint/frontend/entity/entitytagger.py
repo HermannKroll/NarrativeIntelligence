@@ -16,35 +16,36 @@ class EntityTagger(EntityIndexBase):
     Builds upon the EntityResolver and computes reverse indexes,
     e.g. Gene_ID -> Gene_Name is converted to Gene_Name -> Gene_ID
     """
-    __instance = None
+    __initialized = False
 
     VERSION = 5
-    LOAD_INDEX = True
 
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-            logging.info('Initialize EntityTagger...')
-            cls.__instance.autocompletion = None
-            cls.__instance.term2entity = defaultdict(set)
-            cls.__instance.known_terms = set()
+    def __init__(self, load_index=True):
+        if self.__initialized:
+            return
+        super().__init__()
+        logging.info('Initialize EntityTagger...')
+        self.autocompletion = None
+        self.term2entity = defaultdict(set)
+        self.known_terms = set()
 
-            trans_map = {p: '' for p in string.punctuation}
-            # necessary to not distinguish between
-            # "Axicabtagene Ciloleucel"
-            # "Axicabtagene-Ciloleucel"
-            # "AxicabtageneCiloleucel"
-            trans_map[' '] = ''
-            cls.__instance.__translator = str.maketrans(trans_map)
-            cls.__instance.version = None
-            if EntityTagger.LOAD_INDEX:
-                try:
-                    cls.__instance._load_index()
-                except ValueError:
-                    logging.info('Index is outdated. Creating a new one...')
-                    # The index has been outdated or is old - create a new one
-                    cls.__instance.store_index()
-        return cls.__instance
+        trans_map = {p: '' for p in string.punctuation}
+        # necessary to not distinguish between
+        # "Axicabtagene Ciloleucel"
+        # "Axicabtagene-Ciloleucel"
+        # "AxicabtageneCiloleucel"
+        trans_map[' '] = ''
+        self.__translator = str.maketrans(trans_map)
+        self.version = None
+
+        if load_index:
+            try:
+                self._load_index()
+            except ValueError:
+                logging.info('Index is outdated. Creating a new one...')
+                # The index has been outdated or is old - create a new one
+                self.store_index()
+        self.__initialized = True
 
     def _load_index(self, index_path=ENTITY_TAGGING_INDEX):
         logging.info(f'Loading entity tagging index from {index_path}')
@@ -128,8 +129,7 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    EntityTagger.LOAD_INDEX = False
-    entity_tagger = EntityTagger()
+    entity_tagger = EntityTagger(load_index=False)
     entity_tagger.store_index()
 
 

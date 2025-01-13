@@ -10,28 +10,28 @@ from narrant.entity.entityresolver import EntityResolver
 
 
 class EntityExplainer(EntityIndexBase):
-    __instance = None
+    __initialized = False
 
     VERSION = 4
-    LOAD_INDEX = True
 
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-            logging.info('Initialize EntityTagger...')
-            cls.__instance.expand_by_subclasses = False
-            cls.__instance.entity2terms = defaultdict(set)
-            cls.__instance.version = None
-            trans_map = {p: '' for p in string.punctuation}
-            cls.__instance.__translator = str.maketrans(trans_map)
-            if EntityExplainer.LOAD_INDEX:
-                try:
-                    cls.__instance._load_index()
-                except ValueError:
-                    # The index has been outdated or is old - create a new one
-                    logging.info('Index is outdated. Creating a new one...')
-                    cls.__instance.store_index()
-        return cls.__instance
+    def __init__(self, load_index=True):
+        if self.__initialized:
+            return
+        super().__init__()
+        logging.info('Initialize EntityTagger...')
+        self.expand_by_subclasses = False
+        self.entity2terms = defaultdict(set)
+        self.version = None
+        trans_map = {p: '' for p in string.punctuation}
+        self.__translator = str.maketrans(trans_map)
+        if load_index:
+            try:
+                self._load_index()
+            except ValueError:
+                # The index has been outdated or is old - create a new one
+                logging.info('Index is outdated. Creating a new one...')
+                self.store_index()
+        self.__initialized = True
 
     def _load_index(self, index_path=ENTITY_EXPLAINER_INDEX):
         logging.info(f'Loading entity explainer index from {index_path}')
@@ -117,9 +117,11 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    EntityExplainer.LOAD_INDEX = False
-    entity_explainer = EntityExplainer()
+    entity_explainer = EntityExplainer(load_index=False)
     entity_explainer.store_index()
+
+    explanations = entity_explainer.explain_entity_str("metformin")
+    print(explanations)
 
 
 if __name__ == "__main__":
