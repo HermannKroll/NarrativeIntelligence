@@ -20,7 +20,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
-    FEEDBACK_SUBGROUP_DIR, LOG_DIR
+    FEEDBACK_SUBGROUP_DIR, LOG_DIR, FEEDBACK_CLASSIFICATION
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -795,7 +795,7 @@ def post_feedback(request):
                                    sentence=res.Sentence.text))
 
             # create a filename for this rating
-            timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             rating_filename = os.path.join(FEEDBACK_PREDICATION_DIR, f'predication_{userid}_{timestamp}.json')
             with open(rating_filename, 'wt') as f:
                 json.dump(result, f, sort_keys=True, indent=4)
@@ -824,15 +824,25 @@ def post_document_classification_feedback(request):
         View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
         return HttpResponse(status=500)
 
-    if data and data.keys() & {"doc_id", "doc_collection", "classification", "rating"}:
+    if data and data.keys() & {"doc_id", "doc_collection", "classification", "rating", "user_id"}:
         try:
             time_start = datetime.now()
-            document_id = data["doc_id"]
-            document_collection = data["doc_collection"]
-            classification = data["classification"]
-            rating = data["rating"]
+            userid = data["user_id"]
 
-            View().query_logger.write_document_classification(document_id, document_collection, classification, rating)
+            result = {
+                "document_id": data["doc_id"],
+                "document_collection": data["doc_collection"],
+                "document_classification": data["classification"],
+                "rating": data["rating"],
+                "user_id": userid,
+            }
+
+            # create a filename for this rating
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            rating_filename = os.path.join(FEEDBACK_CLASSIFICATION, f'classification_{userid}_{timestamp}.json')
+            with open(rating_filename, 'wt') as f:
+                json.dump(result, f, sort_keys=True, indent=4)
+
             View().query_logger.write_api_call(True, "post_document_classification_feedback", str(request),
                                                time_needed=datetime.now() - time_start)
             return HttpResponse(status=200)
