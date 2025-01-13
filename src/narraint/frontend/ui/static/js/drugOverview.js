@@ -109,7 +109,7 @@ async function translateToDrugId(keyword) {
             return {
                 chemblid: chemblid,
                 entity_name: entity_name
-            }
+            };
         });
 }
 
@@ -194,8 +194,13 @@ async function setDrugData(entity_name) {
             document.getElementById('drug_inchi').innerText = "-";
         })
         .finally(() => {
-            const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
-            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            if (currentChemblID !== null) {
+                const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
+                document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            } else {
+                document.getElementById('drug_chemblid').innerText = '-';
+            }
+
             const pubchemLink = "https://pubchem.ncbi.nlm.nih.gov/compound/" + currentDrugName;
             document.getElementById('drug_pubchem').innerHTML = '<a href="' + pubchemLink + '" target="_blank">' + decodeURI(currentDrugName) + '</a>'
         })
