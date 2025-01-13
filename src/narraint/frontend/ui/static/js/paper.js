@@ -163,6 +163,15 @@ function sendPaperViewLog(docID) {
 
 
 function sendPaperClassificationFeedback(documentID, classification, isPositive, containerId) {
+    // first check if a user id exists
+    // if not, the same function is registered as callback for later execution
+    const user_id = getUserIDFromLocalStorage(() => {
+        sendPaperClassificationFeedback(documentID, classification, isPositive, containerId);
+    });
+
+    if (user_id === "cookie")
+        return;
+
     const request = new Request(
         url_document_classification_feedback,
         {
@@ -174,6 +183,7 @@ function sendPaperClassificationFeedback(documentID, classification, isPositive,
                 doc_collection: documentCollection,
                 classification: classification,
                 rating: isPositive,
+                user_id: user_id
             })
         }
     );

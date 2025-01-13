@@ -61,50 +61,11 @@ const short_urls = {
 
 const visualizationByContainer = document.getElementById("visualization_filter");
 
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
 $('#btn_search_again').click(() => {
     const predicate_input = document.getElementById('input_predicate');
     predicate_input.selectedIndex = 0;
     refreshSearch();
 })
-
-$('#cookiebtnDeny').click(() => {
-    $('.toast').toast('hide')
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-})
-
-const cookieAcceptBtnHandler = (callback) => {
-    let userid = uuidv4();
-    localStorage.setItem('userid', userid);
-    $('.toast').toast('hide');
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-    callback();
-}
-
-function getUserIDFromLocalStorage(callback) {
-    if (!localStorage.getItem('userid')) {
-        console.log("no user id found in local storage");
-
-        //remove previously stored events and add the new callback event
-        $('#cookiebtnAccept').off('click').click(() => {
-            cookieAcceptBtnHandler(callback);
-        })
-
-        let cookie_toast = $('#cookie_toast');
-        cookie_toast.show();
-        cookie_toast.toast('show');
-        return "cookie";
-    }
-    return localStorage.getItem('userid');
-}
 
 
 function escapeString(input_string) {
