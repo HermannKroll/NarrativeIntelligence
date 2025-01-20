@@ -1047,6 +1047,44 @@ def post_drug_ov_chembl_phase_href_log(request):
     return HttpResponse(status=500)
 
 
+def post_entity_ov_search_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"entity"}:
+        entity = data["entity"]
+        try:
+            View().query_logger.write_entity_ov_search(entity)
+        except IOError:
+            logging.debug('Could not write entity searched log file')
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
+def post_entity_ov_subst_href_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"drug", "substance", "query"}:
+        entity = data["drug"]
+        substance = data["substance"]
+        query = data["query"]
+        try:
+            View().query_logger.write_entity_ov_substance_href(entity, substance, query)
+        except IOError:
+            logging.debug('Could not write substance href log file')
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
 def post_report(request):
     try:
         try:
@@ -1242,6 +1280,14 @@ class DocumentView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View().query_logger.write_page_view_log(DocumentView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+class OverviewView(TemplateView):
+    template_name = "ui/general_overview.html"
+
+    def get(self, request, *args, **kwargs):
+        View().query_logger.write_page_view_log(OverviewView.template_name)
         return super().get(request, *args, **kwargs)
 
 

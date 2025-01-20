@@ -1,4 +1,4 @@
-autoComplete(document.getElementById("drugInput"));
+
 
 async function getDrugNames(current) {
     return fetch(autocompletion_url + "?term=" + current + "&entity_type=Drug")
@@ -9,7 +9,7 @@ async function getDrugNames(current) {
     //return ["Aspirin","Ibuprofen","Asopolon","Ibumprumfum","Paracetamol","Pampelmuse"];
 }
 
-function autoComplete(input) {
+function autoComplete(input, entity_type) {
     var names;
     var currentFocus;
     input.addEventListener("input", function(e) {
@@ -27,7 +27,11 @@ function autoComplete(input) {
         this.parentNode.appendChild(outerDiv);
         //names = getDrugNames(value);
         //console.log(names);
-        fetch(autocompletion_url + "?term=" + value + "&entity_type=Drug")
+        let url_call = autocompletion_url + "?term=" + value;
+        if (entity_type) {
+            url_call += "?entity_type=" + entity_type;
+        }
+        fetch(url_call)
         .then(response => response.json())
         .then(data => {
             for (var i = 0; i < data.terms.length; i++) {

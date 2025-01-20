@@ -563,6 +563,7 @@ function logDrugSearch(drug) {
     fetch(request).catch(e => console.log(e))
 }
 
+
 /**
  * Send substation/interaction-clicked logging information to backend
  */

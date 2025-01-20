@@ -324,6 +324,30 @@
         </div>
     </div>
 
+    <div id="modalBackdrop"></div>
+
+        <!-- general overview forwarding -->
+    <div class="modal" tabindex="-1" role="dialog" id="switch_overview_popup">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Drug not found</h5>
+                    <button type="button" class="btn-close"
+                            onclick="closeOverviewForwarding()" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>No drug named <span id="searched_drug">placeholder</span> could be found. Would you like to search in the general overview instead?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeOverviewForwarding()">No</button>
+                    <button type="button" class="btn btn-primary" onclick="closeOverviewForwarding(true)" id="forward_to_overview">Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Search history -->
     <div class="container">
         <div class="modal" tabindex="-1" role="dialog" id="historyModal">
@@ -425,8 +449,8 @@
 
 
     <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverview.js' %}?version=17" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=5" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverview.js' %}?version=18" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
 {% endblock %}

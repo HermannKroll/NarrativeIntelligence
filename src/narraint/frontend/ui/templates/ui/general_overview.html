@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}">
+{% endblock %}
+
+{% block title %}Narrative Service{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+
+    <div class="d-flex flex-row overflow-scroll">
+        <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
+            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="" id="sidebar_entries"></div>
+
+        </div>
+
+        <!-- Main page -->
+        <div class="container-xl col-12 col-lg-10 px-2 px-sm-0 px-lg-5 mb-5 ms-lg-0 mx-xxl-auto wide-size-content">
+            <!-- Searchbar -->
+            <div class="row justify-content-center">
+                <div class="container mt-2">
+                    <div class="col-6 offset-3 flex-row d-flex">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id='drugInput' placeholder="Search for Drug...">
+                            <button class="btn btn-primary" onclick="searchDrug()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-search mb-1" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- drug suggestion link -->
+                <div class="row flex-row justify-content-center">
+                    <a class="w-auto" href="javascript: openHistory()">Search History</a>
+                </div>
+            </div>
+            <!-- Content -->
+            <div class="row">
+                <div class="container" id="drugContent">
+                    <div id="unknown_drug_name_tag"
+                         class="bg-danger d-none text-center fs-3 fw-bolder text-white w-fc p-2 mx-auto my-3 rounded"></div>
+
+                    <div id="overview_entries"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- feedback elements -->
+    <button type="button" class="btn btn-primary feedbackbtn d-none d-lg-inline-block" id="feedback_button"
+            onclick="openFeedback()" data-html2canvas-ignore="true" style="z-index: 4">
+        <span id="feedbackbtn_text">Feedback</span>
+        <span class="spinner-border spinner-border-sm" id="reportSpinner" role="status" style="display: none"></span>
+    </button>
+
+    <div class="modal" tabindex="-1" role="dialog" id="feedbackPopup">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send feedback with screenshot</h5>
+                    <button type="button" class="btn-close"
+                            onclick="closeFeedback()" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <div class="outsideWrapper">
+                                <div class="insideWrapper" id="screenshotContainer">
+                                    <img src="null" id="screenshot"
+                                         class="img-fluid coveredImage border border-primary">
+                                    <canvas class="coveringCanvas" id="screenshotCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-secondary" onclick="resetCanvas()">Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>Please mark the problematic section on the image above and/or describe the problem you have
+                        encountered:</p>
+                    <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeedback()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFeedback(true)" id="sendReport">Send
+                        Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search history -->
+    <div class="container">
+        <div class="modal" tabindex="-1" role="dialog" id="historyModal">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl" style="width: inherit" role="document">
+                <div class="modal-content h-100 w-100">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Search history</h5>
+                        <button type="button" class="btn-close" onclick="closeHistory()" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <table class="table">
+                                <colgroup>
+                                    <col style="width: 30%;">
+                                    <col style="width: 70%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Search</th>
+                                </tr>
+                                </thead>
+                                <tbody id="historyTable">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="closeHistory()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <noscript>
+        <style>
+            body {
+                overflow: hidden;
+            }
+        </style>
+        <div class="noscript">
+            <div>
+                This website requires JavaScript enabled to function properly.
+            </div>
+        </div>
+    </noscript>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/paper.js' %}?version=15" type="text/javascript"></script>
+    <script type="text/javascript">
+        const autocompletion_url = "{% url 'autocompletion' %}";
+        const ok_symbol_url = "{% static 'ok.png' %}";
+        const cancel_symbol_url = "{% static 'cancel.png' %}";
+        const url_query = "/";
+        const url_query_sub_count = "{% url 'query_sub_count' %}";
+        const url_query_document_ids_for_entity = "{% url 'document_ids_for_entity' %}";
+        const url_term_2_entity = "{% url 'term_to_entity' %}";
+        const url_narrative_documents = "{% url 'narrative_documents' %}";
+        const url_loading_gif = "{% static 'assets/loading.gif' %}";
+        const url_feedback_report = "{% url 'report' %}";
+        const url_suggest_drug_report = "{% url 'suggest_drug' %}";
+        const url_keywords = "{% url 'keywords' %}";
+
+        const url_entity_search = "{% url 'entity_search_log' %}";
+        const url_substance_href = "{% url 'entity_substance_forward_log' %}";
+        const url_document_classification_feedback = "{% url 'document_classification_feedback' %}";
+
+        let currentFullscreenPrefix = null;
+        // register an event if "Escape" is pressed in fullscreen to change network graphs classes properly.
+        const fsCloseAction = () => {
+            if (document.fullscreenElement == null) toggleFullscreenNetworkGraph(currentFullscreenPrefix, true)
+        }
+        document.onfullscreenchange = fsCloseAction;
+        document.onwebkitfullscreenchange = fsCloseAction;
+        document.onmsfullscreenchange = fsCloseAction;
+
+        const historyQueryKey = "entity";
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        activateOverviewTracking();
+    </script>
+
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+
+    <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=6" type="text/javascript"></script>
+    <script src="{% static 'js/generalOverview.js' %}?version=16" type="text/javascript"></script>
+    <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+{% endblock %}
