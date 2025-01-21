@@ -38,7 +38,7 @@ fi
 
 
 # Update content information (help-page)
-python ~NarrativeIntelligence/src/narraint/frontend/ui/service_content.py
+python ~/NarrativeIntelligence/src/narraint/frontend/ui/service_content.py
 if [[ $? != 0 ]]; then
      echo "Previous script returned exit code != 0 -> Stopping pipeline."
      exit -1
