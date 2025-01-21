@@ -1,30 +1,3 @@
-const typeColorMap = {
-    "Disease": "#aeff9a",
-    "Drug": "#ff8181",
-    "Species": "#b88cff",
-    "Excipient": "#ffcf97",
-    "LabMethod": "#9eb8ff",
-    "Chemical": "#fff38c",
-    "Gene": "#87e7ff",
-    "Target": "#1fe7ff",
-    "Method": "#7897ff",
-    "DosageForm": "#9189ff",
-    "Mutation": "#8cffa9",
-    "ProteinMutation": "#b9ffcb",
-    "DNAMutation": "#4aff78",
-    "Variant": "#ffa981",
-    "CellLine": "#ce41ff",
-    "SNP": "#fd83ca",
-    "DomainMotif": "#f383fd",
-    "Plant": "#dcfd83",
-    "Strain": "#75c4c7",
-    "Vaccine": "#c7767d",
-    "HealthStatus": "#bbaabb",
-    "Organism": "#00bc0f",
-    "Tissue": "#dc8cff"
-}
-
-
 var markInstance = null;
 var tagsArray = null;
 var activeTypeMap = null;

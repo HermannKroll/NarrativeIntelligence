@@ -199,3 +199,9 @@ class IndexVersion(Extended, DatabaseTable):
     __tablename__ = "index_versions"
     name = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
+
+
+class ContentData(Extended, DatabaseTable):
+    __tablename__ = "content_data"
+    name = Column(String, primary_key=True)
+    data = Column(String, nullable=False)

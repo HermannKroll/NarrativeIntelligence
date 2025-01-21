@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block css %}
-    <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/help.css' %}">
 {% endblock %}
 
@@ -100,16 +99,34 @@
         </div>
 
         <h2>Content</h2>
-        The service contains about 35 million publication abstracts from PubMed. In brief, everything that can be found
-        by a
-        PubMed search can also be found in our system.
-        In addition, we included about 50k COVID 19 pre-prints from the
+        The service contains abstracts from PubMed. In brief, everything that can be found
+        by a PubMed search can also be found in our system.
+        In addition, we included COVID 19 pre-prints from the
         <a href="https://preview.zbmed.de">ZB MED Preview Service</a>.
-        <!--<a href="https://youtu.be/cvzCRBS0P0Y">This video</a> gives a short introduction into our narrative prototype:
         <br>
-        <a href="https://youtu.be/cvzCRBS0P0Y"> <img src="{% static 'video_preview.png' %}" width="500"></a> -->
-        <h2>Content</h2>
+        <div class="row gx-2">
+            <div class="col-12 col-xxl-4 border">
+                <h5 class="text-center">Documents per Collection</h5>
+                <div class="pie-chart-height">
+                    <canvas id="chart-collections"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-xxl-4 border">
+                <h5 class="text-center">Entities/Concepts per Type</h5>
+                <div class="pie-chart-height">
+                    <canvas id="chart-entity_types"></canvas>
+                </div>
+            </div>
+            <div class="col-12 col-xxl-4 border">
+                <h5 class="text-center">Extracted Statements per Relation</h5>
+                <div class="pie-chart-height">
+                    <canvas id="chart-relations"></canvas>
+                </div>
+            </div>
+        </div>
 
+
+        <h2>Content Information</h2>
         <div class="row">
             <div class="col">
                 <table id="help_table" class="table table-bordered">
@@ -169,7 +186,7 @@
                         <td>manually selected subset of Methods that are classfied as labor relevant methods</td>
                     </tr>
                     <tr>
-                        <td>PlantFamiliy/Genus	</td>
+                        <td>PlantFamiliy/Genus</td>
                         <td><a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Wikidata</a>
                         </td>
                         <td>Plants (Families, Genus). Additional Cleaning is performed.</td>
@@ -393,11 +410,90 @@
 {% endblock %}
 
 {% block javascript %}
+    <script src="{% static 'js/../../static/js/../../static/js/libraries/Chart.min.js' %}"></script>
     <script type="text/javascript">
-
+        const URL_CONTENT_CHART_DATA = "{% url "content_data" %}";
         $("#nav_item_search").removeClass("active");
         $("#nav_item_help").addClass("active");
         // $("#nav_item_stats").removeClass("active");
+        loadChartData();
 
+        async function loadChartData() {
+            const data = await fetch(URL_CONTENT_CHART_DATA)
+                .then(response => {
+                    if (!response.ok)
+                        return {};
+
+                    return response.json();
+                })
+                .catch(_ => console.error("Could not load chart data."));
+
+            createChart("collections", data["collections"]);
+            createChart("entity_types", data["entity_types"], true);
+            createChart("relations", data["relations"]);
+        }
+
+
+        function createChart(suffix, chartData, useColorMap = false) {
+            const labels = [];
+            const data = [];
+            const colors = [];
+
+            let other_data = 0;
+            let color_index = 0;
+            for (const [key, value] of Object.entries(chartData)) {
+                if (useColorMap) {
+                    if (key in TYPE_COLOR_MAP) {
+                        colors.push(TYPE_COLOR_MAP[key]);
+                    } else {
+                        // just increment the 'other' value and skip insertion
+                        other_data += value;
+                        continue
+                    }
+                } else {
+                    colors.push(Object.entries(TYPE_COLOR_MAP)[color_index][1]);
+                    color_index += 1;
+                }
+                labels.push(key + " (" + value + ")");
+                data.push(value);
+            }
+
+            // merge unknown types into other-class
+            if (useColorMap && other_data > 0) {
+                colors.push(TYPE_COLOR_MAP["Other"]);
+                labels.push("Other (" + other_data + ")");
+                data.push(other_data);
+            }
+
+            const element = document.getElementById("chart-" + suffix);
+
+            new Chart(element, {
+                type: "pie",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    tooltips: {
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                return data.labels[tooltipItem.index] || '';
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: "right",
+                        labels: {usePointStyle: true, font: {size: 16}}
+                    }
+                }
+            });
+        }
     </script>
 {% endblock %}
