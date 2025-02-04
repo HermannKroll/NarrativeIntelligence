@@ -29,7 +29,8 @@ class EntityTaggerDB(EntityIndexBase):
         super().__init__()
         logging.info("Initialize EntityTaggerDB...")
 
-        trans_map = {p: '' for p in string.punctuation}
+        # we need the space for correct handling of partial term matching
+        trans_map = {p: ' ' for p in string.punctuation}
         self.__translator = str.maketrans(trans_map)
         self.__db_values_to_insert = list()
 
@@ -57,7 +58,11 @@ class EntityTaggerDB(EntityIndexBase):
         return True
 
     def _prepare_string(self, term: str) -> str:
-        return term.strip().lower().translate(self.__translator).strip()
+        term = term.strip().lower().translate(self.__translator).strip()
+        # remove double white spaces
+        while '  ' in term:
+            term = term.replace('  ', ' ')
+        return term
 
     def store_index(self):
         logging.info('Creating index for EntityTaggerDB...')
@@ -84,7 +89,8 @@ class EntityTaggerDB(EntityIndexBase):
         self.__db_values_to_insert.append(dict(entity_id=entity_id,
                                                entity_type=entity_type,
                                                entity_class=entity_class,
-                                               synonym=self._prepare_string(term)))
+                                               # space is important for matching
+                                               synonym=' ' + self._prepare_string(term)))
 
     def tag_entity(self, term: str) -> List[Entity]:
         # first process the string
@@ -98,27 +104,31 @@ class EntityTaggerDB(EntityIndexBase):
         query = session.query(EntityTaggerData)
         # Construct the query as a disjunction with like expressions
         # e.g. the search covid 19 is performed by
-        # WHERE synonym like '%covid%' AND synonym like '%19%'
+        # WHERE synonym like '% covid%' AND synonym like '% 19%'
         # SQL alchemy overloads the bitwise & operation to connect different expressions via AND
         filter_exp = None
         for part in term.split(' '):
             part = part.strip()
             if not part:
                 continue
-
+            # a synonym could match the term at the beginning but not in between
+            # eg all words that start with diab are valid matches
+            # but synonyms like hasdiabda are not matches
             if filter_exp is None:
-                filter_exp = EntityTaggerData.synonym.like('%{}%'.format(part))
+                filter_exp = EntityTaggerData.synonym.like('% {}%'.format(part))
             else:
-                filter_exp = filter_exp & EntityTaggerData.synonym.like('%{}%'.format(part))
+                filter_exp = filter_exp & EntityTaggerData.synonym.like('% {}%'.format(part))
         query = query.filter(filter_exp)
 
         entities = []
         known_entities = set()
+
         for result in query:
-            key = (result.entity_id, result.entity_type, result.synonym)
+            cleaned_synonym = result.synonym.strip()  # remove leading space
+            key = (result.entity_id, result.entity_type, cleaned_synonym)
             if key in known_entities:
                 continue
-            entities.append(Entity(entity_name=result.synonym,
+            entities.append(Entity(entity_name=cleaned_synonym,
                                    entity_id=result.entity_id,
                                    entity_type=result.entity_type,
                                    entity_class=result.entity_class))
