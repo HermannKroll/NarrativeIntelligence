@@ -899,7 +899,7 @@ async function retrieveAdditionalEdges(entity, type) {
         networkEdges.add({
             from: entity, to: entities[i].name,
             label: `${entities[i].count}`,
-            title: `${entities[i].count}`,
+            title: "Search in Narrative Service",
             font: {color: "#000000", strokeWidth: 0},
             color: {color: "#565656", opacity: 0.6},
             width: 1.5,
