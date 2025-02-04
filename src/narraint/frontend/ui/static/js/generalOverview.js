@@ -4,70 +4,70 @@ autoComplete(document.getElementById("drugInput"));
 
 const overviews = {
     drugAssoc: {
-        name: "Drugs",
+        name: "Associated Drugs",
         predicate: "associated",
         object: "?X(Drug)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Drug"]
     },
     indi: {
-        name: "Diseases",
+        name: "Associated Diseases",
         predicate: "associated",
         object: "Disease",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Disease"]
     },
     admin: {
-        name: "Dosage Forms",
+        name: "Associated Dosage Forms",
         predicate: "associated",
         object: "DosageForm",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["DosageForm"]
     },
     targInter: {
-        name: "Targets",
+        name: "Associated Targets",
         predicate: "associated",
         object: "Target",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Gene"]
     },
     labMeth: {
-        name: "Lab Methods",
+        name: "Associated Lab Methods",
         predicate: "method",
         object: "LabMethod",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["LabMethod"]
     },
     species: {
-        name: "Species",
+        name: "Associated Species",
         predicate: "associated",
         object: "?X(Species)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Species"]
     },
     healthstatus: {
-        name: "HealthStatus",
+        name: "Associated HealthStatus",
         predicate: "associated",
         object: "?X(HealthStatus)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["HealthStatus"]
     },
     tissue: {
-        name: "Tissues",
+        name: "Associated Tissues",
         predicate: "associated",
         object: "?X(Tissue)",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["Tissue"]
     },
     celllines: {
-        name: "Cell Lines",
+        name: "Associated Cell Lines",
         predicate: "associated",
         object: "CellLine",
         numVisible: VISIBLE_ELEMENTS,
         color: typeColorMap["CellLine"]
     },
     plants: {
-        name: "Plant Family/Genus",
+        name: "Associated Plant Family/Genus",
         predicate: "associated",
         object: "?X(PlantFamily)",
         numVisible: VISIBLE_ELEMENTS,
