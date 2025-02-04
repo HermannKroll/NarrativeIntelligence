@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 import pickle
@@ -16,7 +17,7 @@ from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECI
 class AutocompletionUtil:
     __instance = None
 
-    VERSION = 3
+    VERSION = 4
     LOAD_INDEX = True
 
     def __new__(cls):
@@ -88,18 +89,40 @@ class AutocompletionUtil:
     def capitalize_entity(entity_str: str) -> str:
         return ' '.join([s.capitalize() for s in entity_str.strip().split(' ')])
 
+    @staticmethod
+    def iterate_entity_name_orders(entity_str: str):
+        results = []
+        entity_terms = [e for e in entity_str.split(' ')]
+        # skip to long terms as they would lead to
+        # 1) too many different permutations and
+        # 2) increase the index size by factors
+        # Stopping at 3 and iterating over the names increases the index (2025, 02) from 80MB to 140MB
+        if len(entity_terms) > 3:
+            return []
+
+        for alternate_order in itertools.permutations(entity_terms):
+            results.append(' '.join(alternate_order))
+        return results
+
     def add_entity_to_dict(self, entity_type, entity_str):
         str_formated = AutocompletionUtil.capitalize_entity(entity_str)
         self.known_terms.add(str_formated)
+        for alternate_order in AutocompletionUtil.iterate_entity_name_orders(str_formated):
+            self.known_terms.add(alternate_order)
+
+        # special handling of drug terms
+        # required for name suggestions of drug overviews
         if entity_type == DRUG:
             self.known_drug_terms.add(str_formated)
+            for alternate_order in AutocompletionUtil.iterate_entity_name_orders(str_formated):
+                self.known_drug_terms.add(alternate_order)
 
     def compute_known_entities_in_db(self):
         # Write dosage form terms + synonyms
         logging.info('Adding entity tagger entries...')
         tagger = EntityTagger()
         start_time = datetime.now()
-        task_size = len(tagger.term2entity.items())
+        task_size = len(tagger.known_terms)
         for idx, term in enumerate(tagger.known_terms):
             try:
                 for e in tagger.tag_entity(term, expand_search_by_prefix=False):
@@ -172,7 +195,6 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-
     AutocompletionUtil.LOAD_INDEX = False
     ac = AutocompletionUtil()
     ac.build_autocompletion_index()
