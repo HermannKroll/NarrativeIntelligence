@@ -18,7 +18,7 @@ from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECI
 class AutocompletionUtil:
     __instance = None
 
-    VERSION = 4
+    VERSION = 5
     LOAD_INDEX = True
 
     def __new__(cls):
