@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 from datetime import datetime
+from typing import Set
 
 import datrie
 
@@ -56,6 +57,22 @@ class AutocompletionUtil:
         self.logger.info('Finished')
         return trie
 
+    @staticmethod
+    def remove_redundant_terms(terms: Set[str]) -> Set[str]:
+        cleaned_terms = set()
+        for term in terms:
+            # Rule 1:
+            # If word without tailing s is although contained, we don't need the longer term
+            # do not force the rules if words are too short
+            # e.g. complications is removed if complication is present
+            if len(term) >= 5 and term[-1] == 's' and term[:-1] in terms:
+                continue
+
+            # add term if no rule fired
+            cleaned_terms.add(term)
+
+        return cleaned_terms
+
     def build_autocompletion_index(self, index_path=AUTOCOMPLETION_TMP_INDEX):
         self.known_terms.clear()
         self.trie = None
@@ -65,6 +82,10 @@ class AutocompletionUtil:
         self.known_terms.add("target")
         self.known_terms.update([t for t in self.variable_types])
         self.known_terms.update([t for t in self.other_terms])
+
+        logging.info('Cleaning known terms...')
+        self.known_terms = AutocompletionUtil.remove_redundant_terms(self.known_terms)
+        self.known_drug_terms = AutocompletionUtil.remove_redundant_terms(self.known_drug_terms)
 
         self.trie = self.__build_trie_structure(known_terms=self.known_terms)
         self.drug_trie = self.__build_trie_structure(known_terms=self.known_drug_terms)

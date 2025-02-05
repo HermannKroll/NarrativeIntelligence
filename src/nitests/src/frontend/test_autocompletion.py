@@ -39,6 +39,11 @@ class AutocompletionTestCase(TestCase):
         for test in diabetes_2_names:
             self.assertIn(test.lower(), diabetes_ac)
 
+    def test_remove_redundant_terms(self):
+        words = {'Complication', 'Complications', 'Complicationss'}
+        self.assertEqual(1, len(AutocompletionUtil.remove_redundant_terms(words)))
+        self.assertIn("Complication", AutocompletionUtil.remove_redundant_terms(words))
+
     def test_autocompletion_diseases(self):
         diabetes_2_names = ['Diabetes Mellitus, Adult Onset', 'Diabetes Mellitus, Ketosis Resistant',
                             'Diabetes Mellitus, Maturity Onset',
