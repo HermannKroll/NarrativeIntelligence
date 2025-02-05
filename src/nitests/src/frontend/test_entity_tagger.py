@@ -193,7 +193,7 @@ class EntityTaggerTestCase(TestCase):
                                     msg=f'name: {n} failed - ids found: {found_ids}')
 
     def test_cell_line_names(self):
-        valid_cell_line_id = {"CVCL_0023"}
+        valid_cell_line_id = {"CVCL:0023"}
         # A 549;A549;NCI-A549;A549/ATCC;A549 ATCC;A549ATCC;hA549
         names = ["A-549", "A 549", "A549", "NCI-A549", "A549/ATCC", "A549 ATCC", "A549ATCC", "hA549"]
         for n in names:

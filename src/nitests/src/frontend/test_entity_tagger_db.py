@@ -40,8 +40,8 @@ class EntityTaggerTestCase(TestCase):
 
     def test_single_terms(self):
         terms = {
-            "Codeine": 1,
-            "Furosemide": 2,
+            " Codeine": 1,
+            " Furosemide": 2,
         }
 
         prepare_tagging_index(terms)
@@ -71,24 +71,17 @@ class EntityTaggerTestCase(TestCase):
         for ent in entity_tagger.tag_entity('Furosemide'):
             self.assertIn(ent, entity_tagger.tag_entity('Furosemid'))
 
-        # test word components
-        self.assertEqual(len(entity_tagger.tag_entity('semid')),
-                         len(entity_tagger.tag_entity('Furo')))
-
-        for ent in entity_tagger.tag_entity('semid'):
-            self.assertIn(ent, entity_tagger.tag_entity('Furo'))
-
     def test_multi_terms(self):
         terms = {
-            "Diabetes": 1,
-            "Diabetes Mellitus": 2,
-            "Diabetes Mellitus, Type I": 3,
-            "Diabetes Mellitus, Type 1": 4,
-            "Diabetes Mellitus, Type II": 5,
-            "Diabetes Mellitus, Type 2": 6,
+            " Diabetes": 1,
+            " Diabetes Mellitus": 2,
+            " Diabetes Mellitus, Type I": 3,
+            " Diabetes Mellitus, Type 1": 4,
+            " Diabetes Mellitus, Type II": 5,
+            " Diabetes Mellitus, Type 2": 6,
 
-            "Type 2 Diabetes": 7,
-            "Type 2 Diabetes Mellitus": 8
+            " Type 2 Diabetes": 7,
+            " Type 2 Diabetes Mellitus": 8
         }
 
         prepare_tagging_index(terms)
@@ -112,6 +105,5 @@ class EntityTaggerTestCase(TestCase):
         self.assertEqual(len(entity_tagger.tag_entity('Diabetes Type')), 6)
         self.assertEqual(len(entity_tagger.tag_entity('Diabetes II')), 1)
 
-        # multiple word components (chopped off)
+        # multiple word components (chopped off only at the beginning!)
         self.assertEqual(len(entity_tagger.tag_entity('Diab Typ 2')), 3)
-        self.assertEqual(len(entity_tagger.tag_entity('betes Typ II')), 1)
