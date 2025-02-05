@@ -86,6 +86,12 @@ class AutocompletionUtil:
             self.logger.info(f'Autocompletion index does not exists: {index_path}')
 
     @staticmethod
+    def remove_term_ending_comma(entity_str: str):
+        # some terms like "Diabetes Mellitus, Adult" contain terms that end with a ',' - remove those ','
+        # but do not remove commas in words like cyp3,a4
+        return entity_str.replace(', ', ' ')
+
+    @staticmethod
     def capitalize_entity(entity_str: str) -> str:
         return ' '.join([s.capitalize() for s in entity_str.strip().split(' ')])
 
@@ -106,6 +112,7 @@ class AutocompletionUtil:
 
     def add_entity_to_dict(self, entity_type, entity_str):
         str_formated = AutocompletionUtil.capitalize_entity(entity_str)
+        str_formated = AutocompletionUtil.remove_term_ending_comma(str_formated)
         self.known_terms.add(str_formated)
         for alternate_order in AutocompletionUtil.iterate_entity_name_orders(str_formated):
             self.known_terms.add(alternate_order)

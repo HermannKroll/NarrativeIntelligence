@@ -23,6 +23,22 @@ class AutocompletionTestCase(TestCase):
         for test in simvastatin_gold:
             self.assertIn(test, simvastatin_ac_test)
 
+    def test_autocompletion_alternate_order(self):
+        alternate_orders = AutocompletionUtil.iterate_entity_name_orders("Diabetes Mellitus Adult")
+        self.assertIn("Mellitus Diabetes Adult", alternate_orders)
+        self.assertIn("Mellitus Adult Diabetes", alternate_orders)
+        self.assertIn("Adult Mellitus Diabetes", alternate_orders)
+        self.assertIn("Adult Diabetes Mellitus", alternate_orders)
+
+        diabetes_2_names = ['Diabetes Mellitus',
+                            'Diabetes Stable Mellitus',
+                            'Diabetes Mellitus Stable'
+                            ]
+
+        diabetes_ac = self.autocompletion.autocomplete("diabetes")
+        for test in diabetes_2_names:
+            self.assertIn(test.lower(), diabetes_ac)
+
     def test_autocompletion_diseases(self):
         diabetes_2_names = ['Diabetes Mellitus, Adult Onset', 'Diabetes Mellitus, Ketosis Resistant',
                             'Diabetes Mellitus, Maturity Onset',
@@ -33,6 +49,8 @@ class AutocompletionTestCase(TestCase):
                             'Diabetes Mellitus, Slow Onset',
                             'Diabetes Mellitus, Stable',
                             'diabetes mellitus, Type II']
+        diabetes_2_names = [AutocompletionUtil.remove_term_ending_comma(n) for n in diabetes_2_names]
+
         diabetes_ac = self.autocompletion.autocomplete("diabetes")
         for test in diabetes_2_names:
             self.assertIn(test.lower(), diabetes_ac)
