@@ -60,10 +60,13 @@ class AutocompletionTestCase(TestCase):
         for test in diabetes_2_names:
             self.assertIn(test.lower(), diabetes_ac)
 
-        neoplasms_terms = ['Neoplasms', 'Neoplasia', 'Neoplasm', 'Neoplasms']
+        neoplasms_terms = ['Neoplasia', 'Neoplasm']
         neoplas_ac = self.autocompletion.autocomplete("neoplas")
         for test in neoplasms_terms:
             self.assertIn(test.lower(), neoplas_ac)
+
+        # Neoplasm is contained so Neoplasms should not be suggested based on our "s" rule
+        self.assertNotIn("Neoplasms", neoplas_ac)
 
     def test_autocompletion_genes(self):
         cyp3a4_names = ['CYP3A4', 'CYP3A', 'CYP3A3', 'CYP3A3', 'CYP3A4', 'CYP3A5']
@@ -78,8 +81,11 @@ class AutocompletionTestCase(TestCase):
                       self.autocompletion.autocomplete('mechanistic'))
 
     def test_mesh(self):
-        self.assertIn('Cardiovascular Diseases'.lower(), self.autocompletion.autocomplete('cardiovascular di'))
-        self.assertIn('Musculoskeletal Diseases'.lower(), self.autocompletion.autocomplete('musculoskeletal'))
+        self.assertIn('Cardiovascular Disease'.lower(), self.autocompletion.autocomplete('cardiovascular di'))
+        self.assertIn('Musculoskeletal Disease'.lower(), self.autocompletion.autocomplete('musculoskeletal'))
+        # again "s" rule so only singular version
+        self.assertNotIn('Cardiovascular Diseases'.lower(), self.autocompletion.autocomplete('cardiovascular di'))
+        self.assertNotIn('Musculoskeletal Diseases'.lower(), self.autocompletion.autocomplete('musculoskeletal'))
 
     def test_excipients(self):
         excipient_names = ['ACETIC ACID', 'AMMONIO METHACRYLATE COPOLYMER TYPE A', 'HYDROCHLORIC ACID',
