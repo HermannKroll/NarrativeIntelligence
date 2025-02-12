@@ -10,9 +10,7 @@ import datrie
 from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.config import AUTOCOMPLETION_TMP_INDEX
 from narraint.frontend.entity.entitytagger import EntityTagger
-from narrant.entitylinking.enttypes import CHEMICAL, DISEASE, DOSAGE_FORM, SPECIES, DRUG, CHEMBL_CHEMICAL, EXCIPIENT, \
-    PLANT_FAMILY_GENUS, ENT_TYPES_SUPPORTED_BY_TAGGERS, METHOD, LAB_METHOD, VACCINE, ORGANISM, TARGET, TISSUE, \
-    HEALTH_STATUS
+from narrant.entitylinking.enttypes import DRUG, ALL
 
 
 class AutocompletionUtil:
@@ -24,10 +22,9 @@ class AutocompletionUtil:
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-            cls.__instance.variable_types = {CHEMICAL, DISEASE, DOSAGE_FORM, "Target",
-                                             SPECIES, PLANT_FAMILY_GENUS, EXCIPIENT, DRUG, CHEMBL_CHEMICAL, METHOD,
-                                             LAB_METHOD, VACCINE, TARGET, ORGANISM, TISSUE, HEALTH_STATUS}
-            cls.__instance.variable_types.update(ENT_TYPES_SUPPORTED_BY_TAGGERS)
+            cls.__instance.variable_types = set()
+            cls.__instance.variable_types.update(ALL)
+            cls.__instance.variable_types.add("Target")
             cls.__instance.other_terms = list(["PlantGenus", "PlantGenera"])
             cls.__instance.variable_types = sorted(list(cls.__instance.variable_types))
 
