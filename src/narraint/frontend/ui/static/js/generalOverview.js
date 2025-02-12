@@ -5,6 +5,7 @@ autoComplete(document.getElementById("drugInput"));
 const overviews = {
     drugAssoc: {
         name: "Associated Drugs",
+        nav_bar_name: "Drugs",
         predicate: "associated",
         object: "?X(Drug)",
         numVisible: VISIBLE_ELEMENTS,
@@ -12,6 +13,7 @@ const overviews = {
     },
     indi: {
         name: "Associated Diseases",
+        nav_bar_name: "Diseases",
         predicate: "associated",
         object: "Disease",
         numVisible: VISIBLE_ELEMENTS,
@@ -19,6 +21,7 @@ const overviews = {
     },
     admin: {
         name: "Associated Dosage Forms",
+        nav_bar_name: "Dosage Forms",
         predicate: "associated",
         object: "DosageForm",
         numVisible: VISIBLE_ELEMENTS,
@@ -26,6 +29,7 @@ const overviews = {
     },
     targInter: {
         name: "Associated Targets",
+        nav_bar_name: "Targets",
         predicate: "associated",
         object: "Target",
         numVisible: VISIBLE_ELEMENTS,
@@ -33,6 +37,7 @@ const overviews = {
     },
     labMeth: {
         name: "Associated Lab Methods",
+        nav_bar_name: "Lab Methods",
         predicate: "method",
         object: "LabMethod",
         numVisible: VISIBLE_ELEMENTS,
@@ -40,6 +45,7 @@ const overviews = {
     },
     species: {
         name: "Associated Species",
+        nav_bar_name: "Species",
         predicate: "associated",
         object: "?X(Species)",
         numVisible: VISIBLE_ELEMENTS,
@@ -47,6 +53,7 @@ const overviews = {
     },
     healthstatus: {
         name: "Associated HealthStatus",
+        nav_bar_name: "HealthStatus",
         predicate: "associated",
         object: "?X(HealthStatus)",
         numVisible: VISIBLE_ELEMENTS,
@@ -54,6 +61,7 @@ const overviews = {
     },
     tissue: {
         name: "Associated Tissues",
+        nav_bar_name: "Tissues",
         predicate: "associated",
         object: "?X(Tissue)",
         numVisible: VISIBLE_ELEMENTS,
@@ -61,6 +69,7 @@ const overviews = {
     },
     celllines: {
         name: "Associated Cell Lines",
+        nav_bar_name: "Cell Lines",
         predicate: "associated",
         object: "CellLine",
         numVisible: VISIBLE_ELEMENTS,
@@ -68,6 +77,7 @@ const overviews = {
     },
     plants: {
         name: "Associated Plant Family/Genus",
+        nav_bar_name: "Plant Family",
         predicate: "associated",
         object: "?X(PlantFamily)",
         numVisible: VISIBLE_ELEMENTS,

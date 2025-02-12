@@ -5,6 +5,7 @@ autoComplete(document.getElementById("drugInput"), "Drug");
 const overviews = {
     indi: {
         name: "Indications (Study Phase via <a href='https://clinicaltrials.gov'>clinicaltrials.gov</a>)",
+        nav_bar_name: "Indications",
         predicate: "treats",
         object: "Disease",
         numVisible: VISIBLE_ELEMENTS,
@@ -63,6 +64,7 @@ const overviews = {
     },
     adve: {
         name: "Adverse Effects (Beta)",
+        nav_bar_name: "Adverse Effects",
         predicate: "induces",
         object: "Disease",
         numVisible: VISIBLE_ELEMENTS,
@@ -103,7 +105,7 @@ async function buildSite() {
     document.getElementById('drugInput').value = decodeURI(keyword);
 
     const chembl_data = await translateToDrugId(keyword);
-    if (!chembl_data || chembl_data["chemblid"] === null) {
+    if (chembl_data === null || chembl_data["chemblid"] === null) {
         document.body.style.overflowY = "hidden";
         document.getElementById("modalBackdrop").style.display = "block";
         document.querySelector("#switch_overview_popup").style.display = "block";
@@ -313,7 +315,6 @@ function resetContainerLoading(keyword = null) {
         return;
     }
     text.innerText = `Drug '${keyword}' is unknown`;
-    openDrugSuggestion();
 }
 
 /**
@@ -499,6 +500,10 @@ async function closeOverviewForwarding(forward = false) {
     if (forward) {
         keywordToLog = searchedDrug;
         const url = new URL(window.location.href);
+        if (url.searchParams.has('drug')) {
+            url.searchParams.delete('drug');
+            window.history.replaceState({}, '', url);
+        }
         url.searchParams.set('entity', searchedDrug);
         url.pathname = "/overview/";
         window.history.pushState("Query", "", "/overview/" + url.search.toString());

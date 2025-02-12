@@ -100,15 +100,17 @@ function createDynamicOverviews() {
             onscroll="scrollHandler('${prefix}')"></div>
 </div>`;
 
-        const row = //TODO find a way without manipulate name string...
-            `<div class="row rounded mt-2 g-0 p-1 d-flex flex-nowrap shadow-sm" onClick="scrollToElement('${prefix}Overview')"
-     style="background-color: ${ov.color}">
+        const row = `
+  <div class="row rounded mt-2 g-0 p-1 d-flex flex-nowrap shadow-sm" 
+       onClick="scrollToElement('${prefix}Overview')" 
+       style="background-color: ${ov.color}">
     <div class="col-8 text-nowrap text-truncate overflow-hidden fs-0-85">
-        ${ov.name.split(" (")[0]}
+      ${ov.nav_bar_name || ov.name}
     </div>
-    <span class="badge rounded-pill bg-transparent text-dark col-3 w-auto me-auto fs-0-75" id="${prefix}Link"></span>
-</div>`;
-
+    <span class="badge rounded-pill bg-transparent text-dark col-3 w-auto me-auto fs-0-75" 
+          id="${prefix}Link">
+    </span>
+  </div>`;
         overviewEntries.innerHTML += entry;
         sidebarEntries.innerHTML += row;
 
