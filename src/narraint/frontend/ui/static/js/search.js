@@ -970,9 +970,11 @@ function showResults(response, parameters) {
     if (is_aggregate === true) {
         document.getElementById("select_sorting_freq").style.display = "block";
         visualizationByContainer.style.display = "block";
+        console.log("vis on");
     } else {
         document.getElementById("select_sorting_freq").style.display = "none";
-        visualizationByContainer.style.display = "none";
+        visualizationByContainer.style.setProperty("display", "none", "important");
+        console.log("vis off");
     }
 
     // Print query translation
@@ -2146,7 +2148,7 @@ function setKeywordSearchHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "none";
+        visualizationByContainer.style.setProperty("display", "none", "important");
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2169,7 +2171,7 @@ function setQueryBuilderHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "none";
+        visualizationByContainer.style.display = "block";
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2225,7 +2227,7 @@ async function setUpRecommenderSearch() {
         sortingYearContainer.style.display = "none";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "none";
+        visualizationByContainer.style.setProperty("display", "none", "important");
     }
     if (previewContainer) {
         previewContainer.style.display = "block";
