@@ -1,136 +1,179 @@
 import logging
-import pickle
 import string
-from collections import defaultdict
-from typing import Set
+from typing import List
 
+from sqlalchemy import delete, insert
+
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import EntityTaggerData, IndexVersion
 from narraint.frontend.entity.entityindexbase import EntityIndexBase
-from narraint.config import ENTITY_TAGGING_INDEX
 from narrant.entity.entity import Entity
 
 
 class EntityTagger(EntityIndexBase):
     """
-    EntityTagger converts a string to an entity
-    Performs a simple dictionary-based lookup and returns the corresponding entity
-    Builds upon the EntityResolver and computes reverse indexes,
-    e.g. Gene_ID -> Gene_Name is converted to Gene_Name -> Gene_ID
+    EntityTagger converts a string to an entity. For that, it performs
+    a simple conjunctive like query search (of all terms) and returns the
+    corresponding entities.
     """
     __initialized = False
 
-    VERSION = 5
+    MINIMUM_CHARACTERS_FOR_TAGGING = 3
 
-    def __init__(self, load_index=True):
+    VERSION = 2
+    NAME = "EntityTagger"
+
+    def __init__(self):
         if self.__initialized:
             return
         super().__init__()
-        logging.info('Initialize EntityTagger...')
-        self.autocompletion = None
-        self.term2entity = defaultdict(set)
-        self.known_terms = set()
+        logging.info("Initialize EntityTagger...")
 
-        trans_map = {p: '' for p in string.punctuation}
-        # necessary to not distinguish between
-        # "Axicabtagene Ciloleucel"
-        # "Axicabtagene-Ciloleucel"
-        # "AxicabtageneCiloleucel"
-        trans_map[' '] = ''
+        # we need the space for correct handling of partial term matching
+        trans_map = {p: ' ' for p in string.punctuation}
         self.__translator = str.maketrans(trans_map)
-        self.version = None
+        self.__db_values_to_insert = list()
 
-        if load_index:
-            try:
-                self._load_index()
-            except ValueError:
-                logging.info('Index is outdated. Creating a new one...')
-                # The index has been outdated or is old - create a new one
-                self.store_index()
+        if not self._validate_index():
+            self.store_index()
         self.__initialized = True
 
-    def _load_index(self, index_path=ENTITY_TAGGING_INDEX):
-        logging.info(f'Loading entity tagging index from {index_path}')
-        with open(index_path, 'rb') as f:
-            self.version, self.known_terms, self.term2entity = pickle.load(f)
+    def _validate_index(self) -> bool:
+        session = SessionExtended.get()
 
-            if self.version != EntityTagger.VERSION:
-                raise ValueError('Entitytagging index is outdated.')
+        # retrieve current version if present
+        index_version = None
+        query = session.query(IndexVersion).filter(IndexVersion.name == self.NAME)
+        if query.count() > 0:
+            index_version = query.first().version
 
-        logging.info(f'Index load ({len(self.term2entity)} different terms)')
+        # retrieve length of database index
+        index_count = session.query(EntityTaggerData).count()
 
-    def store_index(self, index_path=ENTITY_TAGGING_INDEX):
-        self.version = EntityTagger.VERSION
-        logging.info('Computing entity tagging index...')
+        if (index_version is None
+                or index_version != self.VERSION
+                or index_count == 0):
+            logging.info("Index empty or outdated.")
+            return False
+        return True
+
+    def _prepare_string(self, term: str) -> str:
+        term = term.strip().lower().translate(self.__translator).strip()
+        # remove double white spaces
+        while '  ' in term:
+            term = term.replace('  ', ' ')
+        return term
+
+    def store_index(self):
+        logging.info('Creating index for EntityTagger...')
+
+        # delete old index entries
+        session = SessionExtended.get()
+        session.execute(delete(EntityTaggerData))
+        session.commit()
+
         self._create_index()
-        logging.info('{} different terms map to entities'.format(len(self.term2entity)))
-        logging.info(f'Storing index to {index_path}')
-        with open(index_path, 'wb') as f:
-            pickle.dump((self.version, self.known_terms, self.term2entity), f)
-        logging.info('Index stored')
+        logging.info(f'Inserting {len(self.__db_values_to_insert)} values into database...')
+        EntityTaggerData.bulk_insert_values_into_table(session, self.__db_values_to_insert)
+
+        # update new EntityTagger index
+        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityTagger.NAME))
+        session.execute(insert(IndexVersion).values(name=EntityTagger.NAME, version=EntityTagger.VERSION))
+        session.commit()
+        session.remove()
+
+        self.__db_values_to_insert.clear()
+        logging.info('Finished')
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
-        term_lower = term.strip().lower()
-        self.known_terms.add(term_lower)
+        synonym = term.strip().lower()
+        if synonym is None:
+            return
 
-        term_wo_punctuation = term_lower.translate(self.__translator).strip()
-        self.term2entity[term_wo_punctuation].add(Entity(entity_id=entity_id, entity_type=entity_type,
-                                                         entity_class=entity_class))
+        self.__db_values_to_insert.append(dict(entity_id=entity_id,
+                                               entity_type=entity_type,
+                                               entity_class=entity_class,
+                                               synonym=synonym,
+                                               # space is important for matching
+                                               synonym_processed=' ' + self._prepare_string(term)))
 
-    def __find_entities(self, term: str) -> Set[Entity]:
-        if term not in self.term2entity:
-            return set()
-        return self.term2entity[term]
+    def tag_entity(self, term: str) -> List[Entity]:
+        # first process the string
+        term = self._prepare_string(term)
 
-    def __tag_entity_recursive(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
-        # Lower, strip and remove all punctuation
-        t_low = term.lower().translate(self.__translator).strip()
-        entities = set()
+        # ignore to short terms -> no matches
+        if not term or len(term) < EntityTagger.MINIMUM_CHARACTERS_FOR_TAGGING:
+            raise KeyError('Does not know an entity for term: {}'.format(term))
 
-        # fix working with empty strings here
-        if not t_low.strip():
-            return entities
+        session = SessionExtended.get()
+        query = session.query(EntityTaggerData)
+        # Construct the query as a disjunction with like expressions
+        # e.g. the search covid 19 is performed by
+        # WHERE synonym like '% covid%' AND synonym like '% 19%'
+        # SQL alchemy overloads the bitwise & operation to connect different expressions via AND
+        filter_exp = None
+        for part in term.split(' '):
+            part = part.strip()
+            if not part:
+                continue
+            # a synonym could match the term at the beginning but not in between
+            # eg all words that start with diab are valid matches
+            # but synonyms like hasdiabda are not matches
+            if filter_exp is None:
+                filter_exp = EntityTaggerData.synonym_processed.like('% {}%'.format(part))
+            else:
+                filter_exp = filter_exp & EntityTaggerData.synonym_processed.like('% {}%'.format(part))
+        query = query.filter(filter_exp)
 
-        if expand_search_by_prefix:
-            if not self.autocompletion:
-                from narraint.frontend.entity import autocompletion
-                self.autocompletion = autocompletion.AutocompletionUtil()
-            expanded_terms = self.autocompletion.find_entities_starting_with(t_low, retrieve_k=1000)
-            logging.debug(f'Expanding term "{t_low}" with: {expanded_terms}')
-            for term in expanded_terms:
-                entities.update(self.__tag_entity_recursive(term, expand_search_by_prefix=False))
+        entities = []
+        known_entities = set()
 
-        # check direct string
-        entities.update(self.__find_entities(t_low))
-        # also add plural if possible
-        if t_low[-1] != 's':
-            entities.update(self.__find_entities(f'{t_low}s'))
-        # check singular form
-        if t_low[-1] == 's':
-            entities.update(self.__find_entities(t_low[:-1]))
-        # some drugs might be searched without the ending "e"
-        if not expand_search_by_prefix and len(entities) == 0 and t_low[-1] != 'e':
-            entities.update(self.__find_entities(f'{t_low}e'))
-        return entities
+        for result in query:
+            cleaned_synonym = result.synonym.strip()  # remove leading space
+            key = (result.entity_id, result.entity_type, cleaned_synonym)
+            if key in known_entities:
+                continue
+            entities.append(Entity(entity_name=cleaned_synonym,
+                                   entity_id=result.entity_id,
+                                   entity_type=result.entity_type,
+                                   entity_class=result.entity_class))
+            known_entities.add(key)
+        session.remove()
 
-    def tag_entity(self, term: str, expand_search_by_prefix=True) -> Set[Entity]:
-        """
-        Tags an entity by given a string
-        :param term: the entity term
-        :param expand_search_by_prefix: If true, all known terms that have the given term as a prefix are used to search
-        :return: a list of entities (entity_id, entity_type)
-        """
-        entities = self.__tag_entity_recursive(term, expand_search_by_prefix=expand_search_by_prefix)
         if len(entities) == 0:
             raise KeyError('Does not know an entity for term: {}'.format(term))
         return entities
+
+    @staticmethod
+    def known_terms():
+        logging.info("Querying known terms...")
+        known_terms = dict()
+
+        session = SessionExtended.get()
+        query = session.query(EntityTaggerData.synonym, EntityTaggerData.entity_type)
+
+        for synonym in query:
+            term = synonym[0].strip()
+            entity_type = synonym[1].strip()
+
+            if term not in known_terms:
+                known_terms[term] = {entity_type}
+            else:
+                known_terms[term].add(entity_type)
+        return known_terms
 
 
 def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-
-    entity_tagger = EntityTagger(load_index=False)
+    entity_tagger = EntityTagger()
     entity_tagger.store_index()
+    tests = ['covid', 'covid 19', 'melanoma', 'braf']
+    for test in tests:
+        print()
+        for e in entity_tagger.tag_entity(test)[:4]:
+            print(e.entity_id, e.entity_type, e.entity_name, e.entity_class)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
 import logging
-import pickle
 import string
 from collections import defaultdict
 
-from narraint.config import ENTITY_EXPLAINER_INDEX
+from sqlalchemy import delete, insert
+
+from narraint.backend.database import SessionExtended
+from narraint.backend.models import EntityExplainerData, IndexVersion
 from narraint.frontend.entity.entityindexbase import EntityIndexBase
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.entity.entityresolver import EntityResolver
@@ -12,45 +14,72 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __initialized = False
 
-    VERSION = 4
+    VERSION = 1
+    NAME = "EntityExplainer"
 
-    def __init__(self, load_index=True):
+    def __init__(self):
         if self.__initialized:
             return
+
         super().__init__()
-        logging.info('Initialize EntityTagger...')
+
+        logging.info('Initialize EntityExplainer...')
         self.expand_by_subclasses = False
         self.entity2terms = defaultdict(set)
         self.version = None
         trans_map = {p: '' for p in string.punctuation}
         self.__translator = str.maketrans(trans_map)
-        if load_index:
-            try:
-                self._load_index()
-            except ValueError:
-                # The index has been outdated or is old - create a new one
-                logging.info('Index is outdated. Creating a new one...')
-                self.store_index()
+
+        if not self._validate_index():
+            self.store_index()
         self.__initialized = True
 
-    def _load_index(self, index_path=ENTITY_EXPLAINER_INDEX):
-        logging.info(f'Loading entity explainer index from {index_path}')
-        with open(index_path, 'rb') as f:
-            self.version, self.entity2terms = pickle.load(f)
+    def store_index(self):
+        logging.info('Creating index for EntityExplainer...')
 
-            if self.version != EntityExplainer.VERSION:
-                raise ValueError('EntityExplainer index is outdated.')
+        # delete old index entries
+        session = SessionExtended.get()
+        session.execute(delete(EntityExplainerData))
+        session.commit()
 
-        logging.info(f'Index load ({len(self.entity2terms)} different terms)')
-
-    def store_index(self, index_path=ENTITY_EXPLAINER_INDEX):
-        self.version = EntityExplainer.VERSION
-        logging.info('Computing entity explainer index...')
         self._create_index()
-        logging.info(f'Storing index to {index_path}')
-        with open(index_path, 'wb') as f:
-            pickle.dump((self.version, self.entity2terms), f)
-        logging.info('Index stored')
+
+        entries = list()
+        for entity_id, entity_terms in sorted(self.entity2terms.items(), key=lambda x: x[0]):
+            if entity_id.strip() == "":
+                continue
+            terms = EntityExplainerData.synonyms_to_string(list(entity_terms))
+            entries.append(dict(entity_id=entity_id, entity_terms=terms))
+        logging.info(f'Inserting {len(self.entity2terms)} values into database...')
+        EntityExplainerData.bulk_insert_values_into_table(session, entries)
+
+        # update new EntityTaggerDB index
+        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityExplainer.NAME))
+        session.execute(insert(IndexVersion).values(name=EntityExplainer.NAME, version=EntityExplainer.VERSION))
+        session.commit()
+        session.remove()
+
+        self.entity2terms.clear()
+        logging.info('Finished')
+
+    def _validate_index(self) -> bool:
+        session = SessionExtended.get()
+
+        # retrieve current version if present
+        index_version = None
+        query = session.query(IndexVersion).filter(IndexVersion.name == self.NAME)
+        if query.count() > 0:
+            index_version = query.first().version
+
+        # retrieve length of database index
+        index_count = session.query(EntityExplainerData).count()
+
+        if (index_version is None
+                or index_version != self.VERSION
+                or index_count == 0):
+            logging.info("Index empty or outdated.")
+            return False
+        return True
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
         self.entity2terms[entity_id].add(term.strip())
@@ -88,9 +117,16 @@ class EntityExplainer(EntityIndexBase):
         for entity in entities:
             heading = resolver.get_name_for_var_ent_id(entity.entity_id, entity.entity_type, resolve_gene_by_id=False)
             headings.add(heading)
-            if entity.entity_id in self.entity2terms:
-                for term in self.entity2terms[entity.entity_id]:
-                    headings.add(term)
+
+            session = SessionExtended.get()
+            query = session.query(EntityExplainerData.entity_terms)
+            query = query.filter(entity.entity_id == EntityExplainerData.entity_id)
+
+            if query.count() == 0:
+                continue
+            terms = query.first()[0]
+            terms = EntityExplainerData.string_to_synonyms(terms)
+            headings |= set(terms)
 
         # Convert it to a list and sort
         headings = list([h for h in headings if len(h) > 1])
@@ -117,11 +153,13 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
 
-    entity_explainer = EntityExplainer(load_index=False)
-    entity_explainer.store_index()
-
+    entity_explainer = EntityExplainer()
     explanations = entity_explainer.explain_entity_str("metformin")
     print(explanations)
+
+    entity_tagger = EntityTagger()
+    tags = entity_tagger.tag_entity("metformin")
+    print(tags)
 
 
 if __name__ == "__main__":
