@@ -236,8 +236,7 @@ def get_term_to_entity(request):
             if expand_by_prefix_str == "false":
                 expand_by_prefix = False
         try:
-            entities = View().translation.convert_text_to_entity(term,
-                                                                 expand_search_by_prefix=expand_by_prefix)
+            entities = View().translation.convert_text_to_entity(term)
             resolver = EntityResolver()
             for e in entities:
                 try:
