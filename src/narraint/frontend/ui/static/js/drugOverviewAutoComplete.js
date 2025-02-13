@@ -29,7 +29,7 @@ function autoComplete(input, entity_type) {
         //console.log(names);
         let url_call = autocompletion_url + "?term=" + value;
         if (entity_type) {
-            url_call += "?entity_type=" + entity_type;
+            url_call += "&entity_type=" + entity_type;
         }
         fetch(url_call)
         .then(response => response.json())
