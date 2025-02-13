@@ -1,12 +1,11 @@
 import gzip
 import logging
 import os.path
-import string
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice
 
-import datrie
+import marisa_trie
 
 from kgextractiontoolbox.backend.database import Session
 from kgextractiontoolbox.entitylinking.tagging.vocabulary import Vocabulary
@@ -16,10 +15,10 @@ from narrant.atc.atc_tree import ATCTree
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY, MESH_SUPPLEMENTARY_FILE
 from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
-from narrant.mesh.data import MeSHDB
-from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.entitylinking.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE, TARGET, ORGANISM, CELLLINE
+from narrant.mesh.data import MeSHDB
+from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.vocabularies.cellline_vocabulary import CellLineVocabulary
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
@@ -146,16 +145,17 @@ class EntityIndexBase:
             logging.info('Expanding MeSH Descriptors by their sub descriptors...')
             logging.info('Computing Trie for fast lookup...')
             start_time = datetime.now()
-            mesh_trie = datrie.Trie(string.printable)
+
+            trie_entries = set()
             for idx, mesh_id in enumerate(mesh_mappings):
-                print_progress_with_eta("computing trie", idx, len(mesh_mappings), start_time, print_every_k=10)
+                print_progress_with_eta("computing trie entries", idx, len(mesh_mappings), start_time, print_every_k=10)
                 try:
                     tree_nos = self.mesh_ontology.get_tree_numbers_for_descriptor(mesh_id)
                     for tn in tree_nos:
-                        tn_and_id = f'{tn.lower()}:{mesh_id}'
-                        mesh_trie[tn_and_id] = tn_and_id
+                        trie_entries.add(f'{tn.lower()}:{mesh_id}')
                 except KeyError:
                     continue
+            mesh_trie = marisa_trie.Trie(trie_entries)
 
             logging.info('Finished')
 

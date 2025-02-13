@@ -44,15 +44,7 @@ class AutocompletionUtil:
 
     def __build_trie_structure(self, known_terms):
         self.logger.info(f'Building Trie structure with {len(known_terms)} terms...')
-        alphabet = {c for t in known_terms for c in t}
-        self.logger.info(f'{len(alphabet)} different characters are in the alphabet')
-        start_time = datetime.now()
-        trie = datrie.Trie(alphabet)
-        for idx, t in enumerate(known_terms):
-            trie[t.lower()] = t
-            print_progress_with_eta("computing trie", idx, len(known_terms), start_time)
-        self.logger.info('Finished')
-        return trie
+        return marisa_trie.Trie([s.lower() for s in known_terms])
 
     @staticmethod
     def remove_redundant_terms(terms: Set[str]) -> Set[str]:
@@ -114,18 +106,80 @@ class AutocompletionUtil:
         return ' '.join([s.capitalize() for s in entity_str.strip().split(' ')])
 
     @staticmethod
-    def iterate_entity_name_orders(entity_str: str):
-        results = []
-        entity_terms = [e for e in entity_str.split(' ')]
-        # skip to long terms as they would lead to
-        # 1) too many different permutations and
-        # 2) increase the index size by factors
-        # Stopping at 3 and iterating over the names increases the index (2025, 02) from 80MB to 140MB
-        if len(entity_terms) > 3:
-            return []
+    def iterate_entity_name_orders(entity_str: str, recursive_call=False):
+        results = list()
+        # do not alternate terms with 'for', 'of', or 'off'
+        # since this would break the logical order
+        if "For" in entity_str or "Of" in entity_str or "Off" in entity_str:
+            return results
 
-        for alternate_order in itertools.permutations(entity_terms):
-            results.append(' '.join(alternate_order))
+        partial_entity_terms = None
+        and_index = entity_str.find(" And ")
+        or_index = entity_str.find(" Or ")
+        if and_index > 0 or or_index > 0:
+            # we have found a conjunction (and, or)
+            # example: "t1 and t2 or t3" should create
+            # "t1 and t2 or t3"
+            # "t2 and t1 or t3"
+            # "t1 and t3 or t2"
+            # "t3 and t1 or t2"
+            # "t2 and t3 or t1"
+            # "t3 and t2 or t1"
+
+            if 0 <= and_index < or_index or or_index == -1:
+                # "and" occurred first
+                left_str, right_str = entity_str.split(" And ",  1)
+                left_terms = AutocompletionUtil.iterate_entity_name_orders(left_str.strip(), recursive_call=True)
+                right_terms = AutocompletionUtil.iterate_entity_name_orders(right_str.strip(), recursive_call=True)
+                conjunction = " And "
+            else:  # 0 <= or_index < and_index or and_index == -1
+                # "or" occurred first
+                left_str, right_str = entity_str.split(" Or ", 1)
+                left_terms = AutocompletionUtil.iterate_entity_name_orders(left_str.strip(), recursive_call=True)
+                right_terms = AutocompletionUtil.iterate_entity_name_orders(right_str.strip(), recursive_call=True)
+                conjunction = " Or "
+
+            # recursive call invalid (len(term.split()) > AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD)
+            if len(left_terms) == 0:
+                left_terms = [left_str]
+            if len(right_terms) == 0:
+                right_terms = [right_str]
+
+            partial_entity_terms = (left_terms, conjunction, right_terms)
+
+        if not partial_entity_terms:
+            entity_terms = entity_str.split(' ')
+            # skip to long terms as they would lead to
+            # 1) too many different permutations and
+            # 2) increase the index size by factors
+            # Stopping at 4 (2025, 02) 34MB (in-memory & on disk)
+            if len(entity_terms) > AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD:
+                return results
+
+            for alternate_order in itertools.permutations(entity_terms):
+                results.append(' '.join(alternate_order))
+        elif recursive_call:
+            return partial_entity_terms
+        else:
+            term_component_permutations = list()
+            left_terms, conjunction, right_terms = partial_entity_terms
+            term_component_permutations.append(left_terms)
+            conjunction_pattern = "{}" + conjunction + "{}"
+
+            while isinstance(right_terms, tuple):
+                assert len(right_terms) == 3
+                left_terms, conjunction, right_terms = right_terms
+                term_component_permutations.append(left_terms)
+                conjunction_pattern += conjunction + "{}"
+
+            term_component_permutations.append(right_terms)
+
+            for term_component_choice in itertools.product(*term_component_permutations):
+                # term_component_permutations = (['ab', 'ba'], ['cd', 'dc'], ['ef', 'fe'])
+                # term_component_choice = ('ab', 'cd', 'ef') --> insert into pattern
+                for choice_permutation in itertools.permutations(term_component_choice):
+                    results.append(conjunction_pattern.format(*choice_permutation))
+
         return results
 
     def add_entity_to_dict(self, entity_type, entity_str):
@@ -147,11 +201,12 @@ class AutocompletionUtil:
         logging.info('Adding entity tagger entries...')
         tagger = EntityTagger()
         start_time = datetime.now()
-        task_size = len(tagger.known_terms)
-        for idx, term in enumerate(tagger.known_terms):
+        known_terms_to_types = tagger.known_terms()
+        task_size = len(known_terms_to_types)
+        for idx, term in enumerate(known_terms_to_types):
             try:
-                for e in tagger.tag_entity(term, expand_search_by_prefix=False):
-                    self.add_entity_to_dict(e.entity_type, term)
+                for entity_type in known_terms_to_types[term]:
+                    self.add_entity_to_dict(entity_type, term)
                 print_progress_with_eta('adding entity tagger terms...', idx, task_size, start_time)
             except KeyError:
                 pass
