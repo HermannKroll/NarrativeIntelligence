@@ -65,7 +65,7 @@ class QueryTranslation:
         else:
             return None
 
-    def convert_text_to_entity(self, text, expand_search_by_prefix=True):
+    def convert_text_to_entity(self, text):
         text_low = text.replace('_', ' ').lower()
         if text.startswith('?'):
             var_string, var_type = self.check_and_convert_variable(text)
@@ -86,7 +86,7 @@ class QueryTranslation:
             if may_variable:
                 return may_variable
             try:
-                e = self.entity_tagger.tag_entity(text, expand_search_by_prefix=expand_search_by_prefix)
+                e = self.entity_tagger.tag_entity(text)
             except KeyError:
                 raise ValueError(f'term "{text}" unknown')
         return e
