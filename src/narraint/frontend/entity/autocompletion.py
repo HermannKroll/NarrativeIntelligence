@@ -5,10 +5,10 @@ import pickle
 from datetime import datetime
 from typing import Set
 
-import datrie
+import marisa_trie
 
 from kgextractiontoolbox.progress import print_progress_with_eta
-from narraint.config import AUTOCOMPLETION_TMP_INDEX
+from narraint.config import AUTOCOMPLETION_TMP_INDEX, AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.entitylinking.enttypes import DRUG, ALL
 
