@@ -179,6 +179,7 @@ class EntityTaggerData(Extended, DatabaseTable):
     entity_type = Column(String, primary_key=True)
     entity_class = Column(String, nullable=True)
     synonym = Column(String, primary_key=True)
+    synonym_processed = Column(String, nullable=False)
 
 
 class EntityExplainerData(Extended, DatabaseTable):
