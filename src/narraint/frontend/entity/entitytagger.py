@@ -168,7 +168,6 @@ def main():
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
     entity_tagger = EntityTagger()
-    entity_tagger.store_index()
     tests = ['covid', 'covid 19', 'melanoma', 'braf']
     for test in tests:
         print()
