@@ -49,11 +49,15 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
-    <script src="{% static 'js/paper.js' %}?version=11"></script>
+    <script src="{% static 'js/paper.js' %}?version=15"></script>
     <script>
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";
         const url_paper_view_log = "{% url 'paper_view_log' %}";
+        const ok_symbol_url = "{% static 'ok.png' %}";
+        const cancel_symbol_url = "{% static 'cancel.png' %}";
+        const url_document_classification_feedback = "{% url 'document_classification_feedback' %}";
+
         let search = window.location.search;
         const urlParams = new URLSearchParams(search);
         let document_id = urlParams.get('document_id');

@@ -416,7 +416,7 @@ Create a new job file:
 nano /etc/systemd/system/narrative.service
 ```
 
-Enter the following script:
+Insert the required matomo parameters and enter the following script:
 ```
 [Unit]
 Description=NarrativeService
@@ -429,6 +429,9 @@ WorkingDirectory=/home/pubpharm/NarrativeIntelligence/src/narraint/frontend/
 ExecStart= /home/pubpharm/anaconda3/envs/narraint/bin/python3.8 /home/pubpharm/anaconda3/envs/narraint/bin/gunicorn -b 127.0.0.1:8080 --timeout 500 frontend.wsgi -w 4 --preload
 Environment="PYTHONPATH=/home/pubpharm/NarrativeIntelligence/src/:/home/pubpharm/NarrativeIntelligence/lib/NarrativeAnnotation/src/:/home/pubpharm/NarrativeIntelligence/lib/KGExtractionToolbox/src/"
 Environment="DJANGO_SETTINGS_MODULE=frontend.settings.prod"
+Environment="MATOMO_BASE_URL=<base-url>"
+Environment="MATOMO_SIDE_ID_SEARCH=<side-id-search>"
+Environment="MATOMO_SIDE_ID_OVERVIEW=<side-id-overview>"
 
 [Install]
 WantedBy=default.target

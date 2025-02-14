@@ -21,9 +21,12 @@ FEEDBACK_DIR = os.path.join(GIT_ROOT_DIR, 'feedback')
 FEEDBACK_REPORT_DIR = os.path.join(FEEDBACK_DIR, 'reports')
 FEEDBACK_PREDICATION_DIR = os.path.join(FEEDBACK_DIR, "predications")
 FEEDBACK_SUBGROUP_DIR = os.path.join(FEEDBACK_DIR, "subgroups")
+FEEDBACK_CLASSIFICATION = os.path.join(FEEDBACK_DIR, "classification")
 
 QUERY_YIELD_PER_K = 1000000
 BULK_INSERT_AFTER_K = 100000
+
+AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD = 5
 
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)
@@ -43,6 +46,8 @@ if not os.path.isdir(FEEDBACK_PREDICATION_DIR):
 if not os.path.isdir(FEEDBACK_SUBGROUP_DIR):
     os.makedirs(FEEDBACK_SUBGROUP_DIR)
 
+if not os.path.isdir(FEEDBACK_CLASSIFICATION):
+    os.makedirs(FEEDBACK_CLASSIFICATION)
 
 
 # Backend for Tagging

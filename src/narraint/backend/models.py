@@ -171,3 +171,38 @@ class DatabaseUpdate(Extended, DatabaseTable):
         insert_stmt = insert(DatabaseUpdate).values(last_update=datetime.now())
         session.execute(insert_stmt)
         session.commit()
+
+
+class EntityTaggerData(Extended, DatabaseTable):
+    __tablename__ = "entity_tagger_data"
+    entity_id = Column(String, primary_key=True)
+    entity_type = Column(String, primary_key=True)
+    entity_class = Column(String, nullable=True)
+    synonym = Column(String, primary_key=True)
+    synonym_processed = Column(String, nullable=False)
+
+
+class EntityExplainerData(Extended, DatabaseTable):
+    __tablename__ = "entity_explainer_data"
+    entity_id = Column(String, primary_key=True)
+    entity_terms = Column(String)
+
+    @staticmethod
+    def synonyms_to_string(synonyms: list) -> str:
+        return "[" + ",".join(synonyms) + "]"
+
+    @staticmethod
+    def string_to_synonyms(synonym_string: str) -> list:
+        return synonym_string[1:-1].split(",")
+
+
+class IndexVersion(Extended, DatabaseTable):
+    __tablename__ = "index_versions"
+    name = Column(String, primary_key=True)
+    version = Column(Integer, nullable=False)
+
+
+class ContentData(Extended, DatabaseTable):
+    __tablename__ = "content_data"
+    name = Column(String, primary_key=True)
+    data = Column(String, nullable=False)

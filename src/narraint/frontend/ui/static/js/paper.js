@@ -1,30 +1,3 @@
-const typeColorMap = {
-    "Disease": "#aeff9a",
-    "Drug": "#ff8181",
-    "Species": "#b88cff",
-    "Excipient": "#ffcf97",
-    "LabMethod": "#9eb8ff",
-    "Chemical": "#fff38c",
-    "Gene": "#87e7ff",
-    "Target": "#1fe7ff",
-    "Method": "#7897ff",
-    "DosageForm": "#9189ff",
-    "Mutation": "#8cffa9",
-    "ProteinMutation": "#b9ffcb",
-    "DNAMutation": "#4aff78",
-    "Variant": "#ffa981",
-    "CellLine": "#ce41ff",
-    "SNP": "#fd83ca",
-    "DomainMotif": "#f383fd",
-    "Plant": "#dcfd83",
-    "Strain": "#75c4c7",
-    "Vaccine": "#c7767d",
-    "HealthStatus": "#bbaabb",
-    "Organism": "#00bc0f",
-    "Tissue": "#dc8cff"
-}
-
-
 var markInstance = null;
 var tagsArray = null;
 var activeTypeMap = null;
@@ -137,7 +110,7 @@ function fillPaperDetail(contentData) {
     }
     initCheckbox(typeArray);
 
-    fillClassifications(contentData.classification);
+    fillClassifications(contentData["classification"], contentData["id"]);
 
     const href = `/document/?document_id=${contentData.id}&data_source=${documentCollection}`;
     fillPaperNewTabView(href);
@@ -162,7 +135,45 @@ function sendPaperViewLog(docID) {
 }
 
 
-function fillClassifications(classifications) {
+function sendPaperClassificationFeedback(documentID, classification, isPositive, containerId) {
+    // first check if a user id exists
+    // if not, the same function is registered as callback for later execution
+    const user_id = getUserIDFromLocalStorage(() => {
+        sendPaperClassificationFeedback(documentID, classification, isPositive, containerId);
+    });
+
+    if (user_id === "cookie")
+        return;
+
+    const request = new Request(
+        url_document_classification_feedback,
+        {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, "Content-type": "application/json"},
+            mode: 'same-origin',
+            body: JSON.stringify({
+                doc_id: documentID,
+                doc_collection: documentCollection,
+                classification: classification,
+                rating: isPositive,
+                user_id: user_id
+            })
+        }
+    );
+    fetch(request)
+        .then(response => {
+            if (response.ok) {
+                showInfoAtBottom("Thank you for your Feedback!");
+                document.getElementById(containerId).classList.add("feedbackButtonHide");
+            } else {
+                showInfoAtBottom("Your feedback couldn't be transferred - please try again")
+            }
+        })
+        .catch(e => console.log(e))
+}
+
+
+function fillClassifications(classifications, documentID) {
     const classDiv = document.getElementById('classificationDiv');
     const classInfo = document.getElementById('classificationInfo');
 
@@ -176,17 +187,38 @@ function fillClassifications(classifications) {
     classDiv.replaceChildren();
 
     Object.entries(classifications).forEach(([key, value]) => {
-        value = value.replaceAll(' ', '').replaceAll(';', ', ')
-        const classBox = document.createElement("div");
+        value = value.replaceAll(';', ', ')
+        const classContainer = document.createElement("div");
+        const classText = document.createElement("div");
+        const classFeedback = document.createElement('div');
         const tags = document.createElement('div');
         const header = document.createElement('div');
-        classBox.classList.add('classTags');
+        const positive = document.createElement("img");
+        const negative = document.createElement("img");
+
+        classContainer.classList.add('classTags');
+        classFeedback.classList.add('classFeedback');
+        classFeedback.id = "classFeedback" + key;
+
         header.classList.add('classTagsHeader');
         header.innerText = key + ':';
+
         tags.innerText = value;
 
-        classBox.append(header, tags);
-        classDiv.append(classBox);
+        positive.src = ok_symbol_url;
+        positive.classList.add("feedbackButton");
+        positive.title = "correct classification";
+        positive.onclick = () => sendPaperClassificationFeedback(key, documentID, true, classFeedback.id);
+
+        negative.src = cancel_symbol_url;
+        negative.classList.add("feedbackButton");
+        negative.title = "wrong classification";
+        negative.onclick = () => sendPaperClassificationFeedback(key, documentID, false, classFeedback.id);
+
+        classFeedback.append(positive, negative);
+        classText.append(header, tags);
+        classContainer.append(classText, classFeedback);
+        classDiv.append(classContainer);
     })
     classInfo.style.display = 'Block';
 }

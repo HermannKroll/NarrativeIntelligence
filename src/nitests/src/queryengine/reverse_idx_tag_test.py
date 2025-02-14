@@ -52,7 +52,7 @@ class ReverseTagIdxTest(TestCase):
         for row in session.query(TagInvertedIndex):
             key = (row.entity_id, row.entity_type, row.document_collection)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = json.loads(row.document_ids)
+            db_rows[key] = TagInvertedIndex.prepare_document_ids(row.document_ids)
 
         self.assertEqual(allowed_doc_ids[0], db_rows[allowed_keys[0]])
 
@@ -92,7 +92,7 @@ class ReverseTagIdxTest(TestCase):
         for row in session.query(TagInvertedIndex):
             key = (row.entity_id, row.entity_type, row.document_collection)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = (json.loads(row.document_ids), row.support)
+            db_rows[key] = (TagInvertedIndex.prepare_document_ids(row.document_ids), row.support)
 
             # support must correspond to the number of documents
             self.assertEquals(row.support, len(db_rows[key][0]))
@@ -130,7 +130,7 @@ class ReverseTagIdxTest(TestCase):
         for row in session.query(TagInvertedIndex):
             key = (row.entity_id, row.entity_type, row.document_collection)
             self.assertIn(key, allowed_keys)
-            db_rows[key] = (json.loads(row.document_ids), row.support)
+            db_rows[key] = (TagInvertedIndex.prepare_document_ids(row.document_ids), row.support)
 
             # support must correspond to the number of documents
             self.assertEquals(row.support, len(db_rows[key][0]))

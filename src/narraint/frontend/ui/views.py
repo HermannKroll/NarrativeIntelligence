@@ -20,7 +20,7 @@ from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
-    FEEDBACK_SUBGROUP_DIR, LOG_DIR
+    FEEDBACK_SUBGROUP_DIR, LOG_DIR, FEEDBACK_CLASSIFICATION
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
@@ -30,6 +30,7 @@ from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
+from narraint.frontend.ui.service_content import update_content_information
 from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
@@ -235,8 +236,7 @@ def get_term_to_entity(request):
             if expand_by_prefix_str == "false":
                 expand_by_prefix = False
         try:
-            entities = View().translation.convert_text_to_entity(term,
-                                                                 expand_search_by_prefix=expand_by_prefix)
+            entities = View().translation.convert_text_to_entity(term)
             resolver = EntityResolver()
             for e in entities:
                 try:
@@ -795,7 +795,7 @@ def post_feedback(request):
                                    sentence=res.Sentence.text))
 
             # create a filename for this rating
-            timestamp = datetime.now().strftime("%Y-%d-%d_%H-%M-%S")
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             rating_filename = os.path.join(FEEDBACK_PREDICATION_DIR, f'predication_{userid}_{timestamp}.json')
             with open(rating_filename, 'wt') as f:
                 json.dump(result, f, sort_keys=True, indent=4)
@@ -813,6 +813,44 @@ def post_feedback(request):
             traceback.print_exc(file=sys.stdout)
             return HttpResponse(status=500)
     View().query_logger.write_api_call(False, "get_feedback", str(request))
+    return HttpResponse(status=500)
+
+
+def post_document_classification_feedback(request):
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"doc_id", "doc_collection", "classification", "rating", "user_id"}:
+        try:
+            time_start = datetime.now()
+            userid = data["user_id"]
+
+            result = {
+                "document_id": data["doc_id"],
+                "document_collection": data["doc_collection"],
+                "document_classification": data["classification"],
+                "rating": data["rating"],
+                "user_id": userid,
+            }
+
+            # create a filename for this rating
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            rating_filename = os.path.join(FEEDBACK_CLASSIFICATION, f'classification_{userid}_{timestamp}.json')
+            with open(rating_filename, 'wt') as f:
+                json.dump(result, f, sort_keys=True, indent=4)
+
+            View().query_logger.write_api_call(True, "post_document_classification_feedback", str(request),
+                                               time_needed=datetime.now() - time_start)
+            return HttpResponse(status=200)
+        except Exception:
+            View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
+            traceback.print_exc(file=sys.stdout)
+            return HttpResponse(status=500)
+    View().query_logger.write_api_call(False, "post_document_classification_feedback", str(request))
     return HttpResponse(status=500)
 
 
@@ -1005,6 +1043,44 @@ def post_drug_ov_chembl_phase_href_log(request):
             View().query_logger.write_drug_ov_chembl_phase_href(drug, disease_name, disease_id, phase, query)
         except IOError:
             logging.debug('Could not write chembl phase href log file')
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
+def post_entity_ov_search_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"entity"}:
+        entity = data["entity"]
+        try:
+            View().query_logger.write_entity_ov_search(entity)
+        except IOError:
+            logging.debug('Could not write entity searched log file')
+        return HttpResponse(status=200)
+    return HttpResponse(status=500)
+
+
+def post_entity_ov_subst_href_log(request):
+    data = None  # init needed for second evaluation step
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        logging.debug('Invalid JSON received')
+        return HttpResponse(status=500)
+
+    if data and data.keys() & {"drug", "substance", "query"}:
+        entity = data["drug"]
+        substance = data["substance"]
+        query = data["query"]
+        try:
+            View().query_logger.write_entity_ov_substance_href(entity, substance, query)
+        except IOError:
+            logging.debug('Could not write substance href log file')
         return HttpResponse(status=200)
     return HttpResponse(status=500)
 
@@ -1204,6 +1280,14 @@ class DocumentView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         View().query_logger.write_page_view_log(DocumentView.template_name)
+        return super().get(request, *args, **kwargs)
+
+
+class OverviewView(TemplateView):
+    template_name = "ui/general_overview.html"
+
+    def get(self, request, *args, **kwargs):
+        View().query_logger.write_page_view_log(OverviewView.template_name)
         return super().get(request, *args, **kwargs)
 
 
@@ -1448,3 +1532,11 @@ def get_recommend(request):
         return JsonResponse(
             dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
                  query_limit_hit="False"))
+
+
+def get_content_data(request):
+    try:
+        content_information = update_content_information()
+        return JsonResponse(status=200, data=content_information)
+    except Exception:
+        return HttpResponse(status=500)

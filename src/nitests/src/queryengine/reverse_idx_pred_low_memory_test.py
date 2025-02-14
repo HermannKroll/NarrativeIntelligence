@@ -47,7 +47,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(2, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT")]
-        allowed_pm = ['1']
+        allowed_pm = ['[1]']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
@@ -88,7 +88,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['2,1', '1', '2']
+        allowed_pm = ['[2,1]', '[1]', '[2]']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
@@ -110,7 +110,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['2,1', '1', '2']
+        allowed_pm = ['[2,1]', '[1]', '[2]']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
@@ -132,7 +132,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['2,1', '1', '2']
+        allowed_pm = ['[2,1]', '[1]', '[2]']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):
@@ -154,7 +154,7 @@ class ReversePredicationIdxText(TestCase):
         self.assertEqual(3, session.query(PredicationInvertedIndex).count())
 
         allowed_keys = [("A", "AT", "T1", "B", "BT"), ("A", "AT", "T2", "B", "BT"), ("A", "AT", "T3", "B", "BT")]
-        allowed_pm = ['2,1', '1', '2']
+        allowed_pm = ['[2,1]', '[1]', '[2]']
 
         db_rows = {}
         for row in session.query(PredicationInvertedIndex):

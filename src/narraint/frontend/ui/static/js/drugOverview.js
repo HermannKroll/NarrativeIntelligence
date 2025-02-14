@@ -1,17 +1,91 @@
 let keywordToLog = null;
 
+autoComplete(document.getElementById("drugInput"), "Drug");
+
 const overviews = {
-    indi: {name: "Indications (Study Phase via <a href='https://clinicaltrials.gov'>clinicaltrials.gov</a>)", predicate: "treats", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: indiCreateCallback, dataCallback: indiDataCallback},
-    admin: {name: "Administration", predicate: "administered", object: "DosageForm", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["DosageForm"]},
-    targInter: {name: "Target Interactions", predicate: "interacts", object: "Target", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Gene"]},
-    labMeth: {name: "Lab Methods", predicate: "method", object: "LabMethod", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["LabMethod"]},
-    species: {name: "Species", predicate: "associated", object: "?X(Species)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Species"]},
-    healthstatus: {name: "HealthStatus", predicate: "associated", object: "?X(HealthStatus)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["HealthStatus"]},
-    drugAssoc: {name: "Drug Associations", predicate: "associated", object: "?X(Drug)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
-    drugInter: {name: "Drug Interactions", predicate: "interacts", object: "Drug", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Drug"]},
-    adve: {name: "Adverse Effects (Beta)", predicate: "induces", object: "Disease", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Disease"], createCallback: adveCreateCallback, dataCallback: adveDataCallback},
-    tissue: {name: "Tissue", predicate: "associated", object: "?X(Tissue)", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["Tissue"]},
-    celllines: {name: "Cell Lines", predicate: "associated", object: "CellLine", numVisible: VISIBLE_ELEMENTS, color: typeColorMap["CellLine"]}
+    indi: {
+        name: "Indications (Study Phase via <a href='https://clinicaltrials.gov'>clinicaltrials.gov</a>)",
+        nav_bar_name: "Indications",
+        predicate: "treats",
+        object: "Disease",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Disease"],
+        createCallback: indiCreateCallback,
+        dataCallback: indiDataCallback
+    },
+    admin: {
+        name: "Administration",
+        predicate: "administered",
+        object: "DosageForm",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["DosageForm"]
+    },
+    targInter: {
+        name: "Target Interactions",
+        predicate: "interacts",
+        object: "Target",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Gene"]
+    },
+    labMeth: {
+        name: "Lab Methods",
+        predicate: "method",
+        object: "LabMethod",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["LabMethod"]
+    },
+    species: {
+        name: "Species",
+        predicate: "associated",
+        object: "?X(Species)",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Species"]
+    },
+    healthstatus: {
+        name: "HealthStatus",
+        predicate: "associated",
+        object: "?X(HealthStatus)",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["HealthStatus"]
+    },
+    drugAssoc: {
+        name: "Drug Associations",
+        predicate: "associated",
+        object: "?X(Drug)",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Drug"]
+    },
+    drugInter: {
+        name: "Drug Interactions",
+        predicate: "interacts",
+        object: "Drug",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Drug"]
+    },
+    adve: {
+        name: "Adverse Effects (Beta)",
+        nav_bar_name: "Adverse Effects",
+        predicate: "induces",
+        object: "Disease",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Disease"],
+        createCallback: adveCreateCallback,
+        dataCallback: adveDataCallback
+    },
+    tissue: {
+        name: "Tissue",
+        predicate: "associated",
+        object: "?X(Tissue)",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["Tissue"]
+    },
+    celllines: {
+        name: "Cell Lines",
+        predicate: "associated",
+        object: "CellLine",
+        numVisible: VISIBLE_ELEMENTS,
+        color: typeColorMap["CellLine"]
+    }
 }
 
 
@@ -31,13 +105,15 @@ async function buildSite() {
     document.getElementById('drugInput').value = decodeURI(keyword);
 
     const chembl_data = await translateToDrugId(keyword);
-
-    if (!chembl_data) {
-        resetContainerLoading(keyword)
-        return
+    if (chembl_data === null || chembl_data["chemblid"] === null) {
+        document.body.style.overflowY = "hidden";
+        document.getElementById("modalBackdrop").style.display = "block";
+        document.querySelector("#switch_overview_popup").style.display = "block";
+        document.querySelector("#searched_drug").innerHTML = document.querySelector("#drugInput")?.value;
+        return;
     }
 
-    logDrugSearch(keywordToLog ? keywordToLog: keyword)
+    logDrugSearch(keywordToLog ? keywordToLog : keyword)
     currentDrugName = decodeURI(keyword);
     currentChemblID = chembl_data.chemblid;
 
@@ -109,7 +185,7 @@ async function translateToDrugId(keyword) {
             return {
                 chemblid: chemblid,
                 entity_name: entity_name
-            }
+            };
         });
 }
 
@@ -183,19 +259,24 @@ async function setDrugData(entity_name) {
                 document.getElementById('drug_inchi').innerText = "-";
             }
         }).catch(e => {
-            document.getElementById('name').innerText = decodeURI(currentDrugName);
-            document.getElementById('formular').innerText = "-";
-            document.getElementById('mass').innerText = "-";
-            document.getElementById('drug_alogp').innerText = "-";
-            document.getElementById('drug_cxlogp').innerText = "-";
-            document.getElementById('drug_cx_acid_pka').innerText = "-";
-            document.getElementById('drug_cx_basic_pka').innerText = "-";
-            document.getElementById('drug_cx_logd').innerText = "-";
-            document.getElementById('drug_inchi').innerText = "-";
-        })
+        document.getElementById('name').innerText = decodeURI(currentDrugName);
+        document.getElementById('formular').innerText = "-";
+        document.getElementById('mass').innerText = "-";
+        document.getElementById('drug_alogp').innerText = "-";
+        document.getElementById('drug_cxlogp').innerText = "-";
+        document.getElementById('drug_cx_acid_pka').innerText = "-";
+        document.getElementById('drug_cx_basic_pka').innerText = "-";
+        document.getElementById('drug_cx_logd').innerText = "-";
+        document.getElementById('drug_inchi').innerText = "-";
+    })
         .finally(() => {
-            const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
-            document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            if (currentChemblID !== null) {
+                const chemblLink = "https://www.ebi.ac.uk/chembl/compound_report_card/" + currentChemblID;
+                document.getElementById('drug_chemblid').innerHTML = '<a href="' + chemblLink + '" target="_blank">' + currentChemblID + '</a>';
+            } else {
+                document.getElementById('drug_chemblid').innerText = '-';
+            }
+
             const pubchemLink = "https://pubchem.ncbi.nlm.nih.gov/compound/" + currentDrugName;
             document.getElementById('drug_pubchem').innerHTML = '<a href="' + pubchemLink + '" target="_blank">' + decodeURI(currentDrugName) + '</a>'
         })
@@ -227,14 +308,13 @@ function resetContainerLoading(keyword = null) {
     doneLoading("news");
     document.getElementById("structure").hidden = true;
     let text = document.getElementById("unknown_drug_name_tag");
-    text.style.setProperty("display","flex", "important");
+    text.style.setProperty("display", "flex", "important");
 
-    if(keyword === null) {
+    if (keyword === null) {
         text.innerText = `Unknown term`;
         return;
     }
     text.innerText = `Drug '${keyword}' is unknown`;
-    openDrugSuggestion();
 }
 
 /**
@@ -251,7 +331,7 @@ function adveCreateCallback() {
     const options = document.getElementById("adveOptions");
     const defaultHTML = options.innerHTML;
     const newSettings =
-`<div class="input-group-text">
+        `<div class="input-group-text">
     <input class="form-check-input mt-0 me-1" type="checkbox" onChange="adveSwapData()" id="adveShowAll">
     Show All
 </div>`
@@ -276,12 +356,14 @@ async function indiDataCallback() {
         .then((data) => {
             chemblData.push(...data["drug_indications"]);
         })
-        .catch((e) => { console.error(e)})
+        .catch((e) => {
+            console.error(e)
+        })
 
     // match equivalent entities and add chembl phase
-    for(let idx in data) {
+    for (let idx in data) {
         let entity = chemblData.find((e) => e["mesh_id"].split(":")[1] === data[idx]["id"].split(":")[1]);
-        if(entity) {
+        if (entity) {
             data[idx].max_phase_for_ind = Number.parseInt(entity.max_phase_for_ind);
         } else {
             data[idx].max_phase_for_ind = -1;
@@ -332,7 +414,7 @@ async function adveDataCallback() {
 
         //only add entities which count is greater than the one stored in
         // indications or not contained in it
-        if(!obj || obj["count"] < entity["count"]) {
+        if (!obj || obj["count"] < entity["count"]) {
             altData.push(entity);
         }
     });
@@ -370,7 +452,7 @@ function logChemblPhaseHref(drug, disease_name, disease_id, query, phase) {
 
 function openDrugSuggestion() {
     document.querySelector("#drug_suggest_button")?.classList.toggle("disabled");
-
+    document.getElementById("modalBackdrop").style.display = "block";
     document.body.style.overflowY = "hidden";
     document.querySelector("#suggested_drug_popup").style.display = "block"
     document.querySelector("#suggested_drug").value = document.querySelector("#drugInput")?.value;
@@ -403,10 +485,35 @@ async function closeDrugSuggestion(send = false) {
         )
     }
 
+    document.getElementById("modalBackdrop").style.display = "none";
     suggestedDrugPopup.style.display = "none";
     document.body.style.overflowY = "auto";
     document.querySelector("#drug_suggest_button")?.classList.toggle("disabled", false);
 
     document.querySelector("#suggested_drug").value = "";
     document.querySelector("#suggested_drug_text").value = "";
+}
+
+async function closeOverviewForwarding(forward = false) {
+    const switchOverviewPopup = document.getElementById("switch_overview_popup");
+    const searchedDrug = document.getElementById("searched_drug").innerHTML;
+    if (forward) {
+        keywordToLog = searchedDrug;
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('drug')) {
+            url.searchParams.delete('drug');
+            window.history.replaceState({}, '', url);
+        }
+        url.searchParams.set('entity', searchedDrug);
+        url.pathname = "/overview/";
+        window.history.pushState("Query", "", "/overview/" + url.search.toString());
+        window.location.href = url.href;
+    } else {
+        resetContainerLoading();
+    }
+
+    document.getElementById("modalBackdrop").style.display = "none";
+    switchOverviewPopup.style.display = "none";
+    document.body.style.overflowY = "auto";
+    document.getElementById("searched_drug").innerHTML = "";
 }

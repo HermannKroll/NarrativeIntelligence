@@ -59,50 +59,13 @@ const short_urls = {
     'q36': '?Drug(Drug) administered ?Form(DosageForm)',
 };
 
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
+const visualizationByContainer = document.getElementById("visualization_filter");
 
 $('#btn_search_again').click(() => {
     const predicate_input = document.getElementById('input_predicate');
     predicate_input.selectedIndex = 0;
     refreshSearch();
 })
-
-$('#cookiebtnDeny').click(() => {
-    $('.toast').toast('hide')
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-})
-
-const cookieAcceptBtnHandler = (callback) => {
-    let userid = uuidv4();
-    localStorage.setItem('userid', userid);
-    $('.toast').toast('hide');
-    let cookie_toast = $('#cookie_toast');
-    cookie_toast.hide();
-    callback();
-}
-
-function getUserIDFromLocalStorage(callback) {
-    if (!localStorage.getItem('userid')) {
-        console.log("no user id found in local storage");
-
-        //remove previously stored events and add the new callback event
-        $('#cookiebtnAccept').off('click').click(() => {
-            cookieAcceptBtnHandler(callback);
-        })
-
-        let cookie_toast = $('#cookie_toast');
-        cookie_toast.show();
-        cookie_toast.toast('show');
-        return "cookie";
-    }
-    return localStorage.getItem('userid');
-}
 
 
 function escapeString(input_string) {
@@ -296,6 +259,8 @@ function initQueryBuilderFromString(search_str) {
         document.getElementById('input_object').value = triple[2];
         first = false;
     });
+
+    document.getElementById('btn_clear_search').style.display = 'block';
 
     document.getElementById("btn_search").click();
     $('html,body').scrollTop(0);
@@ -1004,8 +969,12 @@ function showResults(response, parameters) {
     document.getElementById("select_sorting_year").style.display = "block";
     if (is_aggregate === true) {
         document.getElementById("select_sorting_freq").style.display = "block";
+        visualizationByContainer.style.display = "block";
+        console.log("vis on");
     } else {
         document.getElementById("select_sorting_freq").style.display = "none";
+        visualizationByContainer.style.setProperty("display", "none", "important");
+        console.log("vis off");
     }
 
     // Print query translation
@@ -1069,9 +1038,9 @@ function showResults(response, parameters) {
 function updateYearFilter(year_aggregation, query_trans_string) {
     let year_filter_container = document.getElementById("year-filter");
     if (JSON.stringify(year_aggregation) !== '{}') {
-        year_filter_container.style.display = "block";
+        year_filter_container.classList.toggle("d-none", false);
     } else {
-        year_filter_container.style.display = "none";
+        year_filter_container.classList.toggle("d-none", true);
     }
     const fromSlider = document.querySelector('#fromSlider');
     const toSlider = document.querySelector('#toSlider');
@@ -1253,9 +1222,9 @@ const createProvenanceDivElement = (explanations) => {
             }
 
             let rate_pos_id = getUniqueRateButtonID();
-            let div_rate_pos = $('<img style="cursor: pointer" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+            let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
             let rate_neg_id = getUniqueRateButtonID();
-            let div_rate_neg = $('<img style="cursor: pointer" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+            let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
 
             div_rate_pos.click(function () {
                 if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
@@ -1271,7 +1240,7 @@ const createProvenanceDivElement = (explanations) => {
                 }
             });
 
-            let div_col_rating = $('<div class="col-1">');
+            let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
             div_col_rating.append(div_rate_pos);
             div_col_rating.append(div_rate_neg);
 
@@ -1281,7 +1250,7 @@ const createProvenanceDivElement = (explanations) => {
                 e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
                 '</div>');
 
-            let div_prov_example = $('<div class="container">');
+            let div_prov_example = $('<div class="container mt-1 border-top">');
             let div_prov_example_row = $('<div class="row">');
 
             div_prov_example_row.append(div_provenance);
@@ -1516,11 +1485,9 @@ const createDocumentAggregate = (queryAggregate, query_len, accordionID, heading
     divCardHeader.append(divH2);
 
     let rate_pos_id = getUniqueRateButtonID()
-    let imgAggrRatePos = $('<img class="subgroupRatingImg"' +
-        ' id="' + rate_pos_id + '" src="' + ok_symbol_url + '" height="30px">');
+    let imgAggrRatePos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct aggregation">');
     let rate_neg_id = getUniqueRateButtonID()
-    let imgAggrRateNeg = $('<img class="subgroupRatingImg" ' +
-        ' id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" height="30px">');
+    let imgAggrRateNeg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong aggregation">');
 
     imgAggrRatePos.click(() => {
         let subgroup = queryAggregate.sub;
@@ -2121,9 +2088,49 @@ async function updatePopoverByType(popover, concept, queryText) {
         .catch((e) => console.log(e));
 }
 
+function toggleClearSearchButton() {
+    const subjectInput = document.getElementById('input_subject').value.trim();
+    const predicateInput = document.getElementById('input_predicate').value.trim();
+    const objectInput = document.getElementById('input_object').value.trim();
+    const queryList = document.getElementById('query_builder_list').children.length;
+
+    const clearButton = document.getElementById('btn_clear_search');
+    console.log(subjectInput);
+    console.log(predicateInput);
+    console.log(objectInput);
+    console.log(queryList);
+    if (subjectInput || predicateInput !== "associated" || objectInput || queryList > 0) {
+        clearButton.style.display = 'block';
+    } else {
+        clearButton.style.display = 'none';
+    }
+}
+
+function clearSearchForm() {
+    document.getElementById('input_subject').value = '';
+    document.getElementById('input_predicate').selectedIndex = 0;
+    document.getElementById('input_object').value = '';
+
+    const queryBuilderList = document.getElementById('query_builder_list');
+    while (queryBuilderList.firstChild) {
+        queryBuilderList.removeChild(queryBuilderList.firstChild);
+    }
+
+    document.getElementById('btn_clear_search').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('input_subject').addEventListener('input', toggleClearSearchButton);
+    document.getElementById('input_predicate').addEventListener('change', toggleClearSearchButton);
+    document.getElementById('input_object').addEventListener('input', toggleClearSearchButton);
+
+    const observer = new MutationObserver(toggleClearSearchButton);
+    observer.observe(document.getElementById('query_builder_list'), { childList: true });
+});
+
+
 const exampleQueriesContainer = document.getElementById("exampleQueries");
 const sortingYearContainer = document.getElementById("sorting_year_container");
-const visualizationByContainer = document.getElementById("visualization_filter");
 const previewContainer = document.getElementById('document_preview');
 
 /**
@@ -2131,7 +2138,6 @@ const previewContainer = document.getElementById('document_preview');
  */
 function setKeywordSearchHelp() {
     current_search_method = 'query_builder';
-    // searchMethod = 'keywordSearch';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
     anchor.target = "_blank";
@@ -2142,7 +2148,7 @@ function setKeywordSearchHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "block";
+        visualizationByContainer.style.setProperty("display", "none", "important");
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2221,7 +2227,7 @@ async function setUpRecommenderSearch() {
         sortingYearContainer.style.display = "none";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "none";
+        visualizationByContainer.style.setProperty("display", "none", "important");
     }
     if (previewContainer) {
         previewContainer.style.display = "block";
