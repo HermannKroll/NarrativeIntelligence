@@ -51,6 +51,12 @@ logger = logging.getLogger(__name__)
 DO_CACHING = True
 
 
+def log_stack_trace(message: str, error: Exception) -> None:
+    tb_lines = traceback.format_exception(type(error), error, error.__traceback__)
+    tb_text = "".join(tb_lines)
+    logging.debug(f"{message}\nTraceback:\n{tb_text}")
+
+
 class View:
     """
     Singleton encapsulating the former global entity_tagger and cache
@@ -221,7 +227,7 @@ def get_check_query(request):
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid="False", query=query_trans_string))
-    except Exception:
+    except Exception as e:
         return JsonResponse(status=500, data=dict(valid="False", query=None))
 
 
@@ -259,8 +265,9 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
         try:
             cached_results = View().cache.load_result_from_cache(collection_string, graph_query)
             cache_hit = True
-        except Exception:
-            logging.error('Cannot load query result from cache...')
+        except Exception as e:
+            message = 'Cannot load query result from cache...'
+            log_stack_trace(message, e)
             cached_results = None
             cache_hit = False
     if DO_CACHING and cached_results:
@@ -275,8 +282,9 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
             try:
 
                 View().cache.add_result_to_cache(collection_string, graph_query, results)
-            except Exception:
-                logging.error('Cannot store query result to cache...')
+            except Exception as e:
+                message = 'Cannot store query result to cache...'
+                log_stack_trace(message, e)
     time_needed = datetime.now() - start_time
     return results, cache_hit, time_needed
 
@@ -414,8 +422,9 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
                 return cached_sub_count_list, True
             else:
                 cached_sub_count_list = None
-        except Exception:
-            logging.error('Cannot load query result from cache...')
+        except Exception as e:
+            message  = 'Cannot load query result from cache...'
+            log_stack_trace(message, e)
     if not cached_sub_count_list:
         # run query
         # compute the query and do not load metadata (not required)
@@ -443,8 +452,9 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
                 View().cache.add_result_to_cache(document_collection, graph_query,
                                                  sub_count_list,
                                                  aggregation_name=aggregation_strategy)
-            except Exception:
-                logging.error('Cannot store query result to cache...')
+            except Exception as e:
+                message = 'Cannot store query result to cache...'
+                log_stack_trace(message, e)
 
         return sub_count_list, False
 
@@ -1127,8 +1137,9 @@ def get_keywords(request):
 
                 return JsonResponse(dict(keywords=keywords))
 
-            except Exception:
-                logging.debug(f"Could not retrieve keywords for {substance_id}")
+            except Exception as e:
+                message = f"Could not retrieve keywords for {substance_id}"
+                log_stack_trace(message, e)
     return HttpResponse(status=500)
 
 
@@ -1352,7 +1363,8 @@ def get_keyword_search_request(request):
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
-                logging.debug(f'Could not generate graph queries for "{keywords}: {e}"')
+                message  = f'Could not generate graph queries for "{keywords}: {e}"'
+                log_stack_trace(message, e)
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
 
     return HttpResponse(status=500)
@@ -1384,8 +1396,9 @@ def get_clinical_trial_phases(request):
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
-        except Exception as _:
-            logging.debug('Could not query clinical trials for {}'.format(chembl_id))
+        except Exception as e:
+            message ='Could not query clinical trials for {}'.format(chembl_id)
+            log_stack_trace(message, e)
             View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
 
