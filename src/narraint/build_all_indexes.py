@@ -5,6 +5,7 @@ from narraint.backend.util import get_db_connection_name
 from narraint.frontend.entity.autocompletion import AutocompletionUtil
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.frontend.ui.service_content import update_content_information
 from narrant.build_all_indexes import build_entity_indexes
 from narrant.build_all_tagging_indexes import build_tagging_indexes
 
@@ -28,6 +29,9 @@ def build_service_indexes():
     AutocompletionUtil.LOAD_INDEX = False
     ac = AutocompletionUtil()
     ac.build_autocompletion_index()
+
+    # build index for content information visualizations
+    update_content_information(force_update=True)
 
     logging.info('=' * 60)
     logging.info('=' * 60)
