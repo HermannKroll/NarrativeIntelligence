@@ -2,10 +2,10 @@ import logging
 import string
 from typing import List
 
-from sqlalchemy import delete, insert
+from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import EntityTaggerData, IndexVersion
+from narraint.backend.models import EntityTaggerData
 from narraint.frontend.entity.entityindexbase import EntityIndexBase
 from narrant.entity.entity import Entity
 
@@ -34,28 +34,7 @@ class EntityTagger(EntityIndexBase):
         self.__translator = str.maketrans(trans_map)
         self.__db_values_to_insert = list()
 
-        if not self._validate_index():
-            self.store_index()
         self.__initialized = True
-
-    def _validate_index(self) -> bool:
-        session = SessionExtended.get()
-
-        # retrieve current version if present
-        index_version = None
-        query = session.query(IndexVersion).filter(IndexVersion.name == self.NAME)
-        if query.count() > 0:
-            index_version = query.first().version
-
-        # retrieve length of database index
-        index_count = session.query(EntityTaggerData).count()
-
-        if (index_version is None
-                or index_version != self.VERSION
-                or index_count == 0):
-            logging.info("Index empty or outdated.")
-            return False
-        return True
 
     def _prepare_string(self, term: str) -> str:
         term = term.strip().lower().translate(self.__translator).strip()
@@ -75,12 +54,6 @@ class EntityTagger(EntityIndexBase):
         self._create_index()
         logging.info(f'Inserting {len(self.__db_values_to_insert)} values into database...')
         EntityTaggerData.bulk_insert_values_into_table(session, self.__db_values_to_insert)
-
-        # update new EntityTagger index
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityTagger.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityTagger.NAME, version=EntityTagger.VERSION))
-        session.commit()
-        session.remove()
 
         self.__db_values_to_insert.clear()
         logging.info('Finished')

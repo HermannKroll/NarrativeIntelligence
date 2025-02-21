@@ -1,10 +1,9 @@
 from unittest import TestCase
 
-from sqlalchemy import delete, insert
+from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import IndexVersion, EntityTaggerData
-from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.backend.models import EntityTaggerData
 from narraint.frontend.entity.query_translation import QueryTranslation
 from narrant.entitylinking.enttypes import PLANT_FAMILY_GENUS
 
@@ -21,10 +20,8 @@ class QueryTranslationTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         session = SessionExtended.get()
-
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityTagger.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityTagger.NAME, version=EntityTagger.VERSION))
-
+        # Delete old tagger data
+        session.execute(delete(EntityTaggerData))
         session.commit()
 
         entity_tagger_data = list()

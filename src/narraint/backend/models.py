@@ -63,7 +63,6 @@ class PredicationInvertedIndex(Extended, DatabaseTable):
         return list(int(doc_id) for doc_id in document_ids_str.strip("[]").split(","))
 
 
-
 class Tagger(models.Tagger):
     pass
 
@@ -83,7 +82,8 @@ class DocumentMetadata(models.DocumentMetadata):
 class DocumentMetadataService(Extended, DatabaseTable):
     __tablename__ = 'document_metadata_service'
     __table_args__ = (
-        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection'), ondelete="CASCADE"),
+        ForeignKeyConstraint(('document_id', 'document_collection'), ('document.id', 'document.collection'),
+                             ondelete="CASCADE"),
         PrimaryKeyConstraint('document_id', 'document_collection', sqlite_on_conflict='IGNORE')
     )
 
@@ -194,12 +194,6 @@ class EntityExplainerData(Extended, DatabaseTable):
     @staticmethod
     def string_to_synonyms(synonym_string: str) -> list:
         return synonym_string[1:-1].split(",")
-
-
-class IndexVersion(Extended, DatabaseTable):
-    __tablename__ = "index_versions"
-    name = Column(String, primary_key=True)
-    version = Column(Integer, nullable=False)
 
 
 class ContentData(Extended, DatabaseTable):
