@@ -71,7 +71,7 @@ def update_content_data(session, name, data):
 def get_content_data(name, force_update=False):
     session = SessionExtended.get()
     query = session.query(ContentData.data).filter(ContentData.name == name)
-    if query.count() == 0 or force_update:
+    if force_update:
         logging.info(f"Compute content data for {name}")
 
         if name == "collections":
@@ -85,8 +85,10 @@ def get_content_data(name, force_update=False):
 
         update_content_data(session, name, data)
         logging.info("finished update")
-    else:
+    elif query.count() > 0:
         data = json.loads(query.first()[0])
+    else:
+        data = dict()
     session.remove()
     return data
 
