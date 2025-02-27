@@ -1,12 +1,15 @@
+import json
 from unittest import TestCase
 
 import tqdm
-from sqlalchemy import insert, delete
+from sqlalchemy import delete
 
+from kgextractiontoolbox.backend.models import EntityResolverData
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import EntityExplainerData, IndexVersion, EntityTaggerData
+from narraint.backend.models import EntityExplainerData, EntityTaggerData
 from narraint.frontend.entity.entityexplainer import EntityExplainer
 from narraint.frontend.entity.entitytagger import EntityTagger
+from narrant.entity.entityresolver import MeshResolver
 
 tagger_entries = [
     ('CHEMBL4204794', 'Drug', None, ' avapritinib'),
@@ -35,7 +38,7 @@ tagger_entries = [
     ('MESH:D000094024', 'Disease', None, ' long haul covid'),
     ('MESH:C535564', 'Disease', None, ' tibia absence of with polydactyly'),
     ('MESH:D000094024', 'Disease', None, ' longcovid'),
-    ('CHEMBL486174', 'Drug', None,  ' variotin'),
+    ('CHEMBL486174', 'Drug', None, ' variotin'),
     ('MESH:D000094024', 'Disease', None, ' long haul covid19s'),
     ('MESH:D000094024', 'Disease', None, ' covid19 long haul'),
     ('MESH:C535563', 'Disease', None, ' absence of tibia'),
@@ -90,6 +93,19 @@ explanation_entries = [
      '[Tibia, Absence of, with Polydactyly,Absence of tibia with polydactyly,Polydactyly with absent tibia]')
 ]
 
+mesh_resolver_data = {
+    "D000094024" : "Long COVID",
+}
+
+mesh_supplement_resolver_data = {
+    "C535563": "Absence of Tibia",
+    # need to be present for test
+    "C535564": "",
+    "C564764": "",
+    "C535689": "",
+    "C563403": ""
+}
+
 
 class EntityExplanationTestCase(TestCase):
 
@@ -97,14 +113,18 @@ class EntityExplanationTestCase(TestCase):
     def setUpClass(cls) -> None:
         session = SessionExtended.get()
 
-        # update versions
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityTagger.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityTagger.NAME, version=EntityTagger.VERSION))
-
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityExplainer.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityExplainer.NAME, version=EntityExplainer.VERSION))
-
+        # Delete old explainer and tagger data
+        session.execute(delete(EntityExplainerData))
+        session.execute(delete(EntityTaggerData))
+        session.execute(delete(EntityResolverData))
         session.commit()
+
+        # important to translate mesh ids to names
+        EntityResolverData.overwrite_resolver_data(session, name=MeshResolver.MESH_NAME,
+                                                   json_data=json.dumps(mesh_resolver_data))
+
+        EntityResolverData.overwrite_resolver_data(session, name=MeshResolver.MESH_SUPPLEMENT_NAME,
+                                                   json_data=json.dumps(mesh_supplement_resolver_data))
 
         entity_tagger_data = list()
         for ent_id, ent_type, ent_class, synonyms in tagger_entries:

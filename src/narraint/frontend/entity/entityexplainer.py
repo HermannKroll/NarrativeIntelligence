@@ -2,10 +2,10 @@ import logging
 import string
 from collections import defaultdict
 
-from sqlalchemy import delete, insert
+from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import EntityExplainerData, IndexVersion
+from narraint.backend.models import EntityExplainerData
 from narraint.frontend.entity.entityindexbase import EntityIndexBase
 from narraint.frontend.entity.entitytagger import EntityTagger
 from narrant.entity.entityresolver import EntityResolver
@@ -29,9 +29,6 @@ class EntityExplainer(EntityIndexBase):
         self.version = None
         trans_map = {p: '' for p in string.punctuation}
         self.__translator = str.maketrans(trans_map)
-
-        if not self._validate_index():
-            self.store_index()
         self.__initialized = True
 
     def store_index(self):
@@ -53,33 +50,8 @@ class EntityExplainer(EntityIndexBase):
         logging.info(f'Inserting {len(self.entity2terms)} values into database...')
         EntityExplainerData.bulk_insert_values_into_table(session, entries)
 
-        # update new EntityTaggerDB index
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityExplainer.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityExplainer.NAME, version=EntityExplainer.VERSION))
-        session.commit()
-        session.remove()
-
         self.entity2terms.clear()
         logging.info('Finished')
-
-    def _validate_index(self) -> bool:
-        session = SessionExtended.get()
-
-        # retrieve current version if present
-        index_version = None
-        query = session.query(IndexVersion).filter(IndexVersion.name == self.NAME)
-        if query.count() > 0:
-            index_version = query.first().version
-
-        # retrieve length of database index
-        index_count = session.query(EntityExplainerData).count()
-
-        if (index_version is None
-                or index_version != self.VERSION
-                or index_count == 0):
-            logging.info("Index empty or outdated.")
-            return False
-        return True
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
         self.entity2terms[entity_id].add(term.strip())

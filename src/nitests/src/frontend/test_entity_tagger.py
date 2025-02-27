@@ -1,11 +1,10 @@
-import json
 import logging
 from unittest import TestCase
 
-from sqlalchemy import delete, insert
+from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import EntityTaggerData, IndexVersion
+from narraint.backend.models import EntityTaggerData
 from narraint.frontend.entity.entitytagger import EntityTagger
 
 logging.basicConfig(
@@ -35,8 +34,9 @@ class EntityTaggerTestCase(TestCase):
     def setUpClass(cls) -> None:
         # update current index version
         session = SessionExtended.get()
-        session.execute(delete(IndexVersion).where(IndexVersion.name == EntityTagger.NAME))
-        session.execute(insert(IndexVersion).values(name=EntityTagger.NAME, version=EntityTagger.VERSION))
+        # Delete old tagger data
+        session.execute(delete(EntityTaggerData))
+        session.commit()
 
     def test_single_terms(self):
         terms = {

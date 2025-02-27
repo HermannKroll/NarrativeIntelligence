@@ -890,7 +890,8 @@ function getInputParameters(query) {
     const dataSources = getSelectedDataSources();
     obj["data_source"] = dataSources.join(";");
 
-    obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]').value;
+    obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]:checked').value;
+    console.log(obj["outer_ranking"]);
     //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
     //dict["inner_ranking"] = "NOT IMPLEMENTED";
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
