@@ -2094,10 +2094,6 @@ function toggleClearSearchButton() {
     const queryList = document.getElementById('query_builder_list').children.length;
 
     const clearButton = document.getElementById('btn_clear_search');
-    console.log(subjectInput);
-    console.log(predicateInput);
-    console.log(objectInput);
-    console.log(queryList);
     if (subjectInput || predicateInput !== "associated" || objectInput || queryList > 0) {
         clearButton.style.display = 'block';
     } else {
