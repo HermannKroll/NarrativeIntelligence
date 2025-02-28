@@ -202,11 +202,6 @@ class EntityIndexBase:
     def _add_mesh_supplements(self, mesh_supplement_file=MESH_SUPPLEMENTARY_FILE):
         # All MeSH supplements are Diseases in our database
         # However, loading all supplements into the index will be too large
-        # That is why we query all tagged MeSH supplements first and use them to build the index
-        logging.info(f'Reading MeSH supplement file: {mesh_supplement_file}')
-        #mesh_supp = MeSHDBSupplementary()
-        #mesh_supp.load_xml(filename=mesh_supplement_file)
-
         logging.info('Query all MeSH supplements from Tag table...')
         session = Session.get()
         q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_id.like('MESH:C%'))
