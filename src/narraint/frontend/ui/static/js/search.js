@@ -661,13 +661,11 @@ const search = (event) => {
     if (!checkQuery())
         return;
 
-    // Todo: hardfix at the moment
-    // resetKeywordSearch();
     const parameters = getInputParameters(query);
     setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
-
+    
     submitSearch(parameters)
         .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
