@@ -100,10 +100,14 @@ async function buildSite() {
     createDynamicOverviews();
 
     const keyword = search.split("=")[1];
-    document.getElementById('drugInput').value = decodeURI(keyword);
+    const keywordDecoded = decodeURI(keyword);
+    document.getElementById('drugInput').value = keywordDecoded;
+
+        // Matomo Tracking
+    _paq.push(['trackSiteSearch', keywordDecoded, "General"]);
 
     logEntitySearch(keywordToLog ? keywordToLog : keyword)
-    currentDrugName = decodeURI(keyword);
+    currentDrugName = keywordDecoded;
 
 
     await loadOverviewData()
