@@ -1,0 +1,5 @@
+
+
+class AnalyzedQuery:
+
+    pass
