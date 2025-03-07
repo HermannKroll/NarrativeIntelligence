@@ -62,8 +62,8 @@ sudo nano /etc/postgresql/14/main/postgresql.conf
 Change the following settings. 
 More memory is better.
 ```
-shared_buffers = 20GB	
-work_mem = 5GB			
+shared_buffers = 30GB	
+work_mem = 10GB			
 
 max_wal_size = 2GB
 min_wal_size = 500MB
