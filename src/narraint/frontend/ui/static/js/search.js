@@ -661,13 +661,11 @@ const search = (event) => {
     if (!checkQuery())
         return;
 
-    // Todo: hardfix at the moment
-    // resetKeywordSearch();
     const parameters = getInputParameters(query);
     setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
-
+    
     submitSearch(parameters)
         .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
@@ -2096,10 +2094,6 @@ function toggleClearSearchButton() {
     const queryList = document.getElementById('query_builder_list').children.length;
 
     const clearButton = document.getElementById('btn_clear_search');
-    console.log(subjectInput);
-    console.log(predicateInput);
-    console.log(objectInput);
-    console.log(queryList);
     if (subjectInput || predicateInput !== "associated" || objectInput || queryList > 0) {
         clearButton.style.display = 'block';
     } else {

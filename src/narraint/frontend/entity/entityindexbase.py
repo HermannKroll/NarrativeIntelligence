@@ -13,7 +13,7 @@ from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.backend.models import Tag
 from narrant.atc.atc_tree import ATCTree
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY, MESH_SUPPLEMENTARY_FILE
-from narrant.entity.entityresolver import EntityResolver, get_gene_ids
+from narrant.entity.entityresolver import EntityResolver, get_gene_ids, MeshResolver
 from narrant.entity.meshontology import MeSHOntology
 from narrant.entitylinking.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
     VACCINE, DISEASE, TARGET, ORGANISM, CELLLINE
@@ -202,11 +202,6 @@ class EntityIndexBase:
     def _add_mesh_supplements(self, mesh_supplement_file=MESH_SUPPLEMENTARY_FILE):
         # All MeSH supplements are Diseases in our database
         # However, loading all supplements into the index will be too large
-        # That is why we query all tagged MeSH supplements first and use them to build the index
-        logging.info(f'Reading MeSH supplement file: {mesh_supplement_file}')
-        mesh_supp = MeSHDBSupplementary()
-        mesh_supp.load_xml(filename=mesh_supplement_file)
-
         logging.info('Query all MeSH supplements from Tag table...')
         session = Session.get()
         q = session.query(Tag.ent_id.distinct()).filter(Tag.ent_id.like('MESH:C%'))
@@ -214,16 +209,15 @@ class EntityIndexBase:
         for r in q:
             used_supplements_records.add(r[0])
 
-        logging.info(f'{len(used_supplements_records)} supplement records found in DB. Extracting terms...')
+
+        logging.info(f'{len(used_supplements_records)} supplement records found in DB. Extracting terms from resolver...')
+        resolver = EntityResolver()
+        # just use the main names and not the synonymous terms (not necessary)
         for record in used_supplements_records:
-            r_id = record.replace('MESH:', '')
             try:
-                supp_record = mesh_supp.record_by_id(r_id)
-                self._add_term(supp_record.name, record, DISEASE)
-                for term in supp_record.terms:
-                    term_str = term.string
-                    self._add_term(term_str, record, DISEASE)
-            except ValueError:
+                name = resolver.get_name_for_var_ent_id(entity_id=record, entity_type=DISEASE)
+                self._add_term(name, record, DISEASE)
+            except KeyError:
                 pass
 
     def _add_chembl_drugs(self):

@@ -102,7 +102,10 @@ async function buildSite() {
     createDynamicOverviews();
 
     const keyword = search.split("=")[1];
-    document.getElementById('drugInput').value = decodeURI(keyword);
+    const keywordDecoded = decodeURI(keyword);
+    document.getElementById('drugInput').value = keywordDecoded;
+    // Matomo Tracking
+    _paq.push(['trackSiteSearch', keywordDecoded, "Drug"]);
 
     const chembl_data = await translateToDrugId(keyword);
     if (chembl_data === null || chembl_data["chemblid"] === null) {
@@ -114,7 +117,7 @@ async function buildSite() {
     }
 
     logDrugSearch(keywordToLog ? keywordToLog : keyword)
-    currentDrugName = decodeURI(keyword);
+    currentDrugName = keywordDecoded;
     currentChemblID = chembl_data.chemblid;
 
     loadPaperData();
