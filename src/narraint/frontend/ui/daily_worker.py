@@ -2,6 +2,7 @@ import os
 import json
 import time
 import logging
+import sys
 from datetime import datetime, timedelta
 
 from narraint.config import LOG_DIR
@@ -11,7 +12,7 @@ log_path = os.path.join(LOG_DIR, "daily_logs_cache")
 if not os.path.exists(log_path):
     os.makedirs(log_path)
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def cache_daily_logs():
     logging.info("Starting the daily log caching process...")
