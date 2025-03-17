@@ -1,7 +1,7 @@
 from typing import Dict
 
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.recommender.core import NarrativeCoreExtractor
-from narraint.recommender.document import RecommenderDocument
 
 
 class Recommender:
@@ -12,8 +12,8 @@ class Recommender:
     def __init__(self, extractor: NarrativeCoreExtractor):
         self.extractor = extractor
 
-    def recommend_documents_core_overlap(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]) -> [
-        RecommenderDocument]:
+    def recommend_documents_core_overlap(self, doc: IndexedDocument, docs_from: [IndexedDocument]) -> [
+        IndexedDocument]:
         # Compute the cores
         # scores are sorted by their size
         core = self.extractor.extract_narrative_core_from_document(doc)
@@ -50,7 +50,7 @@ class Recommender:
         # Ensure cutoff
         return document_ids_scored
 
-    def recommend_documents(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]) -> [RecommenderDocument]:
+    def recommend_documents(self, doc: IndexedDocument, docs_from: [IndexedDocument]) -> [IndexedDocument]:
         # first score every document with the implemented graph strategy
         document_ids_scored_graph = self.recommend_documents_core_overlap(doc, docs_from)
         # convert to dictionary

@@ -4,10 +4,9 @@ import math
 from tqdm import tqdm
 
 from kgextractiontoolbox.backend.models import Document
-from kgextractiontoolbox.document.narrative_document import StatementExtraction
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
-from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.indexed_document import ScoredDocumentEntity
 
 PREDICATE_TO_SCORE = {
     "associated": 0.25,
@@ -51,7 +50,7 @@ class DocumentCorpus:
             logging.info(f'{col_count} documents found')
 
         logging.info(f'{self.document_count} documents in corpus')
-        self.cache_concept2support = dict()
+        self.cache_entity2support = dict()
         self.__load_all_support_into_memory()
 
     def __load_all_support_into_memory(self):
@@ -68,23 +67,21 @@ class DocumentCorpus:
                           TagInvertedIndex.document_collection,
                           TagInvertedIndex.support)
         for row in tqdm(q, desc="Loading db data...", total=total):
-            key = (row.entity_type, row.entity_id)
-            if key in self.cache_concept2support:
-                self.cache_concept2support[key] += row.support
+            key = ScoredDocumentEntity(entity_type=row.entity_type, entity_id=row.entity_id).get_unique_key()
+            if key in self.cache_entity2support:
+                self.cache_entity2support[key] += row.support
             else:
-                self.cache_concept2support[key] = row.support
+                self.cache_entity2support[key] = row.support
         self.all_idf_data_cached = True
         logging.info('Finished')
 
-    def get_entity_ifd_score(self, entity_type: str, entity_id: str) -> float:
+    def get_entity_ifd_score(self, entity: ScoredDocumentEntity) -> float:
         """
         Computes the tf-idf score for an entity (normalized)
-        :param entity_type: the entity type
-        :param entity_id: the entity id
+        :param entity: the entity
         :return: a score between 0 and 1
         """
-        return math.log(self.get_document_count() / self.get_entity_support(entity_type, entity_id)) / math.log(
-            self.document_count)
+        return math.log(self.get_document_count() / self.get_entity_support(entity)) / math.log(self.document_count)
 
     def get_document_count(self) -> int:
         """
@@ -93,47 +90,20 @@ class DocumentCorpus:
         """
         return self.document_count
 
-    def get_entity_support(self, entity_type: str, entity_id: str) -> int:
+    def get_entity_support(self, entity: ScoredDocumentEntity) -> int:
         """
         Gets the number of documents that include a specific entity
-        :param entity_type: the entity type
-        :param entity_id: the entity id
+        :param entity: the entity
         :return: the number of documents containing that entity
         """
-        key = (entity_type, entity_id)
-        if key in self.cache_concept2support:
-            return self.cache_concept2support[key]
+        key = entity.get_unique_key()
+        if key in self.cache_entity2support:
+            return self.cache_entity2support[key]
         # not in index, but all data should be loaded. so no retrieval is needed any more
         # however, some strange statement concept might not appear in the concept index
         else:
             return 1
 
-    def score_edge_by_tf_and_entity_idf(self, statement: StatementExtraction, document: IndexedDocument) -> float:
-        """
-        Computes a statement's score defined as follows:
-        score = confidence * coverage * 1/2 * (tfidf (subject) + tfidf(object)
-        :param statement: a statement
-        :param document: an indexed document
-        :return: a score between 0 and 1
-        """
-        confidence = document.get_statement_confidence(statement)
-
-        if document.concept_count > 0:
-            tf_s = document.get_entity_tf(statement.subject_type, statement.subject_id) / document.concept_count
-            tf_o = document.get_entity_tf(statement.object_type, statement.object_id) / document.concept_count
-        else:
-            tf_s = 0.0
-            tf_o = 0.0
-        idf_s = self.get_entity_ifd_score(statement.subject_type, statement.subject_id)
-        idf_o = self.get_entity_ifd_score(statement.object_type, statement.object_id)
-
-        tfidf = PREDICATE_TO_SCORE[statement.relation] * (0.5 * ((tf_s * idf_s) + (tf_o * idf_o)))
-
-        coverage = min(document.get_entity_coverage(statement.subject_type, statement.subject_id),
-                       document.get_entity_coverage(statement.object_type, statement.object_id))
-
-        return coverage * confidence * tfidf
-
-    def get_concept_ifd_score(self, entity_type: str, entity_id: str):
-        return math.log(self.get_document_count() / self.get_entity_support(entity_type, entity_id)) / math.log(
+    def get_concept_ifd_score(self, entity: ScoredDocumentEntity) -> float:
+        return math.log(self.get_document_count() / self.get_entity_support(entity)) / math.log(
             self.document_count)

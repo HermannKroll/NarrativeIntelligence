@@ -6,8 +6,8 @@ from narraint.backend.database import SessionExtended
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.recommender.core import NarrativeCoreExtractor
-from narraint.recommender.document import RecommenderDocument
 from narraint.recommender.first_stage import FirstStage
 from narraint.recommender.recommender import Recommender
 from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF_HARD, NOT_CONTAINED_COLOUR_EDGE, enttype2colour, \
@@ -37,7 +37,7 @@ class RecommendationSystem:
         if len(input_docs) != 1:
             return []
 
-        input_doc = RecommenderDocument(input_docs[0])
+        input_doc = IndexedDocument(input_docs[0])
         input_core = self.core_extractor.extract_narrative_core_from_document(input_doc)
 
         if input_core is None:
@@ -62,7 +62,7 @@ class RecommendationSystem:
         # print('Step 2: Query document data...')
         retrieved_doc_ids = {d[0] for d in candidate_document_ids}
         documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, query_collection)
-        documents = [RecommenderDocument(d) for d in documents]
+        documents = [IndexedDocument(d) for d in documents]
         docid2doc = {d.id: d for d in documents}
 
         # Step 3: recommendation
@@ -92,7 +92,7 @@ class RecommendationSystem:
         results = QueryEngine.enrich_document_results_with_metadata(results, {"PubMed": rec_doc_ids})
 
         # get input core concepts
-        input_core_concepts = set([sc.concept for sc in input_core_concept.concepts])
+        input_core_concepts = set([sc.entity_id for sc in input_core_concept.entities])
 
         # Convert to a json structure
         results_converted = [r.to_dict() for r in results]

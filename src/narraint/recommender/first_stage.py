@@ -1,7 +1,8 @@
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
-from narraint.recommender.core import NarrativeCoreExtractor, NarrativeConceptCore
-from narraint.recommender.document import RecommenderDocument
+from narraint.ranking.indexed_document import IndexedDocument
+from narraint.recommender.core import NarrativeCoreExtractor, NarrativeEntityCore
+
 from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF, FS_DOCUMENT_CUTOFF_HARD
 
 
@@ -15,7 +16,7 @@ class FirstStage:
         self.document_collections = None
         self.session = SessionExtended.get()
 
-    def retrieve_documents_for(self, document: RecommenderDocument, document_collections: [str]):
+    def retrieve_documents_for(self, document: IndexedDocument, document_collections: [str]):
         self.document_collections = list(document_collections)
         # Compute the cores
         core = self.extractor.extract_concept_core(document)
@@ -34,11 +35,11 @@ class FirstStage:
         # Ensure cutoff
         return self.apply_dynamic_cutoff(document_ids_scored)
 
-    def retrieve_documents(self, concept: str, concept_type: str):
+    def retrieve_documents(self, entity_id: str, entity_type: str):
         q = self.session.query(TagInvertedIndex)
         # Search for matching nodes but not for predicates (ignore direction)
-        q = q.filter(TagInvertedIndex.entity_id == concept)
-        q = q.filter(TagInvertedIndex.entity_type == concept_type)
+        q = q.filter(TagInvertedIndex.entity_id == entity_id)
+        q = q.filter(TagInvertedIndex.entity_type == entity_type)
         if len(self.document_collections) == 1:
             q = q.filter(TagInvertedIndex.document_collection == self.document_collections[0])
         else:
@@ -49,23 +50,22 @@ class FirstStage:
 
         return document_ids
 
-    def score_document_ids_with_core(self, core: NarrativeConceptCore):
+    def score_document_ids_with_core(self, core: NarrativeEntityCore):
         import datetime
         start = datetime.datetime.now()
         # Core statements are also sorted by their score
         document_ids_scored = {}
         # If a statement of the core is contained within a document, we increase the score
         # of the document by the score of the corresponding edge
-        for idx, concept in enumerate(core.concepts):
+        for idx, entity in enumerate(core.entities):
             # retrieve matching documents
-            document_ids = self.retrieve_documents(concept.concept, concept.concept_type)
+            document_ids = self.retrieve_documents(entity_id=entity.entity_id, entity_type=entity.entity_type)
 
             for doc_id in document_ids:
                 if doc_id not in document_ids_scored:
-                    document_ids_scored[doc_id] = concept.score
+                    document_ids_scored[doc_id] = entity.score
                 else:
-                    document_ids_scored[doc_id] += concept.score
-        print("score_document_ids_with_core took ", datetime.datetime.now() - start)
+                    document_ids_scored[doc_id] += entity.score
         return self.normalize_and_sort_document_scores(document_ids_scored)
 
     @staticmethod
