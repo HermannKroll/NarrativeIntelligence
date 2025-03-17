@@ -15,7 +15,7 @@ PREDICATE_TO_SCORE = {
 }
 
 
-def score_edge_by_entity_tf_idf(statement: ScoredDocumentStatement,  corpus: DocumentCorpus):
+def score_edge_by_entity_tf_idf(statement: ScoredDocumentStatement, corpus: DocumentCorpus):
     tf_s = statement.subject.tf_normalized
     tf_o = statement.object.tf_normalized
     idf_s = corpus.get_concept_ifd_score(statement.subject)
@@ -24,15 +24,8 @@ def score_edge_by_entity_tf_idf(statement: ScoredDocumentStatement,  corpus: Doc
     return tfidf
 
 
-
 def score_edge_by_tfidf_coverage_confidence(statement: ScoredDocumentStatement, corpus: DocumentCorpus):
-    tf_s = statement.subject.tf_normalized
-    tf_o = statement.object.tf_normalized
-    idf_s = corpus.get_concept_ifd_score(statement.subject)
-    idf_o = corpus.get_concept_ifd_score(statement.object)
-
-    tfidf = PREDICATE_TO_SCORE[statement.relation] * (0.5 * ((tf_s * idf_s) + (tf_o * idf_o)))
-
+    tfidf = score_edge_by_entity_tf_idf(statement=statement, corpus=corpus)
     coverage = min(statement.subject.coverage, statement.object.coverage)
 
     assert 0.0 <= tfidf <= 1.0
