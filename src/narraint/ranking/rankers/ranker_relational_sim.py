@@ -1,7 +1,6 @@
 import itertools
 
 from narraint.ranking.corpus import DocumentCorpus
-from narraint.ranking.document import AnalyzedNarrativeDocument
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
 from narraint.ranking.rankers.ranker_base import BaseDocumentRanker
@@ -42,7 +41,7 @@ class RelationalSimDocumentRanker(BaseDocumentRanker):
 
         return scores
 
-    def rank_document_fragment(self, query: AnalyzedQuery, doc: AnalyzedNarrativeDocument,
+    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument,
                                corpus: DocumentCorpus, fragment: list):
 
         scores = RelationalSimDocumentRanker.get_relational_similarity_scores(doc, corpus, fragment)
