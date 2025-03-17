@@ -6,10 +6,20 @@ from narrant.entity.entityidtranslator import EntityIDTranslator
 
 
 def get_unique_entity_key(entity_type: str, entity_id: str) -> str:
+    """
+    Generates a unique entity key as a string
+    :param entity_type: entity type
+    :param entity_id: entity id
+    :return: str
+    """
     return '___'.join([entity_type, entity_id])
 
 
 class ScoredDocumentEntity:
+    """
+    Scored document entity contains the entity type and id of some entity within a document
+    Scores like tf, tf_normalized and coverage can be stored
+    """
 
     def __init__(self, entity_type: str, entity_id: str):
         self.entity_type = entity_type
@@ -43,6 +53,9 @@ class ScoredDocumentEntity:
 
 
 class ScoredDocumentStatement:
+    """
+    Class that represents a scored document statement
+    """
 
     def __init__(self, subject: ScoredDocumentEntity, relation: str, object: ScoredDocumentEntity):
         self.subject = subject
@@ -59,6 +72,11 @@ class ScoredDocumentStatement:
         self.score = score
 
     def has_equal_entities(self, other) -> bool:
+        """
+        Test whether two scored document statement have equal entities (either s1=s2 && o1=o2) or (s1=o2) and (o1=s2)
+        :param other:
+        :return:
+        """
         return (self.subject.get_unique_key() == other.subject.get_unique_key() and
                 self.object.get_unique_key() == other.object.get_unique_key()) or \
             (self.object.get_unique_key() == other.subject.get_unique_key() and
@@ -77,7 +95,6 @@ class ScoredDocumentStatement:
 class IndexedDocument(NarrativeDocument):
     """
     Class that represents a narrative document with generated index data,
-    e.g., entity2frequency
     """
 
     def __init__(self, nd: NarrativeDocument):
