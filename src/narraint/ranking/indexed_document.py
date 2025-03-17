@@ -116,6 +116,11 @@ class IndexedDocument(NarrativeDocument):
         self.compute_scored_statement_information()
 
     def compute_scored_entity_information(self):
+        """
+        Computes the set of scored entities within this document
+        We compute tf, tf_normalized and coverage scores
+        :return:
+        """
         entity2frequency = {}
         entity2last_position = {}
         entity2first_position = {}
@@ -146,6 +151,10 @@ class IndexedDocument(NarrativeDocument):
                            text_len=self.text_len)
 
     def compute_scored_statement_information(self):
+        """
+        Compute information for scored statements, i.e. the set of known statements plus their confidence scores
+        :return:
+        """
         spo2confidence = defaultdict(list)
 
         if self.extracted_statements:
