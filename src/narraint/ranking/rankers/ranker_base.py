@@ -2,13 +2,18 @@ from abc import abstractmethod
 from typing import List, Tuple
 
 from narraint.ranking.corpus import DocumentCorpus
-from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement
 from narraint.ranking.query import AnalyzedQuery
 
+class DocumentFragment:
+
+    def __init__(self, statements: List[ScoredDocumentStatement]):
+        self.statements = statements
 
 class ScoredDocumentFragment:
 
-    def __init__(self, score: float, translation_score: float):
+    def __init__(self, fragment: DocumentFragment, score: float, translation_score: float):
+        self.fragment = fragment
         self.score = score
         self.translation_score = translation_score
         assert 0.0 <= self.translation_score <= 1.0
@@ -26,7 +31,7 @@ class BaseDocumentRanker:
         self.name = name
 
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[IndexedDocument],
-                       corpus: DocumentCorpus, fragments: list) -> List[Tuple[str, float]]:
+                       corpus: DocumentCorpus, fragments: [DocumentFragment]) -> List[Tuple[str, float]]:
 
         max_fragment_score = 0.0
         scored_document_fragments = []
@@ -64,7 +69,7 @@ class BaseDocumentRanker:
         return results
 
     def rank_document(self, query: AnalyzedQuery, doc: IndexedDocument,
-                      corpus: DocumentCorpus, fragments: list) -> List[ScoredDocumentFragment]:
+                      corpus: DocumentCorpus, fragments: [DocumentFragment]) -> List[ScoredDocumentFragment]:
         scores = list()
         if len(fragments) == 0:
             raise ValueError("No fragments")
@@ -76,7 +81,7 @@ class BaseDocumentRanker:
 
     @abstractmethod
     def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, corpus: DocumentCorpus,
-                               fragment: list):
+                               fragment: DocumentFragment):
         raise NotImplementedError("rank_document_fragment is not implemented")
 
     @staticmethod

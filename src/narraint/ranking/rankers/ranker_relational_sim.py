@@ -3,7 +3,8 @@ import itertools
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
-from narraint.ranking.rankers.ranker_base import BaseDocumentRanker
+from narraint.ranking.rankers.ranker_base import BaseDocumentRanker, DocumentFragment
+from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 
 
 class RelationalSimDocumentRanker(BaseDocumentRanker):
@@ -11,29 +12,26 @@ class RelationalSimDocumentRanker(BaseDocumentRanker):
         super().__init__(name=name)
 
     @staticmethod
-    def get_relational_similarity_scores(doc: IndexedDocument, corpus: DocumentCorpus, fragment: list):
+    def get_relational_similarity_scores(doc: IndexedDocument, corpus: DocumentCorpus, fragment: DocumentFragment):
         scores = list()
-        for spo in fragment:
-
+        for f_statement in fragment.statements:
             visited = set()
-            for statement in itertools.chain(doc.concept2statement[spo[0]], doc.concept2statement[spo[2]]):
+            subject_key = f_statement.subject.get_unique_key()
+            object_key = f_statement.object.get_unique_key()
+            for neighbor_stmt in itertools.chain(doc.entity_key2statements[subject_key], doc.entity_key2statements[object_key]):
                 # iterate over each edge once
-                n_spo = (statement.subject_id, statement.relation, statement.object_id)
-                if n_spo in visited:
+                n_key = neighbor_stmt.get_unique_key()
+                if n_key in visited:
                     continue
-                visited.add(n_spo)
+                visited.add(n_key)
 
                 # skip edges between the fragment
-                if n_spo[0] == spo[0] and n_spo[2] == spo[2]:
+                if f_statement.has_equal_entities(neighbor_stmt):
                     continue
 
                 # neighbour edge = edge that is connected to the fragment via subject or object
-                if n_spo[0] == spo[0] or n_spo[2] == spo[2]:
-                    tf_idf = BaseDocumentRanker.get_tf_idf(statement=n_spo, doc=doc, corpus=corpus)
-                    confidence = max(doc.spo2confidences[n_spo])
-                    coverage = min(doc.get_concept_coverage(n_spo[0]), doc.get_concept_frequency(n_spo[2]))
-                    score = confidence * tf_idf * coverage
-                    scores.append(score)
+                if f_statement.has_overlapping_entities(neighbor_stmt):
+                    scores.append(score_edge_by_tfidf_coverage_confidence(statement=neighbor_stmt, corpus=corpus))
 
         # we might do not have neighbour edges
         if len(scores) == 0:
@@ -42,7 +40,6 @@ class RelationalSimDocumentRanker(BaseDocumentRanker):
         return scores
 
     def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument,
-                               corpus: DocumentCorpus, fragment: list):
-
+                               corpus: DocumentCorpus, fragment: DocumentFragment):
         scores = RelationalSimDocumentRanker.get_relational_similarity_scores(doc, corpus, fragment)
         return sum(scores)
