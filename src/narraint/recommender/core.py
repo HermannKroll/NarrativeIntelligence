@@ -2,7 +2,7 @@ from typing import List
 
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement, ScoredDocumentEntity
-from narraint.ranking.scoring import score_edge_by_tf_and_concept_idf, score_concept_by_tf_idf_and_coverage
+from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence, score_concept_by_tf_idf_and_coverage
 from narraint.recommender.recommender_config import CONCEPT_MAX_SUPPORT
 
 
@@ -67,7 +67,7 @@ class NarrativeCoreExtractor:
 
         filtered_statements: [ScoredDocumentStatement] = []
         for statement in document.scored_statements:
-            s_score = score_edge_by_tf_and_concept_idf(statement, self.corpus)
+            s_score = score_edge_by_tfidf_coverage_confidence(statement, self.corpus)
             statement.set_score(s_score)
             filtered_statements.append(statement)
 
