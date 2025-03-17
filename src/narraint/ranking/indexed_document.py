@@ -104,7 +104,6 @@ class IndexedDocument(NarrativeDocument):
 
         self.first_stage_score = None
         self.extracted_statements = [s for s in self.extracted_statements if s.relation]
-        self.extracted_statements = [s for s in self.extracted_statements if s.subject_type != s.object_type]
         self.classification = nd.classification
 
         self.scored_entities: [ScoredDocumentEntity] = set()
