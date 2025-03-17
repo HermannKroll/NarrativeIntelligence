@@ -1,8 +1,9 @@
+from typing import Dict, List, Tuple
+
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.recommender.core import NarrativeCoreExtractor, NarrativeEntityCore
-
 from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF, FS_DOCUMENT_CUTOFF_HARD
 
 
@@ -51,8 +52,6 @@ class FirstStage:
         return document_ids
 
     def score_document_ids_with_core(self, core: NarrativeEntityCore):
-        import datetime
-        start = datetime.datetime.now()
         # Core statements are also sorted by their score
         document_ids_scored = {}
         # If a statement of the core is contained within a document, we increase the score
@@ -69,7 +68,7 @@ class FirstStage:
         return self.normalize_and_sort_document_scores(document_ids_scored)
 
     @staticmethod
-    def normalize_and_sort_document_scores(document_ids_scored):
+    def normalize_and_sort_document_scores(document_ids_scored: Dict[str, float]) -> List[Tuple[str, float]]:
         # We did not find any documents
         if len(document_ids_scored) == 0:
             return []
@@ -86,7 +85,7 @@ class FirstStage:
         return document_ids_scored
 
     @staticmethod
-    def apply_dynamic_cutoff(document_ids_scored):
+    def apply_dynamic_cutoff(document_ids_scored: List[Tuple[str, float]]):
         if len(document_ids_scored) > FS_DOCUMENT_CUTOFF:
             # get score at position
             score_at_cutoff = document_ids_scored[FS_DOCUMENT_CUTOFF][1]
