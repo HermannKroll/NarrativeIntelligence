@@ -82,6 +82,17 @@ class ScoredDocumentStatement:
             (self.object.get_unique_key() == other.subject.get_unique_key() and
              self.subject.get_unique_key() == other.object.get_unique_key())
 
+    def has_overlapping_entities(self, other) -> bool:
+        """
+        Returns true if both statements have at least a shared entity
+        :param other:
+        :return:
+        """
+        return self.subject.get_unique_key() == other.subject.get_unique_key() or \
+            self.object.get_unique_key() == other.object.get_unique_key() or \
+            self.object.get_unique_key() == other.subject.get_unique_key() or \
+            self.subject.get_unique_key() == other.object.get_unique_key()
+
     def get_unique_key(self):
         return '___'.join([self.subject.get_unique_key(), self.relation, self.object.get_unique_key()])
 
@@ -113,6 +124,7 @@ class IndexedDocument(NarrativeDocument):
         self.entity_key2scored_entity = {e.get_unique_key(): e for e in self.scored_entities}
 
         self.scored_statements: [ScoredDocumentStatement] = set()
+        self.entity_key2statements = {}
         self.compute_scored_statement_information()
 
     def compute_scored_entity_information(self):
@@ -176,6 +188,12 @@ class IndexedDocument(NarrativeDocument):
         for (subject_type, subject_id, relation, object_type, object_id) in spo2confidence:
             subject_key = get_unique_entity_key(entity_type=subject_type, entity_id=subject_id)
             object_key = get_unique_entity_key(entity_type=object_type, entity_id=object_id)
-            self.scored_statements.add(ScoredDocumentStatement(subject=self.entity_key2scored_entity[subject_key],
-                                                               relation=relation,
-                                                               object=self.entity_key2scored_entity[object_key]))
+            scored_statement = ScoredDocumentStatement(subject=self.entity_key2scored_entity[subject_key],
+                                                       relation=relation,
+                                                       object=self.entity_key2scored_entity[object_key])
+            self.scored_statements.add(scored_statement)
+            for key in [subject_key, object_key]:
+                if key in self.entity_key2statements:
+                    self.entity_key2statements[key].append(scored_statement)
+                else:
+                    self.entity_key2statements[key] = [scored_statement]
