@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import List, Tuple
 
-from narraint.ranking.corpus import DocumentCorpus, PREDICATE_TO_SCORE
-from narraint.ranking.document import AnalyzedNarrativeDocument
+from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
 
 
@@ -25,7 +25,7 @@ class BaseDocumentRanker:
     def __init__(self, name):
         self.name = name
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[AnalyzedNarrativeDocument],
+    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[IndexedDocument],
                        corpus: DocumentCorpus, fragments: list) -> List[Tuple[str, float]]:
 
         max_fragment_score = 0.0
@@ -63,7 +63,7 @@ class BaseDocumentRanker:
         results.sort(key=lambda x: (x[1], x[0]), reverse=True)
         return results
 
-    def rank_document(self, query: AnalyzedQuery, doc: AnalyzedNarrativeDocument,
+    def rank_document(self, query: AnalyzedQuery, doc: IndexedDocument,
                       corpus: DocumentCorpus, fragments: list) -> List[ScoredDocumentFragment]:
         scores = list()
         if len(fragments) == 0:
@@ -75,24 +75,9 @@ class BaseDocumentRanker:
         return scores
 
     @abstractmethod
-    def rank_document_fragment(self, query: AnalyzedQuery, doc: AnalyzedNarrativeDocument, corpus: DocumentCorpus,
+    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, corpus: DocumentCorpus,
                                fragment: list):
         raise NotImplementedError("rank_document_fragment is not implemented")
-
-    @staticmethod
-    def get_tf_idf(statement: tuple, doc: AnalyzedNarrativeDocument, corpus: DocumentCorpus):
-        tf_s = doc.concept2frequency[statement[0]] / doc.max_concept_frequency
-        tf_o = doc.concept2frequency[statement[2]] / doc.max_concept_frequency
-        idf_s = corpus.get_concept_ifd_score(statement[0])
-        idf_o = corpus.get_concept_ifd_score(statement[2])
-
-        return ((tf_s * idf_s) + (tf_o * idf_o)) * PREDICATE_TO_SCORE[statement[1]]
-
-    @staticmethod
-    def get_concept_tf_idf(entity_id: str, doc: AnalyzedNarrativeDocument, corpus: DocumentCorpus):
-        tf = doc.concept2frequency[entity_id] / doc.max_concept_frequency
-        idf = corpus.get_concept_ifd_score(entity_id)
-        return tf * idf
 
     @staticmethod
     def get_fragment_translation_score(fragment: List[tuple], query: AnalyzedQuery):

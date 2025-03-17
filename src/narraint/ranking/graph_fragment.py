@@ -1,11 +1,11 @@
-from narraint.ranking.document import AnalyzedNarrativeDocument
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
 
 
 class GraphFragment:
 
     @staticmethod
-    def matches(query: AnalyzedQuery, document: AnalyzedNarrativeDocument):
+    def matches(query: AnalyzedQuery, document: IndexedDocument):
         """
         Computes all distinct subgraph isomorphism between the query q and the document graph of d.
         Each subgraph isomorphism maps a part of the document graph to the query.
