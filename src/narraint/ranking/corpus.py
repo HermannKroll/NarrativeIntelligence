@@ -108,7 +108,7 @@ class DocumentCorpus:
         else:
             return 1
 
-    def score_edge_by_tf_and_concept_idf(self, statement: StatementExtraction, document: IndexedDocument) -> float:
+    def score_edge_by_tf_and_entity_idf(self, statement: StatementExtraction, document: IndexedDocument) -> float:
         """
         Computes a statement's score defined as follows:
         score = confidence * coverage * 1/2 * (tfidf (subject) + tfidf(object)
@@ -134,27 +134,6 @@ class DocumentCorpus:
 
         return coverage * confidence * tfidf
 
-    def get_concept_support(self, entity_id):
-        if entity_id in self.cache_concept2support:
-            return self.cache_concept2support[entity_id]
-        # not in index, but all data should be loaded. so no retrieval is needed any more
-        # however, some strange statement concept might not appear in the concept index
-        if self.all_idf_data_cached:
-            return 1
-
-        session = SessionExtended.get()
-        q = session.query(TagInvertedIndex.support)
-        q = q.filter(TagInvertedIndex.entity_id == entity_id)
-        support = 0
-        for row in q:
-            support += row.support
-
-        if support == 0:
-            support = 1
-
-        self.cache_concept2support[entity_id] = support
-        return support
-
-    def get_concept_ifd_score(self, entity_id: str):
-        return math.log(self.get_document_count() / self.get_concept_support(entity_id)) / math.log(
+    def get_concept_ifd_score(self, entity_type: str, entity_id: str):
+        return math.log(self.get_document_count() / self.get_entity_support(entity_type, entity_id)) / math.log(
             self.document_count)

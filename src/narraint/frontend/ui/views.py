@@ -106,7 +106,7 @@ def get_document_graph(request):
             # index the document to compute frequency and coverage
             indexed_document = IndexedDocument(narrative_documents[0])
             # score all edge and sort them
-            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_concept_idf(s, indexed_document))
+            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_entity_idf(s, indexed_document))
                                            for s in indexed_document.extracted_statements]
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
