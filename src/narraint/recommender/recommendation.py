@@ -83,11 +83,11 @@ class RecommendationSystem:
                                                var2substitution={}, confidence=0.0,
                                                position2provenance_ids={},
                                                org_document_id=None, doi=None,
-                                               document_collection="PubMed", document_classes=None))
+                                               document_collection=query_collection, document_classes=None))
 
         # print('Step 5: Loading document metadata...')
         # Load metadata for the documents
-        results = QueryEngine.enrich_document_results_with_metadata(results, {"PubMed": rec_doc_ids})
+        results = QueryEngine.enrich_document_results_with_metadata(results, {query_collection: rec_doc_ids})
 
         # get input core concepts
         input_core_concepts = set([sc.entity_id for sc in input_core_concept.entities])
