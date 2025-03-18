@@ -1,12 +1,11 @@
 import logging
 from datetime import datetime
 
-from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
-from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small
 from narraint.recommender.core import NarrativeCoreExtractor
 from narraint.recommender.first_stage import FirstStage
 from narraint.recommender.recommender import Recommender
@@ -31,13 +30,13 @@ class RecommendationSystem:
         # Step 1: First stage retrieval
         # print('Step 1: Perform first stage retrieval...')
 
-        input_docs = retrieve_narrative_documents_from_database(session=session,
-                                                                document_ids={document_id},
-                                                                document_collection=query_collection)
+        input_docs = retrieve_indexed_documents_from_database_small(session=session,
+                                                                    document_ids={document_id},
+                                                                    document_collection=query_collection)
         if len(input_docs) != 1:
             return []
 
-        input_doc = IndexedDocument(input_docs[0])
+        input_doc = input_docs[0]
         input_core = self.core_extractor.extract_narrative_core_from_document(input_doc)
 
         if input_core is None:
@@ -61,8 +60,7 @@ class RecommendationSystem:
         # Step 2: document data retrieval
         # print('Step 2: Query document data...')
         retrieved_doc_ids = {d[0] for d in candidate_document_ids}
-        documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, query_collection)
-        documents = [IndexedDocument(d) for d in documents]
+        documents = retrieve_indexed_documents_from_database_small(session, retrieved_doc_ids, query_collection)
         docid2doc = {d.id: d for d in documents}
 
         # Step 3: recommendation
