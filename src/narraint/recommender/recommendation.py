@@ -10,7 +10,7 @@ from narraint.recommender.core import NarrativeCoreExtractor
 from narraint.recommender.first_stage import FirstStage
 from narraint.recommender.recommender import Recommender
 from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF_HARD, NOT_CONTAINED_COLOUR_EDGE, enttype2colour, \
-    NOT_CONTAINED_COLOUR
+    NOT_CONTAINED_COLOUR, NO_STATEMENTS_TO_SHOW_IN_EXPLANATION
 from narrant.entity.entityresolver import EntityResolver
 
 
@@ -97,7 +97,7 @@ class RecommendationSystem:
         # print('Step 6: Enriching with graph data...')
 
         for r in results_converted:
-            NO_STATEMENTS_TO_SHOW = 6
+
             rec_doc = docid2doc[int(r["docid"])]
             rec_core = self.core_extractor.extract_narrative_core_from_document(rec_doc)
             facts = []
@@ -112,7 +112,7 @@ class RecommendationSystem:
 
                 if core_intersection and len(core_intersection.statements) > 0:
                     for s in core_intersection.statements:
-                        if len(facts) > NO_STATEMENTS_TO_SHOW:
+                        if len(facts) > NO_STATEMENTS_TO_SHOW_IN_EXPLANATION / 2:
                             break
 
                         try:
@@ -140,7 +140,7 @@ class RecommendationSystem:
                             pass
 
                 for s in rec_core.statements:
-                    if len(facts) > NO_STATEMENTS_TO_SHOW * 2:
+                    if len(facts) > NO_STATEMENTS_TO_SHOW_IN_EXPLANATION:
                         break
                     if s.subject_id in input_core_concepts or s.object_id in input_core_concepts:
                         try:
