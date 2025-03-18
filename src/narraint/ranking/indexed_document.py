@@ -215,7 +215,6 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
     """
     doc_results = {}
 
-    # logging.info(f'Querying {len(document_ids)} from collection: {document_collection}...')
     # first query document titles and abstract
     doc_query = session.query(Document).filter(and_(Document.id.in_(document_ids),
                                                     Document.collection == document_collection))
@@ -227,7 +226,6 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
         diff = document_ids - doc_results.keys()
         raise ValueError(f'Did not retrieve all required {document_collection} documents (missed ids: {diff})')
 
-    #  logging.info('Querying for tags...')
     # Next query for all tagged entities in that document
     tag_query = session.query(Tag).filter(and_(Tag.document_id.in_(document_ids),
                                                Tag.document_collection == document_collection))
@@ -243,7 +241,6 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
         doc_results[doc_id].tags = tags
         doc_results[doc_id].sort_tags()
 
-    # logging.info('Querying for statement extractions...')
     # Next query for extracted statements
     es_query = session.query(Predication)
     es_query = es_query.filter(Predication.document_collection == document_collection)
