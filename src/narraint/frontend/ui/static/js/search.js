@@ -1390,7 +1390,7 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
 
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
-    // divDoc_Body.append(divDocRecommenderLink); // TODO deactivate for now
+    divDoc_Body.append(divDocRecommenderLink);
 
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
