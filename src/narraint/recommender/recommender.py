@@ -1,6 +1,9 @@
 from typing import Dict
 
+from sentence_transformers import SentenceTransformer
+
 from narraint.recommender.core import NarrativeCoreExtractor
+from narraint.recommender.recommender_config import GRAPH_WEIGHT, SBERT_WEIGHT
 from narraint.recommender.document import RecommenderDocument
 
 
@@ -11,6 +14,7 @@ class Recommender:
 
     def __init__(self, extractor: NarrativeCoreExtractor):
         self.extractor = extractor
+        self.sbert_model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
 
     def recommend_documents_core_overlap(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]) -> [
         RecommenderDocument]:
@@ -40,6 +44,19 @@ class Recommender:
         # Ensure cutoff
         return document_ids_scored
 
+    def recommend_documents_sbert(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]):
+        sentences = [doc.get_text_content(), *[d.get_text_content() for d in docs_from]]
+
+        # create the semantic embeddings using the model
+        embeddings = self.sbert_model.encode(sentences)
+
+        # calculate similarities between the doc and the recommended docs (default COSINE-Similarity)
+        similarities = self.sbert_model.similarity(embeddings[0], embeddings[1:])
+
+        print(similarities[0])
+        assert len(similarities[0]) == len(docs_from)
+        return {d.id: s for d, s in zip(docs_from, similarities)}
+
     @staticmethod
     def normalize_scores(document_ids_scored: Dict[str, float]) -> Dict[str, float]:
         # Get the maximum score to normalize the scores
@@ -57,16 +74,14 @@ class Recommender:
         document_ids_scored_graph = {k: v for k, v in document_ids_scored_graph}
         document_ids_scored_graph = self.normalize_scores(document_ids_scored_graph)
 
-        # then score every document with BM25
-        # TODO find an alternative
-        # TODO bm25scorer for now disabled - maybe implement sBERT?
-        #       document_ids_scored_bm25 = self.normalize_scores(document_ids_scored_graph)
+        # then score every document with sbert
+        document_ids_scored_sbert = self.recommend_documents_sbert(doc, docs_from)
+        document_ids_scored_sbert = self.normalize_scores(document_ids_scored_sbert)
 
-        #        document_ids_scored = {}
-        #        for d, graph_score in document_ids_scored_graph.items():
-        #            document_ids_scored[d] = GRAPH_WEIGHT * graph_score + BM25_WEIGHT * document_ids_scored_bm25[d]
+        document_ids_scored = {}
+        for d, graph_score in document_ids_scored_graph.items():
+            document_ids_scored[d] = GRAPH_WEIGHT * graph_score + SBERT_WEIGHT * document_ids_scored_sbert[d]
 
-        document_ids_scored = document_ids_scored_graph
         # Sort by score and then doc desc
         document_ids_scored = sorted([(k, v) for k, v in document_ids_scored.items()],
                                      key=lambda x: (x[1], x[0]), reverse=True)
