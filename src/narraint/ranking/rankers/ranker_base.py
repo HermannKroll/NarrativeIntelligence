@@ -5,10 +5,12 @@ from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement
 from narraint.ranking.query import AnalyzedQuery
 
+
 class DocumentFragment:
 
     def __init__(self, statements: List[ScoredDocumentStatement]):
         self.statements = statements
+
 
 class ScoredDocumentFragment:
 
@@ -27,16 +29,17 @@ class ScoredDocumentFragment:
 
 class BaseDocumentRanker:
     @abstractmethod
-    def __init__(self, name):
+    def __init__(self, name, corpus: DocumentCorpus):
+        self.corpus = corpus
         self.name = name
 
     def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[IndexedDocument],
-                       corpus: DocumentCorpus, fragments: [DocumentFragment]) -> List[Tuple[str, float]]:
+                       fragments: [DocumentFragment]) -> List[Tuple[str, float]]:
 
         max_fragment_score = 0.0
         scored_document_fragments = []
         for doc, d_fragments in zip(narrative_documents, fragments):
-            scored_fragments = self.rank_document(query, doc, corpus, d_fragments)
+            scored_fragments = self.rank_document(query, doc, d_fragments)
             # find the maximum overall document score
             max_fragment_score = max(max_fragment_score, max(sf.score for sf in scored_fragments))
 
@@ -62,33 +65,32 @@ class BaseDocumentRanker:
 
             # check that the score is between 0.0 and 1.0
             assert 0.0 <= score <= 1.0
-            results.append((doc.document_id_source, score))
+            results.append((doc.id, score))
 
         # Sort documents by their score and then their id
         results.sort(key=lambda x: (x[1], x[0]), reverse=True)
         return results
 
     def rank_document(self, query: AnalyzedQuery, doc: IndexedDocument,
-                      corpus: DocumentCorpus, fragments: [DocumentFragment]) -> List[ScoredDocumentFragment]:
+                      fragments: [DocumentFragment]) -> List[ScoredDocumentFragment]:
         scores = list()
         if len(fragments) == 0:
             raise ValueError("No fragments")
         for fragment in fragments:
-            scores.append(ScoredDocumentFragment(self.rank_document_fragment(query, doc, corpus, fragment),
+            scores.append(ScoredDocumentFragment(self.rank_document_fragment(query, doc, fragment),
                                                  BaseDocumentRanker.get_fragment_translation_score(fragment,
                                                                                                    query)))
         return scores
 
     @abstractmethod
-    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, corpus: DocumentCorpus,
-                               fragment: DocumentFragment):
+    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, fragment: DocumentFragment):
         raise NotImplementedError("rank_document_fragment is not implemented")
 
     @staticmethod
-    def get_fragment_translation_score(fragment: List[tuple], query: AnalyzedQuery):
+    def get_fragment_translation_score(fragment:DocumentFragment, query: AnalyzedQuery):
         # the fragment is only as good as it weakest translation
         scores = []
-        for statement in fragment:
+        for statement in fragment.statements:
             scores.append(query.concept2score[statement[0]])
             scores.append(query.concept2score[statement[2]])
 

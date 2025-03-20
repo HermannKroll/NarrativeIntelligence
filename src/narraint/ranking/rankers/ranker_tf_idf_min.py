@@ -6,9 +6,8 @@ from narraint.ranking.scoring import score_edge_by_entity_tf_idf
 
 
 class TfIdfMinDocumentRanker(BaseDocumentRanker):
-    def __init__(self, name="TfIdfMinDocumentRanker"):
-        super().__init__(name=name)
+    def __init__(self, corpus:DocumentCorpus, name="TfIdfMinDocumentRanker"):
+        super().__init__(corpus=corpus, name=name)
 
-    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument,
-                               corpus: DocumentCorpus, fragment: DocumentFragment):
-        return min(score_edge_by_entity_tf_idf(statement=stmt, corpus=corpus) for stmt in fragment.statements)
+    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, fragment: DocumentFragment):
+        return min(score_edge_by_entity_tf_idf(statement=stmt, corpus=self.corpus) for stmt in fragment.statements)

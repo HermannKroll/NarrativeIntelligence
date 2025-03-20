@@ -8,8 +8,8 @@ from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 
 
 class RelationalSimDocumentRanker(BaseDocumentRanker):
-    def __init__(self, name="RelationalSimDocumentRanker"):
-        super().__init__(name=name)
+    def __init__(self, corpus:DocumentCorpus, name="RelationalSimDocumentRanker"):
+        super().__init__(name=name, corpus=corpus)
 
     @staticmethod
     def get_relational_similarity_scores(doc: IndexedDocument, corpus: DocumentCorpus, fragment: DocumentFragment):
@@ -39,7 +39,6 @@ class RelationalSimDocumentRanker(BaseDocumentRanker):
 
         return scores
 
-    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument,
-                               corpus: DocumentCorpus, fragment: DocumentFragment):
-        scores = RelationalSimDocumentRanker.get_relational_similarity_scores(doc, corpus, fragment)
+    def rank_document_fragment(self, query: AnalyzedQuery, doc: IndexedDocument, fragment: DocumentFragment):
+        scores = RelationalSimDocumentRanker.get_relational_similarity_scores(doc, self.corpus, fragment)
         return sum(scores)
