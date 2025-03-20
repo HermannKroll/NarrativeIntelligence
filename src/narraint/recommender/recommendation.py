@@ -28,8 +28,6 @@ class RecommendationSystem:
         start = datetime.now()
 
         # Step 1: First stage retrieval
-        # print('Step 1: Perform first stage retrieval...')
-
         input_docs = retrieve_indexed_documents_from_database_small(session=session,
                                                                     document_ids={document_id},
                                                                     document_collection=query_collection)
@@ -41,9 +39,6 @@ class RecommendationSystem:
 
         if input_core is None:
             return []
-
-        #      if not input_core:
-        #          print("Step 1 could not extract document core")
 
         input_core_concept = self.core_extractor.extract_concept_core(input_doc)
         candidate_document_ids = self.first_stage.retrieve_documents_for(input_doc, document_collections)
@@ -72,9 +67,6 @@ class RecommendationSystem:
         ranked_docs = [docid2doc[d] for d in rec_doc_ids]
 
         # Step 4: Get cores of all documents
-
-        # Produce the result
-        # print('Step 4: Converting results...')
         results = []
         for rec_doc in ranked_docs:
             results.append(QueryDocumentResult(document_id=rec_doc.id,
@@ -95,7 +87,6 @@ class RecommendationSystem:
         # Convert to a json structure
         results_converted = [r.to_dict() for r in results]
         # print('Step 6: Enriching with graph data...')
-
         for r in results_converted:
 
             rec_doc = docid2doc[int(r["docid"])]
@@ -173,9 +164,6 @@ class RecommendationSystem:
                 facts = []
                 nodes = set()
 
-            # facts = [{'s': 'Metformin', 'p': 'treats', 'o': 'Diabetes Mellitus'}]
-            # nodes = ['Metformin', 'Diabetes Mellitus']
-            #
             data = {
                 "nodes": [],
                 "edges": []
