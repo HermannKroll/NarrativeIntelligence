@@ -15,10 +15,18 @@ def get_unique_entity_key(entity_type: str, entity_id: str) -> str:
     Generates a unique entity key as a string
     :param entity_type: entity type
     :param entity_id: entity id
-    :return: str
+    :return: unique entity key
     """
     return '___'.join([entity_type, entity_id])
 
+def get_unique_document_key(document_id: int, document_collection: str) -> str:
+    """
+    Generates a unique document key as a string
+    :param document_id: the document id
+    :param document_collection: the document collection
+    :return: unique document key
+    """
+    return f'{document_collection}___{document_id}'
 
 class ScoredDocumentEntity:
     """
@@ -113,11 +121,12 @@ class IndexedDocument(NarrativeDocument):
     Class that represents a narrative document with generated index data,
     """
 
-    def __init__(self, nd: NarrativeDocument):
+    def __init__(self, nd: NarrativeDocument, document_collection: str):
         super().__init__(document_id=nd.id, title=nd.title, abstract=nd.abstract,
                          metadata=nd.metadata, tags=nd.tags, sentences=nd.sentences,
                          extracted_statements=nd.extracted_statements)
 
+        self.document_collection = document_collection
         self.first_stage_score = None
         self.extracted_statements = [s for s in self.extracted_statements if s.relation]
         self.classification = nd.classification
@@ -131,6 +140,9 @@ class IndexedDocument(NarrativeDocument):
         self.scored_statements: [ScoredDocumentStatement] = set()
         self.entity_key2statements = {}
         self.compute_scored_statement_information()
+
+    def get_unique_key(self):
+        return get_unique_document_key(self.id, self.document_collection)
 
     def compute_scored_entity_information(self):
         """
@@ -267,4 +279,4 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
     for doc_id, extractions in es_for_doc.items():
         doc_results[doc_id].extracted_statements = extractions
 
-    return [IndexedDocument(d) for d in doc_results.values()]
+    return [IndexedDocument(d, document_collection) for d in doc_results.values()]

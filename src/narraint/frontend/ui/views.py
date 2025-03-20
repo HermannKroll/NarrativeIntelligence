@@ -104,7 +104,7 @@ def get_document_graph(request):
                 return JsonResponse(status=500, data=dict(reason="No document data available", nodes=[], facts=[]))
 
             # index the document to compute frequency and coverage
-            indexed_document = IndexedDocument(narrative_documents[0])
+            indexed_document = IndexedDocument(narrative_documents[0], document_collection)
             # score all edge and sort them
             sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_entity_idf(s, indexed_document))
                                            for s in indexed_document.extracted_statements]
