@@ -5,7 +5,6 @@ from sentence_transformers import SentenceTransformer
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.recommender.core import NarrativeCoreExtractor
 from narraint.recommender.recommender_config import GRAPH_WEIGHT, SBERT_WEIGHT
-from narraint.recommender.document import RecommenderDocument
 
 
 class Recommender:
@@ -45,7 +44,7 @@ class Recommender:
         # Ensure cutoff
         return document_ids_scored
 
-    def recommend_documents_sbert(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]):
+    def recommend_documents_sbert(self, doc: IndexedDocument, docs_from: [IndexedDocument]):
         sentences = [doc.get_text_content(), *[d.get_text_content() for d in docs_from]]
 
         # create the semantic embeddings using the model
