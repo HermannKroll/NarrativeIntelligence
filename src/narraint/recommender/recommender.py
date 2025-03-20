@@ -2,6 +2,7 @@ from typing import Dict
 
 from sentence_transformers import SentenceTransformer
 
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.recommender.core import NarrativeCoreExtractor
 from narraint.recommender.recommender_config import GRAPH_WEIGHT, SBERT_WEIGHT
 from narraint.recommender.document import RecommenderDocument
@@ -16,8 +17,8 @@ class Recommender:
         self.extractor = extractor
         self.sbert_model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
 
-    def recommend_documents_core_overlap(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]) -> [
-        RecommenderDocument]:
+    def recommend_documents_core_overlap(self, doc: IndexedDocument, docs_from: [IndexedDocument]) -> [
+        IndexedDocument]:
         # Compute the cores
         # scores are sorted by their size
         core = self.extractor.extract_narrative_core_from_document(doc)
@@ -67,7 +68,7 @@ class Recommender:
         # Ensure cutoff
         return document_ids_scored
 
-    def recommend_documents(self, doc: RecommenderDocument, docs_from: [RecommenderDocument]) -> [RecommenderDocument]:
+    def recommend_documents(self, doc: IndexedDocument, docs_from: [IndexedDocument]) -> [IndexedDocument]:
         # first score every document with the implemented graph strategy
         document_ids_scored_graph = self.recommend_documents_core_overlap(doc, docs_from)
         # convert to dictionary
@@ -82,6 +83,7 @@ class Recommender:
         for d, graph_score in document_ids_scored_graph.items():
             document_ids_scored[d] = GRAPH_WEIGHT * graph_score + SBERT_WEIGHT * document_ids_scored_sbert[d]
 
+        document_ids_scored = document_ids_scored_graph
         # Sort by score and then doc desc
         document_ids_scored = sorted([(k, v) for k, v in document_ids_scored.items()],
                                      key=lambda x: (x[1], x[0]), reverse=True)

@@ -1,17 +1,16 @@
 import logging
 from datetime import datetime
 
-from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small
 from narraint.recommender.core import NarrativeCoreExtractor
-from narraint.recommender.document import RecommenderDocument
 from narraint.recommender.first_stage import FirstStage
 from narraint.recommender.recommender import Recommender
 from narraint.recommender.recommender_config import FS_DOCUMENT_CUTOFF_HARD, NOT_CONTAINED_COLOUR_EDGE, enttype2colour, \
-    NOT_CONTAINED_COLOUR
+    NOT_CONTAINED_COLOUR, NO_STATEMENTS_TO_SHOW_IN_EXPLANATION
 from narrant.entity.entityresolver import EntityResolver
 
 
@@ -31,13 +30,13 @@ class RecommendationSystem:
         # Step 1: First stage retrieval
         # print('Step 1: Perform first stage retrieval...')
 
-        input_docs = retrieve_narrative_documents_from_database(session=session,
-                                                                document_ids={document_id},
-                                                                document_collection=query_collection)
+        input_docs = retrieve_indexed_documents_from_database_small(session=session,
+                                                                    document_ids={document_id},
+                                                                    document_collection=query_collection)
         if len(input_docs) != 1:
             return []
 
-        input_doc = RecommenderDocument(input_docs[0])
+        input_doc = input_docs[0]
         input_core = self.core_extractor.extract_narrative_core_from_document(input_doc)
 
         if input_core is None:
@@ -61,8 +60,7 @@ class RecommendationSystem:
         # Step 2: document data retrieval
         # print('Step 2: Query document data...')
         retrieved_doc_ids = {d[0] for d in candidate_document_ids}
-        documents = retrieve_narrative_documents_from_database(session, retrieved_doc_ids, query_collection)
-        documents = [RecommenderDocument(d) for d in documents]
+        documents = retrieve_indexed_documents_from_database_small(session, retrieved_doc_ids, query_collection)
         docid2doc = {d.id: d for d in documents}
 
         # Step 3: recommendation
@@ -85,21 +83,21 @@ class RecommendationSystem:
                                                var2substitution={}, confidence=0.0,
                                                position2provenance_ids={},
                                                org_document_id=None, doi=None,
-                                               document_collection="PubMed", document_classes=None))
+                                               document_collection=query_collection, document_classes=None))
 
         # print('Step 5: Loading document metadata...')
         # Load metadata for the documents
-        results = QueryEngine.enrich_document_results_with_metadata(results, {"PubMed": rec_doc_ids})
+        results = QueryEngine.enrich_document_results_with_metadata(results, {query_collection: rec_doc_ids})
 
         # get input core concepts
-        input_core_concepts = set([sc.concept for sc in input_core_concept.concepts])
+        input_core_concepts = set([sc.entity_id for sc in input_core_concept.entities])
 
         # Convert to a json structure
         results_converted = [r.to_dict() for r in results]
         # print('Step 6: Enriching with graph data...')
 
         for r in results_converted:
-            NO_STATEMENTS_TO_SHOW = 6
+
             rec_doc = docid2doc[int(r["docid"])]
             rec_core = self.core_extractor.extract_narrative_core_from_document(rec_doc)
             facts = []
@@ -114,7 +112,7 @@ class RecommendationSystem:
 
                 if core_intersection and len(core_intersection.statements) > 0:
                     for s in core_intersection.statements:
-                        if len(facts) > NO_STATEMENTS_TO_SHOW:
+                        if len(facts) > NO_STATEMENTS_TO_SHOW_IN_EXPLANATION / 2:
                             break
 
                         try:
@@ -142,7 +140,7 @@ class RecommendationSystem:
                             pass
 
                 for s in rec_core.statements:
-                    if len(facts) > NO_STATEMENTS_TO_SHOW * 2:
+                    if len(facts) > NO_STATEMENTS_TO_SHOW_IN_EXPLANATION:
                         break
                     if s.subject_id in input_core_concepts or s.object_id in input_core_concepts:
                         try:
