@@ -3,7 +3,7 @@ from typing import List
 from narraint.backend.database import SessionExtended
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
-from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small
+from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, get_unique_document_key
 from narraint.ranking.query import AnalyzedQuery
 from narraint.ranking.rankers.ranker_confidence import ConfidenceDocumentRanker
 from narraint.ranking.rankers.ranker_coverage import CoverageDocumentRanker
@@ -32,6 +32,9 @@ class GraphRank:
             indexed_docs.extend(retrieve_indexed_documents_from_database_small(session, document_ids=dids,
                                                                                document_collection=collection))
 
+        # remove opened session
+        session.remove()
+
         # todo compute fragments
         fragments = []
 
@@ -44,7 +47,11 @@ class GraphRank:
         for ranker in self.rankers:
             ranker2scores[ranker.name] = ranker.rank_documents(query, indexed_docs, fragments)
 
-        doc2scores = {d: 0.0 for d in indexed_docs}
+        doc2scores = {d.get_unique_key():
+                          sum(ranker2scores[r.name][d.get_unique_key()] for r in self.rankers) / len(self.weights)
+                      for d in indexed_docs}
 
-        # remove opened session
-        session.remove()
+        # sort and return the documents
+        return sorted(query_results,
+                      key=lambda x: doc2scores[get_unique_document_key(x.document_id, x.document_collection)],
+                      reverse=True)

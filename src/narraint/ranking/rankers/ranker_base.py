@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Tuple
+from typing import List, Dict
 
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement
@@ -33,12 +33,12 @@ class BaseDocumentRanker:
         self.corpus = corpus
         self.name = name
 
-    def rank_documents(self, query: AnalyzedQuery, narrative_documents: List[IndexedDocument],
-                       fragments: [DocumentFragment]) -> List[Tuple[str, float]]:
+    def rank_documents(self, query: AnalyzedQuery, documents: List[IndexedDocument],
+                       fragments: [DocumentFragment]) -> Dict[str, float]:
 
         max_fragment_score = 0.0
         scored_document_fragments = []
-        for doc, d_fragments in zip(narrative_documents, fragments):
+        for doc, d_fragments in zip(documents, fragments):
             scored_fragments = self.rank_document(query, doc, d_fragments)
             # find the maximum overall document score
             max_fragment_score = max(max_fragment_score, max(sf.score for sf in scored_fragments))
@@ -47,9 +47,9 @@ class BaseDocumentRanker:
 
         # next normalize all document scores by the maximum score
         # and compute the final document score
-        results = list()
+        results = {}
         assert 0.0 <= max_fragment_score
-        for doc, scored_fragments in zip(narrative_documents, scored_document_fragments):
+        for doc, scored_fragments in zip(documents, scored_document_fragments):
             doc_fragment_scores = []
             for scored_fragment in scored_fragments:
                 # normalize the fragment score * translation score
@@ -65,10 +65,8 @@ class BaseDocumentRanker:
 
             # check that the score is between 0.0 and 1.0
             assert 0.0 <= score <= 1.0
-            results.append((doc.id, score))
+            results[doc.get_unique_key()] = score
 
-        # Sort documents by their score and then their id
-        results.sort(key=lambda x: (x[1], x[0]), reverse=True)
         return results
 
     def rank_document(self, query: AnalyzedQuery, doc: IndexedDocument,
@@ -87,7 +85,7 @@ class BaseDocumentRanker:
         raise NotImplementedError("rank_document_fragment is not implemented")
 
     @staticmethod
-    def get_fragment_translation_score(fragment:DocumentFragment, query: AnalyzedQuery):
+    def get_fragment_translation_score(fragment: DocumentFragment, query: AnalyzedQuery):
         # the fragment is only as good as it weakest translation
         scores = []
         for statement in fragment.statements:
