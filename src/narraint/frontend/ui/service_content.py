@@ -74,11 +74,11 @@ def get_content_data(name, force_update=False):
     if force_update:
         logging.info(f"Compute content data for {name}")
 
-        if name == "collections":
+        if name == ContentData.CONTENT_DATA_COLLECTIONS:
             data = compute_publications_per_document_collection(session)
-        elif name == "entity_types":
+        elif name == ContentData.CONTENT_DATA_ENTITY_TYPES:
             data = compute_detected_entities_per_entity_type(session)
-        elif name == "relations":
+        elif name == ContentData.CONTENT_DATA_STATEMENTS:
             data = compute_extracted_statements_per_relation(session)
         else:
             raise NotImplementedError(f"Unknown content data type: {name}")
@@ -95,9 +95,9 @@ def get_content_data(name, force_update=False):
 
 def update_content_information(force_update=False):
     content = dict()
-    content["collections"] = get_content_data("collections", force_update=force_update)
-    content["entity_types"] = get_content_data("entity_types", force_update=force_update)
-    content["relations"] = get_content_data("relations", force_update=force_update)
+    content[ContentData.CONTENT_DATA_COLLECTIONS] = get_content_data(ContentData.CONTENT_DATA_COLLECTIONS, force_update=force_update)
+    content[ContentData.CONTENT_DATA_ENTITY_TYPES] = get_content_data(ContentData.CONTENT_DATA_ENTITY_TYPES, force_update=force_update)
+    content[ContentData.CONTENT_DATA_STATEMENTS] = get_content_data(ContentData.CONTENT_DATA_STATEMENTS, force_update=force_update)
     return content
 
 

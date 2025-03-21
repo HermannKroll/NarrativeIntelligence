@@ -197,6 +197,10 @@ class EntityExplainerData(Extended, DatabaseTable):
 
 
 class ContentData(Extended, DatabaseTable):
+    CONTENT_DATA_COLLECTIONS = "collections"
+    CONTENT_DATA_ENTITY_TYPES = "entity_types"
+    CONTENT_DATA_STATEMENTS = "relations"
+
     __tablename__ = "content_data"
     name = Column(String, primary_key=True)
     data = Column(String, nullable=False)
