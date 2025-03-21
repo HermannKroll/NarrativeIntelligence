@@ -1,11 +1,11 @@
+import json
 import logging
 import math
 
 from tqdm import tqdm
 
-from kgextractiontoolbox.backend.models import Document
 from narraint.backend.database import SessionExtended
-from narraint.backend.models import TagInvertedIndex
+from narraint.backend.models import TagInvertedIndex, ContentData
 from narraint.ranking.indexed_document import ScoredDocumentEntity
 
 PREDICATE_TO_SCORE = {
@@ -38,14 +38,19 @@ class DocumentCorpus:
         session = SessionExtended.get()
         self.collections = set()
         self.all_idf_data_cached = False
-        for row in session.query(Document.collection).distinct():
-            self.collections.add(row.collection)
+
+        query = session.query(ContentData).filter(ContentData.name == ContentData.CONTENT_DATA_COLLECTIONS)
+        collection2count = {}
+        for row in query:
+            collection2count = json.loads(row.data)
+
+        self.collections = set(collection2count.keys())
 
         logging.info(f'Retrieving size of document corpus (collections = {self.collections})')
         self.document_count = 0
         for collection in self.collections:
             logging.info(f'Counting documents in collection: {collection}')
-            col_count = session.query(Document.id).filter(Document.collection == collection).count()
+            col_count = int(collection2count[collection])
             self.document_count += col_count
             logging.info(f'{col_count} documents found')
 
