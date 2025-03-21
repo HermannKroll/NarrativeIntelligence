@@ -50,7 +50,7 @@ class GraphRank:
         for result in query_results:
             result.score = sum(self.weights[i] * ranker2scores[r.name][get_unique_document_key(result.document_id,
                                                                                                result.document_collection)]
-                               for i, r in enumerate(self.rankers)) / len(self.weights)
+                               for i, r in enumerate(self.rankers))
 
         # sort and return the documents
         return sorted(query_results, key=lambda x: (x.score, x.document_id), reverse=True)
