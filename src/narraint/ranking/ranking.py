@@ -47,11 +47,10 @@ class GraphRank:
         for ranker in self.rankers:
             ranker2scores[ranker.name] = ranker.rank_documents(query, indexed_docs, fragments)
 
-        doc2scores = {d.get_unique_key():
-                          sum(ranker2scores[r.name][d.get_unique_key()] for r in self.rankers) / len(self.weights)
-                      for d in indexed_docs}
+        for result in query_results:
+            result.score = sum(self.weights[i] * ranker2scores[r.name][get_unique_document_key(result.document_id,
+                                                                                               result.document_collection)]
+                               for i, r in enumerate(self.rankers)) / len(self.weights)
 
         # sort and return the documents
-        return sorted(query_results,
-                      key=lambda x: doc2scores[get_unique_document_key(x.document_id, x.document_collection)],
-                      reverse=True)
+        return sorted(query_results, key=lambda x: (x.score, x.document_id), reverse=True)

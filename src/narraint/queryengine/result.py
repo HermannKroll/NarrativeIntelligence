@@ -164,12 +164,13 @@ class QueryDocumentResult(QueryResultBase):
         self.doi = doi
         self.document_collection = document_collection
         self.document_classes = document_classes
+        self.score = 0.0
 
     def to_dict(self):
         return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,
                     journals=self.journals, year=self.publication_year, prov=self.position2provenance_ids,
                     month=self.publication_month, org_document_id=self.org_document_id, doi=self.doi,
-                    collection=self.document_collection)
+                    collection=self.document_collection, score=self.score)
 
     def get_result_size(self):
         return 1
