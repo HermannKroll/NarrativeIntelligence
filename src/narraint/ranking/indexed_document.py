@@ -251,8 +251,6 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
     es_query = es_query.filter(Predication.relation != None)
 
     es_for_doc = defaultdict(list)
-    sentence_ids = set()
-    sentenceid2doc = defaultdict(set)
     for res in es_query:
         es_for_doc[res.document_id].append(StatementExtraction(subject_id=res.subject_id,
                                                                subject_type=res.subject_type,
@@ -264,9 +262,7 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
                                                                object_str=res.object_str,
                                                                sentence_id=res.sentence_id,
                                                                confidence=res.confidence))
-        sentence_ids.add(res.sentence_id)
-        sentenceid2doc[res.sentence_id].add(res.document_id)
-
+  
     for doc_id, extractions in es_for_doc.items():
         doc_results[doc_id].extracted_statements = extractions
 
