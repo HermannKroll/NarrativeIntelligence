@@ -205,6 +205,10 @@ class IndexedDocument(NarrativeDocument):
         for (subject_type, subject_id, relation, object_type, object_id) in spo2confidence:
             subject_key = get_unique_entity_key(entity_type=subject_type, entity_id=subject_id)
             object_key = get_unique_entity_key(entity_type=object_type, entity_id=object_id)
+            # This situation should not happen often in practice
+            # but in some situations we have old statements that do not refer to existing
+            # concepts in documents anymore
+            # we ignore these statements for ranking purposes
             if subject_key not in self.entity_key2scored_entity:
                 continue
             if object_key not in self.entity_key2scored_entity:
