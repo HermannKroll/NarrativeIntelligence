@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex, ContentData
-from narraint.ranking.indexed_document import ScoredDocumentEntity
+from narrant.entity.entity import Entity
 
 
 class DocumentCorpus:
@@ -59,7 +59,7 @@ class DocumentCorpus:
                           TagInvertedIndex.document_collection,
                           TagInvertedIndex.support)
         for row in tqdm(q, desc="Loading db data...", total=total):
-            key = ScoredDocumentEntity(entity_type=row.entity_type, entity_id=row.entity_id).get_unique_key()
+            key = Entity(entity_type=row.entity_type, entity_id=row.entity_id).get_unique_key()
             if key in self.cache_entity2support:
                 self.cache_entity2support[key] += row.support
             else:
@@ -67,7 +67,7 @@ class DocumentCorpus:
         self.all_idf_data_cached = True
         logging.info('Finished')
 
-    def get_entity_ifd_score(self, entity: ScoredDocumentEntity) -> float:
+    def get_entity_ifd_score(self, entity: Entity) -> float:
         """
         Computes the tf-idf score for an entity (normalized)
         :param entity: the entity
@@ -82,7 +82,7 @@ class DocumentCorpus:
         """
         return self.document_count
 
-    def get_entity_support(self, entity: ScoredDocumentEntity) -> int:
+    def get_entity_support(self, entity: Entity) -> int:
         """
         Gets the number of documents that include a specific entity
         :param entity: the entity
@@ -96,6 +96,6 @@ class DocumentCorpus:
         else:
             return 1
 
-    def get_concept_ifd_score(self, entity: ScoredDocumentEntity) -> float:
+    def get_concept_ifd_score(self, entity: Entity) -> float:
         return math.log(self.get_document_count() / self.get_entity_support(entity)) / math.log(
             self.document_count)

@@ -7,17 +7,9 @@ from kgextractiontoolbox.backend.models import Document, Tag, Predication
 from kgextractiontoolbox.document.document import TaggedEntity
 from kgextractiontoolbox.document.narrative_document import NarrativeDocument, StatementExtraction
 from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES
+from narrant.entity.entity import Entity, get_unique_entity_key
 from narrant.entity.entityidtranslator import EntityIDTranslator
 
-
-def get_unique_entity_key(entity_type: str, entity_id: str) -> str:
-    """
-    Generates a unique entity key as a string
-    :param entity_type: entity type
-    :param entity_id: entity id
-    :return: unique entity key
-    """
-    return '___'.join([entity_type, entity_id])
 
 def get_unique_document_key(document_id: int, document_collection: str) -> str:
     """
@@ -28,15 +20,14 @@ def get_unique_document_key(document_id: int, document_collection: str) -> str:
     """
     return f'{document_collection}___{document_id}'
 
-class ScoredDocumentEntity:
+class ScoredDocumentEntity(Entity):
     """
     Scored document entity contains the entity type and id of some entity within a document
     Scores like tf, tf_normalized and coverage can be stored
     """
 
     def __init__(self, entity_type: str, entity_id: str):
-        self.entity_type = entity_type
-        self.entity_id = entity_id
+        super().__init__(entity_id=entity_id, entity_type=entity_type)
         self.tf = None
         self.tf_normalized = None
         self.coverage = None
@@ -54,15 +45,6 @@ class ScoredDocumentEntity:
         coverage = float(diff) / float(text_len)
         # some taggers produced strange tag positions that may exceed the text range
         self.coverage = max(0.0, min(1.0, coverage))
-
-    def get_unique_key(self):
-        return get_unique_entity_key(entity_type=self.entity_type, entity_id=self.entity_id)
-
-    def __hash__(self):
-        return hash(self.get_unique_key())
-
-    def __eq__(self, other):
-        return self.get_unique_key() == other.get_unique_key()
 
 
 class ScoredDocumentStatement:
