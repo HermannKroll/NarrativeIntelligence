@@ -174,9 +174,9 @@ class IndexedDocument(NarrativeDocument):
             self.max_entity_frequency = max(v for _, v in entity2frequency.items())
 
         for e in self.scored_entities:
-            e.set_frequency(frequency=entity2frequency[e.get_unique_key], max_entity_count=self.max_entity_frequency)
-            e.set_coverage(first_pos=entity2first_position[e.get_unique_key],
-                           last_pos=entity2last_position[e.get_unique_key],
+            e.set_frequency(frequency=entity2frequency[e.get_unique_key()], max_entity_count=self.max_entity_frequency)
+            e.set_coverage(first_pos=entity2first_position[e.get_unique_key()],
+                           last_pos=entity2last_position[e.get_unique_key()],
                            text_len=self.text_len)
 
     def compute_scored_statement_information(self):
@@ -205,6 +205,11 @@ class IndexedDocument(NarrativeDocument):
         for (subject_type, subject_id, relation, object_type, object_id) in spo2confidence:
             subject_key = get_unique_entity_key(entity_type=subject_type, entity_id=subject_id)
             object_key = get_unique_entity_key(entity_type=object_type, entity_id=object_id)
+            if subject_key not in self.entity_key2scored_entity:
+                continue
+            if object_key not in self.entity_key2scored_entity:
+                continue
+
             scored_statement = ScoredDocumentStatement(subject=self.entity_key2scored_entity[subject_key],
                                                        relation=relation,
                                                        object=self.entity_key2scored_entity[object_key])
