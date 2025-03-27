@@ -20,6 +20,7 @@ def get_unique_document_key(document_id: int, document_collection: str) -> str:
     """
     return f'{document_collection}___{document_id}'
 
+
 class ScoredDocumentEntity(Entity):
     """
     Scored document entity contains the entity type and id of some entity within a document
@@ -47,16 +48,18 @@ class ScoredDocumentEntity(Entity):
         self.coverage = max(0.0, min(1.0, coverage))
 
 
-class ScoredDocumentStatement:
+class ScoredDocumentStatement(StatementExtraction):
     """
     Class that represents a scored document statement
     """
 
     def __init__(self, subject: ScoredDocumentEntity, relation: str, object: ScoredDocumentEntity):
+        super().__init__(subject_id=subject.entity_id, subject_type=subject.entity_type, subject_str="",
+                         predicate="", relation=relation,
+                         object_id=object.entity_id, object_type=object.entity_type, object_str="",
+                         sentence_id=0, confidence=-1.0)
         self.subject = subject
-        self.relation = relation
         self.object = object
-        self.confidence = None
         self.score = None
 
     def set_confidence(self, confidence: float):
@@ -262,7 +265,7 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
                                                                object_str=res.object_str,
                                                                sentence_id=res.sentence_id,
                                                                confidence=res.confidence))
-  
+
     for doc_id, extractions in es_for_doc.items():
         doc_results[doc_id].extracted_statements = extractions
 
