@@ -17,3 +17,4 @@ unidecode~=1.2.0
 ijson==3.2.3
 git+https://github.com/LIAAD/yake
 sentence-transformers~=3.1.1
+torch~=2.4.1
