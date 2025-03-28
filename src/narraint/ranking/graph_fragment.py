@@ -2,15 +2,26 @@ from tqdm.contrib import itertools
 
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
-from narraint.queryengine.result import QueryFactExplanation
-from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement
 from narraint.ranking.query import AnalyzedQuery
+
+
+class GraphFragment:
+
+    def __init__(self, statements: [ScoredDocumentStatement]):
+        self.statements = statements
+
+    def __getitem__(self, item):
+        return self.statements[item]
+
+    def __len__(self):
+        return len(self.statements)
 
 
 class GraphFragmentExtractor:
 
     @staticmethod
-    def matches(query: AnalyzedQuery, document: IndexedDocument):
+    def matches(query: AnalyzedQuery, document: IndexedDocument) -> [GraphFragment]:
         """
         Computes all distinct subgraph isomorphism between the query q and the document graph of d.
         Each subgraph isomorphism maps a part of the document graph to the query.
@@ -45,12 +56,12 @@ class GraphFragmentExtractor:
             # ignore predicate when type equals "associated"
             ignore_predicate = (len(predicates) == 1 and list(predicates)[0] == DO_NOT_CARE_PREDICATE)
 
-            # match fact patterns against predications
-            for s in document.extracted_statements:
+            # match fact patterns against the scored statements
+            # it is enough to match against scored^ statements because they are the only ones relevant for ranking
+            for s in document.scored_statements:
                 if (s.subject_id in subject_ids and s.subject_type in subject_types
                         and s.object_id in object_ids and s.object_type in object_types
                         and (ignore_predicate or s.relation in predicates)):
-
                     fp2statements[index].append(s)
 
         # now we need to compute the cross product
@@ -60,4 +71,4 @@ class GraphFragmentExtractor:
         # remove duplicated fragments
         fragments = list(set(fragments))
 
-        return fragments
+        return [GraphFragment(f) for f in fragments]
