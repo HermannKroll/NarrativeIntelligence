@@ -12,6 +12,14 @@ class DocumentFragment:
         self.statements = statements
 
 
+    def __getitem__(self, item):
+        return self.statements[item]
+
+    def __len__(self):
+        return len(self.statements)
+
+
+
 class ScoredDocumentFragment:
 
     def __init__(self, fragment: DocumentFragment, score: float, translation_score: float):

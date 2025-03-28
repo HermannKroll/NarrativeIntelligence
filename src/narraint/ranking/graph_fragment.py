@@ -2,26 +2,15 @@ from tqdm.contrib import itertools
 
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
-from narraint.ranking.indexed_document import IndexedDocument, ScoredDocumentStatement
+from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
-
-
-class GraphFragment:
-
-    def __init__(self, statements: [ScoredDocumentStatement]):
-        self.statements = statements
-
-    def __getitem__(self, item):
-        return self.statements[item]
-
-    def __len__(self):
-        return len(self.statements)
+from narraint.ranking.rankers.ranker_base import DocumentFragment
 
 
 class GraphFragmentExtractor:
 
     @staticmethod
-    def matches(query: AnalyzedQuery, document: IndexedDocument) -> [GraphFragment]:
+    def matches(query: AnalyzedQuery, document: IndexedDocument) -> [DocumentFragment]:
         """
         Computes all distinct subgraph isomorphism between the query q and the document graph of d.
         Each subgraph isomorphism maps a part of the document graph to the query.
@@ -71,4 +60,4 @@ class GraphFragmentExtractor:
         # remove duplicated fragments
         fragments = list(set(fragments))
 
-        return [GraphFragment(f) for f in fragments]
+        return [DocumentFragment(f) for f in fragments]
