@@ -167,6 +167,9 @@ class QueryDocumentResult(QueryResultBase):
         self.score = 0.0
 
     def to_dict(self):
+        if "score" not in self.__dict__:
+            self.score = 0.0
+
         return dict(t="doc", docid=self.document_id, title=self.title, authors=self.authors,
                     journals=self.journals, year=self.publication_year, prov=self.position2provenance_ids,
                     month=self.publication_month, org_document_id=self.org_document_id, doi=self.doi,
