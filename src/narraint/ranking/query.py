@@ -1,5 +1,6 @@
+from narraint.queryengine.query import GraphQuery
 
 
-class AnalyzedQuery:
+class AnalyzedQuery(GraphQuery):
 
     pass

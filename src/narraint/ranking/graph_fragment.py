@@ -1,8 +1,13 @@
+from tqdm.contrib import itertools
+
+from narraint.queryengine.expander import QueryExpander
+from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
+from narraint.queryengine.result import QueryFactExplanation
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
 
 
-class GraphFragment:
+class GraphFragmentExtractor:
 
     @staticmethod
     def matches(query: AnalyzedQuery, document: IndexedDocument):
@@ -17,5 +22,42 @@ class GraphFragment:
         stmt2 maps to which edges of the document graph g? -> given by query engine through predication ids
         Cross product between all combinations
         """
-        # Todo: Implementation missing
-        raise NotImplementedError
+
+        fp2statements = {}
+
+        # query for each fact pattern
+        for index, fp in enumerate(query.fact_patterns):
+            fp2statements[index] = list()
+
+            subject_ids = set(s.entity_id for s in fp.subjects)
+            subject_types = set(s.entity_type for s in fp.subjects)
+            predicates = {fp.predicate}
+            object_ids = set(o.entity_id for o in fp.objects)
+            object_types = set(o.entity_type for o in fp.objects)
+
+            for expanded_fp in QueryExpander.expand_fact_pattern(fp):
+                subject_ids.update(s.entity_id for s in expanded_fp.subjects)
+                subject_types.update((s.entity_type for s in expanded_fp.subjects))
+                predicates.add(expanded_fp.predicate)
+                object_ids.update(o.entity_id for o in expanded_fp.objects)
+                object_types.update(o.entity_type for o in expanded_fp.objects)
+
+            # ignore predicate when type equals "associated"
+            ignore_predicate = (len(predicates) == 1 and list(predicates)[0] == DO_NOT_CARE_PREDICATE)
+
+            # match fact patterns against predications
+            for s in document.extracted_statements:
+                if (s.subject_id in subject_ids and s.subject_type in subject_types
+                        and s.object_id in object_ids and s.object_type in object_types
+                        and (ignore_predicate or s.relation in predicates)):
+
+                    fp2statements[index].append(s)
+
+        # now we need to compute the cross product
+        # cross-product over all statements
+        fragments = list(itertools.product(*[v for v in fp2statements.values()]))
+
+        # remove duplicated fragments
+        fragments = list(set(fragments))
+
+        return fragments
