@@ -6,8 +6,8 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityTaggerData
+from narraint.entity.entity import TranslatedEntity
 from narraint.entity.entityindexbase import EntityIndexBase
-from narrant.entity.entity import Entity
 
 
 class EntityTagger(EntityIndexBase):
@@ -70,7 +70,7 @@ class EntityTagger(EntityIndexBase):
                                                # space is important for matching
                                                synonym_processed=' ' + self._prepare_string(term)))
 
-    def tag_entity(self, term: str) -> List[Entity]:
+    def tag_entity(self, term: str) -> List[TranslatedEntity]:
         # first process the string
         term = self._prepare_string(term)
 
@@ -106,10 +106,17 @@ class EntityTagger(EntityIndexBase):
             key = (result.entity_id, result.entity_type, cleaned_synonym)
             if key in known_entities:
                 continue
-            entities.append(Entity(entity_name=cleaned_synonym,
-                                   entity_id=result.entity_id,
-                                   entity_type=result.entity_type,
-                                   entity_class=result.entity_class))
+
+            # compute jaccard similarity between the matching synonym and the entered term
+            term_tokens = set(term.strip().split(' '))
+            synonym_tokens = set(result.synonym.strip().split(' '))
+            similarity = len(term_tokens.intersection(synonym_tokens)) / len(term_tokens.union(synonym_tokens))
+
+            entities.append(TranslatedEntity(entity_name=cleaned_synonym,
+                                             entity_id=result.entity_id,
+                                             entity_type=result.entity_type,
+                                             entity_class=result.entity_class,
+                                             translation_score=similarity))
             known_entities.add(key)
         session.remove()
 
