@@ -82,7 +82,7 @@ class NarrativeCoreExtractor:
         # nodes because filtered statements are sorted by their score desc
         # for connected_nodes, size in connected_components:
         core_statements = []
-        for statement, _ in filtered_statements:
+        for statement in filtered_statements:
             # add only the strongest edge between two nodes (could be caused by multiple extractions)
             so = (statement.subject.get_unique_key(), statement.object.get_unique_key())
             os = (statement.object.get_unique_key(), statement.subject.get_unique_key())
