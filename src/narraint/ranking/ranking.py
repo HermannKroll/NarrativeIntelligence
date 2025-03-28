@@ -44,7 +44,7 @@ class GraphRank:
     def rank_document(self, graph_query: GraphQuery, documents: List[QueryDocumentResult], desc: bool = True) -> List[
         QueryDocumentResult]:
 
-        if graph_query.has_variables():
+        if graph_query.has_variable():
             # we cannot support variables for two reasons here:
             # 1. the fragment computation does not support variables at the moment
             # 2. lists with variables are likely too large for ranking them

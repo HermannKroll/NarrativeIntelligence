@@ -161,7 +161,7 @@ class GraphQuery:
                     var_names.append(var_name)
         return var_names
 
-    def has_variables(self):
+    def has_variable(self):
         for fp in self.fact_patterns:
             if fp.has_variable():
                 return True
