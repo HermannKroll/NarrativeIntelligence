@@ -1,4 +1,4 @@
-from tqdm.contrib import itertools
+import itertools
 
 from narraint.queryengine.expander import QueryExpander
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
