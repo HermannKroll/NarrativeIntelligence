@@ -2,7 +2,7 @@ import logging
 import argparse
 import csv
 import time
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.engine import QueryEngine
 

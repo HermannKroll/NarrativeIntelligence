@@ -21,10 +21,10 @@ from narraint.backend.models import Predication, TagInvertedIndex, EntityKeyword
     DatabaseUpdate, Sentence
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
     FEEDBACK_SUBGROUP_DIR, LOG_DIR, FEEDBACK_CLASSIFICATION
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
-from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.autocompletion import AutocompletionUtil
+from narraint.entity.entityexplainer import EntityExplainer
+from narraint.entity.entitytagger import EntityTagger
+from narraint.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter

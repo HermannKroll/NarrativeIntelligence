@@ -1,6 +1,6 @@
 import logging
 
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine

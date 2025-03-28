@@ -4,7 +4,7 @@ import re
 
 from kgextractiontoolbox.cleaning.relation_vocabulary import RelationVocabulary
 from narrant.config import PHARM_RELATION_VOCABULARY
-from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.entity.entitytagger import EntityTagger
 from narraint.queryengine.query import GraphQuery, FactPattern
 from narraint.queryengine.query_hints import VAR_NAME, VAR_TYPE, ENTITY_TYPE_VARIABLE
 from narrant.entity.entity import Entity

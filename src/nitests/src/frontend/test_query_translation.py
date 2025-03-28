@@ -4,7 +4,7 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityTaggerData
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.query_translation import QueryTranslation
 from narrant.entitylinking.enttypes import PLANT_FAMILY_GENUS
 
 tagger_entries = {
@@ -137,7 +137,7 @@ class QueryTranslationTestCase(TestCase):
 
 
 def generate_test_data():
-    from narraint.frontend.entity.entitytagger import EntityTagger
+    from narraint.entity.entitytagger import EntityTagger
 
     import tqdm
 

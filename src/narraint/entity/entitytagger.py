@@ -6,7 +6,7 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityTaggerData
-from narraint.frontend.entity.entityindexbase import EntityIndexBase
+from narraint.entity.entityindexbase import EntityIndexBase
 from narrant.entity.entity import Entity
 
 

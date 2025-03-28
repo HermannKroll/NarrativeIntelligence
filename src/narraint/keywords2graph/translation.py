@@ -8,11 +8,11 @@ from typing import List
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
 from narrant.entity.entity import Entity
-from narrant.entitylinking.enttypes import ALL, DOSAGE_FORM
+from narrant.entitylinking.enttypes import DOSAGE_FORM
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 

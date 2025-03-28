@@ -7,8 +7,8 @@ from sqlalchemy import delete
 from kgextractiontoolbox.backend.models import EntityResolverData
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityExplainerData, EntityTaggerData
-from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.entity.entityexplainer import EntityExplainer
+from narraint.entity.entitytagger import EntityTagger
 from narrant.entity.entityresolver import MeshResolver
 
 tagger_entries = [
