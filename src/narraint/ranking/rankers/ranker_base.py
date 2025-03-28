@@ -83,7 +83,8 @@ class BaseDocumentRanker:
         if len(fragments) == 0:
             raise ValueError("No fragments")
         for fragment in fragments:
-            scores.append(ScoredDocumentFragment(self.rank_document_fragment(query, doc, fragment),
+            scores.append(ScoredDocumentFragment(fragment,
+                                                 self.rank_document_fragment(query, doc, fragment),
                                                  BaseDocumentRanker.get_fragment_translation_score(fragment,
                                                                                                    query)))
         return scores
