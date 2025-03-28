@@ -124,6 +124,7 @@ class IndexedDocument(NarrativeDocument):
 
         self.scored_statements: [ScoredDocumentStatement] = set()
         self.entity_key2statements = {}
+        self.extracted_stmt2scored_statement = {}
         self.compute_scored_statement_information()
 
     def get_unique_key(self):
@@ -169,25 +170,22 @@ class IndexedDocument(NarrativeDocument):
         Compute information for scored statements, i.e. the set of known statements plus their confidence scores
         :return:
         """
-        spo2confidence = defaultdict(list)
 
+        key2stmts = defaultdict(list)
         if self.extracted_statements:
             for statement in self.extracted_statements:
-                spos = [(statement.subject_type, statement.subject_id,
-                         statement.relation,
-                         statement.object_type, statement.object_id)]
+                key = (statement.subject_type, statement.subject_id, statement.relation,
+                       statement.object_type, statement.object_id)
+                key2stmts[key].append(statement)
+
                 if statement.relation in SYMMETRIC_PREDICATES:
-                    spos.append((statement.object_type, statement.object_id,
-                                 statement.relation,
-                                 statement.subject_type, statement.subject_id))
+                    key = (statement.object_type, statement.object_id,
+                           statement.relation,
+                           statement.subject_type, statement.subject_id)
+                    key2stmts[key].append(statement)
 
-                for spo in spos:
-                    if spo in spo2confidence:
-                        spo2confidence[spo] = max(spo2confidence[spo], statement.confidence)
-                    else:
-                        spo2confidence[spo] = statement.confidence
-
-        for (subject_type, subject_id, relation, object_type, object_id) in spo2confidence:
+        for key, statements in key2stmts.items():
+            subject_type, subject_id, relation, object_type, object_id = key
             subject_key = get_unique_entity_key(entity_type=subject_type, entity_id=subject_id)
             object_key = get_unique_entity_key(entity_type=object_type, entity_id=object_id)
             # This situation should not happen often in practice
@@ -202,12 +200,19 @@ class IndexedDocument(NarrativeDocument):
             scored_statement = ScoredDocumentStatement(subject=self.entity_key2scored_entity[subject_key],
                                                        relation=relation,
                                                        object=self.entity_key2scored_entity[object_key])
+
+            scored_statement.set_confidence(max([s.confidence for s in statements]))
             self.scored_statements.add(scored_statement)
-            for key in [subject_key, object_key]:
-                if key in self.entity_key2statements:
-                    self.entity_key2statements[key].append(scored_statement)
+            # all statements are different extractions, but are scored in the same way
+            # i.e. the scored statement represents all of them
+            for s in statements:
+                self.extracted_stmt2scored_statement[s] = scored_statement
+
+            for entity_key in [subject_key, object_key]:
+                if entity_key in self.entity_key2statements:
+                    self.entity_key2statements[entity_key].append(scored_statement)
                 else:
-                    self.entity_key2statements[key] = [scored_statement]
+                    self.entity_key2statements[entity_key] = [scored_statement]
 
 
 def retrieve_indexed_documents_from_database_small(session, document_ids: Set[int], document_collection: str) \
