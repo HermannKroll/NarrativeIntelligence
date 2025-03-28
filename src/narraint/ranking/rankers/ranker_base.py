@@ -97,8 +97,8 @@ class BaseDocumentRanker:
         # the fragment is only as good as it weakest translation
         scores = []
         for statement in fragment.statements:
-            scores.append(query.concept2score[statement[0]])
-            scores.append(query.concept2score[statement[2]])
+            scores.append(query.entity2score[statement.subject.get_unique_key()])
+            scores.append(query.entity2score[statement.object.get_unique_key()])
 
         min_score = min(scores)
         assert 0.0 <= min_score <= 1.0
