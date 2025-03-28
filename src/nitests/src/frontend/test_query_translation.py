@@ -139,8 +139,6 @@ class QueryTranslationTestCase(TestCase):
 def generate_test_data():
     from narraint.entity.entitytagger import EntityTagger
 
-    import tqdm
-
     tagger_data = set()
     entity_tagger = EntityTagger()
 
@@ -153,7 +151,7 @@ def generate_test_data():
     }
 
     known_terms = set()
-    for term in tqdm.tqdm(terms_to_explain):
+    for term in terms_to_explain:
         for entity in entity_tagger.tag_entity(term):
             if entity.entity_name not in terms_to_explain or entity.entity_name in known_terms:
                 continue

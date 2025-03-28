@@ -1,7 +1,6 @@
 import json
 from unittest import TestCase
 
-import tqdm
 from sqlalchemy import delete
 
 from kgextractiontoolbox.backend.models import EntityResolverData
@@ -94,7 +93,7 @@ explanation_entries = [
 ]
 
 mesh_resolver_data = {
-    "D000094024" : "Long COVID",
+    "D000094024": "Long COVID",
 }
 
 mesh_supplement_resolver_data = {
@@ -258,7 +257,7 @@ def generate_test_data():
     ]
     session = SessionExtended.get()
 
-    for term in tqdm.tqdm(terms_to_explain):
+    for term in terms_to_explain:
         for entity in entity_tagger.tag_entity(term):
             tagger_data.add((entity.entity_id, entity.entity_type, entity.entity_class, entity.entity_name))
 
