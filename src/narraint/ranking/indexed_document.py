@@ -143,7 +143,11 @@ class IndexedDocument(NarrativeDocument):
         entityidtranslator = EntityIDTranslator()
         for t in self.tags:
             # translate gene ids to symbols to be compatible to statement gene representation
-            translated_id = entityidtranslator.translate_entity_id(t.ent_id, t.ent_type)
+            try:
+                translated_id = entityidtranslator.translate_entity_id(t.ent_id, t.ent_type)
+            # some rare genes may not be present in our translation table, just use them as they are
+            except KeyError:
+                translated_id = t.ent_id
             e = ScoredDocumentEntity(entity_type=t.ent_type, entity_id=translated_id)
             self.scored_entities.add(e)
             entity_key = e.get_unique_key()
