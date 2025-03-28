@@ -8,6 +8,7 @@ import traceback
 from collections import defaultdict
 from datetime import datetime
 from json import JSONDecodeError
+from typing import Dict
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
@@ -19,6 +20,7 @@ from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_fr
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
+from narraint.backend.service_content import update_content_information
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
     FEEDBACK_SUBGROUP_DIR, LOG_DIR, FEEDBACK_CLASSIFICATION
 from narraint.entity.autocompletion import AutocompletionUtil
@@ -30,7 +32,6 @@ from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.backend.service_content import update_content_information
 from narraint.keywords2graph.translation import Keyword2GraphTranslation
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
@@ -41,6 +42,7 @@ from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.ranking import GraphRank, PublicationDateRank, DocumentRanker
 from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 from narraint.recommender.recommendation import RecommendationSystem
 from narrant.entity.entityresolver import EntityResolver
@@ -69,6 +71,10 @@ class View:
     _instance = None
     initialized = False
 
+    RANK_BY_GRAPH = "graph"
+    RANK_BY_TIME = "time"
+    RANKER_SUPPORTED = {RANK_BY_TIME, RANK_BY_GRAPH}
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -83,6 +89,10 @@ class View:
             cls.keyword2graph = Keyword2GraphTranslation()
             cls.corpus = DocumentCorpus()
             cls.recommender = RecommendationSystem()
+            cls.strategy2ranker: Dict[str, DocumentRanker] = {
+                View.RANK_BY_GRAPH: GraphRank(),
+                View.RANK_BY_TIME: PublicationDateRank()
+            }
         return cls._instance
 
 
@@ -428,7 +438,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
             else:
                 cached_sub_count_list = None
         except Exception as e:
-            message  = 'Cannot load query result from cache...'
+            message = 'Cannot load query result from cache...'
             log_stack_trace(message, e)
     if not cached_sub_count_list:
         # run query
@@ -685,17 +695,37 @@ def get_query(request):
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 
             results_converted = []
-            if outer_ranking == 'outer_ranking_substitution':
-                substitution_aggregation = ResultTreeAggregationBySubstitution()
-                sorted_var_names = graph_query.get_var_names_in_order()
-                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
-                                                                                     freq_sort_desc, year_sort_desc,
-                                                                                     start_pos, end_pos)
-                results_converted = results_ranked.to_dict()
-            elif outer_ranking == 'outer_ranking_ontology':
-                substitution_ontology = ResultAggregationByOntology()
-                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
-                                                                                  year_sort_desc)
+            if graph_query.has_variable():
+                if outer_ranking == 'outer_ranking_substitution':
+                    substitution_aggregation = ResultTreeAggregationBySubstitution()
+                    sorted_var_names = graph_query.get_var_names_in_order()
+                    results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
+                                                                                         freq_sort_desc, year_sort_desc,
+                                                                                         start_pos, end_pos)
+
+                    results_converted = results_ranked.to_dict()
+                elif outer_ranking == 'outer_ranking_ontology':
+                    substitution_ontology = ResultAggregationByOntology()
+                    results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                                      year_sort_desc)
+                    results_converted = results_ranked.to_dict()
+            else:
+                # no variable is used
+                results_ranked = QueryDocumentResultList()
+                for res in results:
+                    results_ranked.add_query_result(res)
+
+                # descending or ascending?
+                strategy = "graph"
+                descending = True
+
+                # time ranking
+                if strategy in View.RANKER_SUPPORTED:
+                    results_ranked.results = View().strategy2ranker[strategy].rank_document(graph_query, results,
+                                                                                            descending)
+                else:
+                    raise ValueError(f'Strategy "{strategy}" is not supported')
+
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_query", str(request),
@@ -1368,7 +1398,7 @@ def get_keyword_search_request(request):
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
-                message  = f'Could not generate graph queries for "{keywords}: {e}"'
+                message = f'Could not generate graph queries for "{keywords}: {e}"'
                 log_stack_trace(message, e)
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
 
@@ -1402,7 +1432,7 @@ def get_clinical_trial_phases(request):
                                                time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
         except Exception as e:
-            message ='Could not query clinical trials for {}'.format(chembl_id)
+            message = 'Could not query clinical trials for {}'.format(chembl_id)
             log_stack_trace(message, e)
             View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
