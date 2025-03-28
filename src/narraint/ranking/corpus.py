@@ -2,8 +2,7 @@ import json
 import logging
 import math
 
-from tqdm import tqdm
-
+from kgextractiontoolbox.progress import Progress
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex, ContentData
 from narrant.entity.entity import Entity
@@ -14,13 +13,17 @@ class DocumentCorpus:
     Singleton class that can compute tf-idf scores for statements and entities
     """
     __instance = None
+    __initialized = False
 
     def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-        return cls.__instance
+        if DocumentCorpus.__instance is None:
+            DocumentCorpus.__instance = super().__new__(cls)
+        return DocumentCorpus.__instance
 
     def __init__(self):
+        if DocumentCorpus.__initialized:
+            return
+        
         logging.info('Querying available document collections...')
         session = SessionExtended.get()
         self.collections = set()
@@ -45,6 +48,8 @@ class DocumentCorpus:
         self.cache_entity2support = dict()
         self.__load_all_support_into_memory()
 
+        DocumentCorpus.__initialized = True
+
     def __load_all_support_into_memory(self):
         """
         Transfers all tag inverted index information into main memory
@@ -58,12 +63,17 @@ class DocumentCorpus:
                           TagInvertedIndex.entity_id,
                           TagInvertedIndex.document_collection,
                           TagInvertedIndex.support)
-        for row in tqdm(q, desc="Loading db data...", total=total):
+        progress = Progress(text="Loading db data...", total=total, print_every=500)
+        progress.start_time()
+        for idx, row in enumerate(q):
+            progress.print_progress(idx)
             key = Entity(entity_type=row.entity_type, entity_id=row.entity_id).get_unique_key()
             if key in self.cache_entity2support:
                 self.cache_entity2support[key] += row.support
             else:
                 self.cache_entity2support[key] = row.support
+
+        progress.done()
         self.all_idf_data_cached = True
         logging.info('Finished')
 
