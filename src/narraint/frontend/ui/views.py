@@ -41,6 +41,7 @@ from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 from narraint.recommender.recommendation import RecommendationSystem
 from narrant.entity.entityresolver import EntityResolver
 
@@ -104,10 +105,13 @@ def get_document_graph(request):
                 return JsonResponse(status=500, data=dict(reason="No document data available", nodes=[], facts=[]))
 
             # index the document to compute frequency and coverage
-            indexed_document = IndexedDocument(narrative_documents[0], document_collection)
+            doc = IndexedDocument(narrative_documents[0], document_collection)
             # score all edge and sort them
-            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_entity_idf(s, indexed_document))
-                                           for s in indexed_document.extracted_statements]
+            sorted_extracted_statements = [(s,
+                                            score_edge_by_tfidf_coverage_confidence(
+                                                doc.extracted_stmt2scored_statement[s],
+                                                corpus=View().corpus))
+                                           for s in doc.extracted_statements]
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
             sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
@@ -175,6 +179,7 @@ def get_document_graph(request):
             View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
             return JsonResponse(dict(nodes=list(nodes), facts=scored_results))
         except ValueError:
+            traceback.print_exc()
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
     else:
