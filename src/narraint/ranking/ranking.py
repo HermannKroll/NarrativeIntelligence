@@ -1,6 +1,7 @@
 from typing import List
 
 from narraint.backend.database import SessionExtended
+from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.graph_fragment import GraphFragmentExtractor
@@ -23,7 +24,7 @@ class GraphRank:
         assert len(self.weights) == len(self.rankers)
         assert sum(self.weights) == 1.0
 
-    def rank_document(self, query_results: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
+    def rank_document(self, graph_query: GraphQuery, query_results: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
         session = SessionExtended.get()
         # we need to retrieve data for each collection separately
         collections = {r.document_collection for r in query_results}
@@ -37,8 +38,7 @@ class GraphRank:
         session.remove()
 
         # analyze query
-        # TODO: implement
-        query = AnalyzedQuery()
+        query = AnalyzedQuery(graph_query)
 
         # Compute the fragment matches between a document and the query
         # a "fragment" explains the match, i.e. it selects the scored statements that match the query
