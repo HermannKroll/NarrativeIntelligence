@@ -3,6 +3,7 @@ from typing import List
 from narraint.backend.database import SessionExtended
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
+from narraint.ranking.graph_fragment import GraphFragmentExtractor
 from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, get_unique_document_key
 from narraint.ranking.query import AnalyzedQuery
 from narraint.ranking.rankers.ranker_confidence import ConfidenceDocumentRanker
@@ -35,12 +36,13 @@ class GraphRank:
         # remove opened session
         session.remove()
 
-        # todo compute fragments
-        fragments = []
-
         # analyze query
         # TODO: implement
         query = AnalyzedQuery()
+
+        # Compute the fragment matches between a document and the query
+        # a "fragment" explains the match, i.e. it selects the scored statements that match the query
+        fragments = [GraphFragmentExtractor.matches(query, doc) for doc in indexed_docs]
 
         # next compute the document score
         ranker2scores = {}
