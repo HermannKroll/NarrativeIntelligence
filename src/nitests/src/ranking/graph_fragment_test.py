@@ -3,6 +3,7 @@ from unittest import TestCase
 from kgextractiontoolbox.document.document import TaggedEntity
 from kgextractiontoolbox.document.narrative_document import NarrativeDocument, StatementExtraction
 from narraint.queryengine.query import FactPattern
+from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
 from narraint.ranking.graph_fragment import GraphFragmentExtractor
 from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.query import AnalyzedQuery
@@ -123,3 +124,32 @@ class GraphFragmentTest(TestCase):
         self.assertIn(fragment[0], self.stmts)
         self.assertIn(fragment[1], self.stmts)
         self.assertIn(fragment[2], self.stmts)
+
+    def test_graph_fragment_no_match(self):
+        # the second query has one match
+        query = AnalyzedQuery(fact_patterns=[FactPattern(subjects=[Entity("X", "AT"),
+                                                                   Entity("A2", "AT")],
+                                                         predicate="r1",
+                                                         objects=[Entity("Y", "BT")])
+                                             ])
+
+        fragments = GraphFragmentExtractor.matches(query, self.index_document)
+        self.assertEqual(0, len(fragments))
+
+    def test_graph_fragment_do_not_care(self):
+        # the first query has one match
+        query = AnalyzedQuery(fact_patterns=[FactPattern(subjects=[Entity("A1", "AT"),
+                                                                   Entity("A2", "AT")],
+                                                         predicate=DO_NOT_CARE_PREDICATE,
+                                                         objects=[Entity("B", "BT")]),
+                                             FactPattern(subjects=[Entity("A1", "AT")],
+                                                         predicate="r3",
+                                                         objects=[Entity("C", "CT")])
+                                             ])
+
+        fragments = GraphFragmentExtractor.matches(query, self.index_document)
+        self.assertEqual(2, len(fragments))
+        for fragment in fragments:
+            # statement 1 and 3 match the query, i.e. the fragment must match both
+            self.assertIn(fragment[0], self.stmts)
+            self.assertIn(fragment[1], self.stmts)
