@@ -1,16 +1,16 @@
 import itertools
 
 from narraint.queryengine.expander import QueryExpander
+from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.query_hints import DO_NOT_CARE_PREDICATE
 from narraint.ranking.indexed_document import IndexedDocument
-from narraint.ranking.query import AnalyzedQuery
 from narraint.ranking.rankers.ranker_base import DocumentFragment
 
 
 class GraphFragmentExtractor:
 
     @staticmethod
-    def matches(query: AnalyzedQuery, document: IndexedDocument) -> [DocumentFragment]:
+    def matches(query: GraphQuery, document: IndexedDocument) -> [DocumentFragment]:
         """
         Computes all distinct subgraph isomorphism between the query q and the document graph of d.
         Each subgraph isomorphism maps a part of the document graph to the query.
