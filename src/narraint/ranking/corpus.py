@@ -23,7 +23,7 @@ class DocumentCorpus:
     def __init__(self):
         if DocumentCorpus.__initialized:
             return
-        
+
         logging.info('Querying available document collections...')
         session = SessionExtended.get()
         self.collections = set()
