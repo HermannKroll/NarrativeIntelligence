@@ -12,6 +12,18 @@ from narraint.ranking.rankers.ranker_coverage import CoverageDocumentRanker
 from narraint.ranking.rankers.ranker_relational_sim import RelationalSimDocumentRanker
 from narraint.ranking.rankers.ranker_tf_idf_min import TfIdfMinDocumentRanker
 
+class DocumentRankingStrategy:
+
+    def __init__(self):
+        pass
+
+    def rank_document(self, graph_query: GraphQuery, docs: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
+        raise NotImplementedError()
+
+class PublicationDateRank(DocumentRankingStrategy):
+
+    def rank_document(self, graph_query: GraphQuery, docs: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
+        return sorted(docs, key=lambda x: (x.publication_year, x.publication_month), reverse=True) 
 
 class GraphRank:
 
@@ -24,13 +36,13 @@ class GraphRank:
         assert len(self.weights) == len(self.rankers)
         assert sum(self.weights) == 1.0
 
-    def rank_document(self, graph_query: GraphQuery, query_results: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
+    def rank_document(self, graph_query: GraphQuery, docs: List[QueryDocumentResult]) -> List[QueryDocumentResult]:
         session = SessionExtended.get()
         # we need to retrieve data for each collection separately
-        collections = {r.document_collection for r in query_results}
+        collections = {r.document_collection for r in docs}
         indexed_docs = []
         for collection in collections:
-            dids = {r.document_id for r in query_results if r.document_collection == collection}
+            dids = {r.document_id for r in docs if r.document_collection == collection}
             indexed_docs.extend(retrieve_indexed_documents_from_database_small(session, document_ids=dids,
                                                                                document_collection=collection))
 
@@ -49,10 +61,10 @@ class GraphRank:
         for ranker in self.rankers:
             ranker2scores[ranker.name] = ranker.rank_documents(query, indexed_docs, fragments)
 
-        for result in query_results:
+        for result in docs:
             result.score = sum(self.weights[i] * ranker2scores[r.name][get_unique_document_key(result.document_id,
                                                                                                result.document_collection)]
                                for i, r in enumerate(self.rankers))
 
         # sort and return the documents
-        return sorted(query_results, key=lambda x: (x.score, x.document_id), reverse=True)
+        return sorted(docs, key=lambda x: (x.score, x.document_id), reverse=True)
