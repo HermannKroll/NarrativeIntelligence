@@ -285,7 +285,8 @@ The tests should be detected automatically.
 
 
 # Mac Development (Apple Silicon)
-
+Apple Silicon has LibreSSL installed, however the URL package expects OpenSSL to be installed.
+That is why we need to downgrade the requirement to a lower version.
 ```
 pip install urllib3==1.26.7
 ```
