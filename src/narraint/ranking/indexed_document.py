@@ -61,6 +61,7 @@ class ScoredDocumentStatement(StatementExtraction):
         self.subject = subject
         self.object = object
         self.score = None
+        self.confidence = None
 
     def set_confidence(self, confidence: float):
         assert 0.0 <= confidence <= 1.0
