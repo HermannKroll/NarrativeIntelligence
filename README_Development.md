@@ -282,3 +282,10 @@ To run on of the tests, create a new run configuration (as for step 6).
 
 Select the freshly created run-config and execute it.
 The tests should be detected automatically.
+
+
+# Mac Development (Apple Silicon)
+
+```
+pip install urllib3==1.26.7
+```
