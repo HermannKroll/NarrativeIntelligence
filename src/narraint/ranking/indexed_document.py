@@ -72,7 +72,7 @@ class ScoredDocumentStatement(StatementExtraction):
 
     def has_equal_entities(self, other) -> bool:
         """
-        Test whether two scored document statement have equal entities (either s1=s2 && o1=o2) or (s1=o2) and (o1=s2)
+        Test whether two scored document statement have equal entities (either s1=s2 && o1=o2) or (s1=o2 && o1=s2)
         :param other:
         :return:
         """
