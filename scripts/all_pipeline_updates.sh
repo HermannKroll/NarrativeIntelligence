@@ -47,6 +47,21 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
+# This will invoke the Patents pipeline (data will be crawled from VZG index)
+bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_EPA" "$UPDATE_DATE" "Patents" 2> /root/ns_update_err.log
+
+if [[ $? != 0 ]]; then
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    exit -1
+fi
+
+# This will invoke the Preprints pipeline (data will be crawled from VZG index)
+bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_XAR%20OR%20GBV_XBI%20OR%20GBV_XCH%20OR%20GBV_XEN%20OR%20GBV_XRA%20OR%20techrXiv%20OR%20preprintsorg" "$UPDATE_DATE" "Preprints" 2> /root/ns_update_err.log
+
+if [[ $? != 0 ]]; then
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    exit -1
+fi
 
 bash ~/NarrativeAnnotation/scripts/process_zbmed_for_service.sh 2> /root/ns_update_err.log
 
