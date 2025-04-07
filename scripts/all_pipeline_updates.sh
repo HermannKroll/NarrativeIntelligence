@@ -114,4 +114,4 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
-echo "Clinical Study Phases for Drug Overviews done" | mailx -s "Narrative Service Update done" "$ADDRESS" -r "$SENDER"
+echo "Clinical Study Phases for Drug Overviews done" | mailx -s "Clinical Study Phases for Drug Overviews done" "$ADDRESS" -r "$SENDER"
