@@ -3,54 +3,136 @@ This document describes the setup of a PyCharm IDE to develop on the Narrative S
 
 ## System Requirements
 
-The Narrative Service requires a Linux-like OS to work properly.
-It is because the implementation relies on certain Python libraries that work only on this OS.
-To be OS-independent, a simple solution is to develop over SSH.
+Two different methodologies exist to develop and run the NarrativeService:
+- Local development: This requires the existence of a (remote) database connection. An SSH connection forwarding relevant ports is necessary.
+- Remote development via SSH (using PyCharm Professional): by using the SSH connection, the project can be edited locally and executed remotely.
 
-The following steps describe how to set up the PyCharm Professional IDE for SSH development.
+First, the [Local Development](#ld-1-narrative-service-setup) is described, and the [Remote Development](#rd-1-create-python-virtual-environment) later.
+The process of cloning the database is discussed in the first step [0. Prerequisites](#0-prerequisites).
+This needs to be done for both methods.
+Starting with step [6. Create Django Executable in Pycharm](#6-create-django-executable-in-pycharm), both methods share the same content.
 
-*tl;dr, the following things are required:*
-- Linux server (to run the service)
-- PyCharm Professional (on any OS)
-- SSH access to the dev server
-
-
+The following two things are assumed to exist already:
 - server user `pubpharm`
 - postgres database `fidpharmazie`
+
+
 
 ## References:
 - [PyCharm SSH Interpreter](https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html)
 - [PyCharm Django Setup](https://www.jetbrains.com/help/pycharm/creating-and-running-your-first-django-project.html)
 - [Miniconda Docs](https://www.anaconda.com/docs/getting-started/miniconda/install#macos-linux-installation)
-- [StackOverflow](https://stackoverflow.com/a/876565/23125650) - Copy postgres production databases 
+- [StackOverflow](https://stackoverflow.com/a/876565/23125650) - Copy postgres production databases
+
 ## 0. Prerequisites
 
 Since the development requires an active database connection, it needs to be initialized beforehand.
 It is recommended to not use the production database for development, instead, create a copy of it.
 
-The following command assumes, that a production database with the name `fidpharmazie` and the owner `pubpharm` exists (as created in with [Service-Readme](README_Service.md)).
-It creates a new database with the name `fidpharmazie-dev`, owned by `pubpharm`, and using `fidpharmazie` as template.
-
-> **Note** that the command needs to be executed as postgres user!
+The following commands assume that a production database with the name `fidpharmazie` and the owner `pubpharm` exists (as created in with [Service-Readme](README_Service.md)).
+The easiest way of cloning the database is by executing the commands as the `postgres` superuser.
+The process consist of a backup procedure and the restore of that.
+It creates a new database with the name `fidpharmazie-dev` using `fidpharmazie` as template:
 
 ```bash
 su postgres
-createdb -O pubpharm -T fidpharmazie fidpharmazie-dev
+pg_dump -h 127.0.0.1 -d fidpharmazie -F c -f fidpharmazie.dump
+pg_restore --dbname=fidpharmazie-dev fidpharmazie.dump
+rm -f fidpharmazie.dump
 exit
 ```
 
-> It might be the case that active connections of the production database prevent the execution of `createdb`.
-> If this is the case wait a few minutes or disconnect each active connection before executing the command again by
-> running the following SQL code in the `isql` environment:
+The following steps depend on whether to develop locally or remote.
+For local development (LD), the next step is the following section (1).
+For remote development (RD), the next step is section (TBA)
 
-```sql
-SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity 
-WHERE pg_stat_activity.datname = 'fidpharmazie' AND pid <> pg_backend_pid();
+## LD-1. Narrative Service Setup
+
+In PyCharm, first a new project has to be created.
+
+### Create and configure local project
+
+The simplest method is to directly initialize it from GitHub:
+1. Click on **Project from Version Control...**
+2. Insert **URL** `git@github.com:HermannKroll/NarrativeIntelligence.git`
+3. Insert a path, e.g., `/path/to/NarrativeIntelligence`
+4. Click on **Clone**
+*...this may take a while...*
+It may appear a window to create a new virtual environment (Python Interpreter).
+Close it since we want to create a virtual environment using conda.
+
+## LD-2. Create a local interpreter
+
+The next step is to create a local python interpreter (using conda).
+1. Open **Settings**
+2. Search for `Python Interpreter`
+3. Click on **Add Interpreter** and select **Add local Interpreter**
+4. Select *Generate new*
+5. Select type **Conda**
+6. Python version **3.8**
+7. Choose a name, e.g., `narraint-dev`
+
+> If you have not installed conda yet, the window will provide a clickable link to install the conda executable.
+You need to click on **install conda**.
+
+8. Click on **ok** to create the environment.
+
+Next, the modules need to be installed.
+Make sure, that the newly created environment is selected:
+If you do not already see the active interpreter in the footer, you can visualize it by left-clicking on a footer-element and select `Python-Interpreter` as well.
+
+To install the requirements, open the following files, hover over one of the underlined elements and click on `Install all missing packages`.
+- `NarrativeIntelligence/requirements.txt`
+- `NarrativeIntelligence/lib/NarrativeAnnotation/requirements.txt`
+- `NarrativeIntelligence/lib/KGExtractionToolbox/requirements.txt`
+After the interpreter has indexed the newly added requirements, none of them should have an underline anymore.
+Alternatively, this can be done using the PyCharm console:
+
+```bash
+cd ~/dev/NarrativeIntelligence
+python -m pip install -r requirements.txt \
+                      -r lib/NarrativeAnnotation/requirements.txt \
+                      -r lib/KGExtractionToolbox/requirements.txt
 ```
 
-> *If this step is skipped, the database name in config of step 4. needs to be changed back to* `fidpharmazie`
+## LD-3. Configure the service
 
-## 1. Create Python Virtual Environment
+All configuration lives inside the `NarrativeIntelligence/config` directory. 
+The `*.prod.json` files show the structure of the corresponding configuration file. 
+Copy the example file and remove the `.prod` from the name. 
+This need to be done each of the three files: `backend.json`, `entity_linking.json`, and `nlp.json`.
+
+Next, configure the database connection in `backend.json`.
+Open the file and insert the postgres username and password to get access to the `fidpharmazie` database.
+```json
+{
+  "use_SQLite": false,
+  "SQLite_path": "sqlitebase.db",
+  "POSTGRES_DB": "fidpharmazie-dev",
+  "POSTGRES_HOST": "127.0.0.1",
+  "POSTGRES_PORT": "5432",
+  "POSTGRES_USER": "pubpharm",
+  "POSTGRES_PW": "POSTGRES_PASSWORD",
+  "POSTGRES_SCHEMA": "public"
+}
+```
+
+As a last step, mark each `src` folder as `Sources Root`.
+Therefore, right-click on the `NarrativeIntelligence/src` folder and select `Mark directory as` - `Sources Root`.
+Repeat the process for the source folders in `lib/NarrativeAnnotation/src` and `lib/KGExtractionToolbox/src`.
+
+## LD-4. Download external dependencies
+To build the indexes locally, some external dependencies need to be downloaded first.
+Therefore, execute the following script in the PyCharm console:
+```bash
+cd lib/NarrativeAnnotation/
+bash download_data.sh
+```
+
+> The next required steps are equal to the remote development procedure; 
+> skip until step [6. Create Django Executable in Pycharm](#6-create-django-executable-in-pycharm).
+
+## RD-1. Create Python Virtual Environment
 
 For the first step, connect to the remote server with a SSH session and login into the pubpharm user.
 Download the latest version of miniconda. (If not already existent)
@@ -94,7 +176,7 @@ Last, activate the newly created environment `narraint-dev`.
 conda activate narraint-dev
 ```
 
-## 2. Narrative Service Setup (Remote)
+## RD-2. Narrative Service Setup (Remote)
 
 Now, create the directory on the server where the project should be live.
 The project does not need to be cloned since we deploy it later from the local setup.
@@ -103,7 +185,7 @@ The project does not need to be cloned since we deploy it later from the local s
 mkdir /home/pubpharm/dev/NarrativeIntelligence
 ```
 
-## 3. Narrative Service Setup (Local)
+## RD-3. Narrative Service Setup (Local)
 
 In PyCharm, first a new project has to be created.
 
@@ -158,7 +240,7 @@ The synchronization may take a while…
 
 > The loading bar on the bottom of the IDE indicates the upload of any change
 
-## 4. Configure the service
+## RD-4. Configure the service
 
 All configuration lives inside the `NarrativeIntelligence/config` directory. 
 The `*.prod.json` files show the structure of the corresponding configuration file. 
@@ -194,7 +276,7 @@ As a last step, mark each `src` folder as `Sources Root`.
 Therefore, right-click on the `NarrativeIntelligence/src` folder and select `Mark directory as` - `Sources Root`.
 Repeat the process for the source folders in `lib/NarrativeAnnotation/src` and `lib/KGExtractionToolbox/src`.
 
-## 5. Download external dependencies
+## RD-5. Download external dependencies
 
 The following steps are required only on the remote server.
 Therefore, execute the commands in a SSH session.
@@ -239,14 +321,14 @@ Open run configurations and configure remote interpreter for new Django applicat
 
 1. Click on **Edit Configurations...**
 2. Create new `Django Server` run configuration by clicking on **+** on the left (Add new configuration)
-3. Select remote Conda Interpreter (narraint-dev)
+3. Select remote Conda Interpreter (`narraint-dev`)
 4. Insert host `localhost`
 5. Append the **Environment Variables:** with `PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=frontend.settings.dev`
 6. Click on **Apply** and close the window
 
 Now, the Django Server can be started.
 
-### Activate SSH Port Forwarding
+### RD-6.1: Activate SSH Port Forwarding for the NarrativeService
 
 To connect to the local service, the last step is to forward the required port.
 By default, the port is set to `8000`.
@@ -257,9 +339,20 @@ Start a terminal and execute the following command:
 ssh -L 8000:localhost:8000 pubpharm@<SERVER-ADDR>
 ```
 
-> **Note** that this connection needs to be alive to access the service.
+### LD-6.1: Activate SSH Port Forwarding for the Database
 
-### Finally: Start the Narrative Service
+To connect to the remote database service, the last step is to forward the required port.
+By default, the port is set to `5432`.
+If it is changed on the remote server, the corresponding parameter `POSTGRES_PORT` needs to be changed in the configuration file (`backend.json`).
+
+Start a terminal and execute the following command:
+```bash
+ssh -L 5432:localhost:5432 pubpharm@<SERVER-ADDR>
+```
+
+> **Note** that those connections need to be alive when the service runs.
+
+### 6.2. Finally: Start the Narrative Service
 
 If everything works correctly, the server starts (after clicking on the green triangle on the top left).
 When the initialization is finished the IP address will show up to access the service.
@@ -289,4 +382,10 @@ Apple Silicon has LibreSSL installed, however the URL package expects OpenSSL to
 That is why we need to downgrade the requirement to a lower version.
 ```
 pip install urllib3==1.26.7
+```
+
+The `psycopg2-binary` can not be installed with the expected version (2.9.1).
+Instead, the version needs to be higher (2.9.3):
+```
+pip install psycopg2-binary==2.9.3
 ```
