@@ -71,9 +71,18 @@ class View:
     _instance = None
     initialized = False
 
+    # without variables
     RANK_BY_GRAPH = "graph"
     RANK_BY_TIME = "time"
     RANKER_SUPPORTED = {RANK_BY_TIME, RANK_BY_GRAPH}
+
+    # with variables
+    RANK_BY_FREQUENCY = "freq"
+    RANKER_VAR_SUPPORTED = {RANK_BY_FREQUENCY}
+
+    # ranking order
+    ORDER_DESCENDING = "desc"
+    ORDER_ASCENDING = "asc"
 
     def __new__(cls):
         if cls._instance is None:
@@ -602,23 +611,11 @@ def get_query(request):
         else:
             end_pos = None
 
-        if "freq_sort" in request.GET:
-            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
-            if freq_sort_desc == 'False':
-                freq_sort_desc = False
-            else:
-                freq_sort_desc = True
-        else:
-            freq_sort_desc = True
+        # get sort filter; default is (publication) time
+        sort_by = str(request.GET.get("sort_by", View.RANK_BY_TIME).strip())
 
-        if "year_sort" in request.GET:
-            year_sort_desc = str(request.GET.get("year_sort", "").strip())
-            if year_sort_desc == 'False':
-                year_sort_desc = False
-            else:
-                year_sort_desc = True
-        else:
-            year_sort_desc = True
+        # get sort order; default is descending
+        sort_order = str(request.GET.get("sort_order", View.ORDER_DESCENDING).strip())
 
         year_start = None
         if "year_start" in request.GET:
@@ -696,6 +693,14 @@ def get_query(request):
 
             results_converted = []
             if graph_query.has_variable():
+                # required for variable search
+                if sort_by not in View().RANKER_VAR_SUPPORTED:
+                    sort_by = View.RANK_BY_FREQUENCY
+
+                freq_sort_desc = sort_by == View.RANK_BY_FREQUENCY and sort_order == View.ORDER_DESCENDING
+                # disable to sort the inner ranking by time
+                year_sort_desc = False
+
                 if outer_ranking == 'outer_ranking_substitution':
                     substitution_aggregation = ResultTreeAggregationBySubstitution()
                     sorted_var_names = graph_query.get_var_names_in_order()
@@ -716,24 +721,21 @@ def get_query(request):
                     results_ranked.add_query_result(res)
 
                 # descending or ascending?
-                strategy = "graph"
-                descending = True
+                descending = (sort_order == View.ORDER_DESCENDING)
 
-                # time ranking
-                if strategy in View.RANKER_SUPPORTED:
-                    results_ranked.results = View().strategy2ranker[strategy].rank_document(graph_query, results,
-                                                                                            descending)
-                else:
-                    raise ValueError(f'Strategy "{strategy}" is not supported')
+                # verify sorting strategy (and default to time if not known)
+                if sort_by not in View.RANKER_SUPPORTED:
+                    sort_by = View.RANK_BY_TIME
 
+                results_ranked.results = View().strategy2ranker[sort_by].rank_document(graph_query, results, descending)
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_query", str(request),
                                            time_needed=datetime.now() - time_start)
 
         return JsonResponse(
-            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
-                 query_translation=query_trans_string, year_aggregation=year_aggregation,
+            dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
+                 results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
                  query_limit_hit="False"))
     except Exception:
         View().query_logger.write_api_call(False, "get_query", str(request))

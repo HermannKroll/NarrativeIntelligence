@@ -285,12 +285,143 @@ function result_present() {
     return $("#div_documents")[0].hasChildNodes()
 }
 
-document.getElementById("select_sorting_year").addEventListener("change", function () {
-    document.getElementById("btn_search").click()
-});
-document.getElementById("select_sorting_freq").addEventListener("change", function () {
-    document.getElementById("btn_search").click()
-});
+/**
+ * Submit the search process.
+ */
+function searchClick() {
+    document.querySelector("#btn_search").click()
+}
+
+/**
+ * Event to change the current sort order.
+ * First, the visual element is changed, and second,
+ * the search is submitted.
+ */
+function sortOrderClick() {
+    const orderDesc = document.querySelector("#sorting-order-down");
+    const orderAsc = document.querySelector("#sorting-order-up");
+
+    if (orderAsc.classList.contains("d-none")) {
+        // currently descending
+        orderDesc.classList.add("d-none");
+        orderAsc.classList.remove("d-none");
+    } else {
+        // currently ascending
+        orderDesc.classList.remove("d-none");
+        orderAsc.classList.add("d-none");
+    }
+    searchClick();
+}
+
+/**
+ * Get the current sorting order, either descending or ascending.
+ * @returns {string}
+ */
+function sortOrderGet() {
+    // return desc if asc is disabled
+    if (document.querySelector("#sorting-order-up").classList.contains("d-none"))
+        return "desc";
+    return "asc"
+}
+
+/**
+ * Set the current sorting order. Either descending or ascending.
+ * The function toggles the visible element on the screen.
+ * @param order string
+ */
+function sortOrderSet(order) {
+    const orderDesc = document.querySelector("#sorting-order-down");
+    const orderAsc = document.querySelector("#sorting-order-up");
+    if (order === "desc") {
+        orderDesc.classList.toggle("d-none", false);
+        orderAsc.classList.toggle("d-none", true);
+    } else if (order === "asc") {
+        orderDesc.classList.toggle("d-none", true);
+        orderAsc.classList.toggle("d-none", false);
+    }
+}
+
+/**
+ * Change the accessible sorting strategies based on the result.
+ * If the query has a variable, only frequency sorting is available,
+ * else time and relevance.
+ * @param queryHasVariables boolean
+ */
+function sortStrategyUpdate(queryHasVariables) {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (queryHasVariables) {
+        // disable default filter methods since they
+        // are not supported with variables
+        filterTime.classList.toggle("d-none", true);
+        filterGraph.classList.toggle("d-none", true);
+        filterFreq.classList.toggle("d-none", false);
+    } else {
+        filterTime.classList.toggle("d-none", false);
+        filterGraph.classList.toggle("d-none", false);
+        filterFreq.classList.toggle("d-none", true);
+    }
+}
+
+/**
+ * Returns the selected sorting strategy; undefined,
+ * if none of the known strategies is selected.
+ * @returns {undefined|string}
+ */
+function sortStrategyGet() {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (filterTime.selected)
+        return "time";
+    else if (filterGraph.selected)
+        return "graph";
+    else if (filterFreq.selected)
+        return "freq";
+    return undefined;
+}
+
+/**
+ * Set the current ordering strategy
+ * @param sortFilter strategy string
+ */
+function sortStrategySet(sortFilter) {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (sortFilter === filterTime.value) {
+        filterGraph.selected = false;
+        filterFreq.selected = false;
+        filterTime.selected = true;
+    } else if (sortFilter === filterGraph.value) {
+        filterTime.selected = false;
+        filterFreq.selected = false;
+        filterGraph.selected = true;
+    } else if (sortFilter === filterFreq.value) {
+        filterTime.selected = false;
+        filterGraph.selected = false;
+        filterFreq.selected = true;
+    }
+}
+
+/**
+ * Update a single parameter of the current active URL.
+ * The state is replaced such that navigating back to this point,
+ * the new parameter is used.
+ * @param key of the URL parameter
+ * @param value of the new parameter
+ */
+function updateURLParameter(key, value) {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(key))
+        return;
+    url.searchParams.set(key, value);
+    window.history.replaceState("Query", "", "/" + url.search.toString());
+}
 
 let imgrect = {width: 0, height: 0};
 document.getElementById("screenshot").addEventListener('load', (e) => {
@@ -547,15 +678,37 @@ function initFromURLQueryParams() {
         }
     }
 
+    // The following two cases only exist to support legacy URLs.
+    // Since we do not support both filters in parallel, only one
+    // of them can be selected: if both are provided, `time` has
+    // higher precedence.
+    // The backend catches invalid combinations (e.g. variable use
+    // with `time`) and reports it back to the frontend.
     if (params.has("sort_frequency_desc")) {
-        let sort_frequency = params.get("sort_frequency_desc");
-        document.getElementById('select_sorting_freq').value = sort_frequency;
+        let sort_frequency_desc = params.get("sort_frequency_desc");
+        if (sort_frequency_desc === "False") {
+            sortOrderSet("asc");
+        } else {
+            sortOrderSet("desc");
+        }
+        sortStrategySet("freq");
     }
 
     if (params.has("sort_year_desc")) {
-        let sort_year = params.get("sort_year_desc");
-        document.getElementById('select_sorting_year').value = sort_year;
+        let sort_year_desc = params.get("sort_year_desc");
+        if (sort_year_desc === "False") {
+            sortOrderSet("asc");
+        } else {
+            sortOrderSet("desc");
+        }
+        sortStrategySet("time");
     }
+
+    if (params.has("sort_by"))
+        sortStrategySet(params.get("sort_by"));
+
+    if (params.has("sort_order"))
+        sortOrderSet(params.get("sort_order"));
 
     if (params.has("data_source")) {
         let dataSourceStr = params.get("data_source")
@@ -718,17 +871,8 @@ function updateURLParameters(parameters) {
         url.searchParams.delete("visualization");
     }
 
-    if (parameters["freq_sort"] !== "True") {
-        url.searchParams.set("sort_frequency_desc", parameters["freq_sort"]);
-    } else {
-        url.searchParams.delete("sort_frequency_desc");
-    }
-
-    if (parameters["year_sort"] !== "True") {
-        url.searchParams.set("sort_year_desc", parameters["year_sort"]);
-    } else {
-        url.searchParams.delete("sort_year_desc");
-    }
+    url.searchParams.set("sort_by", parameters["sort_by"]);
+    url.searchParams.set("sort_order", parameters["sort_order"]);
 
     if (parameters["start_pos"] !== 0) {
         url.searchParams.set("start_pos", parameters["start_pos"]);
@@ -792,8 +936,8 @@ function logInputParameters(parameters) {
     message += "Data source                : " + parameters["data_source"] + "\n";
     message += "Outer Ranking              : " + parameters["outer_ranking"] + "\n";
     message += "Inner Ranking              : " + parameters["inner_ranking"] + "\n";
-    message += "Sorting by frequency (desc): " + parameters["freq_sort_desc"] + "\n";
-    message += "Sorting by year (desc)     : " + parameters["year_sort_desc"] + "\n";
+    message += "Sort-by                    : " + parameters["sort_by"] + "\n";
+    message += "Sort-order                 : " + parameters["sort_order"] + "\n";
     message += "Start position             : " + parameters["start_pos"] + "\n";
     message += "End position               : " + parameters["end_pos"] + "\n";
     message += "Start year                 : " + parameters["year_start"] + "\n";
@@ -882,8 +1026,8 @@ function getInputParameters(query) {
         obj["query_col"] = collectionInput.options[collectionInput.selectedIndex].value;
     }
     adjustSelectedPage(obj);
-    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
-    obj["year_sort"] = document.getElementById("select_sorting_year").value;
+    obj["sort_by"] = sortStrategyGet();
+    obj["sort_order"] = sortOrderGet();
 
     const dataSources = getSelectedDataSources();
     obj["data_source"] = dataSources.join(";");
@@ -948,8 +1092,7 @@ function showResults(response, parameters) {
 
     let valid_query = response["valid_query"];
     if (valid_query !== true) {
-        document.getElementById("select_sorting_year").style.display = "none";
-        document.getElementById("select_sorting_freq").style.display = "none";
+        document.getElementById("sorting_container").classList.toggle("d-none", true);
         document.getElementById("div_input_page").style.display = "none";
         document.getElementById("input_title_filter").style.display = "none";
         document.getElementById("input_title_filter_label").style.display = "none";
@@ -965,16 +1108,22 @@ function showResults(response, parameters) {
 
     // Hide sort buttons depending on the result
     let is_aggregate = response["is_aggregate"];
-    document.getElementById("select_sorting_year").style.display = "block";
     if (is_aggregate === true) {
-        document.getElementById("select_sorting_freq").style.display = "block";
-        visualizationByContainer.style.display = "block";
-        console.log("vis on");
+        visualizationByContainer.classList.toggle("d-none", false);
     } else {
-        document.getElementById("select_sorting_freq").style.display = "none";
-        visualizationByContainer.style.setProperty("display", "none", "important");
-        console.log("vis off");
+        visualizationByContainer.classList.toggle("d-none", true);
     }
+
+    // sort filter selection
+    sortStrategyUpdate(is_aggregate);
+    sortStrategySet(response["sort_by"]);
+    sortOrderSet(response["sort_order"]);
+
+    // required for invalid strategies (from URL)
+    if (response["sort_by"] !== parameters["sort_by"])
+        updateURLParameter("sort_by", response["sort_by"])
+
+    document.getElementById("sorting_container").classList.toggle("d-none", false);
 
     // Print query translation
     let query_translation = $("#query_translation");
@@ -2125,7 +2274,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 const exampleQueriesContainer = document.getElementById("exampleQueries");
-const sortingYearContainer = document.getElementById("sorting_year_container");
+const sortingYearContainer = document.getElementById("sorting_container");
 const previewContainer = document.getElementById('document_preview');
 
 /**
@@ -2143,7 +2292,7 @@ function setKeywordSearchHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.setProperty("display", "none", "important");
+        visualizationByContainer.classList.toggle("d-none", true);
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2166,7 +2315,7 @@ function setQueryBuilderHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "block";
+        visualizationByContainer.classList.toggle("d-none", false);
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
