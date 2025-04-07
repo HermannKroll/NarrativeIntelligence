@@ -8,6 +8,7 @@ Table Document {
   abstract string
   fulltext string [null]
   date_inserted datetime
+  source_id string [null]
 }
 
 Table Document_Metadata_Service {
@@ -23,30 +24,6 @@ Table Document_Metadata_Service {
   document_classifications string [null]
 }
 
-Table Predication {
-  id bigint PK
-  document_id bigint [ref: > Document.id]
-  document_collection string [ref: > Document.id]
-  subject_id string
-  subject_str string
-  subject_type string
-  predicate_org string
-  predicate string
-  relation string [null]
-  object_id string
-  object_str string
-  object_type string
-  confidence float [null]
-  sentence_id bigint [ref: > Sentence.id]
-  extraction_type string
-}
-
-Table Sentence {
-  id bigint [primary key]
-  document_collection string
-  text string
-  md5hash string
-}
 
 Table Tag_Inverted_Index {
   entity_id string [primary key]
@@ -55,13 +32,6 @@ Table Tag_Inverted_Index {
   support int
   document_ids string
 }
-
-Table Term_Inverted_Index {
-  term string [primary key]
-  document_collection string [primary key]
-  document_ids string 
-}
-
 
 
 Table Predication_Inverted_Index {
@@ -72,25 +42,6 @@ Table Predication_Inverted_Index {
   object_id string
   object_type string
   provenance_mapping string
-}
-
-Table Predication_Rating {
-  user_id string [primary key]
-  query string [primary key]
-  predication_id bigint [primary key, ref: > Predication.id]
-  rating string
-  date_inserted datetime
-}
-
-Table Substitution_Group_Rating {
-  variable_name string [primary key]
-  entity_name string [primary key]
-  entity_id string [primary key]
-  entity_type string [primary key]
-  user_id string [primary key]
-  query string [primary key]
-  rating string
-  date_inserted datetime
 }
 
 Table Entity_Keywords {
@@ -104,4 +55,33 @@ Table Schema_Support_Graph_Info {
   relation string [primary key]
   object_type string [primary key]
   support int
+}
+
+Table Drug_Disease_Trial_Phase {
+  drug string [primary key]
+  disease string [primary key]
+  phase int
+}
+
+Table Entity_Tagger_Data {
+  entity_id string [primary key]
+  entity_type string [primary key]
+  entity_class string
+  synonym string
+  synonym_processed string
+}
+
+Table Entity_Explainer_Data {
+  entity_id string [primary key]
+  entity_type string [primary key]
+  entity_terms string
+}
+
+Table Content_Data {
+    name string [primary key]
+    data string
+}
+
+Table Database_Update {
+  last_update Date [primary key]
 }
