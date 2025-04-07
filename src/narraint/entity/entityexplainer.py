@@ -127,13 +127,7 @@ def main():
                         level=logging.DEBUG)
 
     entity_explainer = EntityExplainer()
-    explanations = entity_explainer.explain_entity_str("metformin")
-    print(explanations)
-
-    entity_tagger = EntityTagger()
-    tags = entity_tagger.tag_entity("metformin")
-    print(tags)
-
+    entity_explainer.store_index()
 
 if __name__ == "__main__":
     main()
