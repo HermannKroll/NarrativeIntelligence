@@ -71,10 +71,6 @@ class DocTaggedBy(models.DocTaggedBy):
     pass
 
 
-class DocumentTranslation(models.DocumentTranslation):
-    pass
-
-
 class DocumentMetadata(models.DocumentMetadata):
     pass
 
