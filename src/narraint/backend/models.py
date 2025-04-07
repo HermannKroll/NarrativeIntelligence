@@ -181,6 +181,7 @@ class EntityTaggerData(Extended, DatabaseTable):
 class EntityExplainerData(Extended, DatabaseTable):
     __tablename__ = "entity_explainer_data"
     entity_id = Column(String, primary_key=True)
+    entity_type = Column(String, primary_key=True)
     entity_terms = Column(String)
 
     @staticmethod

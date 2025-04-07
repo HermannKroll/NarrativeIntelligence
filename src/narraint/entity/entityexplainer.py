@@ -14,7 +14,7 @@ from narrant.entity.entityresolver import EntityResolver
 class EntityExplainer(EntityIndexBase):
     __initialized = False
 
-    VERSION = 1
+    VERSION = 2
     NAME = "EntityExplainer"
 
     def __init__(self):
@@ -42,11 +42,11 @@ class EntityExplainer(EntityIndexBase):
         self._create_index()
 
         entries = list()
-        for entity_id, entity_terms in sorted(self.entity2terms.items(), key=lambda x: x[0]):
+        for (entity_id, entity_type), entity_terms in sorted(self.entity2terms.items(), key=lambda x: x[0]):
             if entity_id.strip() == "":
                 continue
             terms = EntityExplainerData.synonyms_to_string(list(entity_terms))
-            entries.append(dict(entity_id=entity_id, entity_terms=terms))
+            entries.append(dict(entity_id=entity_id, entity_type=entity_type, entity_terms=terms))
         logging.info(f'Inserting {len(self.entity2terms)} values into database...')
         EntityExplainerData.bulk_insert_values_into_table(session, entries)
 
@@ -54,7 +54,7 @@ class EntityExplainer(EntityIndexBase):
         logging.info('Finished')
 
     def _add_term(self, term, entity_id: str, entity_type: str, entity_class: str = None):
-        self.entity2terms[entity_id].add(term.strip())
+        self.entity2terms[(entity_id, entity_type)].add(term.strip())
 
     def get_prefixes(self, name):
         words = list([n for n in name.translate(self.__translator).lower().split(' ')])
@@ -93,6 +93,7 @@ class EntityExplainer(EntityIndexBase):
             session = SessionExtended.get()
             query = session.query(EntityExplainerData.entity_terms)
             query = query.filter(entity.entity_id == EntityExplainerData.entity_id)
+            query = query.filter(entity.entity_type == EntityExplainerData.entity_type)
 
             if query.count() == 0:
                 continue
