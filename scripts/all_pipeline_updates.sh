@@ -63,14 +63,6 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
-bash ~/NarrativeAnnotation/scripts/process_zbmed_for_service.sh 2> /root/ns_update_err.log
-
-if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
-    exit -1
-fi
-
-
 bash ~/NarrativeAnnotation/scripts/process_pubmed_updates_for_service.sh 2> /root/ns_update_err.log
 
 if [[ $? != 0 ]]; then
