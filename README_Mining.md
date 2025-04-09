@@ -56,6 +56,17 @@ SENDER="from@beispiel.de (Narrative Service Updater)"
 ```
 Save it.
 
+We need to configure the crawling of the K10 plus index. 
+Therefore, we need a second environment file:
+```
+nano .k10env
+```
+edit:
+```
+BASEURL=...
+```
+Save it.
+
 For the complete pipeline run:
 ```
 bash ~/NarrativeIntelligence/scripts/all_pipeline_updates.sh
