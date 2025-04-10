@@ -1,15 +1,13 @@
 {
-  "pmcid2pmid": "../tools/pmcid2pmid.tsv",
-  "pmc_dir": "../pubmed_central",
   "taggerOne": {
-    "root": "../tools/tagger/TaggerOne-0.2.1",
+    "root": "/home/USER/tools/TaggerOne-0.2.1",
     "model": "models/model_BC5CDRJ_011.bin",
     "batchSize": 10000,
     "timeout": 10,
     "max_retries": 1
   },
   "gnormPlus": {
-    "root": "../tools/tagger/GNormPlusJava",
+    "root": "/home/USER/tools/GNormPlusJava",
     "javaArgs": "-Xmx16G -Xms10G",
     "timeout": 10
   },
