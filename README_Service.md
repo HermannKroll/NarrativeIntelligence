@@ -154,9 +154,9 @@ conda init
 ```
 
 ### Environment Setup
-We tested and used Python 3.8 and Conda. 
+We tested and used Python 3.10 and Conda. 
 ```
-conda create -n narraint python=3.8
+conda create -n narraint python=3.10
 ```
 
 Activate the environment

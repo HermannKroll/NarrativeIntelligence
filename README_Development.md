@@ -69,7 +69,7 @@ The next step is to create a local python interpreter (using conda).
 3. Click on **Add Interpreter** and select **Add local Interpreter**
 4. Select *Generate new*
 5. Select type **Conda**
-6. Python version **3.8**
+6. Python version **3.10**
 7. Choose a name, e.g., `narraint-dev`
 
 > If you have not installed conda yet, the window will provide a clickable link to install the conda executable.
