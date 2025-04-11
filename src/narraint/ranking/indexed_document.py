@@ -3,9 +3,10 @@ from typing import List, Set
 
 from sqlalchemy import and_
 
-from kgextractiontoolbox.backend.models import Document, Tag, Predication
+from kgextractiontoolbox.backend.models import Document, Tag, Predication, BULK_MAX_NO_OF_IN_VALUES
 from kgextractiontoolbox.document.document import TaggedEntity
 from kgextractiontoolbox.document.narrative_document import NarrativeDocument, StatementExtraction
+from kgextractiontoolbox.util.helpers import chunks
 from narrant.cleaning.pharmaceutical_vocabulary import SYMMETRIC_PREDICATES
 from narrant.entity.entity import Entity, get_unique_entity_key
 from narrant.entity.entityidtranslator import EntityIDTranslator
@@ -231,52 +232,55 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
     """
     doc_results = {}
 
-    # first query document titles and abstract
-    doc_query = session.query(Document).filter(and_(Document.id.in_(document_ids),
-                                                    Document.collection == document_collection))
+    document_ids_input = sorted(list(document_ids))
+    for document_ids_chunk in chunks(document_ids_input, BULK_MAX_NO_OF_IN_VALUES):
 
-    for res in doc_query:
-        doc_results[res.id] = NarrativeDocument(document_id=res.id, title=res.title, abstract=res.abstract)
+        # first query document titles and abstract
+        doc_query = session.query(Document).filter(and_(Document.id.in_(document_ids_chunk),
+                                                        Document.collection == document_collection))
+
+        for res in doc_query:
+            doc_results[res.id] = NarrativeDocument(document_id=res.id, title=res.title, abstract=res.abstract)
+
+        # Next query for all tagged entities in that document
+        tag_query = session.query(Tag).filter(and_(Tag.document_id.in_(document_ids_chunk),
+                                                   Tag.document_collection == document_collection))
+        tag_result = defaultdict(list)
+        for res in tag_query:
+            tag_result[res.document_id].append(TaggedEntity(document=res.document_id,
+                                                            start=res.start,
+                                                            end=res.end,
+                                                            ent_id=res.ent_id,
+                                                            ent_type=res.ent_type,
+                                                            text=res.ent_str))
+        for doc_id, tags in tag_result.items():
+            doc_results[doc_id].tags = tags
+            doc_results[doc_id].sort_tags()
+
+        # Next query for extracted statements
+        es_query = session.query(Predication)
+        es_query = es_query.filter(Predication.document_collection == document_collection)
+        es_query = es_query.filter(Predication.document_id.in_(document_ids_chunk))
+        es_query = es_query.filter(Predication.relation != None)
+
+        es_for_doc = defaultdict(list)
+        for res in es_query:
+            es_for_doc[res.document_id].append(StatementExtraction(subject_id=res.subject_id,
+                                                                   subject_type=res.subject_type,
+                                                                   subject_str=res.subject_str,
+                                                                   predicate=res.predicate,
+                                                                   relation=res.relation,
+                                                                   object_id=res.object_id,
+                                                                   object_type=res.object_type,
+                                                                   object_str=res.object_str,
+                                                                   sentence_id=res.sentence_id,
+                                                                   confidence=res.confidence))
+
+        for doc_id, extractions in es_for_doc.items():
+            doc_results[doc_id].extracted_statements = extractions
 
     if len(doc_results) != len(document_ids):
-        diff = document_ids - doc_results.keys()
+        diff = set(document_ids) - doc_results.keys()
         raise ValueError(f'Did not retrieve all required {document_collection} documents (missed ids: {diff})')
-
-    # Next query for all tagged entities in that document
-    tag_query = session.query(Tag).filter(and_(Tag.document_id.in_(document_ids),
-                                               Tag.document_collection == document_collection))
-    tag_result = defaultdict(list)
-    for res in tag_query:
-        tag_result[res.document_id].append(TaggedEntity(document=res.document_id,
-                                                        start=res.start,
-                                                        end=res.end,
-                                                        ent_id=res.ent_id,
-                                                        ent_type=res.ent_type,
-                                                        text=res.ent_str))
-    for doc_id, tags in tag_result.items():
-        doc_results[doc_id].tags = tags
-        doc_results[doc_id].sort_tags()
-
-    # Next query for extracted statements
-    es_query = session.query(Predication)
-    es_query = es_query.filter(Predication.document_collection == document_collection)
-    es_query = es_query.filter(Predication.document_id.in_(document_ids))
-    es_query = es_query.filter(Predication.relation != None)
-
-    es_for_doc = defaultdict(list)
-    for res in es_query:
-        es_for_doc[res.document_id].append(StatementExtraction(subject_id=res.subject_id,
-                                                               subject_type=res.subject_type,
-                                                               subject_str=res.subject_str,
-                                                               predicate=res.predicate,
-                                                               relation=res.relation,
-                                                               object_id=res.object_id,
-                                                               object_type=res.object_type,
-                                                               object_str=res.object_str,
-                                                               sentence_id=res.sentence_id,
-                                                               confidence=res.confidence))
-
-    for doc_id, extractions in es_for_doc.items():
-        doc_results[doc_id].extracted_statements = extractions
 
     return [IndexedDocument(d, document_collection) for d in doc_results.values()]
