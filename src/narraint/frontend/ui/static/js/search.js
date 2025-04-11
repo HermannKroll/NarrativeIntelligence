@@ -2379,3 +2379,10 @@ async function setUpRecommenderSearch() {
 
     await loadCollectionDropDownMenu();
 }
+
+function setUpPatternDiscoverySearch() {
+    current_search_method = "knowledgepath";
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "none";
+    }
+}

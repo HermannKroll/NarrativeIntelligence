@@ -33,6 +33,7 @@ from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.keywords2graph.translation import Keyword2GraphTranslation
+from narraint.pattern_discovery import PatternDiscovery
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -102,6 +103,7 @@ class View:
                 View.RANK_BY_GRAPH: GraphRank(),
                 View.RANK_BY_TIME: PublicationDateRank()
             }
+            cls.pattern_discovery = PatternDiscovery()
         return cls._instance
 
 
@@ -1590,3 +1592,46 @@ def get_content_data(request):
         return JsonResponse(status=200, data=content_information)
     except Exception:
         return HttpResponse(status=500)
+
+
+def get_pattern_discovery(request):
+    if "concepts" not in request.GET.keys():
+        message = "Missing concepts in request."
+    else:
+        concepts = request.GET.get("concepts")
+        if not concepts.strip():
+            message = "Empty keywords in request."
+        else:
+            time_start = datetime.now()
+            try:
+                logging.debug('Generating knowledge path for "{}"'.format(concepts))
+                concepts = concepts.split("_AND_")
+                if len(concepts) < 2:
+                    return JsonResponse(status=500, data=dict(reason="At least two concepts are required."))
+
+                knowledge_graph, concept_nodes, indexed_documents = View().pattern_discovery.discover_pattern_for_concepts(
+                    concepts)
+                document_results = [QueryDocumentResult(document_id=d.id, title="", authors="", journals="",
+                                                        publication_year=0, publication_month=0, var2substitution={},
+                                                        confidence=0.0, position2provenance_ids={},
+                                                        document_collection="PubMed") for d in indexed_documents]
+
+                collection2ids = dict(PubMed=[d.id for d in indexed_documents])
+                document_results = QueryEngine.enrich_document_results_with_metadata(document_results, collection2ids)
+                document_results.sort(key=lambda x: x.document_id, reverse=True)
+
+                result_list = QueryDocumentResultList()
+                for d in document_results:
+                    result_list.add_query_result(d)
+
+                View().query_logger.write_api_call(True, "get_knowledge_path_search_request", str(request),
+                                                   time_needed=datetime.now() - time_start)
+                return JsonResponse(status=200, data=dict(graph=knowledge_graph, concepts=concept_nodes,
+                                                          results=result_list.to_dict()))
+
+            except Exception as e:
+                View().query_logger.write_api_call(False, "get_knowledge_path_search_request", str(request),
+                                                   time_needed=datetime.now() - time_start)
+                message = f'Could not mine knowledge path for "{concepts}: {e}"'
+                log_stack_trace(message, e)
+    return JsonResponse(status=500, data=dict(reason=message))

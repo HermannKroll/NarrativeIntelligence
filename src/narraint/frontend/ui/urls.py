@@ -8,7 +8,7 @@ from narraint.frontend.ui.views import get_autocompletion, get_check_query, get_
     get_keywords, get_logs_data, get_keyword_search_request, get_explain_translation, \
     post_drug_suggestion, get_clinical_trial_phases, get_last_db_update, get_data_sources, \
     get_explain_document, get_recommend, get_classifications, post_document_classification_feedback, get_content_data, \
-    post_entity_ov_search_log, post_entity_ov_subst_href_log
+    post_entity_ov_search_log, post_entity_ov_subst_href_log, get_pattern_discovery
 
 urlpatterns = [
     path("query", get_query, name="query"),
@@ -46,5 +46,6 @@ urlpatterns = [
     path("recommend", get_recommend, name="recommend"),
     path("document_classification_feedback", post_document_classification_feedback,
          name="document_classification_feedback"),
-    path("content_data", get_content_data, name="content_data")
+    path("content_data", get_content_data, name="content_data"),
+    path("pattern_discovery", get_pattern_discovery, name="pattern_discovery"),
 ]

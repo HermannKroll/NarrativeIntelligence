@@ -32,12 +32,13 @@
             <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
-
             <li class="nav-item" onclick="setUpRecommenderSearch()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender
                     (Beta)</a>
             </li>
-
+            <li class="nav-item" onclick="setUpPatternDiscoverySearch()">
+                <a class="nav-link" data-bs-toggle="tab" href="#search-type-knowledge-path" role="tab">Knowledge Path Search</a>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -132,7 +133,6 @@
                 </div>
             </div>
             <!-- recommendation -->
-
             <div class="tab-pane fade" id="search-type-recommender">
                 <div class="row">
                     <div class="input-group">
@@ -153,7 +153,32 @@
                     <div class="alert alert-danger" style="display:none" id="alert_recommender" role="alert"></div>
                 </div>
             </div>
-
+            <!-- knowledge paths -->
+            <div class="tab-pane fade" id="search-type-knowledge-path">
+                <div class="row">
+                    <div class="input-group">
+                        <input type="text" class="form-control" aria-label="Concepts" id="input-path-concepts"
+                               placeholder="enter keywords and press enter  (e.g. metformin diabetes mellitus injection)">
+                        <button class="btn btn-success" type="button" id="button-add-path-concepts" onclick="addPatternDiscoveryConcept()">
+                            Add
+                        </button>
+                        <button class="btn btn-primary" type="button" id="button-submit-path-concepts" onclick="searchPatternDiscovery()">
+                            <span class="spinner-border spinner-border-sm d-none" id="spinner-search-path-concepts"
+                                  role="status"></span>
+                            Search
+                        </button>
+                    </div>
+                    <div class="d-flex w-100 flex-row flex-wrap" id="path-concept-list"></div>
+                    <div class="w-100">
+                        <div class="alert alert-danger d-none mt-1" role="alert" id="alert-path-concepts"></div>
+                    </div>
+                    <div class="w-100 d-none mt-1" id="container-div-path-concepts">
+                        <div id="info_text">Click on one query to search.</div>
+                        <!-- result query graphs -->
+                        <div class="row d-flex flex-wrap justify-content-center" id="graph-div-path-concepts"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -789,6 +814,7 @@
     <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
+    <script src="{% static 'js/pattern_discovery.js' %}?version=1" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
@@ -814,6 +840,7 @@
         const url_available_collections = "{% url 'document_collections' %}";
         const url_available_classifications = "{% url 'document_classifications' %}";
         const url_document_classification_feedback = "{% url 'document_classification_feedback' %}";
+        const url_pattern_discovery = "{% url 'pattern_discovery' %}";
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";
