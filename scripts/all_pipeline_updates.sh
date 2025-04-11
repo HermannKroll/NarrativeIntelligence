@@ -38,6 +38,9 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
+# If you want to crawl all data from K10plus again, you can overwrite the Update Date here
+## UPDATE_DATE="1900-01-01"
+
 
 # This will invoke the Clinical Trials pipeline (data will be crawled from VZG index)
 bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_WHO%20OR%20GBV_CTG" "$UPDATE_DATE" "ClinicalTrials" 2> /root/ns_update_err.log
