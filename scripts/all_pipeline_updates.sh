@@ -63,12 +63,26 @@ if [[ $? != 0 ]]; then
     exit -1
 fi
 
+# As long as we have this pipeline, we shall use data from PubTator.
+# PubTator provides additional entity annotations that are useful for our extraction pipeline
 bash ~/NarrativeAnnotation/scripts/process_pubmed_updates_for_service.sh 2> /root/ns_update_err.log
 
 if [[ $? != 0 ]]; then
     mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
     exit -1
 fi
+
+# If PubTator is not available any more, we can switch to the following pipeline.
+# However, make sure that old PubMed data is deleted first as IDs might not be compatible
+# You can delete the collection via (you only need to do it once)
+##  python3 ~/NarrativeIntelligence/src/narraint/backend/delete_collection.py PubMed --force
+# This will invoke the MedLine pipeline (data will be crawled from VZG index)
+##bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_NLM" "$UPDATE_DATE" "PubMed" 2> /root/ns_update_err.log
+
+##if [[ $? != 0 ]]; then
+##    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+##    exit -1
+##fi
 
 
 bash ~/NarrativeAnnotation/scripts/process_clean_extractions.sh 2> /root/ns_update_err.log
