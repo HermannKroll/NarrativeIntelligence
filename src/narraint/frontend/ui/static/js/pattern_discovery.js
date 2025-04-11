@@ -196,7 +196,7 @@ function createKnowledgeGraphElements(statements, concepts) {
 
         if (needHighlight) {
             node["shape"] = "box";
-            node["font"] = { size: 18 }
+            node["font"] = { size: 24 }
         }
 
         nodes.add(node);
