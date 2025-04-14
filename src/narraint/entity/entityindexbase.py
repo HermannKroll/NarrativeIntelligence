@@ -13,12 +13,11 @@ from kgextractiontoolbox.progress import print_progress_with_eta
 from narraint.backend.models import Tag
 from narrant.atc.atc_tree import ATCTree
 from narrant.config import MESH_DESCRIPTORS_FILE, GENE_FILE, DISEASE_TAGGER_VOCAB_DIRECTORY, MESH_SUPPLEMENTARY_FILE
-from narrant.entity.entityresolver import EntityResolver, get_gene_ids, MeshResolver
+from narrant.entity.entityresolver import EntityResolver, get_gene_ids
 from narrant.entity.meshontology import MeSHOntology
 from narrant.entitylinking.enttypes import GENE, SPECIES, DOSAGE_FORM, DRUG, EXCIPIENT, PLANT_FAMILY_GENUS, CHEMICAL, \
-    VACCINE, DISEASE, TARGET, ORGANISM, CELLLINE
+    VACCINE, DISEASE, ORGANISM, CELLLINE
 from narrant.mesh.data import MeSHDB
-from narrant.mesh.supplementary import MeSHDBSupplementary
 from narrant.vocabularies.cellline_vocabulary import CellLineVocabulary
 from narrant.vocabularies.chemical_vocabulary import ChemicalVocabulary
 from narrant.vocabularies.dosageform_vocabulary import DosageFormVocabulary
@@ -26,7 +25,6 @@ from narrant.vocabularies.drug_vocabulary import DrugVocabulary
 from narrant.vocabularies.excipient_vocabulary import ExcipientVocabulary
 from narrant.vocabularies.organism_vocabulary import OrganismVocabulary
 from narrant.vocabularies.plant_family_genus import PlantFamilyGenusVocabulary
-from narrant.vocabularies.target_vocabulary import TargetVocabulary
 from narrant.vocabularies.vaccine_vocabulary import VaccineVocabulary
 
 
@@ -63,7 +61,6 @@ class EntityIndexBase:
         self._add_vaccine_terms()
         self._add_plant_families()
         # Targets are deactivated at the moment
-        # self._add_chembl_targets()
         self._add_chembl_organisms()
         self._add_celllines()
 
@@ -209,8 +206,8 @@ class EntityIndexBase:
         for r in q:
             used_supplements_records.add(r[0])
 
-
-        logging.info(f'{len(used_supplements_records)} supplement records found in DB. Extracting terms from resolver...')
+        logging.info(
+            f'{len(used_supplements_records)} supplement records found in DB. Extracting terms from resolver...')
         resolver = EntityResolver()
         # just use the main names and not the synonymous terms (not necessary)
         for record in used_supplements_records:
@@ -250,13 +247,6 @@ class EntityIndexBase:
         for term, chids in drug_terms2dbid.items():
             for chid in chids:
                 self._add_term(term, chid, CHEMICAL)
-
-    def _add_chembl_targets(self):
-        logging.info('Adding ChEMBL targets...')
-        terms2id = TargetVocabulary.create_target_vocabulary(expand_by_s_and_e=False)
-        for term, chids in terms2id.items():
-            for chid in chids:
-                self._add_term(term, chid, TARGET)
 
     def _add_chembl_organisms(self):
         logging.info('Adding ChEMBL organism...')
