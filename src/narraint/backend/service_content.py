@@ -49,7 +49,6 @@ def compute_extracted_statements_per_relation(session):
     # WHERE relation <> NULL
     # GROUP BY relation;
     # ORDER BY count(*) DESC
-    session = SessionExtended.get()
     query = session.query(Predication.relation, func.count())
     query = query.filter(Predication.relation.is_not(None))
     query = query.group_by(Predication.relation)
@@ -95,9 +94,12 @@ def get_content_data(name, force_update=False):
 
 def update_content_information(force_update=False):
     content = dict()
-    content[ContentData.CONTENT_DATA_COLLECTIONS] = get_content_data(ContentData.CONTENT_DATA_COLLECTIONS, force_update=force_update)
-    content[ContentData.CONTENT_DATA_ENTITY_TYPES] = get_content_data(ContentData.CONTENT_DATA_ENTITY_TYPES, force_update=force_update)
-    content[ContentData.CONTENT_DATA_STATEMENTS] = get_content_data(ContentData.CONTENT_DATA_STATEMENTS, force_update=force_update)
+    content[ContentData.CONTENT_DATA_COLLECTIONS] = get_content_data(ContentData.CONTENT_DATA_COLLECTIONS,
+                                                                     force_update=force_update)
+    content[ContentData.CONTENT_DATA_ENTITY_TYPES] = get_content_data(ContentData.CONTENT_DATA_ENTITY_TYPES,
+                                                                      force_update=force_update)
+    content[ContentData.CONTENT_DATA_STATEMENTS] = get_content_data(ContentData.CONTENT_DATA_STATEMENTS,
+                                                                    force_update=force_update)
     return content
 
 

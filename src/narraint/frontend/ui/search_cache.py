@@ -14,7 +14,8 @@ class SearchCache:
         if not os.path.isdir(CACHE_DIR):
             os.mkdir(CACHE_DIR)
 
-    def convert_query_to_path(self, document_collection, graph_query: GraphQuery, aggregation_name: str = None):
+    @staticmethod
+    def convert_query_to_path(document_collection, graph_query: GraphQuery, aggregation_name: str = None):
         key = hashlib.md5(graph_query.get_unique_key().encode('utf-8')).hexdigest()
         if not aggregation_name:
             return os.path.join(CACHE_DIR, '{}_{}.pkl'.format(document_collection, key))

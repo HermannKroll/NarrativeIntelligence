@@ -26,6 +26,8 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         self.pref2result = {}
         self._pref_trees_visited = set()
         self._pref_tree_nodes_with_docs = set()
+        self.freq_sort_desc = None
+        self.year_sort_desc = None
 
     def _clear_state(self):
         self.var_names.clear()
@@ -134,16 +136,17 @@ class ResultAggregationByOntology(QueryResultAggregationStrategy):
         var2sub[self.var_names[0]] = QueryEntitySubstitution(ent_str, ent_id, ent_type, ent_name)
         return QueryResultAggregate(var2sub)
 
-    def _node_has_result_list(self, node):
+    @staticmethod
+    def node_has_result_list(node):
         if isinstance(node, QueryResultAggregateList) or isinstance(node, QueryResultAggregate):
             return True
         return False
 
     def _sort_node_result_list(self, node):
-        if self._node_has_result_list(node):
+        if self.node_has_result_list(node):
             result_docs = []
             for res in node.results:
-                if self._node_has_result_list(res):
+                if self.node_has_result_list(res):
                     self._sort_node_result_list(res)
                 if isinstance(res, QueryDocumentResult):
                     result_docs.append(res)

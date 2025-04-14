@@ -14,7 +14,7 @@ def main():
     database_name = get_db_connection_name()
     logging.info(f'Your current database is: {database_name}')
 
-    session = SessionExtended.get()
+    SessionExtended.get()
     logging.info('Finished')
 
 

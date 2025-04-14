@@ -1,7 +1,6 @@
-import argparse
 import itertools
 import logging
-from typing import Dict, Tuple, Any
+from typing import Dict
 
 from sqlalchemy import delete
 
@@ -234,8 +233,6 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-    parser = argparse.ArgumentParser()
-    args = parser.parse_args()
 
     SchemaSupportGraph.compute_schema_graph()
 

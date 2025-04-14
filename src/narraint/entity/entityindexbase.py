@@ -196,7 +196,7 @@ class EntityIndexBase:
                 except KeyError:
                     continue
 
-    def _add_mesh_supplements(self, mesh_supplement_file=MESH_SUPPLEMENTARY_FILE):
+    def _add_mesh_supplements(self):
         # All MeSH supplements are Diseases in our database
         # However, loading all supplements into the index will be too large
         logging.info('Query all MeSH supplements from Tag table...')

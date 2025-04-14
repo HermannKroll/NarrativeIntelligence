@@ -168,7 +168,7 @@ def main():
               f'This will also delete all corresponding tags (Tag), '
               'tagging information (doc_taggedb_by), facts (Predication) and extraction information (doc_processed_by_ie)')
         answer = input('Enter y(yes) to proceed the deletion...')
-        if (answer and (answer.lower() == 'y' or answer.lower() == 'yes')):
+        if answer and (answer.lower() == 'y' or answer.lower() == 'yes'):
             delete_document_collection_from_database_enhanced(document_collection)
             logging.info('Finished')
         else:

@@ -1,4 +1,3 @@
-import argparse
 import copy
 import itertools
 import logging
@@ -253,8 +252,6 @@ def main():
     logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
                         level=logging.DEBUG)
-    parser = argparse.ArgumentParser()
-    args = parser.parse_args()
 
     g = Keyword2GraphTranslation()
 

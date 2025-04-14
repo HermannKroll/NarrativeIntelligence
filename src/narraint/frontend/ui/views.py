@@ -211,11 +211,9 @@ def get_document_graph(request):
 def get_autocompletion(request):
     if "term" in request.GET:
         search_string = str(request.GET.get("term", "").strip())
-        completion_terms = []
         if "entity_type" in request.GET:
             entity_type = str(request.GET.get("entity_type", "").strip())
-            completion_terms = View().autocompletion.compute_autocompletion_list(search_string,
-                                                                                 entity_type=entity_type)
+            completion_terms = View().autocompletion.compute_autocompletion_list(search_string, entity_type=entity_type)
         else:
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
@@ -253,7 +251,7 @@ def get_check_query(request):
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid="False", query=query_trans_string))
-    except Exception as e:
+    except Exception:
         return JsonResponse(status=500, data=dict(valid="False", query=None))
 
 
@@ -262,11 +260,6 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="term not given"))
     try:
         term = str(request.GET.get("term", "").strip()).lower()
-        expand_by_prefix = True
-        if "expand_by_prefix" in request.GET:
-            expand_by_prefix_str = str(request.GET.get("expand_by_prefix", "").strip()).lower()
-            if expand_by_prefix_str == "false":
-                expand_by_prefix = False
         try:
             entities = View().translation.convert_text_to_entity(term)
             resolver = EntityResolver()
@@ -278,7 +271,7 @@ def get_term_to_entity(request):
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
-    except Exception as e:
+    except Exception:
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
@@ -578,8 +571,6 @@ def get_query(request):
     results_converted = []
     is_aggregate = False
     valid_query = False
-    query_limit_hit = False
-    query_trans_string = ""
     if "query" not in request.GET:
         View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
@@ -670,7 +661,6 @@ def get_query(request):
         elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
                 graph_query) > 1:
             results_converted = []
-            nt_string = ""
             query_trans_string = "Do not support multiple variables in an ontology-based ranking"
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
@@ -1165,10 +1155,9 @@ def get_keywords(request):
             try:
                 session = SessionExtended.get()
                 query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
+                keywords = ""
                 try:
                     result = query.first()
-
-                    keywords = ""
                     if result:
                         keywords = ast.literal_eval(result[0])
                 except OperationalError:
@@ -1225,7 +1214,7 @@ def get_last_db_update(request):
         logging.debug(f"Get last DB update: {last_update}")
         View().query_logger.write_api_call(True, "get_last_db_update", str(request))
         return JsonResponse(data=dict(last_update=last_update))
-    except Exception as e:
+    except Exception:
         View().query_logger.write_api_call(False, "get_last_db_update", str(request))
         traceback.print_exc(file=sys.stdout)
         return HttpResponse(status=500)
@@ -1235,7 +1224,7 @@ class SearchView(TemplateView):
     template_name = "ui/search.html"
 
     def __init__(self):
-        init_view = View()
+        View()
         super(SearchView, self).__init__()
 
     def get(self, request, *args, **kwargs):
@@ -1465,7 +1454,6 @@ def get_recommend(request):
     results_converted = []
     is_aggregate = False
     valid_query = False
-    query_trans_string = ""
     if "query" not in request.GET:
         View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="document_id parameter is missing"))

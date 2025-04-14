@@ -15,7 +15,6 @@ LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
 TMP_DIR_TAGGER = os.path.join(TMP_DIR, 'tagger')
 CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
-CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
 
 FEEDBACK_DIR = os.path.join(GIT_ROOT_DIR, 'feedback')
 FEEDBACK_REPORT_DIR = os.path.join(FEEDBACK_DIR, 'reports')

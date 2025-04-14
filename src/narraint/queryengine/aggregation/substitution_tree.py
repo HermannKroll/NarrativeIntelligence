@@ -50,7 +50,7 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
             for r in results:
                 self._add_query_result_in_aggregation(r)
 
-            self._populate_tree_structure(freq_sort_desc, start_pos, end_pos)
+            self._populate_tree_structure(freq_sort_desc)
 
             # self.root.sort_results_by_substitutions(freq_sort_desc)
             if start_pos and end_pos:
@@ -98,7 +98,7 @@ class ResultTreeAggregationBySubstitution(QueryResultAggregationStrategy):
                     parent.add_query_result(node)
                     self.generated_tree_aggregates[current_sub] = node
 
-    def _populate_tree_structure(self, freq_sort_desc, start_pos, end_pos):
+    def _populate_tree_structure(self, freq_sort_desc):
         all_result_lists = []
 
         # consider only substitutions that are on level 1 between start pos and end pos
