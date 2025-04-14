@@ -19,28 +19,30 @@ class AutocompletionUtil:
     VERSION = 5
     LOAD_INDEX = True
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-            cls.__instance.variable_types = set()
-            cls.__instance.variable_types.update(ALL)
-            cls.__instance.variable_types.add("Target")
-            cls.__instance.other_terms = list(["PlantGenus", "PlantGenera"])
-            cls.__instance.variable_types = sorted(list(cls.__instance.variable_types))
-
-            cls.__instance.logger = logging
-            cls.__instance.known_terms = set()
-            cls.__instance.known_drug_terms = set()
-            cls.__instance.trie = None
-            cls.__instance.drug_trie = None
-            cls.__instance.version = None
-            if AutocompletionUtil.LOAD_INDEX:
-                try:
-                    cls.__instance.load_autocompletion_index()
-                except ValueError:
-                    logging.info('Autocompletion index is outdated. Creating a new one...')
-                    cls.__instance.build_autocompletion_index()
         return cls.__instance
+
+    def __init__(self):
+        self.variable_types = set()
+        self.variable_types.update(ALL)
+        self.variable_types.add("Target")
+        self.other_terms = list(["PlantGenus", "PlantGenera"])
+        self.variable_types = sorted(list(self.variable_types))
+
+        self.logger = logging
+        self.known_terms = set()
+        self.known_drug_terms = set()
+        self.trie = None
+        self.drug_trie = None
+        self.version = None
+        if AutocompletionUtil.LOAD_INDEX:
+            try:
+                self.load_autocompletion_index()
+            except ValueError:
+                logging.info('Autocompletion index is outdated. Creating a new one...')
+                self.build_autocompletion_index()
 
     def __build_trie_structure(self, known_terms):
         self.logger.info(f'Building Trie structure with {len(known_terms)} terms...')
@@ -128,7 +130,7 @@ class AutocompletionUtil:
 
             if 0 <= and_index < or_index or or_index == -1:
                 # "and" occurred first
-                left_str, right_str = entity_str.split(" And ",  1)
+                left_str, right_str = entity_str.split(" And ", 1)
                 left_terms = AutocompletionUtil.iterate_entity_name_orders(left_str.strip(), recursive_call=True)
                 right_terms = AutocompletionUtil.iterate_entity_name_orders(right_str.strip(), recursive_call=True)
                 conjunction = " And "
