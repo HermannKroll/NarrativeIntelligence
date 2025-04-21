@@ -100,6 +100,7 @@ async function buildSite() {
 
     const search = await getSearchParam();
     createDynamicOverviews();
+    buildDocumentCollectionFilter();
 
     const keyword = search.split("=")[1];
     const keywordDecoded = decodeURI(keyword);

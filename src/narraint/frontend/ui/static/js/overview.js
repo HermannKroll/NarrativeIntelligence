@@ -158,10 +158,11 @@ async function loadPaperData(chemblid = currentChemblID, enttype = "Drug") {
  * @returns {Promise<void>}
  */
 async function loadOverviewData() {
+    const dataSources = getSelectedDataSources().join(";");
     for (let prefix in overviews) {
         const ov = overviews[prefix];
 
-        const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
+        const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=${dataSources}`;
         // use await to request one overview after the other
         const data = await fetch(url)
             .then((response) => {
@@ -867,16 +868,17 @@ function networkUnselectNode() {
  * @param type {String}
  */
 async function retrieveAdditionalEdges(entity, type) {
+    const dataSources = getSelectedDataSources().join(";");
     const startTime = Date.now()
     let entities = []
     if (type === "drug") {
-        let result = await fetch(`${url_query_sub_count}?query=${entity}+interacts+Target&data_source=PubMed`)
+        let result = await fetch(`${url_query_sub_count}?query=${entity}+interacts+Target&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
         entities.push(...result["sub_count_list"]);
 
-        result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Disease&data_source=PubMed`)
+        result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Disease&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -884,7 +886,7 @@ async function retrieveAdditionalEdges(entity, type) {
 
     } else { // target or disease
         const predicate = (type === "target") ? "interacts" : "associated"; // TODO use this? then use it above too!
-        let result = await fetch(`${url_query_sub_count}?query=Drug+${predicate}+${entity}&data_source=PubMed`)
+        let result = await fetch(`${url_query_sub_count}?query=Drug+${predicate}+${entity}&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -932,4 +934,100 @@ const networkSelectEdge = (e) => {
     // open the corresponding query in a new tab
     window.open(`/?query="${subject}"+${predicate}+"${object}"`, '_blank');
     network.unselectAll();
+}
+
+/**
+ * Function gets all selected data sources and returns them as a list. If no data source
+ * is available, `PubMed` is returned as default.
+ * @returns {String[]} list of data sources
+ */
+function getSelectedDataSources() {
+    let dataSource = [];
+    let dataSourceChildren = document.getElementById("collection-filter").children;
+
+    for (let i in dataSourceChildren) {
+        const child = dataSourceChildren.item(i);
+        const name = child["name"] || "";
+        const checked = child["checked"] || false;
+
+        if (name !== "data_source" || !checked)
+            continue;
+
+        const dataSourceString = child["id"].split("_")[1];
+        dataSource.push(dataSourceString);
+    }
+    if (dataSource.length === 0) {
+        if (document.getElementById("filter_PubMed") !== null) {
+            document.getElementById("filter_PubMed").checked = true;
+        }
+        dataSource.push("PubMed");
+    }
+    return dataSource;
+}
+
+async function refreshAllData() {
+    await loadOverviewData()
+        .then(() => createNetworkGraph())
+        .catch((e) => console.log(e))
+}
+
+
+/**
+ * Function fetches the collections available for filtering. For each option, the appropriate
+ * filter entry gets created. The collection with the highest priority is checked initially.
+ * @returns {Promise<void>}
+ */
+async function buildDocumentCollectionFilter() {
+    const collections = await fetch(url_available_collections)
+        .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
+            return response.json();
+        }).then((data) => {
+            return data["data_sources"];
+        })
+        .catch(() => {
+            console.error("Could not load collection filter types.");
+            return null;
+        });
+
+    if (!collections)
+        return;
+
+    const collectionFilter = document.getElementById("collection-filter");
+    const maxPriority = Math.max(...collections.map(o => o["priority"]))
+    const maxPriorityIndex = collections.findIndex((e) => {
+        return e["priority"] === maxPriority
+    });
+
+    for (const i in collections) {
+        const dc = collections[i];
+
+        const inputId = "filter_" + dc["collection"];
+        const filterInput = document.createElement("input");
+        filterInput.type = "checkbox";
+        filterInput.id = inputId;
+        filterInput.name = "data_source";
+        filterInput.classList.add(["col-1"]);
+        filterInput.value = dc["collection"];
+        filterInput.onclick = async (e) => {
+            await refreshAllData();
+        };
+
+        if (i === maxPriorityIndex.toString())
+            filterInput.checked = true;
+
+        const filterHelpAnchor = document.createElement("a");
+        filterHelpAnchor.href = dc["url"];
+        filterHelpAnchor.target = "_blank";
+        filterHelpAnchor.text = "Help";
+
+        const filterLabel = document.createElement("label");
+        filterLabel.classList.add(["col-11"]);
+        filterLabel.htmlFor = inputId;
+        filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
+
+        collectionFilter.append(filterInput, filterLabel);
+    }
 }

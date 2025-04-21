@@ -423,7 +423,7 @@ def get_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
-def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collection: str):
+def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collections: list) -> dict:
     """
     Does the query sub count processing with caching if activated
     :param graph_query: a graph query object
@@ -434,7 +434,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     cached_sub_count_list = None
     if DO_CACHING:
         try:
-            cached_sub_count_list = View().cache.load_result_from_cache(document_collection, graph_query,
+            cached_sub_count_list = View().cache.load_result_from_cache(document_collections, graph_query,
                                                                         aggregation_name=aggregation_strategy)
             if cached_sub_count_list:
                 logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
@@ -448,7 +448,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
         # run query
         # compute the query and do not load metadata (not required)
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter={document_collection},
+                                                           document_collection_filter=set(document_collections),
                                                            load_document_metadata=False)
 
         # next get the aggregation by var names
@@ -468,7 +468,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
 
         if DO_CACHING:
             try:
-                View().cache.add_result_to_cache(document_collection, graph_query,
+                View().cache.add_result_to_cache(document_collections, graph_query,
                                                  sub_count_list,
                                                  aggregation_name=aggregation_strategy)
             except Exception as e:
@@ -482,11 +482,19 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
         query = str(request.GET["query"]).strip()
-        document_collection = str(request.GET["data_source"]).strip()
-        if document_collection not in ["LitCovid", "LongCovid", "PubMed"]:
-            return JsonResponse(status=500,
-                                data=dict(answer="data source not valid", reason="Data sources supported: PubMed,"
-                                                                                 " LitCovid and LongCovid"))
+        document_collections = get_document_collections_from_data_source_string(str(request.GET["data_source"]).strip())
+        allowed_sources = {"LitCovid", "LongCovid", "PubMed"}
+        invalid_sources = [ds for ds in document_collections if ds not in allowed_sources]
+
+        if invalid_sources:
+            return JsonResponse(
+                status=500,
+                data=dict(
+                    answer="data source not valid",
+                    reason=f"Unsupported data sources: {', '.join(invalid_sources)}. "
+                           f"Supported: {', '.join(allowed_sources)}"
+                )
+            )
 
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
         if not graph_query or len(graph_query.fact_patterns) == 0:
@@ -499,7 +507,7 @@ def get_query_sub_count(request):
 
         time_start = datetime.now()
         # Get sub count list via caching
-        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collection)
+        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collections)
 
         if "topk" in request.GET:
             try:

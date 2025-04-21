@@ -12,9 +12,17 @@
 
     <div class="d-flex flex-row overflow-scroll">
         <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
-            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="row m-1 align-items-center border-bottom" id="collection-filter">
+                <label class="g-0">
+                    <strong>Data Source:</strong>
+                </label>
+            </div>
+{#            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>#}
+            <label class="g-0">
+                    <strong>Overview:</strong>
+            </label>
             <div class="row rounded mt-2 g-0 d-flex p-1 flex-nowrap shadow-sm" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="background-color: lightgrey">
-                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85" >
+                <div class="sidebar_entry_name overflow-hidden text-nowrap fs-0-85">
                     Drug
                 </div>
             </div>
@@ -201,7 +209,7 @@
 
                     <div class="container border bg-dark-grey rounded mt-4" id="RecentPapers">
                         <div class="row border-bottom border-dark px-1 pt-1 mb-1">
-                            <h5 class="col-12 gx-0 fw-bolder mt-1">Recent Papers</h5>
+                            <h5 class="col-12 gx-0 fw-bolder mt-1">Recent Papers from PubMed</h5>
                         </div>
                         <div class="row my-5 align-items-center" id="newsLoading">
                             <div class="spinner-border mx-auto my-auto" role="status">
@@ -418,6 +426,7 @@
         const url_suggest_drug_report = "{% url 'suggest_drug' %}";
         const url_keywords = "{% url 'keywords' %}";
         const url_paper_view_log = "{% url 'paper_view_log' %}";
+        const url_available_collections = "{% url 'document_collections' %}";
 
         const url_drug_search = "{% url 'drug_search_log' %}";
         const url_substance_href = "{% url 'drug_substance_forward_log' %}";
@@ -448,9 +457,9 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 
-    <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?version=10" type="text/javascript"></script>
     <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=7" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverview.js' %}?version=19" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverview.js' %}?version=20" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
 {% endblock %}
