@@ -99,23 +99,21 @@ class PatternDiscovery:
         relevant_statements = set()
         known_statements = set()
         for statement in statements:
-            subject = (self.key_to_statement[statement].subject.entity_id,
-                       self.key_to_statement[statement].subject.entity_type)
-            object = (self.key_to_statement[statement].object.entity_id,
-                      self.key_to_statement[statement].object.entity_type)
+            subject_key = self.key_to_statement[statement].subject.get_unique_key()
+            object_key = self.key_to_statement[statement].object.get_unique_key()
 
             # components do not contain a concepts entity
-            if (subject not in self.concept_to_entities[concept]
-                    and object not in self.concept_to_entities[concept]):
+            if (subject_key not in self.concept_to_entities[concept]
+                    and object_key not in self.concept_to_entities[concept]):
                 continue
 
             # statement already known
-            if ((subject, object) in known_statements
-                    or (object, subject) in known_statements):
+            if ((subject_key, object_key) in known_statements
+                    or (object_key, subject_key) in known_statements):
                 continue
 
             relevant_statements.add(statement)
-            known_statements.add((subject, object))
+            known_statements.add((subject_key, object_key))
             if len(relevant_statements) >= threshold:
                 break
         return relevant_statements
