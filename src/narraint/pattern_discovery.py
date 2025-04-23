@@ -4,7 +4,6 @@ from typing import List
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.entity.entitytagger import EntityTagger
-from narraint.keywords2graph.translation import ASSOCIATED
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import ScoredDocumentEntity, retrieve_indexed_documents_from_database_small, \
     IndexedDocument
@@ -77,9 +76,6 @@ class PatternDiscovery:
 
         for indexed_document in scored_documents:
             for scored_statement in indexed_document.scored_statements:
-                if scored_statement.relation == ASSOCIATED:
-                    continue
-
                 score = score_edge_by_tfidf_coverage_confidence(statement=scored_statement, corpus=self.corpus)
                 statement_key = scored_statement.get_unique_key()
 
