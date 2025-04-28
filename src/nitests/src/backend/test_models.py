@@ -33,6 +33,19 @@ class TestModels(unittest.TestCase):
         self.assertEqual(5, len(doc_ids))
         self.assertEqual({1, 2, 3, 4, 5}, doc_ids)
 
+        collection2doc_ids = TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_id="A",
+                                                                               entity_type="TYPE_A",
+                                                                               document_collections=["Test"])
+        self.assertEqual(1, len(collection2doc_ids))
+        doc_ids = collection2doc_ids['Test']
+        self.assertEqual(5, len(doc_ids))
+        self.assertEqual({1, 2, 3, 4, 5}, doc_ids)
+
+        collection2doc_ids = TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_id="A",
+                                                                               entity_type="TYPE_A",
+                                                                               document_collections=["NOT_EXISTS"])
+        self.assertEqual(0, len(collection2doc_ids))
+
         collection2doc_ids = TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_id="B",
                                                                              entity_type="TYPE_B")
         self.assertEqual(1, len(collection2doc_ids))
