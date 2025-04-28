@@ -28,23 +28,42 @@ class UiConfig(AppConfig):
         daily_worker_path = os.path.join(os.path.dirname(__file__), "daily_worker.py")
 
         if not self._is_process_running(daily_worker_path):
-            python_executable = sys.executable
-            process = subprocess.Popen(
-                [python_executable, daily_worker_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            logging.info("dailyWorker process started.")
+            try:
+                python_executable = sys.executable
+                process = subprocess.Popen(
+                    [python_executable, daily_worker_path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                logging.info("dailyWorker process started.")
 
-            threading.Thread(target=log_output, args=(process.stdout, logging.INFO)).start()
-            threading.Thread(target=log_output, args=(process.stderr, logging.ERROR)).start()
+                threading.Thread(target=log_output, args=(process.stdout, logging.INFO)).start()
+                threading.Thread(target=log_output, args=(process.stderr, logging.ERROR)).start()
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                logging.error("Exception occurred while spawning dailyWorker process.")
         else:
             logging.info("dailyWorker process is already running.")
 
     @staticmethod
     def _is_process_running(script_path):
-        for proc in subprocess.check_output(["ps", "aux"]).splitlines():
-            if script_path in str(proc):
+        import platform
+        platform_system = platform.system()
+        try:
+            if platform_system == "Windows":
+                ps_output = subprocess.check_output(["wmic", "process", "get", "commandline"], shell=True)
+            elif platform_system == "Darwin" or platform_system == "Linux":
+                ps_output = subprocess.check_output(["ps", "aux"], shell=True)
+            else:
+                raise NotImplementedError("Unsupported platform {}".format(platform_system))
+            ps_output = ps_output.decode()
+            if script_path in ps_output:
                 return True
+        except (NotImplementedError, subprocess.CalledProcessError) as e:
+            import traceback
+            traceback.print_exc()
+            logging.error(e)
         return False
+
