@@ -46,6 +46,7 @@ from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.ranking import GraphRank, PublicationDateRank, DocumentRanker
 from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 from narraint.recommender.recommendation import RecommendationSystem
+from narrant.entity.entity import get_unique_entity_key
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -127,12 +128,26 @@ def get_document_graph(request):
 
             # index the document to compute frequency and coverage
             doc = IndexedDocument(narrative_documents[0], document_collection)
+            # extract longest text sequence from tags
+            entity2tagged_sequence = dict()
+            for tag in doc.tags:
+                key = get_unique_entity_key(tag.ent_type, tag.ent_id)
+                if key not in entity2tagged_sequence:
+                    entity2tagged_sequence[key] = tag.text.capitalize()
+                else:
+                    if len(tag.text) > len(entity2tagged_sequence[key]):
+                        entity2tagged_sequence[key] = tag.text.capitalize()
+
             # score all edge and sort them
+            # some edges might use entities that are not present in our vocabulary anymore
+            # so just take edges that have been scored
             sorted_extracted_statements = [(s,
                                             score_edge_by_tfidf_coverage_confidence(
                                                 doc.extracted_stmt2scored_statement[s],
                                                 corpus=View().corpus))
-                                           for s in doc.extracted_statements]
+                                           for s in doc.extracted_statements
+                                           if s in doc.extracted_stmt2scored_statement]
+
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
             sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
@@ -147,8 +162,18 @@ def get_document_graph(request):
                 try:
                     subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
                                                                            resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if subject_name == stmt.subject_id.capitalize():
+                        # extract longest text sequence from tags
+                        subject_name = entity2tagged_sequence[get_unique_entity_key(stmt.subject_type, stmt.subject_id)]
+
                     object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
                                                                           resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if object_name == stmt.object_id.capitalize():
+                        # extract longest text sequence from tags
+                        object_name = entity2tagged_sequence[get_unique_entity_key(stmt.object_type, stmt.object_id)]
+
                     subject_name = f'{subject_name} ({stmt.subject_type})'
                     object_name = f'{object_name} ({stmt.object_type})'
 
@@ -171,6 +196,8 @@ def get_document_graph(request):
 
                     # Map the fact to the corresponding sentence text
                     facts2text[so_key] = sentence_id2text[stmt.sentence_id]
+                except KeyError:
+                    continue
                 except Exception:
                     pass
 
