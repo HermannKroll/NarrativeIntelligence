@@ -87,11 +87,18 @@ After the interpreter has indexed the newly added requirements, none of them sho
 Alternatively, this can be done using the PyCharm console:
 
 ```bash
-cd ~/dev/NarrativeIntelligence
+cd ~/path/to/NarrativeIntelligence
 python -m pip install -r requirements.txt \
                       -r lib/NarrativeAnnotation/requirements.txt \
                       -r lib/KGExtractionToolbox/requirements.txt
 ```
+
+> It might be the case that the installation fails at some point.
+Missing packages can easily be installed afterward.
+For example, the package `sphinx` (from requirements.txt) can be installed with: `python -m pip install sphinx~=2.3.1`.
+Make sure that you have selected the right python environment.
+This can be checked with `python -c "import sys;print(sys.executable)`.
+It should be something like `/path/to/miniconda3/envs/narraint-dev/python.exe`.
 
 ## Local-Development-3: Configure the service
 
@@ -131,25 +138,16 @@ bash download_data.sh
 ## Local-Development-5: Create Django Executable in PyCharm
 
 Now, you are ready create a run config for the service application.
-But first, the PyCharm settings have to be adjusted for Django: 
-
-1. Open Settings and search for `Django`
-2. Navigate to `Languages & Frameworks` - `Django`
-3. Enable **Django Support**
-4. Insert (local!) **Django Project root:** `/path/to/NarrativeIntelligence/src/narraint/frontend`
-5. Insert **Settings** `frontend/settings/dev.py`
-6. Insert **Manage script:** `manage.py`
-7. Insert **Folder pattern to track files:** `migrations`
-8. Click on **Ok** and close the window
-
 Open run configurations and configure remote interpreter for new Django application (top Right):
 
 1. Click on **Edit Configurations...**
-2. Create new `Django Server` run configuration by clicking on **+** on the left (Add new configuration)
+2. Create new `Python` run configuration by clicking on **+** on the left (Add new configuration)
 3. Select remote Conda Interpreter (`narraint-dev`)
-4. Insert host `localhost`
-5. Append the **Environment Variables:** with `PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=frontend.settings.dev`
-6. Click on **Apply** and close the window
+4. Select **script** path `/path/to/NarrativeIntelligence/src/narraint/frontend/manage.py`
+5. Insert **Script parameter**: `runserver`
+6. Insert **Working Directory**: `/path/to/NarrativeIntelligence/src/narraint/frontend`
+7. Append the **Environment Variables:** with `PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=frontend.settings.dev`
+8. Click on **Apply** and close the window
 
 Now, the Django Server can be started.
 
