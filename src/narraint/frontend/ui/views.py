@@ -33,7 +33,7 @@ from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.keywords2graph.translation import Keyword2GraphTranslation
-from narraint.pattern_discovery import PatternDiscovery
+from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -104,7 +104,7 @@ class View:
                 View.RANK_BY_GRAPH: GraphRank(),
                 View.RANK_BY_TIME: PublicationDateRank()
             }
-            cls.pattern_discovery = PatternDiscovery()
+            cls.discovery = PatternDiscovery()
         return cls._instance
 
 
@@ -143,8 +143,8 @@ def get_document_graph(request):
             # so just take edges that have been scored
             sorted_extracted_statements = [(s,
                                             score_edge_by_tfidf_coverage_confidence(
-                                                doc.extracted_stmt2scored_statement[s],
-                                                corpus=View().corpus))
+                                                    doc.extracted_stmt2scored_statement[s],
+                                                    corpus=View().corpus))
                                            for s in doc.extracted_statements
                                            if s in doc.extracted_stmt2scored_statement]
 
@@ -271,7 +271,7 @@ def get_check_query(request):
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
         query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-            search_string)
+                search_string)
         if query_fact_patterns:
             logging.info('query is valid')
             return JsonResponse(dict(valid="True", query=query_fact_patterns.to_dict()))
@@ -515,12 +515,12 @@ def get_query_sub_count(request):
 
         if invalid_sources:
             return JsonResponse(
-                status=500,
-                data=dict(
-                    answer="data source not valid",
-                    reason=f"Unsupported data sources: {', '.join(invalid_sources)}. "
-                           f"Supported: {', '.join(allowed_sources)}"
-                )
+                    status=500,
+                    data=dict(
+                            answer="data source not valid",
+                            reason=f"Unsupported data sources: {', '.join(invalid_sources)}. "
+                                   f"Supported: {', '.join(allowed_sources)}"
+                    )
             )
 
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
@@ -680,7 +680,7 @@ def get_query(request):
         # logging.info('Strategy for inner ranking: {}'.format(inner_ranking))
         time_start = datetime.now()
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-            query)
+                query)
         year_aggregation = {}
 
         if not all(ds in DataSourcesFilter.get_available_db_collections() for ds in document_collections):
@@ -761,16 +761,16 @@ def get_query(request):
                                            time_needed=datetime.now() - time_start)
 
         return JsonResponse(
-            dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
-                 results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
-                 query_limit_hit="False"))
+                dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
+                     results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
+                     query_limit_hit="False"))
     except Exception:
         View().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_provenance(request):
@@ -965,7 +965,7 @@ def post_subgroup_feedback(request):
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
             try:
                 View().query_logger.write_subgroup_rating_log(
-                    query, userid, variable_name, entity_name, entity_id, entity_type)
+                        query, userid, variable_name, entity_name, entity_id, entity_type)
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
@@ -1213,7 +1213,7 @@ def get_explain_translation(request):
             search_string = str(request.GET.get("query", "").strip())
             logging.info(f'checking query: {search_string}')
             query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-                search_string)
+                    search_string)
 
             if not query_fact_patterns:
                 return JsonResponse(dict(headings=["Please complete query first"]))
@@ -1336,7 +1336,7 @@ class StatsView(TemplateView):
                         traceback.print_exc(file=sys.stdout)
                     session.close()
                 return JsonResponse(
-                    dict(results=StatsView.stats_query_results)
+                        dict(results=StatsView.stats_query_results)
                 )
         return super().get(request, *args, **kwargs)
 
@@ -1605,8 +1605,8 @@ def get_recommend(request):
         error_msg = "recommendation can not be applied"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_content_data(request):
@@ -1617,44 +1617,99 @@ def get_content_data(request):
         return HttpResponse(status=500)
 
 
+def extract_url_parameter(params, key, value_class, default=None):
+    if key not in params:
+        return default
+    value = params.get(key, "").strip()
+    try:
+        value = value_class(value)
+    except Exception:
+        value = default
+    return value
+
+
 def get_pattern_discovery(request):
-    if "concepts" not in request.GET.keys():
+    if "query" not in request.GET.keys():
         message = "Missing concepts in request."
+    elif "data_source" not in request.GET.keys():
+        message = "Missing document collection in request."
+    elif "num_edges" not in request.GET.keys():
+        message = "Missing number of edges in request."
     else:
-        concepts = request.GET.get("concepts")
-        if not concepts.strip():
-            message = "Empty keywords in request."
-        else:
-            time_start = datetime.now()
-            try:
-                logging.debug('Generating knowledge path for "{}"'.format(concepts))
-                concepts = concepts.split("_AND_")
-                if len(concepts) < 2:
-                    return JsonResponse(status=500, data=dict(reason="At least two concepts are required."))
+        concepts = ""
+        time_start = datetime.now()
+        try:
+            raw_concepts = request.GET.get("query").strip()
+            concepts = raw_concepts.split("_AND_")
+            document_collections = request.GET.get("data_source").strip().split(";")
+            num_edges = int(request.GET.get("num_edges").strip())
 
-                knowledge_graph, concept_nodes, indexed_documents = View().pattern_discovery.discover_pattern_for_concepts(
-                    concepts)
-                document_results = [QueryDocumentResult(document_id=d.id, title="", authors="", journals="",
-                                                        publication_year=0, publication_month=0, var2substitution={},
-                                                        confidence=0.0, position2provenance_ids={},
-                                                        document_collection="PubMed") for d in indexed_documents]
+            # get sort filter; default is (publication) time
+            sort_by = request.GET.get("sort_by", View.RANK_BY_TIME).strip()
 
-                collection2ids = dict(PubMed=[d.id for d in indexed_documents])
-                document_results = QueryEngine.enrich_document_results_with_metadata(document_results, collection2ids)
-                document_results.sort(key=lambda x: x.document_id, reverse=True)
+            # get sort order; default is descending
+            sort_order = request.GET.get("sort_order", View.ORDER_DESCENDING).strip()
 
-                result_list = QueryDocumentResultList()
-                for d in document_results:
-                    result_list.add_query_result(d)
+            year_start = extract_url_parameter(request.GET, "year_start", int)
+            year_end = extract_url_parameter(request.GET, "year_end", int)
+            title_filter = extract_url_parameter(request.GET, "title_filter", str)
+            classification_filter = extract_url_parameter(request.GET, "classification_filter", lambda s: s.strip(";"))
 
-                View().query_logger.write_api_call(True, "get_knowledge_path_search_request", str(request),
-                                                   time_needed=datetime.now() - time_start)
-                return JsonResponse(status=200, data=dict(graph=knowledge_graph, concepts=concept_nodes,
-                                                          results=result_list.to_dict()))
+            logging.debug('Generating knowledge path for "{}"'.format(concepts))
 
-            except Exception as e:
-                View().query_logger.write_api_call(False, "get_knowledge_path_search_request", str(request),
-                                                   time_needed=datetime.now() - time_start)
-                message = f'Could not mine knowledge path for "{concepts}: {e}"'
-                log_stack_trace(message, e)
+            if len(concepts) < 2:
+                raise ValueError("At least two concepts are required.")
+
+            # first retrieve documents for concepts
+            collection2ids, concept2entities = View().discovery.retrieve_relevant_documents_for_concepts(
+                    concepts=concepts, document_collections=document_collections)
+
+            # create query documents and get metadata
+            results = list()
+            for collection, document_ids in collection2ids.items():
+                results.extend([QueryDocumentResult(document_id=doc_id, title="", authors="", journals="",
+                                                    publication_year=0, publication_month=0, var2substitution={},
+                                                    confidence=0.0, position2provenance_ids={},
+                                                    document_collection=collection) for doc_id in document_ids])
+
+            # apply filter
+            results = QueryEngine.enrich_document_results_with_metadata(results, collection2ids)
+            results = TitleFilter.filter_documents(results, title_filter)
+
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            results = View().strategy2ranker[View.RANK_BY_TIME].rank_document(None, results)
+
+            # apply pattern discovery
+            results, graph, concepts = View().discovery.discover_pattern_for_documents(documents=results,
+                                                                                       concept2entity=concept2entities,
+                                                                                       num_edges=num_edges)
+
+            # descending or ascending?
+            descending = (sort_order == View.ORDER_DESCENDING)
+
+            # verify valid strategy and set to time since relevance requires a query
+            if sort_by in View.RANKER_SUPPORTED:
+                sort_by = View.RANK_BY_TIME
+
+            # sort finally if ascending is requested
+            results = View().strategy2ranker[sort_by].rank_document(None, results, desc=descending)
+
+            result_list = QueryDocumentResultList()
+            result_list.results = results
+
+            View().query_logger.write_api_call(True, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            data = dict(graph=graph, concepts=concepts, sort_by=sort_by, sort_order=sort_order,
+                        results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
+            return JsonResponse(status=200, data=data)
+        except Exception as e:
+            View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            message = f'Could not discover pattern for "{concepts}: {e}"'
+            log_stack_trace(message, e)
     return JsonResponse(status=500, data=dict(reason=message))
