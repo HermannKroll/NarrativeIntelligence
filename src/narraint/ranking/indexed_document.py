@@ -63,6 +63,7 @@ class ScoredDocumentStatement(StatementExtraction):
         self.object = object
         self.score = None
         self.confidence = None
+        self.frequency = None
 
     def set_confidence(self, confidence: float):
         assert 0.0 <= confidence <= 1.0
@@ -70,6 +71,9 @@ class ScoredDocumentStatement(StatementExtraction):
 
     def set_score(self, score: float):
         self.score = score
+
+    def set_frequency(self, frequency: int):
+        self.frequency = frequency
 
     def has_equal_entities(self, other) -> bool:
         """
@@ -208,6 +212,7 @@ class IndexedDocument(NarrativeDocument):
                                                        object=self.entity_key2scored_entity[object_key])
 
             scored_statement.set_confidence(max([s.confidence for s in statements]))
+            scored_statement.set_frequency(len(statements))
             self.scored_statements.add(scored_statement)
             # all statements are different extractions, but are scored in the same way
             # i.e. the scored statement represents all of them
