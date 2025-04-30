@@ -275,6 +275,8 @@ function refreshSearch(fromUrl = false) {
         }
         if (current_search_method === 'recommender') {
             recommenderSearch();
+        } else if (current_search_method === "discovery") {
+            searchPatternDiscovery();
         } else {
             document.getElementById("btn_search").click();
         }
@@ -752,6 +754,8 @@ function initFromURLQueryParams() {
         if (search_method === "recommender") {
             let query_col = params.get("query_col");
             initRecommendSearchFromURL(query, query_col);
+        } else if (search_method === "discovery") {
+            initPatternDiscoveryFromURL(query);
         } else {
             switchTab("#search-type-query");
             initQueryBuilderFromString(query);
@@ -874,26 +878,29 @@ function updateURLParameters(parameters) {
     url.searchParams.set("sort_by", parameters["sort_by"]);
     url.searchParams.set("sort_order", parameters["sort_order"]);
 
-    if (parameters["start_pos"] !== 0) {
+    if (parameters.hasOwnProperty("start_pos") && parameters["start_pos"] !== 0) {
         url.searchParams.set("start_pos", parameters["start_pos"]);
     } else {
         url.searchParams.delete("start_pos");
     }
 
     //   url.searchParams.set("end_pos", end_pos);
-    if (parameters["year_start"] !== undefined && parameters["year_start"] !== document.querySelector("#fromSlider").min) {
+    if (parameters.hasOwnProperty("year_start") &&
+        parameters["year_start"] !== document.querySelector("#fromSlider").min) {
         url.searchParams.set("year_start", parameters["year_start"]);
     } else {
         url.searchParams.delete("year_start");
     }
-    if (parameters["year_end"] !== undefined && parameters["year_end"] !== document.querySelector("#toSlider").max) {
+    if (parameters.hasOwnProperty("year_end") &&
+        parameters["year_end"] !== document.querySelector("#toSlider").max) {
         url.searchParams.set("year_end", parameters["year_end"]);
     } else {
         url.searchParams.delete("year_end");
     }
 
-    if (parameters["use_sys_review"]) {
-        if (!parameters["title_filter"].includes("systemat review")) {
+    if (parameters.hasOwnProperty("use_sys_review") && parameters["use_sys_review"]) {
+        if (parameters.hasOwnProperty("title_filter") &&
+            !parameters["title_filter"].includes("systemat review")) {
             if (parameters["title_filter"].length > 0)
                 parameters["title_filter"] += " ";
             parameters["title_filter"] += "systemat review";
@@ -902,24 +909,24 @@ function updateURLParameters(parameters) {
         parameters["title_filter"] = parameters["title_filter"].replace("systemat review", "");
     }
 
-    if (parameters["title_filter"].length > 0) {
+    if (parameters.hasOwnProperty("title_filter") && parameters["title_filter"].length > 0) {
         url.searchParams.set("title_filter", parameters["title_filter"]);
     } else {
         url.searchParams.delete("title_filter");
     }
 
     // classifications
-    if (parameters["classification_filter"].length > 0) {
+    if (parameters.hasOwnProperty("classification_filter") && parameters["classification_filter"].length > 0) {
         url.searchParams.set("classification_filter", parameters["classification_filter"]);
     } else {
         url.searchParams.delete("classification_filter");
         parameters["classification_filter"] = undefined;
     }
 
-    if (parameters["search_method"]) {
+    if (parameters.hasOwnProperty("search_method") && parameters["search_method"]) {
         url.searchParams.set("search_method", parameters["search_method"]);
     } else {
-        url.searchParams.delete("title_filter");
+        url.searchParams.delete("search_method");
     }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 }
@@ -1031,16 +1038,13 @@ function getInputParameters(query) {
 
     const dataSources = getSelectedDataSources();
     obj["data_source"] = dataSources.join(";");
-
     obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    console.log(obj["outer_ranking"]);
-    //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
-    //dict["inner_ranking"] = "NOT IMPLEMENTED";
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
-    if (latest_valid_query === query) {
+    if (latest_valid_query === query && !document.getElementById("year-filter").classList.contains("d-none")) {
         // same query requested
         // add year filter params only if the filter already contains valid years (of the current search)
+        // and is visible
         obj["year_start"] = document.querySelector("#fromSlider").value;
         obj["year_end"] = document.querySelector("#toSlider").value;
     } else if (latest_valid_query !== "") {
@@ -1053,7 +1057,10 @@ function getInputParameters(query) {
     const classifications = getSelectedClassifications();
     obj["classification_filter"] = classifications.join(";");
 
-    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
+    if (document.getElementById("checkbox_sys_review").checked) {
+        obj["use_sys_review"] = true;
+    }
+
     obj["search_method"] = current_search_method;
     return obj;
 }
@@ -1198,7 +1205,7 @@ function updateYearFilter(year_aggregation, query_trans_string) {
         xValues.push(year);
         yValues.push(year_aggregation[year]);
     }
-    if (current_search_method === "recommender") {
+    if (current_search_method === "recommender" || current_search_method === "discovery") {
         if (latest_query_translation !== query_trans_string) {
             initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
             initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
@@ -2390,7 +2397,7 @@ async function setUpRecommenderSearch() {
 }
 
 function setUpPatternDiscoverySearch() {
-    current_search_method = "knowledgepath";
+    current_search_method = "discovery";
     if (exampleQueriesContainer) {
         exampleQueriesContainer.style.display = "none";
     }

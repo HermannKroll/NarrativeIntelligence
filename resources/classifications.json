@@ -12,5 +12,9 @@
   {
     "classification": "PharmaceuticalTechnology",
     "label": "Pharm. Technology"
+  },
+  {
+    "classification": "PharmaceuticalChemistry",
+    "label": "Pharm. Chemistry"
   }
 ]

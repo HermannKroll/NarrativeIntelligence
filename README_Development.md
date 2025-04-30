@@ -7,22 +7,20 @@ Two different methodologies exist to develop and run the NarrativeService:
 - Local development: This requires the existence of a (remote) database connection. An SSH connection forwarding relevant ports is necessary.
 - Remote development via SSH (using PyCharm Professional): by using the SSH connection, the project can be edited locally and executed remotely.
 
-First, the [Local Development](#ld-1-narrative-service-setup) is described, and the [Remote Development](#rd-1-create-python-virtual-environment) later.
+First, the [Local Development](#local-development-1-narrative-service-setup) is described, and the [Remote Development](#remote-development-1-create-python-virtual-environment) afterward.
 The process of cloning the database is discussed in the first step [0. Prerequisites](#0-prerequisites).
 This needs to be done for both methods.
-Starting with step [6. Create Django Executable in Pycharm](#6-create-django-executable-in-pycharm), both methods share the same content.
 
 The following two things are assumed to exist already:
 - server user `pubpharm`
 - postgres database `fidpharmazie`
 
-
+> Important information for Mac-Users can be found under [Mac Development](#mac-development-apple-silicon).
 
 ## References:
 - [PyCharm SSH Interpreter](https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html)
 - [PyCharm Django Setup](https://www.jetbrains.com/help/pycharm/creating-and-running-your-first-django-project.html)
-- [Miniconda Docs](https://www.anaconda.com/docs/getting-started/miniconda/install#macos-linux-installation)
-- [StackOverflow](https://stackoverflow.com/a/876565/23125650) - Copy postgres production databases
+- [Anaconda Docs](https://www.anaconda.com/docs/getting-started/anaconda/install#linux-installer)
 
 ## 0. Prerequisites
 
@@ -43,10 +41,10 @@ exit
 ```
 
 The following steps depend on whether to develop locally or remote.
-For local development (LD), the next step is the following section (1).
-For remote development (RD), the next step is section (TBA)
+For local development, the next step is the following section [Local Development](#local-development-1-narrative-service-setup).
+For remote development, the next step is section [Remote Development](#remote-development-1-create-python-virtual-environment).
 
-## LD-1. Narrative Service Setup
+## Local-Development-1: Narrative Service Setup
 
 In PyCharm, first a new project has to be created.
 
@@ -61,7 +59,7 @@ The simplest method is to directly initialize it from GitHub:
 It may appear a window to create a new virtual environment (Python Interpreter).
 Close it since we want to create a virtual environment using conda.
 
-## LD-2. Create a local interpreter
+## Local-Development-2: Create a local interpreter
 
 The next step is to create a local python interpreter (using conda).
 1. Open **Settings**
@@ -89,13 +87,20 @@ After the interpreter has indexed the newly added requirements, none of them sho
 Alternatively, this can be done using the PyCharm console:
 
 ```bash
-cd ~/dev/NarrativeIntelligence
+cd ~/path/to/NarrativeIntelligence
 python -m pip install -r requirements.txt \
                       -r lib/NarrativeAnnotation/requirements.txt \
                       -r lib/KGExtractionToolbox/requirements.txt
 ```
 
-## LD-3. Configure the service
+> It might be the case that the installation fails at some point.
+Missing packages can easily be installed afterward.
+For example, the package `sphinx` (from requirements.txt) can be installed with: `python -m pip install sphinx~=2.3.1`.
+Make sure that you have selected the right python environment.
+This can be checked with `python -c "import sys;print(sys.executable)`.
+It should be something like `/path/to/miniconda3/envs/narraint-dev/python.exe`.
+
+## Local-Development-3: Configure the service
 
 All configuration lives inside the `NarrativeIntelligence/config` directory. 
 The `*.prod.json` files show the structure of the corresponding configuration file. 
@@ -121,7 +126,8 @@ As a last step, mark each `src` folder as `Sources Root`.
 Therefore, right-click on the `NarrativeIntelligence/src` folder and select `Mark directory as` - `Sources Root`.
 Repeat the process for the source folders in `lib/NarrativeAnnotation/src` and `lib/KGExtractionToolbox/src`.
 
-## LD-4. Download external dependencies
+## Local-Development-4: Download external dependencies
+
 To build the indexes locally, some external dependencies need to be downloaded first.
 Therefore, execute the following script in the PyCharm console:
 ```bash
@@ -129,27 +135,79 @@ cd lib/NarrativeAnnotation/
 bash download_data.sh
 ```
 
-> The next required steps are equal to the remote development procedure; 
-> skip until step [6. Create Django Executable in Pycharm](#6-create-django-executable-in-pycharm).
+## Local-Development-5: Create Django Executable in PyCharm
 
-## RD-1. Create Python Virtual Environment
+Now, you are ready create a run config for the service application.
+Open run configurations and configure remote interpreter for new Django application (top Right):
+
+1. Click on **Edit Configurations...**
+2. Create new `Python` run configuration by clicking on **+** on the left (Add new configuration)
+3. Select remote Conda Interpreter (`narraint-dev`)
+4. Select **script** path `/path/to/NarrativeIntelligence/src/narraint/frontend/manage.py`
+5. Insert **Script parameter**: `runserver`
+6. Insert **Working Directory**: `/path/to/NarrativeIntelligence/src/narraint/frontend`
+7. Append the **Environment Variables:** with `PYTHONUNBUFFERED=1;DJANGO_SETTINGS_MODULE=frontend.settings.dev`
+8. Click on **Apply** and close the window
+
+Now, the Django Server can be started.
+
+### Activate SSH Port Forwarding for the Database
+
+To connect to the remote database service, the last step is to forward the required port.
+By default, the port is set to `5432`.
+If it is changed on the remote server, the corresponding parameter `POSTGRES_PORT` needs to be changed in the configuration file (`backend.json`).
+
+Start a terminal and execute the following command:
+```bash
+ssh -L 5432:localhost:5432 pubpharm@<SERVER-ADDR>
+```
+
+> **Note** that those connections need to be alive when the service runs.
+
+### Finally: Start the Narrative Service
+
+If everything works correctly, the server starts (after clicking on the `green triangle` on the top left).
+When the initialization is finished the IP address will show up to access the service.
+Open the ip address with the browser.
+
+Congratulations, you have done it.
+
+## Local-Development-6: Create Unit-Tests Executables in PyCharm
+
+The service comes with a bunch of unit tests to ensure that it works as expected.
+Each set of tests is located as a subdirectory of the source folders, namely `nitests` (`src/nitest`), `narranttests` (`lib/NarrativeAnnotation/src/narranttests`), and `kgtests` (`lib/KGExtractionToolbox/src/kgtests`).
+
+To run on of the tests, create a new run configuration (as for step 6).
+1. Select the run-config type `Python tests` - `Autodetect`
+2. Select the remote interpreter `narraint-dev`
+3. Choose to execute a `Script` 
+4. Enter the **Script path** to the test root, e.g., `/path/to/NarrativeIntelligence/src/nitests`
+5. Enter the same path at **Working directory**
+6. Click on **Apply** and close the window
+
+Select the freshly created run-config and execute it.
+The tests should be detected automatically.
+
+## Remote-Development-1: Create Python Virtual Environment
 
 For the first step, connect to the remote server with a SSH session and login into the pubpharm user.
-Download the latest version of miniconda. (If not already existent)
+Download the latest version of Anaconda. (If not already existent)
+Note that the used version might have been updated already.
+If necessary, check for newer versions on the anaconda [website](https://www.anaconda.com/docs/getting-started/anaconda/install#linux-installer).
 
 ```bash
 cd ~
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+curl -O https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
 ```
 
-Install miniconda.
+Install anaconda.
 
 ```bash
-bash ~/Miniconda3-latest-Linux-x86_64.sh
+bash ~/Anaconda3-2024.10-1-Linux-x86_64.sh
 ```
 
 Proceed with the installation.
-The default installation path `/home/pubpharm/miniconda3` should be sufficient.
+The default installation path `/home/pubpharm/anaconda3` should be sufficient.
 Choose `YES` to allow Conda to modify your shell configuration to support Conda commands.
 Use the following command to refresh the terminal session.
 
@@ -164,10 +222,10 @@ To finish the installation, initialize Conda.
 conda init
 ```
 As the next step, create a virtual environment.
-The Narrative Service is based on Python version 3.8.
+The Narrative Service is based on Python version 3.10.
 
 ```bash
-conda create -n narraint-dev python=3.8
+conda create -n narraint-dev python=3.10
 ```
 
 Last, activate the newly created environment `narraint-dev`.
@@ -176,7 +234,7 @@ Last, activate the newly created environment `narraint-dev`.
 conda activate narraint-dev
 ```
 
-## RD-2. Narrative Service Setup (Remote)
+## Remote-Development-2: Narrative Service Setup (Remote)
 
 Now, create the directory on the server where the project should be live.
 The project does not need to be cloned since we deploy it later from the local setup.
@@ -185,7 +243,7 @@ The project does not need to be cloned since we deploy it later from the local s
 mkdir /home/pubpharm/dev/NarrativeIntelligence
 ```
 
-## RD-3. Narrative Service Setup (Local)
+## Remote-Development-3: Narrative Service Setup (Local)
 
 In PyCharm, first a new project has to be created.
 
@@ -217,7 +275,7 @@ Click on **Next** until page 4/4 is visible.
 
 Select to connect to a `Conda Environment` on the left
 If the executable (on remote) is not automatically found, insert the path to the conda env.
-The path should look something like this: `/home/pubpharm/miniconda3/bin/conda`.
+The path should look something like this: `/home/pubpharm/anaconda3/bin/conda`.
 
 In the dropdown **Use existing environment** select `narraint-dev`.
 
@@ -240,7 +298,7 @@ The synchronization may take a while…
 
 > The loading bar on the bottom of the IDE indicates the upload of any change
 
-## RD-4. Configure the service
+## Remote-Development-4:: Configure the service
 
 All configuration lives inside the `NarrativeIntelligence/config` directory. 
 The `*.prod.json` files show the structure of the corresponding configuration file. 
@@ -276,7 +334,7 @@ As a last step, mark each `src` folder as `Sources Root`.
 Therefore, right-click on the `NarrativeIntelligence/src` folder and select `Mark directory as` - `Sources Root`.
 Repeat the process for the source folders in `lib/NarrativeAnnotation/src` and `lib/KGExtractionToolbox/src`.
 
-## RD-5. Download external dependencies
+## Remote-Development-5: Download external dependencies
 
 The following steps are required only on the remote server.
 Therefore, execute the commands in a SSH session.
@@ -303,7 +361,7 @@ bash download_data.sh
 Now, the external dependencies are loaded.
 You can close the SSH session.
 
-## 6. Create Django Executable in PyCharm
+## Remote-Development-6: Create Django Executable in PyCharm
 
 Now, you are ready create a run config for the service application.
 But first, the PyCharm settings have to be adjusted for Django: 
@@ -328,7 +386,7 @@ Open run configurations and configure remote interpreter for new Django applicat
 
 Now, the Django Server can be started.
 
-### RD-6.1: Activate SSH Port Forwarding for the NarrativeService
+### Activate SSH Port Forwarding for the NarrativeService
 
 To connect to the local service, the last step is to forward the required port.
 By default, the port is set to `8000`.
@@ -339,20 +397,9 @@ Start a terminal and execute the following command:
 ssh -L 8000:localhost:8000 pubpharm@<SERVER-ADDR>
 ```
 
-### LD-6.1: Activate SSH Port Forwarding for the Database
-
-To connect to the remote database service, the last step is to forward the required port.
-By default, the port is set to `5432`.
-If it is changed on the remote server, the corresponding parameter `POSTGRES_PORT` needs to be changed in the configuration file (`backend.json`).
-
-Start a terminal and execute the following command:
-```bash
-ssh -L 5432:localhost:5432 pubpharm@<SERVER-ADDR>
-```
-
 > **Note** that those connections need to be alive when the service runs.
 
-### 6.2. Finally: Start the Narrative Service
+### Finally: Start the Narrative Service
 
 If everything works correctly, the server starts (after clicking on the green triangle on the top left).
 When the initialization is finished the IP address will show up to access the service.
@@ -360,7 +407,7 @@ Open the ip address with the browser.
 
 Congratulations, you have done it.
 
-## 7. Create Unit-Tests Executables in PyCharm
+## Remote-Development-7: Create Unit-Tests Executables in PyCharm
 
 The service comes with a bunch of unit tests to ensure that it works as expected.
 Each set of tests is located as a subdirectory of the source folders, namely `nitests`, `narranttests`, and `kgtests`.

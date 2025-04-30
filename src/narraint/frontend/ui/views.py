@@ -33,7 +33,7 @@ from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.keywords2graph.translation import Keyword2GraphTranslation
-from narraint.pattern_discovery import PatternDiscovery
+from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -46,6 +46,7 @@ from narraint.ranking.indexed_document import IndexedDocument
 from narraint.ranking.ranking import GraphRank, PublicationDateRank, DocumentRanker
 from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 from narraint.recommender.recommendation import RecommendationSystem
+from narrant.entity.entity import get_unique_entity_key
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -103,7 +104,7 @@ class View:
                 View.RANK_BY_GRAPH: GraphRank(),
                 View.RANK_BY_TIME: PublicationDateRank()
             }
-            cls.pattern_discovery = PatternDiscovery()
+            cls.discovery = PatternDiscovery()
         return cls._instance
 
 
@@ -127,12 +128,26 @@ def get_document_graph(request):
 
             # index the document to compute frequency and coverage
             doc = IndexedDocument(narrative_documents[0], document_collection)
+            # extract longest text sequence from tags
+            entity2tagged_sequence = dict()
+            for tag in doc.tags:
+                key = get_unique_entity_key(tag.ent_type, tag.ent_id)
+                if key not in entity2tagged_sequence:
+                    entity2tagged_sequence[key] = tag.text.capitalize()
+                else:
+                    if len(tag.text) > len(entity2tagged_sequence[key]):
+                        entity2tagged_sequence[key] = tag.text.capitalize()
+
             # score all edge and sort them
+            # some edges might use entities that are not present in our vocabulary anymore
+            # so just take edges that have been scored
             sorted_extracted_statements = [(s,
                                             score_edge_by_tfidf_coverage_confidence(
-                                                doc.extracted_stmt2scored_statement[s],
-                                                corpus=View().corpus))
-                                           for s in doc.extracted_statements]
+                                                    doc.extracted_stmt2scored_statement[s],
+                                                    corpus=View().corpus))
+                                           for s in doc.extracted_statements
+                                           if s in doc.extracted_stmt2scored_statement]
+
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
             sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
@@ -147,8 +162,18 @@ def get_document_graph(request):
                 try:
                     subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
                                                                            resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if subject_name == stmt.subject_id.capitalize():
+                        # extract longest text sequence from tags
+                        subject_name = entity2tagged_sequence[get_unique_entity_key(stmt.subject_type, stmt.subject_id)]
+
                     object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
                                                                           resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if object_name == stmt.object_id.capitalize():
+                        # extract longest text sequence from tags
+                        object_name = entity2tagged_sequence[get_unique_entity_key(stmt.object_type, stmt.object_id)]
+
                     subject_name = f'{subject_name} ({stmt.subject_type})'
                     object_name = f'{object_name} ({stmt.object_type})'
 
@@ -171,6 +196,8 @@ def get_document_graph(request):
 
                     # Map the fact to the corresponding sentence text
                     facts2text[so_key] = sentence_id2text[stmt.sentence_id]
+                except KeyError:
+                    continue
                 except Exception:
                     pass
 
@@ -244,7 +271,7 @@ def get_check_query(request):
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
         query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-            search_string)
+                search_string)
         if query_fact_patterns:
             logging.info('query is valid')
             return JsonResponse(dict(valid="True", query=query_fact_patterns.to_dict()))
@@ -721,16 +748,16 @@ def get_query(request):
                                            time_needed=datetime.now() - time_start)
 
         return JsonResponse(
-            dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
-                 results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
-                 query_limit_hit="False"))
+                dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
+                     results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
+                     query_limit_hit="False"))
     except Exception:
         View().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_provenance(request):
@@ -925,7 +952,7 @@ def post_subgroup_feedback(request):
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
             try:
                 View().query_logger.write_subgroup_rating_log(
-                    query, userid, variable_name, entity_name, entity_id, entity_type)
+                        query, userid, variable_name, entity_name, entity_id, entity_type)
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
@@ -1173,7 +1200,7 @@ def get_explain_translation(request):
             search_string = str(request.GET.get("query", "").strip())
             logging.info(f'checking query: {search_string}')
             query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-                search_string)
+                    search_string)
 
             if not query_fact_patterns:
                 return JsonResponse(dict(headings=["Please complete query first"]))
@@ -1296,7 +1323,7 @@ class StatsView(TemplateView):
                         traceback.print_exc(file=sys.stdout)
                     session.close()
                 return JsonResponse(
-                    dict(results=StatsView.stats_query_results)
+                        dict(results=StatsView.stats_query_results)
                 )
         return super().get(request, *args, **kwargs)
 
@@ -1369,8 +1396,8 @@ def get_keyword_search_request(request):
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
 
-                possible_queries = View().keyword2graph.translate_keywords(keywords)
-                json_data = [r.to_json_data() for r in possible_queries]
+                json_data = View().keyword2graph.translate_keywords(keywords)
+                # json_data = [r.to_json_data() for r in possible_queries]
                 # This is the format
                 # json_data = [
                 #     [("Metformin", "treats", "Diabetes Mellitus")],
@@ -1565,8 +1592,8 @@ def get_recommend(request):
         error_msg = "recommendation can not be applied"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_content_data(request):
@@ -1577,44 +1604,94 @@ def get_content_data(request):
         return HttpResponse(status=500)
 
 
+def extract_url_parameter(params, key, value_class, default=None):
+    if key not in params:
+        return default
+    value = params.get(key, "").strip()
+    try:
+        value = value_class(value)
+    except Exception:
+        value = default
+    return value
+
+
 def get_pattern_discovery(request):
-    if "concepts" not in request.GET.keys():
+    if "query" not in request.GET.keys():
         message = "Missing concepts in request."
+    elif "data_source" not in request.GET.keys():
+        message = "Missing document collection in request."
     else:
-        concepts = request.GET.get("concepts")
-        if not concepts.strip():
-            message = "Empty keywords in request."
-        else:
-            time_start = datetime.now()
-            try:
-                logging.debug('Generating knowledge path for "{}"'.format(concepts))
-                concepts = concepts.split("_AND_")
-                if len(concepts) < 2:
-                    return JsonResponse(status=500, data=dict(reason="At least two concepts are required."))
+        concept2type = ""
+        time_start = datetime.now()
+        try:
+            raw_concepts = request.GET.get("query").strip()
+            concept2type = raw_concepts.split("_AND_")
+            document_collections = request.GET.get("data_source").strip().split(";")
 
-                knowledge_graph, concept_nodes, indexed_documents = View().pattern_discovery.discover_pattern_for_concepts(
-                    concepts)
-                document_results = [QueryDocumentResult(document_id=d.id, title="", authors="", journals="",
-                                                        publication_year=0, publication_month=0, var2substitution={},
-                                                        confidence=0.0, position2provenance_ids={},
-                                                        document_collection="PubMed") for d in indexed_documents]
+            # get sort filter; default is (publication) time
+            sort_by = request.GET.get("sort_by", View.RANK_BY_TIME).strip()
 
-                collection2ids = dict(PubMed=[d.id for d in indexed_documents])
-                document_results = QueryEngine.enrich_document_results_with_metadata(document_results, collection2ids)
-                document_results.sort(key=lambda x: x.document_id, reverse=True)
+            # get sort order; default is descending
+            sort_order = request.GET.get("sort_order", View.ORDER_DESCENDING).strip()
 
-                result_list = QueryDocumentResultList()
-                for d in document_results:
-                    result_list.add_query_result(d)
+            year_start = extract_url_parameter(request.GET, "year_start", int)
+            year_end = extract_url_parameter(request.GET, "year_end", int)
+            title_filter = extract_url_parameter(request.GET, "title_filter", str)
+            classification_filter = extract_url_parameter(request.GET, "classification_filter", lambda s: s.strip(";"))
 
-                View().query_logger.write_api_call(True, "get_knowledge_path_search_request", str(request),
-                                                   time_needed=datetime.now() - time_start)
-                return JsonResponse(status=200, data=dict(graph=knowledge_graph, concepts=concept_nodes,
-                                                          results=result_list.to_dict()))
+            logging.debug('Generating knowledge path for "{}"'.format(concept2type))
 
-            except Exception as e:
-                View().query_logger.write_api_call(False, "get_knowledge_path_search_request", str(request),
-                                                   time_needed=datetime.now() - time_start)
-                message = f'Could not mine knowledge path for "{concepts}: {e}"'
-                log_stack_trace(message, e)
+            if len(concept2type) < 2:
+                raise ValueError("At least two concepts are required.")
+
+            # first retrieve documents for concepts
+            collection2ids, concept2entities = View().discovery.retrieve_relevant_documents_for_concepts(
+                    concepts=concept2type, document_collections=document_collections)
+
+            # create query documents and get metadata
+            results = list()
+            for collection, document_ids in collection2ids.items():
+                results.extend([QueryDocumentResult(document_id=doc_id, title="", authors="", journals="",
+                                                    publication_year=0, publication_month=0, var2substitution={},
+                                                    confidence=0.0, position2provenance_ids={},
+                                                    document_collection=collection) for doc_id in document_ids])
+
+            # apply filter
+            results = QueryEngine.enrich_document_results_with_metadata(results, collection2ids)
+            results = TitleFilter.filter_documents(results, title_filter)
+
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            results = View().strategy2ranker[View.RANK_BY_TIME].rank_document(None, results)
+
+            # apply pattern discovery
+            results, concept2graph = View().discovery.discover_pattern_for_documents(documents=results, concept2entity=concept2entities)
+
+            # descending or ascending?
+            descending = (sort_order == View.ORDER_DESCENDING)
+
+            # verify valid strategy and set to time since relevance requires a query
+            if sort_by in View.RANKER_SUPPORTED:
+                sort_by = View.RANK_BY_TIME
+
+            # sort finally if ascending is requested
+            results = View().strategy2ranker[sort_by].rank_document(None, results, desc=descending)
+
+            result_list = QueryDocumentResultList()
+            result_list.results = results
+
+            View().query_logger.write_api_call(True, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            data = dict(graph=concept2graph, sort_by=sort_by, sort_order=sort_order,
+                        results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
+            return JsonResponse(status=200, data=data)
+        except Exception as e:
+            View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            message = f'Could not discover pattern for "{concept2type}: {e}"'
+            log_stack_trace(message, e)
     return JsonResponse(status=500, data=dict(reason=message))

@@ -37,7 +37,7 @@
                     (Beta)</a>
             </li>
             <li class="nav-item" onclick="setUpPatternDiscoverySearch()">
-                <a class="nav-link" data-bs-toggle="tab" href="#search-type-knowledge-path" role="tab">Knowledge Path Search</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#search-type-pattern-discovery" role="tab">Pattern Discovery (Beta)</a>
             </li>
         </ul>
 
@@ -154,7 +154,7 @@
                 </div>
             </div>
             <!-- knowledge paths -->
-            <div class="tab-pane fade" id="search-type-knowledge-path">
+            <div class="tab-pane fade" id="search-type-pattern-discovery">
                 <div class="row">
                     <div class="input-group">
                         <input type="text" class="form-control" aria-label="Concepts" id="input-path-concepts"
@@ -172,10 +172,30 @@
                     <div class="w-100">
                         <div class="alert alert-danger d-none mt-1" role="alert" id="alert-path-concepts"></div>
                     </div>
-                    <div class="w-100 d-none mt-1" id="container-div-path-concepts">
-                        <div id="info_text">Click on one query to search.</div>
-                        <!-- result query graphs -->
-                        <div class="row d-flex flex-wrap justify-content-center" id="graph-div-path-concepts"></div>
+                    <div class="col-2 mt-2" id="div-checkbox-path-concepts">
+                        <div class="rounded border d-flex flex-column d-none" id="checkbox-path-concepts"></div>
+                    </div>
+                    <div class="col-10 d-none mt-2" id="container-div-path-concepts">
+                        <div class="rounded border">
+                            <!-- result query graph -->
+                            <div class="row d-flex flex-wrap justify-content-center" id="graph-div-path-concepts"></div>
+                            <div class="input-group mx-auto mb-auto me-sm-0 w-auto p-1 h-fc justify-content-end">
+                                    <span class="input-group-text ml-auto" id="path-concepts-num-edges">Top 10</span>
+                                    <div class="input-group-text">
+                                        <input type="range" class="form-range mx-0 mx-sm-0" id="path-concepts-slider" min="1" max="15" value="6" step="1" oninput="updateKnowledgeGraph()">
+                                    </div>
+                                    <!--<button class="btn btn-secondary" onclick="clearPatternDiscovery()">Clear Selection</button>-->
+                                    <button class="btn btn-secondary" onclick="centerPatternDiscovery()">
+                                        Center
+                                    </button>
+                                    <!--<button class="btn btn-secondary d-flex align-items-center" onclick="toggleFullscreenPatternDiscovery('drugNetwork')">
+                                        <svg class="me-1" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                                        </svg>
+                                        <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
+                                    </button>-->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -807,14 +827,14 @@
     <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
 
-    <script src="{% static 'js/search.js' %}?version=42" type="text/javascript"></script>
+    <script src="{% static 'js/search.js' %}?version=43" type="text/javascript"></script>
     <script src="{% static 'js/paper.js' %}?version=25" type="text/javascript"></script>
     <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
-    <script src="{% static 'js/pattern_discovery.js' %}?version=1" type="text/javascript"></script>
+    <script src="{% static 'js/pattern_discovery.js' %}?version=4" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";

@@ -1,16 +1,20 @@
 import copy
 import itertools
 import logging
+import random
 from collections import defaultdict
 from datetime import datetime
-from typing import List
+from typing import List, Set
 
+from kgextractiontoolbox.document.narrative_document import StatementExtraction
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import TagInvertedIndex
 from narraint.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
+from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
-from narrant.entity.entity import Entity
+from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, IndexedDocument
+from narrant.entity.entity import Entity, get_unique_entity_key
 from narrant.entitylinking.enttypes import DOSAGE_FORM
 
 ASSOCIATED = PREDICATE_ASSOCIATED
@@ -109,6 +113,7 @@ class Keyword2GraphTranslation:
     def __init__(self):
         self.graph: SchemaSupportGraph = SchemaSupportGraph()
         self.translation: QueryTranslation = QueryTranslation()
+        self.discovery: PatternDiscovery = PatternDiscovery()
 
     @staticmethod
     def greedy_find_most_supported_entity_type(entities: [Entity]):
@@ -198,7 +203,7 @@ class Keyword2GraphTranslation:
         final_possible_patterns.sort(key=lambda x: x.minimum_support, reverse=True)
         return final_possible_patterns
 
-    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
+    def translate_keywords_old(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
         # The first step is to transform keywords into entities
         # Then for each set of possible entities the most supported translation is searched
         # Most supported means to have the highest support (be detected in the most documents)
@@ -246,6 +251,143 @@ class Keyword2GraphTranslation:
             results.append(associated_patterns[0])
 
         return results
+
+    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
+        """
+
+        :param keyword_lists:
+        :return:
+        """
+
+        # Step 1: divide keywords into entities and variables
+        keyword_lists = list(keyword_lists)
+        variables = []
+        searched_entity_terms = []
+        for keywords in keyword_lists:
+            entities = self.translation.convert_text_to_entity(keywords)
+            logging.debug(f'Found entities: {entities}')
+            # What is a variable?
+            if len(entities) == 1 and list(entities)[0].entity_type == ENTITY_TYPE_VARIABLE:
+                # ID should be something like this f'?{var_type}({var_type})'
+                var_type = VAR_TYPE.search(list(entities)[0].entity_id)
+                if var_type:
+                    ms_type = var_type.group(1)
+                else:
+                    # We have the type ALL ->
+                    ms_type = "All"
+                variables.append(ms_type)
+            else:
+                searched_entity_terms.append(keywords)
+
+        # Step 2: find common patterns between entities
+        collection2ids, keyword2entity_keys = self.discovery.retrieve_relevant_documents_for_concepts(searched_entity_terms,
+                                                                                                      self.discovery.corpus.collections)
+        collection2count = {k: len(v) for k, v in collection2ids.items()}
+        logging.info(f'Compute patterns from following documents: {collection2count}')
+        # Todo: What happens if we have too many documents?
+        allowed_entitykeys = set()
+        for entitykeys in keyword2entity_keys.values():
+            allowed_entitykeys.update(entitykeys)
+
+        session = SessionExtended.get()
+        # retrieve indexed documents
+        indexed_documents = list()
+        for collection, ids in collection2ids.items():
+            if len(ids) > 500:
+                ids = random.sample(ids, 500)
+
+            indexed_documents.extend(retrieve_indexed_documents_from_database_small(session=session,
+                                                                                    document_ids=ids,
+                                                                                    document_collection=collection))
+
+        statements = self.get_statements_ranked_by_frequency(indexed_documents, allowed_entitykeys)
+        statements_without_associations = [stmt for stmt in statements if stmt.relation != ASSOCIATED]
+
+        specific_pattern1 = self.greedy_get_most_frequent_statements(statements_without_associations,
+                                                                     keyword2entity_keys)
+        pattern1_statements = [s[0] for s in specific_pattern1]
+
+        # ignore already selected statements from pattern 1 as an alternative here
+        statements_without_associations = [stmt for stmt in statements_without_associations
+                                           if stmt not in pattern1_statements]
+        specific_pattern2 = self.greedy_get_most_frequent_statements(statements_without_associations,
+                                                                     keyword2entity_keys)
+
+        statements_association_only = [stmt for stmt in statements if stmt.relation == ASSOCIATED]
+        associated_pattern = self.greedy_get_most_frequent_statements(statements_association_only, keyword2entity_keys)
+
+
+        print("A")
+        # for entity_list in
+        # Step 3: use schema graph to add variables to the search
+        # Step 4: apply different selection strategies
+
+
+        result = []
+        for pattern in [specific_pattern1, specific_pattern2, associated_pattern]:
+            # skip empty patterns
+            if len(pattern) == 0:
+                continue
+
+            pattern_data = []
+            for stmt, keyword1, keyword2 in pattern:
+                pattern_data.append((keyword1, stmt.relation, keyword2))
+            result.append(pattern_data)
+        return result
+
+    @staticmethod
+    def greedy_get_most_frequent_statements(statements: List[StatementExtraction], keyword2entity_keys):
+        selected_pattern = list()
+        # statements are already sorted by their frequency
+        selected_keywords = set()
+        for statement in statements:
+            for keyword1, entity_keys1 in keyword2entity_keys.items():
+                for keyword2, entity_keys2 in keyword2entity_keys.items():
+                    # only select one edge between two keywords
+                    if (keyword1, keyword2) in selected_keywords:
+                        continue
+
+                    cond1 = get_unique_entity_key(statement.subject_type, statement.subject_id) in entity_keys1
+                    cond2 = get_unique_entity_key(statement.object_type, statement.object_id) in entity_keys2
+
+                    if cond1 and cond2:
+                        selected_pattern.append((statement, keyword1, keyword2))
+                        # ensure that direction does not matter
+                        # and that we only select on edge per keyword pair
+                        selected_keywords.add((keyword1, keyword2))
+                        selected_keywords.add((keyword2, keyword1))
+
+                        # we can stop as soon as we picked an edge between each pair of keywords
+                        if len(selected_pattern) == len(keyword2entity_keys) - 1:
+                            return selected_pattern
+
+        # pattern does not include enough information (otherwise the inner return would have fired)
+        # so we ignore that pattern and just return an empty one
+        return []
+
+    def get_statements_ranked_by_frequency(self, documents: List[IndexedDocument], allowed_entity_keys: Set[str]):
+        statement2frequency = dict()
+        key2statement = dict()
+        for indexed_document in documents:
+            for scored_statement in indexed_document.scored_statements:
+                # only statements between searched entities are important
+                # all other statements can be ignored
+                if scored_statement.subject.get_unique_key() not in allowed_entity_keys:
+                    continue
+                if scored_statement.object.get_unique_key() not in allowed_entity_keys:
+                    continue
+
+                statement_key = scored_statement.get_unique_key()
+
+                if statement_key not in statement2frequency:
+                    statement2frequency[statement_key] = scored_statement.frequency
+                    key2statement[statement_key] = scored_statement
+                else:
+                    statement2frequency[statement_key] += scored_statement.frequency
+
+        # sort by highest score
+        statements = sorted(statement2frequency.items(), key=lambda x: x[1], reverse=True)
+        return [key2statement[key] for key, _ in statements]
 
 
 def main():
