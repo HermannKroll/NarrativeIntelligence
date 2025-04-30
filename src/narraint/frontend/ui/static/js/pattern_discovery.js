@@ -154,6 +154,7 @@ async function searchPatternDiscovery(query = undefined) {
 
     // show loading visuals
     queryGraphContainer.classList.toggle('d-none', true);
+    document.getElementById("checkbox-path-concepts").classList.toggle("d-none", true);
     showLoadingScreen();
 
     // remove old visuals
@@ -234,13 +235,21 @@ function createKnowledgeGraph(concept2statements, parentDiv) {
 function updateKnowledgeGraph() {
     const topK = document.getElementById("path-concepts-slider").value;
     document.getElementById("path-concepts-num-edges").innerText = `Top ${topK}`;
+    const selectedEntityTypes = getSelectedEntityTypes();
+    console.log(selectedEntityTypes);
+
     discoveryGraph.physics.physicsEnabled = true;
     discoveryGraphNodes.forEach((node) => {
-        if (node.hidden && node.index < topK) {
+        if (node.index === 0)
+            return;
+        const nodeTypeSelected = selectedEntityTypes.includes(node.entityType);
+        if (node.hidden && node.index < topK && nodeTypeSelected) {
+            // show node
             node.hidden = false;
             node.physics = true;
             discoveryGraphNodes.update(node);
-        } else if (node.index >= topK && !node.hidden) {
+        } else if ((!nodeTypeSelected || node.index >= topK) && !node.hidden) {
+            // hide node
             node.hidden = true;
             node.physics = false;
             discoveryGraphNodes.update(node);
@@ -260,7 +269,46 @@ function showAlert(message) {
     setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
 }
 
+function createEntityTypeButton(entityType) {
+    const container = document.getElementById("checkbox-path-concepts");
+    const div = document.createElement("div")
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    const inputId = "checkboxType" + entityType;
+
+    div.style.backgroundColor = TYPE_COLOR_MAP[entityType];
+    div.classList.add("d-flex", "rounded", "p-1", "mx-2", "my-1", "align-items-center");
+
+    input.id = inputId;
+    input.checked = true;
+    input.onchange = updateKnowledgeGraph;
+    input.type = "checkbox";
+    input.entityType = entityType;
+    input.classList.add("mx-1", "form-check-input-wrap")
+
+    label.innerText = entityType;
+    label.htmlFor = inputId;
+
+    div.append(input, label);
+    container.append(div);
+}
+
+function getSelectedEntityTypes() {
+    const container = document.getElementById("checkbox-path-concepts");
+    const selectedEntityTypes = [];
+    for (const child of container.childNodes) {
+        if (child.firstChild.checked) {
+            selectedEntityTypes.push(child.firstChild.entityType)
+        }
+    }
+    return selectedEntityTypes;
+}
+
 function createKnowledgeGraphElements(concept2statements) {
+    document.getElementById("checkbox-path-concepts").innerHTML = "";
+    document.getElementById("checkbox-path-concepts").classList.toggle("d-none", false);
+
+    const knownEntityTypes = [];
     let index = 1;
     discoveryGraphNodes = new vis.DataSet();
     discoveryGraphEdges = new vis.DataSet();
@@ -278,7 +326,11 @@ function createKnowledgeGraphElements(concept2statements) {
             return;
         }
 
-        const node = { id: entityName, label: entityName, color: color };
+        if (!knownEntityTypes.includes(entityType)) {
+            createEntityTypeButton(entityType);
+        }
+
+        const node = { id: entityName, label: entityName, color: color, entityType: entityType };
 
         // highlight concept nodes and set index 0
         if (entityName in concept2statements) {
@@ -290,6 +342,7 @@ function createKnowledgeGraphElements(concept2statements) {
             index++;
         }
         discoveryGraphNodes.add(node);
+        knownEntityTypes.push(entityType);
     }
 
     for (const [_, statement] of Object.entries(concept2statements)) {

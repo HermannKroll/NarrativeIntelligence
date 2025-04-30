@@ -172,7 +172,10 @@
                     <div class="w-100">
                         <div class="alert alert-danger d-none mt-1" role="alert" id="alert-path-concepts"></div>
                     </div>
-                    <div class="col-12 d-none mt-2" id="container-div-path-concepts">
+                    <div class="col-2 mt-2" id="div-checkbox-path-concepts">
+                        <div class="rounded border d-flex flex-column d-none" id="checkbox-path-concepts"></div>
+                    </div>
+                    <div class="col-10 d-none mt-2" id="container-div-path-concepts">
                         <div class="rounded border">
                             <!-- result query graph -->
                             <div class="row d-flex flex-wrap justify-content-center" id="graph-div-path-concepts"></div>
@@ -831,7 +834,7 @@
     <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
     <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
-    <script src="{% static 'js/pattern_discovery.js' %}?version=3" type="text/javascript"></script>
+    <script src="{% static 'js/pattern_discovery.js' %}?version=4" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
