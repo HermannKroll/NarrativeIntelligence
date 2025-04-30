@@ -12,7 +12,15 @@
 
     <div class="d-flex flex-row overflow-scroll">
         <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
-            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="row m-1 align-items-center border-bottom" id="collection-filter">
+                <label class="g-0">
+                    <strong>Data Source:</strong>
+                </label>
+            </div>
+{#            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>#}
+            <label class="g-0">
+                    <strong>Overview:</strong>
+            </label>
             <div class="" id="sidebar_entries"></div>
 
         </div>
@@ -169,6 +177,7 @@
         const url_feedback_report = "{% url 'report' %}";
         const url_suggest_drug_report = "{% url 'suggest_drug' %}";
         const url_keywords = "{% url 'keywords' %}";
+        const url_available_collections = "{% url 'document_collections' %}";
 
         const url_entity_search = "{% url 'entity_search_log' %}";
         const url_substance_href = "{% url 'entity_substance_forward_log' %}";

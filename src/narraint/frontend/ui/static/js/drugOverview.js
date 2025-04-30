@@ -98,12 +98,19 @@ buildSite().catch((e) => console.log(e));
 async function buildSite() {
     networkData = {drug: "drugAssoc", target: "targInter", disease: "indi", phase: true}
 
-    const search = await getSearchParam();
+    await getSearchParam();
     createDynamicOverviews();
     buildDocumentCollectionFilter();
 
-    const keyword = search.split("=")[1];
-    const keywordDecoded = decodeURI(keyword);
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get('drug');
+
+    if (!keyword) {
+        console.error("No drug specified in URL");
+        return;
+    }
+
+    const keywordDecoded = decodeURIComponent(keyword);
     document.getElementById('drugInput').value = keywordDecoded;
     // Matomo Tracking
     _paq.push(['trackSiteSearch', keywordDecoded, "Drug"]);
@@ -520,4 +527,10 @@ async function closeOverviewForwarding(forward = false) {
     switchOverviewPopup.style.display = "none";
     document.body.style.overflowY = "auto";
     document.getElementById("searched_drug").innerHTML = "";
+}
+
+refresh = async function () {
+    await loadOverviewData()
+        .then(() => createNetworkGraph())
+        .catch((e) => console.log(e))
 }

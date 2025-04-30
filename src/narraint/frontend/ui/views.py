@@ -483,19 +483,6 @@ def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
         query = str(request.GET["query"]).strip()
         document_collections = get_document_collections_from_data_source_string(str(request.GET["data_source"]).strip())
-        allowed_sources = {"LitCovid", "LongCovid", "PubMed"}
-        invalid_sources = [ds for ds in document_collections if ds not in allowed_sources]
-
-        if invalid_sources:
-            return JsonResponse(
-                status=500,
-                data=dict(
-                    answer="data source not valid",
-                    reason=f"Unsupported data sources: {', '.join(invalid_sources)}. "
-                           f"Supported: {', '.join(allowed_sources)}"
-                )
-            )
-
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
         if not graph_query or len(graph_query.fact_patterns) == 0:
             View().query_logger.write_api_call(False, "get_query_sub_count", str(request))

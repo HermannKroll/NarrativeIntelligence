@@ -96,11 +96,19 @@ window.addEventListener('popstate', () => {
 async function buildSite() {
     networkData = {drug: "drugAssoc", target: "targInter", disease: "indi", phase: true}
 
-    const search = await getSearchParam();
+    await getSearchParam();
     createDynamicOverviews();
+    buildDocumentCollectionFilter();
 
-    const keyword = search.split("=")[1];
-    const keywordDecoded = decodeURI(keyword);
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get('entity');
+
+    if (!keyword) {
+        console.error("No drug specified in URL");
+        return;
+    }
+
+    const keywordDecoded = decodeURIComponent(keyword);
     document.getElementById('drugInput').value = keywordDecoded;
 
         // Matomo Tracking
@@ -159,4 +167,8 @@ function logEntitySearch(entity) {
         }
     );
     fetch(request).catch(e => console.log(e))
+}
+
+refresh = async function () {
+    await loadOverviewData()
 }

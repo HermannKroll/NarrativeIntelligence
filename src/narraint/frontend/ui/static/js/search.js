@@ -818,7 +818,7 @@ const search = (event) => {
     setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
-    
+
     submitSearch(parameters)
         .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
@@ -1343,72 +1343,74 @@ const createProvenanceDivElement = (explanations) => {
     try {
         // sort by confidence and create an element for each explanation
         explanations
-            .sort((a, b) => {return (a["conf"] >= b["conf"]) ? -1 : 1;})
+            .sort((a, b) => {
+                return (a["conf"] >= b["conf"]) ? -1 : 1;
+            })
             .forEach(e => {
-            let sentence = e["s"];
-            let predication_ids_str = e['ids'];
-            // an explanation might have multiple subjects / predicates / objects separated by //
-            e["s_str"].split('//').forEach(s => {
-                let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
-                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">$1</code>')
-            });
-            e["p"].split('//').forEach(p => {
-                let p_reg = new RegExp('(' + p + '[a-z]*)', 'gi');
-                sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
-            });
-            e["o_str"].split('//').forEach(o => {
-                let o_reg = new RegExp('(' + o + '[a-zg]*)', 'gi');
-                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
-            });
+                let sentence = e["s"];
+                let predication_ids_str = e['ids'];
+                // an explanation might have multiple subjects / predicates / objects separated by //
+                e["s_str"].split('//').forEach(s => {
+                    let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
+                    sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">$1</code>')
+                });
+                e["p"].split('//').forEach(p => {
+                    let p_reg = new RegExp('(' + p + '[a-z]*)', 'gi');
+                    sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
+                });
+                e["o_str"].split('//').forEach(o => {
+                    let o_reg = new RegExp('(' + o + '[a-zg]*)', 'gi');
+                    sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
+                });
 
-            if (j === -1) {
-                j = parseInt(e["pos"]) + 1;
-            }
-            if (j !== parseInt(e["pos"]) + 1) {
-                div_provenance_all.append($('<br>'));
-                j = parseInt(e["pos"]) + 1;
-            }
-
-            let rate_pos_id = getUniqueRateButtonID();
-            let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
-            let rate_neg_id = getUniqueRateButtonID();
-            let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
-
-            div_rate_pos.click(function () {
-                if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
-                    $('#' + rate_pos_id).fadeOut();
-                    $('#' + rate_neg_id).fadeOut();
+                if (j === -1) {
+                    j = parseInt(e["pos"]) + 1;
+                }
+                if (j !== parseInt(e["pos"]) + 1) {
+                    div_provenance_all.append($('<br>'));
+                    j = parseInt(e["pos"]) + 1;
                 }
 
+                let rate_pos_id = getUniqueRateButtonID();
+                let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
+                let rate_neg_id = getUniqueRateButtonID();
+                let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
+
+                div_rate_pos.click(function () {
+                    if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
+                        $('#' + rate_pos_id).fadeOut();
+                        $('#' + rate_neg_id).fadeOut();
+                    }
+
+                });
+                div_rate_neg.click(function () {
+                    if (rateExtraction(false, predication_ids_str, () => div_rate_neg.trigger('click'))) {
+                        $('#' + rate_pos_id).fadeOut();
+                        $('#' + rate_neg_id).fadeOut();
+                    }
+                });
+
+                let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
+                div_col_rating.append(div_rate_pos);
+                div_col_rating.append(div_rate_neg);
+
+
+                let div_provenance = $('<div class="col-11">' +
+                    j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                    e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
+                    '</div>');
+
+                let div_prov_example = $('<div class="container mt-1 border-top">');
+                let div_prov_example_row = $('<div class="row">');
+
+                div_prov_example_row.append(div_provenance);
+                div_prov_example_row.append(div_col_rating);
+                div_prov_example.append(div_prov_example_row);
+
+                div_provenance_all.append(div_prov_example);
+
+
             });
-            div_rate_neg.click(function () {
-                if (rateExtraction(false, predication_ids_str, () => div_rate_neg.trigger('click'))) {
-                    $('#' + rate_pos_id).fadeOut();
-                    $('#' + rate_neg_id).fadeOut();
-                }
-            });
-
-            let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
-            div_col_rating.append(div_rate_pos);
-            div_col_rating.append(div_rate_neg);
-
-
-            let div_provenance = $('<div class="col-11">' +
-                j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
-                e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
-                '</div>');
-
-            let div_prov_example = $('<div class="container mt-1 border-top">');
-            let div_prov_example_row = $('<div class="row">');
-
-            div_prov_example_row.append(div_provenance);
-            div_prov_example_row.append(div_col_rating);
-            div_prov_example.append(div_prov_example_row);
-
-            div_provenance_all.append(div_prov_example);
-
-
-        });
     } catch (SyntaxError) {
 
     }
@@ -1996,6 +1998,10 @@ async function buildDocumentCollectionFilter() {
         return e["priority"] === maxPriority
     });
 
+    const urlParams = new URL(window.location.href).searchParams;
+    const activeDataSourceParam = urlParams.get('data_source');
+    const activeDataSources = activeDataSourceParam ? activeDataSourceParam.split(";") : [];
+
     for (const i in collections) {
         const dc = collections[i];
 
@@ -2008,8 +2014,11 @@ async function buildDocumentCollectionFilter() {
         filterInput.value = dc["collection"];
         filterInput.onclick = refreshSearch;
 
-        if (i === maxPriorityIndex.toString())
-            filterInput.checked = true;
+        if (activeDataSources.length > 0) {
+            filterInput.checked = activeDataSources.includes(dc["collection"]);
+        } else {
+            filterInput.checked = i === maxPriorityIndex.toString();
+        }
 
         const filterHelpAnchor = document.createElement("a");
         filterHelpAnchor.href = dc["url"];
@@ -2269,7 +2278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input_object').addEventListener('input', toggleClearSearchButton);
 
     const observer = new MutationObserver(toggleClearSearchButton);
-    observer.observe(document.getElementById('query_builder_list'), { childList: true });
+    observer.observe(document.getElementById('query_builder_list'), {childList: true});
 });
 
 

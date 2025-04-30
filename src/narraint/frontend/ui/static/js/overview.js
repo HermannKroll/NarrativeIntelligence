@@ -329,6 +329,7 @@ function sortElements(prefix) {
  */
 async function fillSearchbox(prefix) {
     const searchbox = document.getElementById(prefix + "Content");
+    searchbox.innerHTML = "";
     const maxCount = overviews[prefix].count;
     const data = overviews[prefix].visibleData;
 
@@ -405,8 +406,10 @@ function getLinkToQuery(prefix, item) {
     const subject = currentDrugName.split(' ').join('+');
     const predicate = overviews[prefix].predicate;
     const object = item.name.split("//")[0].split(' ').join('+');
-
-    return `${url_query}?query="${subject}"+${predicate}+"${object}"`;
+    const dataSources = getSelectedDataSources().join(";");
+    console.log(dataSources);
+    console.log(`${url_query}?query="${subject}"+${predicate}+"${object}"&data_source=${dataSources}`)
+    return `${url_query}?query="${subject}"+${predicate}+"${object}"&data_source=${dataSources}`;
 }
 
 /**
@@ -965,12 +968,14 @@ function getSelectedDataSources() {
     return dataSource;
 }
 
-async function refreshAllData() {
-    await loadOverviewData()
-        .then(() => createNetworkGraph())
-        .catch((e) => console.log(e))
-}
 
+let refresh = async () => {
+    console.warn("refresh not defined");
+};
+
+async function refreshAllData() {
+    await refresh();
+}
 
 /**
  * Function fetches the collections available for filtering. For each option, the appropriate
@@ -992,14 +997,15 @@ async function buildDocumentCollectionFilter() {
             return null;
         });
 
-    if (!collections)
-        return;
+    if (!collections) return;
 
     const collectionFilter = document.getElementById("collection-filter");
-    const maxPriority = Math.max(...collections.map(o => o["priority"]))
-    const maxPriorityIndex = collections.findIndex((e) => {
-        return e["priority"] === maxPriority
-    });
+    const maxPriority = Math.max(...collections.map(o => o["priority"]));
+    const maxPriorityIndex = collections.findIndex((e) => e["priority"] === maxPriority);
+
+    const urlParams = new URL(window.location.href).searchParams;
+    const activeDataSourceParam = urlParams.get('data_source');
+    const activeDataSources = activeDataSourceParam ? activeDataSourceParam.split(";") : [];
 
     for (const i in collections) {
         const dc = collections[i];
@@ -1011,12 +1017,17 @@ async function buildDocumentCollectionFilter() {
         filterInput.name = "data_source";
         filterInput.classList.add(["col-1"]);
         filterInput.value = dc["collection"];
+
+        if (activeDataSources.length > 0) {
+            filterInput.checked = activeDataSources.includes(dc["collection"]);
+        } else {
+            filterInput.checked = i === maxPriorityIndex.toString();
+        }
+
         filterInput.onclick = async (e) => {
+            updateURLDataSources();
             await refreshAllData();
         };
-
-        if (i === maxPriorityIndex.toString())
-            filterInput.checked = true;
 
         const filterHelpAnchor = document.createElement("a");
         filterHelpAnchor.href = dc["url"];
@@ -1030,4 +1041,19 @@ async function buildDocumentCollectionFilter() {
 
         collectionFilter.append(filterInput, filterLabel);
     }
+}
+
+function updateURLDataSources() {
+    const selectedSources = Array.from(document.querySelectorAll('input[name="data_source"]:checked'))
+        .map(input => input.value);
+
+    const url = new URL(window.location.href);
+
+    if (selectedSources.length > 0) {
+        url.searchParams.set('data_source', selectedSources.join(';'));
+    } else {
+        url.searchParams.delete('data_source');
+    }
+
+    window.history.replaceState({}, '', url);
 }
