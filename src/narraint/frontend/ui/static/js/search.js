@@ -875,12 +875,6 @@ function updateURLParameters(parameters) {
         url.searchParams.delete("visualization");
     }
 
-    if (parameters.hasOwnProperty("num_edges")) {
-        url.searchParams.set("num_edges", parameters["num_edges"]);
-    } else {
-        url.searchParams.delete("num_edges");
-    }
-
     url.searchParams.set("sort_by", parameters["sort_by"]);
     url.searchParams.set("sort_order", parameters["sort_order"]);
 

@@ -6,12 +6,34 @@ let networkOptionsKG = {
         dragView: true,
         dragNodes: true
     },
+    layout: {
+        improvedLayout: true
+    },
     physics: {
-            solver: "barnesHut",
+        solver: "barnesHut",
+        barnesHut: {
+            gravitationalConstant: -3000,
+            centralGravity: 0.0,
+            springLength: 140,
+            springConstant: 0.03,
+            damping: 0.70,
+            avoidOverlap: 0.3
+        },
     },
 };
 
+/**
+ * vis.network()
+ * @type {undefined}
+ */
 let discoveryGraph = undefined;
+
+/**
+ * vis.network nodes and edges
+ * @type {undefined}
+ */
+let discoveryGraphNodes = undefined;
+let discoveryGraphEdges = undefined;
 
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -106,6 +128,7 @@ function getConceptsFromInput() {
 
 async function searchPatternDiscovery(query = undefined) {
     const queryGraphContainer = document.querySelector('#container-div-path-concepts');
+    const queryGraphDiv = document.querySelector('#graph-div-path-concepts');
     const divDocuments = $('#div_documents');
 
     // use query from parameter if provided and create from input else
@@ -126,21 +149,18 @@ async function searchPatternDiscovery(query = undefined) {
 
     const parameters = getInputParameters(conceptString)
 
-    parameters["num_edges"] = document.getElementById("path-concepts-slider").value;
-    document.getElementById("path-concepts-num-edges").innerText = `Top ${parameters["num_edges"]}`;
-
     logInputParameters(parameters);
     updateURLParameters(parameters);
 
+    // show loading visuals
     queryGraphContainer.classList.toggle('d-none', true);
     showLoadingScreen();
 
-    const queryGraphDiv = document.querySelector('#graph-div-path-concepts');
+    // remove old visuals
     queryGraphDiv.innerHTML = "";
-    document.getElementById('div_documents').innerText = '';
+    divDocuments.empty();
 
     const parameterString = createURLParameterString(parameters);
-
     const data = await fetch(`${url_pattern_discovery}?${parameterString}`)
         .then((response) => {
             if (response.ok)
@@ -151,10 +171,9 @@ async function searchPatternDiscovery(query = undefined) {
                 })
             }
         })
-        .catch((e) => {
-            showAlert(e);
-        });
+        .catch((e) => showAlert(e));
 
+    // return early if the response failed
     if (!data) {
         hideLoadingScreen();
         return;
@@ -166,7 +185,7 @@ async function searchPatternDiscovery(query = undefined) {
     sortStrategySet(data["sort_by"]);
     sortOrderSet(data["sort_order"]);
 
-    // required for invalid strategies (from URL)
+    // update invalid strategies (from URL)
     if (data["sort_by"] !== parameters["sort_by"])
         updateURLParameter("sort_by", data["sort_by"])
 
@@ -182,18 +201,17 @@ async function searchPatternDiscovery(query = undefined) {
 
     updateYearFilter(data["year_aggregation"], data["query"]);
 
-    // knowledge graph
-    createKnowledgeGraph(data["graph"], data["concepts"], queryGraphDiv);
+    // create and show knowledge graph
+    createKnowledgeGraph(data["graph"], queryGraphDiv);
     queryGraphContainer.classList.toggle("d-none", false);
 
-    // documents
-    divDocuments.empty();
-    divDocuments.append(createResultList(data["results"], 0));
-
+    // create and show documents
+    const documentResults = createResultList(data["results"], 0);
+    divDocuments.append(documentResults);
     hideLoadingScreen();
 }
 
-function createKnowledgeGraph(statements, concepts, parentDiv) {
+function createKnowledgeGraph(concept2statements, parentDiv) {
     const column = document.createElement('div');
     column.classList.add("col-12");
     const container = document.createElement('div');
@@ -205,16 +223,33 @@ function createKnowledgeGraph(statements, concepts, parentDiv) {
     column.appendChild(container)
     parentDiv.appendChild(column);
 
-    // graphs.push(container);
+    createKnowledgeGraphElements(concept2statements);
+    discoveryGraph = new vis.Network(graphDiv, {}, networkOptionsKG);
+    discoveryGraph.physics.physicsEnabled = false;
+    discoveryGraph.on("click", graphOnClick);
+    discoveryGraph.setData({nodes: discoveryGraphNodes, edges: discoveryGraphEdges})
+    updateKnowledgeGraph();
+}
 
-    // addClickEvent(statements, container);
+function updateKnowledgeGraph() {
+    const topK = document.getElementById("path-concepts-slider").value;
+    document.getElementById("path-concepts-num-edges").innerText = `Top ${topK}`;
+    discoveryGraph.physics.physicsEnabled = true;
+    discoveryGraphNodes.forEach((node) => {
+        if (node.hidden && node.index < topK) {
+            node.hidden = false;
+            node.physics = true;
+            discoveryGraphNodes.update(node);
+        } else if (node.index >= topK && !node.hidden) {
+            node.hidden = true;
+            node.physics = false;
+            discoveryGraphNodes.update(node);
+        }
+    });
 
-    const data = createKnowledgeGraphElements(statements, concepts);
-    const graph = new vis.Network(graphDiv, data, networkOptionsKG);
-
-    graph.physics.physicsEnabled = false;
-    graph.on("click", graphOnClick);
-    discoveryGraph = graph;
+    discoveryGraph.stabilize(100);
+    discoveryGraph.physics.physicsEnabled = false;
+    centerPatternDiscovery();
 }
 
 function showAlert(message) {
@@ -225,44 +260,44 @@ function showAlert(message) {
     setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
 }
 
-function createKnowledgeGraphElements(statements, concepts) {
-    const statementEntities = {}
+function createKnowledgeGraphElements(concept2statements) {
+    let index = 1;
+    discoveryGraphNodes = new vis.DataSet();
+    discoveryGraphEdges = new vis.DataSet();
 
-    const nodes = new vis.DataSet();
-    const edges = new vis.DataSet();
-
-    // insert node elements only, if they not already exist in the current graph
-    function insertNodeElement(entityId, entityType) {
+    function insertNodeElement(entityName, entityType) {
         const color = TYPE_COLOR_MAP[entityType];
-        if (entityId in statementEntities)
+        // insert node elements only, if they not already exist in the current graph
+        if (discoveryGraphNodes.get(entityName) != null) {
             return;
-
-        const needHighlight = entityId in concepts;
-        const node = { id: entityId, label: entityId, color: color };
-
-        if (needHighlight) {
-            node["shape"] = "box";
-            node["font"] = { size: 24 }
         }
 
-        nodes.add(node);
-        statementEntities[entityId] = entityType;
+        const node = { id: entityName, label: entityName, color: color };
+
+        // highlight concept nodes and set index 0
+        if (entityName in concept2statements) {
+            node["shape"] = "box";
+            node["font"] = { size: 24 }
+            node["index"] = 0;
+        } else {
+            node["index"] = index;
+            index++;
+        }
+        discoveryGraphNodes.add(node);
     }
 
-    statements.forEach(([subjectID, subjectType, predicate, objectID, objectType]) => {
-        insertNodeElement(subjectID, subjectType);
-        insertNodeElement(objectID, objectType);
-
-        edges.add({
-            from: subjectID,
-            to: objectID,
-            color: '#848484',
-            // label: predicate,
-            // smooth: { enabled: false },
-            // font: { align: 'top'}
-        });
-    });
-    return { nodes: nodes, edges: edges };
+    for (const [_, statement] of Object.entries(concept2statements)) {
+        for (const [subjectName, subjectType, objectName, objectType] of statement) {
+            insertNodeElement(subjectName, subjectType);
+            insertNodeElement(objectName, objectType);
+            discoveryGraphEdges.add({
+                from: subjectName,
+                to: objectName,
+                color: '#848484',
+            });
+        }
+        index = 1;
+    }
 }
 
 async function initPatternDiscoveryFromURL(query) {

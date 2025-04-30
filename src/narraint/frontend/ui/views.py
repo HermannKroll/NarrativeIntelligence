@@ -1633,16 +1633,13 @@ def get_pattern_discovery(request):
         message = "Missing concepts in request."
     elif "data_source" not in request.GET.keys():
         message = "Missing document collection in request."
-    elif "num_edges" not in request.GET.keys():
-        message = "Missing number of edges in request."
     else:
-        concepts = ""
+        concept2type = ""
         time_start = datetime.now()
         try:
             raw_concepts = request.GET.get("query").strip()
-            concepts = raw_concepts.split("_AND_")
+            concept2type = raw_concepts.split("_AND_")
             document_collections = request.GET.get("data_source").strip().split(";")
-            num_edges = int(request.GET.get("num_edges").strip())
 
             # get sort filter; default is (publication) time
             sort_by = request.GET.get("sort_by", View.RANK_BY_TIME).strip()
@@ -1655,14 +1652,14 @@ def get_pattern_discovery(request):
             title_filter = extract_url_parameter(request.GET, "title_filter", str)
             classification_filter = extract_url_parameter(request.GET, "classification_filter", lambda s: s.strip(";"))
 
-            logging.debug('Generating knowledge path for "{}"'.format(concepts))
+            logging.debug('Generating knowledge path for "{}"'.format(concept2type))
 
-            if len(concepts) < 2:
+            if len(concept2type) < 2:
                 raise ValueError("At least two concepts are required.")
 
             # first retrieve documents for concepts
             collection2ids, concept2entities = View().discovery.retrieve_relevant_documents_for_concepts(
-                    concepts=concepts, document_collections=document_collections)
+                    concepts=concept2type, document_collections=document_collections)
 
             # create query documents and get metadata
             results = list()
@@ -1685,9 +1682,7 @@ def get_pattern_discovery(request):
             results = View().strategy2ranker[View.RANK_BY_TIME].rank_document(None, results)
 
             # apply pattern discovery
-            results, graph, concepts = View().discovery.discover_pattern_for_documents(documents=results,
-                                                                                       concept2entity=concept2entities,
-                                                                                       num_edges=num_edges)
+            results, concept2graph = View().discovery.discover_pattern_for_documents(documents=results, concept2entity=concept2entities)
 
             # descending or ascending?
             descending = (sort_order == View.ORDER_DESCENDING)
@@ -1704,12 +1699,12 @@ def get_pattern_discovery(request):
 
             View().query_logger.write_api_call(True, "get_pattern_discovery_request", str(request),
                                                time_needed=datetime.now() - time_start)
-            data = dict(graph=graph, concepts=concepts, sort_by=sort_by, sort_order=sort_order,
+            data = dict(graph=concept2graph, sort_by=sort_by, sort_order=sort_order,
                         results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
             return JsonResponse(status=200, data=data)
         except Exception as e:
             View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
                                                time_needed=datetime.now() - time_start)
-            message = f'Could not discover pattern for "{concepts}: {e}"'
+            message = f'Could not discover pattern for "{concept2type}: {e}"'
             log_stack_trace(message, e)
     return JsonResponse(status=500, data=dict(reason=message))
