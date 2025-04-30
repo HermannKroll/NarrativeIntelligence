@@ -267,6 +267,12 @@ function createKnowledgeGraphElements(concept2statements) {
 
     function insertNodeElement(entityName, entityType) {
         const color = TYPE_COLOR_MAP[entityType];
+
+        // some entities have two names, just take the right side
+        if (entityName.includes("//")) {
+            entityName = entityName.split("//", 1)[1];
+        }
+
         // insert node elements only, if they not already exist in the current graph
         if (discoveryGraphNodes.get(entityName) != null) {
             return;
