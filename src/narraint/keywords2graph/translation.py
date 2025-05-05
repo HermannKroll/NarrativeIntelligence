@@ -19,14 +19,40 @@ from narrant.entitylinking.enttypes import TARGET, GENE
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 
+
 class VariableTypeNotSupportedError(Exception):
     pass
+
 
 class TwoEntitiesRequiredError(Exception):
     pass
 
+
 class NoDocumentsFoundError(Exception):
     pass
+
+
+class GeneratedStatement:
+
+    def __init__(self, statement: StatementExtraction, keyword1: str, keyword2: str):
+        self.statement = statement
+        self.keyword1 = keyword1
+        self.keyword2 = keyword2
+
+class GeneratedPattern:
+
+    def __init__(self):
+        self.selected_statements = list()
+
+    def add_generated_statement(self, statement: GeneratedStatement):
+        self.selected_statements.append(statement)
+
+    def to_json_data(self):
+        pattern_data = []
+        for stmt in self.selected_statements:
+            pattern_data.append((stmt.keyword1, stmt.statement.relation, stmt.keyword2))
+        return pattern_data
+
 
 class Keyword2GraphTranslation:
 
@@ -139,7 +165,7 @@ class Keyword2GraphTranslation:
         statements_without_associations = [stmt for stmt in statements if stmt.relation != ASSOCIATED]
         specific_pattern1 = self.greedy_get_most_frequent_statements(statements_without_associations,
                                                                      keyword2entity_keys)
-        pattern1_statements = [s[0] for s in specific_pattern1]
+        pattern1_statements = [s.statement for s in specific_pattern1.selected_statements]
 
         # ignore already selected statements from pattern 1 as an alternative here
         statements_without_associations = [stmt for stmt in statements_without_associations
@@ -150,23 +176,26 @@ class Keyword2GraphTranslation:
         statements_association_only = [stmt for stmt in statements if stmt.relation == ASSOCIATED]
         associated_pattern = self.greedy_get_most_frequent_statements(statements_association_only, keyword2entity_keys)
 
-        result = []
+        generated_patterns = []
         for pattern in [specific_pattern1, specific_pattern2, associated_pattern]:
             # skip empty patterns
-            if len(pattern) == 0:
+            if len(pattern.selected_statements) == 0:
                 continue
 
-            self.enrich_pattern_with_variable(keywords2variables, pattern, indexed_documents)
-
-            pattern_data = []
-            for stmt, keyword1, keyword2 in pattern:
-                pattern_data.append((keyword1, stmt.relation, keyword2))
-            result.append(pattern_data)
-        return result
+            self.enrich_pattern_with_variables(keywords2variables, pattern, indexed_documents)
+            generated_patterns.append(pattern)
+        return generated_patterns
 
     @staticmethod
-    def greedy_get_most_frequent_statements(statements: List[StatementExtraction], keyword2entity_keys):
-        selected_pattern = list()
+    def greedy_get_most_frequent_statements(statements: List[StatementExtraction], keyword2entity_keys) \
+            -> GeneratedPattern:
+        """
+        Selects the most supported statements first
+        :param statements: a list of statement extractions
+        :param keyword2entity_keys: dict mapping keywords to allowed entity keys
+        :return: a list (statement, keyword1, keyword2)
+        """
+        selected_pattern = GeneratedPattern()
         # statements are already sorted by their frequency
         selected_keywords = set()
         for statement in statements:
@@ -180,23 +209,30 @@ class Keyword2GraphTranslation:
                     cond2 = get_unique_entity_key(statement.object_type, statement.object_id) in entity_keys2
 
                     if cond1 and cond2:
-                        selected_pattern.append((statement, keyword1, keyword2))
+                        selected_pattern.add_generated_statement(GeneratedStatement(statement, keyword1, keyword2))
                         # ensure that direction does not matter
                         # and that we only select on edge per keyword pair
                         selected_keywords.add((keyword1, keyword2))
                         selected_keywords.add((keyword2, keyword1))
 
                         # we can stop as soon as we picked an edge between each pair of keywords
-                        if len(selected_pattern) == len(keyword2entity_keys) - 1:
+                        if len(selected_pattern.selected_statements) == len(keyword2entity_keys) - 1:
                             return selected_pattern
 
         # pattern does not include enough information (otherwise the inner return would have fired)
         # so we ignore that pattern and just return an empty one
-        return []
+        return None
 
     @staticmethod
     def get_statements_ranked_by_frequency(documents: List[IndexedDocument],
                                            keyword2entity_keys: Dict[str, Set[str]]) -> List[ScoredDocumentStatement]:
+        """
+        Generates a list of all known statements between the set of allowed entity keys. Sorts statements
+        descending by their frequency
+        :param documents: a list of indexed documents
+        :param keyword2entity_keys: a set of allowed entity keys
+        :return: a sorted list of statements (sort by frequency descending)
+        """
         # first identify all allowed entity keys
         allowed_entity_keys = set()
         for entity_keys in keyword2entity_keys.values():
@@ -226,7 +262,18 @@ class Keyword2GraphTranslation:
         statements = sorted(statement2frequency.items(), key=lambda x: x[1], reverse=True)
         return [key2statement[key] for key, _ in statements]
 
-    def enrich_pattern_with_variable(self, keywords2variables, pattern, documents: List[IndexedDocument]):
+    @staticmethod
+    def enrich_pattern_with_variables(keywords2variables, pattern: GeneratedPattern, documents: List[IndexedDocument]):
+        """
+        Enriches a pattern by attaching the variables to the most likely connecting node, i.e., by adding a new
+        statement that connects an existing node with the variable and yielding the most documents
+        :param keywords2variables: dict mapping keywords to variable types
+        :param pattern: the pattern to enrich
+        :param documents: a list of indexed documents
+        :return: None
+        """
+        # First retrieve information from the set of retrieved documents
+        # We want to know the most supported connections between entity types
         so2relations = defaultdict(set)
         spo2support = defaultdict(int)
         for document in documents:
@@ -237,7 +284,8 @@ class Keyword2GraphTranslation:
         # add the most likely statement for each var type in our set of searched variable types
         for var_keywords, var_type in keywords2variables.items():
             candidates = []
-            for statement, kw1, kw2 in pattern:
+            for stmt_data in pattern.selected_statements:
+                statement, kw1, kw2 = stmt_data.statement, stmt_data.keyword1, stmt_data.keyword2
                 for keywords, statement_type in [(kw1, statement.subject_type), (kw2, statement.object_type)]:
                     # use statement type as subject to connect variable to
                     for relation in so2relations[(statement_type, var_type)]:
@@ -254,11 +302,12 @@ class Keyword2GraphTranslation:
 
             # add the most likely variable connection
             best_candidate = candidates[0]
-            # pattern consists of triples ( statement, keywords1, keywords2)
-            pattern.append((StatementExtraction(subject_id="", subject_type=best_candidate[0], subject_str="",
-                                                predicate="", relation=best_candidate[2],
-                                                object_id="", object_type=best_candidate[3], object_str="",
-                                                sentence_id=0), best_candidate[1], best_candidate[4]))
+            # add candidate to pattern
+            pattern.add_generated_statement(GeneratedStatement(StatementExtraction(
+                subject_id="", subject_type=best_candidate[0], subject_str="",
+                predicate="", relation=best_candidate[2],
+                object_id="", object_type=best_candidate[3], object_str="",
+                sentence_id=0), best_candidate[1], best_candidate[4]))
 
 
 def main():

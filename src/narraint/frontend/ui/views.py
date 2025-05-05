@@ -1397,20 +1397,13 @@ def get_keyword_search_request(request):
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
                 try:
-                    json_data = View().keyword2graph.translate_keywords(keywords)
+                    json_data = [p.to_json_data() for p in View().keyword2graph.translate_keywords(keywords)]
                 except NoDocumentsFoundError:
                     return JsonResponse(status=500, data=dict(reason="No documents containing all entities were found."))
                 except TwoEntitiesRequiredError:
                     return JsonResponse(status=500, data=dict(reason="At least two entities are required."))
                 except VariableTypeNotSupportedError as e:
                     return JsonResponse(status=500, data=dict(reason=f"Variable type not supported: {e}"))
-                # json_data = [r.to_json_data() for r in possible_queries]
-                # This is the format
-                # json_data = [
-                #     [("Metformin", "treats", "Diabetes Mellitus")],
-                #     [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
-                #     [("Insulin", "associated", "Diabetes Mellitus")],
-                # ]
 
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
