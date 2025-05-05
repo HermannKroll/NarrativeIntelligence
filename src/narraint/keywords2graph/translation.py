@@ -12,8 +12,11 @@ from narraint.backend.models import TagInvertedIndex
 from narraint.entity.query_translation import QueryTranslation
 from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.pattern_discovery.discovery import PatternDiscovery
+from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
+from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, IndexedDocument
+from narraint.ranking.ranking import PublicationDateRank
 from narrant.entity.entity import Entity, get_unique_entity_key
 from narrant.entitylinking.enttypes import DOSAGE_FORM
 
@@ -114,6 +117,7 @@ class Keyword2GraphTranslation:
         self.graph: SchemaSupportGraph = SchemaSupportGraph()
         self.translation: QueryTranslation = QueryTranslation()
         self.discovery: PatternDiscovery = PatternDiscovery()
+        self.date_ranker = PublicationDateRank()
 
     @staticmethod
     def greedy_find_most_supported_entity_type(entities: [Entity]):
@@ -284,7 +288,6 @@ class Keyword2GraphTranslation:
                                                                                                       self.discovery.corpus.collections)
         collection2count = {k: len(v) for k, v in collection2ids.items()}
         logging.info(f'Compute patterns from following documents: {collection2count}')
-        # Todo: What happens if we have too many documents?
         allowed_entitykeys = set()
         for entitykeys in keyword2entity_keys.values():
             allowed_entitykeys.update(entitykeys)
@@ -292,10 +295,29 @@ class Keyword2GraphTranslation:
         session = SessionExtended.get()
         # retrieve indexed documents
         indexed_documents = list()
-        for collection, ids in collection2ids.items():
-            if len(ids) > 500:
-                ids = random.sample(ids, 500)
+        no_of_documents = sum(collection2count.values())
 
+        # if more than k documents are retrieved, we reduce the set of documents to the latest k ones
+        if no_of_documents > PatternDiscovery.TOP_NEWEST_DOCUMENTS:
+            # create query documents and get metadata
+            doc_results = list()
+            for collection, document_ids in collection2ids.items():
+                doc_results.extend([QueryDocumentResult(document_id=doc_id, title="", authors="", journals="",
+                                                    publication_year=0, publication_month=0, var2substitution={},
+                                                    confidence=0.0, position2provenance_ids={},
+                                                    document_collection=collection) for doc_id in document_ids])
+
+            # apply filter
+            doc_results = QueryEngine.enrich_document_results_with_metadata(doc_results, collection2ids)
+            doc_results = self.date_ranker.rank_document(None, doc_results)
+            doc_results = doc_results[:PatternDiscovery.TOP_NEWEST_DOCUMENTS]
+
+            collection2ids = {k: set() for k, v in collection2ids.items()}
+            for res in doc_results:
+                collection2ids[res.document_collection].add(res.document_id)
+
+        # now retrieve the actual document data
+        for collection, ids in collection2ids.items():
             indexed_documents.extend(retrieve_indexed_documents_from_database_small(session=session,
                                                                                     document_ids=ids,
                                                                                     document_collection=collection))
