@@ -181,13 +181,19 @@ class Keyword2GraphTranslation:
         statements_without_associations = [stmt for stmt in statements if stmt.relation != ASSOCIATED]
         specific_pattern1 = self.greedy_get_most_frequent_statements(statements_without_associations,
                                                                      keyword2entity_keys)
-        pattern1_statements = [s.statement for s in specific_pattern1.selected_statements]
+        # the relation of the best-selected statement should be ignored for the second pattern
+        if specific_pattern1 and len(specific_pattern1.selected_statements) >= 1:
+            pattern1_relations = {s.statement.relation for s in specific_pattern1.selected_statements[:1]}
 
-        # ignore already selected statements from pattern 1 as an alternative here
-        statements_without_associations = [stmt for stmt in statements_without_associations
-                                           if stmt not in pattern1_statements]
-        specific_pattern2 = self.greedy_get_most_frequent_statements(statements_without_associations,
-                                                                     keyword2entity_keys)
+            # ignore already selected statements from pattern 1 as an alternative here
+            statements_without_associations = [stmt
+                                               for stmt in statements_without_associations
+                                               if stmt.relation not in pattern1_relations]
+            specific_pattern2 = self.greedy_get_most_frequent_statements(statements_without_associations,
+                                                                         keyword2entity_keys)
+        else:
+            # there won't be a second pattern if we did not find a first one
+            specific_pattern2 = None
 
         statements_association_only = [stmt for stmt in statements if stmt.relation == ASSOCIATED]
         associated_pattern = self.greedy_get_most_frequent_statements(statements_association_only, keyword2entity_keys)
@@ -195,7 +201,7 @@ class Keyword2GraphTranslation:
         generated_patterns = []
         for pattern in [specific_pattern1, specific_pattern2, associated_pattern]:
             # skip empty patterns
-            if len(pattern.selected_statements) == 0:
+            if not pattern or len(pattern.selected_statements) == 0:
                 continue
 
             self.enrich_pattern_with_variables(keywords2variables, pattern, indexed_documents)
