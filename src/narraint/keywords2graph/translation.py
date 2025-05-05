@@ -38,6 +38,12 @@ class GeneratedStatement:
         self.keyword1 = keyword1
         self.keyword2 = keyword2
 
+    def __str__(self):
+        return f"<{self.keyword1}, <{self.statement.relation}, {self.keyword2}>"
+
+    def __repr__(self):
+        return str(self)
+
 
 class GeneratedPattern:
 
@@ -52,6 +58,12 @@ class GeneratedPattern:
         for stmt in self.selected_statements:
             pattern_data.append((stmt.keyword1, stmt.statement.relation, stmt.keyword2))
         return pattern_data
+
+    def __str__(self):
+        return str([str(s) for s in self.selected_statements])
+
+    def __repr__(self):
+        return str(self)
 
 
 class Keyword2GraphTranslation:
