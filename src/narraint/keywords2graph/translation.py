@@ -39,7 +39,7 @@ class GeneratedStatement:
         self.keyword2 = keyword2
 
     def __str__(self):
-        return f"<{self.keyword1}, <{self.statement.relation}, {self.keyword2}>"
+        return f"<{self.keyword1}, {self.statement.relation}, {self.keyword2}>"
 
     def __repr__(self):
         return str(self)
