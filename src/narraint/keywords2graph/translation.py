@@ -288,9 +288,9 @@ class Keyword2GraphTranslation:
                                                                                                       self.discovery.corpus.collections)
         collection2count = {k: len(v) for k, v in collection2ids.items()}
         logging.info(f'Compute patterns from following documents: {collection2count}')
-        allowed_entitykeys = set()
+        allowed_entity_keys = set()
         for entitykeys in keyword2entity_keys.values():
-            allowed_entitykeys.update(entitykeys)
+            allowed_entity_keys.update(entitykeys)
 
         session = SessionExtended.get()
         # retrieve indexed documents
@@ -322,7 +322,7 @@ class Keyword2GraphTranslation:
                                                                                     document_ids=ids,
                                                                                     document_collection=collection))
 
-        statements = self.get_statements_ranked_by_frequency(indexed_documents, allowed_entitykeys)
+        statements = self.get_statements_ranked_by_frequency(indexed_documents, allowed_entity_keys)
         statements_without_associations = [stmt for stmt in statements if stmt.relation != ASSOCIATED]
 
         specific_pattern1 = self.greedy_get_most_frequent_statements(statements_without_associations,
