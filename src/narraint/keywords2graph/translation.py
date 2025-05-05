@@ -132,11 +132,16 @@ class Keyword2GraphTranslation:
                                                                                     document_collection=collection))
         return indexed_documents
 
-    def translate_keywords(self, keyword_lists: List[str]):
+    def translate_keywords(self, keyword_lists: List[str]) -> List[GeneratedPattern]:
         """
-
-        :param keyword_lists:
-        :return:
+        Translates a list of keyword lists into a list of generated patterns
+        1. Retrieve a the set of documents that contain all searched entities
+        2. Rank statements between the specified entities by their frequency
+        3. Generate patterns based on their frequency (most frequent first)
+        4. Generate two specific patterns and one associated-based pattern
+        5. Enrich patterns if variables were used / searched
+        :param keyword_lists: a list of strings
+        :return: a list of generated patterns
         """
 
         # Step 1: divide keywords into entities and variables
