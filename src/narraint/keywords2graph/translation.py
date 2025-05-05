@@ -19,6 +19,14 @@ from narrant.entitylinking.enttypes import TARGET, GENE
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 
+class VariableTypeNotSupportedError(Exception):
+    pass
+
+class TwoEntitiesRequiredError(Exception):
+    pass
+
+class NoDocumentsFoundError(Exception):
+    pass
 
 class Keyword2GraphTranslation:
 
@@ -44,13 +52,16 @@ class Keyword2GraphTranslation:
                 var_type = VAR_TYPE.search(list(entities)[0].entity_id)
                 if var_type:
                     ms_type = var_type.group(1)
-                    ms_type = self.translation.variable_type_mappings[ms_type.lower()]
-                    if ms_type == TARGET:
-                        ms_type = GENE
+                    try:
+                        ms_type = self.translation.variable_type_mappings[ms_type.lower()]
+                        if ms_type == TARGET:
+                            ms_type = GENE
+                        keywords2variables[keywords] = ms_type
+                    except KeyError:
+                        raise VariableTypeNotSupportedError()
                 else:
-                    # We have the type ALL ->
-                    ms_type = "All"
-                keywords2variables[keywords] = ms_type
+                    raise VariableTypeNotSupportedError()
+
             else:
                 searched_entity_terms.append(keywords)
 
@@ -95,7 +106,7 @@ class Keyword2GraphTranslation:
                                                                                     document_collection=collection))
         return indexed_documents
 
-    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
+    def translate_keywords(self, keyword_lists: List[str]):
         """
 
         :param keyword_lists:
@@ -105,6 +116,9 @@ class Keyword2GraphTranslation:
         # Step 1: divide keywords into entities and variables
         keywords2variables, searched_entity_terms = self.split_variables_and_entities(keyword_lists)
 
+        if len(searched_entity_terms) < 2:
+            raise TwoEntitiesRequiredError(f'At least two entities are required. Given: {searched_entity_terms}')
+
         # Step 2: discovery relevant documents that contain all searched entities
         collection2ids, keyword2entity_keys = self.discovery.retrieve_relevant_documents_for_concepts(
             searched_entity_terms,
@@ -112,6 +126,10 @@ class Keyword2GraphTranslation:
 
         # Step 3: retrieve the latest k indexed documents that contain all searched entities
         indexed_documents = self.retrieve_latest_indexed_documents(collection2ids)
+
+        # we might not have any documents
+        if len(indexed_documents) == 0:
+            raise NoDocumentsFoundError(f"Entities {searched_entity_terms} do not co-occurr together")
 
         # Step 4: identify statements that contain one of the searched entities as subject/object
         # sort statements by their frequency

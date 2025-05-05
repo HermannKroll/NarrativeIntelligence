@@ -32,7 +32,8 @@ from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.keywords2graph.translation import Keyword2GraphTranslation
+from narraint.keywords2graph.translation import Keyword2GraphTranslation, NoDocumentsFoundError, \
+    TwoEntitiesRequiredError, VariableTypeNotSupportedError
 from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
@@ -1395,8 +1396,14 @@ def get_keyword_search_request(request):
                 keywords = keywords.split("_AND_")
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
-
-                json_data = View().keyword2graph.translate_keywords(keywords)
+                try:
+                    json_data = View().keyword2graph.translate_keywords(keywords)
+                except NoDocumentsFoundError:
+                    return JsonResponse(status=500, data=dict(reason="No documents containing all entities were found."))
+                except TwoEntitiesRequiredError:
+                    return JsonResponse(status=500, data=dict(reason="At least two entities are required."))
+                except VariableTypeNotSupportedError as e:
+                    return JsonResponse(status=500, data=dict(reason=f"Variable type not supported: {e}"))
                 # json_data = [r.to_json_data() for r in possible_queries]
                 # This is the format
                 # json_data = [

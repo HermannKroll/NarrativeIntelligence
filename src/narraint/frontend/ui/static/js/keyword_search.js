@@ -112,7 +112,7 @@ async function keywordSearch() {
 
     const keywordsString = keywords.join("_AND_")
     if (keywordsString === "") {
-        showAlert("Empty input. Provide keywords to search!");
+        showKeywordSearchAlert("Empty input. Provide keywords to search!");
         return;
     }
 
@@ -146,14 +146,14 @@ async function keywordSearch() {
             queryGraphContainer.classList.toggle('d-none', false);
         })
         .catch((e) => {
-            showAlert(e);
+            showKeywordSearchAlert(e);
         })
         .finally(() => {
             hideLoadingScreen();
         });
 }
 
-function showAlert(message) {
+function showKeywordSearchAlert(message) {
     hideLoadingScreen();
     const inputAlert = document.querySelector('#input_alert');
     inputAlert.classList.toggle('d-none', false);
