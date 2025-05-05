@@ -35,7 +35,7 @@ class SchemaSupportGraph:
         for row in query:
             key = (row.subject_type, row.relation, row.object_type)
             self.spo2support[key] = row.support
-            self.relations = row.relation
+            self.relations.add(row.relation)
             self.entity_types.add(row.subject_type)
             self.entity_types.add(row.object_type)
 
