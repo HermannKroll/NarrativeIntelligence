@@ -1,10 +1,9 @@
 import copy
 import itertools
 import logging
-import random
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Set
+from typing import List, Set, Tuple, Dict
 
 from kgextractiontoolbox.document.narrative_document import StatementExtraction
 from narraint.backend.database import SessionExtended
@@ -15,7 +14,8 @@ from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
 from narraint.queryengine.result import QueryDocumentResult
-from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, IndexedDocument
+from narraint.ranking.indexed_document import retrieve_indexed_documents_from_database_small, IndexedDocument, \
+    ScoredDocumentStatement
 from narraint.ranking.ranking import PublicationDateRank
 from narrant.entity.entity import Entity, get_unique_entity_key
 from narrant.entitylinking.enttypes import DOSAGE_FORM
@@ -256,17 +256,13 @@ class Keyword2GraphTranslation:
 
         return results
 
-    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
+    def split_variables_and_entities(self, keyword_lists: List[str]) -> Tuple[List[str], List[str]]:
         """
-
-        :param keyword_lists:
-        :return:
+        Identifies which keywords belong to entities or to variables
+        :param keyword_lists: a list of keyword lists
+        :return: keywords that belong to variables, keywords that belong to entities
         """
-
-        # Step 1: divide keywords into entities and variables
-        keyword_lists = list(keyword_lists)
-        variables = []
-        searched_entity_terms = []
+        variables, searched_entity_terms = [], []
         for keywords in keyword_lists:
             entities = self.translation.convert_text_to_entity(keywords)
             logging.debug(f'Found entities: {entities}')
@@ -283,18 +279,18 @@ class Keyword2GraphTranslation:
             else:
                 searched_entity_terms.append(keywords)
 
-        # Step 2: find common patterns between entities
-        collection2ids, keyword2entity_keys = self.discovery.retrieve_relevant_documents_for_concepts(searched_entity_terms,
-                                                                                                      self.discovery.corpus.collections)
+        return variables, searched_entity_terms
+
+    def retrieve_latest_indexed_documents(self, collection2ids) -> List[IndexedDocument]:
+        """
+        Retrieve latest TOP_NEWEST_DOCUMENTS indexed documents
+        :param collection2ids: a dict mapping collections to document ids
+        :return: a list of indexed documents
+        """
         collection2count = {k: len(v) for k, v in collection2ids.items()}
         logging.info(f'Compute patterns from following documents: {collection2count}')
-        allowed_entity_keys = set()
-        for entitykeys in keyword2entity_keys.values():
-            allowed_entity_keys.update(entitykeys)
 
         session = SessionExtended.get()
-        # retrieve indexed documents
-        indexed_documents = list()
         no_of_documents = sum(collection2count.values())
 
         # if more than k documents are retrieved, we reduce the set of documents to the latest k ones
@@ -303,9 +299,9 @@ class Keyword2GraphTranslation:
             doc_results = list()
             for collection, document_ids in collection2ids.items():
                 doc_results.extend([QueryDocumentResult(document_id=doc_id, title="", authors="", journals="",
-                                                    publication_year=0, publication_month=0, var2substitution={},
-                                                    confidence=0.0, position2provenance_ids={},
-                                                    document_collection=collection) for doc_id in document_ids])
+                                                        publication_year=0, publication_month=0, var2substitution={},
+                                                        confidence=0.0, position2provenance_ids={},
+                                                        document_collection=collection) for doc_id in document_ids])
 
             # apply filter
             doc_results = QueryEngine.enrich_document_results_with_metadata(doc_results, collection2ids)
@@ -317,14 +313,37 @@ class Keyword2GraphTranslation:
                 collection2ids[res.document_collection].add(res.document_id)
 
         # now retrieve the actual document data
+        indexed_documents = list()
         for collection, ids in collection2ids.items():
             indexed_documents.extend(retrieve_indexed_documents_from_database_small(session=session,
                                                                                     document_ids=ids,
                                                                                     document_collection=collection))
+        return indexed_documents
 
-        statements = self.get_statements_ranked_by_frequency(indexed_documents, allowed_entity_keys)
+    def translate_keywords(self, keyword_lists: List[str]) -> [SupportedGraphPattern]:
+        """
+
+        :param keyword_lists:
+        :return:
+        """
+
+        # Step 1: divide keywords into entities and variables
+        variables, searched_entity_terms = self.split_variables_and_entities(keyword_lists)
+
+        # Step 2: discovery relevant documents that contain all searched entities
+        collection2ids, keyword2entity_keys = self.discovery.retrieve_relevant_documents_for_concepts(
+            searched_entity_terms,
+            self.discovery.corpus.collections)
+
+        # Step 3: retrieve the latest k indexed documents that contain all searched entities
+        indexed_documents = self.retrieve_latest_indexed_documents(collection2ids)
+
+        # Step 4: identify statements that contain one of the searched entities as subject/object
+        # sort statements by their frequency
+        statements = self.get_statements_ranked_by_frequency(indexed_documents, keyword2entity_keys)
+        # Find all statements that do not have an associated relation
+
         statements_without_associations = [stmt for stmt in statements if stmt.relation != ASSOCIATED]
-
         specific_pattern1 = self.greedy_get_most_frequent_statements(statements_without_associations,
                                                                      keyword2entity_keys)
         pattern1_statements = [s[0] for s in specific_pattern1]
@@ -337,12 +356,6 @@ class Keyword2GraphTranslation:
 
         statements_association_only = [stmt for stmt in statements if stmt.relation == ASSOCIATED]
         associated_pattern = self.greedy_get_most_frequent_statements(statements_association_only, keyword2entity_keys)
-
-
-        print("A")
-        # for entity_list in
-        # Step 3: use schema graph to add variables to the search
-        # Step 4: apply different selection strategies
 
 
         result = []
@@ -387,7 +400,15 @@ class Keyword2GraphTranslation:
         # so we ignore that pattern and just return an empty one
         return []
 
-    def get_statements_ranked_by_frequency(self, documents: List[IndexedDocument], allowed_entity_keys: Set[str]):
+    @staticmethod
+    def get_statements_ranked_by_frequency(documents: List[IndexedDocument],
+                                           keyword2entity_keys: Dict[str, Set[str]]) -> List[ScoredDocumentStatement]:
+        # first identify all allowed entity keys
+        allowed_entity_keys = set()
+        for entity_keys in keyword2entity_keys.values():
+            allowed_entity_keys.update(entity_keys)
+
+        # next find statements that have one of the searched entities as subject or object
         statement2frequency = dict()
         key2statement = dict()
         for indexed_document in documents:
@@ -407,7 +428,7 @@ class Keyword2GraphTranslation:
                 else:
                     statement2frequency[statement_key] += scored_statement.frequency
 
-        # sort by highest score
+        # sort by highest frequency
         statements = sorted(statement2frequency.items(), key=lambda x: x[1], reverse=True)
         return [key2statement[key] for key, _ in statements]
 
