@@ -18,7 +18,7 @@ from narraint.ranking.indexed_document import retrieve_indexed_documents_from_da
     ScoredDocumentStatement
 from narraint.ranking.ranking import PublicationDateRank
 from narrant.entity.entity import Entity, get_unique_entity_key
-from narrant.entitylinking.enttypes import DOSAGE_FORM
+from narrant.entitylinking.enttypes import DOSAGE_FORM, TARGET, GENE
 
 ASSOCIATED = PREDICATE_ASSOCIATED
 
@@ -225,7 +225,7 @@ class Keyword2GraphTranslation:
                     ms_type = var_type.group(1)
                 else:
                     # We have the type ALL ->
-                    ms_type = "All"
+                    raise KeyError('The All-type for variables is not supported')
             else:
                 # Get type from most supported entity
                 ms_type = Keyword2GraphTranslation.greedy_find_most_supported_entity_type(entities)
@@ -262,7 +262,7 @@ class Keyword2GraphTranslation:
         :param keyword_lists: a list of keyword lists
         :return: keywords that belong to variables, keywords that belong to entities
         """
-        variables, searched_entity_terms = [], []
+        keywords2variables, searched_entity_terms = dict(), []
         for keywords in keyword_lists:
             entities = self.translation.convert_text_to_entity(keywords)
             logging.debug(f'Found entities: {entities}')
@@ -272,14 +272,17 @@ class Keyword2GraphTranslation:
                 var_type = VAR_TYPE.search(list(entities)[0].entity_id)
                 if var_type:
                     ms_type = var_type.group(1)
+                    ms_type = self.translation.variable_type_mappings[ms_type.lower()]
+                    if ms_type == TARGET:
+                        ms_type = GENE
                 else:
                     # We have the type ALL ->
                     ms_type = "All"
-                variables.append(ms_type)
+                keywords2variables[keywords] = ms_type
             else:
                 searched_entity_terms.append(keywords)
 
-        return variables, searched_entity_terms
+        return keywords2variables, searched_entity_terms
 
     def retrieve_latest_indexed_documents(self, collection2ids) -> List[IndexedDocument]:
         """
@@ -328,7 +331,7 @@ class Keyword2GraphTranslation:
         """
 
         # Step 1: divide keywords into entities and variables
-        variables, searched_entity_terms = self.split_variables_and_entities(keyword_lists)
+        keywords2variables, searched_entity_terms = self.split_variables_and_entities(keyword_lists)
 
         # Step 2: discovery relevant documents that contain all searched entities
         collection2ids, keyword2entity_keys = self.discovery.retrieve_relevant_documents_for_concepts(
@@ -357,12 +360,13 @@ class Keyword2GraphTranslation:
         statements_association_only = [stmt for stmt in statements if stmt.relation == ASSOCIATED]
         associated_pattern = self.greedy_get_most_frequent_statements(statements_association_only, keyword2entity_keys)
 
-
         result = []
         for pattern in [specific_pattern1, specific_pattern2, associated_pattern]:
             # skip empty patterns
             if len(pattern) == 0:
                 continue
+
+            self.enrich_pattern_with_variable(keywords2variables, pattern, indexed_documents)
 
             pattern_data = []
             for stmt, keyword1, keyword2 in pattern:
@@ -431,6 +435,40 @@ class Keyword2GraphTranslation:
         # sort by highest frequency
         statements = sorted(statement2frequency.items(), key=lambda x: x[1], reverse=True)
         return [key2statement[key] for key, _ in statements]
+
+    def enrich_pattern_with_variable(self, keywords2variables, pattern, documents: List[IndexedDocument]):
+        so2relations = defaultdict(set)
+        spo2support = defaultdict(int)
+        for document in documents:
+            for statement in document.scored_statements:
+                so2relations[(statement.subject_type, statement.object_type)].add(statement.relation)
+                spo2support[(statement.subject_type, statement.relation, statement.object_type)] += statement.frequency
+
+        # add the most likely statement for each var type in our set of searched variable types
+        for var_keywords, var_type in keywords2variables.items():
+            candidates = []
+            for statement, kw1, kw2 in pattern:
+                for keywords, statement_type in [(kw1, statement.subject_type), (kw2, statement.object_type)]:
+                    # use statement type as subject to connect variable to
+                    for relation in so2relations[(statement_type, var_type)]:
+                        candidates.append((statement_type, keywords, relation, var_type, var_keywords,
+                                           spo2support[(statement_type, relation, var_type)]))
+
+                    # use statement type as object to connect variable to
+                    for relation in so2relations[(var_type, statement_type)]:
+                        candidates.append((var_type, var_keywords, relation, statement_type, keywords,
+                                           spo2support[(var_type, relation, statement_type)]))
+
+            # sort by estimated support descending
+            candidates.sort(key=lambda x: x[5], reverse=True)
+
+            # add the most likely variable connection
+            best_candidate = candidates[0]
+            # pattern consists of triples ( statement, keywords1, keywords2)
+            pattern.append((StatementExtraction(subject_id="", subject_type=best_candidate[0], subject_str="",
+                                               predicate="", relation=best_candidate[2],
+                                               object_id="", object_type=best_candidate[3], object_str="",
+                                               sentence_id=0), best_candidate[1], best_candidate[4]))
 
 
 def main():
