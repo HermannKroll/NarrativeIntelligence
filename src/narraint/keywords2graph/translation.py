@@ -6,7 +6,6 @@ from typing import List, Set, Tuple, Dict
 from kgextractiontoolbox.document.narrative_document import StatementExtraction
 from narraint.backend.database import SessionExtended
 from narraint.entity.query_translation import QueryTranslation
-from narraint.keywords2graph.schema_support_graph import SchemaSupportGraph
 from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.query_hints import PREDICATE_ASSOCIATED, ENTITY_TYPE_VARIABLE, VAR_TYPE
@@ -39,6 +38,7 @@ class GeneratedStatement:
         self.keyword1 = keyword1
         self.keyword2 = keyword2
 
+
 class GeneratedPattern:
 
     def __init__(self):
@@ -57,7 +57,6 @@ class GeneratedPattern:
 class Keyword2GraphTranslation:
 
     def __init__(self):
-        self.graph: SchemaSupportGraph = SchemaSupportGraph()
         self.translation: QueryTranslation = QueryTranslation()
         self.discovery: PatternDiscovery = PatternDiscovery()
         self.date_ranker = PublicationDateRank()
