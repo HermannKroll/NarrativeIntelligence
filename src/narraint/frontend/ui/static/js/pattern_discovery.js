@@ -143,7 +143,7 @@ async function searchPatternDiscovery(query = undefined) {
     }
 
     if (conceptString === "") {
-        showAlert("Empty input. Provide keywords to search!");
+        showPatternDiscoveryAlert("Empty input. Provide keywords to search!");
         return;
     }
 
@@ -172,7 +172,7 @@ async function searchPatternDiscovery(query = undefined) {
                 })
             }
         })
-        .catch((e) => showAlert(e));
+        .catch((e) => showPatternDiscoveryAlert(e));
 
     // return early if the response failed
     if (!data) {
@@ -233,11 +233,10 @@ function createKnowledgeGraph(concept2statements, parentDiv) {
 }
 
 function updateKnowledgeGraph() {
-    const topK = document.getElementById("path-concepts-slider").value;
-    document.getElementById("path-concepts-num-edges").innerText = `Top ${topK}`;
+    const topK = parseInt(document.getElementById("path-concepts-slider").value);
+    document.getElementById("path-concepts-num-edges").innerText = `Top ${topK - 1}`;
     const selectedEntityTypes = getSelectedEntityTypes();
     console.log(selectedEntityTypes);
-
     discoveryGraph.physics.physicsEnabled = true;
     discoveryGraphNodes.forEach((node) => {
         if (node.index === 0)
@@ -261,7 +260,7 @@ function updateKnowledgeGraph() {
     centerPatternDiscovery();
 }
 
-function showAlert(message) {
+function showPatternDiscoveryAlert(message) {
     hideLoadingScreen();
     const inputAlert = document.querySelector('#alert-path-concepts');
     inputAlert.classList.toggle('d-none', false);

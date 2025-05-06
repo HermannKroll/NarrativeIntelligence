@@ -182,7 +182,7 @@
                             <div class="input-group mx-auto mb-auto me-sm-0 w-auto p-1 h-fc justify-content-end">
                                     <span class="input-group-text ml-auto" id="path-concepts-num-edges">Top 10</span>
                                     <div class="input-group-text">
-                                        <input type="range" class="form-range mx-0 mx-sm-0" id="path-concepts-slider" min="1" max="15" value="6" step="1" oninput="updateKnowledgeGraph()">
+                                        <input type="range" class="form-range mx-0 mx-sm-0" id="path-concepts-slider" min="1" max="51" value="6" step="1" oninput="updateKnowledgeGraph()">
                                     </div>
                                     <!--<button class="btn btn-secondary" onclick="clearPatternDiscovery()">Clear Selection</button>-->
                                     <button class="btn btn-secondary" onclick="centerPatternDiscovery()">
@@ -834,7 +834,7 @@
     <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
     <script src="{% static 'js/keyword_search.js' %}?version=9" type="text/javascript"></script>
     <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
-    <script src="{% static 'js/pattern_discovery.js' %}?version=4" type="text/javascript"></script>
+    <script src="{% static 'js/pattern_discovery.js' %}?version=5" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";

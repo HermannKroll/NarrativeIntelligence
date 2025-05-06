@@ -35,7 +35,7 @@ def pairwise(iterable):
 class PatternDiscovery:
     TOP_NEWEST_DOCUMENTS = 1000
     TOP_ENTITIES = 1
-    MAX_EDGES_PER_CONCEPT = 15
+    MAX_EDGES_PER_CONCEPT = 50
 
     def __init__(self):
         self.tagger = EntityTagger()
