@@ -78,7 +78,8 @@ class TagInvertedIndex(Extended, DatabaseTable):
         :return: dict mapping document collections to document ids in which one of the entities was detected
         """
         if len(entity_types) == 1 and len(entity_ids) == 1:
-            return TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_ids[0], entity_types[0])
+            return TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_ids[0], entity_types[0],
+                                                                     document_collections=document_collections)
 
         collection2ids = dict()
         query = session.query(TagInvertedIndex.document_collection, TagInvertedIndex.document_ids)
