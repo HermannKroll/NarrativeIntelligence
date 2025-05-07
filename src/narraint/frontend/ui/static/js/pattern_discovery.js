@@ -352,6 +352,7 @@ function createKnowledgeGraphElements(concept2statements) {
                 from: subjectName,
                 to: objectName,
                 color: '#848484',
+                title: "Search in Narrative Service",
             });
         }
         index = 1;
