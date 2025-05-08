@@ -50,13 +50,6 @@ Table Entity_Keywords {
   keyword_data string
 }
 
-Table Schema_Support_Graph_Info {
-  subject_type string [primary key]
-  relation string [primary key]
-  object_type string [primary key]
-  support int
-}
-
 Table Drug_Disease_Trial_Phase {
   drug string [primary key]
   disease string [primary key]

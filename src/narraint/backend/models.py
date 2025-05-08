@@ -187,15 +187,6 @@ class EntityKeywords(Extended, DatabaseTable):
         session.commit()
 
 
-class SchemaSupportGraphInfo(Extended, DatabaseTable):
-    __tablename__ = "schema_support_graph_info"
-
-    subject_type = Column(String, nullable=False, primary_key=True)
-    relation = Column(String, nullable=False, primary_key=True)
-    object_type = Column(String, nullable=False, primary_key=True)
-    support = Column(Integer, nullable=False)
-
-
 class DrugDiseaseTrialPhase(Extended, DatabaseTable):
     __tablename__ = "drug_disease_trial_phase"
 
