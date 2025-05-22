@@ -6,11 +6,25 @@
     "priority": 10,
     "url": "https://pubmed.ncbi.nlm.nih.gov/"
   },
-  {
-    "collection": "ZBMed",
-    "label": "Covid 19 Pre-Prints via ZBMED",
-    "selected": false,
-    "priority": 6,
-    "url": "https://preview.zbmed.de/"
+   {
+    "collection": "Preprints",
+    "label": "Preprints",
+    "selected": true,
+    "priority": 9,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/"
+  },
+   {
+    "collection": "Clinical Trials",
+    "label": "ClinicalTrials",
+    "selected": true,
+    "priority": 8,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/"
+  },
+   {
+    "collection": "Patents",
+    "label": "Patents",
+    "selected": true,
+    "priority": 7,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/"
   }
 ]
