@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 
 from narraint.config import LOG_DIR
 from narraint.queryengine.log_statistics import create_dictionary_of_logs
+from narraint.queryengine.logger import QueryLogger
+
+# ensure that all log directories are created
+QueryLogger()
 
 log_path = os.path.join(LOG_DIR, "daily_logs_cache")
 if not os.path.exists(log_path):
