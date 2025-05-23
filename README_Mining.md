@@ -272,3 +272,22 @@ However, if you just need to create the data model + tables without doing anythi
 ```
 python src/narraint/backend/create_database.py
 ```
+# Update Pipeline
+
+Update code
+```
+cd ~/NarrativeIntelligence/
+git pull --recurse-submodules
+```
+
+Activate conda environment
+```
+conda activate narrant
+```
+
+Upgrade Python requirements
+```
+pip install --upgrade -r ~/NarrativeIntelligence/requirements.txt
+pip install --upgrade -r ~/NarrativeIntelligence/lib/NarrativeAnnotation/requirements.txt
+pip install --upgrade -r ~/NarrativeIntelligence/lib/KGExtractionToolbox/requirements.txt
+```
