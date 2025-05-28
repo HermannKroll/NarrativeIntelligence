@@ -18,12 +18,16 @@ ALLOWED_HOSTS = [
     "www.narrative.pubpharm.de",
     "narrative.pubpharm.de",
     "drugoverviews.pubpharm.de",
-    "drugoverview.pubpharm.de"
+    "drugoverview.pubpharm.de",
+    "www.beta.narrative.pubpharm.de",
+    "beta.narrative.pubpharm.de",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://narrative.pubpharm.de',
-    'https://www.narrative.pubpharm.de'
+    'https://www.narrative.pubpharm.de',
+    'https://beta.narrative.pubpharm.de',
+    'https://www.beta.narrative.pubpharm.de'
 ]
 
 STATIC_ROOT = "/var/www/static"
