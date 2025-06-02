@@ -169,6 +169,20 @@ function logEntitySearch(entity) {
     fetch(request).catch(e => console.log(e))
 }
 
-refresh = async function () {
-    await loadOverviewData()
-}
+refresh = async function (token) {
+    if (token !== currentRefreshToken) {
+        console.warn("Ignored outdated refresh call.");
+        return;
+    }
+
+    try {
+        await loadOverviewData();
+        if (token !== currentRefreshToken) {
+            console.warn("Ignored outdated refresh after load.");
+            return;
+        }
+
+    } catch (error) {
+        console.error("Error while refreshing data:", error);
+    }
+};

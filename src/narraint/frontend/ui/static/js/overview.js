@@ -62,6 +62,8 @@ let currentDTDnode = "";
  */
 let networkData = null;
 
+let currentRefreshToken = 0;
+
 const VISIBLE_ELEMENTS = 50;
 
 /**
@@ -186,11 +188,10 @@ async function loadOverviewData() {
         const length = data["length"];
         if (length <= 0) {
             doneLoading(prefix);
-            continue;
         }
         overviews[prefix].fullData = data;
         overviews[prefix].visibleData = data;
-        overviews[prefix].count = data[0].count;
+        overviews[prefix].count = data?.[0]?.count ?? 0;
 
         document.getElementById(prefix + "Link").innerText = length;
 
@@ -407,8 +408,6 @@ function getLinkToQuery(prefix, item) {
     const predicate = overviews[prefix].predicate;
     const object = item.name.split("//")[0].split(' ').join('+');
     const dataSources = getSelectedDataSources().join(";");
-    console.log(dataSources);
-    console.log(`${url_query}?query="${subject}"+${predicate}+"${object}"&data_source=${dataSources}`)
     return `${url_query}?query="${subject}"+${predicate}+"${object}"&data_source=${dataSources}`;
 }
 
@@ -969,12 +968,16 @@ function getSelectedDataSources() {
 }
 
 
-let refresh = async () => {
+let refresh = async (token) => {
     console.warn("refresh not defined");
 };
 
 async function refreshAllData() {
-    await refresh();
+    for (let prefix in overviews) {
+        startLoading(prefix);
+    }
+    const token = ++currentRefreshToken;
+    await refresh(token);
 }
 
 /**

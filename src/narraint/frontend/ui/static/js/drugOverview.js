@@ -435,8 +435,7 @@ async function adveDataCallback() {
     overviews[prefix].fullData = altData;
     overviews[prefix].visibleData = altData;
     overviews[prefix].altData = fullData;
-
-    overviews[prefix].count = fullData[0].count;
+    overviews[prefix].count = fullData?.[0]?.count ?? 0;
 }
 
 /**
@@ -529,8 +528,24 @@ async function closeOverviewForwarding(forward = false) {
     document.getElementById("searched_drug").innerHTML = "";
 }
 
-refresh = async function () {
-    await loadOverviewData()
-        .then(() => createNetworkGraph())
-        .catch((e) => console.log(e))
-}
+refresh = async function (token) {
+    for (let prefix in overviews) {
+        startLoading(prefix);
+    }
+    startLoading("drugNetwork");
+    if (token !== currentRefreshToken) {
+        console.warn("Ignored outdated refresh call.");
+        return;
+    }
+
+    try {
+        await loadOverviewData();
+        if (token !== currentRefreshToken) {
+            console.warn("Ignored outdated refresh after load.");
+            return;
+        }
+        await createNetworkGraph();
+    } catch (error) {
+        console.error("Error while refreshing data:", error);
+    }
+};
