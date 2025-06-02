@@ -755,6 +755,8 @@ function initFromURLQueryParams() {
             initRecommendSearchFromURL(query, query_col);
         } else if (search_method === "discovery") {
             initPatternDiscoveryFromURL(query);
+        } else if (search_method === "keyword") {
+            initKeywordSearchFromURL(query);
         } else {
             switchTab("#search-type-query");
             initQueryBuilderFromString(query);
@@ -874,8 +876,13 @@ function updateURLParameters(parameters) {
         url.searchParams.delete("visualization");
     }
 
-    url.searchParams.set("sort_by", parameters["sort_by"]);
-    url.searchParams.set("sort_order", parameters["sort_order"]);
+    if (current_search_method !== "recommender"  && current_search_method !== "keyword") {
+        url.searchParams.set("sort_by", parameters["sort_by"]);
+        url.searchParams.set("sort_order", parameters["sort_order"]);
+    } else {
+        url.searchParams.delete("sort_by");
+        url.searchParams.delete("sort_order");
+    }
 
     if (parameters.hasOwnProperty("start_pos") && parameters["start_pos"] !== 0) {
         url.searchParams.set("start_pos", parameters["start_pos"]);
@@ -2295,7 +2302,7 @@ const previewContainer = document.getElementById('document_preview');
 /**
  * The function sets the help settings for the keyword search tab.
  */
-function setKeywordSearchHelp() {
+function setQueryBuilderHelp() {
     current_search_method = 'query_builder';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
@@ -2317,7 +2324,7 @@ function setKeywordSearchHelp() {
 /**
  * The function sets the help settings for the query builder tab.
  */
-function setQueryBuilderHelp() {
+function setKeywordSearchHelp() {
     current_search_method = 'keyword';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "#";

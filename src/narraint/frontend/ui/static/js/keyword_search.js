@@ -63,11 +63,6 @@ window.addEventListener("DOMContentLoaded", () => {
     })
 });
 
-
-function initKeywordSearchFromURL() {
-
-}
-
 function keywordAdd() {
     const keywordList = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector('#search_input');
@@ -98,23 +93,31 @@ function keywordAdd() {
     keywordInput.value = "";
 }
 
-async function keywordSearch() {
+async function keywordSearch(keywordsString = null) {
     const queryGraphContainer = document.querySelector('#query_graph_container');
     const keywordDiv = document.querySelector("#keyword-list");
     const keywordInput = document.querySelector("#search_input");
     const keywords = [];
-    if (keywordInput.value.trim() !== "")
-        keywords.push(keywordInput.value);
 
-    // Substring because the tailing X should be removed (X do remove the keyword)
-    keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
-        n.innerText.substring(0, n.innerText.length - 1).replace('\n', '').trim()));
+    if (keywordsString === null) {
+        if (keywordInput.value.trim() !== "")
+            keywords.push(keywordInput.value);
 
-    const keywordsString = keywords.join("_AND_")
+        // Substring because the tailing X should be removed (X do remove the keyword)
+        keywords.push(...Array.from(keywordDiv.childNodes).map((n) =>
+            n.innerText.substring(0, n.innerText.length - 1).replace('\n', '').trim()));
+
+        keywordsString = keywords.join("_AND_");
+    }
+
     if (keywordsString === "") {
         showKeywordSearchAlert("Empty input. Provide keywords to search!");
         return;
     }
+
+    const parameters = getInputParameters(keywordsString);
+    logInputParameters(parameters);
+    updateURLParameters(parameters);
 
     queryGraphContainer.classList.toggle('d-none', true);
     showLoadingScreen();
@@ -159,6 +162,11 @@ function showKeywordSearchAlert(message) {
     inputAlert.classList.toggle('d-none', false);
     inputAlert.innerText = message;
     setTimeout(() => inputAlert.classList.toggle('d-none', true), 5000);
+}
+
+async function initKeywordSearchFromURL(query) {
+    switchTab("#search-type-graph");
+    await keywordSearch(query);
 }
 
 /**
