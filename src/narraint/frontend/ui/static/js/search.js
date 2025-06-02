@@ -358,11 +358,11 @@ function sortStrategyUpdate(queryHasVariables) {
         // disable default filter methods since they
         // are not supported with variables
         filterTime.classList.toggle("d-none", true);
-        filterGraph.classList.toggle("d-none", true);
+        if (filterGraph) filterGraph.classList.add("d-none");
         filterFreq.classList.toggle("d-none", false);
     } else {
         filterTime.classList.toggle("d-none", false);
-        filterGraph.classList.toggle("d-none", false);
+        if (filterGraph) filterGraph.classList.remove("d-none");
         filterFreq.classList.toggle("d-none", true);
     }
 }
@@ -379,10 +379,9 @@ function sortStrategyGet() {
 
     if (filterTime.selected)
         return "time";
-    else if (filterGraph.selected)
-        return "graph";
     else if (filterFreq.selected)
         return "freq";
+    if (filterGraph?.selected) return "graph";
     return undefined;
 }
 
@@ -396,7 +395,7 @@ function sortStrategySet(sortFilter) {
     const filterFreq = document.querySelector("#sorting-filter-freq");
 
     if (sortFilter === filterTime.value) {
-        filterGraph.selected = false;
+        if (filterGraph) filterGraph.selected = false;
         filterFreq.selected = false;
         filterTime.selected = true;
     } else if (sortFilter === filterGraph.value) {
@@ -405,7 +404,7 @@ function sortStrategySet(sortFilter) {
         filterGraph.selected = true;
     } else if (sortFilter === filterFreq.value) {
         filterTime.selected = false;
-        filterGraph.selected = false;
+        if (filterGraph) filterGraph.selected = false;
         filterFreq.selected = true;
     }
 }

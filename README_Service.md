@@ -533,3 +533,60 @@ zip -r logs_2024_01_09.zip NarrativeIntelligence/logs/* NarrativeIntelligence/fe
 ```
 
 Connect via an SFTP client or download the zip via scp. 
+
+
+# Hiding the Recommender and Pattern Discovery Functionality
+
+To hide the Recommender and Pattern Discovery functionality in the user interface, comment out the following lines of code:
+
+---
+
+### 1. Remove the "Recommender" Tab from Navigation
+
+**File:** [`search.html`](src/narraint/frontend/ui/templates/ui/search.html)  
+**Lines:** 35–38
+
+```html
+<!--
+<li class="nav-item" onclick="setUpRecommenderSearch()">
+    <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender (Beta)</a>
+</li>
+-->
+```
+
+---
+
+### 2. Remove the "Relevance (Beta)" Sorting Option
+
+**File:** [`search.html`](src/narraint/frontend/ui/templates/ui/search.html) 
+**Line:** 622
+
+```html
+<!-- <option id="sorting-filter-graph" value="graph">Relevance (Beta)</option> -->
+```
+
+---
+
+### 3. Hide the Recommender Link in the Document Listing
+
+**File:** [`search.js`](src/narraint/frontend/ui/static/js/search.js)  
+**Line:** 1559
+
+```js
+// divDoc_Body.append(divDocRecommenderLink);
+```
+
+---
+
+### 4. Remove the "Pattern Discovery" Tab from Navigation
+
+**File:** [`search.html`](src/narraint/frontend/ui/templates/ui/search.html)  
+**Lines:** 39–41
+
+```html
+<!--
+<li class="nav-item" onclick="setUpPatternDiscoverySearch()">
+    <a class="nav-link" data-bs-toggle="tab" href="#search-type-pattern-discovery" role="tab">Pattern Discovery (Beta)</a>
+</li>
+-->
+```
