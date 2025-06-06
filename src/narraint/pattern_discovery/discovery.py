@@ -225,6 +225,7 @@ class PatternDiscovery:
                     # Since the frontend ignores the relation, we need to filter for duplicate statements.
                     continue
                 concept_statements.append((subject_name, subject.entity_type, object_name, object_.entity_type))
+                known_statement_pairs.add((subject_name, object_name))
 
             concept_name, _ = self.entity_to_name(concept)
             concept2graph[concept_name] = concept_statements
