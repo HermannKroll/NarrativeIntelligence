@@ -344,16 +344,24 @@ function createKnowledgeGraphElements(concept2statements) {
         knownEntityTypes.push(entityType);
     }
 
-    for (const [_, statement] of Object.entries(concept2statements)) {
-        for (const [subjectName, subjectType, objectName, objectType] of statement) {
-            insertNodeElement(subjectName, subjectType);
-            insertNodeElement(objectName, objectType);
-            discoveryGraphEdges.add({
+    function insertEdgeElement(subjectName, objectName) {
+        discoveryGraphEdges.add({
                 from: subjectName,
                 to: objectName,
                 color: '#848484',
                 title: "Search in Narrative Service",
             });
+    }
+
+    for (const [_, statement] of Object.entries(concept2statements)) {
+        for (const [subjectName, subjectType, objectName, objectType] of statement) {
+            // skip loops
+            if (subjectName === objectName)
+                continue;
+
+            insertNodeElement(subjectName, subjectType);
+            insertNodeElement(objectName, objectType);
+            insertEdgeElement(subjectName, objectName);
         }
         index = 1;
     }
