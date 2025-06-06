@@ -1003,28 +1003,25 @@ async function buildDocumentCollectionFilter() {
     if (!collections) return;
 
     const collectionFilter = document.getElementById("collection-filter");
-    const maxPriority = Math.max(...collections.map(o => o["priority"]));
-    const maxPriorityIndex = collections.findIndex((e) => e["priority"] === maxPriority);
-
     const urlParams = new URL(window.location.href).searchParams;
     const activeDataSourceParam = urlParams.get('data_source');
     const activeDataSources = activeDataSourceParam ? activeDataSourceParam.split(";") : [];
 
-    for (const i in collections) {
-        const dc = collections[i];
-
-        const inputId = "filter_" + dc["collection"];
+    for (const collection of collections) {
+        const inputId = "filter_" + collection["collection"];
         const filterInput = document.createElement("input");
         filterInput.type = "checkbox";
         filterInput.id = inputId;
         filterInput.name = "data_source";
         filterInput.classList.add(["col-1"]);
-        filterInput.value = dc["collection"];
+        filterInput.value = collection["collection"];
 
         if (activeDataSources.length > 0) {
-            filterInput.checked = activeDataSources.includes(dc["collection"]);
+            // data source selected in url
+            filterInput.checked = activeDataSources.includes(collection["collection"]);
         } else {
-            filterInput.checked = i === maxPriorityIndex.toString();
+            // data source selected in server configuration
+            filterInput.checked = collection["selected"];
         }
 
         filterInput.onclick = async (e) => {
@@ -1033,14 +1030,14 @@ async function buildDocumentCollectionFilter() {
         };
 
         const filterHelpAnchor = document.createElement("a");
-        filterHelpAnchor.href = dc["url"];
+        filterHelpAnchor.href = collection["url"];
         filterHelpAnchor.target = "_blank";
         filterHelpAnchor.text = "Help";
 
         const filterLabel = document.createElement("label");
         filterLabel.classList.add(["col-11"]);
         filterLabel.htmlFor = inputId;
-        filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
+        filterLabel.append(collection["label"] + " (", filterHelpAnchor, ")");
 
         collectionFilter.append(filterInput, filterLabel);
     }
