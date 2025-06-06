@@ -410,7 +410,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/Chart.min.js' %}"></script>
+    <script src="{% static 'js/libraries/Chart.min.js' %}"></script>
     <script type="text/javascript">
         const URL_CONTENT_CHART_DATA = "{% url "content_data" %}";
         $("#nav_item_search").removeClass("active");

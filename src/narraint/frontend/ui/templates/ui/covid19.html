@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}">
+    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
 {% endblock %}
 
 {% block title %}Narrative Service{% endblock %}
@@ -290,10 +290,9 @@
 
         activateOverviewTracking();
     </script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/vis-network.min.js'%}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
+    <script src="{% static 'js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/libraries/async.min.js' %}"></script>
     <script src="{% static 'js/overview.js' %}?version=10" type="text/javascript"></script>
     <script src="{% static 'js/covid19.js' %}?version=6" type="text/javascript"></script>
     <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>

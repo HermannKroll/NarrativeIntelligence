@@ -46,9 +46,9 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/vis-network.min.js'%}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
+    <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
+    <script src="{% static 'js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/libraries/async.min.js' %}"></script>
     <script src="{% static 'js/paper.js' %}?version=15"></script>
     <script>
         const url_document_graph = "{% url 'document_graph' %}";
