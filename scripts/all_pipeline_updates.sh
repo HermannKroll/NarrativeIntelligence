@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LOGPATH="/root/ns_update_err.log"
+
 source ~/NarrativeIntelligence/scripts/.mailenv
 SUBJECT="Narrative Service update error"
 
@@ -27,7 +29,7 @@ UPDATE_DATE_FILE="/data/FID_Pharmazie_Services/narrative_data_update/last_update
 python3 ~/NarrativeIntelligence/src/narraint/backend/export_db_update_date.py $UPDATE_DATE_FILE --offset 14
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
@@ -43,35 +45,35 @@ fi
 
 
 # This will invoke the Clinical Trials pipeline (data will be crawled from VZG index)
-bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_WHO%20OR%20GBV_CTG" "$UPDATE_DATE" "ClinicalTrials" 2> /root/ns_update_err.log
+bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_WHO%20OR%20GBV_CTG" "$UPDATE_DATE" "ClinicalTrials" 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
 # This will invoke the Patents pipeline (data will be crawled from VZG index)
-bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_EPA" "$UPDATE_DATE" "Patents" 2> /root/ns_update_err.log
+bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_EPA" "$UPDATE_DATE" "Patents" 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
 # This will invoke the Preprints pipeline (data will be crawled from VZG index)
-bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_XAR%20OR%20GBV_XBI%20OR%20GBV_XCH%20OR%20GBV_XEN%20OR%20GBV_XRA%20OR%20techrXiv%20OR%20preprintsorg" "$UPDATE_DATE" "Preprints" 2> /root/ns_update_err.log
+bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_XAR%20OR%20GBV_XBI%20OR%20GBV_XCH%20OR%20GBV_XEN%20OR%20GBV_XRA%20OR%20techrXiv%20OR%20preprintsorg" "$UPDATE_DATE" "Preprints" 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
 # As long as we have this pipeline, we shall use data from PubTator.
 # PubTator provides additional entity annotations that are useful for our extraction pipeline
-bash ~/NarrativeAnnotation/scripts/process_pubmed_updates_for_service.sh 2> /root/ns_update_err.log
+bash ~/NarrativeAnnotation/scripts/process_pubmed_updates_for_service.sh 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
@@ -80,35 +82,35 @@ fi
 # You can delete the collection via (you only need to do it once)
 ##  python3 ~/NarrativeIntelligence/src/narraint/backend/delete_collection.py PubMed --force
 # This will invoke the MedLine pipeline (data will be crawled from VZG index)
-##bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_NLM" "$UPDATE_DATE" "PubMed" 2> /root/ns_update_err.log
+##bash ~/NarrativeAnnotation/scripts/process_pubpharm_document_collection.sh "$BASE_URL" "GBV_NLM" "$UPDATE_DATE" "PubMed" 2> $LOGPATH
 
 ##if [[ $? != 0 ]]; then
-##    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+##    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
 ##    exit -1
 ##fi
 
 
-bash ~/NarrativeAnnotation/scripts/process_clean_extractions.sh 2> /root/ns_update_err.log
+bash ~/NarrativeAnnotation/scripts/process_clean_extractions.sh 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
 
-bash ~/NarrativeIntelligence/scripts/update_service_data.sh 2> /root/ns_update_err.log
+bash ~/NarrativeIntelligence/scripts/update_service_data.sh 2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
 
 # Set last database update date to now
-python3 ~/NarrativeIntelligence/src/narraint/backend/update_database_update_date.py
+python3 ~/NarrativeIntelligence/src/narraint/backend/update_database_update_date.py  2> $LOGPATH
 
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
@@ -117,9 +119,9 @@ echo "Narrative Update done" | mailx -s "Narrative Service Update done" "$ADDRES
 
 
 # Update clinical trial phases for drug overviews
-python3 ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
+python3 ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py 2> $LOGPATH
 if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_err.log
+    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < $LOGPATH
     exit -1
 fi
 
