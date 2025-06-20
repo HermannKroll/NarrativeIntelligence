@@ -19,6 +19,8 @@ class SearchCache:
         if isinstance(document_collections, str):
             document_collections = [document_collections]
         collections_key = "_".join(sorted(document_collections))
+        # if some collection contains a white space
+        collections_key = collections_key.replace(' ', '')
         key = hashlib.md5(graph_query.get_unique_key().encode('utf-8')).hexdigest()
         if not aggregation_name:
             return os.path.join(CACHE_DIR, '{}_{}.pkl'.format(collections_key, key))
