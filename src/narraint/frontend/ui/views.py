@@ -1301,34 +1301,6 @@ def get_logs_data(request):
     return JsonResponse(LogsView.data_dict)
 
 
-class StatsView(TemplateView):
-    template_name = "ui/stats.html"
-    stats_query_results = None
-
-    def get(self, request, *args, **kwargs):
-        View().query_logger.write_page_view_log(StatsView.template_name)
-        if request.is_ajax():
-            if "query" in request.GET:
-                if not StatsView.stats_query_results:
-                    session = SessionExtended.get()
-                    try:
-                        logging.info('Processing database statistics...')
-                        query = session.query(Predication.relation, Predication.extraction_type,
-                                              func.count(Predication.relation)). \
-                            group_by(Predication.relation).group_by(Predication.extraction_type).all()
-                        results = list()
-                        for r in query:
-                            results.append((r[0], r[1], r[2]))
-                        StatsView.stats_query_results = results
-                    except:
-                        traceback.print_exc(file=sys.stdout)
-                    session.close()
-                return JsonResponse(
-                        dict(results=StatsView.stats_query_results)
-                )
-        return super().get(request, *args, **kwargs)
-
-
 class HelpView(TemplateView):
     template_name = "ui/help.html"
 

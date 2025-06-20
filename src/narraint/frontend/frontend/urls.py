@@ -18,12 +18,11 @@ from django.urls import path, include
 from django.views.decorators.cache import never_cache
 
 from narraint.frontend.frontend.settings.base import INSTALLED_APPS, ADMIN_ENABLED
-from narraint.frontend.ui.views import StatsView, HelpView, DocumentView, DrugOverviewView, \
+from narraint.frontend.ui.views import HelpView, DocumentView, DrugOverviewView, \
     SearchView, SwaggerUIView, LogsView, LongCovidView, CovidView19, MECFSView, OverviewView
 
 urlpatterns = [
     path(r'', include('ui.urls')),
-    path("stats/", never_cache(StatsView.as_view()), name="stats"),
     path("logs/", never_cache(LogsView.as_view()), name="logs"),
     path("help/", never_cache(HelpView.as_view()), name="help"),
     path("document/", never_cache(DocumentView.as_view()), name="document"),
