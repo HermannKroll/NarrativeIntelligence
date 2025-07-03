@@ -8,7 +8,8 @@ from typing import Set
 import marisa_trie
 
 from kgextractiontoolbox.progress import print_progress_with_eta
-from narraint.config import AUTOCOMPLETION_TMP_INDEX, AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD
+from narraint.config import AUTOCOMPLETION_TMP_INDEX, AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD, \
+    AUTOCOMPLETION_RETRIEVE_K_SUGGESTIONS
 from narraint.entity.entitytagger import EntityTagger
 from narrant.entitylinking.enttypes import DRUG, ALL
 
@@ -237,15 +238,15 @@ class AutocompletionUtil:
         else:
             return self.trie.keys(start_str)
 
-    def find_entities_starting_with(self, start_str: str, retrieve_k=10, entity_type: str = None):
+    def find_entities_starting_with(self, start_str: str, entity_type: str = None):
         hits = self.autocomplete(start_str, entity_type=entity_type)
-        hits.sort()
         formatted_hits = []
-        for h in hits[0:retrieve_k]:
+        for h in hits:
             formatted_hits.append(AutocompletionUtil.capitalize_entity(h))
         return formatted_hits
 
-    def compute_autocompletion_list(self, search_str: str, entity_type: str = None):
+    def compute_autocompletion_list(self, search_str: str, entity_type: str = None,
+                                    retrieve_k: int = AUTOCOMPLETION_RETRIEVE_K_SUGGESTIONS):
         if len(search_str) < 2:
             return []
         relevant_term = AutocompletionUtil.prepare_search_str(search_str)
@@ -268,9 +269,8 @@ class AutocompletionUtil:
                 pass
 
         # shortest completions first
-        sorted_by_length = sorted(completions, key=lambda x: len(x))[0:10]
-        # sort alphabetically
-        return sorted(sorted_by_length)
+        sorted_by_length = sorted(completions, key=lambda x: len(x))[0:retrieve_k]
+        return sorted_by_length
 
 
 def main():
