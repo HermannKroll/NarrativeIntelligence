@@ -105,6 +105,23 @@
                     Please be patient. This process can take up to one minute.
                 </p>
                 <div class="alert alert-danger" style="display:none" id="alert_translation" role="alert"></div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center">
+                            <h6>How to Search:
+                                <a href="https://youtu.be/iagphBPLokM" target="_blank" id="searchHelpAnchor">
+                                    <img src="{% static 'assets/help.png' %}" height="40px">
+                                </a>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- keyword search  -->
             <div class="tab-pane fade" id="search-type-graph">
@@ -131,6 +148,11 @@
                         <div class="row d-flex flex-wrap justify-content-center" id="query_graphs"></div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
+                </div>
             </div>
             <!-- recommendation -->
             <div class="tab-pane fade" id="search-type-recommender">
@@ -151,6 +173,11 @@
                         Please be patient. This process can take up to one minute.
                     </p>
                     <div class="alert alert-danger" style="display:none" id="alert_recommender" role="alert"></div>
+                </div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
                 </div>
             </div>
             <!-- knowledge paths -->
@@ -209,23 +236,6 @@
     </div>
 
     <div class="container">
-        <div class="row">
-            <div class="col d-flex justify-content-center">
-                <a href="javascript:openHistory()">Search History</a>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-center">
-                    <h6>How to Search:
-                        <a href="https://youtu.be/iagphBPLokM" target="_blank" id="searchHelpAnchor">
-                            <img src="{% static 'assets/help.png' %}" height="40px">
-                        </a>
-                    </h6>
-                </div>
-            </div>
-        </div>
         <!-- "Bootstrap Modal" (popup window) for ATC classes -->
         <div class="modal" id="atcModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-xl modal-dialog-scrollable"
