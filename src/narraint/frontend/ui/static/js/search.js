@@ -291,7 +291,13 @@ function result_present() {
  * Submit the search process.
  */
 function searchClick() {
-    document.querySelector("#btn_search").click()
+    if (current_search_method === "recommender"){
+        recommenderSearch();
+    } else if (current_search_method === "discovery"){
+        searchPatternDiscovery();
+    } else {
+        document.querySelector("#btn_search").click()
+    }
 }
 
 /**
@@ -566,6 +572,8 @@ $(document).ready(async function () {
         if (e.key === 'Enter' || e.keyCode === 13) {
             if (current_search_method === "recommender") {
                 recommenderSearch();
+            } else if (current_search_method === "discovery") {
+                searchPatternDiscovery();
             } else {
                 search(e);
             }
@@ -876,7 +884,7 @@ function updateURLParameters(parameters) {
         url.searchParams.delete("visualization");
     }
 
-    if (current_search_method !== "recommender"  && current_search_method !== "keyword") {
+    if (current_search_method !== "recommender" && current_search_method !== "keyword") {
         url.searchParams.set("sort_by", parameters["sort_by"]);
         url.searchParams.set("sort_order", parameters["sort_order"]);
     } else {
@@ -1575,7 +1583,7 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         }
     });
 
-    if(current_search_method !== "discovery"){
+    if (current_search_method !== "discovery") {
         divDoc_Card.append(div_provenance_button);
         divDoc_Card.append(div_provenance_collapsable_block);
     }
