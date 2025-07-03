@@ -210,6 +210,8 @@ async function searchPatternDiscovery(query = undefined) {
     const documentResults = createResultList(data["results"], 0);
     divDocuments.append(documentResults);
     hideLoadingScreen();
+
+    document.getElementById('btn_clear_search_discovery').style.display = 'block';
 }
 
 function createKnowledgeGraph(concept2statements, parentDiv) {
@@ -403,4 +405,15 @@ function graphSelectEdge(e) {
     // open the corresponding query in a new tab
     window.open(`/?query="${subject}"+associated+"${object}"`, '_blank');
     discoveryGraph.unselectAll();
+}
+
+
+function clearSearchFormDiscovery() {
+    const conceptDiv = document.querySelector("#path-concept-list");
+    const conceptInput = document.querySelector("#input-path-concepts");
+
+    conceptDiv.innerHTML = "";
+    conceptInput.value = "";
+
+    document.getElementById('btn_clear_search_discovery').style.display = 'none';
 }
