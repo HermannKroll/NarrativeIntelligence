@@ -226,6 +226,15 @@ function createKnowledgeGraph(concept2statements, parentDiv) {
     column.appendChild(container)
     parentDiv.appendChild(column);
 
+    // Finde the maximum edges for some entity and set it as the maximum for the slider
+    let maximumEdgesPerEntity = 0;
+    for(const [entity, stmts] of Object.entries(concept2statements)) {
+        if(stmts.length > maximumEdgesPerEntity) {
+            maximumEdgesPerEntity = stmts.length;
+        }
+    }
+    document.getElementById("path-concepts-slider").max = maximumEdgesPerEntity;
+
     createKnowledgeGraphElements(concept2statements);
     discoveryGraph = new vis.Network(graphDiv, {}, networkOptionsKG);
     discoveryGraph.physics.physicsEnabled = false;
