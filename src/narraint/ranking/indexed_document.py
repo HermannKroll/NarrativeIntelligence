@@ -136,6 +136,12 @@ class IndexedDocument(NarrativeDocument):
     def get_unique_key(self):
         return get_unique_document_key(self.id, self.document_collection)
 
+    def __hash__(self):
+        return hash(self.get_unique_key())
+
+    def __eq__(self, other):
+        return self.get_unique_key() == other.get_unique_key()
+
     def compute_scored_entity_information(self):
         """
         Computes the set of scored entities within this document

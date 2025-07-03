@@ -34,6 +34,9 @@ let discoveryGraph = undefined;
  */
 let discoveryGraphNodes = undefined;
 let discoveryGraphEdges = undefined;
+let edge2documents = {};
+let lastResult = undefined;
+let lastResultSize = undefined;
 
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -131,6 +134,11 @@ async function searchPatternDiscovery(query = undefined) {
     const queryGraphDiv = document.querySelector('#graph-div-path-concepts');
     const divDocuments = $('#div_documents');
 
+    // clear old data
+    edge2documents = {};
+    lastResult = undefined;
+    lastResultSize = undefined;
+
     // use query from parameter if provided and create from input else
     let conceptString;
     if (query) {
@@ -190,12 +198,12 @@ async function searchPatternDiscovery(query = undefined) {
     if (data["sort_by"] !== parameters["sort_by"])
         updateURLParameter("sort_by", data["sort_by"])
 
-    const results = data["results"];
-    const result_size = results["s"];
+    lastResult = data["results"];
+    lastResultSize = lastResult["s"];
 
     document.getElementById("sorting_container").classList.toggle("d-none", false);
 
-    if (result_size !== 0) {
+    if (lastResultSize !== 0) {
         document.getElementById("input_title_filter").classList.toggle("d-none", false);
         document.getElementById("input_title_filter_label").classList.toggle("d-none", false);
     }
@@ -207,7 +215,7 @@ async function searchPatternDiscovery(query = undefined) {
     queryGraphContainer.classList.toggle("d-none", false);
 
     // create and show documents
-    const documentResults = createResultList(data["results"], 0);
+    const documentResults = createResultList(lastResult, 0);
     divDocuments.append(documentResults);
     hideLoadingScreen();
 
@@ -314,6 +322,10 @@ function getSelectedEntityTypes() {
     return selectedEntityTypes;
 }
 
+function getEdgeKey(subjectName, objectName) {
+    return subjectName + "___" + objectName;
+}
+
 function createKnowledgeGraphElements(concept2statements) {
     document.getElementById("checkbox-path-concepts").innerHTML = "";
     document.getElementById("checkbox-path-concepts").classList.toggle("d-none", false);
@@ -355,24 +367,30 @@ function createKnowledgeGraphElements(concept2statements) {
         knownEntityTypes.push(entityType);
     }
 
-    function insertEdgeElement(subjectName, objectName) {
+    function insertEdgeElement(subjectName, objectName, documents) {
         discoveryGraphEdges.add({
                 from: subjectName,
                 to: objectName,
+                label: `${documents.length}`,
                 color: '#848484',
-                title: "Search in Narrative Service",
+                title: "Show Documents",
             });
     }
 
+
     for (const [_, statement] of Object.entries(concept2statements)) {
-        for (const [subjectName, subjectType, objectName, objectType] of statement) {
+        for (const [subjectName, subjectType, objectName, objectType, documents] of statement) {
             // skip loops
             if (subjectName === objectName)
                 continue;
 
             insertNodeElement(subjectName, subjectType);
             insertNodeElement(objectName, objectType);
-            insertEdgeElement(subjectName, objectName);
+            insertEdgeElement(subjectName, objectName, documents);
+
+            // add both directions (sometimes the direction of the clicked edge does not match the created once)
+            edge2documents[getEdgeKey(subjectName, objectName)] = documents;
+            edge2documents[getEdgeKey(objectName, subjectName)] = documents;
         }
         index = 1;
     }
@@ -395,9 +413,19 @@ function centerPatternDiscovery() {
 
 async function graphOnClick(e) {
     // check if either a node or an edge is selected
-    if (e.edges.length > 0) {
+    if (e.edges.length === 1) {
         graphSelectEdge(e);
+    } else {
+        // create old document list
+        const divDocuments = $('#div_documents');
+        divDocuments.empty();
+        const documentResults = createResultList(lastResult, 0);
+        divDocuments.append(documentResults);
     }
+}
+
+function getDocumentKey(document_collection, document_id){
+    return document_collection + '___' + document_id;
 }
 
 function graphSelectEdge(e) {
@@ -410,10 +438,33 @@ function graphSelectEdge(e) {
 
     const subject = discoveryGraph.body.nodes[nodes[1]].options.id;
     const object = discoveryGraph.body.nodes[nodes[0]].options.id;
+    let edgekey = getEdgeKey(subject, object);
 
-    // open the corresponding query in a new tab
-    window.open(`/?query="${subject}"+associated+"${object}"`, '_blank');
-    discoveryGraph.unselectAll();
+    let documentFilter = new Set();
+    edge2documents[edgekey].forEach((document) => {
+        documentFilter.add(getDocumentKey(document[0], document[1]));
+    });
+
+
+    let filteredDocuments = [];
+    lastResult["r"].forEach(doc => {
+        if(documentFilter.has(getDocumentKey(doc.collection, doc.docid))){
+            filteredDocuments.push(doc);
+        }
+    })
+
+    let filteredDocumentResults = {
+        "r": filteredDocuments,
+        "s": filteredDocuments.length,
+        "t": "doc_l"
+    }
+
+    // use selected edge as filter for document list
+    const divDocuments = $('#div_documents');
+    divDocuments.empty();
+    const documentResults = createResultList(filteredDocumentResults, 0);
+    divDocuments.append(documentResults);
+    document.getElementById("div_documents").scrollIntoView();
 }
 
 

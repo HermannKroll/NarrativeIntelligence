@@ -77,7 +77,7 @@ class PatternDiscovery:
         return collection2ids, entities
 
     def score_document_statements(self, scored_documents: List[IndexedDocument]) \
-            -> Tuple[List[str], Dict[str, ScoredDocumentStatement]]:
+            -> Tuple[List[str], Dict[str, ScoredDocumentStatement], Dict[str, Set]]:
         """
         Compute a list of statements from a list of documents. The list contains
         unique statements ordered by their support score (descending).
@@ -89,6 +89,7 @@ class PatternDiscovery:
         """
         statement2score = dict()
         key2statement = dict()
+        statement_key2documents = dict()
         for indexed_document in scored_documents:
             for scored_statement in indexed_document.scored_statements:
                 score = score_edge_by_tfidf_coverage_confidence(statement=scored_statement, corpus=self.corpus)
@@ -97,13 +98,15 @@ class PatternDiscovery:
                 if statement_key not in statement2score:
                     statement2score[statement_key] = score
                     key2statement[statement_key] = scored_statement
+                    statement_key2documents[statement_key] = {indexed_document}
                 else:
                     statement2score[statement_key] += score
+                    statement_key2documents[statement_key].add(indexed_document)
 
         # sort by highest score
         statements = sorted(statement2score.items(), key=lambda x: x[1], reverse=True)
         statements = list(statement for statement, _ in statements)
-        return statements, key2statement
+        return statements, key2statement, statement_key2documents
 
     def relevant_statements_for_concepts(self, statements: List[str], concept2entity: Dict[str, TranslatedEntity],
                                          key2statement: Dict[str, ScoredDocumentStatement]) -> Dict[Tuple, List[str]]:
@@ -196,7 +199,8 @@ class PatternDiscovery:
                                                                                     document_collection=collection))
 
         # 3. score all statements (sum up scores of duplicated statements)
-        statements, key2statement = self.score_document_statements(scored_documents=indexed_documents)
+        statements, key2statement, statement_key2documents = self.score_document_statements(
+            scored_documents=indexed_documents)
 
         # 4. find top k statements for each concept
         concept2relevant_statements = self.relevant_statements_for_concepts(statements=statements,
@@ -210,6 +214,7 @@ class PatternDiscovery:
             for statement_key in statement_keys:
                 subject = key2statement[statement_key].subject
                 object_ = key2statement[statement_key].object
+                stmt_documents = statement_key2documents[statement_key]
 
                 subject_name, subject_type = self.entity_to_name(subject)
                 object_name, object_type = self.entity_to_name(object_)
@@ -224,7 +229,8 @@ class PatternDiscovery:
                     # The resolver resolves both subjects to the same string: 'Arthritis, Experimental'.
                     # Since the frontend ignores the relation, we need to filter for duplicate statements.
                     continue
-                concept_statements.append((subject_name, subject.entity_type, object_name, object_.entity_type))
+                concept_statements.append((subject_name, subject.entity_type, object_name, object_.entity_type,
+                                           [(doc.document_collection, doc.id) for doc in stmt_documents]))
                 known_statement_pairs.add((subject_name, object_name))
 
             concept_name, _ = self.entity_to_name(concept)
