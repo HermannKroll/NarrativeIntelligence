@@ -1664,6 +1664,7 @@ def get_pattern_discovery(request):
         except Exception as e:
             View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
                                                time_needed=datetime.now() - time_start)
-            message = f'Could not discover pattern for "{concept2type}: {e}"'
+            # remove beginning and tailing '
+            message = str(e)[1:-1]
             log_stack_trace(message, e)
     return JsonResponse(status=500, data=dict(reason=message))

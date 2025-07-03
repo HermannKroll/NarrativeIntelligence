@@ -150,7 +150,7 @@ class PatternDiscovery:
                     break
 
             if not concept_entity:
-                raise KeyError("Could not find concept entity information for: {}".format(concept))
+                raise KeyError("Could not find entity information for: {}".format(concept))
             concept2relevant_statements[concept_entity] = concept_relevant_statements
         return concept2relevant_statements
 
