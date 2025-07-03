@@ -1575,8 +1575,10 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         }
     });
 
-    divDoc_Card.append(div_provenance_button);
-    divDoc_Card.append(div_provenance_collapsable_block);
+    if(current_search_method !== "discovery"){
+        divDoc_Card.append(div_provenance_button);
+        divDoc_Card.append(div_provenance_collapsable_block);
+    }
 
     let divFinal = $('<div/>');
     divFinal.append(divDoc_Card);
