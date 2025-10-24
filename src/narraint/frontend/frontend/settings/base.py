@@ -42,6 +42,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # this middleware ensures that database rollback errors are handled
+    "narraint.frontend.DBMiddleware.SQLAlchemyCleanupMiddleware"
 ]
 
 ROOT_URLCONF = 'frontend.urls'
