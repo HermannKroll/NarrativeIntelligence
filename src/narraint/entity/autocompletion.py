@@ -44,6 +44,10 @@ class AutocompletionUtil:
             except ValueError:
                 logging.info('Autocompletion index is outdated. Creating a new one...')
                 self.build_autocompletion_index()
+            except FileNotFoundError:
+                self.logger.info(f'Autocompletion index does not exists -- creating a new one...')
+                self.build_autocompletion_index()
+
 
     def __build_trie_structure(self, known_terms):
         self.logger.info(f'Building Trie structure with {len(known_terms)} terms...')
@@ -97,6 +101,7 @@ class AutocompletionUtil:
                     raise ValueError('Autocompletion index is outdated.')
         else:
             self.logger.info(f'Autocompletion index does not exists: {index_path}')
+            raise FileNotFoundError(f'Autocompletion index does not exists: {index_path}')
 
     @staticmethod
     def remove_term_ending_comma(entity_str: str):
