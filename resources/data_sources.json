@@ -14,7 +14,7 @@
     "url": "https://pubmed.ncbi.nlm.nih.gov/"
   },
    {
-    "collection": "Clinical Trials",
+    "collection": "ClinicalTrials",
     "label": "ClinicalTrials",
     "selected": true,
     "priority": 8,
