@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from typing import List, Set
 
@@ -292,6 +293,12 @@ def retrieve_indexed_documents_from_database_small(session, document_ids: Set[in
 
     if len(doc_results) != len(document_ids):
         diff = set(document_ids) - doc_results.keys()
-        raise ValueError(f'Did not retrieve all required {document_collection} documents (missed ids: {diff})')
+        # This error is not bad as because we update PubPharm documents by their real doc ID
+        # We assign artificial IDs to each document
+        # This means if a old document is updated, the old artificial ID will be invalid and deleted from DB
+        # and the document will be inserted with a new ID
+        # However, the retrieval index is only updated by new documents and fully rebuild half a year
+        # So old ids might exists here, however, not if problem, then the documents are just missing
+        logging.info(f'Maybe the retrieval index is outdated: Did not retrieve all required {document_collection} documents (missed ids: {diff})')
 
     return [IndexedDocument(d, document_collection) for d in doc_results.values()]
