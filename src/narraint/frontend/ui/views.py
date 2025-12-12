@@ -1461,7 +1461,7 @@ def get_recommend(request):
         if not request.GET.keys():
             return HttpResponse(status=500)
 
-        document_id = int(request.GET.get("query", ""))
+        document_id = request.GET.get("query", "")
         query_collection = request.GET.get("query_col", "")
         query_trans_string = document_id
         document_collections = request.GET.get("data_source", "")

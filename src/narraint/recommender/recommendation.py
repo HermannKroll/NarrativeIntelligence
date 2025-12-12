@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from narraint.backend.database import SessionExtended
+from narraint.backend.models import Document
 from narraint.queryengine.engine import QueryEngine
 from narraint.queryengine.result import QueryDocumentResult
 from narraint.ranking.corpus import DocumentCorpus
@@ -23,9 +24,22 @@ class RecommendationSystem:
         self.recommender = Recommender(extractor=self.core_extractor)
         self.resolver = EntityResolver()
 
-    def apply_recommendation(self, document_id: int, query_collection: str, document_collections: set):
+    def apply_recommendation(self, document_id: str, query_collection: str, document_collections: set):
         session = SessionExtended.get()
         start = datetime.now()
+
+        # Step 0: translate id because frontend might send us real id (source ids) and not DB ids
+        id_query = session.query(Document.id)
+        id_query = id_query.filter(Document.source_id == document_id)
+        id_query = id_query.filter(Document.collection == query_collection)
+
+        # only replace the document id by an artificial one if there is one result
+        # if no source id matches our given document, then we might have received the artificial id and can
+        # continue with the remaining code
+        for result in id_query:
+            logging.debug(f'Replace source document id {document_id} with artificial id {result.id}')
+            document_id = result.id
+
 
         # Step 1: First stage retrieval
         input_docs = retrieve_indexed_documents_from_database_small(session=session,
