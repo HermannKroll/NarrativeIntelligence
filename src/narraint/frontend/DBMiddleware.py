@@ -15,9 +15,15 @@ class SQLAlchemyCleanupMiddleware:
         try:
             return self.get_response(request)
         except PendingRollbackError:
-            logging.info('Recieving rollback error: Rollback transaction...')
+            logging.info('Receiving rollback error: Rollback transaction...')
             session = SessionExtended.get()
             session.rollback()
             logging.info("Retrying request after rollback transaction...")
             return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        logging.info(f"Some error {exception} has happened -> remove DB connection")
+        session = SessionExtended.get()
+        session.remove()
+
 
