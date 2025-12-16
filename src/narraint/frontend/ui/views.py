@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+import time
 import traceback
 from collections import defaultdict
 from datetime import datetime
@@ -14,7 +15,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, PendingRollbackError
 
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
@@ -62,6 +63,14 @@ def log_stack_trace(message: str, error: Exception) -> None:
     tb_text = "".join(tb_lines)
     logging.debug(f"{message}\nTraceback:\n{tb_text}")
 
+def handle_rollback_error():
+    logging.info("Received rollback error -> rollbacking session...")
+    session = SessionExtended.get()
+    session.rollback()
+    session.commit()
+    # to stop permanent loops that block cpu
+    time.sleep(0.1)
+    logging.info("Session rolled back")
 
 class View:
     """
@@ -107,6 +116,7 @@ class View:
             }
             cls.discovery = PatternDiscovery()
         return cls._instance
+
 
 
 def get_document_graph(request):
@@ -231,6 +241,9 @@ def get_document_graph(request):
             traceback.print_exc()
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_document_graph(request)
     else:
         View().query_logger.write_api_call(False, "get_document_graph", str(request))
         return HttpResponse(status=500)
@@ -279,6 +292,9 @@ def get_check_query(request):
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid="False", query=query_trans_string))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_check_query(request)
     except Exception:
         return JsonResponse(status=500, data=dict(valid="False", query=None))
 
@@ -299,6 +315,9 @@ def get_term_to_entity(request):
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_term_to_entity(request)
     except Exception:
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
@@ -327,7 +346,6 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
         cache_hit = False
         if DO_CACHING:
             try:
-
                 View().cache.add_result_to_cache(collection_string, graph_query, results)
             except Exception as e:
                 message = 'Cannot store query result to cache...'
@@ -370,6 +388,9 @@ def get_query_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_query_narrative_documents(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
@@ -404,6 +425,9 @@ def get_query_document_ids(request):
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_query_document_ids(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
@@ -444,6 +468,9 @@ def get_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_narrative_document", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_narrative_documents(request)
     except Exception as e:
         logger.error(f"get_narrative_document: {e}")
         traceback.print_exc()
@@ -502,8 +529,9 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
             except Exception as e:
                 message = 'Cannot store query result to cache...'
                 log_stack_trace(message, e)
-
         return sub_count_list, False
+
+    return [], False
 
 
 @gzip_page
@@ -522,7 +550,11 @@ def get_query_sub_count(request):
 
         time_start = datetime.now()
         # Get sub count list via caching
-        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collections)
+        try:
+            sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collections)
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_query_sub_count(request)
 
         if "topk" in request.GET:
             try:
@@ -576,7 +608,9 @@ def get_document_ids_for_entity(request):
                                            time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
-
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_document_ids_for_entity(request)
     except Exception as e:
         logger.error(f"get_document_ids_for_entity: {e}")
         traceback.print_exc()
@@ -752,6 +786,9 @@ def get_query(request):
                 dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
                      results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
                      query_limit_hit="False"))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_query(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
@@ -782,6 +819,9 @@ def get_provenance(request):
             View().query_logger.write_api_call(True, "get_provenance", str(request),
                                                time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_provenance(request)
         except Exception:
             View().query_logger.write_api_call(False, "get_provenance", str(request))
             traceback.print_exc(file=sys.stdout)
@@ -811,7 +851,9 @@ def get_explain_document(request):
                                               variables)
         View().query_logger.write_api_call(True, "get_explain_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
-
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_explain_document(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_explain_document", str(request))
         return HttpResponse(status=500)
@@ -1187,7 +1229,9 @@ def get_keywords(request):
                     pass
 
                 return JsonResponse(dict(keywords=keywords))
-
+            except PendingRollbackError:
+                handle_rollback_error()
+                return get_keywords(request)
             except Exception as e:
                 message = f"Could not retrieve keywords for {substance_id}"
                 log_stack_trace(message, e)
@@ -1220,6 +1264,9 @@ def get_explain_translation(request):
             return JsonResponse(dict(headings=headings))
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_explain_translation(request)
         except Exception:
             View().query_logger.write_api_call(False, "get_explain_translation", str(request))
             traceback.print_exc(file=sys.stdout)
@@ -1237,6 +1284,9 @@ def get_last_db_update(request):
         logging.debug(f"Get last DB update: {last_update}")
         View().query_logger.write_api_call(True, "get_last_db_update", str(request))
         return JsonResponse(data=dict(last_update=last_update))
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_last_db_update(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_last_db_update", str(request))
         traceback.print_exc(file=sys.stdout)
@@ -1380,7 +1430,9 @@ def get_keyword_search_request(request):
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
-
+            except PendingRollbackError:
+                handle_rollback_error()
+                return get_keyword_search_request(request)
             except Exception as e:
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
@@ -1418,6 +1470,9 @@ def get_clinical_trial_phases(request):
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_clinical_trial_phases(request)
         except Exception as e:
             message = 'Could not query clinical trials for {}'.format(chembl_id)
             log_stack_trace(message, e)
@@ -1558,7 +1613,9 @@ def get_recommend(request):
                                  query_translation=query_trans_string, year_aggregation=year_aggregation,
                                  query_limit_hit="False"))
 
-
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_recommend(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_recommend", str(request))
         error_msg = "recommendation can not be applied"
@@ -1572,6 +1629,9 @@ def get_content_data(request):
     try:
         content_information = update_content_information()
         return JsonResponse(status=200, data=content_information)
+    except PendingRollbackError:
+        handle_rollback_error()
+        return get_content_data(request)
     except Exception:
         return HttpResponse(status=500)
 
@@ -1661,6 +1721,9 @@ def get_pattern_discovery(request):
             data = dict(graph=concept2graph, sort_by=sort_by, sort_order=sort_order,
                         results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
             return JsonResponse(status=200, data=data)
+        except PendingRollbackError:
+            handle_rollback_error()
+            return get_pattern_discovery(request)
         except Exception as e:
             View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
                                                time_needed=datetime.now() - time_start)
