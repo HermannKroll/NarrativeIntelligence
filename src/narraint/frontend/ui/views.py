@@ -96,6 +96,9 @@ class View:
     ORDER_DESCENDING = "desc"
     ORDER_ASCENDING = "asc"
 
+    CACHED_DB_DATE = None
+    CACHED_DB_DATE_FETCHED_ON = None
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -1276,13 +1279,23 @@ def get_explain_translation(request):
         return HttpResponse(status=500)
 
 
+
 def get_last_db_update(request):
+    # if date is too old, we need to fetch it again
+    if View().CACHED_DB_DATE_FETCHED_ON and (datetime.now() - View().CACHED_DB_DATE_FETCHED_ON).days >= 7:
+        View().CACHED_DB_DATE = None
+
+    cached_date = View().CACHED_DB_DATE
+    if cached_date:
+        return JsonResponse(data=dict(last_update=cached_date))
     try:
         session = SessionExtended.get()
         last_update = str(DatabaseUpdate.get_latest_update(session))
         last_update = last_update.replace('-', '.')
         logging.debug(f"Get last DB update: {last_update}")
         View().query_logger.write_api_call(True, "get_last_db_update", str(request))
+        View().CACHED_DB_DATE_FETCHED_ON = datetime.now()
+        View().CACHED_DB_DATE = last_update
         return JsonResponse(data=dict(last_update=last_update))
     except PendingRollbackError:
         handle_rollback_error()
