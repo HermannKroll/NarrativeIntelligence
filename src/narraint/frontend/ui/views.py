@@ -1300,10 +1300,10 @@ def get_last_db_update(request):
     except PendingRollbackError:
         handle_rollback_error()
         return get_last_db_update(request)
-    except Exception:
+    except Exception as e:
         View().query_logger.write_api_call(False, "get_last_db_update", str(request))
         traceback.print_exc(file=sys.stdout)
-        return HttpResponse(status=500)
+        return JsonResponse(status=500, data=dict(error=f"Error: {e}"))
 
 
 class SearchView(TemplateView):
