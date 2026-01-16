@@ -1687,7 +1687,7 @@ def get_pattern_discovery(request):
             logging.debug('Generating knowledge path for "{}"'.format(concept2type))
 
             if len(concept2type) < 2:
-                raise ValueError("At least two concepts are required.")
+                return JsonResponse(status=500, data=dict(reason="At least two concepts are required."))
 
             # first retrieve documents for concepts
             collection2ids, concept2entities = View().discovery.retrieve_relevant_documents_for_concepts(
