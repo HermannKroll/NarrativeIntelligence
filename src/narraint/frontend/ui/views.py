@@ -15,7 +15,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
-from sqlalchemy.exc import OperationalError, PendingRollbackError
+from sqlalchemy.exc import OperationalError, PendingRollbackError, InternalError
 
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
@@ -244,7 +244,7 @@ def get_document_graph(request):
             traceback.print_exc()
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_document_graph(request)
     else:
@@ -295,7 +295,7 @@ def get_check_query(request):
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid="False", query=query_trans_string))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_check_query(request)
     except Exception:
@@ -318,7 +318,7 @@ def get_term_to_entity(request):
             return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_term_to_entity(request)
     except Exception:
@@ -391,7 +391,7 @@ def get_query_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_query_narrative_documents(request)
     except Exception:
@@ -428,7 +428,7 @@ def get_query_document_ids(request):
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_query_document_ids(request)
     except Exception:
@@ -471,7 +471,7 @@ def get_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_narrative_document", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_narrative_documents(request)
     except Exception as e:
@@ -555,7 +555,7 @@ def get_query_sub_count(request):
         # Get sub count list via caching
         try:
             sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collections)
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_query_sub_count(request)
 
@@ -611,7 +611,7 @@ def get_document_ids_for_entity(request):
                                            time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_document_ids_for_entity(request)
     except Exception as e:
@@ -789,7 +789,7 @@ def get_query(request):
                 dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
                      results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
                      query_limit_hit="False"))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_query(request)
     except Exception:
@@ -822,7 +822,7 @@ def get_provenance(request):
             View().query_logger.write_api_call(True, "get_provenance", str(request),
                                                time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_provenance(request)
         except Exception:
@@ -854,7 +854,7 @@ def get_explain_document(request):
                                               variables)
         View().query_logger.write_api_call(True, "get_explain_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_explain_document(request)
     except Exception:
@@ -1232,7 +1232,7 @@ def get_keywords(request):
                     pass
 
                 return JsonResponse(dict(keywords=keywords))
-            except PendingRollbackError:
+            except (PendingRollbackError, InternalError):
                 handle_rollback_error()
                 return get_keywords(request)
             except Exception as e:
@@ -1267,7 +1267,7 @@ def get_explain_translation(request):
             return JsonResponse(dict(headings=headings))
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_explain_translation(request)
         except Exception:
@@ -1297,7 +1297,7 @@ def get_last_db_update(request):
         View().CACHED_DB_DATE_FETCHED_ON = datetime.now()
         View().CACHED_DB_DATE = last_update
         return JsonResponse(data=dict(last_update=last_update))
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_last_db_update(request)
     except Exception as e:
@@ -1443,7 +1443,7 @@ def get_keyword_search_request(request):
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
-            except PendingRollbackError:
+            except (PendingRollbackError, InternalError):
                 handle_rollback_error()
                 return get_keyword_search_request(request)
             except Exception as e:
@@ -1483,7 +1483,7 @@ def get_clinical_trial_phases(request):
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_clinical_trial_phases(request)
         except Exception as e:
@@ -1626,7 +1626,7 @@ def get_recommend(request):
                                  query_translation=query_trans_string, year_aggregation=year_aggregation,
                                  query_limit_hit="False"))
 
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_recommend(request)
     except Exception:
@@ -1642,7 +1642,7 @@ def get_content_data(request):
     try:
         content_information = update_content_information()
         return JsonResponse(status=200, data=content_information)
-    except PendingRollbackError:
+    except (PendingRollbackError, InternalError):
         handle_rollback_error()
         return get_content_data(request)
     except Exception:
@@ -1734,7 +1734,7 @@ def get_pattern_discovery(request):
             data = dict(graph=concept2graph, sort_by=sort_by, sort_order=sort_order,
                         results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
             return JsonResponse(status=200, data=data)
-        except PendingRollbackError:
+        except (PendingRollbackError, InternalError):
             handle_rollback_error()
             return get_pattern_discovery(request)
         except Exception as e:
