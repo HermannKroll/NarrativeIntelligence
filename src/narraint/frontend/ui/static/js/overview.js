@@ -934,7 +934,9 @@ const networkSelectEdge = (e) => {
     const object = network.body.nodes[nodes[0]].options.id;
 
     // open the corresponding query in a new tab
-    window.open(`/?query="${subject}"+${predicate}+"${object}"`, '_blank');
+    let selectedDataSources = getSelectedDataSources().join(";");
+    let searchURI = encodeURI(`/?query="${subject}"+${predicate}+"${object}"&data_source=${selectedDataSources}`);
+    window.open(searchURI, '_blank');
     network.unselectAll();
 }
 
