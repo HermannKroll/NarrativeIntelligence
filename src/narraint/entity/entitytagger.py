@@ -36,7 +36,7 @@ class EntityTagger(EntityIndexBase):
 
         self.__initialized = True
 
-    def _prepare_string(self, term: str) -> str:
+    def prepare_string(self, term: str) -> str:
         term = term.strip().lower().translate(self.__translator).strip()
         # remove double white spaces
         while '  ' in term:
@@ -68,11 +68,11 @@ class EntityTagger(EntityIndexBase):
                                                entity_class=entity_class,
                                                synonym=synonym,
                                                # space is important for matching
-                                               synonym_processed=' ' + self._prepare_string(term)))
+                                               synonym_processed=' ' + self.prepare_string(term)))
 
     def tag_entity(self, term: str) -> List[TranslatedEntity]:
         # first process the string
-        term = self._prepare_string(term)
+        term = self.prepare_string(term)
 
         # ignore to short terms -> no matches
         if not term or len(term) < EntityTagger.MINIMUM_CHARACTERS_FOR_TAGGING:

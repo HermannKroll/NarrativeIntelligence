@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import os
+import string
 import sys
 import time
 import traceback
@@ -309,13 +310,26 @@ def get_term_to_entity(request):
         term = str(request.GET.get("term", "").strip()).lower()
         try:
             entities = View().translation.convert_text_to_entity(term)
+            entities = list(set(entities)) # remove duplicates
             resolver = EntityResolver()
+            results = []
+            sim = 0.0
             for e in entities:
                 try:
                     e.entity_name = resolver.get_name_for_var_ent_id(e.entity_id, e.entity_type)
+                    term_tokens = set(View().entity_tagger.prepare_string(term).split(' '))
+                    synonym_tokens = set(View().entity_tagger.prepare_string(e.entity_name).split(' '))
+                    sim = len(term_tokens.intersection(synonym_tokens)) / len(term_tokens.union(synonym_tokens))
                 except KeyError:
                     e.entity_name = ""
-            return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
+                    sim = 0.0
+
+                result_dict = e.to_dict()
+                result_dict["similarity"] = sim
+                results.append(result_dict)
+
+            results.sort(key=lambda x: (x["similarity"], x["entity_name"]), reverse=True)
+            return JsonResponse(dict(valid=True, entity=[r for r in results]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
         except (PendingRollbackError, InternalError):
