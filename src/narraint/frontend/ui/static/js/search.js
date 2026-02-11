@@ -1551,9 +1551,15 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
     divDoc_Body.append(divDoc_Image);
     divDoc_Body.append(divDoc_DocumentGraph);
 
-    let divDoc_Content = $('<br><b>' + title + '</b><br>' +
-        "in: " + journals + " | " + month + year + '<br>' +
-        "by: " + authors + '<br>');
+    let divDoc_Content = "";
+    if( authors.length == 0 ){
+        divDoc_Content = $('<br><b>' + title + '</b><br>' +
+            "in: " + journals + " | " + month + year + '<br>');
+    } else {
+        divDoc_Content = $('<br><b>' + title + '</b><br>' +
+            "in: " + journals + " | " + month + year + '<br>' +
+            "by: " + authors + '<br>');
+    }
 
     divDoc_Body.append(divDoc_Content);
     let divDocRecommenderLink = $(
