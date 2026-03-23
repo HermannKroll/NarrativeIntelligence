@@ -1527,6 +1527,9 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         document_id = queryResult["org_document_id"];
         doiText = "DOI";
     }
+    if(["Preprints","Patents","ClinicalTrials"].includes(collection)){
+        doiText = "ID";
+    }
 
     let doi = queryResult["doi"];
 
