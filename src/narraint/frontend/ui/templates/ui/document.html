@@ -32,6 +32,6 @@
     <script type="text/javascript">
         const document_graph_url = "{% url 'document_graph' %}";
     </script>
-    <script src="{% static 'js/document.js' %}?version=4" type="text/javascript"></script>
+    <script src="{% static 'js/document.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 
 {% endblock %}

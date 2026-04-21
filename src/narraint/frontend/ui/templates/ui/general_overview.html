@@ -163,7 +163,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/paper.js' %}?version=17" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?v={{ v_tag }}" type="text/javascript"></script>
     <script type="text/javascript">
         const autocompletion_url = "{% url 'autocompletion' %}";
         const ok_symbol_url = "{% static 'ok.png' %}";
@@ -202,9 +202,9 @@
     <script src="{% static 'js/libraries/async.min.js' %}"></script>
 
 
-    <script src="{% static 'js/overview.js' %}?version=12" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=7" type="text/javascript"></script>
-    <script src="{% static 'js/generalOverview.js' %}?version=18" type="text/javascript"></script>
-    <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
-    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/generalOverview.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/feedback.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 {% endblock %}

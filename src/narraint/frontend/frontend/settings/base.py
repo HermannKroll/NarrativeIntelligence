@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import time
 
 # Build paths inside the project like this: os.path.join(DJANGO_PROJ_DIR, ...)
 # noinspection PyUnresolvedReferences
@@ -61,7 +62,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'narraint.frontend.frontend.processors.get_matomo_credentials'
+                'narraint.frontend.frontend.processors.get_matomo_credentials',
+                'narraint.frontend.frontend.settings.context_processors.version_tag'
             ],
         },
     },
@@ -114,3 +116,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Einmaliger Zeitstempel beim Start des Prozesses
+STATIC_VERSION = str(int(time.time()))

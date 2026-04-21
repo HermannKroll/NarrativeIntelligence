@@ -49,7 +49,7 @@
     <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
     <script src="{% static 'js/libraries/mark.min.js' %}"></script>
     <script src="{% static 'js/libraries/async.min.js' %}"></script>
-    <script src="{% static 'js/paper.js' %}?version=17"></script>
+    <script src="{% static 'js/paper.js' %}?v={{ v_tag }}"></script>
     <script>
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";

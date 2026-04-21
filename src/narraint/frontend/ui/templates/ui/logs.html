@@ -179,7 +179,7 @@
 
     <div id="dashboard"></div>
 
-    <script src="{% static 'js/json_logger_data.js' %}?version=4"></script>
+    <script src="{% static 'js/json_logger_data.js' %}?v={{ v_tag }}"></script>
     <script type="text/javascript">
         const logs_url = "{% url 'logs' %}";
     </script>
