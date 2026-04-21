@@ -947,19 +947,23 @@ const networkSelectEdge = (e) => {
  */
 function getSelectedDataSources() {
     let dataSource = [];
-    let dataSourceChildren = document.getElementById("collection-filter").children;
+    // Check if the current overview has a collection-filter. Covid/LongCovid/MECFS does not.
+    if(document.getElementById("collection-filter")){
+        let dataSourceChildren = document.getElementById("collection-filter").children;
 
-    for (let i in dataSourceChildren) {
-        const child = dataSourceChildren.item(i);
-        const name = child["name"] || "";
-        const checked = child["checked"] || false;
+        for (let i in dataSourceChildren) {
+            const child = dataSourceChildren.item(i);
+            const name = child["name"] || "";
+            const checked = child["checked"] || false;
 
-        if (name !== "data_source" || !checked)
-            continue;
+            if (name !== "data_source" || !checked)
+                continue;
 
-        const dataSourceString = child["id"].split("_")[1];
-        dataSource.push(dataSourceString);
+            const dataSourceString = child["id"].split("_")[1];
+            dataSource.push(dataSourceString);
+        }
     }
+
     if (dataSource.length === 0) {
         if (document.getElementById("filter_PubMed") !== null) {
             document.getElementById("filter_PubMed").checked = true;
