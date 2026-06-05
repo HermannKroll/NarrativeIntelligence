@@ -1,8 +1,9 @@
-import logging
 import argparse
 import csv
+import logging
 import time
-from narraint.frontend.entity.query_translation import QueryTranslation
+
+from narraint.entity.query_translation import QueryTranslation
 from narraint.frontend.ui.search_cache import SearchCache
 from narraint.queryengine.engine import QueryEngine
 
@@ -24,7 +25,7 @@ def execute_queries(cache, translation, result_writer):
             start_time_with_caching = time.time()
             for collection in DOCUMENT_COLLECTIONS:
                 try:
-                    cached_results = cache.load_result_from_cache(collection, graph_query)
+                    cache.load_result_from_cache(collection, graph_query)
                 except Exception:
                     logging.error('Cannot load query result from cache...')
                     results = QueryEngine.process_query_with_expansion(graph_query,
@@ -38,8 +39,7 @@ def execute_queries(cache, translation, result_writer):
             print("jojjojojoj")
             start_time_without_caching = time.time()
             for collection in DOCUMENT_COLLECTIONS:
-                results = QueryEngine.process_query_with_expansion(graph_query,
-                                                                   document_collection_filter={collection})
+                QueryEngine.process_query_with_expansion(graph_query, document_collection_filter={collection})
             elapsed_time_without_caching = time.time() - start_time_without_caching
 
             logging.info('Query Execution Time without caching: {:.4f} seconds'.format(elapsed_time_without_caching))
@@ -60,7 +60,8 @@ def main():
 
     with open(args.result_file, 'w', newline='') as csvfile:
         result_writer = csv.writer(csvfile, delimiter='\t')
-        result_writer.writerow(['Query', 'Iteration', 'Execution Time (seconds) with caching', 'Execution Time (seconds) without caching'])
+        result_writer.writerow(
+            ['Query', 'Iteration', 'Execution Time (seconds) with caching', 'Execution Time (seconds) without caching'])
 
         execute_queries(cache, translation, result_writer)
 

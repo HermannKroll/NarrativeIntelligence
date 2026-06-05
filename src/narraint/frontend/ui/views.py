@@ -3,35 +3,40 @@ import base64
 import json
 import logging
 import os
+import string
 import sys
+import time
 import traceback
 from collections import defaultdict
 from datetime import datetime
 from json import JSONDecodeError
+from typing import Dict
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.gzip import gzip_page
 from django.views.generic import TemplateView
 from sqlalchemy import func
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, PendingRollbackError, InternalError
 
 from kgextractiontoolbox.backend.retrieve import retrieve_narrative_documents_from_database
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, TagInvertedIndex, EntityKeywords, DrugDiseaseTrialPhase, \
     DatabaseUpdate, Sentence
+from narraint.backend.service_content import update_content_information
 from narraint.config import FEEDBACK_REPORT_DIR, CHEMBL_ATC_TREE_FILE, MESH_DISEASE_TREE_JSON, FEEDBACK_PREDICATION_DIR, \
     FEEDBACK_SUBGROUP_DIR, LOG_DIR, FEEDBACK_CLASSIFICATION
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
-from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
-from narraint.frontend.entity.query_translation import QueryTranslation
+from narraint.entity.autocompletion import AutocompletionUtil
+from narraint.entity.entityexplainer import EntityExplainer
+from narraint.entity.entitytagger import EntityTagger
+from narraint.entity.query_translation import QueryTranslation
 from narraint.frontend.filter.classification_filter import ClassificationFilter
 from narraint.frontend.filter.data_sources_filter import DataSourcesFilter
 from narraint.frontend.filter.time_filter import TimeFilter
 from narraint.frontend.filter.title_filter import TitleFilter
 from narraint.frontend.ui.search_cache import SearchCache
-from narraint.frontend.ui.service_content import update_content_information
-from narraint.keywords2graph.translation import Keyword2GraphTranslation
+from narraint.keywords2graph.translation import Keyword2GraphTranslation, NoDocumentsFoundError, \
+    TwoEntitiesRequiredError, VariableTypeNotSupportedError
+from narraint.pattern_discovery.discovery import PatternDiscovery
 from narraint.queryengine.aggregation.ontology import ResultAggregationByOntology
 from narraint.queryengine.aggregation.substitution_tree import ResultTreeAggregationBySubstitution
 from narraint.queryengine.engine import QueryEngine
@@ -41,7 +46,10 @@ from narraint.queryengine.query import GraphQuery
 from narraint.queryengine.result import QueryDocumentResult, QueryDocumentResultList
 from narraint.ranking.corpus import DocumentCorpus
 from narraint.ranking.indexed_document import IndexedDocument
+from narraint.ranking.ranking import GraphRank, PublicationDateRank, DocumentRanker
+from narraint.ranking.scoring import score_edge_by_tfidf_coverage_confidence
 from narraint.recommender.recommendation import RecommendationSystem
+from narrant.entity.entity import get_unique_entity_key
 from narrant.entity.entityresolver import EntityResolver
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
@@ -56,6 +64,14 @@ def log_stack_trace(message: str, error: Exception) -> None:
     tb_text = "".join(tb_lines)
     logging.debug(f"{message}\nTraceback:\n{tb_text}")
 
+def handle_rollback_error():
+    logging.info("Received rollback error -> rollbacking session...")
+    session = SessionExtended.get()
+    session.rollback()
+    session.commit()
+    # to stop permanent loops that block cpu
+    time.sleep(0.1)
+    logging.info("Session rolled back")
 
 class View:
     """
@@ -67,6 +83,22 @@ class View:
 
     _instance = None
     initialized = False
+
+    # without variables
+    RANK_BY_GRAPH = "graph"
+    RANK_BY_TIME = "time"
+    RANKER_SUPPORTED = {RANK_BY_TIME, RANK_BY_GRAPH}
+
+    # with variables
+    RANK_BY_FREQUENCY = "freq"
+    RANKER_VAR_SUPPORTED = {RANK_BY_FREQUENCY}
+
+    # ranking order
+    ORDER_DESCENDING = "desc"
+    ORDER_ASCENDING = "asc"
+
+    CACHED_DB_DATE = None
+    CACHED_DB_DATE_FETCHED_ON = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -82,7 +114,13 @@ class View:
             cls.keyword2graph = Keyword2GraphTranslation()
             cls.corpus = DocumentCorpus()
             cls.recommender = RecommendationSystem()
+            cls.strategy2ranker: Dict[str, DocumentRanker] = {
+                View.RANK_BY_GRAPH: GraphRank(),
+                View.RANK_BY_TIME: PublicationDateRank()
+            }
+            cls.discovery = PatternDiscovery()
         return cls._instance
+
 
 
 def get_document_graph(request):
@@ -104,10 +142,27 @@ def get_document_graph(request):
                 return JsonResponse(status=500, data=dict(reason="No document data available", nodes=[], facts=[]))
 
             # index the document to compute frequency and coverage
-            indexed_document = IndexedDocument(narrative_documents[0])
+            doc = IndexedDocument(narrative_documents[0], document_collection)
+            # extract longest text sequence from tags
+            entity2tagged_sequence = dict()
+            for tag in doc.tags:
+                key = get_unique_entity_key(tag.ent_type, tag.ent_id)
+                if key not in entity2tagged_sequence:
+                    entity2tagged_sequence[key] = tag.text.capitalize()
+                else:
+                    if len(tag.text) > len(entity2tagged_sequence[key]):
+                        entity2tagged_sequence[key] = tag.text.capitalize()
+
             # score all edge and sort them
-            sorted_extracted_statements = [(s, View().corpus.score_edge_by_tf_and_concept_idf(s, indexed_document))
-                                           for s in indexed_document.extracted_statements]
+            # some edges might use entities that are not present in our vocabulary anymore
+            # so just take edges that have been scored
+            sorted_extracted_statements = [(s,
+                                            score_edge_by_tfidf_coverage_confidence(
+                                                    doc.extracted_stmt2scored_statement[s],
+                                                    corpus=View().corpus))
+                                           for s in doc.extracted_statements
+                                           if s in doc.extracted_stmt2scored_statement]
+
             sorted_extracted_statements.sort(key=lambda x: x[1], reverse=True)
 
             sentence_ids = set(s.sentence_id for (s, _) in sorted_extracted_statements)
@@ -122,8 +177,18 @@ def get_document_graph(request):
                 try:
                     subject_name = View().resolver.get_name_for_var_ent_id(stmt.subject_id, stmt.subject_type,
                                                                            resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if subject_name == stmt.subject_id.capitalize():
+                        # extract longest text sequence from tags
+                        subject_name = entity2tagged_sequence[get_unique_entity_key(stmt.subject_type, stmt.subject_id)]
+
                     object_name = View().resolver.get_name_for_var_ent_id(stmt.object_id, stmt.object_type,
                                                                           resolve_gene_by_id=False)
+                    # check whether a human-readable label was found (the method returns otherwise capitalized id)
+                    if object_name == stmt.object_id.capitalize():
+                        # extract longest text sequence from tags
+                        object_name = entity2tagged_sequence[get_unique_entity_key(stmt.object_type, stmt.object_id)]
+
                     subject_name = f'{subject_name} ({stmt.subject_type})'
                     object_name = f'{object_name} ({stmt.object_type})'
 
@@ -146,6 +211,8 @@ def get_document_graph(request):
 
                     # Map the fact to the corresponding sentence text
                     facts2text[so_key] = sentence_id2text[stmt.sentence_id]
+                except KeyError:
+                    continue
                 except Exception:
                     pass
 
@@ -175,8 +242,12 @@ def get_document_graph(request):
             View().query_logger.write_api_call(True, "get_document_graph", str(request), time_needed)
             return JsonResponse(dict(nodes=list(nodes), facts=scored_results))
         except ValueError:
+            traceback.print_exc()
             View().query_logger.write_api_call(False, "get_document_graph", str(request))
             return JsonResponse(dict(nodes=[], facts=[]))
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_document_graph(request)
     else:
         View().query_logger.write_api_call(False, "get_document_graph", str(request))
         return HttpResponse(status=500)
@@ -185,11 +256,9 @@ def get_document_graph(request):
 def get_autocompletion(request):
     if "term" in request.GET:
         search_string = str(request.GET.get("term", "").strip())
-        completion_terms = []
         if "entity_type" in request.GET:
             entity_type = str(request.GET.get("entity_type", "").strip())
-            completion_terms = View().autocompletion.compute_autocompletion_list(search_string,
-                                                                                 entity_type=entity_type)
+            completion_terms = View().autocompletion.compute_autocompletion_list(search_string, entity_type=entity_type)
         else:
             completion_terms = View().autocompletion.compute_autocompletion_list(search_string)
         logging.info(f'For {search_string} sending completion terms: {completion_terms}')
@@ -220,14 +289,17 @@ def get_check_query(request):
         search_string = str(request.GET.get("query", "").strip())
         logging.info(f'checking query: {search_string}')
         query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-            search_string)
+                search_string)
         if query_fact_patterns:
             logging.info('query is valid')
             return JsonResponse(dict(valid="True", query=query_fact_patterns.to_dict()))
         else:
             logging.info(f'query is not valid: {query_trans_string}')
             return JsonResponse(dict(valid="False", query=query_trans_string))
-    except Exception as e:
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_check_query(request)
+    except Exception:
         return JsonResponse(status=500, data=dict(valid="False", query=None))
 
 
@@ -236,23 +308,34 @@ def get_term_to_entity(request):
         return JsonResponse(status=500, data=dict(reason="term not given"))
     try:
         term = str(request.GET.get("term", "").strip()).lower()
-        expand_by_prefix = True
-        if "expand_by_prefix" in request.GET:
-            expand_by_prefix_str = str(request.GET.get("expand_by_prefix", "").strip()).lower()
-            if expand_by_prefix_str == "false":
-                expand_by_prefix = False
         try:
             entities = View().translation.convert_text_to_entity(term)
+            entities = list(set(entities)) # remove duplicates
             resolver = EntityResolver()
+            results = []
+            sim = 0.0
             for e in entities:
                 try:
                     e.entity_name = resolver.get_name_for_var_ent_id(e.entity_id, e.entity_type)
+                    term_tokens = set(View().entity_tagger.prepare_string(term).split(' '))
+                    synonym_tokens = set(View().entity_tagger.prepare_string(e.entity_name).split(' '))
+                    sim = len(term_tokens.intersection(synonym_tokens)) / len(term_tokens.union(synonym_tokens))
                 except KeyError:
                     e.entity_name = ""
-            return JsonResponse(dict(valid=True, entity=[e.to_dict() for e in entities]))
+                    sim = 0.0
+
+                result_dict = e.to_dict()
+                result_dict["similarity"] = sim
+                results.append(result_dict)
+
+            results.sort(key=lambda x: (x["similarity"], x["entity_name"]), reverse=True)
+            return JsonResponse(dict(valid=True, entity=[r for r in results]))
         except ValueError as e:
             return JsonResponse(dict(valid=False, entity=f'{e}'))
-    except Exception as e:
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_term_to_entity(request)
+    except Exception:
         return JsonResponse(status=500, data=dict(reason="Internal server error"))
 
 
@@ -280,7 +363,6 @@ def do_query_processing_with_caching(graph_query: GraphQuery, document_collectio
         cache_hit = False
         if DO_CACHING:
             try:
-
                 View().cache.add_result_to_cache(collection_string, graph_query, results)
             except Exception as e:
                 message = 'Cannot store query result to cache...'
@@ -323,6 +405,9 @@ def get_query_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_query_narrative_documents", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_query_narrative_documents(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query_narrative_documents", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
@@ -357,6 +442,9 @@ def get_query_document_ids(request):
         View().query_logger.write_api_call(True, "get_query_document_ids", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=result_ids))
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_query_document_ids(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query_document_ids", str(request))
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
@@ -397,6 +485,9 @@ def get_narrative_documents(request):
         View().query_logger.write_api_call(True, "get_narrative_document", str(request),
                                            time_needed=datetime.now() - time_start)
         return JsonResponse(dict(results=list([nd.to_dict() for nd in narrative_documents])))
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_narrative_documents(request)
     except Exception as e:
         logger.error(f"get_narrative_document: {e}")
         traceback.print_exc()
@@ -404,7 +495,7 @@ def get_narrative_documents(request):
         return JsonResponse(status=500, data=dict(answer="Internal server error"))
 
 
-def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collection: str):
+def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collections: list) -> dict:
     """
     Does the query sub count processing with caching if activated
     :param graph_query: a graph query object
@@ -415,7 +506,7 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
     cached_sub_count_list = None
     if DO_CACHING:
         try:
-            cached_sub_count_list = View().cache.load_result_from_cache(document_collection, graph_query,
+            cached_sub_count_list = View().cache.load_result_from_cache(document_collections, graph_query,
                                                                         aggregation_name=aggregation_strategy)
             if cached_sub_count_list:
                 logging.info('Sub Count cache hit - {} results loaded'.format(len(cached_sub_count_list)))
@@ -423,13 +514,13 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
             else:
                 cached_sub_count_list = None
         except Exception as e:
-            message  = 'Cannot load query result from cache...'
+            message = 'Cannot load query result from cache...'
             log_stack_trace(message, e)
     if not cached_sub_count_list:
         # run query
         # compute the query and do not load metadata (not required)
         results = QueryEngine.process_query_with_expansion(graph_query,
-                                                           document_collection_filter={document_collection},
+                                                           document_collection_filter=set(document_collections),
                                                            load_document_metadata=False)
 
         # next get the aggregation by var names
@@ -449,26 +540,22 @@ def get_query_sub_count_with_caching(graph_query: GraphQuery, document_collectio
 
         if DO_CACHING:
             try:
-                View().cache.add_result_to_cache(document_collection, graph_query,
+                View().cache.add_result_to_cache(document_collections, graph_query,
                                                  sub_count_list,
                                                  aggregation_name=aggregation_strategy)
             except Exception as e:
                 message = 'Cannot store query result to cache...'
                 log_stack_trace(message, e)
-
         return sub_count_list, False
+
+    return [], False
 
 
 @gzip_page
 def get_query_sub_count(request):
     if "query" in request.GET and "data_source" in request.GET:
         query = str(request.GET["query"]).strip()
-        document_collection = str(request.GET["data_source"]).strip()
-        if document_collection not in ["LitCovid", "LongCovid", "PubMed"]:
-            return JsonResponse(status=500,
-                                data=dict(answer="data source not valid", reason="Data sources supported: PubMed,"
-                                                                                 " LitCovid and LongCovid"))
-
+        document_collections = get_document_collections_from_data_source_string(str(request.GET["data_source"]).strip())
         graph_query, query_trans_string = View().translation.convert_query_text_to_fact_patterns(query)
         if not graph_query or len(graph_query.fact_patterns) == 0:
             View().query_logger.write_api_call(False, "get_query_sub_count", str(request))
@@ -480,7 +567,11 @@ def get_query_sub_count(request):
 
         time_start = datetime.now()
         # Get sub count list via caching
-        sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collection)
+        try:
+            sub_count_list, cache_hit = get_query_sub_count_with_caching(graph_query, document_collections)
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_query_sub_count(request)
 
         if "topk" in request.GET:
             try:
@@ -534,7 +625,9 @@ def get_document_ids_for_entity(request):
                                            time_needed=datetime.now() - time_start)
         # send results back
         return JsonResponse(dict(document_ids=document_ids))
-
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_document_ids_for_entity(request)
     except Exception as e:
         logger.error(f"get_document_ids_for_entity: {e}")
         traceback.print_exc()
@@ -552,8 +645,6 @@ def get_query(request):
     results_converted = []
     is_aggregate = False
     valid_query = False
-    query_limit_hit = False
-    query_trans_string = ""
     if "query" not in request.GET:
         View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="query parameter is missing"))
@@ -587,23 +678,11 @@ def get_query(request):
         else:
             end_pos = None
 
-        if "freq_sort" in request.GET:
-            freq_sort_desc = str(request.GET.get("freq_sort", "").strip())
-            if freq_sort_desc == 'False':
-                freq_sort_desc = False
-            else:
-                freq_sort_desc = True
-        else:
-            freq_sort_desc = True
+        # get sort filter; default is (publication) time
+        sort_by = str(request.GET.get("sort_by", View.RANK_BY_TIME).strip())
 
-        if "year_sort" in request.GET:
-            year_sort_desc = str(request.GET.get("year_sort", "").strip())
-            if year_sort_desc == 'False':
-                year_sort_desc = False
-            else:
-                year_sort_desc = True
-        else:
-            year_sort_desc = True
+        # get sort order; default is descending
+        sort_order = str(request.GET.get("sort_order", View.ORDER_DESCENDING).strip())
 
         year_start = None
         if "year_start" in request.GET:
@@ -656,7 +735,6 @@ def get_query(request):
         elif outer_ranking == 'outer_ranking_ontology' and QueryTranslation.count_variables_in_query(
                 graph_query) > 1:
             results_converted = []
-            nt_string = ""
             query_trans_string = "Do not support multiple variables in an ontology-based ranking"
             logger.error("Do not support multiple variables in an ontology-based ranking")
         else:
@@ -680,33 +758,61 @@ def get_query(request):
             results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
 
             results_converted = []
-            if outer_ranking == 'outer_ranking_substitution':
-                substitution_aggregation = ResultTreeAggregationBySubstitution()
-                sorted_var_names = graph_query.get_var_names_in_order()
-                results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
-                                                                                     freq_sort_desc, year_sort_desc,
-                                                                                     start_pos, end_pos)
-                results_converted = results_ranked.to_dict()
-            elif outer_ranking == 'outer_ranking_ontology':
-                substitution_ontology = ResultAggregationByOntology()
-                results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
-                                                                                  year_sort_desc)
+            if graph_query.has_variable():
+                # required for variable search
+                if sort_by not in View().RANKER_VAR_SUPPORTED:
+                    sort_by = View.RANK_BY_FREQUENCY
+
+                freq_sort_desc = sort_by == View.RANK_BY_FREQUENCY and sort_order == View.ORDER_DESCENDING
+                # disable to sort the inner ranking by time
+                year_sort_desc = False
+
+                if outer_ranking == 'outer_ranking_substitution':
+                    substitution_aggregation = ResultTreeAggregationBySubstitution()
+                    sorted_var_names = graph_query.get_var_names_in_order()
+                    results_ranked, is_aggregate = substitution_aggregation.rank_results(results, sorted_var_names,
+                                                                                         freq_sort_desc, year_sort_desc,
+                                                                                         start_pos, end_pos)
+
+                    results_converted = results_ranked.to_dict()
+                elif outer_ranking == 'outer_ranking_ontology':
+                    substitution_ontology = ResultAggregationByOntology()
+                    results_ranked, is_aggregate = substitution_ontology.rank_results(results, freq_sort_desc,
+                                                                                      year_sort_desc)
+                    results_converted = results_ranked.to_dict()
+            else:
+                # no variable is used
+                results_ranked = QueryDocumentResultList()
+                for res in results:
+                    results_ranked.add_query_result(res)
+
+                # descending or ascending?
+                descending = (sort_order == View.ORDER_DESCENDING)
+
+                # verify sorting strategy (and default to time if not known)
+                if sort_by not in View.RANKER_SUPPORTED:
+                    sort_by = View.RANK_BY_TIME
+
+                results_ranked.results = View().strategy2ranker[sort_by].rank_document(graph_query, results, descending)
                 results_converted = results_ranked.to_dict()
 
         View().query_logger.write_api_call(True, "get_query", str(request),
                                            time_needed=datetime.now() - time_start)
 
         return JsonResponse(
-            dict(valid_query=valid_query, is_aggregate=is_aggregate, results=results_converted,
-                 query_translation=query_trans_string, year_aggregation=year_aggregation,
-                 query_limit_hit="False"))
+                dict(valid_query=valid_query, is_aggregate=is_aggregate, sort_by=sort_by, sort_order=sort_order,
+                     results=results_converted, query_translation=query_trans_string, year_aggregation=year_aggregation,
+                     query_limit_hit="False"))
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_query(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_query", str(request))
         query_trans_string = "keyword query cannot be converted (syntax error)"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=query_trans_string, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_provenance(request):
@@ -730,6 +836,9 @@ def get_provenance(request):
             View().query_logger.write_api_call(True, "get_provenance", str(request),
                                                time_needed=datetime.now() - start)
             return JsonResponse(dict(result=result.to_dict()))
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_provenance(request)
         except Exception:
             View().query_logger.write_api_call(False, "get_provenance", str(request))
             traceback.print_exc(file=sys.stdout)
@@ -759,7 +868,9 @@ def get_explain_document(request):
                                               variables)
         View().query_logger.write_api_call(True, "get_explain_document", str(request), start - datetime.now())
         return JsonResponse(dict(result=result.to_dict()))
-
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_explain_document(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_explain_document", str(request))
         return HttpResponse(status=500)
@@ -901,7 +1012,7 @@ def post_subgroup_feedback(request):
                          f'[{entity_name}, {entity_id}, {entity_type}] as "{rating}"')
             try:
                 View().query_logger.write_subgroup_rating_log(
-                    query, userid, variable_name, entity_name, entity_id, entity_type)
+                        query, userid, variable_name, entity_name, entity_id, entity_type)
             except IOError:
                 logging.debug('Could not write rating log file')
             View().query_logger.write_api_call(True, "get_subgroup_feedback", str(request),
@@ -1126,17 +1237,18 @@ def get_keywords(request):
             try:
                 session = SessionExtended.get()
                 query = session.query(EntityKeywords.keyword_data).filter(EntityKeywords.entity_id == substance_id)
+                keywords = ""
                 try:
                     result = query.first()
-
-                    keywords = ""
                     if result:
                         keywords = ast.literal_eval(result[0])
                 except OperationalError:
                     pass
 
                 return JsonResponse(dict(keywords=keywords))
-
+            except (PendingRollbackError, InternalError):
+                handle_rollback_error()
+                return get_keywords(request)
             except Exception as e:
                 message = f"Could not retrieve keywords for {substance_id}"
                 log_stack_trace(message, e)
@@ -1150,7 +1262,7 @@ def get_explain_translation(request):
             search_string = str(request.GET.get("query", "").strip())
             logging.info(f'checking query: {search_string}')
             query_fact_patterns, query_trans_string = View().translation.convert_query_text_to_fact_patterns(
-                search_string)
+                    search_string)
 
             if not query_fact_patterns:
                 return JsonResponse(dict(headings=["Please complete query first"]))
@@ -1169,6 +1281,9 @@ def get_explain_translation(request):
             return JsonResponse(dict(headings=headings))
         except KeyError:
             return JsonResponse(dict(headings=["Not known yet"]))
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_explain_translation(request)
         except Exception:
             View().query_logger.write_api_call(False, "get_explain_translation", str(request))
             traceback.print_exc(file=sys.stdout)
@@ -1178,25 +1293,38 @@ def get_explain_translation(request):
         return HttpResponse(status=500)
 
 
+
 def get_last_db_update(request):
+    # if date is too old, we need to fetch it again
+    if View().CACHED_DB_DATE_FETCHED_ON and (datetime.now() - View().CACHED_DB_DATE_FETCHED_ON).days >= 7:
+        View().CACHED_DB_DATE = None
+
+    cached_date = View().CACHED_DB_DATE
+    if cached_date:
+        return JsonResponse(data=dict(last_update=cached_date))
     try:
         session = SessionExtended.get()
         last_update = str(DatabaseUpdate.get_latest_update(session))
         last_update = last_update.replace('-', '.')
         logging.debug(f"Get last DB update: {last_update}")
         View().query_logger.write_api_call(True, "get_last_db_update", str(request))
+        View().CACHED_DB_DATE_FETCHED_ON = datetime.now()
+        View().CACHED_DB_DATE = last_update
         return JsonResponse(data=dict(last_update=last_update))
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_last_db_update(request)
     except Exception as e:
         View().query_logger.write_api_call(False, "get_last_db_update", str(request))
         traceback.print_exc(file=sys.stdout)
-        return HttpResponse(status=500)
+        return JsonResponse(status=500, data=dict(error=f"Error: {e}"))
 
 
 class SearchView(TemplateView):
     template_name = "ui/search.html"
 
     def __init__(self):
-        init_view = View()
+        View()
         super(SearchView, self).__init__()
 
     def get(self, request, *args, **kwargs):
@@ -1248,34 +1376,6 @@ class LogsView(TemplateView):
 def get_logs_data(request):
     LogsView.recompute_logs_if_necessary()
     return JsonResponse(LogsView.data_dict)
-
-
-class StatsView(TemplateView):
-    template_name = "ui/stats.html"
-    stats_query_results = None
-
-    def get(self, request, *args, **kwargs):
-        View().query_logger.write_page_view_log(StatsView.template_name)
-        if request.is_ajax():
-            if "query" in request.GET:
-                if not StatsView.stats_query_results:
-                    session = SessionExtended.get()
-                    try:
-                        logging.info('Processing database statistics...')
-                        query = session.query(Predication.relation, Predication.extraction_type,
-                                              func.count(Predication.relation)). \
-                            group_by(Predication.relation).group_by(Predication.extraction_type).all()
-                        results = list()
-                        for r in query:
-                            results.append((r[0], r[1], r[2]))
-                        StatsView.stats_query_results = results
-                    except:
-                        traceback.print_exc(file=sys.stdout)
-                    session.close()
-                return JsonResponse(
-                    dict(results=StatsView.stats_query_results)
-                )
-        return super().get(request, *args, **kwargs)
 
 
 class HelpView(TemplateView):
@@ -1345,25 +1445,26 @@ def get_keyword_search_request(request):
                 keywords = keywords.split("_AND_")
                 if len(keywords) < 2:
                     return JsonResponse(status=500, data=dict(reason="At least two keywords are required."))
-
-                possible_queries = View().keyword2graph.translate_keywords(keywords)
-                json_data = [r.to_json_data() for r in possible_queries]
-                # This is the format
-                # json_data = [
-                #     [("Metformin", "treats", "Diabetes Mellitus")],
-                #     [("Metformin", "treats", "Diabetes Mellitus"), ("Metformin", "administered", "Syringe")],
-                #     [("Insulin", "associated", "Diabetes Mellitus")],
-                # ]
+                try:
+                    json_data = [p.to_json_data() for p in View().keyword2graph.translate_keywords(keywords)]
+                except NoDocumentsFoundError:
+                    return JsonResponse(status=500, data=dict(reason="No documents containing all entities were found."))
+                except TwoEntitiesRequiredError:
+                    return JsonResponse(status=500, data=dict(reason="At least two entities are required."))
+                except VariableTypeNotSupportedError as e:
+                    return JsonResponse(status=500, data=dict(reason=f"Variable type not supported: {e}"))
 
                 View().query_logger.write_api_call(True, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 return JsonResponse(status=200, data=dict(query_graphs=json_data))
-
+            except (PendingRollbackError, InternalError):
+                handle_rollback_error()
+                return get_keyword_search_request(request)
             except Exception as e:
                 View().query_logger.write_api_call(False, "get_keyword_search_request", str(request),
                                                    time_needed=datetime.now() - time_start)
                 query_trans_string = str(e)
-                message  = f'Could not generate graph queries for "{keywords}: {e}"'
+                message = f'Could not generate graph queries for "{keywords}: {e}"'
                 log_stack_trace(message, e)
                 return JsonResponse(status=500, data=dict(reason=query_trans_string))
 
@@ -1396,8 +1497,11 @@ def get_clinical_trial_phases(request):
             View().query_logger.write_api_call(True, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
             return JsonResponse(status=200, data=dict(drug_indications=drug_indications))
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_clinical_trial_phases(request)
         except Exception as e:
-            message ='Could not query clinical trials for {}'.format(chembl_id)
+            message = 'Could not query clinical trials for {}'.format(chembl_id)
             log_stack_trace(message, e)
             View().query_logger.write_api_call(False, "clinical_trial_phases", str(request),
                                                time_needed=datetime.now() - time_start)
@@ -1426,7 +1530,6 @@ def get_recommend(request):
     results_converted = []
     is_aggregate = False
     valid_query = False
-    query_trans_string = ""
     if "query" not in request.GET:
         View().query_logger.write_api_call(False, "get_query", str(request))
         return JsonResponse(status=500, data=dict(reason="document_id parameter is missing"))
@@ -1440,7 +1543,7 @@ def get_recommend(request):
         if not request.GET.keys():
             return HttpResponse(status=500)
 
-        document_id = int(request.GET.get("query", ""))
+        document_id = request.GET.get("query", "")
         query_collection = request.GET.get("query_col", "")
         query_trans_string = document_id
         document_collections = request.GET.get("data_source", "")
@@ -1537,19 +1640,121 @@ def get_recommend(request):
                                  query_translation=query_trans_string, year_aggregation=year_aggregation,
                                  query_limit_hit="False"))
 
-
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_recommend(request)
     except Exception:
         View().query_logger.write_api_call(False, "get_recommend", str(request))
         error_msg = "recommendation can not be applied"
         traceback.print_exc(file=sys.stdout)
         return JsonResponse(
-            dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
-                 query_limit_hit="False"))
+                dict(valid_query="", results=[], query_translation=error_msg, year_aggregation="",
+                     query_limit_hit="False"))
 
 
 def get_content_data(request):
     try:
         content_information = update_content_information()
         return JsonResponse(status=200, data=content_information)
+    except (PendingRollbackError, InternalError):
+        handle_rollback_error()
+        return get_content_data(request)
     except Exception:
         return HttpResponse(status=500)
+
+
+def extract_url_parameter(params, key, value_class, default=None):
+    if key not in params:
+        return default
+    value = params.get(key, "").strip()
+    try:
+        value = value_class(value)
+    except Exception:
+        value = default
+    return value
+
+
+def get_pattern_discovery(request):
+    if "query" not in request.GET.keys():
+        message = "Missing concepts in request."
+    elif "data_source" not in request.GET.keys():
+        message = "Missing document collection in request."
+    else:
+        concept2type = ""
+        time_start = datetime.now()
+        try:
+            raw_concepts = request.GET.get("query").strip()
+            concept2type = raw_concepts.split("_AND_")
+            document_collections = request.GET.get("data_source").strip().split(";")
+
+            # get sort filter; default is (publication) time
+            sort_by = request.GET.get("sort_by", View.RANK_BY_TIME).strip()
+
+            # get sort order; default is descending
+            sort_order = request.GET.get("sort_order", View.ORDER_DESCENDING).strip()
+
+            year_start = extract_url_parameter(request.GET, "year_start", int)
+            year_end = extract_url_parameter(request.GET, "year_end", int)
+            title_filter = extract_url_parameter(request.GET, "title_filter", str)
+            classification_filter = extract_url_parameter(request.GET, "classification_filter", lambda s: s.strip(";"))
+
+            logging.debug('Generating knowledge path for "{}"'.format(concept2type))
+
+            if len(concept2type) < 2:
+                return JsonResponse(status=500, data=dict(reason="At least two concepts are required."))
+
+            # first retrieve documents for concepts
+            collection2ids, concept2entities = View().discovery.retrieve_relevant_documents_for_concepts(
+                    concepts=concept2type, document_collections=document_collections)
+
+            # create query documents and get metadata
+            results = list()
+            for collection, document_ids in collection2ids.items():
+                results.extend([QueryDocumentResult(document_id=doc_id, title="", authors="", journals="",
+                                                    publication_year=0, publication_month=0, var2substitution={},
+                                                    confidence=0.0, position2provenance_ids={},
+                                                    document_collection=collection) for doc_id in document_ids])
+
+            # apply filter
+            results = QueryEngine.enrich_document_results_with_metadata(results, collection2ids)
+            results = TitleFilter.filter_documents(results, title_filter)
+
+            if classification_filter:
+                logging.debug(f'Filtering document classifications with {classification_filter}...')
+                results = ClassificationFilter.filter_documents(results, document_classes=classification_filter)
+
+            year_aggregation = TimeFilter.aggregate_years(results)
+            results = TimeFilter.filter_documents_by_year(results, year_start, year_end)
+            results = View().strategy2ranker[View.RANK_BY_TIME].rank_document(None, results)
+
+            # apply pattern discovery
+            results, concept2graph = View().discovery.discover_pattern_for_documents(documents=results, concept2entity=concept2entities)
+
+            # descending or ascending?
+            descending = (sort_order == View.ORDER_DESCENDING)
+
+            # verify valid strategy and set to time since relevance requires a query
+            if sort_by in View.RANKER_SUPPORTED:
+                sort_by = View.RANK_BY_TIME
+
+            # sort finally if ascending is requested
+            results = View().strategy2ranker[sort_by].rank_document(None, results, desc=descending)
+
+            result_list = QueryDocumentResultList()
+            result_list.results = results
+
+            View().query_logger.write_api_call(True, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            data = dict(graph=concept2graph, sort_by=sort_by, sort_order=sort_order,
+                        results=result_list.to_dict(), year_aggregation=year_aggregation, query=raw_concepts)
+            return JsonResponse(status=200, data=data)
+        except (PendingRollbackError, InternalError):
+            handle_rollback_error()
+            return get_pattern_discovery(request)
+        except Exception as e:
+            View().query_logger.write_api_call(False, "get_pattern_discovery_request", str(request),
+                                               time_needed=datetime.now() - time_start)
+            # remove beginning and tailing '
+            message = str(e)[1:-1]
+            log_stack_trace(message, e)
+    return JsonResponse(status=500, data=dict(reason=message))

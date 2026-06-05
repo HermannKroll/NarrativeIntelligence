@@ -2,10 +2,10 @@ import logging
 from argparse import ArgumentParser
 
 from narraint.backend.util import get_db_connection_name
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
-from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
-from narraint.frontend.ui.service_content import update_content_information
+from narraint.entity.autocompletion import AutocompletionUtil
+from narraint.entity.entityexplainer import EntityExplainer
+from narraint.entity.entitytagger import EntityTagger
+from narraint.backend.service_content import update_content_information
 from narrant.build_all_indexes import build_entity_indexes
 from narrant.build_all_tagging_indexes import build_tagging_indexes
 

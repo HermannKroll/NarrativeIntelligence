@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}">
+    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
 {% endblock %}
 
 {% block title %}Narrative Service{% endblock %}
@@ -52,7 +52,7 @@
                 <div class="container" id="drugContent">
                       <h2 id="name" class="fw-bolder" style="text-align: center">ME/CFS Overview (Chronic Fatigue Syndrome)
                           <a href="https://youtu.be/ZOOf_07BXI8" target="_blank" class="w-auto">
-                                <img src="{% static 'icons/help.png' %}" height="40px">
+                                <img src="{% static 'assets/help.png' %}" height="40px">
                           </a>
                       </h2>
                     <p class="d-flex justify-content-center">
@@ -71,7 +71,7 @@
                         <div class="row border-bottom border-dark px-1 pt-1 flex-row">
                             <h5 class="gx-0 fw-bolder mt-1 w-auto">Drug-Target-Disease Network</h5>
                             <a href="https://youtu.be/iLMelMXAXFw" target="_blank" class="w-auto">
-                                <img src="{% static 'icons/help.png' %}" height="40px">
+                                <img src="{% static 'assets/help.png' %}" height="40px">
                             </a>
                         </div>
                         <div class="row vh-90-sm vh-fc bg-dark-grey" id="drugNetworkContainer">
@@ -247,7 +247,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/paper.js' %}?version=14" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 
     <script type="text/javascript">
         const autocompletion_url = "{% url 'autocompletion' %}";
@@ -289,11 +289,11 @@
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         activateOverviewTracking();
     </script>
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
-    <script src="{% static 'js/mecfs.js' %}?version=2" type="text/javascript"></script>
-    <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
+    <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
+    <script src="{% static 'js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/libraries/async.min.js' %}"></script>
+
+    <script src="{% static 'js/overview.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/mecfs.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/feedback.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 {% endblock %}

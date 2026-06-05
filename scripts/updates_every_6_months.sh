@@ -24,14 +24,6 @@ if [[ $? != 0 ]]; then
 fi
 
 
-# Update Schema Graph for Keyword2Graph translation
-python ~/NarrativeIntelligence/src/narraint/keywords2graph/schema_support_graph.py 2> /root/ns_update_every_6_month_err.log
-if [[ $? != 0 ]]; then
-    mailx -s "$SUBJECT" "$ADDRESS" -r "$SENDER" < /root/ns_update_every_6_month_err.log
-    exit -1
-fi
-
-
 # Rebuild the retrieval indexes
 python3 ~/NarrativeIntelligence/src/narraint/queryengine/index/compute_reverse_index_tag.py 2> /root/ns_update_every_6_month_err.log
 if [[ $? != 0 ]]; then

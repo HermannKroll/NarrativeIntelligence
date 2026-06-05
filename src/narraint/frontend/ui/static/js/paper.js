@@ -203,7 +203,16 @@ function fillClassifications(classifications, documentID) {
         header.classList.add('classTagsHeader');
         header.innerText = key + ':';
 
-        tags.innerText = value;
+        if (value === "SVM")
+        {
+            tags.innerText = "Classified by AI";
+        }
+        else
+        {
+            // regular expression based matching; has its explanation
+            tags.innerText = value;
+        }
+
 
         positive.src = ok_symbol_url;
         positive.classList.add("feedbackButton");

@@ -39,3 +39,10 @@ NODE_SIMILARITY_THRESHOLD = 0.3
 
 GRAPH_WEIGHT = 0.6
 BM25_WEIGHT = 0.4
+SBERT_WEIGHT =0.4
+
+# The number of maximum statements that shall explain a recommended document
+# For that we use half of the number for overlapping information and half for added information
+# So in case of 12, 6 overlapping statements and 6 additional are shown at max
+# However, if no overlapping statements were found, than 12 additional statements are shown at max
+NO_STATEMENTS_TO_SHOW_IN_EXPLANATION = 12

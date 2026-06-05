@@ -3,9 +3,9 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/simpleTree.css' %}" type="text/css"/>
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/ui.css' %}" type="text/css"/>
+    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/simpleTree.css' %}" type="text/css"/>
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}" type="text/css"/>
 {% endblock %}
 
 {% block title %}Narrative Service{% endblock %}
@@ -26,18 +26,19 @@
     <!-- search type selection tabs -->
     <div class="container">
         <ul class="nav nav-tabs border-bottom-0">
-            <li class="nav-item" onclick="setKeywordSearchHelp()">
+            <li class="nav-item" onclick="setQueryBuilderHelp()">
                 <a class="nav-link active" data-bs-toggle="tab" href="#search-type-query" role="tab">Query Builder</a>
             </li>
-            <li class="nav-item" onclick="setQueryBuilderHelp()">
+            <li class="nav-item" onclick="setKeywordSearchHelp()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-graph" role="tab">Keyword Search</a>
             </li>
-            <!--
             <li class="nav-item" onclick="setUpRecommenderSearch()">
                 <a class="nav-link" data-bs-toggle="tab" href="#search-type-recommender" role="tab">Recommender
                     (Beta)</a>
             </li>
-            -->
+            <li class="nav-item" onclick="setUpPatternDiscoverySearch()">
+                <a class="nav-link" data-bs-toggle="tab" href="#search-type-pattern-discovery" role="tab">Pattern Discovery (Beta)</a>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -104,6 +105,23 @@
                     Please be patient. This process can take up to one minute.
                 </p>
                 <div class="alert alert-danger" style="display:none" id="alert_translation" role="alert"></div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center">
+                            <h6>How to Search:
+                                <a href="https://youtu.be/iagphBPLokM" target="_blank" id="searchHelpAnchor">
+                                    <img src="{% static 'assets/help.png' %}" height="40px">
+                                </a>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- keyword search  -->
             <div class="tab-pane fade" id="search-type-graph">
@@ -130,9 +148,13 @@
                         <div class="row d-flex flex-wrap justify-content-center" id="query_graphs"></div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
+                </div>
             </div>
             <!-- recommendation -->
-            <!--
             <div class="tab-pane fade" id="search-type-recommender">
                 <div class="row">
                     <div class="input-group">
@@ -152,29 +174,68 @@
                     </p>
                     <div class="alert alert-danger" style="display:none" id="alert_recommender" role="alert"></div>
                 </div>
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <a href="javascript:openHistory()">Search History</a>
+                    </div>
+                </div>
             </div>
-            -->
+            <!-- knowledge paths -->
+            <div class="tab-pane fade" id="search-type-pattern-discovery">
+                <div class="row">
+                    <div class="input-group">
+                        <input type="text" class="form-control" aria-label="Concepts" id="input-path-concepts"
+                               placeholder="enter keywords and press enter  (e.g. metformin diabetes mellitus injection)">
+                        <button class="btn btn-success" type="button" id="button-add-path-concepts" onclick="addPatternDiscoveryConcept()">
+                            Add
+                        </button>
+                        <button class="btn btn-primary" type="button" id="button-submit-path-concepts" onclick="searchPatternDiscovery()">
+                            <span class="spinner-border spinner-border-sm d-none" id="spinner-search-path-concepts"
+                                  role="status"></span>
+                            Search
+                        </button>
+                    </div>
+                   <div class="d-flex w-100 flex-row flex-wrap" id="path-concept-list"></div>
+                    <div class="text-start mt-0 mb-3">
+                         <button class="btn btn-danger" type="button" id="btn_clear_search_discovery" onclick="clearSearchFormDiscovery()"
+                                style="display: none;margin-top: 5px;">
+                            Clear Search
+                        </button>
+                    </div>
+                    <div class="w-100">
+                        <div class="alert alert-danger d-none mt-1" role="alert" id="alert-path-concepts"></div>
+                    </div>
+                    <div class="col-2 mt-2" id="div-checkbox-path-concepts">
+                        <div class="rounded border d-flex flex-column d-none" id="checkbox-path-concepts"></div>
+                    </div>
+                    <div class="col-10 d-none mt-2" id="container-div-path-concepts">
+                        <div class="rounded border">
+                            <!-- result query graph -->
+                            <div class="row d-flex flex-wrap justify-content-center" id="graph-div-path-concepts"></div>
+                            <div class="input-group mx-auto mb-auto me-sm-0 w-auto p-1 h-fc justify-content-end">
+                                    <span class="input-group-text ml-auto" id="path-concepts-num-edges">Top 10</span>
+                                    <div class="input-group-text">
+                                        <input type="range" class="form-range mx-0 mx-sm-0" id="path-concepts-slider" min="1" max="51" value="6" step="1" oninput="updateKnowledgeGraph()">
+                                    </div>
+                                    <!--<button class="btn btn-secondary" onclick="clearPatternDiscovery()">Clear Selection</button>-->
+                                    <button class="btn btn-secondary" onclick="centerPatternDiscovery()">
+                                        Center
+                                    </button>
+                                    <!--<button class="btn btn-secondary d-flex align-items-center" onclick="toggleFullscreenPatternDiscovery('drugNetwork')">
+                                        <svg class="me-1" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"></path>
+                                        </svg>
+                                        <span type="button" id="drugNetworkFullscreen">Fullscreen</span>
+                                    </button>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="container">
-        <div class="row">
-            <div class="col d-flex justify-content-center">
-                <a href="javascript:openHistory()">Search History</a>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-center">
-                    <h6>How to Search:
-                        <a href="https://youtu.be/iagphBPLokM" target="_blank" id="searchHelpAnchor">
-                            <img src="{% static 'icons/help.png' %}" height="40px">
-                        </a>
-                    </h6>
-                </div>
-            </div>
-        </div>
         <!-- "Bootstrap Modal" (popup window) for ATC classes -->
         <div class="modal" id="atcModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-xl modal-dialog-scrollable"
@@ -482,11 +543,11 @@
         <div class="row flex-lg-row flex-column">
             <!-- left column: filter options menu-->
             <div class="col col-lg-2 mb-2 mb-lg-0">
-                <form class="border rounded px-2">
+                <form class="border rounded px-1">
                     <!-- Collection class filter -->
                     <div class="row m-1 align-items-center border-bottom" id="collection-filter">
                         <label class="g-0">
-                            <strong>Data Source:</strong>
+                            <strong>Data Sources:</strong>
                         </label>
                     </div>
 
@@ -507,7 +568,7 @@
                     </div>
 
                     <!-- Visualization Buttons -->
-                    <div class="row m-1 align-items-center d-flex border-bottom" id="visualization_filter">
+                    <div class="row m-1 align-items-center d-none d-flex border-bottom" id="visualization_filter">
                         <label class="g-0"><strong>Visualization by:</strong></label>
 
 
@@ -549,17 +610,16 @@
             <div class="col">
                 <div id="resultdiv">
                     <div class="row" id="document_preview"></div>
-                    <div class="row">
-                        <div class="col-12">
+                    <div class="row justify-content-between">
+                        <div class="col-12 col-md-4">
                             <h2 id="document_header">Results:
-
                                 <a href="https://youtu.be/DrG1u8497g0" target="_blank">
-                                    <img src="{% static 'icons/help.png' %}" height="40px">
+                                    <img src="{% static 'assets/help.png' %}" height="40px">
                                 </a>
                             </h2>
                         </div>
-                    </div>
-                    <div class="row">
+
+                        <!-- page filter -->
                         <div class="col-12 col-md-4" id="div_input_page" style="display: none">
                             <div class="input-group w-100">
                                 <label class="input-group-text" for="input_page_no">Page: </label>
@@ -570,22 +630,37 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-md-4" id="sorting_year_container">
-                            <select class="form-select w-100" id="select_sorting_year"
-                                    style="width: auto; display: none">
-                                <option selected value="True">Latest Publications First</option>
-                                <option value="False">Oldest Publications First</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12 col-md-4">
-                            <select class="form-select w-100" id="select_sorting_freq"
-                                    style="width: auto; display: none">
-                                <option selected value="True">Most Frequent Substitutions First</option>
-                                <option value="False">Unusual Substitutions First</option>
-                            </select>
+                        <!-- sort filter -->
+                        <div class="col-12 col-md-4 d-none" id="sorting_container">
+                            <div class="input-group w-100">
+                                <select class="form-select" id="select_sorting_filter" onchange="searchClick()">
+                                    <option id="sorting-filter-time" selected value="time">Publication Date</option>
+                                    <option id="sorting-filter-graph" value="graph">Relevance (Beta)</option>
+                                    <option id="sorting-filter-freq" value="freq" class="d-none">Substitution Frequency</option>
+                                </select>
+                                <button class="btn border" onclick="sortOrderClick()"
+                                        id="button-sorting-filter">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor"
+                                         viewBox="0 0 16 16" id="sorting-order-down" class="w-100 h-100">
+                                         <path d="M3.5 2.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999
+                                         .007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 11.293zm3.5 1a.5.5
+                                          0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5M7.5 6a.5.5 0 0 0 0 1h5a.5.5 0
+                                          0 0 0-1zm0 3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h1a.5.5 0 0 0
+                                          0-1z"></path>
+                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor"
+                                         viewBox="0 0 16 16" id="sorting-order-up" class="d-none w-100 h-100">
+                                        <path d="M3.5 12.5a.5.5 0 0 1-1 0V3.707L1.354 4.854a.5.5 0 1 1-.708-.708l2-1.999
+                                        .007-.007a.5.5 0 0 1 .7.006l2 2a.5.5 0 1 1-.707.708L3.5 3.707zm3.5-9a.5.5 0 0 1
+                                        .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5M7.5 6a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1
+                                        zm0 3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <label for="input_title_filter" id="input_title_filter_label" class="col-12 col-md-8 d-none">Search
                             in result titles:</label>
@@ -761,20 +836,19 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+    <script src="{% static 'js/libraries/jquery-ui.1.12.1.min.js'%}"></script>
     <!-- used for paper view popup -->
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
+    <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
+    <script src="{% static 'js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/libraries/async.min.js' %}"></script>
 
-    <script src="{% static 'js/search.js' %}?version=41" type="text/javascript"></script>
-    <script src="{% static 'js/paper.js' %}?version=25" type="text/javascript"></script>
-    <!-- as found on https://www.jqueryscript.net/other/hierarchical-searchable-tree.html -->
+    <script src="{% static 'js/search.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?v={{ v_tag }}" type="text/javascript"></script>
     <script src="{% static 'js/simpleTree.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/search_history.js' %}?version=3" type="text/javascript"></script>
-    <script src="{% static 'js/keyword_search.js' %}?version=8" type="text/javascript"></script>
-    <script src="{% static 'js/recommender_search.js' %}?version=8" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/keyword_search.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/recommender_search.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/pattern_discovery.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 
     <script type="text/javascript">
         const document_url = "{% url 'document' %}";
@@ -788,7 +862,7 @@
         const explain_document_url = "{% url 'explain_document' %}";
         const report_url = "{% url 'report' %}";
         const document_clicked_url = "{% url 'document_clicked' %}";
-        const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.png'  %}";
+        const pubpharm_image_url = "{% static 'fid_pubpharm_logo_comb.svg'  %}";
         const ok_symbol_url = "{% static 'ok.png' %}";
         const cancel_symbol_url = "{% static 'cancel.png' %}";
         const search_icon_url = "{% static 'assets/searchicon.svg' %}"
@@ -800,6 +874,7 @@
         const url_available_collections = "{% url 'document_collections' %}";
         const url_available_classifications = "{% url 'document_classifications' %}";
         const url_document_classification_feedback = "{% url 'document_classification_feedback' %}";
+        const url_pattern_discovery = "{% url 'pattern_discovery' %}";
 
         const url_document_graph = "{% url 'document_graph' %}";
         const url_narrative_documents = "{% url 'narrative_documents' %}";

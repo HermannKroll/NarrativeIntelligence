@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Set, Dict, List
 
 from sqlalchemy import Column, String, ForeignKeyConstraint, PrimaryKeyConstraint, \
     BigInteger, insert, Integer, Date, delete
@@ -36,6 +37,67 @@ class TagInvertedIndex(Extended, DatabaseTable):
     def prepare_document_ids(document_ids_str: str):
         return list(int(doc_id) for doc_id in document_ids_str.strip("[]").split(","))
 
+    @staticmethod
+    def retrieve_document_ids_for_entity(session, entity_id: str, entity_type: str,
+                                         document_collections: List[str] = None) -> Dict[str, Set[int]]:
+        """
+        Retrieves a dictionary mapping document collections to document ids in which the entity was detected
+        :param session: session
+        :param entity_id: entity id to search
+        :param entity_type: entity type to search
+        :param document_collections: optional collections to search
+        :return: a dictionary mapping document collections to document ids in which the entity was detected
+        """
+        collection2ids = dict()
+        query = session.query(TagInvertedIndex.document_collection, TagInvertedIndex.document_ids)
+        query = query.filter(TagInvertedIndex.entity_type == entity_type, TagInvertedIndex.entity_id == entity_id)
+        if document_collections:
+            if len(document_collections) == 1:
+                query = query.filter(TagInvertedIndex.document_collection == document_collections[0])
+            else:
+                query = query.filter(TagInvertedIndex.document_collection.in_(document_collections))
+
+        for row in query:
+            if row.document_collection not in collection2ids:
+                collection2ids[row.document_collection] = set()
+
+            collection2ids[row.document_collection] |= set(TagInvertedIndex.prepare_document_ids(row.document_ids))
+
+        return collection2ids
+
+    @staticmethod
+    def retrieve_document_ids_for_entities(session, entity_ids: List[str], entity_types: List[str],
+                                           document_collections: List[str] = None) -> Dict[
+        str, Set[int]]:
+        """
+        Retrieves a dict mapping document collections to document ids in which one of the entities was detected
+        :param session: session
+        :param entity_ids: entity ids to search
+        :param entity_types: entity types to search
+        :param document_collections: optional collections to search
+        :return: dict mapping document collections to document ids in which one of the entities was detected
+        """
+        if len(entity_types) == 1 and len(entity_ids) == 1:
+            return TagInvertedIndex.retrieve_document_ids_for_entity(session, entity_ids[0], entity_types[0],
+                                                                     document_collections=document_collections)
+
+        collection2ids = dict()
+        query = session.query(TagInvertedIndex.document_collection, TagInvertedIndex.document_ids)
+        query = query.filter(TagInvertedIndex.entity_type.in_(entity_types), TagInvertedIndex.entity_id.in_(entity_ids))
+        if document_collections:
+            if len(document_collections) == 1:
+                query = query.filter(TagInvertedIndex.document_collection == document_collections[0])
+            else:
+                query = query.filter(TagInvertedIndex.document_collection.in_(document_collections))
+
+        for row in query:
+            if row.document_collection not in collection2ids:
+                collection2ids[row.document_collection] = set()
+
+            collection2ids[row.document_collection] |= set(TagInvertedIndex.prepare_document_ids(row.document_ids))
+
+        return collection2ids
+
 
 class TermInvertedIndex(Extended, DatabaseTable):
     __tablename__ = "term_inverted_index"
@@ -68,10 +130,6 @@ class Tagger(models.Tagger):
 
 
 class DocTaggedBy(models.DocTaggedBy):
-    pass
-
-
-class DocumentTranslation(models.DocumentTranslation):
     pass
 
 
@@ -129,15 +187,6 @@ class EntityKeywords(Extended, DatabaseTable):
         session.commit()
 
 
-class SchemaSupportGraphInfo(Extended, DatabaseTable):
-    __tablename__ = "schema_support_graph_info"
-
-    subject_type = Column(String, nullable=False, primary_key=True)
-    relation = Column(String, nullable=False, primary_key=True)
-    object_type = Column(String, nullable=False, primary_key=True)
-    support = Column(Integer, nullable=False)
-
-
 class DrugDiseaseTrialPhase(Extended, DatabaseTable):
     __tablename__ = "drug_disease_trial_phase"
 
@@ -185,6 +234,7 @@ class EntityTaggerData(Extended, DatabaseTable):
 class EntityExplainerData(Extended, DatabaseTable):
     __tablename__ = "entity_explainer_data"
     entity_id = Column(String, primary_key=True)
+    entity_type = Column(String, primary_key=True)
     entity_terms = Column(String)
 
     @staticmethod
@@ -197,6 +247,10 @@ class EntityExplainerData(Extended, DatabaseTable):
 
 
 class ContentData(Extended, DatabaseTable):
+    CONTENT_DATA_COLLECTIONS = "collections"
+    CONTENT_DATA_ENTITY_TYPES = "entity_types"
+    CONTENT_DATA_STATEMENTS = "relations"
+
     __tablename__ = "content_data"
     name = Column(String, primary_key=True)
     data = Column(String, nullable=False)

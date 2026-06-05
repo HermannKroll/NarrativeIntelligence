@@ -22,7 +22,7 @@ The project consists of two parts.
 Make sure which part you want to setup and run:
 - Narrative Service (see [Readme](README_Service.md))
 - Mining scripts to update the service data (see [Readme](README_Mining.md))
-
+- PyCharm as a remote development environment (see [Readme](README_Development.md))
 
 # Development
 

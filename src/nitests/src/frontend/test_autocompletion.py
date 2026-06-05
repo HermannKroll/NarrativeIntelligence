@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from narraint.frontend.entity.autocompletion import AutocompletionUtil
+from narraint.entity.autocompletion import AutocompletionUtil
 
 
 class AutocompletionTestCase(TestCase):

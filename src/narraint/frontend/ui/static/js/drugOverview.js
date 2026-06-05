@@ -98,11 +98,19 @@ buildSite().catch((e) => console.log(e));
 async function buildSite() {
     networkData = {drug: "drugAssoc", target: "targInter", disease: "indi", phase: true}
 
-    const search = await getSearchParam();
+    await getSearchParam();
     createDynamicOverviews();
+    buildDocumentCollectionFilter();
 
-    const keyword = search.split("=")[1];
-    const keywordDecoded = decodeURI(keyword);
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get('drug');
+
+    if (!keyword) {
+        console.error("No drug specified in URL");
+        return;
+    }
+
+    const keywordDecoded = decodeURIComponent(keyword);
     document.getElementById('drugInput').value = keywordDecoded;
     // Matomo Tracking
     _paq.push(['trackSiteSearch', keywordDecoded, "Drug"]);
@@ -427,8 +435,7 @@ async function adveDataCallback() {
     overviews[prefix].fullData = altData;
     overviews[prefix].visibleData = altData;
     overviews[prefix].altData = fullData;
-
-    overviews[prefix].count = fullData[0].count;
+    overviews[prefix].count = fullData?.[0]?.count ?? 0;
 }
 
 /**
@@ -520,3 +527,25 @@ async function closeOverviewForwarding(forward = false) {
     document.body.style.overflowY = "auto";
     document.getElementById("searched_drug").innerHTML = "";
 }
+
+refresh = async function (token) {
+    for (let prefix in overviews) {
+        startLoading(prefix);
+    }
+    startLoading("drugNetwork");
+    if (token !== currentRefreshToken) {
+        console.warn("Ignored outdated refresh call.");
+        return;
+    }
+
+    try {
+        await loadOverviewData();
+        if (token !== currentRefreshToken) {
+            console.warn("Ignored outdated refresh after load.");
+            return;
+        }
+        await createNetworkGraph();
+    } catch (error) {
+        console.error("Error while refreshing data:", error);
+    }
+};

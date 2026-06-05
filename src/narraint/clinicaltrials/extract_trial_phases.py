@@ -107,7 +107,7 @@ class ClinicalTrialPhaseExtractor:
 
         with open(self.clinical_trial_file, newline='') as csvfile:
             csv_reader = csv.DictReader(csvfile)
-            total_rows = sum(1 for row in csv_reader)
+            total_rows = sum(1 for _ in csv_reader)
             csvfile.seek(0)
             idx = 0
             start_time = datetime.now()

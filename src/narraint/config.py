@@ -15,7 +15,6 @@ LOG_DIR = os.path.join(GIT_ROOT_DIR, "logs")
 TMP_DIR = os.path.join(GIT_ROOT_DIR, "tmp")
 TMP_DIR_TAGGER = os.path.join(TMP_DIR, 'tagger')
 CACHE_DIR = os.path.join(GIT_ROOT_DIR, 'cache')
-CODE_DIR = os.path.join(GIT_ROOT_DIR, 'narraint')
 
 FEEDBACK_DIR = os.path.join(GIT_ROOT_DIR, 'feedback')
 FEEDBACK_REPORT_DIR = os.path.join(FEEDBACK_DIR, 'reports')
@@ -27,6 +26,7 @@ QUERY_YIELD_PER_K = 1000000
 BULK_INSERT_AFTER_K = 100000
 
 AUTOCOMPLETION_PARTIAL_TERM_THRESHOLD = 5
+AUTOCOMPLETION_RETRIEVE_K_SUGGESTIONS = 10
 
 if not os.path.isdir(TMP_DIR):
     os.makedirs(TMP_DIR)

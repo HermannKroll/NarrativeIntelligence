@@ -275,6 +275,8 @@ function refreshSearch(fromUrl = false) {
         }
         if (current_search_method === 'recommender') {
             recommenderSearch();
+        } else if (current_search_method === "discovery") {
+            searchPatternDiscovery();
         } else {
             document.getElementById("btn_search").click();
         }
@@ -285,12 +287,148 @@ function result_present() {
     return $("#div_documents")[0].hasChildNodes()
 }
 
-document.getElementById("select_sorting_year").addEventListener("change", function () {
-    document.getElementById("btn_search").click()
-});
-document.getElementById("select_sorting_freq").addEventListener("change", function () {
-    document.getElementById("btn_search").click()
-});
+/**
+ * Submit the search process.
+ */
+function searchClick() {
+    if (current_search_method === "recommender"){
+        recommenderSearch();
+    } else if (current_search_method === "discovery"){
+        searchPatternDiscovery();
+    } else {
+        document.querySelector("#btn_search").click()
+    }
+}
+
+/**
+ * Event to change the current sort order.
+ * First, the visual element is changed, and second,
+ * the search is submitted.
+ */
+function sortOrderClick() {
+    const orderDesc = document.querySelector("#sorting-order-down");
+    const orderAsc = document.querySelector("#sorting-order-up");
+
+    if (orderAsc.classList.contains("d-none")) {
+        // currently descending
+        orderDesc.classList.add("d-none");
+        orderAsc.classList.remove("d-none");
+    } else {
+        // currently ascending
+        orderDesc.classList.remove("d-none");
+        orderAsc.classList.add("d-none");
+    }
+    searchClick();
+}
+
+/**
+ * Get the current sorting order, either descending or ascending.
+ * @returns {string}
+ */
+function sortOrderGet() {
+    // return desc if asc is disabled
+    if (document.querySelector("#sorting-order-up").classList.contains("d-none"))
+        return "desc";
+    return "asc"
+}
+
+/**
+ * Set the current sorting order. Either descending or ascending.
+ * The function toggles the visible element on the screen.
+ * @param order string
+ */
+function sortOrderSet(order) {
+    const orderDesc = document.querySelector("#sorting-order-down");
+    const orderAsc = document.querySelector("#sorting-order-up");
+    if (order === "desc") {
+        orderDesc.classList.toggle("d-none", false);
+        orderAsc.classList.toggle("d-none", true);
+    } else if (order === "asc") {
+        orderDesc.classList.toggle("d-none", true);
+        orderAsc.classList.toggle("d-none", false);
+    }
+}
+
+/**
+ * Change the accessible sorting strategies based on the result.
+ * If the query has a variable, only frequency sorting is available,
+ * else time and relevance.
+ * @param queryHasVariables boolean
+ */
+function sortStrategyUpdate(queryHasVariables) {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (queryHasVariables) {
+        // disable default filter methods since they
+        // are not supported with variables
+        filterTime.classList.toggle("d-none", true);
+        if (filterGraph) filterGraph.classList.add("d-none");
+        filterFreq.classList.toggle("d-none", false);
+    } else {
+        filterTime.classList.toggle("d-none", false);
+        if (filterGraph) filterGraph.classList.remove("d-none");
+        filterFreq.classList.toggle("d-none", true);
+    }
+}
+
+/**
+ * Returns the selected sorting strategy; undefined,
+ * if none of the known strategies is selected.
+ * @returns {undefined|string}
+ */
+function sortStrategyGet() {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (filterTime.selected)
+        return "time";
+    else if (filterFreq.selected)
+        return "freq";
+    if (filterGraph?.selected) return "graph";
+    return undefined;
+}
+
+/**
+ * Set the current ordering strategy
+ * @param sortFilter strategy string
+ */
+function sortStrategySet(sortFilter) {
+    const filterTime = document.querySelector("#sorting-filter-time");
+    const filterGraph = document.querySelector("#sorting-filter-graph");
+    const filterFreq = document.querySelector("#sorting-filter-freq");
+
+    if (sortFilter === filterTime.value) {
+        if (filterGraph) filterGraph.selected = false;
+        filterFreq.selected = false;
+        filterTime.selected = true;
+    } else if (sortFilter === filterGraph.value) {
+        filterTime.selected = false;
+        filterFreq.selected = false;
+        filterGraph.selected = true;
+    } else if (sortFilter === filterFreq.value) {
+        filterTime.selected = false;
+        if (filterGraph) filterGraph.selected = false;
+        filterFreq.selected = true;
+    }
+}
+
+/**
+ * Update a single parameter of the current active URL.
+ * The state is replaced such that navigating back to this point,
+ * the new parameter is used.
+ * @param key of the URL parameter
+ * @param value of the new parameter
+ */
+function updateURLParameter(key, value) {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(key))
+        return;
+    url.searchParams.set(key, value);
+    window.history.replaceState("Query", "", "/" + url.search.toString());
+}
 
 let imgrect = {width: 0, height: 0};
 document.getElementById("screenshot").addEventListener('load', (e) => {
@@ -434,6 +572,8 @@ $(document).ready(async function () {
         if (e.key === 'Enter' || e.keyCode === 13) {
             if (current_search_method === "recommender") {
                 recommenderSearch();
+            } else if (current_search_method === "discovery") {
+                searchPatternDiscovery();
             } else {
                 search(e);
             }
@@ -547,15 +687,37 @@ function initFromURLQueryParams() {
         }
     }
 
+    // The following two cases only exist to support legacy URLs.
+    // Since we do not support both filters in parallel, only one
+    // of them can be selected: if both are provided, `time` has
+    // higher precedence.
+    // The backend catches invalid combinations (e.g. variable use
+    // with `time`) and reports it back to the frontend.
     if (params.has("sort_frequency_desc")) {
-        let sort_frequency = params.get("sort_frequency_desc");
-        document.getElementById('select_sorting_freq').value = sort_frequency;
+        let sort_frequency_desc = params.get("sort_frequency_desc");
+        if (sort_frequency_desc === "False") {
+            sortOrderSet("asc");
+        } else {
+            sortOrderSet("desc");
+        }
+        sortStrategySet("freq");
     }
 
     if (params.has("sort_year_desc")) {
-        let sort_year = params.get("sort_year_desc");
-        document.getElementById('select_sorting_year').value = sort_year;
+        let sort_year_desc = params.get("sort_year_desc");
+        if (sort_year_desc === "False") {
+            sortOrderSet("asc");
+        } else {
+            sortOrderSet("desc");
+        }
+        sortStrategySet("time");
     }
+
+    if (params.has("sort_by"))
+        sortStrategySet(params.get("sort_by"));
+
+    if (params.has("sort_order"))
+        sortOrderSet(params.get("sort_order"));
 
     if (params.has("data_source")) {
         let dataSourceStr = params.get("data_source")
@@ -599,6 +761,10 @@ function initFromURLQueryParams() {
         if (search_method === "recommender") {
             let query_col = params.get("query_col");
             initRecommendSearchFromURL(query, query_col);
+        } else if (search_method === "discovery") {
+            initPatternDiscoveryFromURL(query);
+        } else if (search_method === "keyword") {
+            initKeywordSearchFromURL(query);
         } else {
             switchTab("#search-type-query");
             initQueryBuilderFromString(query);
@@ -665,7 +831,7 @@ const search = (event) => {
     setButtonSearching(true, 'btn_search', 'help_search');
     logInputParameters(parameters);
     updateURLParameters(parameters);
-    
+
     submitSearch(parameters)
         .finally(() => setButtonSearching(false, 'btn_search', 'help_search'));
 }
@@ -718,38 +884,37 @@ function updateURLParameters(parameters) {
         url.searchParams.delete("visualization");
     }
 
-    if (parameters["freq_sort"] !== "True") {
-        url.searchParams.set("sort_frequency_desc", parameters["freq_sort"]);
+    if (current_search_method !== "recommender" && current_search_method !== "keyword") {
+        url.searchParams.set("sort_by", parameters["sort_by"]);
+        url.searchParams.set("sort_order", parameters["sort_order"]);
     } else {
-        url.searchParams.delete("sort_frequency_desc");
+        url.searchParams.delete("sort_by");
+        url.searchParams.delete("sort_order");
     }
 
-    if (parameters["year_sort"] !== "True") {
-        url.searchParams.set("sort_year_desc", parameters["year_sort"]);
-    } else {
-        url.searchParams.delete("sort_year_desc");
-    }
-
-    if (parameters["start_pos"] !== 0) {
+    if (parameters.hasOwnProperty("start_pos") && parameters["start_pos"] !== 0) {
         url.searchParams.set("start_pos", parameters["start_pos"]);
     } else {
         url.searchParams.delete("start_pos");
     }
 
     //   url.searchParams.set("end_pos", end_pos);
-    if (parameters["year_start"] !== undefined && parameters["year_start"] !== document.querySelector("#fromSlider").min) {
+    if (parameters.hasOwnProperty("year_start") &&
+        parameters["year_start"] !== document.querySelector("#fromSlider").min) {
         url.searchParams.set("year_start", parameters["year_start"]);
     } else {
         url.searchParams.delete("year_start");
     }
-    if (parameters["year_end"] !== undefined && parameters["year_end"] !== document.querySelector("#toSlider").max) {
+    if (parameters.hasOwnProperty("year_end") &&
+        parameters["year_end"] !== document.querySelector("#toSlider").max) {
         url.searchParams.set("year_end", parameters["year_end"]);
     } else {
         url.searchParams.delete("year_end");
     }
 
-    if (parameters["use_sys_review"]) {
-        if (!parameters["title_filter"].includes("systemat review")) {
+    if (parameters.hasOwnProperty("use_sys_review") && parameters["use_sys_review"]) {
+        if (parameters.hasOwnProperty("title_filter") &&
+            !parameters["title_filter"].includes("systemat review")) {
             if (parameters["title_filter"].length > 0)
                 parameters["title_filter"] += " ";
             parameters["title_filter"] += "systemat review";
@@ -758,24 +923,24 @@ function updateURLParameters(parameters) {
         parameters["title_filter"] = parameters["title_filter"].replace("systemat review", "");
     }
 
-    if (parameters["title_filter"].length > 0) {
+    if (parameters.hasOwnProperty("title_filter") && parameters["title_filter"].length > 0) {
         url.searchParams.set("title_filter", parameters["title_filter"]);
     } else {
         url.searchParams.delete("title_filter");
     }
 
     // classifications
-    if (parameters["classification_filter"].length > 0) {
+    if (parameters.hasOwnProperty("classification_filter") && parameters["classification_filter"].length > 0) {
         url.searchParams.set("classification_filter", parameters["classification_filter"]);
     } else {
         url.searchParams.delete("classification_filter");
         parameters["classification_filter"] = undefined;
     }
 
-    if (parameters["search_method"]) {
+    if (parameters.hasOwnProperty("search_method") && parameters["search_method"]) {
         url.searchParams.set("search_method", parameters["search_method"]);
     } else {
-        url.searchParams.delete("title_filter");
+        url.searchParams.delete("search_method");
     }
     window.history.pushState("Query", "Title", "/" + url.search.toString());
 }
@@ -792,8 +957,8 @@ function logInputParameters(parameters) {
     message += "Data source                : " + parameters["data_source"] + "\n";
     message += "Outer Ranking              : " + parameters["outer_ranking"] + "\n";
     message += "Inner Ranking              : " + parameters["inner_ranking"] + "\n";
-    message += "Sorting by frequency (desc): " + parameters["freq_sort_desc"] + "\n";
-    message += "Sorting by year (desc)     : " + parameters["year_sort_desc"] + "\n";
+    message += "Sort-by                    : " + parameters["sort_by"] + "\n";
+    message += "Sort-order                 : " + parameters["sort_order"] + "\n";
     message += "Start position             : " + parameters["start_pos"] + "\n";
     message += "End position               : " + parameters["end_pos"] + "\n";
     message += "Start year                 : " + parameters["year_start"] + "\n";
@@ -882,21 +1047,18 @@ function getInputParameters(query) {
         obj["query_col"] = collectionInput.options[collectionInput.selectedIndex].value;
     }
     adjustSelectedPage(obj);
-    obj["freq_sort"] = document.getElementById("select_sorting_freq").value;
-    obj["year_sort"] = document.getElementById("select_sorting_year").value;
+    obj["sort_by"] = sortStrategyGet();
+    obj["sort_order"] = sortOrderGet();
 
     const dataSources = getSelectedDataSources();
     obj["data_source"] = dataSources.join(";");
-
     obj["outer_ranking"] = document.querySelector('input[name = "outer_ranking"]:checked').value;
-    console.log(obj["outer_ranking"]);
-    //let inner_ranking = document.querySelector('input[name = "inner_ranking"]:checked').value;
-    //dict["inner_ranking"] = "NOT IMPLEMENTED";
     obj["title_filter"] = document.getElementById("input_title_filter").value.trim();
 
-    if (latest_valid_query === query) {
+    if (latest_valid_query === query && !document.getElementById("year-filter").classList.contains("d-none")) {
         // same query requested
         // add year filter params only if the filter already contains valid years (of the current search)
+        // and is visible
         obj["year_start"] = document.querySelector("#fromSlider").value;
         obj["year_end"] = document.querySelector("#toSlider").value;
     } else if (latest_valid_query !== "") {
@@ -909,7 +1071,10 @@ function getInputParameters(query) {
     const classifications = getSelectedClassifications();
     obj["classification_filter"] = classifications.join(";");
 
-    obj["use_sys_review"] = document.getElementById("checkbox_sys_review").checked;
+    if (document.getElementById("checkbox_sys_review").checked) {
+        obj["use_sys_review"] = true;
+    }
+
     obj["search_method"] = current_search_method;
     return obj;
 }
@@ -948,8 +1113,7 @@ function showResults(response, parameters) {
 
     let valid_query = response["valid_query"];
     if (valid_query !== true) {
-        document.getElementById("select_sorting_year").style.display = "none";
-        document.getElementById("select_sorting_freq").style.display = "none";
+        document.getElementById("sorting_container").classList.toggle("d-none", true);
         document.getElementById("div_input_page").style.display = "none";
         document.getElementById("input_title_filter").style.display = "none";
         document.getElementById("input_title_filter_label").style.display = "none";
@@ -965,16 +1129,22 @@ function showResults(response, parameters) {
 
     // Hide sort buttons depending on the result
     let is_aggregate = response["is_aggregate"];
-    document.getElementById("select_sorting_year").style.display = "block";
     if (is_aggregate === true) {
-        document.getElementById("select_sorting_freq").style.display = "block";
-        visualizationByContainer.style.display = "block";
-        console.log("vis on");
+        visualizationByContainer.classList.toggle("d-none", false);
     } else {
-        document.getElementById("select_sorting_freq").style.display = "none";
-        visualizationByContainer.style.setProperty("display", "none", "important");
-        console.log("vis off");
+        visualizationByContainer.classList.toggle("d-none", true);
     }
+
+    // sort filter selection
+    sortStrategyUpdate(is_aggregate);
+    sortStrategySet(response["sort_by"]);
+    sortOrderSet(response["sort_order"]);
+
+    // required for invalid strategies (from URL)
+    if (response["sort_by"] !== parameters["sort_by"])
+        updateURLParameter("sort_by", response["sort_by"])
+
+    document.getElementById("sorting_container").classList.toggle("d-none", false);
 
     // Print query translation
     let query_translation = $("#query_translation");
@@ -1049,7 +1219,7 @@ function updateYearFilter(year_aggregation, query_trans_string) {
         xValues.push(year);
         yValues.push(year_aggregation[year]);
     }
-    if (current_search_method === "recommender") {
+    if (current_search_method === "recommender" || current_search_method === "discovery") {
         if (latest_query_translation !== query_trans_string) {
             initializeValues(fromSlider, xValues[0], xValues[0], xValues[xValues.length - 1]);
             initializeValues(toSlider, xValues[xValues.length - 1], xValues[0], xValues[xValues.length - 1]);
@@ -1194,72 +1364,74 @@ const createProvenanceDivElement = (explanations) => {
     try {
         // sort by confidence and create an element for each explanation
         explanations
-            .sort((a, b) => {return (a["conf"] >= b["conf"]) ? -1 : 1;})
+            .sort((a, b) => {
+                return (a["conf"] >= b["conf"]) ? -1 : 1;
+            })
             .forEach(e => {
-            let sentence = e["s"];
-            let predication_ids_str = e['ids'];
-            // an explanation might have multiple subjects / predicates / objects separated by //
-            e["s_str"].split('//').forEach(s => {
-                let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
-                sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">$1</code>')
-            });
-            e["p"].split('//').forEach(p => {
-                let p_reg = new RegExp('(' + p + '[a-z]*)', 'gi');
-                sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
-            });
-            e["o_str"].split('//').forEach(o => {
-                let o_reg = new RegExp('(' + o + '[a-zg]*)', 'gi');
-                sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
-            });
+                let sentence = e["s"];
+                let predication_ids_str = e['ids'];
+                // an explanation might have multiple subjects / predicates / objects separated by //
+                e["s_str"].split('//').forEach(s => {
+                    let s_reg = new RegExp('(' + s + '[a-z]*)', 'gi');
+                    sentence = sentence.replaceAll(s_reg, '<code class="highlighter-rouge">$1</code>')
+                });
+                e["p"].split('//').forEach(p => {
+                    let p_reg = new RegExp('(' + p + '[a-z]*)', 'gi');
+                    sentence = sentence.replaceAll(p_reg, "<mark>$1</mark>")
+                });
+                e["o_str"].split('//').forEach(o => {
+                    let o_reg = new RegExp('(' + o + '[a-zg]*)', 'gi');
+                    sentence = sentence.replaceAll(o_reg, '<code class="highlighter-rouge">$1</code>')
+                });
 
-            if (j === -1) {
-                j = parseInt(e["pos"]) + 1;
-            }
-            if (j !== parseInt(e["pos"]) + 1) {
-                div_provenance_all.append($('<br>'));
-                j = parseInt(e["pos"]) + 1;
-            }
-
-            let rate_pos_id = getUniqueRateButtonID();
-            let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
-            let rate_neg_id = getUniqueRateButtonID();
-            let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
-
-            div_rate_pos.click(function () {
-                if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
-                    $('#' + rate_pos_id).fadeOut();
-                    $('#' + rate_neg_id).fadeOut();
+                if (j === -1) {
+                    j = parseInt(e["pos"]) + 1;
+                }
+                if (j !== parseInt(e["pos"]) + 1) {
+                    div_provenance_all.append($('<br>'));
+                    j = parseInt(e["pos"]) + 1;
                 }
 
+                let rate_pos_id = getUniqueRateButtonID();
+                let div_rate_pos = $('<img class="feedbackButton" id="' + rate_pos_id + '" src="' + ok_symbol_url + '" title="correct provenance">');
+                let rate_neg_id = getUniqueRateButtonID();
+                let div_rate_neg = $('<img class="feedbackButton" id="' + rate_neg_id + '" src="' + cancel_symbol_url + '" title="wrong provenance">');
+
+                div_rate_pos.click(function () {
+                    if (rateExtraction(true, predication_ids_str, () => div_rate_pos.trigger('click'))) {
+                        $('#' + rate_pos_id).fadeOut();
+                        $('#' + rate_neg_id).fadeOut();
+                    }
+
+                });
+                div_rate_neg.click(function () {
+                    if (rateExtraction(false, predication_ids_str, () => div_rate_neg.trigger('click'))) {
+                        $('#' + rate_pos_id).fadeOut();
+                        $('#' + rate_neg_id).fadeOut();
+                    }
+                });
+
+                let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
+                div_col_rating.append(div_rate_pos);
+                div_col_rating.append(div_rate_neg);
+
+
+                let div_provenance = $('<div class="col-11">' +
+                    j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
+                    e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
+                    '</div>');
+
+                let div_prov_example = $('<div class="container mt-1 border-top">');
+                let div_prov_example_row = $('<div class="row">');
+
+                div_prov_example_row.append(div_provenance);
+                div_prov_example_row.append(div_col_rating);
+                div_prov_example.append(div_prov_example_row);
+
+                div_provenance_all.append(div_prov_example);
+
+
             });
-            div_rate_neg.click(function () {
-                if (rateExtraction(false, predication_ids_str, () => div_rate_neg.trigger('click'))) {
-                    $('#' + rate_pos_id).fadeOut();
-                    $('#' + rate_neg_id).fadeOut();
-                }
-            });
-
-            let div_col_rating = $('<div class="col-1 d-flex flex-row align-items-center">');
-            div_col_rating.append(div_rate_pos);
-            div_col_rating.append(div_rate_neg);
-
-
-            let div_provenance = $('<div class="col-11">' +
-                j + '. ' + sentence + "<br>[" + e["s_str"] + ", " + e["p"] + " -> " +
-                e["p_c"] + ", " + e["o_str"] + ']' + "<small><i> - confidence: " + e["conf"] + "</i></small>" +
-                '</div>');
-
-            let div_prov_example = $('<div class="container mt-1 border-top">');
-            let div_prov_example_row = $('<div class="row">');
-
-            div_prov_example_row.append(div_provenance);
-            div_prov_example_row.append(div_col_rating);
-            div_prov_example.append(div_prov_example_row);
-
-            div_provenance_all.append(div_prov_example);
-
-
-        });
     } catch (SyntaxError) {
 
     }
@@ -1355,6 +1527,9 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         document_id = queryResult["org_document_id"];
         doiText = "DOI";
     }
+    if(["Preprints","Patents","ClinicalTrials"].includes(collection)){
+        doiText = "ID";
+    }
 
     let doi = queryResult["doi"];
 
@@ -1379,9 +1554,15 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
     divDoc_Body.append(divDoc_Image);
     divDoc_Body.append(divDoc_DocumentGraph);
 
-    let divDoc_Content = $('<br><b>' + title + '</b><br>' +
-        "in: " + journals + " | " + month + year + '<br>' +
-        "by: " + authors + '<br>');
+    let divDoc_Content = "";
+    if( authors.length == 0 ){
+        divDoc_Content = $('<br><b>' + title + '</b><br>' +
+            "in: " + journals + " | " + month + year + '<br>');
+    } else {
+        divDoc_Content = $('<br><b>' + title + '</b><br>' +
+            "in: " + journals + " | " + month + year + '<br>' +
+            "by: " + authors + '<br>');
+    }
 
     divDoc_Body.append(divDoc_Content);
     let divDocRecommenderLink = $(
@@ -1390,7 +1571,7 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
 
     divDoc_Card.append(divDoc_Body);
     divDoc_Body.append(divDoc_Body_Link);
-    // divDoc_Body.append(divDocRecommenderLink); // TODO deactivate for now
+    divDoc_Body.append(divDocRecommenderLink);
 
 
     let unique_div_id = "prov_" + uniqueProvenanceID;
@@ -1411,8 +1592,10 @@ const createResultDocumentElement = (queryResult, parentContainerID) => {
         }
     });
 
-    divDoc_Card.append(div_provenance_button);
-    divDoc_Card.append(div_provenance_collapsable_block);
+    if (current_search_method !== "discovery") {
+        divDoc_Card.append(div_provenance_button);
+        divDoc_Card.append(div_provenance_collapsable_block);
+    }
 
     let divFinal = $('<div/>');
     divFinal.append(divDoc_Card);
@@ -1842,35 +2025,37 @@ async function buildDocumentCollectionFilter() {
         return;
 
     const collectionFilter = document.getElementById("collection-filter");
-    const maxPriority = Math.max(...collections.map(o => o["priority"]))
-    const maxPriorityIndex = collections.findIndex((e) => {
-        return e["priority"] === maxPriority
-    });
+    const urlParams = new URL(window.location.href).searchParams;
+    const activeDataSourceParam = urlParams.get('data_source');
+    const activeDataSources = activeDataSourceParam ? activeDataSourceParam.split(";") : [];
 
-    for (const i in collections) {
-        const dc = collections[i];
-
-        const inputId = "filter_" + dc["collection"];
+    for (const collection of collections) {
+        const inputId = "filter_" + collection["collection"];
         const filterInput = document.createElement("input");
         filterInput.type = "checkbox";
         filterInput.id = inputId;
         filterInput.name = "data_source";
         filterInput.classList.add(["col-1"]);
-        filterInput.value = dc["collection"];
+        filterInput.value = collection["collection"];
         filterInput.onclick = refreshSearch;
 
-        if (i === maxPriorityIndex.toString())
-            filterInput.checked = true;
+        if (activeDataSources.length > 0) {
+            // data source selected in url
+            filterInput.checked = activeDataSources.includes(collection["collection"]);
+        } else {
+            // data source selected in server configuration
+            filterInput.checked = collection["selected"];
+        }
 
         const filterHelpAnchor = document.createElement("a");
-        filterHelpAnchor.href = dc["url"];
+        filterHelpAnchor.href = collection["url"];
         filterHelpAnchor.target = "_blank";
         filterHelpAnchor.text = "Help";
 
         const filterLabel = document.createElement("label");
         filterLabel.classList.add(["col-11"]);
         filterLabel.htmlFor = inputId;
-        filterLabel.append(dc["label"] + " (", filterHelpAnchor, ")");
+        filterLabel.append(collection["label"] + " (", filterHelpAnchor, ")");
 
         collectionFilter.append(filterInput, filterLabel);
     }
@@ -2120,18 +2305,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input_object').addEventListener('input', toggleClearSearchButton);
 
     const observer = new MutationObserver(toggleClearSearchButton);
-    observer.observe(document.getElementById('query_builder_list'), { childList: true });
+    observer.observe(document.getElementById('query_builder_list'), {childList: true});
 });
 
 
 const exampleQueriesContainer = document.getElementById("exampleQueries");
-const sortingYearContainer = document.getElementById("sorting_year_container");
+const sortingYearContainer = document.getElementById("sorting_container");
 const previewContainer = document.getElementById('document_preview');
 
 /**
  * The function sets the help settings for the keyword search tab.
  */
-function setKeywordSearchHelp() {
+function setQueryBuilderHelp() {
     current_search_method = 'query_builder';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "https://youtu.be/iagphBPLokM";
@@ -2143,7 +2328,7 @@ function setKeywordSearchHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.setProperty("display", "none", "important");
+        visualizationByContainer.classList.toggle("d-none", true);
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2153,7 +2338,7 @@ function setKeywordSearchHelp() {
 /**
  * The function sets the help settings for the query builder tab.
  */
-function setQueryBuilderHelp() {
+function setKeywordSearchHelp() {
     current_search_method = 'keyword';
     let anchor = document.getElementById("searchHelpAnchor");
     anchor.href = "#";
@@ -2166,7 +2351,7 @@ function setQueryBuilderHelp() {
         sortingYearContainer.style.display = "block";
     }
     if (visualizationByContainer) {
-        visualizationByContainer.style.display = "block";
+        visualizationByContainer.classList.toggle("d-none", false);
     }
     if (previewContainer) {
         previewContainer.style.display = "none";
@@ -2229,4 +2414,11 @@ async function setUpRecommenderSearch() {
     }
 
     await loadCollectionDropDownMenu();
+}
+
+function setUpPatternDiscoverySearch() {
+    current_search_method = "discovery";
+    if (exampleQueriesContainer) {
+        exampleQueriesContainer.style.display = "none";
+    }
 }

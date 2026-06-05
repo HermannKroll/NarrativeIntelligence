@@ -6,7 +6,7 @@
     <title>Logging Dashboard</title>
     <link rel="stylesheet" href="{% static 'css/logs.css' %}">
 </head>
-<script src="{% static 'js/../../static/js/../../static/js/libraries/Chart.min.js' %}">
+<script src="{% static 'js/libraries/Chart.min.js' %}">
 </script>
 <body>
     <div id="top" class="container">
@@ -179,7 +179,7 @@
 
     <div id="dashboard"></div>
 
-    <script src="{% static 'js/json_logger_data.js' %}?version=4"></script>
+    <script src="{% static 'js/json_logger_data.js' %}?v={{ v_tag }}"></script>
     <script type="text/javascript">
         const logs_url = "{% url 'logs' %}";
     </script>

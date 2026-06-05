@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/../../static/css/../../static/css/drugOverview.css' %}">
+    <link rel="stylesheet" href="{% static 'css/drugOverview.css' %}">
 {% endblock %}
 
 {% block title %}Narrative Service{% endblock %}
@@ -12,7 +12,15 @@
 
     <div class="d-flex flex-row overflow-scroll">
         <div class="container-xl py-1 px-lg-2 ms-2 mt-2 me-0 ms-lg-5 me-lg-5 px-4 d-none d-lg-block col-lg-2 border rounded wide-size-sidebar">
-            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>
+            <div class="row m-1 align-items-center border-bottom" id="collection-filter">
+                <label class="g-0">
+                    <strong>Data Source:</strong>
+                </label>
+            </div>
+{#            <p class="row g-0 fw-bolder fs-6 justify-content-center">Overview</p>#}
+            <label class="g-0">
+                    <strong>Overview:</strong>
+            </label>
             <div class="" id="sidebar_entries"></div>
 
         </div>
@@ -155,7 +163,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/paper.js' %}?version=16" type="text/javascript"></script>
+    <script src="{% static 'js/paper.js' %}?v={{ v_tag }}" type="text/javascript"></script>
     <script type="text/javascript">
         const autocompletion_url = "{% url 'autocompletion' %}";
         const ok_symbol_url = "{% static 'ok.png' %}";
@@ -169,6 +177,7 @@
         const url_feedback_report = "{% url 'report' %}";
         const url_suggest_drug_report = "{% url 'suggest_drug' %}";
         const url_keywords = "{% url 'keywords' %}";
+        const url_available_collections = "{% url 'document_collections' %}";
 
         const url_entity_search = "{% url 'entity_search_log' %}";
         const url_substance_href = "{% url 'entity_substance_forward_log' %}";
@@ -188,15 +197,14 @@
         activateOverviewTracking();
     </script>
 
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/mark.min.js' %}"></script>
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/async.min.js' %}"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="{% static 'js/libraries/vis-network.min.js'%}"></script>
+    <script src="{% static 'js/libraries/mark.min.js' %}"></script>
+    <script src="{% static 'js/libraries/async.min.js' %}"></script>
 
 
-    <script src="{% static 'js/overview.js' %}?version=9" type="text/javascript"></script>
-    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?version=7" type="text/javascript"></script>
-    <script src="{% static 'js/generalOverview.js' %}?version=18" type="text/javascript"></script>
-    <script src="{% static 'js/feedback.js' %}?version=7" type="text/javascript"></script>
-    <script src="{% static 'js/search_history.js' %}?version=2" type="text/javascript"></script>
+    <script src="{% static 'js/overview.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/drugOverviewAutoComplete.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/generalOverview.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/feedback.js' %}?v={{ v_tag }}" type="text/javascript"></script>
+    <script src="{% static 'js/search_history.js' %}?v={{ v_tag }}" type="text/javascript"></script>
 {% endblock %}

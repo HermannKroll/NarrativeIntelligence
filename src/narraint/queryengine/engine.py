@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Set, Dict, List
 
+from kgextractiontoolbox.backend.models import Document
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import Predication, Sentence, \
     PredicationInvertedIndex, DocumentMetadataService, TagInvertedIndex, TermInvertedIndex
@@ -134,6 +135,20 @@ class QueryEngine:
         if not graph_query:
             logging.error('Query will not yield results.')
             return query_explanation
+
+
+        # Step 0: translate id because frontend might send us real id (source ids) and not DB ids
+        session = SessionExtended.get()
+        id_query = session.query(Document.id)
+        id_query = id_query.filter(Document.source_id == document_id)
+        id_query = id_query.filter(Document.collection == document_collection)
+
+        # only replace the document id by an artificial one if there is one result
+        # if no source id matches our given document, then we might have received the artificial id and can
+        # continue with the remaining code
+        for result in id_query:
+            logging.debug(f'Replace source document id {document_id} with artificial id {result.id}')
+            document_id = result.id
 
         logging.debug("Query provenance information for doc {} ({})".format(document_id, document_collection))
 

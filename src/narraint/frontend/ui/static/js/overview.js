@@ -62,6 +62,8 @@ let currentDTDnode = "";
  */
 let networkData = null;
 
+let currentRefreshToken = 0;
+
 const VISIBLE_ELEMENTS = 50;
 
 /**
@@ -158,10 +160,11 @@ async function loadPaperData(chemblid = currentChemblID, enttype = "Drug") {
  * @returns {Promise<void>}
  */
 async function loadOverviewData() {
+    const dataSources = getSelectedDataSources().join(";");
     for (let prefix in overviews) {
         const ov = overviews[prefix];
 
-        const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=PubMed`;
+        const url = `${url_query_sub_count}?query=${currentDrugName}+${ov.predicate}+${ov.object}&data_source=${dataSources}`;
         // use await to request one overview after the other
         const data = await fetch(url)
             .then((response) => {
@@ -185,11 +188,10 @@ async function loadOverviewData() {
         const length = data["length"];
         if (length <= 0) {
             doneLoading(prefix);
-            continue;
         }
         overviews[prefix].fullData = data;
         overviews[prefix].visibleData = data;
-        overviews[prefix].count = data[0].count;
+        overviews[prefix].count = data?.[0]?.count ?? 0;
 
         document.getElementById(prefix + "Link").innerText = length;
 
@@ -328,6 +330,7 @@ function sortElements(prefix) {
  */
 async function fillSearchbox(prefix) {
     const searchbox = document.getElementById(prefix + "Content");
+    searchbox.innerHTML = "";
     const maxCount = overviews[prefix].count;
     const data = overviews[prefix].visibleData;
 
@@ -404,8 +407,8 @@ function getLinkToQuery(prefix, item) {
     const subject = currentDrugName.split(' ').join('+');
     const predicate = overviews[prefix].predicate;
     const object = item.name.split("//")[0].split(' ').join('+');
-
-    return `${url_query}?query="${subject}"+${predicate}+"${object}"`;
+    const dataSources = getSelectedDataSources().join(";");
+    return `${url_query}?query="${subject}"+${predicate}+"${object}"&data_source=${dataSources}`;
 }
 
 /**
@@ -867,16 +870,17 @@ function networkUnselectNode() {
  * @param type {String}
  */
 async function retrieveAdditionalEdges(entity, type) {
+    const dataSources = getSelectedDataSources().join(";");
     const startTime = Date.now()
     let entities = []
     if (type === "drug") {
-        let result = await fetch(`${url_query_sub_count}?query=${entity}+interacts+Target&data_source=PubMed`)
+        let result = await fetch(`${url_query_sub_count}?query=${entity}+interacts+Target&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
         entities.push(...result["sub_count_list"]);
 
-        result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Disease&data_source=PubMed`)
+        result = await fetch(`${url_query_sub_count}?query=${entity}+associated+Disease&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -884,7 +888,7 @@ async function retrieveAdditionalEdges(entity, type) {
 
     } else { // target or disease
         const predicate = (type === "target") ? "interacts" : "associated"; // TODO use this? then use it above too!
-        let result = await fetch(`${url_query_sub_count}?query=Drug+${predicate}+${entity}&data_source=PubMed`)
+        let result = await fetch(`${url_query_sub_count}?query=Drug+${predicate}+${entity}&data_source=${dataSources}`)
             .then((response) => {
                 return response.json();
             }).catch((e) => console.log(e));
@@ -930,6 +934,132 @@ const networkSelectEdge = (e) => {
     const object = network.body.nodes[nodes[0]].options.id;
 
     // open the corresponding query in a new tab
-    window.open(`/?query="${subject}"+${predicate}+"${object}"`, '_blank');
+    let selectedDataSources = getSelectedDataSources().join(";");
+    let searchURI = encodeURI(`/?query="${subject}"+${predicate}+"${object}"&data_source=${selectedDataSources}`);
+    window.open(searchURI, '_blank');
     network.unselectAll();
+}
+
+/**
+ * Function gets all selected data sources and returns them as a list. If no data source
+ * is available, `PubMed` is returned as default.
+ * @returns {String[]} list of data sources
+ */
+function getSelectedDataSources() {
+    let dataSource = [];
+    // Check if the current overview has a collection-filter. Covid/LongCovid/MECFS does not.
+    if(document.getElementById("collection-filter")){
+        let dataSourceChildren = document.getElementById("collection-filter").children;
+
+        for (let i in dataSourceChildren) {
+            const child = dataSourceChildren.item(i);
+            const name = child["name"] || "";
+            const checked = child["checked"] || false;
+
+            if (name !== "data_source" || !checked)
+                continue;
+
+            const dataSourceString = child["id"].split("_")[1];
+            dataSource.push(dataSourceString);
+        }
+    }
+
+    if (dataSource.length === 0) {
+        if (document.getElementById("filter_PubMed") !== null) {
+            document.getElementById("filter_PubMed").checked = true;
+        }
+        dataSource.push("PubMed");
+    }
+    return dataSource;
+}
+
+
+let refresh = async (token) => {
+    console.warn("refresh not defined");
+};
+
+async function refreshAllData() {
+    for (let prefix in overviews) {
+        startLoading(prefix);
+    }
+    const token = ++currentRefreshToken;
+    await refresh(token);
+}
+
+/**
+ * Function fetches the collections available for filtering. For each option, the appropriate
+ * filter entry gets created. The collection with the highest priority is checked initially.
+ * @returns {Promise<void>}
+ */
+async function buildDocumentCollectionFilter() {
+    const collections = await fetch(url_available_collections)
+        .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
+            return response.json();
+        }).then((data) => {
+            return data["data_sources"];
+        })
+        .catch(() => {
+            console.error("Could not load collection filter types.");
+            return null;
+        });
+
+    if (!collections) return;
+
+    const collectionFilter = document.getElementById("collection-filter");
+    const urlParams = new URL(window.location.href).searchParams;
+    const activeDataSourceParam = urlParams.get('data_source');
+    const activeDataSources = activeDataSourceParam ? activeDataSourceParam.split(";") : [];
+
+    for (const collection of collections) {
+        const inputId = "filter_" + collection["collection"];
+        const filterInput = document.createElement("input");
+        filterInput.type = "checkbox";
+        filterInput.id = inputId;
+        filterInput.name = "data_source";
+        filterInput.classList.add(["col-1"]);
+        filterInput.value = collection["collection"];
+
+        if (activeDataSources.length > 0) {
+            // data source selected in url
+            filterInput.checked = activeDataSources.includes(collection["collection"]);
+        } else {
+            // data source selected in server configuration
+            filterInput.checked = collection["selected"];
+        }
+
+        filterInput.onclick = async (e) => {
+            updateURLDataSources();
+            await refreshAllData();
+        };
+
+        const filterHelpAnchor = document.createElement("a");
+        filterHelpAnchor.href = collection["url"];
+        filterHelpAnchor.target = "_blank";
+        filterHelpAnchor.text = "Help";
+
+        const filterLabel = document.createElement("label");
+        filterLabel.classList.add(["col-11"]);
+        filterLabel.htmlFor = inputId;
+        filterLabel.append(collection["label"] + " (", filterHelpAnchor, ")");
+
+        collectionFilter.append(filterInput, filterLabel);
+    }
+}
+
+function updateURLDataSources() {
+    const selectedSources = Array.from(document.querySelectorAll('input[name="data_source"]:checked'))
+        .map(input => input.value);
+
+    const url = new URL(window.location.href);
+
+    if (selectedSources.length > 0) {
+        url.searchParams.set('data_source', selectedSources.join(';'));
+    } else {
+        url.searchParams.delete('data_source');
+    }
+
+    window.history.replaceState({}, '', url);
 }

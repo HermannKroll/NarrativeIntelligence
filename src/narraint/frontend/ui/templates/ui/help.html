@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/hermann.png" alt="Hermann Kroll">
+                        <img src="{% static 'assets/team/hermann.png' %}?v={{ v_tag }}" alt="Hermann Kroll">
                         <div class="description">
                             <p class="name-text">Hermann Kroll</p>
                             <p>Computer Scientist</p>
@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/tilo.png" alt="Prof. Dr. Wolf-Tilo Balke">
+                        <img src="{% static 'assets/team/tilo.png' %}?v={{ v_tag }}" alt="Prof. Dr. Wolf-Tilo Balke">
                         <div class="description">
                             <p class="name-text">Wolf-Tilo Balke</p>
                             <p>Professor</p>
@@ -34,7 +34,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/christina.jpg" alt="Christina Draheim">
+                        <img src="{% static 'assets/team/christina.jpg' %}?v={{ v_tag }}" alt="Christina Draheim">
                         <div class="description">
                             <p class="name-text">Christina Draheim</p>
                             <p>Pharmacist</p>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/stefan.jpg" alt="Stefan Wulle">
+                        <img src="{% static 'assets/team/stefan.jpg' %}?v={{ v_tag }}" alt="Stefan Wulle">
                         <div class="description">
                             <p class="name-text">Stefan Wulle</p>
                             <p>Pharmacist</p>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/johannes.png" alt="Johannes Ruthmann">
+                        <img src="{% static 'assets/team/johannes.png' %}?v={{ v_tag }}" alt="Johannes Ruthmann">
                         <div class="description">
                             <p class="name-text">Johannes Ruthmann</p>
                             <p>Research Assistant</p>
@@ -61,7 +61,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/jan.jpg" alt="Jan Pirklbauer">
+                        <img src="{% static 'assets/team/jan.jpg' %}?v={{ v_tag }}" alt="Jan Pirklbauer">
                         <div class="description">
                             <p class="name-text">Jan Pirklbauer</p>
                             <p>Research Assistant</p>
@@ -70,7 +70,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/morris.jpg" alt="Morris Kunz">
+                        <img src="{% static 'assets/team/morris.jpg' %}?v={{ v_tag }}" alt="Morris Kunz">
                         <div class="description">
                             <p class="name-text">Morris Kunz</p>
                             <p>Research Assistant</p>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/pascal.png" alt="Pascal Sackhoff">
+                        <img src="{% static 'assets/team/pascal.png' %}?v={{ v_tag }}" alt="Pascal Sackhoff">
                         <div class="description">
                             <p class="name-text">Pascal Sackhoff</p>
                             <p>Research Assistant</p>
@@ -88,7 +88,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
-                        <img src="../../static/assets/team/matthias.png" alt="Bill Matthias Thang">
+                        <img src="{% static 'assets/team/matthias.png' %}?v={{ v_tag }}" alt="Bill Matthias Thang">
                         <div class="description">
                             <p class="name-text">Bill Matthias Thang</p>
                             <p>Research Assistant</p>
@@ -410,7 +410,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'js/../../static/js/../../static/js/libraries/Chart.min.js' %}"></script>
+    <script src="{% static 'js/libraries/Chart.min.js' %}"></script>
     <script type="text/javascript">
         const URL_CONTENT_CHART_DATA = "{% url "content_data" %}";
         $("#nav_item_search").removeClass("active");

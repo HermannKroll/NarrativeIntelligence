@@ -9,16 +9,9 @@ Table Document {
   abstract string
   fulltext string [null]
   date_inserted datetime
+  source_id string [null]
 }
 
-Table Document_Translation {
-  document_id bigint [primary key, ref: > Document.id]
-  document_collection string [primary key, ref: > Document.id]
-  source_doc_id string
-  md5 string
-  date_inserted datetime
-  source string
-}
 
 Table Tagger {
   name string [primary key]
@@ -103,6 +96,7 @@ Table Document_Section {
   text string
 }
 
-Table Predication_To_Delete {
-  predication_id bigint PK
+Table Entity_Resolver_Data {
+  name string [primary key]
+  data string
 }

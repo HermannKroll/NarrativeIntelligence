@@ -5,7 +5,7 @@ from sqlalchemy import delete
 
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityTaggerData
-from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.entity.entitytagger import EntityTagger
 
 logging.basicConfig(
     filename='test.log',

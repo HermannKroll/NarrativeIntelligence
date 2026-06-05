@@ -119,7 +119,7 @@ def set_stopword_list():
             file.close()
             logging.info(f"Created stopword list with {len(stopwords)} entries")
     except IOError as e:
-        logging.warning("Could not read stopword list. Using YAKE's default wordlist.")
+        logging.warning(f"Could not read stopword list. Using YAKE's default wordlist. (Error: {e})")
 
 
 def main():

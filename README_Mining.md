@@ -56,6 +56,17 @@ SENDER="from@beispiel.de (Narrative Service Updater)"
 ```
 Save it.
 
+We need to configure the crawling of the K10 plus index. 
+Therefore, we need a second environment file:
+```
+nano .k10env
+```
+edit:
+```
+BASEURL=...
+```
+Save it.
+
 For the complete pipeline run:
 ```
 bash ~/NarrativeIntelligence/scripts/all_pipeline_updates.sh
@@ -260,4 +271,23 @@ However, if you just need to create the data model + tables without doing anythi
 
 ```
 python src/narraint/backend/create_database.py
+```
+# Update Pipeline
+
+Update code
+```
+cd ~/NarrativeIntelligence/
+git pull --recurse-submodules
+```
+
+Activate conda environment
+```
+conda activate narrant
+```
+
+Upgrade Python requirements
+```
+pip install --upgrade -r ~/NarrativeIntelligence/requirements.txt
+pip install --upgrade -r ~/NarrativeIntelligence/lib/NarrativeAnnotation/requirements.txt
+pip install --upgrade -r ~/NarrativeIntelligence/lib/KGExtractionToolbox/requirements.txt
 ```

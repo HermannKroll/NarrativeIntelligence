@@ -1,14 +1,13 @@
 import json
 from unittest import TestCase
 
-import tqdm
 from sqlalchemy import delete
 
 from kgextractiontoolbox.backend.models import EntityResolverData
 from narraint.backend.database import SessionExtended
 from narraint.backend.models import EntityExplainerData, EntityTaggerData
-from narraint.frontend.entity.entityexplainer import EntityExplainer
-from narraint.frontend.entity.entitytagger import EntityTagger
+from narraint.entity.entityexplainer import EntityExplainer
+from narraint.entity.entitytagger import EntityTagger
 from narrant.entity.entityresolver import MeshResolver
 
 tagger_entries = [
@@ -61,40 +60,41 @@ tagger_entries = [
 ]
 
 explanation_entries = [
-    ('CHEMBL1201391', '[simvastatin acid,tenivastatin,simvastatin hydroxy acid,simvastatin carboxylic acid]'),
-    ('CHEMBL2165491', '[spiroamantadine]'),
-    ('CHEMBL2348413', '[metformin pregabalin salt]'),
-    ('CVCL:B6WA', '[1e5 [mouse hybridoma against amantadine]]'),
-    ('CHEMBL4204794', '[avapritinib,x-720776,c-366,70c366,blu-285,x720776]'),
-    ('CHEMBL1703',
+    ('CHEMBL1201391', "Drug", '[simvastatin acid,tenivastatin,simvastatin hydroxy acid,simvastatin carboxylic acid]'),
+    ('CHEMBL2165491', "Drug", '[spiroamantadine]'),
+    ('CHEMBL2348413', "Drug", '[metformin pregabalin salt]'),
+    ('CVCL:B6WA', "CellLine", '[1e5 [mouse hybridoma against amantadine]]'),
+    ('CHEMBL4204794', "Drug", '[avapritinib,x-720776,c-366,70c366,blu-285,x720776]'),
+    ('CHEMBL1703', "Drug",
      '[ex404,walaphage,benofomin,diabefagos,neodipa,siamformet,diabex,ex-404,apophage,metformin hcl,la-6023,nsc-91485,metformin hydrochloride,glucaminol]'),
-    ('CHEMBL503',
+    ('CHEMBL503', "Drug",
      '[simvastatin impurity, lovastatin-,sivlor,mevlor,c10aa02,lovastatin,mevinolin,mk-803,nsc-758662,6.alpha.-methylcompactin,l-154803,monacolin k]'),
-    ('CHEMBL494397', '[metformin xr]'), ('CHEMBL2108299', '[metformin glycinate,dmmet-01]'),
-    ('CHEMBL1569',
+    ('CHEMBL494397', "Drug", '[metformin xr]'),
+    ('CHEMBL2108299', "Drug", '[metformin glycinate,dmmet-01]'),
+    ('CHEMBL1569', "Drug",
      '[adamantanamine hydrochloride,amantadine hcl,mantadix,amantadine hydrochloride,exp-105-1,osmolex,nsc-83653]'),
-    ('CHEMBL660', '[symmetrel,symadine,nsc-341865,amantadine,tcmdc-125869,amantidine]'),
-    ('CHEMBL465617', '[amantadine sulfate]'),
-    ('CHEMBL1064', '[nsc-758706,synvinolin,mk-733,simvastatin,simvastatin hydroxy acid,c10aa01,mk-0733]'),
-    ('CHEMBL1431', '[la-6023,metformin,metformin extended release]'),
-    ('CHEMBL2348410', '[metformin gabapentin salt]'),
-    ('MESH:D000094024',
+    ('CHEMBL660', "Drug", '[symmetrel,symadine,nsc-341865,amantadine,tcmdc-125869,amantidine]'),
+    ('CHEMBL465617', "Drug", '[amantadine sulfate]'),
+    ('CHEMBL1064', "Drug", '[nsc-758706,synvinolin,mk-733,simvastatin,simvastatin hydroxy acid,c10aa01,mk-0733]'),
+    ('CHEMBL1431', "Drug", '[la-6023,metformin,metformin extended release]'),
+    ('CHEMBL2348410', "Drug", '[metformin gabapentin salt]'),
+    ('MESH:D000094024', "Disease",
      '[long covid,Long-Haul COVIDs,Long Haul COVID 19,Post-Acute COVID-19 Syndromes,Long Haul COVID,Post-COVID Conditions,persistent covid-19,post-covid syndrome,post-acute covid syndrome,post-coronavirus disease-2019 syndrome,Long Haul COVID-19,long-covid,long-haul covid,long-haul coronavirus disease,post-acute covid19 syndrome,chronic coronavirus disease syndrome,Post Acute Sequelae of SARS CoV 2 Infection,Post-COVID Condition,COVID-19 Post-Acute Sequelae,PASC Post Acute Sequelae of COVID 19,long haul covid,Post-Acute Sequelae of COVID-19,Post-Acute Sequelae of SARS-CoV-2 Infection,Post Acute COVID-19 Syndrome,Post Acute COVID 19 Syndrome,chronic covid syndrome,post-acute sequelae of sars-cov-2 infection,long hauler covid,COVID, Long-Haul,post-coronavirus disease syndrome,Post-Acute COVID-19 Syndrome,Post COVID Conditions,post-covid-19 syndrome,COVID-19 Syndrome, Post-Acute,Long COVID,Post Acute Sequelae of COVID 19,PASC Post Acute Sequelae of COVID-19,pasc,Long Haul COVID-19s,Long-Haul COVID,COVID-19, Long Haul,post-acute covid-19 syndrome,post-acute sequelae of severe acute respiratory syndrome coronavirus 2]'),
-    ('MESH:C535563', '[Tibial hemimelia,Absence of Tibia,Bilateral absence of the tibia,Tibia, absence of]'),
-    ('MESH:C564764', '[Tibia, Absence of, with Congenital Deafness]'),
-    ('MESH:C535689',
+    ('MESH:C535563', "Disease", '[Tibial hemimelia,Absence of Tibia,Bilateral absence of the tibia,Tibia, absence of]'),
+    ('MESH:C564764', "Disease", '[Tibia, Absence of, with Congenital Deafness]'),
+    ('MESH:C535689', "Disease",
      '[Tetramelic mirror-image polydactyly,Mirror hands and feet with nasal defects,Fibula And Ulna, Duplication Of, With Absence Of Tibia And Radius,Laurin-Sandrow Syndrome, Segmental,Laurin Sandrow syndrome,Fibula ulna duplication tibia radius absence,Mirror-Image Polydactyly,Laurin-Sandrow syndrome,Sandrow syndrome]'),
-    ('MESH:C563403',
+    ('MESH:C563403', "Disease",
      '[Tibia, Absence or Hypoplasia of, with Polydactyly, Retrocerebellar Arachnoid Cyst, and Other Anomalies]'),
-    ('CHEMBL486174', '[variotin,nsc-291839,pecilocin]'),
-    ('Q97154236',
+    ('CHEMBL486174', "Drug", '[variotin,nsc-291839,pecilocin]'),
+    ('Q97154236', "Vaccine",
      '[rbd-dimer,zf-uz-vac-2001,zifivax,anhui zhifei longcom biopharmaceutical covid-19 vaccine candidate,zf2001,zhongyianke biotech–liaoning maokangyuan biotech covid-19 vaccine]'),
-    ('MESH:C535564',
+    ('MESH:C535564', "Disease",
      '[Tibia, Absence of, with Polydactyly,Absence of tibia with polydactyly,Polydactyly with absent tibia]')
 ]
 
 mesh_resolver_data = {
-    "D000094024" : "Long COVID",
+    "D000094024": "Long COVID",
 }
 
 mesh_supplement_resolver_data = {
@@ -135,8 +135,9 @@ class EntityExplanationTestCase(TestCase):
                                            synonym_processed=synonyms))
 
         entity_explainer_data = list()
-        for ent_id, ent_terms in explanation_entries:
-            entry = dict(entity_id=ent_id, entity_terms=ent_terms)
+        for ent_id, ent_type, ent_terms in explanation_entries:
+            print(ent_id)
+            entry = dict(entity_id=ent_id, entity_type=ent_type, entity_terms=ent_terms)
             entity_explainer_data.append(entry)
 
         # update index data
@@ -258,7 +259,7 @@ def generate_test_data():
     ]
     session = SessionExtended.get()
 
-    for term in tqdm.tqdm(terms_to_explain):
+    for term in terms_to_explain:
         for entity in entity_tagger.tag_entity(term):
             tagger_data.add((entity.entity_id, entity.entity_type, entity.entity_class, entity.entity_name))
 

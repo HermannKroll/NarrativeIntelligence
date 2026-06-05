@@ -21,24 +21,8 @@ if [[ $? != 0 ]]; then
 fi
 
 
-# Set DB date to now
-python3 ~/NarrativeIntelligence/src/narraint/queryengine/update_database_update_date.py
-if [[ $? != 0 ]]; then
-    echo "Previous script returned exit code != 0 -> Stopping pipeline."
-    exit -1
-fi
-
-
-# Update clinical trial phases for drug overviews
-python ~/NarrativeIntelligence/src/narraint/clinicaltrials/extract_trial_phases.py
-if [[ $? != 0 ]]; then
-     echo "Previous script returned exit code != 0 -> Stopping pipeline."
-     exit -1
-fi
-
-
 # Update content information (help-page)
-python ~/NarrativeIntelligence/src/narraint/frontend/ui/service_content.py
+python ~/NarrativeIntelligence/src/narraint/backend/service_content.py
 if [[ $? != 0 ]]; then
      echo "Previous script returned exit code != 0 -> Stopping pipeline."
      exit -1
