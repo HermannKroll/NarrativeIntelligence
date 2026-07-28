@@ -20,8 +20,13 @@
           SwaggerUIBundle.SwaggerUIStandalonePreset
         ],
         layout: "BaseLayout",
+        servers: [{url: window.location.origin, description: "Current Server"}],
         requestInterceptor: (request) => {
-          request.headers['X-CSRFToken'] = "{{ csrf_token }}"
+          // CSRF-Token nur bei schreibenden Methoden mitsenden,
+          // da GET-Anfragen sonst CORS-Preflight (OPTIONS) auslösen
+          if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+            request.headers['X-CSRFToken'] = "{{ csrf_token }}"
+          }
           return request;
         }
       })

@@ -3,9 +3,6 @@ info:
   title: PubPharm Narrative Service API
   description: PubPharm Narrative Service API
   version: 1.0.0
-servers:
-  - url: https://narrative.pubpharm.de
-    description: PubPharm Narrative Service
 paths:
   /autocompletion:
     get:
@@ -45,6 +42,13 @@ paths:
           schema:
             type: string
           example: Metformin treats Diabetes Mellitus
+      responses:
+        '200':
+          description: The query translation result
+          content:
+            application/json:
+              schema:
+                type: object
 
   /document_ids_for_entity:
     get:
@@ -72,6 +76,13 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+      responses:
+        '200':
+          description: A list of document ids
+          content:
+            application/json:
+              schema:
+                type: object
 
   /document_graph:
     get:
@@ -92,6 +103,13 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+      responses:
+        '200':
+          description: The document graph
+          content:
+            application/json:
+              schema:
+                type: object
 
   /term_to_entity:
     get:
@@ -112,6 +130,13 @@ paths:
             type: bool
           description: enable or disable the entity expansion by prefix (if true all entities that start with this term are matches)
           example: true
+      responses:
+        '200':
+          description: The entity translation result
+          content:
+            application/json:
+              schema:
+                type: object
 
   /query_sub_count:
     get:
@@ -138,6 +163,13 @@ paths:
             type: int
           example: 10
           description: determines how many substitutions should be retrieved (ranked by supporting documents descending)
+      responses:
+        '200':
+          description: The substitution count result
+          content:
+            application/json:
+              schema:
+                type: object
 
 
   /query_narrative_documents:
@@ -158,6 +190,13 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+      responses:
+        '200':
+          description: A list of narrative documents
+          content:
+            application/json:
+              schema:
+                type: object
 
 
   /query_document_ids:
@@ -178,6 +217,13 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+      responses:
+        '200':
+          description: A list of document ids
+          content:
+            application/json:
+              schema:
+                type: object
 
   /narrative_documents:
     get:
@@ -198,3 +244,10 @@ paths:
             type: string
           example: PubMed
           description: The corresponding document collection
+      responses:
+        '200':
+          description: A list of narrative documents
+          content:
+            application/json:
+              schema:
+                type: object
