@@ -233,6 +233,18 @@ async function setDrugData(entity_name) {
             //synonym seems to be correct
             document.getElementById('name').innerText = entity_name;
 
+            if (data2.molecule_properties.hba) {
+                document.getElementById('drug_hba').innerText = data2.molecule_properties.hba;
+            } else {
+                document.getElementById('drug_hba').innerText = "-";
+            }
+
+            if (data2.molecule_properties.hbd) {
+                document.getElementById('drug_hbd').innerText = data2.molecule_properties.hbd;
+            } else {
+                document.getElementById('drug_hbd').innerText = "-";
+            }
+
             if (data2.molecule_properties.alogp) {
                 document.getElementById('drug_alogp').innerText = data2.molecule_properties.alogp;
             } else {
